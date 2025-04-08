@@ -100,8 +100,8 @@ function FFMI() {
     { range: '16 - 17', description: '肌肉量低於平均' },
     { range: '18 - 19', description: '肌肉量在平均值' },
     { range: '20 - 21', description: '肌肉量高於平均值' },
-    { range: '22', description: '肌肉量極高' },
-    { range: '23 - 25', description: '肌肉量很高' },
+    { range: '22', description: '肌肉量很高' },
+    { range: '23 - 25', description: '肌肉量極高' },
     { range: '26 - 27', description: '肌肉量已經高到可能有使用藥物' },
     { range: '28 - 30', description: '不用藥不可能達到的數值' },
   ];
