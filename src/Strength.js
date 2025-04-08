@@ -16,8 +16,7 @@ function Strength() {
   const [benchPress, setBenchPress] = useState({ weight: '', reps: '', max: null, score: null });
   const [squat, setSquat] = useState({ weight: '', reps: '', max: null, score: null });
   const [deadlift, setDeadlift] = useState({ weight: '', reps: '', max: null, score: null });
-  const [pullUp, setPullUp] = useState({ weight: weight || '', reps: '', max: null, score: null });
-  const [pullUpType, setPullUpType] = useState('pullUp');
+  const [latPulldown, setLatPulldown] = useState({ weight: '', reps: '', max: null, score: null }); // 改名為 latPulldown
   const [shoulderPress, setShoulderPress] = useState({ weight: '', reps: '', max: null, score: null });
   const [history, setHistory] = useState([]);
 
@@ -49,15 +48,9 @@ function Strength() {
       bodyweight: gender === 'female' ? standards.bodyweightStandardsFemaleDeadlift : standards.bodyweightStandardsMaleDeadlift,
       age: gender === 'female' ? standards.ageStandardsFemaleDeadlift : standards.ageStandardsMaleDeadlift,
     },
-    pullUp: {
-      pullUp: {
-        bodyweight: gender === 'female' ? standards.bodyweightStandardsFemalePullUp : standards.bodyweightStandardsMalePullUp,
-        age: gender === 'female' ? standards.ageStandardsFemalePullUp : standards.ageStandardsMalePullUp,
-      },
-      latPulldown: {
-        bodyweight: gender === 'female' ? standards.bodyweightStandardsFemaleLatPulldown : standards.bodyweightStandardsMaleLatPulldown,
-        age: gender === 'female' ? standards.ageStandardsFemaleLatPulldown : standards.ageStandardsMaleLatPulldown,
-      },
+    latPulldown: { // 改名為 latPulldown
+      bodyweight: gender === 'female' ? standards.bodyweightStandardsFemaleLatPulldown : standards.bodyweightStandardsMaleLatPulldown,
+      age: gender === 'female' ? standards.ageStandardsFemaleLatPulldown : standards.ageStandardsMaleLatPulldown,
     },
     shoulderPress: {
       bodyweight: gender === 'female' ? standards.bodyweightStandardsFemaleShoulderPress : standards.bodyweightStandardsMaleShoulderPress,
@@ -81,16 +74,15 @@ function Strength() {
       return;
     }
 
-    if (!(type === 'pullUp' && pullUpType === 'pullUp') && repsNum > 12) {
+    if (repsNum > 12) {
       alert('可完成次數不得超過12次，請重新輸入！');
       setState((prev) => ({ ...prev, reps: '' }));
       return;
     }
 
-    const isRepsBased = type === 'pullUp' && pullUpType === 'pullUp';
-    const valueToCompare = isRepsBased ? repsNum : weightNum / (1.0278 - 0.0278 * repsNum);
+    const valueToCompare = weightNum / (1.0278 - 0.0278 * repsNum);
 
-    const standardsForType = type === 'pullUp' ? standardMap[type][pullUpType] : standardMap[type];
+    const standardsForType = standardMap[type];
     const weightKeys = Object.keys(standardsForType.bodyweight).map(Number);
     const ageKeys = Object.keys(standardsForType.age).map(Number);
 
@@ -110,24 +102,13 @@ function Strength() {
 
     setState((prev) => ({
       ...prev,
-      max: isRepsBased ? repsNum : valueToCompare.toFixed(1),
+      max: valueToCompare.toFixed(1),
       score: finalScore,
     }));
   };
 
-  const handlePullUpTypeChange = (e) => {
-    setPullUpType(e.target.value);
-    setPullUp((prev) => ({
-      ...prev,
-      weight: e.target.value === 'pullUp' ? weight || '' : '',
-      reps: '',
-      max: null,
-      score: null,
-    }));
-  };
-
   const radarData = {
-    labels: ['臥推', '深蹲', '硬舉', '背部訓練', '站姿肩推'],
+    labels: ['臥推', '深蹲', '硬舉', '滑輪下拉', '站姿肩推'],
     datasets: [
       {
         label: '力量評測分數',
@@ -135,7 +116,7 @@ function Strength() {
           benchPress.score || 0,
           squat.score || 0,
           deadlift.score || 0,
-          pullUp.score || 0,
+          latPulldown.score || 0, // 改為 latPulldown
           shoulderPress.score || 0,
         ],
         backgroundColor: 'rgba(75, 192, 192, 0.2)',
@@ -162,7 +143,7 @@ function Strength() {
     benchPress.score,
     squat.score,
     deadlift.score,
-    pullUp.score,
+    latPulldown.score, // 改為 latPulldown
     shoulderPress.score,
   ].filter((score) => score !== null);
   const averageScore = scores.length > 0 ? (scores.reduce((a, b) => a + parseFloat(b), 0) / scores.length).toFixed(0) : null;
@@ -178,7 +159,7 @@ function Strength() {
       benchPress: benchPress.score,
       squat: squat.score,
       deadlift: deadlift.score,
-      pullUp: pullUp.score,
+      latPulldown: latPulldown.score, // 改為 latPulldown
       shoulderPress: shoulderPress.score,
       averageScore,
     };
@@ -217,7 +198,7 @@ function Strength() {
         />
         <input
           type="number"
-          placeholder="次數 (12次以下)"
+          placeholder="次數 (12次以下較準確)"
           value={benchPress.reps}
           onChange={(e) => setBenchPress((prev) => ({ ...prev, reps: e.target.value }))}
           className="input-field"
@@ -240,7 +221,7 @@ function Strength() {
         />
         <input
           type="number"
-          placeholder="次數 (12次以下)"
+          placeholder="次數 (12次以下較準確)"
           value={squat.reps}
           onChange={(e) => setSquat((prev) => ({ ...prev, reps: e.target.value }))}
           className="input-field"
@@ -263,7 +244,7 @@ function Strength() {
         />
         <input
           type="number"
-          placeholder="次數 (12次以下)"
+          placeholder="次數 (12次以下較準確)"
           value={deadlift.reps}
           onChange={(e) => setDeadlift((prev) => ({ ...prev, reps: e.target.value }))}
           className="input-field"
@@ -276,31 +257,26 @@ function Strength() {
       </div>
 
       <div className="exercise-section">
-        <h2 className="text-lg font-semibold">背部訓練</h2>
-        <select value={pullUpType} onChange={handlePullUpTypeChange} className="input-field">
-          <option value="pullUp">引體向上</option>
-          <option value="latPulldown">滑輪下拉</option>
-        </select>
+        <h2 className="text-lg font-semibold">滑輪下拉</h2>
         <input
           type="number"
-          placeholder={pullUpType === 'pullUp' ? "重量 (自動設為體重)" : "重量 (kg)"}
-          value={pullUp.weight}
-          readOnly={pullUpType === 'pullUp'}
-          onChange={(e) => setPullUp((prev) => ({ ...prev, weight: e.target.value }))}
+          placeholder="重量 (kg)"
+          value={latPulldown.weight}
+          onChange={(e) => setLatPulldown((prev) => ({ ...prev, weight: e.target.value }))}
           className="input-field"
         />
         <input
           type="number"
-          placeholder={pullUpType === 'pullUp' ? "次數" : "次數 (12次以下)"}
-          value={pullUp.reps}
-          onChange={(e) => setPullUp((prev) => ({ ...prev, reps: e.target.value }))}
+          placeholder="次數 (12次以下較準確)"
+          value={latPulldown.reps}
+          onChange={(e) => setLatPulldown((prev) => ({ ...prev, reps: e.target.value }))}
           className="input-field"
         />
-        <button onClick={() => calculateMaxStrength(pullUp.weight, pullUp.reps, setPullUp, 'pullUp')} className="calculate-btn">
+        <button onClick={() => calculateMaxStrength(latPulldown.weight, latPulldown.reps, setLatPulldown, 'latPulldown')} className="calculate-btn">
           計算
         </button>
-        {pullUp.max && <p>{pullUpType === 'pullUp' ? `完成次數: ${pullUp.max} 次` : `最大力量: ${pullUp.max} kg`}</p>}
-        {pullUp.score && <p>分數: {pullUp.score}</p>}
+        {latPulldown.max && <p>最大力量: {latPulldown.max} kg</p>}
+        {latPulldown.score && <p>分數: {latPulldown.score}</p>}
       </div>
 
       <div className="exercise-section">
@@ -314,7 +290,7 @@ function Strength() {
         />
         <input
           type="number"
-          placeholder="次數 (12次以下)"
+          placeholder="次數 (12次以下較準確)"
           value={shoulderPress.reps}
           onChange={(e) => setShoulderPress((prev) => ({ ...prev, reps: e.target.value }))}
           className="input-field"
@@ -341,7 +317,7 @@ function Strength() {
                 <p>臥推: {entry.benchPress}</p>
                 <p>深蹲: {entry.squat}</p>
                 <p>硬舉: {entry.deadlift}</p>
-                <p>背部訓練: {entry.pullUp}</p>
+                <p>滑輪下拉: {entry.latPulldown}</p>
                 <p>站姿肩推: {entry.shoulderPress}</p>
                 <p>平均分數: {entry.averageScore}</p>
               </li>
@@ -364,7 +340,7 @@ function Strength() {
 
 export default Strength;
 
-// 響應式 CSS
+// 響應式 CSS（保持不變）
 const styles = `
   .strength-container {
     max-width: 100%;
