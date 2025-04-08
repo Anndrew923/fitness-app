@@ -9,10 +9,6 @@ import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Toolti
 // 註冊 Chart.js 組件
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
-// 日誌：確認導入的標準
-console.log('導入的 SMM 標準 (male)：', standards.muscleStandardsMaleSMM);
-console.log('導入的 SM% 標準 (male)：', standards.muscleStandardsMaleSMPercent);
-
 function Muscle() {
   const { userData, setUserData } = useUser();
   const navigate = useNavigate();
@@ -44,58 +40,58 @@ function Muscle() {
     return null;
   };
 
-  // 根據標準計算分數（添加日誌）
+  // 根據標準計算分數
   const calculateScoreFromStandard = (value, standard, label) => {
-    console.log(`[${label}] 比較值：`, value, '標準：', standard); // 日誌：顯示當前比較的值和標準
+    console.log(`[${label}] 比較值：`, value, '標準：', standard);
     if (value >= standard[100]) {
-      console.log(`[${label}] >= 100: ${value} >= ${standard[100]}`); // 日誌：確認達到 100 分標準
+      console.log(`[${label}] >= 100: ${value} >= ${standard[100]}`);
       return 100;
     }
     if (value >= standard[90]) {
-      console.log(`[${label}] >= 90: ${value} >= ${standard[90]}`); // 日誌：確認達到 90 分標準
+      console.log(`[${label}] >= 90: ${value} >= ${standard[90]}`);
       return 90;
     }
     if (value >= standard[80]) {
-      console.log(`[${label}] >= 80: ${value} >= ${standard[80]}`); // 日誌：確認達到 80 分標準
+      console.log(`[${label}] >= 80: ${value} >= ${standard[80]}`);
       return 80;
     }
     if (value >= standard[70]) {
-      console.log(`[${label}] >= 70: ${value} >= ${standard[70]}`); // 日誌：確認達到 70 分標準
+      console.log(`[${label}] >= 70: ${value} >= ${standard[70]}`);
       return 70;
     }
     if (value >= standard[60]) {
-      console.log(`[${label}] >= 60: ${value} >= ${standard[60]}`); // 日誌：確認達到 60 分標準
+      console.log(`[${label}] >= 60: ${value} >= ${standard[60]}`);
       return 60;
     }
     if (value >= standard[50]) {
-      console.log(`[${label}] >= 50: ${value} >= ${standard[50]}`); // 日誌：確認達到 50 分標準
+      console.log(`[${label}] >= 50: ${value} >= ${standard[50]}`);
       return 50;
     }
     if (value >= standard[40]) {
-      console.log(`[${label}] >= 40: ${value} >= ${standard[40]}`); // 日誌：確認達到 40 分標準
+      console.log(`[${label}] >= 40: ${value} >= ${standard[40]}`);
       return 40;
     }
     if (value >= standard[30]) {
-      console.log(`[${label}] >= 30: ${value} >= ${standard[30]}`); // 日誌：確認達到 30 分標準
+      console.log(`[${label}] >= 30: ${value} >= ${standard[30]}`);
       return 30;
     }
     if (value >= standard[20]) {
-      console.log(`[${label}] >= 20: ${value} >= ${standard[20]}`); // 日誌：確認達到 20 分標準
+      console.log(`[${label}] >= 20: ${value} >= ${standard[20]}`);
       return 20;
     }
     if (value >= standard[10]) {
-      console.log(`[${label}] >= 10: ${value} >= ${standard[10]}`); // 日誌：確認達到 10 分標準
+      console.log(`[${label}] >= 10: ${value} >= ${standard[10]}`);
       return 10;
     }
     if (value >= standard[0]) {
-      console.log(`[${label}] >= 0: ${value} >= ${standard[0]}`); // 日誌：確認達到 0 分標準
+      console.log(`[${label}] >= 0: ${value} >= ${standard[0]}`);
       return 0;
     }
-    console.log(`[${label}] 小於最低標準: ${value} < ${standard[0]}`); // 日誌：確認小於最低標準
+    console.log(`[${label}] 小於最低標準: ${value} < ${standard[0]}`);
     return 0; // 小於最低標準得 0 分
   };
 
-  // 計算骨骼肌肉量分數（添加日誌）
+  // 計算骨骼肌肉量分數
   const calculateMuscleScore = () => {
     if (!weight || !smm || !age || !gender) {
       alert('請確保已在用戶信息中輸入體重、年齡和性別，並在此輸入骨骼肌肉量！');
@@ -145,7 +141,6 @@ function Muscle() {
     // 日誌：顯示最終分數
     console.log('最終分數：', finalScore);
 
-    // 日誌：確認設置的 result
     setResult({ smmScore, smPercent, smPercentScore, finalScore });
     console.log('設置的 result：', { smmScore, smPercent, smPercentScore, finalScore });
   };
@@ -193,6 +188,7 @@ function Muscle() {
         backgroundColor: ['#4bc0c0', '#ff9f40'],
         borderColor: ['#3aa0a0', '#e08e36'],
         borderWidth: 1,
+        barPercentage: 0.4, // 調整長條粗度為現有的一半（預設 0.8，現在設為 0.4）
       },
     ],
   };
@@ -207,6 +203,7 @@ function Muscle() {
         backgroundColor: ['#36a2eb'],
         borderColor: ['#2a82cb'],
         borderWidth: 1,
+        barPercentage: 0.4, // 調整長條粗度為現有的一半（預設 0.8，現在設為 0.4）
       },
     ],
   };
@@ -268,10 +265,10 @@ function Muscle() {
         <button onClick={calculateMuscleScore} className="calculate-btn">
           計算
         </button>
-        {result.smmScore && (console.log('渲染 SMM 分數：', result.smmScore), <p>骨骼肌肉量 (SMM) 分數: {result.smmScore}</p>)}
-        {result.smPercent && (console.log('渲染 SM%：', result.smPercent), <p>骨骼肌肉量百分比 (SM%): {result.smPercent}%</p>)}
-        {result.smPercentScore && (console.log('渲染 SM% 分數：', result.smPercentScore), <p>骨骼肌肉量百分比 (SM%) 分數: {result.smPercentScore}</p>)}
-        {result.finalScore && (console.log('渲染最終分數：', result.finalScore), <p>最終分數: {result.finalScore}</p>)}
+        {result.smmScore && <p>骨骼肌肉量 (SMM) 分數: {result.smmScore}</p>}
+        {result.smPercent && <p>骨骼肌肉量百分比 (SM%): {result.smPercent}%</p>}
+        {result.smPercentScore && <p>骨骼肌肉量百分比 (SM%) 分數: {result.smPercentScore}</p>}
+        {result.finalScore && <p>最終分數: {result.finalScore}</p>}
       </div>
 
       {/* 長條圖區域 */}

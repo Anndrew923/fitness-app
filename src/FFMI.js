@@ -73,8 +73,8 @@ function FFMI() {
       if (adjustedFfmi < 16) setFfmiCategory('肌肉量低於平均');
       else if (adjustedFfmi < 18) setFfmiCategory('肌肉量在平均值');
       else if (adjustedFfmi < 20) setFfmiCategory('肌肉量高於平均值');
-      else if (adjustedFfmi < 22) setFfmiCategory('肌肉量極高');
-      else if (adjustedFfmi < 25) setFfmiCategory('肌肉量很高');
+      else if (adjustedFfmi < 22) setFfmiCategory('肌肉量很高');
+      else if (adjustedFfmi < 25) setFfmiCategory('肌肉量極高');
       else if (adjustedFfmi < 28) setFfmiCategory('肌肉量已經高到可能有使用藥物');
       else setFfmiCategory('不無藥不可能達到的數值');
     } else {
