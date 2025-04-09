@@ -37,7 +37,7 @@ function UserInfo() {
       if (user) {
         setMode('login');
         try {
-          console.log('正在查詢 Firestore，user.uid:', user.uid); // 調試：檢查 user.uid
+          console.log('正在查詢 Firestore，user.uid:', user.uid);
           const q = query(
             collection(db, 'users'),
             where('userId', '==', user.uid),
@@ -45,10 +45,10 @@ function UserInfo() {
             limit(1)
           );
           const querySnapshot = await getDocs(q);
-          console.log('查詢結果：', querySnapshot.docs.map(doc => doc.data())); // 調試：檢查查詢結果
+          console.log('查詢結果：', querySnapshot.docs.map(doc => doc.data()));
           if (!querySnapshot.empty) {
             const userDoc = querySnapshot.docs[0].data();
-            console.log('載入的資料：', userDoc); // 調試：檢查載入的資料
+            console.log('載入的資料：', userDoc);
             setHeight(userDoc.height || '');
             setWeight(userDoc.weight || '');
             setAge(userDoc.age || '');
@@ -62,14 +62,13 @@ function UserInfo() {
               updatedAt: userDoc.updatedAt,
             });
           } else {
-            console.log('沒有找到該用戶的歷史資料'); // 調試：如果沒有資料
+            console.log('沒有找到該用戶的歷史資料');
             setError('沒有找到歷史資料，請填寫並儲存新資料。');
           }
         } catch (err) {
-          console.error('從 Firestore 讀取資料失敗：', err); // 詳細錯誤日誌
-          console.error('錯誤代碼：', err.code); // 調試：檢查錯誤代碼
-          console.error('錯誤訊息：', err.message); // 調試：檢查錯誤訊息
-          // 改進：提供更友好的錯誤訊息
+          console.error('從 Firestore 讀取資料失敗：', err);
+          console.error('錯誤代碼：', err.code);
+          console.error('錯誤訊息：', err.message);
           if (err.message.includes('The query requires an index')) {
             setError('資料庫索引尚未創建，請聯繫管理員或稍後再試。');
           } else if (err.code === 'auth/network-request-failed') {
@@ -86,12 +85,13 @@ function UserInfo() {
         setWeight(userData.weight || '');
         setAge(userData.age || '');
         setGender(userData.gender || '');
-        setError(null); // 改進：在訪客模式下清除錯誤訊息
+        setError(null);
       }
     });
 
     return () => unsubscribe();
-  }, []); // 改進：移除 userData 和 setUserData 依賴，確保 useEffect 只在組件掛載時執行
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // 登出功能
   const handleSignOut = async () => {
@@ -179,7 +179,6 @@ function UserInfo() {
       console.error('儲存到 Firestore 失敗：', err);
       console.error('錯誤代碼：', err.code);
       console.error('錯誤訊息：', err.message);
-      // 改進：提供更友好的錯誤訊息
       if (err.code === 'auth/network-request-failed') {
         setError('無法連接到伺服器，請檢查您的網路連線並稍後再試。');
       } else if (err.code === 'permission-denied') {
@@ -287,7 +286,7 @@ function UserInfo() {
               >
                 訪客模式
               </button>
-              <span className="tooltip">僅儲存到本地，重新整理後可能遺失</span>
+              Ascendancy('span', 'tooltip', '僅儲存到本地，重新整理後可能遺失')
             </div>
             <div className="button-with-tooltip">
               <button
