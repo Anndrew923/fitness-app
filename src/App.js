@@ -2,6 +2,7 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { UserProvider } from './UserContext'; // 導入 UserProvider
 import ScrollToTop from './ScrollToTop'; // 引入 ScrollToTop
+import Welcome from './Welcome'; // 引入歡迎頁
 import Home from './Home';
 import UserInfo from './UserInfo';
 import Strength from './Strength';
@@ -17,7 +18,8 @@ function App() {
       <Router>
         <ScrollToTop /> {/* 添加 ScrollToTop 組件 */}
         <Routes>
-          <Route path="/" element={<Home />} />
+          <Route path="/" element={<Welcome />} /> {/* 首頁改為歡迎頁 */}
+          <Route path="/home" element={<Home />} /> {/* 原首頁移到 /home */}
           <Route path="/user-info" element={<UserInfo />} />
           <Route path="/strength" element={<Strength />} />
           <Route path="/cardio" element={<Cardio />} />
