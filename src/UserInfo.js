@@ -286,7 +286,8 @@ function UserInfo() {
               >
                 訪客模式
               </button>
-              Ascendancy('span', 'tooltip', '僅儲存到本地，重新整理後可能遺失')
+              {/* 修復：移除 Ascendancy，改用 <span> */}
+              <span className="tooltip">僅儲存到本地，重新整理後可能遺失</span>
             </div>
             <div className="button-with-tooltip">
               <button
