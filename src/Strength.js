@@ -16,7 +16,7 @@ function Strength() {
   const [benchPress, setBenchPress] = useState({ weight: '', reps: '', max: null, score: null });
   const [squat, setSquat] = useState({ weight: '', reps: '', max: null, score: null });
   const [deadlift, setDeadlift] = useState({ weight: '', reps: '', max: null, score: null });
-  const [latPulldown, setLatPulldown] = useState({ weight: '', reps: '', max: null, score: null }); // 改名為 latPulldown
+  const [latPulldown, setLatPulldown] = useState({ weight: '', reps: '', max: null, score: null });
   const [shoulderPress, setShoulderPress] = useState({ weight: '', reps: '', max: null, score: null });
   const [history, setHistory] = useState([]);
 
@@ -48,7 +48,7 @@ function Strength() {
       bodyweight: gender === 'female' ? standards.bodyweightStandardsFemaleDeadlift : standards.bodyweightStandardsMaleDeadlift,
       age: gender === 'female' ? standards.ageStandardsFemaleDeadlift : standards.ageStandardsMaleDeadlift,
     },
-    latPulldown: { // 改名為 latPulldown
+    latPulldown: {
       bodyweight: gender === 'female' ? standards.bodyweightStandardsFemaleLatPulldown : standards.bodyweightStandardsMaleLatPulldown,
       age: gender === 'female' ? standards.ageStandardsFemaleLatPulldown : standards.ageStandardsMaleLatPulldown,
     },
@@ -107,6 +107,25 @@ function Strength() {
     }));
   };
 
+  const getAverageScoreComment = (score, gender) => {
+    const genderValue = gender === '男性' || gender.toLowerCase() === 'male' ? 'male' : 'female';
+    let comment = '';
+
+    if (score >= 80) {
+      comment = genderValue === 'male' ? '無敵強者！你是力量之王，繼續稱霸！' : '太驚艷了！你是力量女神，超棒的！';
+    } else if (score >= 70) {
+      comment = genderValue === 'male' ? '超猛表現！頂尖水準，衝向巔峰吧！' : '真的很傑出！表現超棒，繼續保持哦！';
+    } else if (score >= 60) {
+      comment = genderValue === 'male' ? '很強！超越業餘極限，再拼一把！' : '表現超棒！超越大多數人，你很厲害！';
+    } else if (score >= 50) {
+      comment = genderValue === 'male' ? '不錯的水準！再加把勁，突破極限！' : '很棒的水準！再努力一點，你會更好！';
+    } else {
+      comment = genderValue === 'male' ? '兄弟，該衝了！全力以赴，突破自己！' : '親愛的，還有進步空間，繼續加油哦！';
+    }
+
+    return comment;
+  };
+
   const radarData = {
     labels: ['臥推', '深蹲', '硬舉', '滑輪下拉', '站姿肩推'],
     datasets: [
@@ -116,7 +135,7 @@ function Strength() {
           benchPress.score || 0,
           squat.score || 0,
           deadlift.score || 0,
-          latPulldown.score || 0, // 改為 latPulldown
+          latPulldown.score || 0,
           shoulderPress.score || 0,
         ],
         backgroundColor: 'rgba(75, 192, 192, 0.2)',
@@ -143,7 +162,7 @@ function Strength() {
     benchPress.score,
     squat.score,
     deadlift.score,
-    latPulldown.score, // 改為 latPulldown
+    latPulldown.score,
     shoulderPress.score,
   ].filter((score) => score !== null);
   const averageScore = scores.length > 0 ? (scores.reduce((a, b) => a + parseFloat(b), 0) / scores.length).toFixed(0) : null;
@@ -159,9 +178,10 @@ function Strength() {
       benchPress: benchPress.score,
       squat: squat.score,
       deadlift: deadlift.score,
-      latPulldown: latPulldown.score, // 改為 latPulldown
+      latPulldown: latPulldown.score,
       shoulderPress: shoulderPress.score,
       averageScore,
+      comment: getAverageScoreComment(averageScore, gender),
     };
 
     const updatedHistory = [...history, newHistoryEntry];
@@ -187,6 +207,23 @@ function Strength() {
       <p>體重：{weight ? `${weight} 公斤` : '未輸入'}</p>
       <p>年齡：{age || '未輸入'}</p>
 
+      <div className="instructions-btn-container">
+        <button onClick={() => navigate('/strength-instructions')} className="nav-btn">
+          動作說明
+        </button>
+      </div>
+
+      {/* 新增評測標準說明區塊 */}
+      <div className="standards-description">
+        <h2 className="text-lg font-semibold mb-2">評測標準說明</h2>
+        <p>
+          我們的評測標準基於 Strength Level 用戶提供的超過 1.34 億次舉重數據，涵蓋男女標準，適用於臥推、深蹲、硬舉、肩推等多項健身動作。
+        </p>
+        <p className="mt-2 text-sm text-gray-600">
+          來源：<a href="https://strengthlevel.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">https://strengthlevel.com/</a>
+        </p>
+      </div>
+
       <div className="exercise-section">
         <h2 className="text-lg font-semibold">臥推</h2>
         <input
@@ -207,7 +244,7 @@ function Strength() {
           計算
         </button>
         {benchPress.max && <p>最大力量 (1RM): {benchPress.max} kg</p>}
-        {benchPress.score && <p>分數: {benchPress.score}</p>}
+        {benchPress.score && <p className="score-display">分數: {benchPress.score}</p>}
       </div>
 
       <div className="exercise-section">
@@ -230,7 +267,7 @@ function Strength() {
           計算
         </button>
         {squat.max && <p>最大力量 (1RM): {squat.max} kg</p>}
-        {squat.score && <p>分數: {squat.score}</p>}
+        {squat.score && <p className="score-display">分數: {squat.score}</p>}
       </div>
 
       <div className="exercise-section">
@@ -253,7 +290,7 @@ function Strength() {
           計算
         </button>
         {deadlift.max && <p>最大力量 (1RM): {deadlift.max} kg</p>}
-        {deadlift.score && <p>分數: {deadlift.score}</p>}
+        {deadlift.score && <p className="score-display">分數: {deadlift.score}</p>}
       </div>
 
       <div className="exercise-section">
@@ -276,7 +313,7 @@ function Strength() {
           計算
         </button>
         {latPulldown.max && <p>最大力量: {latPulldown.max} kg</p>}
-        {latPulldown.score && <p>分數: {latPulldown.score}</p>}
+        {latPulldown.score && <p className="score-display">分數: {latPulldown.score}</p>}
       </div>
 
       <div className="exercise-section">
@@ -299,13 +336,18 @@ function Strength() {
           計算
         </button>
         {shoulderPress.max && <p>最大力量 (1RM): {shoulderPress.max} kg</p>}
-        {shoulderPress.score && <p>分數: {shoulderPress.score}</p>}
+        {shoulderPress.score && <p className="score-display">分數: {shoulderPress.score}</p>}
       </div>
 
       <div className="radar-chart">
         <Radar data={radarData} options={radarOptions} />
       </div>
-      {averageScore && <p className="text-center">平均分數: {averageScore}</p>}
+      {averageScore && (
+        <div className="average-score-section">
+          <p className="average-score-display">平均分數: {averageScore}</p>
+          <p className="average-score-display">{getAverageScoreComment(averageScore, gender)}</p>
+        </div>
+      )}
 
       {history.length > 0 && (
         <div className="history-section">
@@ -320,6 +362,7 @@ function Strength() {
                 <p>滑輪下拉: {entry.latPulldown}</p>
                 <p>站姿肩推: {entry.shoulderPress}</p>
                 <p>平均分數: {entry.averageScore}</p>
+                <p>評語: {entry.comment}</p>
               </li>
             ))}
           </ul>
@@ -327,9 +370,6 @@ function Strength() {
       )}
 
       <div className="button-group">
-        <button onClick={() => navigate('/strength-instructions')} className="nav-btn">
-          動作說明
-        </button>
         <button onClick={handleSubmit} className="submit-btn">
           提交並返回總覽
         </button>
@@ -340,7 +380,7 @@ function Strength() {
 
 export default Strength;
 
-// 響應式 CSS（保持不變）
+// 響應式 CSS
 const styles = `
   .strength-container {
     max-width: 100%;
@@ -380,6 +420,25 @@ const styles = `
     background-color: #3aa0a0;
   }
 
+  .score-display {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #1E90FF; /* 亮眼的藍色 */
+    margin-top: 0.5rem;
+  }
+
+  .average-score-section {
+    text-align: center;
+    margin: 1rem 0;
+  }
+
+  .average-score-display {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #1E90FF; /* 亮眼的藍色 */
+    margin-top: 0.5rem;
+  }
+
   .radar-chart {
     max-width: 100%;
     margin: 1.5rem 0;
@@ -409,6 +468,18 @@ const styles = `
     margin-top: 1.5rem;
   }
 
+  .instructions-btn-container {
+    margin-bottom: 1rem;
+  }
+
+  .standards-description {
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background-color: #fff;
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+
   .nav-btn, .submit-btn {
     width: 100%;
     padding: 0.75rem;
@@ -433,6 +504,21 @@ const styles = `
 
   .submit-btn:hover {
     background-color: #3aa0a0;
+  }
+
+  @media (max-width: 767px) {
+    .score-display {
+      font-size: 1.25rem; /* 手機端稍小 */
+    }
+
+    .average-score-display {
+      font-size: 1.5rem; /* 手機端稍小 */
+      word-break: break-word; /* 自動換行 */
+    }
+
+    .standards-description {
+      font-size: 0.9rem;
+    }
   }
 
   @media (min-width: 768px) {

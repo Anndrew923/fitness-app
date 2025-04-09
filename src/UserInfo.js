@@ -12,11 +12,17 @@ function UserInfo() {
   const [height, setHeight] = useState(userData.height || '');
   const [weight, setWeight] = useState(userData.weight || '');
   const [age, setAge] = useState(userData.age || '');
+  const [isSaved, setIsSaved] = useState(false); // 新增狀態：是否已儲存
   const navigate = useNavigate();
 
   const handleSubmit = (e) => {
     e.preventDefault();
     setUserData({ ...userData, height, weight, age });
+    setIsSaved(true); // 設置為已儲存狀態
+    // 2 秒後恢復按鈕原始狀態
+    setTimeout(() => {
+      setIsSaved(false);
+    }, 2000);
   };
 
   const radarData = {
@@ -88,8 +94,8 @@ function UserInfo() {
             required
           />
         </div>
-        <button type="submit" className="submit-btn">
-          儲存
+        <button type="submit" className={`submit-btn ${isSaved ? 'saved' : ''}`}>
+          {isSaved ? '已儲存' : '儲存'}
         </button>
       </form>
       <div className="radar-section">
@@ -151,10 +157,19 @@ const styles = `
     border-radius: 4px;
     font-size: 1rem;
     cursor: pointer;
+    transition: background-color 0.3s ease; /* 添加過渡效果 */
   }
 
   .submit-btn:hover {
     background-color: #3aa0a0;
+  }
+
+  .submit-btn.saved {
+    background-color: #28a745; /* 綠色，表示已儲存 */
+  }
+
+  .submit-btn.saved:hover {
+    background-color: #218838; /* 綠色懸停效果 */
   }
 
   .radar-section {
