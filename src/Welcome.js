@@ -5,10 +5,10 @@ import { useNavigate } from 'react-router-dom';
 function Welcome() {
   const navigate = useNavigate();
 
-  // 模擬加載，3秒後跳轉到用戶信息頁
+  // 模擬加載，3秒後跳轉到 Home 頁
   useEffect(() => {
     const timer = setTimeout(() => {
-      navigate('/user-info'); // 跳轉到用戶信息頁
+      navigate('/home'); // 始終跳轉到 /home
     }, 3000); // 3秒後跳轉
 
     return () => clearTimeout(timer); // 清理計時器
