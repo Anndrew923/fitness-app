@@ -85,10 +85,10 @@ function Power() {
       return;
     }
 
-    // 處理未輸入的項目，設為0（對於100公尺衝刺跑，設為999秒以確保0分）
-    const verticalJumpNum = verticalJump ? parseFloat(verticalJump) : 0;
-    const standingLongJumpNum = standingLongJump ? parseFloat(standingLongJump) : 0;
-    const sprintNum = sprint ? parseFloat(sprint) : 999; // 設為大值以確保0分
+    // 處理輸入值，未輸入的項目保持為空（不設為 0）
+    const verticalJumpNum = verticalJump ? parseFloat(verticalJump) : null;
+    const standingLongJumpNum = standingLongJump ? parseFloat(standingLongJump) : null;
+    const sprintNum = sprint ? parseFloat(sprint) : null;
 
     // 根據性別和年齡選擇標準
     const genderValue = gender === '男性' || gender.toLowerCase() === 'male' ? 'male' : gender === '女性' || gender.toLowerCase() === 'female' ? 'female' : null;
@@ -105,18 +105,25 @@ function Power() {
       return;
     }
 
-    // 計算各動作分數
-    const verticalJumpScore = calculateScoreIncreasing(verticalJumpNum, verticalJumpStandard);
-    const standingLongJumpScore = calculateScoreIncreasing(standingLongJumpNum, standingLongJumpStandard);
-    const sprintScore = calculateScoreDecreasing(sprintNum, sprintStandard);
+    // 計算各動作分數，未輸入的項目分數設為 null
+    const verticalJumpScore = verticalJumpNum !== null ? calculateScoreIncreasing(verticalJumpNum, verticalJumpStandard) : null;
+    const standingLongJumpScore = standingLongJumpNum !== null ? calculateScoreIncreasing(standingLongJumpNum, standingLongJumpStandard) : null;
+    const sprintScore = sprintNum !== null ? calculateScoreDecreasing(sprintNum, sprintStandard) : null;
 
-    // 最終分數 = 三個動作分數的平均值
-    const finalScore = ((verticalJumpScore + standingLongJumpScore + sprintScore) / 3).toFixed(0);
+    // 收集有分數的項目
+    const scores = [verticalJumpScore, standingLongJumpScore, sprintScore].filter(score => score !== null);
+    if (scores.length === 0) {
+      alert('請至少完成一項動作的測量！');
+      return;
+    }
+
+    // 計算最終分數：只平均有分數的項目
+    const finalScore = (scores.reduce((sum, score) => sum + score, 0) / scores.length).toFixed(0);
 
     setResult({
-      verticalJumpScore: verticalJumpScore.toFixed(0),
-      standingLongJumpScore: standingLongJumpScore.toFixed(0),
-      sprintScore: sprintScore.toFixed(0),
+      verticalJumpScore: verticalJumpScore ? verticalJumpScore.toFixed(0) : null,
+      standingLongJumpScore: standingLongJumpScore ? standingLongJumpScore.toFixed(0) : null,
+      sprintScore: sprintScore ? sprintScore.toFixed(0) : null,
       finalScore,
     });
   };
@@ -128,15 +135,15 @@ function Power() {
       return;
     }
 
-    // 儲存歷史記錄，對於未輸入的項目設為0
+    // 儲存歷史記錄，對於未輸入的項目設為 0
     const newHistoryEntry = {
       date: new Date().toLocaleString(),
       verticalJump: verticalJump ? parseFloat(verticalJump) : 0,
       standingLongJump: standingLongJump ? parseFloat(standingLongJump) : 0,
-      sprint: sprint ? parseFloat(sprint) : 0, // 歷史記錄顯示為0秒
-      verticalJumpScore: result.verticalJumpScore,
-      standingLongJumpScore: result.standingLongJumpScore,
-      sprintScore: result.sprintScore,
+      sprint: sprint ? parseFloat(sprint) : 0, // 歷史記錄顯示為 0 秒
+      verticalJumpScore: result.verticalJumpScore || 0,
+      standingLongJumpScore: result.standingLongJumpScore || 0,
+      sprintScore: result.sprintScore || 0,
       finalScore: result.finalScore,
     };
 
@@ -192,9 +199,9 @@ function Power() {
           </button>
           {result.finalScore && (
             <>
-              <p className="score-display">垂直彈跳分數: {result.verticalJumpScore}</p>
-              <p className="score-display">立定跳遠分數: {result.standingLongJumpScore}</p>
-              <p className="score-display">100公尺衝刺跑分數: {result.sprintScore}</p>
+              {result.verticalJumpScore && <p className="score-display">垂直彈跳分數: {result.verticalJumpScore}</p>}
+              {result.standingLongJumpScore && <p className="score-display">立定跳遠分數: {result.standingLongJumpScore}</p>}
+              {result.sprintScore && <p className="score-display">100公尺衝刺跑分數: {result.sprintScore}</p>}
               <p className="score-display">最終分數: {result.finalScore}</p>
             </>
           )}
