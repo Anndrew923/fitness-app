@@ -265,16 +265,16 @@ function Muscle() {
         <button onClick={calculateMuscleScore} className="calculate-btn">
           計算
         </button>
-        {result.smmScore && <p>骨骼肌肉量 (SMM) 分數: {result.smmScore}</p>}
-        {result.smPercent && <p>骨骼肌肉量百分比 (SM%): {result.smPercent}%</p>}
-        {result.smPercentScore && <p>骨骼肌肉量百分比 (SM%) 分數: {result.smPercentScore}</p>}
-        {result.finalScore && <p>最終分數: {result.finalScore}</p>}
+        {result.smmScore && <p className="score-text">骨骼肌肉量 (SMM) 分數: {result.smmScore}</p>}
+        {result.smPercent && <p className="score-text">骨骼肌肉量百分比 (SM%): {result.smPercent}%</p>}
+        {result.smPercentScore && <p className="score-text">骨骼肌肉量百分比 (SM%) 分數: {result.smPercentScore}</p>}
+        {result.finalScore && <p className="score-text">最終分數: {result.finalScore}</p>}
       </div>
 
       {/* 長條圖區域 */}
       {result.finalScore && (
         <div className="chart-section">
-          <h2 className="text-lg font-semibold mb-2">分數視覺化</h2>
+          <h2 className="text-lg font-semibold mb-2">數值比較</h2>
           <div className="chart-container">
             <Bar data={barData1} options={barOptions} />
           </div>
@@ -354,6 +354,14 @@ const styles = `
     background-color: #3aa0a0;
   }
 
+  /* 新增分數文字樣式 */
+  .score-text {
+    font-size: 1.5rem; /* 字體調大到 24px */
+    color: #d32f2f; /* 顯眼的深紅色 */
+    font-weight: 600; /* 稍微加粗 */
+    margin: 0.5rem 0; /* 增加上下間距 */
+  }
+
   .chart-section {
     margin-top: 1.5rem;
   }
@@ -420,6 +428,11 @@ const styles = `
 
     .submit-btn {
       width: 48%;
+    }
+
+    /* 桌面設備上分數文字更大 */
+    .score-text {
+      font-size: 1.75rem; /* 桌面設備上設為 28px */
     }
   }
 `;

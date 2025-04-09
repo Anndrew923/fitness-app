@@ -59,7 +59,7 @@ function UserInfo() {
 
   return (
     <div className="user-info-container">
-      <h1 className="text-2xl font-bold text-center mb-6">用戶信息與總覽</h1>
+      <h1 className="text-2xl font-bold text-center mb-6">身體狀態與表現總覽</h1>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label className="block text-sm font-medium text-gray-700">身高 (cm)</label>
@@ -99,7 +99,7 @@ function UserInfo() {
         </button>
       </form>
       <div className="radar-section">
-        <h2 className="text-xl font-semibold text-center mb-4">您的表現總覽</h2>
+        <h2 className="text-xl font-semibold text-center mb-4">表現總覽</h2>
         <Radar data={radarData} options={radarOptions} />
       </div>
       <div className="button-group">
