@@ -186,12 +186,6 @@ function Cardio() {
             </ul>
           </div>
         )}
-
-        <div className="button-group">
-          <button onClick={handleSubmit} className="submit-btn">
-            提交並返回總覽
-          </button>
-        </div>
       </div>
 
       {/* 下半部：動作說明 */}
@@ -212,6 +206,13 @@ function Cardio() {
             本 Cooper 測試標準表可在 Cooper Test Chart 找到，由 Carl Magnus Swahn 設計。
           </p>
         </div>
+      </div>
+
+      {/* 移動按鈕到最下方 */}
+      <div className="button-group">
+        <button onClick={handleSubmit} className="submit-btn">
+          提交並返回總覽
+        </button>
       </div>
     </div>
   );
@@ -292,6 +293,7 @@ const styles = `
     flex-direction: column;
     gap: 0.5rem;
     margin-top: 1.5rem;
+    margin-bottom: 1.5rem; /* 添加底部間距，與 FFMI.js 統一 */
   }
 
   .submit-btn {

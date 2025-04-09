@@ -138,12 +138,26 @@ function FFMI() {
         <div className="result-section">
           <h2 className="result-title">您的評估結果</h2>
           <p className="result-text">FFMI：{ffmi}</p>
-          <p className="result-text">FFMI 評分：{ffmiScore} 分</p>
-          <p className="result-text">FFMI 等級：{ffmiCategory}</p>
+          <p className="score-text">FFMI 評分：{ffmiScore} 分</p>
+          <p className="category-text">FFMI 等級：{ffmiCategory}</p>
           <p className="result-text note-text">
           </p>
         </div>
       )}
+      {/* 新增：FFMI 是什麼？說明區塊 */}
+      <div className="description-section">
+        <h2 className="description-title">FFMI 是什麼？</h2>
+        <div className="description-content">
+          <p>
+            FFMI（Fat Free Mass Index 無脂肪質量指數）用來評估肌肉量多寡，考量身高與體脂，比 BMI 更準確。數值越高，代表肌肉量越多，是健身評估常用指標。在以下幾個狀況下易造成結果失真：
+          </p>
+          <ol className="list-decimal pl-5 mt-2">
+            <li>受測者身高高於平均標準 (190 以上)</li>
+            <li>受測者體脂肪率顯著高於平均標準</li>
+            <li>受測者體重高於平均標準</li>
+          </ol>
+        </div>
+      </div>
       <div className="table-section">
         <h2 className="table-title">
           FFMI 對照表 ({userData.gender === 'male' ? '男性' : '女性'})
@@ -166,7 +180,7 @@ function FFMI() {
         </table>
       </div>
       <button onClick={() => navigate('/user-info')} className="back-btn">
-        返回總覽
+        提交並返回總覽
       </button>
     </div>
   );
@@ -272,10 +286,51 @@ const styles = `
     text-align: center;
   }
 
+  .score-text {
+    font-size: 1.25rem;
+    font-weight: bold;
+    color: #3b82f6;
+    margin: 0.5rem 0;
+    text-align: center;
+  }
+
+  .category-text {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #3b82f6;
+    margin: 0.5rem 0;
+    text-align: center;
+  }
+
   .note-text {
     font-size: 0.75rem;
     color: #e11d48;
     font-style: italic;
+  }
+
+  /* 新增：FFMI 是什麼？的樣式 */
+  .description-section {
+    width: 90%;
+    max-width: 400px;
+    background: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin-bottom: 1.5rem;
+  }
+
+  .description-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 1rem;
+    text-align: center;
+  }
+
+  .description-content {
+    font-size: 0.875rem;
+    color: #4b5563;
+    line-height: 1.6;
   }
 
   .table-section {
@@ -326,7 +381,7 @@ const styles = `
     font-size: 1rem;
     font-weight: 500;
     color: white;
-    background: linear-gradient(90deg, #6b7280, #9ca3af);
+    background: linear-gradient(90deg, #3b82f6, #60a5fa);
     border: none;
     border-radius: 6px;
     cursor: pointer;
@@ -334,7 +389,7 @@ const styles = `
   }
 
   .back-btn:hover {
-    background: linear-gradient(90deg, #4b5563, #6b7280);
+    background: linear-gradient(90deg, #2563eb, #3b82f6);
   }
 
   @media (min-width: 768px) {
@@ -342,13 +397,21 @@ const styles = `
       font-size: 2rem;
     }
     .result-title,
-    .table-title {
+    .table-title,
+    .description-title {
       font-size: 1.5rem;
     }
     .result-text,
     .ffmi-table th,
-    .ffmi-table td {
+    .ffmi-table td,
+    .description-content {
       font-size: 1rem;
+    }
+    .score-text {
+      font-size: 1.5rem;
+    }
+    .category-text {
+      font-size: 1.25rem;
     }
     .note-text {
       font-size: 0.875rem;

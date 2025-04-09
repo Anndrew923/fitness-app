@@ -6,10 +6,15 @@ function ScrollToTop() {
   const { pathname } = useLocation();
 
   useEffect(() => {
-    window.scrollTo(0, 0); // 每次路徑變更時滾動到頂部
-  }, [pathname]); // 依賴於路徑名稱，路徑變更時觸發
+    // 添加 100ms 延遲，確保頁面渲染完成後滾動
+    const timer = setTimeout(() => {
+      window.scrollTo(0, 0);
+    }, 100);
 
-  return null; // 這個組件不渲染任何內容
+    return () => clearTimeout(timer); // 清理計時器
+  }, [pathname]);
+
+  return null;
 }
 
 export default ScrollToTop;
