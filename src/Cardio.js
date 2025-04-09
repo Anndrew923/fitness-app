@@ -171,6 +171,26 @@ function Cardio() {
           )}
         </div>
 
+        {/* 移動：評測說明到歷史記錄上方 */}
+        <div className="description-section">
+          <h2 className="text-lg font-semibold mb-2">動作說明</h2>
+          <div className="description-content">
+            <p className="font-semibold">Cooper Test 簡介</p>
+            <p>
+              傳統心肺耐力測試需在實驗室以極限強度測量最大攝氧量（VO₂ Max），但難以普及。Kenneth H. Cooper 博士發現 12 分鐘跑步距離與 VO₂ Max 高度相關，於 1968 年設計 Cooper Test，廣泛應用於美軍體測，簡化測量並提升效率。測試以年齡、性別和跑步距離估算 VO₂ Max。
+            </p>
+            <p className="font-semibold mt-2">測量方式</p>
+            <ul className="list-disc pl-5">
+              <li><strong>地點</strong>：選擇田徑場或安全跑步環境，方便記錄距離和配速。</li>
+              <li><strong>記錄</strong>：用圈數或運動手錶記錄 12 分鐘跑步距離。</li>
+              <li><strong>熱身</strong>：跑前動態熱身 10-15 分鐘，避免受傷。</li>
+            </ul>
+            <p className="mt-2 text-sm text-gray-600">
+              本 Cooper 測試標準表可在 Cooper Test Chart 找到，由 Carl Magnus Swahn 設計。
+            </p>
+          </div>
+        </div>
+
         {history.length > 0 && (
           <div className="history-section">
             <h2 className="text-lg font-semibold">歷史記錄</h2>
@@ -186,26 +206,6 @@ function Cardio() {
             </ul>
           </div>
         )}
-      </div>
-
-      {/* 下半部：動作說明 */}
-      <div className="description-section">
-        <h2 className="text-lg font-semibold mb-2">動作說明</h2>
-        <div className="description-content">
-          <p className="font-semibold">Cooper Test 簡介</p>
-          <p>
-            傳統心肺耐力測試需在實驗室以極限強度測量最大攝氧量（VO₂ Max），但難以普及。Kenneth H. Cooper 博士發現 12 分鐘跑步距離與 VO₂ Max 高度相關，於 1968 年設計 Cooper Test，廣泛應用於美軍體測，簡化測量並提升效率。測試以年齡、性別和跑步距離估算 VO₂ Max。
-          </p>
-          <p className="font-semibold mt-2">測量方式</p>
-          <ul className="list-disc pl-5">
-            <li><strong>地點</strong>：選擇田徑場或安全跑步環境，方便記錄距離和配速。</li>
-            <li><strong>記錄</strong>：用圈數或運動手錶記錄 12 分鐘跑步距離。</li>
-            <li><strong>熱身</strong>：跑前動態熱身 10-15 分鐘，避免受傷。</li>
-          </ul>
-          <p className="mt-2 text-sm text-gray-600">
-            本 Cooper 測試標準表可在 Cooper Test Chart 找到，由 Carl Magnus Swahn 設計。
-          </p>
-        </div>
       </div>
 
       {/* 移動按鈕到最下方 */}
