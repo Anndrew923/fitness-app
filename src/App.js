@@ -11,6 +11,7 @@ import Power from './Power';
 import Muscle from './Muscle';
 import FFMI from './FFMI';
 import StrengthInstructions from './StrengthInstructions';
+import CelebrityComparison from './CelebrityComparison'; // 導入 CelebrityComparison
 
 function App() {
   return (
@@ -27,6 +28,10 @@ function App() {
           <Route path="/muscle-mass" element={<Muscle />} />
           <Route path="/body-fat" element={<FFMI />} />
           <Route path="/strength-instructions" element={<StrengthInstructions />} />
+          {/* 添加 CelebrityComparison 路由 */}
+          <Route path="/celebrity-comparison" element={<CelebrityComparison />} />
+          {/* 可選：添加 404 路由 */}
+          <Route path="*" element={<div>404 - 頁面未找到</div>} />
         </Routes>
       </Router>
     </UserProvider>

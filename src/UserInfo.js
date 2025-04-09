@@ -209,6 +209,10 @@ function UserInfo() {
         <button onClick={() => navigate('/body-fat')} className="nav-btn">
           體脂肪率與FFMI
         </button>
+        {/* 新增按鈕：參考體育明星的表現 */}
+        <button onClick={() => navigate('/celebrity-comparison')} className="nav-btn">
+          名人數據參照表
+        </button>
       </div>
     </div>
   );
