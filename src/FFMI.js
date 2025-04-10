@@ -10,6 +10,8 @@ function FFMI() {
   const [ffmi, setFfmi] = useState(null);
   const [ffmiScore, setFfmiScore] = useState(null);
   const [ffmiCategory, setFfmiCategory] = useState('');
+  // 新增：管理展開/收起狀態
+  const [isExpanded, setIsExpanded] = useState(false);
 
   const calculateScores = () => {
     if (!userData.gender || !userData.height || !userData.weight || !userData.age) {
@@ -140,22 +142,33 @@ function FFMI() {
           <p className="result-text">FFMI：{ffmi}</p>
           <p className="score-text">FFMI 評分：{ffmiScore} 分</p>
           <p className="category-text">FFMI 等級：{ffmiCategory}</p>
-          <p className="result-text note-text">
-          </p>
+          <p className="result-text note-text"></p>
         </div>
       )}
-      {/* 新增：FFMI 是什麼？說明區塊 */}
+      {/* 修改：將 FFMI 是什麼？改為可展開/收起的卡片 */}
       <div className="description-section">
-        <h2 className="description-title">FFMI 是什麼？</h2>
-        <div className="description-content">
-          <p>
-            FFMI（Fat Free Mass Index 無脂肪質量指數）用來評估肌肉量多寡，考量身高與體脂，比 BMI 更準確。數值越高，代表肌肉量越多，是健身評估常用指標。在以下幾個狀況下易造成結果失真：
-          </p>
-          <ol className="list-decimal pl-5 mt-2">
-            <li>受測者身高高於平均標準 (190 以上)</li>
-            <li>受測者體脂肪率顯著高於平均標準</li>
-            <li>受測者體重高於平均標準</li>
-          </ol>
+        <div className="description-card">
+          <div
+            className="description-header"
+            onClick={() => setIsExpanded(!isExpanded)}
+          >
+            <h2 className="description-title">FFMI 是什麼？</h2>
+            <span className={`arrow ${isExpanded ? 'expanded' : ''}`}>
+              {isExpanded ? '▲' : '▼'}
+            </span>
+          </div>
+          {isExpanded && (
+            <div className="description-content">
+              <p>
+                FFMI（Fat Free Mass Index 無脂肪質量指數）用來評估肌肉量多寡，考量身高與體脂，比 BMI 更準確。數值越高，代表肌肉量越多，是健身評估常用指標。在以下幾個狀況下易造成結果失真：
+              </p>
+              <ol className="list-decimal pl-5 mt-2">
+                <li>受測者身高高於平均標準 (190 以上)</li>
+                <li>受測者體脂肪率顯著高於平均標準</li>
+                <li>受測者體重高於平均標準</li>
+              </ol>
+            </div>
+          )}
         </div>
       </div>
       <div className="table-section">
@@ -308,29 +321,57 @@ const styles = `
     font-style: italic;
   }
 
-  /* 新增：FFMI 是什麼？的樣式 */
+  /* 修改：FFMI 是什麼？的卡片式設計樣式 */
   .description-section {
     width: 90%;
     max-width: 400px;
+    margin-bottom: 1.5rem;
+  }
+
+  .description-card {
     background: white;
-    padding: 1.5rem;
     border-radius: 8px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    margin-bottom: 1.5rem;
+    overflow: hidden;
+  }
+
+  .description-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem;
+    cursor: pointer;
+    background-color: #f1f1f1;
+    transition: background-color 0.3s ease;
+  }
+
+  .description-header:hover {
+    background-color: #e0e0e0;
   }
 
   .description-title {
     font-size: 1.25rem;
     font-weight: 600;
     color: #1f2937;
-    margin-bottom: 1rem;
-    text-align: center;
+    margin: 0;
   }
 
   .description-content {
+    padding: 1.5rem;
     font-size: 0.875rem;
     color: #4b5563;
     line-height: 1.6;
+    background-color: white;
+    transition: max-height 0.3s ease, padding 0.3s ease;
+  }
+
+  .arrow {
+    font-size: 1rem;
+    transition: transform 0.3s ease;
+  }
+
+  .arrow.expanded {
+    transform: rotate(180deg);
   }
 
   .table-section {
