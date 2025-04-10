@@ -20,6 +20,9 @@ function Power() {
     finalScore: null,
   }); // 結果
   const [history, setHistory] = useState([]); // 歷史記錄
+  // 新增：管理展開/收起狀態
+  const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false); // 動作說明
+  const [isStandardsExpanded, setIsStandardsExpanded] = useState(false); // 檢測標準說明
 
   // 載入歷史記錄
   useEffect(() => {
@@ -209,33 +212,58 @@ function Power() {
 
         {/* 動作說明與檢測標準說明 */}
         <div className="description-section">
-          <h2 className="text-lg font-semibold mb-2">動作說明</h2>
-          <div className="description-content">
-            <p className="exercise-title">垂直彈跳</p>
-            <p className="exercise-description">測量垂直跳躍高度，反映下肢爆發力。站立時伸手觸及最高點，然後全力跳起觸及最高點，兩者高度差即為垂直彈跳高度（單位：公分）。</p>
-            <p className="exercise-title mt-2">立定跳遠</p>
-            <p className="exercise-description">測量站立跳躍距離，反映下肢力量和協調性。雙腳站立於起跳線，無助跑直接跳出，測量起跳線(腳尖)到著地點(腳跟)最近處的距離（單位：公分）。</p>
-            <p className="exercise-title mt-2">100公尺衝刺跑</p>
-            <p className="exercise-description">測量短距離衝刺速度，反映全身爆發力和速度。從靜止起跑，盡全力衝刺100公尺，記錄完成時間（單位：秒）。</p>
-            <p className="mt-2 text-sm text-gray-600">
-              建議：測量前充分熱身，避免受傷。使用專業設備或在標準場地進行測量以確保準確性。
-            </p>
+          {/* 修改：將動作說明改為可展開/收起的卡片 */}
+          <div className="description-card">
+            <div
+              className="description-header"
+              onClick={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
+            >
+              <h2 className="text-lg font-semibold">動作說明</h2>
+              <span className={`arrow ${isDescriptionExpanded ? 'expanded' : ''}`}>
+                {isDescriptionExpanded ? '▲' : '▼'}
+              </span>
+            </div>
+            {isDescriptionExpanded && (
+              <div className="description-content">
+                <p className="exercise-title">垂直彈跳</p>
+                <p className="exercise-description">測量垂直跳躍高度，反映下肢爆發力。站立時伸手觸及最高點，然後全力跳起觸及最高點，兩者高度差即為垂直彈跳高度（單位：公分）。</p>
+                <p className="exercise-title mt-2">立定跳遠</p>
+                <p className="exercise-description">測量站立跳躍距離，反映下肢力量和協調性。雙腳站立於起跳線，無助跑直接跳出，測量起跳線(腳尖)到著地點(腳跟)最近處的距離（單位：公分）。</p>
+                <p className="exercise-title mt-2">100公尺衝刺跑</p>
+                <p className="exercise-description">測量短距離衝刺速度，反映全身爆發力和速度。從靜止起跑，盡全力衝刺100公尺，記錄完成時間（單位：秒）。</p>
+                <p className="mt-2 text-sm text-gray-600">
+                  建議：測量前充分熱身，避免受傷。使用專業設備或在標準場地進行測量以確保準確性。
+                </p>
+              </div>
+            )}
           </div>
 
-          {/* 檢測標準說明 */}
-          <h2 className="text-lg font-semibold mt-4 mb-2">檢測標準說明</h2>
-          <div className="standards-content">
-            <p className="font-semibold">來源：</p>
-            <p>參考教育部體育署體適能網站、美國運動醫學會（ACSM）、世界田徑協會及全國中等學校運動會田徑標準。</p>
-            <p className="font-semibold mt-2">依據：</p>
-            <ul className="list-disc pl-5">
-              <li>原地垂直彈跳：ACSM標準與青少年數據。</li>
-              <li>立定跳遠：教育部常模與ACSM衰退研究。</li>
-              <li>100公尺衝刺跑：世界田徑與全國運動會標準。</li>
-            </ul>
-            <p className="mt-2 text-sm text-gray-600">
-              本測驗包含推測值：12-80歲全齡數據不全，依ACSM每10年下降10-15%、性別差異70-90%推估。
-            </p>
+          {/* 修改：將檢測標準說明改為可展開/收起的卡片 */}
+          <div className="standards-card">
+            <div
+              className="standards-header"
+              onClick={() => setIsStandardsExpanded(!isStandardsExpanded)}
+            >
+              <h2 className="text-lg font-semibold">檢測標準說明</h2>
+              <span className={`arrow ${isStandardsExpanded ? 'expanded' : ''}`}>
+                {isStandardsExpanded ? '▲' : '▼'}
+              </span>
+            </div>
+            {isStandardsExpanded && (
+              <div className="standards-content">
+                <p className="font-semibold">來源：</p>
+                <p>參考教育部體育署體適能網站、美國運動醫學會（ACSM）、世界田徑協會及全國中等學校運動會田徑標準。</p>
+                <p className="font-semibold mt-2">依據：</p>
+                <ul className="list-disc pl-5">
+                  <li>原地垂直彈跳：ACSM標準與青少年數據。</li>
+                  <li>立定跳遠：教育部常模與ACSM衰退研究。</li>
+                  <li>100公尺衝刺跑：世界田徑與全國運動會標準。</li>
+                </ul>
+                <p className="mt-2 text-sm text-gray-600">
+                  本測驗包含推測值：12-80歲全齡數據不全，依ACSM每10年下降10-15%、性別差異70-90%推估。
+                </p>
+              </div>
+            )}
           </div>
         </div>
 
@@ -323,14 +351,45 @@ const styles = `
 
   .description-section {
     margin-top: 2rem;
-    padding: 1rem;
+  }
+
+  /* 修改：卡片式設計的樣式（共用於動作說明和檢測標準說明） */
+  .description-card, .standards-card {
+    margin-bottom: 1.5rem;
     background-color: #fff;
     border-radius: 4px;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
   }
 
-  .description-content {
+  .description-header, .standards-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    cursor: pointer;
+    background-color: #f1f1f1;
+    transition: background-color 0.3s ease;
+  }
+
+  .description-header:hover, .standards-header:hover {
+    background-color: #e0e0e0;
+  }
+
+  .description-content, .standards-content {
+    padding: 1rem;
+    background-color: #fff;
+    transition: max-height 0.3s ease, padding 0.3s ease;
     line-height: 1.6;
+  }
+
+  .arrow {
+    font-size: 1rem;
+    transition: transform 0.3s ease;
+  }
+
+  .arrow.expanded {
+    transform: rotate(180deg);
   }
 
   .exercise-title {
@@ -342,10 +401,6 @@ const styles = `
   .exercise-description {
     font-size: 1rem;
     color: #555;
-  }
-
-  .standards-content {
-    line-height: 1.6;
   }
 
   .history-section {
