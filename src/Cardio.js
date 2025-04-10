@@ -13,6 +13,8 @@ function Cardio() {
   const [distance, setDistance] = useState(''); // 12 分鐘跑步距離 (公尺)
   const [score, setScore] = useState(null); // 分數
   const [history, setHistory] = useState([]); // 歷史記錄
+  // 新增：管理展開/收起狀態
+  const [isExpanded, setIsExpanded] = useState(false);
 
   // 載入歷史記錄
   useEffect(() => {
@@ -171,23 +173,35 @@ function Cardio() {
           )}
         </div>
 
-        {/* 移動：評測說明到歷史記錄上方 */}
+        {/* 修改：將動作說明改為可展開/收起的卡片 */}
         <div className="description-section">
-          <h2 className="text-lg font-semibold mb-2">動作說明</h2>
-          <div className="description-content">
-            <p className="font-semibold">Cooper Test 簡介</p>
-            <p>
-              傳統心肺耐力測試需在實驗室以極限強度測量最大攝氧量（VO₂ Max），但難以普及。Kenneth H. Cooper 博士發現 12 分鐘跑步距離與 VO₂ Max 高度相關，於 1968 年設計 Cooper Test，廣泛應用於美軍體測，簡化測量並提升效率。測試以年齡、性別和跑步距離估算 VO₂ Max。
-            </p>
-            <p className="font-semibold mt-2">測量方式</p>
-            <ul className="list-disc pl-5">
-              <li><strong>地點</strong>：選擇田徑場或安全跑步環境，方便記錄距離和配速。</li>
-              <li><strong>記錄</strong>：用圈數或運動手錶記錄 12 分鐘跑步距離。</li>
-              <li><strong>熱身</strong>：跑前動態熱身 10-15 分鐘，避免受傷。</li>
-            </ul>
-            <p className="mt-2 text-sm text-gray-600">
-              本 Cooper 測試標準表可在 Cooper Test Chart 找到，由 Carl Magnus Swahn 設計。
-            </p>
+          <div className="description-card">
+            <div
+              className="description-header"
+              onClick={() => setIsExpanded(!isExpanded)}
+            >
+              <h2 className="text-lg font-semibold">動作說明</h2>
+              <span className={`arrow ${isExpanded ? 'expanded' : ''}`}>
+                {isExpanded ? '▲' : '▼'}
+              </span>
+            </div>
+            {isExpanded && (
+              <div className="description-content">
+                <p className="font-semibold">Cooper Test 簡介</p>
+                <p>
+                  傳統心肺耐力測試需在實驗室以極限強度測量最大攝氧量（VO₂ Max），但難以普及。Kenneth H. Cooper 博士發現 12 分鐘跑步距離與 VO₂ Max 高度相關，於 1968 年設計 Cooper Test，廣泛應用於美軍體測，簡化測量並提升效率。測試以年齡、性別和跑步距離估算 VO₂ Max。
+                </p>
+                <p className="font-semibold mt-2">測量方式</p>
+                <ul className="list-disc pl-5">
+                  <li><strong>地點</strong>：選擇田徑場或安全跑步環境，方便記錄距離和配速。</li>
+                  <li><strong>記錄</strong>：用圈數或運動手錶記錄 12 分鐘跑步距離。</li>
+                  <li><strong>熱身</strong>：跑前動態熱身 10-15 分鐘，避免受傷。</li>
+                </ul>
+                <p className="mt-2 text-sm text-gray-600">
+                  本 Cooper 測試標準表可在 Cooper Test Chart 找到，由 Carl Magnus Swahn 設計。
+                </p>
+              </div>
+            )}
           </div>
         </div>
 
@@ -313,14 +327,45 @@ const styles = `
 
   .description-section {
     margin-top: 2rem;
-    padding: 1rem;
+  }
+
+  /* 修改：卡片式設計的樣式 */
+  .description-card {
+    margin-bottom: 1.5rem;
     background-color: #fff;
     border-radius: 4px;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+  }
+
+  .description-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    cursor: pointer;
+    background-color: #f1f1f1;
+    transition: background-color 0.3s ease;
+  }
+
+  .description-header:hover {
+    background-color: #e0e0e0;
   }
 
   .description-content {
+    padding: 1rem;
+    background-color: #fff;
+    transition: max-height 0.3s ease, padding 0.3s ease;
     line-height: 1.6;
+  }
+
+  .arrow {
+    font-size: 1rem;
+    transition: transform 0.3s ease;
+  }
+
+  .arrow.expanded {
+    transform: rotate(180deg);
   }
 
   @media (max-width: 767px) {
