@@ -19,6 +19,8 @@ function Strength() {
   const [latPulldown, setLatPulldown] = useState({ weight: '', reps: '', max: null, score: null });
   const [shoulderPress, setShoulderPress] = useState({ weight: '', reps: '', max: null, score: null });
   const [history, setHistory] = useState([]);
+  // 新增：管理展開/收起狀態
+  const [isExpanded, setIsExpanded] = useState(false);
 
   useEffect(() => {
     const savedHistory = JSON.parse(localStorage.getItem('strengthHistory')) || [];
@@ -213,15 +215,35 @@ function Strength() {
         </button>
       </div>
 
-      {/* 新增評測標準說明區塊 */}
-      <div className="standards-description">
-        <h2 className="text-lg font-semibold mb-2">評測標準說明</h2>
-        <p>
-          我們的評測標準基於 Strength Level 用戶提供的超過 1.34 億次舉重數據，涵蓋男女標準，適用於臥推、深蹲、硬舉、肩推等多項健身動作。
-        </p>
-        <p className="mt-2 text-sm text-gray-600">
-          來源：<a href="https://strengthlevel.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">https://strengthlevel.com/</a>
-        </p>
+      {/* 修改：將評測標準說明改為可展開/收起的卡片 */}
+      <div className="standards-card">
+        <div
+          className="standards-header"
+          onClick={() => setIsExpanded(!isExpanded)}
+        >
+          <h2 className="text-lg font-semibold">評測標準說明</h2>
+          <span className={`arrow ${isExpanded ? 'expanded' : ''}`}>
+            {isExpanded ? '▲' : '▼'}
+          </span>
+        </div>
+        {isExpanded && (
+          <div className="standards-content">
+            <p>
+              我們的評測標準基於 Strength Level 用戶提供的超過 1.34 億次舉重數據，涵蓋男女標準，適用於臥推、深蹲、硬舉、肩推等多項健身動作。
+            </p>
+            <p className="mt-2 text-sm text-gray-600">
+              來源：
+              <a
+                href="https://strengthlevel.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-600 hover:underline"
+              >
+                https://strengthlevel.com/
+              </a>
+            </p>
+          </div>
+        )}
       </div>
 
       <div className="exercise-section">
@@ -472,12 +494,42 @@ const styles = `
     margin-bottom: 1rem;
   }
 
-  .standards-description {
+  /* 修改：卡片式設計的樣式 */
+  .standards-card {
     margin-bottom: 1.5rem;
-    padding: 1rem;
     background-color: #fff;
     border-radius: 4px;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+  }
+
+  .standards-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    cursor: pointer;
+    background-color: #f1f1f1;
+    transition: background-color 0.3s ease;
+  }
+
+  .standards-header:hover {
+    background-color: #e0e0e0;
+  }
+
+  .standards-content {
+    padding: 1rem;
+    background-color: #fff;
+    transition: max-height 0.3s ease;
+  }
+
+  .arrow {
+    font-size: 1rem;
+    transition: transform 0.3s ease;
+  }
+
+  .arrow.expanded {
+    transform: rotate(180deg);
   }
 
   .nav-btn, .submit-btn {
@@ -516,7 +568,7 @@ const styles = `
       word-break: break-word; /* 自動換行 */
     }
 
-    .standards-description {
+    .standards-content {
       font-size: 0.9rem;
     }
   }
