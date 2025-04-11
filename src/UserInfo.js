@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from './UserContext';
 import { Radar } from 'react-chartjs-2';
@@ -9,12 +9,24 @@ import { doc, setDoc, getDoc, collection, query, orderBy, getDocs } from 'fireba
 // 註冊 Chart.js 組件
 ChartJS.register(RadialLinearScale, PointElement, LineElement, Filler, Tooltip, Legend);
 
-function UserInfo({ isGuestMode, testData, onLogout, clearTestData, onGuestMode }) {
+// 定義預設的成績數據
+const DEFAULT_SCORES = {
+  strength: 0,
+  explosivePower: 0,
+  cardio: 0,
+  muscleMass: 0,
+  bodyFat: 0,
+};
+
+// 定義有效的性別選項
+const GENDER_OPTIONS = ['male', 'female'];
+
+function UserInfo({ isGuestMode, setIsGuestMode, testData, onLogout, clearTestData }) {
   const { userData, setUserData } = useUser();
-  const [height, setHeight] = useState(userData.height?.toString() || '');
-  const [weight, setWeight] = useState(userData.weight?.toString() || '');
-  const [age, setAge] = useState(userData.age?.toString() || '');
-  const [gender, setGender] = useState(userData.gender || '');
+  const [height, setHeight] = useState('');
+  const [weight, setWeight] = useState('');
+  const [age, setAge] = useState('');
+  const [gender, setGender] = useState('');
   const [isSaved, setIsSaved] = useState(false);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -23,9 +35,29 @@ function UserInfo({ isGuestMode, testData, onLogout, clearTestData, onGuestMode 
   const [historyData, setHistoryData] = useState([]);
   const navigate = useNavigate();
 
+  // 檢查 useUser 返回值
+  console.log('useUser 返回值:', { userData, setUserData });
+
   // 檢查 auth 和 db 是否正確初始化
   console.log('auth:', auth);
   console.log('db:', db);
+
+  // 處理訪客模式
+  const handleGuestMode = useCallback(() => {
+    console.log('handleGuestMode 觸發');
+    setIsGuestMode(true);
+    setUserData({
+      scores: DEFAULT_SCORES,
+    });
+    setHeight('');
+    setWeight('');
+    setAge('');
+    setGender('');
+    setError(null);
+    if (auth.currentUser) {
+      auth.signOut();
+    }
+  }, [setIsGuestMode, setUserData]);
 
   // 監聽用戶登入狀態並從 Firestore 載入資料
   useEffect(() => {
@@ -50,21 +82,19 @@ function UserInfo({ isGuestMode, testData, onLogout, clearTestData, onGuestMode 
             const userDoc = userSnap.data();
             console.log('從 Firestore 載入的用戶數據：', userDoc);
             console.log('載入的 scores 數據：', userDoc.scores);
-            setHeight(userDoc.height?.toString() || '');
-            setWeight(userDoc.weight?.toString() || '');
-            setAge(userDoc.age?.toString() || '');
-            setGender(userDoc.gender || '');
             const updatedData = {
-              ...userData,
-              height: userDoc.height || 0,
-              weight: userDoc.weight || 0,
-              age: userDoc.age || 0,
-              gender: userDoc.gender || '',
-              scores: userDoc.scores || {},
+              height: typeof userDoc.height === 'number' ? userDoc.height : undefined,
+              weight: typeof userDoc.weight === 'number' ? userDoc.weight : undefined,
+              age: typeof userDoc.age === 'number' ? userDoc.age : undefined,
+              gender: typeof userDoc.gender === 'string' ? userDoc.gender : '',
+              scores: userDoc.scores || DEFAULT_SCORES,
             };
             setUserData(updatedData);
             console.log('更新後的 userData:', updatedData);
-            // 如果缺少必要數據，提示用戶填寫
+            setHeight(typeof userDoc.height === 'number' && userDoc.height > 0 ? userDoc.height.toString() : '');
+            setWeight(typeof userDoc.weight === 'number' && userDoc.weight > 0 ? userDoc.weight.toString() : '');
+            setAge(typeof userDoc.age === 'number' && userDoc.age > 0 ? userDoc.age.toString() : '');
+            setGender(typeof userDoc.gender === 'string' ? userDoc.gender : '');
             if (
               !updatedData.height ||
               updatedData.height <= 0 ||
@@ -78,42 +108,43 @@ function UserInfo({ isGuestMode, testData, onLogout, clearTestData, onGuestMode 
             }
           } else {
             console.log('沒有找到該用戶的資料');
-            setError('沒有找到用戶資料，請填寫並儲存新資料。');
-            setUserData((prev) => ({ ...prev, height: 0, weight: 0, age: 0, gender: '', scores: {} }));
+            setError('歡迎！請填寫並儲存您的身高、體重、年齡和性別。');
+            setUserData({
+              scores: DEFAULT_SCORES,
+            });
+            setHeight('');
+            setWeight('');
+            setAge('');
+            setGender('');
           }
         } catch (err) {
           console.error('從 Firestore 讀取資料失敗：', err);
-          if (err.code === 'permission-denied') {
-            setError('您沒有權限訪問這些資料，請聯繫管理員。');
-          } else if (err.code === 'network-request-failed') {
-            setError('無法連接到伺服器，請檢查您的網路連線並稍後再試。');
-          } else {
-            setError(`無法載入用戶資料：${err.message}`);
-          }
-          setUserData((prev) => ({ ...prev, height: 0, weight: 0, age: 0, gender: '', scores: {} }));
+          setError(`無法載入用戶資料：${err.message}`);
+          setUserData({
+            scores: DEFAULT_SCORES,
+          });
+          setHeight('');
+          setWeight('');
+          setAge('');
+          setGender('');
         }
-      } else {
-        setHeight(userData.height?.toString() || '');
-        setWeight(userData.weight?.toString() || '');
-        setAge(userData.age?.toString() || '');
-        setGender(userData.gender || '');
+      } else if (!isGuestMode) {
+        setHeight('');
+        setWeight('');
+        setAge('');
+        setGender('');
         setError(null);
       }
     });
 
     return () => unsubscribe();
-  }, [setUserData, isGuestMode, userData]);
+  }, [setUserData, isGuestMode]);
 
-  // 訪客模式儲存（僅更新本地狀態）
-  const handleGuestSave = (e) => {
-    e.preventDefault();
-    setError(null);
-    setLoading(true);
-
+  // 驗證數據是否有效
+  const validateData = useCallback(() => {
     if (!height || !weight || !age || !gender) {
       setError('請填寫所有欄位');
-      setLoading(false);
-      return;
+      return false;
     }
 
     const heightNum = parseFloat(height);
@@ -122,105 +153,107 @@ function UserInfo({ isGuestMode, testData, onLogout, clearTestData, onGuestMode 
 
     if (heightNum <= 0 || weightNum <= 0 || ageNum <= 0) {
       setError('身高、體重和年齡必須大於 0');
-      setLoading(false);
-      return;
+      return false;
     }
 
-    if (gender !== 'male' && gender !== 'female') {
+    if (!GENDER_OPTIONS.includes(gender)) {
       setError('請選擇有效的性別（男性或女性）');
-      setLoading(false);
-      return;
+      return false;
     }
 
-    const updatedUserData = {
-      height: heightNum,
-      weight: weightNum,
-      age: ageNum,
-      gender,
-      updatedAt: new Date().toISOString(),
-      scores: userData.scores || {},
-    };
+    return true;
+  }, [height, weight, age, gender]);
 
-    setUserData(updatedUserData); // 修復：將 updatedData 改為 updatedUserData
-    console.log('訪客模式儲存後的 userData:', updatedUserData);
-    setIsSaved(true);
+  // 儲存數據（訪客模式和登入模式共用）
+  const saveData = useCallback(
+    async (e) => {
+      e.preventDefault();
+      setError(null);
+      setLoading(true);
+      console.log('setLoading to true');
 
-    setTimeout(() => {
-      setIsSaved(false);
-      setLoading(false);
-    }, 2000);
-  };
+      if (!validateData()) {
+        setLoading(false);
+        console.log('setLoading to false - validation failed');
+        return;
+      }
 
-  // 登入模式儲存（儲存到 Firestore 的 users/{userId}）
-  const handleLoginSave = async (e) => {
-    e.preventDefault();
-    setError(null);
-    setLoading(true);
+      const heightNum = parseFloat(height);
+      const weightNum = parseFloat(weight);
+      const ageNum = parseInt(age, 10);
 
-    if (!height || !weight || !age || !gender) {
-      setError('請填寫所有欄位');
-      setLoading(false);
-      return;
-    }
-
-    const heightNum = parseFloat(height);
-    const weightNum = parseFloat(weight);
-    const ageNum = parseInt(age, 10);
-
-    if (heightNum <= 0 || weightNum <= 0 || ageNum <= 0) {
-      setError('身高、體重和年齡必須大於 0');
-      setLoading(false);
-      return;
-    }
-
-    if (gender !== 'male' && gender !== 'female') {
-      setError('請選擇有效的性別（男性或女性）');
-      setLoading(false);
-      return;
-    }
-
-    if (!currentUser || !db) {
-      setError('無法儲存資料：Firebase 未正確初始化。');
-      setLoading(false);
-      return;
-    }
-
-    try {
-      const userRef = doc(db, 'users', currentUser.uid);
       const updatedUserData = {
         height: heightNum,
         weight: weightNum,
         age: ageNum,
         gender,
         updatedAt: new Date().toISOString(),
-        scores: userData.scores || {},
+        scores: userData.scores || DEFAULT_SCORES,
       };
-      await setDoc(userRef, updatedUserData, { merge: true });
-      setUserData((prev) => ({
-        ...prev,
-        ...updatedUserData,
-      }));
-      console.log('登入模式儲存後的 userData:', updatedUserData);
-      setIsSaved(true);
-    } catch (err) {
-      console.error('儲存到 Firestore 失敗：', err);
-      if (err.code === 'network-request-failed') {
-        setError('無法連接到伺服器，請檢查您的網路連線並稍後再試。');
-      } else if (err.code === 'permission-denied') {
-        setError('您沒有權限儲存資料，請聯繫管理員。');
-      } else {
+
+      try {
+        if (!isGuestMode && currentUser) {
+          if (!db) throw new Error('Firestore 未初始化');
+          const userRef = doc(db, 'users', currentUser.uid);
+          await setDoc(userRef, updatedUserData, { merge: true });
+          console.log('Firestore write successful');
+        }
+        setUserData(updatedUserData);
+        console.log('Updated userData:', updatedUserData);
+        setIsSaved(true);
+      } catch (err) {
+        console.error('儲存到 Firestore 失敗：', err);
         setError(`儲存失敗：${err.message}`);
-      }
-    } finally {
-      setTimeout(() => {
+      } finally {
         setIsSaved(false);
         setLoading(false);
-      }, 2000);
-    }
-  };
+        console.log('setLoading to false - finally block');
+      }
+    },
+    [height, weight, age, gender, isGuestMode, currentUser, setUserData, validateData, userData.scores]
+  );
+
+  // 檢查數據是否已保存並處理導航
+  const handleNavigation = useCallback(
+    (path) => {
+      console.log('handleNavigation - userData:', userData);
+      console.log('handleNavigation - form state:', { height, weight, age, gender });
+      if (
+        !userData.height ||
+        userData.height <= 0 ||
+        !userData.weight ||
+        userData.weight <= 0 ||
+        !userData.age ||
+        userData.age <= 0 ||
+        !userData.gender
+      ) {
+        if (height && weight && age && gender) {
+          const syntheticEvent = { preventDefault: () => {} };
+          saveData(syntheticEvent);
+        } else {
+          setError('請先填寫並儲存您的身高、體重、年齡和性別！');
+          return;
+        }
+      }
+
+      setTimeout(() => {
+        if (
+          userData.height > 0 &&
+          userData.weight > 0 &&
+          userData.age > 0 &&
+          userData.gender
+        ) {
+          navigate(path);
+        } else {
+          setError('請確保資料已正確保存後再進行評測！');
+        }
+      }, 100);
+    },
+    [userData, height, weight, age, gender, saveData, navigate]
+  );
 
   // 獲取歷史數據
-  const fetchHistory = async () => {
+  const fetchHistory = useCallback(async () => {
     const user = auth?.currentUser;
     if (!user || isGuestMode) {
       console.log('fetchHistory: 用戶未登入或為訪客模式，跳過歷史數據載入');
@@ -251,22 +284,22 @@ function UserInfo({ isGuestMode, testData, onLogout, clearTestData, onGuestMode 
       console.error('獲取歷史數據失敗:', error);
       alert('獲取歷史數據失敗，請稍後再試！');
     }
-  };
+  }, [isGuestMode]);
 
   // 點擊「歷史數據」按鈕時觸發
-  const handleShowHistory = () => {
+  const handleShowHistory = useCallback(() => {
     setShowModal(true);
     fetchHistory();
-  };
+  }, [fetchHistory]);
 
   // 關閉模態框
-  const handleCloseModal = () => {
+  const handleCloseModal = useCallback(() => {
     setShowModal(false);
     setHistoryData([]);
-  };
+  }, []);
 
   // 格式化數據顯示，添加更多容錯處理
-  const formatData = (type, data) => {
+  const formatData = useCallback((type, data) => {
     if (!data || typeof data !== 'object') {
       return '無數據';
     }
@@ -284,25 +317,27 @@ function UserInfo({ isGuestMode, testData, onLogout, clearTestData, onGuestMode 
       default:
         return JSON.stringify(data, null, 2);
     }
-  };
+  }, []);
 
   // 計算平均分數，確保數據為數值
-  const calculateAverageScore = () => {
+  const averageScore = useMemo(() => {
+    const scores = userData.scores || DEFAULT_SCORES;
     const scoreValues = [
-      Number(userData.scores?.strength) || 0,
-      Number(userData.scores?.explosivePower) || 0,
-      Number(userData.scores?.cardio) || 0,
-      Number(userData.scores?.muscleMass) || 0,
-      Number(userData.scores?.bodyFat) || 0,
+      Number(scores.strength) || 0,
+      Number(scores.explosivePower) || 0,
+      Number(scores.cardio) || 0,
+      Number(scores.muscleMass) || 0,
+      Number(scores.bodyFat) || 0,
     ];
     console.log('計算平均分數的數據：', scoreValues);
     const completedScores = scoreValues.filter((score) => score > 0);
     if (completedScores.length === 0) return 0;
     const total = completedScores.reduce((sum, score) => sum + score, 0);
     return (total / completedScores.length).toFixed(0);
-  };
+  }, [userData.scores]);
 
-  const getScoreSlogan = (averageScore, gender) => {
+  // 根據平均分數和性別生成鼓勵語
+  const scoreSlogan = useMemo(() => {
     const slogansMale = [
       '初試啼聲，繼續努力！', '點燃鬥志，挑戰極限！', '熱血啟動，突破自我！', '戰意初現，堅持到底！',
       '燃燒吧，展現潛能！', '鬥志昂揚，勇往直前！', '熱血沸騰，超越極限！', '戰力提升，無所畏懼！',
@@ -322,17 +357,22 @@ function UserInfo({ isGuestMode, testData, onLogout, clearTestData, onGuestMode 
     const index = Math.min(Math.floor(averageScore / 5), 19);
     const isMale = gender === 'male' || gender === '男性';
     return isMale ? slogansMale[index] : slogansFemale[index];
-  };
+  }, [averageScore, gender]);
 
   // 檢查 scores 是否為空，並確保數據為數值
-  const scoresToUse = userData.scores || {};
-  const scoreValues = {
-    strength: Number(scoresToUse.strength) || 0,
-    explosivePower: Number(scoresToUse.explosivePower) || 0,
-    cardio: Number(scoresToUse.cardio) || 0,
-    muscleMass: Number(scoresToUse.muscleMass) || 0,
-    bodyFat: Number(scoresToUse.bodyFat) || 0,
-  };
+  const scoresToUse = userData.scores || DEFAULT_SCORES;
+
+  // 使用 useMemo 穩定 scoreValues，避免每次渲染都創建新物件
+  const scoreValues = useMemo(() => {
+    return {
+      strength: Number(scoresToUse.strength) || 0,
+      explosivePower: Number(scoresToUse.explosivePower) || 0,
+      cardio: Number(scoresToUse.cardio) || 0,
+      muscleMass: Number(scoresToUse.muscleMass) || 0,
+      bodyFat: Number(scoresToUse.bodyFat) || 0,
+    };
+  }, [scoresToUse]);
+
   const hasScores = Object.values(scoreValues).some((score) => score > 0);
   console.log('hasScores:', hasScores);
   console.log('userData.scores:', userData.scores);
@@ -340,51 +380,52 @@ function UserInfo({ isGuestMode, testData, onLogout, clearTestData, onGuestMode 
   console.log('scoreValues:', scoreValues);
 
   // 設置雷達圖數據，確保數據為數值
-  const radarData = {
-    labels: ['力量', '爆發力', '心肺耐力', '骨骼肌肉量', 'FFMI'],
-    datasets: [
-      {
-        label: '您的表現',
-        data: [
-          scoreValues.strength,
-          scoreValues.explosivePower,
-          scoreValues.cardio,
-          scoreValues.muscleMass,
-          scoreValues.bodyFat,
-        ],
-        backgroundColor: 'rgba(34, 202, 236, 0.2)',
-        borderColor: 'rgba(34, 202, 236, 1)',
-        borderWidth: 2,
-      },
-    ],
-  };
+  const radarData = useMemo(
+    () => ({
+      labels: ['力量', '爆發力', '心肺耐力', '骨骼肌肉量', 'FFMI'],
+      datasets: [
+        {
+          label: '您的表現',
+          data: [
+            scoreValues.strength,
+            scoreValues.explosivePower,
+            scoreValues.cardio,
+            scoreValues.muscleMass,
+            scoreValues.bodyFat,
+          ],
+          backgroundColor: 'rgba(34, 202, 236, 0.2)',
+          borderColor: 'rgba(34, 202, 236, 1)',
+          borderWidth: 2,
+        },
+      ],
+    }),
+    [scoreValues]
+  );
 
-  // 設置雷達圖選項，禁用動畫以避免 eval
-  const radarOptions = {
-    scales: {
-      r: {
-        min: 0,
-        max: 100,
-        ticks: { stepSize: 20 },
+  // 設置雷達圖選項，禁用動畫以避免潛在問題
+  const radarOptions = useMemo(
+    () => ({
+      scales: {
+        r: {
+          min: 0,
+          max: 100,
+          ticks: { stepSize: 20 },
+        },
       },
-    },
-    plugins: {
-      legend: { position: 'top' },
-    },
-    animation: false, // 明確禁用動畫
-  };
-
-  const averageScore = calculateAverageScore();
-  const scoreSlogan = getScoreSlogan(averageScore, gender);
+      plugins: {
+        legend: { position: 'top' },
+      },
+      animation: false,
+    }),
+    []
+  );
 
   console.log('UserInfo 渲染, isGuestMode:', isGuestMode, 'currentUser:', currentUser, 'testData:', testData);
 
   return (
     <div className="user-info-container">
-      {/* 顯示錯誤訊息，即使未進入訪客或登入模式 */}
       {error && <p className="error-message">{error}</p>}
 
-      {/* 顯示登入狀態 */}
       {isGuestMode ? (
         <div className="user-status">
           <p>您正在使用訪客模式，數據不會儲存。</p>
@@ -404,19 +445,13 @@ function UserInfo({ isGuestMode, testData, onLogout, clearTestData, onGuestMode 
           <h2 className="text-xl font-semibold text-center mb-4">選擇使用模式</h2>
           <div className="button-group-mode">
             <div className="button-with-tooltip">
-              <button
-                onClick={() => onGuestMode()}
-                className="mode-btn guest-btn"
-              >
+              <button onClick={handleGuestMode} className="mode-btn guest-btn">
                 訪客模式
               </button>
               <span className="tooltip">僅儲存到本地，重新整理後可能遺失</span>
             </div>
             <div className="button-with-tooltip">
-              <button
-                onClick={() => navigate('/login')}
-                className="mode-btn login-btn"
-              >
+              <button onClick={() => navigate('/login')} className="mode-btn login-btn">
                 登入模式
               </button>
               <span className="tooltip">將數據保存到雲端，隨時隨地訪問</span>
@@ -425,20 +460,26 @@ function UserInfo({ isGuestMode, testData, onLogout, clearTestData, onGuestMode 
         </div>
       )}
 
-      {/* 表單顯示 */}
       {(isGuestMode || currentUser) && (
         <>
           <h1 className="text-2xl font-bold text-center mb-6">身體狀態與表現總覽</h1>
           <form className="space-y-4">
             <div>
-              <label htmlFor="gender" className="block text-sm font-medium text-gray-700">性別</label>
+              <label htmlFor="gender" className="block text-sm font-medium text-gray-700">
+                性別
+              </label>
               <select
                 id="gender"
+                name="gender"
                 value={gender}
-                onChange={(e) => setGender(e.target.value)}
+                onChange={(e) => {
+                  console.log('Gender select changed:', e.target.value);
+                  setGender(e.target.value);
+                  console.log('New gender state:', e.target.value);
+                }}
                 className="input-field"
                 required
-                disabled={loading}
+                autocomplete="sex"
               >
                 <option value="">請選擇性別</option>
                 <option value="male">男性</option>
@@ -446,48 +487,69 @@ function UserInfo({ isGuestMode, testData, onLogout, clearTestData, onGuestMode 
               </select>
             </div>
             <div>
-              <label htmlFor="height" className="block text-sm font-medium text-gray-700">身高 (cm)</label>
+              <label htmlFor="height" className="block text-sm font-medium text-gray-700">
+                身高 (cm)
+              </label>
               <input
                 id="height"
+                name="height"
                 type="number"
                 value={height}
-                onChange={(e) => setHeight(e.target.value)}
+                onChange={(e) => {
+                  console.log('Height input changed:', e.target.value);
+                  setHeight(e.target.value);
+                  console.log('New height state:', e.target.value);
+                }}
                 placeholder="身高 (cm)"
                 className="input-field"
                 required
-                disabled={loading}
+                autocomplete="height"
               />
             </div>
             <div>
-              <label htmlFor="weight" className="block text-sm font-medium text-gray-700">體重 (kg)</label>
+              <label htmlFor="weight" className="block text-sm font-medium text-gray-700">
+                體重 (kg)
+              </label>
               <input
                 id="weight"
+                name="weight"
                 type="number"
                 value={weight}
-                onChange={(e) => setWeight(e.target.value)}
+                onChange={(e) => {
+                  console.log('Weight input changed:', e.target.value);
+                  setWeight(e.target.value);
+                  console.log('New weight state:', e.target.value);
+                }}
                 placeholder="體重 (kg)"
                 className="input-field"
                 required
-                disabled={loading}
+                autocomplete="weight"
               />
             </div>
             <div>
-              <label htmlFor="age" className="block text-sm font-medium text-gray-700">年齡</label>
+              <label htmlFor="age" className="block text-sm font-medium text-gray-700">
+                年齡
+              </label>
               <input
                 id="age"
+                name="age"
                 type="number"
                 value={age}
-                onChange={(e) => setAge(e.target.value)}
+                onChange={(e) => {
+                  console.log('Age input changed:', e.target.value);
+                  setAge(e.target.value);
+                  console.log('New age state:', e.target.value);
+                }}
                 placeholder="年齡"
                 className="input-field"
                 required
-                disabled={loading}
+                autocomplete="age"
               />
             </div>
             <div className="button-group-submit">
               <button
                 type="button"
-                onClick={isGuestMode ? handleGuestSave : handleLoginSave}
+                onClick={saveData}
                 className={`submit-btn ${isSaved ? 'saved' : ''}`}
                 disabled={loading}
               >
@@ -498,17 +560,17 @@ function UserInfo({ isGuestMode, testData, onLogout, clearTestData, onGuestMode 
         </>
       )}
 
-      {/* 顯示測驗數據 */}
       {testData && (
         <div>
           <h2 className="text-xl font-semibold text-center mb-4">最新測驗結果</h2>
           <p>類型: {testData.squat ? '力量' : testData.distance ? '心肺耐力' : '其他'}</p>
           <p>數據: {JSON.stringify(testData)}</p>
-          <button onClick={clearTestData} className="nav-btn">清除測驗數據</button>
+          <button onClick={clearTestData} className="nav-btn">
+            清除測驗數據
+          </button>
         </div>
       )}
 
-      {/* 雷達圖和導航按鈕 */}
       <div className="radar-section">
         <h2 className="text-xl font-semibold text-center mb-4">表現總覽</h2>
         {hasScores ? (
@@ -528,22 +590,22 @@ function UserInfo({ isGuestMode, testData, onLogout, clearTestData, onGuestMode 
         )}
       </div>
       <div className="button-group">
-        <button onClick={() => navigate('/strength')} className="nav-btn">
+        <button onClick={() => handleNavigation('/strength')} className="nav-btn">
           力量評測
         </button>
-        <button onClick={() => navigate('/explosive-power')} className="nav-btn">
+        <button onClick={() => handleNavigation('/explosive-power')} className="nav-btn">
           爆發力測試
         </button>
-        <button onClick={() => navigate('/cardio')} className="nav-btn">
+        <button onClick={() => handleNavigation('/cardio')} className="nav-btn">
           心肺耐力測試
         </button>
-        <button onClick={() => navigate('/muscle-mass')} className="nav-btn">
+        <button onClick={() => handleNavigation('/muscle-mass')} className="nav-btn">
           骨骼肌肉量
         </button>
-        <button onClick={() => navigate('/body-fat')} className="nav-btn">
+        <button onClick={() => handleNavigation('/body-fat')} className="nav-btn">
           體脂肪率與FFMI
         </button>
-        <button onClick={() => navigate('/celebrity-comparison')} className="nav-btn">
+        <button onClick={() => handleNavigation('/celebrity-comparison')} className="nav-btn">
           名人數據參照表
         </button>
         {currentUser && !isGuestMode && (
@@ -553,13 +615,14 @@ function UserInfo({ isGuestMode, testData, onLogout, clearTestData, onGuestMode 
         )}
       </div>
 
-      {/* 模態框 */}
       {showModal && !isGuestMode && (
         <div className="modal-overlay">
           <div className="modal-content">
             <div className="modal-header">
               <h2 className="modal-title">歷史數據</h2>
-              <button onClick={handleCloseModal} className="modal-close-btn">×</button>
+              <button onClick={handleCloseModal} className="modal-close-btn">
+                ×
+              </button>
             </div>
             <div className="modal-body">
               {historyData.length > 0 ? (
@@ -594,7 +657,7 @@ function UserInfo({ isGuestMode, testData, onLogout, clearTestData, onGuestMode 
 
 export default UserInfo;
 
-// 響應式 CSS（保持不變）
+// 響應式 CSS（添加 placeholder 樣式）
 const styles = `
   .user-info-container {
     max-width: 100%;
@@ -674,6 +737,13 @@ const styles = `
     border: 1px solid #ccc;
     border-radius: 4px;
     font-size: 1rem;
+  }
+
+  /* 優化 placeholder 樣式 */
+  .input-field::placeholder {
+    color: #a0a0a0; /* 半透明灰色 */
+    opacity: 0.6; /* 半透明效果 */
+    font-style: italic; /* 斜體增加提示感 */
   }
 
   .submit-btn {

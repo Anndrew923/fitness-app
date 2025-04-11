@@ -1,11 +1,31 @@
-// src/Welcome.js
 import { useNavigate } from 'react-router-dom';
+import { useUser } from './UserContext';
+import { auth } from './firebase';
 
-function Welcome({ onLogin, onGuestMode }) { // 接受 onLogin 和 onGuestMode 作為 props
+function Welcome({ onLogin, setIsGuestMode }) { // 接受 onLogin 和 setIsGuestMode 作為 props
   const navigate = useNavigate();
+  const { setUserData } = useUser();
 
   const handleGuestMode = () => {
-    onGuestMode(); // 調用 App.js 中的 handleGuestMode，設置 isGuestMode 為 true
+    console.log('Welcome handleGuestMode 觸發');
+    setIsGuestMode(true); // 設置為訪客模式
+    // 重置 userData
+    setUserData({
+      gender: '',
+      height: 0,
+      weight: 0,
+      age: 0,
+      scores: {
+        strength: 0,
+        explosivePower: 0,
+        cardio: 0,
+        muscleMass: 0,
+        bodyFat: 0,
+      },
+    });
+    if (auth.currentUser) {
+      auth.signOut();
+    }
   };
 
   const handleLoginRedirect = () => {
