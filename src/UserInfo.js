@@ -1,23 +1,20 @@
-// src/UserInfo.js
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from './UserContext';
 import { Radar } from 'react-chartjs-2';
 import { Chart as ChartJS, RadialLinearScale, PointElement, LineElement, Filler, Tooltip, Legend } from 'chart.js';
 import { db, auth } from './firebase';
-import { signOut } from 'firebase/auth';
 import { doc, setDoc, getDoc, collection, query, orderBy, getDocs } from 'firebase/firestore';
 
 // 註冊 Chart.js 組件
 ChartJS.register(RadialLinearScale, PointElement, LineElement, Filler, Tooltip, Legend);
 
-function UserInfo() {
+function UserInfo({ isGuestMode, testData, onLogout, clearTestData, onGuestMode }) { // 添加 onGuestMode 作為 prop
   const { userData, setUserData } = useUser();
   const [height, setHeight] = useState(userData.height?.toString() || '');
   const [weight, setWeight] = useState(userData.weight?.toString() || '');
   const [age, setAge] = useState(userData.age?.toString() || '');
   const [gender, setGender] = useState(userData.gender || '');
-  const [mode, setMode] = useState('');
   const [isSaved, setIsSaved] = useState(false);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -28,6 +25,7 @@ function UserInfo() {
 
   // 監聽用戶登入狀態並從 Firestore 載入資料
   useEffect(() => {
+    console.log('UserInfo useEffect 觸發, isGuestMode:', isGuestMode, 'auth.currentUser:', auth.currentUser);
     if (!auth) {
       console.error('auth 未初始化');
       setError('無法初始化身份驗證，請稍後再試。');
@@ -36,8 +34,8 @@ function UserInfo() {
 
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
       setCurrentUser(user);
-      if (user) {
-        setMode('login');
+      if (user && !isGuestMode) {
+        // 僅在登入模式下載入 Firestore 數據
         try {
           const userRef = doc(db, 'users', user.uid);
           const userSnap = await getDoc(userRef);
@@ -49,23 +47,18 @@ function UserInfo() {
             setWeight(userDoc.weight?.toString() || '');
             setAge(userDoc.age?.toString() || '');
             setGender(userDoc.gender || '');
-            setUserData({
-              ...userData,
+            setUserData((prev) => ({
+              ...prev,
               height: userDoc.height || 0,
               weight: userDoc.weight || 0,
               age: userDoc.age || 0,
               gender: userDoc.gender || '',
               scores: userDoc.scores || {},
-            });
-            console.log('更新後的狀態 - height:', userDoc.height?.toString() || '');
-            console.log('更新後的狀態 - weight:', userDoc.weight?.toString() || '');
-            console.log('更新後的狀態 - age:', userDoc.age?.toString() || '');
-            console.log('更新後的狀態 - gender:', userDoc.gender || '');
-            console.log('更新後的 scores:', userDoc.scores || {});
+            }));
           } else {
             console.log('沒有找到該用戶的資料');
             setError('沒有找到用戶資料，請填寫並儲存新資料。');
-            setUserData({ ...userData, height: 0, weight: 0, age: 0, gender: '', scores: {} });
+            setUserData((prev) => ({ ...prev, height: 0, weight: 0, age: 0, gender: '', scores: {} }));
           }
         } catch (err) {
           console.error('從 Firestore 讀取資料失敗：', err);
@@ -76,46 +69,22 @@ function UserInfo() {
           } else {
             setError(`無法載入用戶資料：${err.message}`);
           }
-          setUserData({ ...userData, height: 0, weight: 0, age: 0, gender: '', scores: {} });
+          setUserData((prev) => ({ ...prev, height: 0, weight: 0, age: 0, gender: '', scores: {} }));
         }
       } else {
-        setMode('');
+        // 訪客模式或未登入，重置部分狀態
         setHeight(userData.height?.toString() || '');
         setWeight(userData.weight?.toString() || '');
         setAge(userData.age?.toString() || '');
         setGender(userData.gender || '');
         setError(null);
-        setUserData({ ...userData, height: 0, weight: 0, age: 0, gender: '', scores: userData.scores || {} });
-        console.log('未登入狀態 - userData:', userData);
       }
     });
 
     return () => unsubscribe();
-  }, [setUserData, userData]);
+  }, [setUserData, isGuestMode]);
 
-  // 登出功能
-  const handleSignOut = async () => {
-    try {
-      await signOut(auth);
-      setCurrentUser(null);
-      setMode('');
-      alert('已成功登出！');
-    } catch (error) {
-      console.error('登出失敗：', error);
-      setError('登出失敗，請稍後再試。');
-    }
-  };
-
-  // 選擇模式
-  const handleModeSelect = (selectedMode) => {
-    if (selectedMode === 'login' && !currentUser) {
-      navigate('/login');
-    } else {
-      setMode(selectedMode);
-    }
-  };
-
-  // 訪客模式儲存
+  // 訪客模式儲存（僅更新本地狀態）
   const handleGuestSave = (e) => {
     e.preventDefault();
     setError(null);
@@ -168,10 +137,10 @@ function UserInfo() {
         scores: userData.scores || {},
       };
       await setDoc(userRef, updatedUserData, { merge: true });
-      setUserData({
-        ...userData,
+      setUserData((prev) => ({
+        ...prev,
         ...updatedUserData,
-      });
+      }));
       setIsSaved(true);
     } catch (err) {
       console.error('儲存到 Firestore 失敗：', err);
@@ -193,8 +162,9 @@ function UserInfo() {
   // 獲取歷史數據
   const fetchHistory = async () => {
     const user = auth.currentUser;
-    if (!user) {
-      alert('請先登入！');
+    if (!user || isGuestMode) {
+      console.log('fetchHistory: 用戶未登入或為訪客模式，跳過歷史數據載入');
+      alert('請使用登入模式以查看歷史數據！');
       return;
     }
 
@@ -220,13 +190,14 @@ function UserInfo() {
 
   // 點擊「歷史數據」按鈕時觸發
   const handleShowHistory = () => {
-    fetchHistory();
     setShowModal(true);
+    fetchHistory();
   };
 
   // 關閉模態框
   const handleCloseModal = () => {
     setShowModal(false);
+    setHistoryData([]);
   };
 
   // 格式化數據顯示，添加更多容錯處理
@@ -341,13 +312,22 @@ function UserInfo() {
   const averageScore = calculateAverageScore();
   const scoreSlogan = getScoreSlogan(averageScore, gender);
 
+  console.log('UserInfo 渲染, isGuestMode:', isGuestMode, 'currentUser:', currentUser, 'testData:', testData);
+
   return (
     <div className="user-info-container">
       {/* 顯示登入狀態 */}
-      {currentUser ? (
+      {isGuestMode ? (
+        <div className="user-status">
+          <p>您正在使用訪客模式，數據不會儲存。</p>
+          <button onClick={onLogout} className="signout-btn">
+            返回登入頁面
+          </button>
+        </div>
+      ) : currentUser ? (
         <div className="user-status">
           <p>歡迎，{currentUser.email}！</p>
-          <button onClick={handleSignOut} className="signout-btn">
+          <button onClick={onLogout} className="signout-btn">
             登出
           </button>
         </div>
@@ -357,7 +337,7 @@ function UserInfo() {
           <div className="button-group-mode">
             <div className="button-with-tooltip">
               <button
-                onClick={() => handleModeSelect('guest')}
+                onClick={() => onGuestMode()} // 直接調用 onGuestMode，而不是跳轉到 /
                 className="mode-btn guest-btn"
               >
                 訪客模式
@@ -366,7 +346,7 @@ function UserInfo() {
             </div>
             <div className="button-with-tooltip">
               <button
-                onClick={() => handleModeSelect('login')}
+                onClick={() => navigate('/login')}
                 className="mode-btn login-btn"
               >
                 登入模式
@@ -377,11 +357,11 @@ function UserInfo() {
         </div>
       )}
 
-      {/* 模式選擇後顯示表單 */}
-      {(mode === 'guest' || (mode === 'login' && currentUser)) && (
+      {/* 表單顯示 */}
+      {(isGuestMode || currentUser) && (
         <>
           <h1 className="text-2xl font-bold text-center mb-6">身體狀態與表現總覽</h1>
-          {error && <p className="error-message">{error}</p>}
+          {error && <p className I="error-message">{error}</p>}
           <form className="space-y-4">
             <div>
               <label htmlFor="gender" className="block text-sm font-medium text-gray-700">性別</label>
@@ -440,7 +420,7 @@ function UserInfo() {
             <div className="button-group-submit">
               <button
                 type="button"
-                onClick={mode === 'guest' ? handleGuestSave : handleLoginSave}
+                onClick={isGuestMode ? handleGuestSave : handleLoginSave}
                 className={`submit-btn ${isSaved ? 'saved' : ''}`}
                 disabled={loading}
               >
@@ -449,6 +429,16 @@ function UserInfo() {
             </div>
           </form>
         </>
+      )}
+
+      {/* 顯示測驗數據 */}
+      {testData && (
+        <div>
+          <h2 className="text-xl font-semibold text-center mb-4">最新測驗結果</h2>
+          <p>類型: {testData.squat ? '力量' : testData.distance ? '心肺耐力' : '其他'}</p>
+          <p>數據: {JSON.stringify(testData)}</p>
+          <button onClick={clearTestData} className="nav-btn">清除測驗數據</button>
+        </div>
       )}
 
       {/* 雷達圖和導航按鈕 */}
@@ -489,7 +479,7 @@ function UserInfo() {
         <button onClick={() => navigate('/celebrity-comparison')} className="nav-btn">
           名人數據參照表
         </button>
-        {currentUser && (
+        {currentUser && !isGuestMode && (
           <button onClick={handleShowHistory} className="nav-btn history-btn">
             歷史數據
           </button>
@@ -497,7 +487,7 @@ function UserInfo() {
       </div>
 
       {/* 模態框 */}
-      {showModal && (
+      {showModal && !isGuestMode && (
         <div className="modal-overlay">
           <div className="modal-content">
             <div className="modal-header">

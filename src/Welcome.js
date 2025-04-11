@@ -1,26 +1,35 @@
 // src/Welcome.js
-import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-function Welcome() {
+function Welcome({ onLogin, onGuestMode }) { // 接受 onLogin 和 onGuestMode 作為 props
   const navigate = useNavigate();
 
-  // 模擬加載，3秒後跳轉到 Home 頁
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      navigate('/home'); // 始終跳轉到 /home
-    }, 3000); // 3秒後跳轉
+  const handleGuestMode = () => {
+    onGuestMode(); // 調用 App.js 中的 handleGuestMode，設置 isGuestMode 為 true
+  };
 
-    return () => clearTimeout(timer); // 清理計時器
-  }, [navigate]);
+  const handleLoginRedirect = () => {
+    navigate('/login'); // 跳轉到登入頁面
+  };
 
   return (
     <div className="welcome-container">
       <div className="welcome-content">
         <h1 className="welcome-title">歡迎體驗健身評測</h1>
         <p className="welcome-subtitle">探索你的身體潛能，開啟健康新旅程！</p>
-        <div className="loading-bar">
-          <div className="loading-progress"></div>
+        <div className="button-group-mode">
+          <div className="button-with-tooltip">
+            <button onClick={handleGuestMode} className="mode-btn guest-btn">
+              訪客模式
+            </button>
+            <span className="tooltip">僅儲存到本地，重新整理後可能遺失</span>
+          </div>
+          <div className="button-with-tooltip">
+            <button onClick={handleLoginRedirect} className="mode-btn login-btn">
+              登入模式
+            </button>
+            <span className="tooltip">將數據保存到雲端，隨時隨地訪問</span>
+          </div>
         </div>
       </div>
     </div>
@@ -29,7 +38,7 @@ function Welcome() {
 
 export default Welcome;
 
-// 歡迎頁 CSS
+// 歡迎頁 CSS（添加按鈕樣式，移除加載條）
 const styles = `
   .welcome-container {
     position: relative;
@@ -73,32 +82,72 @@ const styles = `
     animation: fadeIn 2s ease-in-out;
   }
 
-  .loading-bar {
-    width: 200px;
-    height: 8px;
-    background-color: rgba(255, 255, 255, 0.3);
-    border-radius: 4px;
-    overflow: hidden;
-    margin: 0 auto;
+  .button-group-mode {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-top: 1rem;
   }
 
-  .loading-progress {
-    width: 0;
-    height: 100%;
-    background-color: #4bc0c0; /* 與按鈕顏色一致 */
-    animation: loading 3s linear forwards;
+  .mode-btn {
+    width: 100%;
+    padding: 0.75rem;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+
+  .guest-btn {
+    background-color: #4bc0c0;
+  }
+
+  .guest-btn:hover {
+    background-color: #3aa0a0;
+  }
+
+  .login-btn {
+    background-color: #ff6f61;
+  }
+
+  .login-btn:hover {
+    background-color: #e65a50;
+  }
+
+  .button-with-tooltip {
+    position: relative;
+    width: 100%;
+  }
+
+  .tooltip {
+    visibility: hidden;
+    width: 200px;
+    background-color: #555;
+    color: #fff;
+    text-align: center;
+    border-radius: 4px;
+    padding: 5px;
+    position: absolute;
+    z-index: 1;
+    bottom: 125%;
+    left: 50%;
+    transform: translateX(-50%);
+    opacity: 0;
+    transition: opacity 0.3s;
+    font-size: 0.75rem;
+  }
+
+  .button-with-tooltip:hover .tooltip {
+    visibility: visible;
+    opacity: 1;
   }
 
   /* 淡入動畫 */
   @keyframes fadeIn {
     0% { opacity: 0; transform: translateY(20px); }
     100% { opacity: 1; transform: translateY(0); }
-  }
-
-  /* 讀取條動畫 */
-  @keyframes loading {
-    0% { width: 0; }
-    100% { width: 100%; }
   }
 
   @media (max-width: 767px) {
@@ -110,8 +159,19 @@ const styles = `
       font-size: 1.2rem;
     }
 
-    .loading-bar {
-      width: 150px;
+    .button-group-mode {
+      gap: 0.75rem;
+    }
+  }
+
+  @media (min-width: 768px) {
+    .button-group-mode {
+      flex-direction: row;
+      gap: 1rem;
+    }
+
+    .button-with-tooltip {
+      width: 48%;
     }
   }
 `;
