@@ -1,7 +1,9 @@
 // src/FFMI.js
-import { useState } from 'react';
+import { useState, useEffect } from 'react'; // 引入 useEffect
 import { useNavigate } from 'react-router-dom';
 import { useUser } from './UserContext';
+import { db, auth } from './firebase'; // 引入 Firebase 配置
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore'; // 引入模組化語法
 
 function FFMI() {
   const { userData, setUserData } = useUser();
@@ -10,8 +12,15 @@ function FFMI() {
   const [ffmi, setFfmi] = useState(null);
   const [ffmiScore, setFfmiScore] = useState(null);
   const [ffmiCategory, setFfmiCategory] = useState('');
+  const [history, setHistory] = useState([]); // 新增：歷史記錄狀態
   // 新增：管理展開/收起狀態
   const [isExpanded, setIsExpanded] = useState(false);
+
+  // 載入歷史記錄
+  useEffect(() => {
+    const savedHistory = JSON.parse(localStorage.getItem('ffmiHistory')) || [];
+    setHistory(savedHistory);
+  }, []);
 
   const calculateScores = () => {
     if (!userData.gender || !userData.height || !userData.weight || !userData.age) {
@@ -24,7 +33,7 @@ function FFMI() {
       return;
     }
 
-    const isMale = userData.gender === 'male';
+    const isMale = userData.gender === 'male' || userData.gender === '男性';
     const heightInMeters = parseFloat(userData.height) / 100;
     const weight = parseFloat(userData.weight);
     const bodyFatValue = parseFloat(bodyFat) / 100;
@@ -78,23 +87,69 @@ function FFMI() {
       else if (adjustedFfmi < 22) setFfmiCategory('肌肉量很高');
       else if (adjustedFfmi < 25) setFfmiCategory('肌肉量極高');
       else if (adjustedFfmi < 28) setFfmiCategory('肌肉量已經高到可能有使用藥物');
-      else setFfmiCategory('不無藥不可能達到的數值');
+      else setFfmiCategory('不用藥不可能達到的數值');
     } else {
       if (adjustedFfmi < 13) setFfmiCategory('肌肉量低於平均');
       else if (adjustedFfmi < 15) setFfmiCategory('肌肉量在平均值');
       else if (adjustedFfmi < 17) setFfmiCategory('肌肉量高於平均值');
       else if (adjustedFfmi < 19) setFfmiCategory('肌肉量很高');
-      else setFfmiCategory('不無藥不可能達到的數值');
+      else setFfmiCategory('不用藥不可能達到的數值');
+    }
+  };
+
+  // 提交結果並儲存
+  const handleSubmit = async () => {
+    if (!ffmi || !ffmiScore) {
+      alert('請先計算 FFMI 分數！');
+      return;
     }
 
-    // 更新全局狀態（直接使用 FFMI 分數）
+    // 確認用戶已登入
+    const user = auth.currentUser;
+    if (!user) {
+      alert('請先登入！');
+      return;
+    }
+
+    // 儲存歷史記錄
+    const newHistoryEntry = {
+      date: new Date().toLocaleString(),
+      bodyFat: parseFloat(bodyFat),
+      ffmi: parseFloat(ffmi),
+      ffmiScore: parseFloat(ffmiScore),
+      ffmiCategory: ffmiCategory,
+    };
+
+    // 儲存到 Firebase
+    try {
+      const userHistoryRef = collection(db, 'users', user.uid, 'history');
+      await addDoc(userHistoryRef, {
+        timestamp: serverTimestamp(),
+        type: 'ffmi',
+        data: newHistoryEntry,
+      });
+      console.log('數據成功儲存到 Firebase！');
+    } catch (error) {
+      console.error('儲存到 Firebase 失敗:', error);
+      alert('儲存數據失敗，請稍後再試！');
+      return;
+    }
+
+    // 儲存到本地歷史記錄
+    const updatedHistory = [...history, newHistoryEntry];
+    setHistory(updatedHistory);
+    localStorage.setItem('ffmiHistory', JSON.stringify(updatedHistory));
+
+    // 更新 UserContext
     setUserData({
       ...userData,
       scores: {
         ...userData.scores,
-        bodyFat: parseFloat(newFfmiScore),
+        bodyFat: parseFloat(ffmiScore),
       },
     });
+
+    navigate('/user-info');
   };
 
   // 男性 FFMI 對照表數據
@@ -118,7 +173,7 @@ function FFMI() {
   ];
 
   // 根據性別選擇對照表
-  const ffmiTable = userData.gender === 'male' ? maleFfmiTable : femaleFfmiTable;
+  const ffmiTable = (userData.gender === 'male' || userData.gender === '男性') ? maleFfmiTable : femaleFfmiTable;
 
   return (
     <div className="ffmi-container">
@@ -173,7 +228,7 @@ function FFMI() {
       </div>
       <div className="table-section">
         <h2 className="table-title">
-          FFMI 對照表 ({userData.gender === 'male' ? '男性' : '女性'})
+          FFMI 對照表 ({(userData.gender === 'male' || userData.gender === '男性') ? '男性' : '女性'})
         </h2>
         <table className="ffmi-table">
           <thead>
@@ -192,7 +247,23 @@ function FFMI() {
           </tbody>
         </table>
       </div>
-      <button onClick={() => navigate('/user-info')} className="back-btn">
+      {history.length > 0 && (
+        <div className="history-section">
+          <h2 className="table-title">歷史記錄</h2>
+          <ul className="history-list">
+            {history.map((entry, index) => (
+              <li key={index} className="history-item">
+                <p>日期: {entry.date}</p>
+                <p>體脂肪率: {entry.bodyFat}%</p>
+                <p>FFMI: {entry.ffmi}</p>
+                <p>FFMI 評分: {entry.ffmiScore} 分</p>
+                <p>FFMI 等級: {entry.ffmiCategory}</p>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+      <button onClick={handleSubmit} className="back-btn">
         提交並返回總覽
       </button>
     </div>
@@ -415,6 +486,27 @@ const styles = `
     border-bottom: none;
   }
 
+  .history-section {
+    width: 90%;
+    max-width: 400px;
+    margin-bottom: 1.5rem;
+  }
+
+  .history-list {
+    list-style: none;
+    padding: 0;
+  }
+
+  .history-item {
+    background: white;
+    padding: 1rem;
+    margin-bottom: 0.5rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    font-size: 0.875rem;
+    color: #4b5563;
+  }
+
   .back-btn {
     width: 90%;
     max-width: 400px;
@@ -445,7 +537,8 @@ const styles = `
     .result-text,
     .ffmi-table th,
     .ffmi-table td,
-    .description-content {
+    .description-content,
+    .history-item {
       font-size: 1rem;
     }
     .score-text {
