@@ -5,6 +5,8 @@ import { useUser } from './UserContext';
 import * as standards from './standards';
 import { Bar } from 'react-chartjs-2'; // 導入 Bar 組件
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js'; // 導入 Chart.js 組件
+import { db, auth } from './firebase'; // 引入 Firebase 配置
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore'; // 引入模組化語法
 
 // 註冊 Chart.js 組件
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
@@ -146,9 +148,16 @@ function Muscle() {
   };
 
   // 提交結果並儲存
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!result.finalScore) {
       alert('請先計算骨骼肌肉量分數！');
+      return;
+    }
+
+    // 確認用戶已登入
+    const user = auth.currentUser;
+    if (!user) {
+      alert('請先登入！');
       return;
     }
 
@@ -162,6 +171,22 @@ function Muscle() {
       finalScore: result.finalScore,
     };
 
+    // 儲存到 Firebase
+    try {
+      const userHistoryRef = collection(db, 'users', user.uid, 'history');
+      await addDoc(userHistoryRef, {
+        timestamp: serverTimestamp(),
+        type: 'muscle',
+        data: newHistoryEntry,
+      });
+      console.log('數據成功儲存到 Firebase！');
+    } catch (error) {
+      console.error('儲存到 Firebase 失敗:', error);
+      alert('儲存數據失敗，請稍後再試！');
+      return;
+    }
+
+    // 儲存到本地歷史記錄
     const updatedHistory = [...history, newHistoryEntry];
     setHistory(updatedHistory);
     localStorage.setItem('muscleHistory', JSON.stringify(updatedHistory));
