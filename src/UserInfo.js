@@ -9,7 +9,7 @@ import { doc, setDoc, getDoc, collection, query, orderBy, getDocs } from 'fireba
 // 註冊 Chart.js 組件
 ChartJS.register(RadialLinearScale, PointElement, LineElement, Filler, Tooltip, Legend);
 
-function UserInfo({ isGuestMode, testData, onLogout, clearTestData, onGuestMode }) { // 添加 onGuestMode 作為 prop
+function UserInfo({ isGuestMode, testData, onLogout, clearTestData, onGuestMode }) {
   const { userData, setUserData } = useUser();
   const [height, setHeight] = useState(userData.height?.toString() || '');
   const [weight, setWeight] = useState(userData.weight?.toString() || '');
@@ -337,7 +337,7 @@ function UserInfo({ isGuestMode, testData, onLogout, clearTestData, onGuestMode 
           <div className="button-group-mode">
             <div className="button-with-tooltip">
               <button
-                onClick={() => onGuestMode()} // 直接調用 onGuestMode，而不是跳轉到 /
+                onClick={() => onGuestMode()}
                 className="mode-btn guest-btn"
               >
                 訪客模式
@@ -361,7 +361,7 @@ function UserInfo({ isGuestMode, testData, onLogout, clearTestData, onGuestMode 
       {(isGuestMode || currentUser) && (
         <>
           <h1 className="text-2xl font-bold text-center mb-6">身體狀態與表現總覽</h1>
-          {error && <p className I="error-message">{error}</p>}
+          {error && <p className="error-message">{error}</p>} {/* 修復語法錯誤 */}
           <form className="space-y-4">
             <div>
               <label htmlFor="gender" className="block text-sm font-medium text-gray-700">性別</label>
