@@ -21,11 +21,12 @@ function UserInfo() {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
+  const [showModal, setShowModal] = useState(false); // 控制模態框顯示
+  const [historyData, setHistoryData] = useState([]); // 儲存歷史數據
   const navigate = useNavigate();
 
   // 監聽用戶登入狀態並從 Firestore 載入資料
   useEffect(() => {
-    // 檢查 auth 是否已初始化
     if (!auth) {
       console.error('auth 未初始化');
       setError('無法初始化身份驗證，請稍後再試。');
@@ -194,6 +195,58 @@ function UserInfo() {
     }
   };
 
+  // 獲取歷史數據
+  const fetchHistory = async () => {
+    const user = auth.currentUser;
+    if (!user) {
+      alert('請先登入！');
+      return;
+    }
+
+    try {
+      const historyRef = collection(db, 'users', user.uid, 'history');
+      const q = query(historyRef, orderBy('timestamp', 'desc')); // 按時間降序排序
+      const querySnapshot = await getDocs(q);
+      const history = querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setHistoryData(history);
+    } catch (error) {
+      console.error('獲取歷史數據失敗:', error);
+      alert('獲取歷史數據失敗，請稍後再試！');
+    }
+  };
+
+  // 點擊「歷史數據」按鈕時觸發
+  const handleShowHistory = () => {
+    fetchHistory();
+    setShowModal(true);
+  };
+
+  // 關閉模態框
+  const handleCloseModal = () => {
+    setShowModal(false);
+  };
+
+  // 格式化數據顯示
+  const formatData = (type, data) => {
+    switch (type) {
+      case 'cardio':
+        return `跑步距離: ${data.distance} 公尺, 分數: ${data.score}, 評語: ${data.comment}`;
+      case 'muscle':
+        return `SMM: ${data.smm} kg, SM%: ${data.smPercent}%, SMM 分數: ${data.smmScore}, SM% 分數: ${data.smPercentScore}, 最終分數: ${data.finalScore}`;
+      case 'ffmi':
+        return `體脂肪率: ${data.bodyFat}%, FFMI: ${data.ffmi}, FFMI 評分: ${data.ffmiScore}, 等級: ${data.ffmiCategory}`;
+      case 'strength':
+        return `深蹲: ${data.squat} kg, 分數: ${data.squatScore}, 硬舉: ${data.deadlift} kg, 分數: ${data.deadliftScore}, 臥推: ${data.bench} kg, 分數: ${data.benchScore}, 最終分數: ${data.finalScore}`;
+      case 'power':
+        return `垂直跳: ${data.jumpHeight} cm, 分數: ${data.jumpScore}, 立定跳遠: ${data.jumpDistance} cm, 分數: ${data.distanceScore}, 最終分數: ${data.finalScore}`;
+      default:
+        return JSON.stringify(data);
+    }
+  };
+
   const calculateAverageScore = () => {
     const scoreValues = [
       userData.scores?.strength || 0,
@@ -286,7 +339,6 @@ function UserInfo() {
               >
                 訪客模式
               </button>
-              {/* 修復：移除 Ascendancy，改用 <span> */}
               <span className="tooltip">僅儲存到本地，重新整理後可能遺失</span>
             </div>
             <div className="button-with-tooltip">
@@ -404,14 +456,56 @@ function UserInfo() {
         <button onClick={() => navigate('/celebrity-comparison')} className="nav-btn">
           名人數據參照表
         </button>
+        {/* 僅在登入模式下顯示「歷史數據」按鈕 */}
+        {currentUser && (
+          <button onClick={handleShowHistory} className="nav-btn history-btn">
+            歷史數據
+          </button>
+        )}
       </div>
+
+      {/* 模態框 */}
+      {showModal && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h2 className="modal-title">歷史數據</h2>
+              <button onClick={handleCloseModal} className="modal-close-btn">×</button>
+            </div>
+            <div className="modal-body">
+              {historyData.length > 0 ? (
+                <table className="history-table">
+                  <thead>
+                    <tr>
+                      <th>日期</th>
+                      <th>類型</th>
+                      <th>數據</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {historyData.map((entry) => (
+                      <tr key={entry.id}>
+                        <td>{entry.data?.date || '未知日期'}</td>
+                        <td>{entry.type}</td>
+                        <td>{formatData(entry.type, entry.data)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              ) : (
+                <p>暫無歷史數據</p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
 export default UserInfo;
 
-// 響應式 CSS（保持不變）
+// 修改後的響應式 CSS，添加模態框和表格樣式
 const styles = `
   .user-info-container {
     max-width: 100%;
@@ -612,6 +706,96 @@ const styles = `
     background-color: #3aa0a0;
   }
 
+  .history-btn {
+    background-color: #36a2eb;
+  }
+
+  .history-btn:hover {
+    background-color: #2a82cb;
+  }
+
+  /* 模態框樣式 */
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+
+  .modal-content {
+    background: white;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 800px;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    position: relative;
+  }
+
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    border-bottom: 1px solid #e5e7eb;
+  }
+
+  .modal-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #1f2937;
+  }
+
+  .modal-close-btn {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #4b5563;
+  }
+
+  .modal-close-btn:hover {
+    color: #1f2937;
+  }
+
+  .modal-body {
+    padding: 1rem;
+  }
+
+  .history-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+
+  .history-table th,
+  .history-table td {
+    padding: 0.75rem;
+    font-size: 0.875rem;
+    color: #4b5563;
+    border-bottom: 1px solid #e5e7eb;
+    text-align: left;
+  }
+
+  .history-table th {
+    background-color: #f3f4f6;
+    font-weight: 600;
+    color: #1f2937;
+  }
+
+  .history-table tr:last-child td {
+    border-bottom: none;
+  }
+
   @media (min-width: 768px) {
     .user-info-container {
       max-width: 800px;
@@ -634,6 +818,11 @@ const styles = `
 
     .nav-btn {
       width: 48%;
+    }
+
+    .history-table th,
+    .history-table td {
+      font-size: 1rem;
     }
   }
 
