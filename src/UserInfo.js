@@ -6,23 +6,24 @@ import { Radar } from 'react-chartjs-2';
 import { Chart as ChartJS, RadialLinearScale, PointElement, LineElement, Filler, Tooltip, Legend } from 'chart.js';
 import { db, auth } from './firebase';
 import { signOut } from 'firebase/auth';
-import { collection, query, where, orderBy, limit, getDocs, addDoc } from 'firebase/firestore';
+import { doc, setDoc, getDoc, collection, query, orderBy, getDocs } from 'firebase/firestore';
 
+// 註冊 Chart.js 組件
 ChartJS.register(RadialLinearScale, PointElement, LineElement, Filler, Tooltip, Legend);
 
 function UserInfo() {
   const { userData, setUserData } = useUser();
-  const [height, setHeight] = useState(userData.height || '');
-  const [weight, setWeight] = useState(userData.weight || '');
-  const [age, setAge] = useState(userData.age || '');
+  const [height, setHeight] = useState(userData.height?.toString() || '');
+  const [weight, setWeight] = useState(userData.weight?.toString() || '');
+  const [age, setAge] = useState(userData.age?.toString() || '');
   const [gender, setGender] = useState(userData.gender || '');
   const [mode, setMode] = useState('');
   const [isSaved, setIsSaved] = useState(false);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
-  const [showModal, setShowModal] = useState(false); // 控制模態框顯示
-  const [historyData, setHistoryData] = useState([]); // 儲存歷史數據
+  const [showModal, setShowModal] = useState(false);
+  const [historyData, setHistoryData] = useState([]);
   const navigate = useNavigate();
 
   // 監聽用戶登入狀態並從 Firestore 載入資料
@@ -38,61 +39,59 @@ function UserInfo() {
       if (user) {
         setMode('login');
         try {
-          console.log('正在查詢 Firestore，user.uid:', user.uid);
-          const q = query(
-            collection(db, 'users'),
-            where('userId', '==', user.uid),
-            orderBy('updatedAt', 'desc'),
-            limit(1)
-          );
-          const querySnapshot = await getDocs(q);
-          console.log('查詢結果：', querySnapshot.docs.map(doc => doc.data()));
-          if (!querySnapshot.empty) {
-            const userDoc = querySnapshot.docs[0].data();
-            console.log('載入的資料：', userDoc);
-            setHeight(userDoc.height || '');
-            setWeight(userDoc.weight || '');
-            setAge(userDoc.age || '');
+          const userRef = doc(db, 'users', user.uid);
+          const userSnap = await getDoc(userRef);
+          if (userSnap.exists()) {
+            const userDoc = userSnap.data();
+            console.log('從 Firestore 載入的用戶數據：', userDoc);
+            console.log('載入的 scores 數據：', userDoc.scores);
+            setHeight(userDoc.height?.toString() || '');
+            setWeight(userDoc.weight?.toString() || '');
+            setAge(userDoc.age?.toString() || '');
             setGender(userDoc.gender || '');
             setUserData({
               ...userData,
-              height: userDoc.height,
-              weight: userDoc.weight,
-              age: userDoc.age,
-              gender: userDoc.gender,
-              updatedAt: userDoc.updatedAt,
+              height: userDoc.height || 0,
+              weight: userDoc.weight || 0,
+              age: userDoc.age || 0,
+              gender: userDoc.gender || '',
+              scores: userDoc.scores || {},
             });
+            console.log('更新後的狀態 - height:', userDoc.height?.toString() || '');
+            console.log('更新後的狀態 - weight:', userDoc.weight?.toString() || '');
+            console.log('更新後的狀態 - age:', userDoc.age?.toString() || '');
+            console.log('更新後的狀態 - gender:', userDoc.gender || '');
+            console.log('更新後的 scores:', userDoc.scores || {});
           } else {
-            console.log('沒有找到該用戶的歷史資料');
-            setError('沒有找到歷史資料，請填寫並儲存新資料。');
+            console.log('沒有找到該用戶的資料');
+            setError('沒有找到用戶資料，請填寫並儲存新資料。');
+            setUserData({ ...userData, height: 0, weight: 0, age: 0, gender: '', scores: {} });
           }
         } catch (err) {
           console.error('從 Firestore 讀取資料失敗：', err);
-          console.error('錯誤代碼：', err.code);
-          console.error('錯誤訊息：', err.message);
-          if (err.message.includes('The query requires an index')) {
-            setError('資料庫索引尚未創建，請聯繫管理員或稍後再試。');
-          } else if (err.code === 'auth/network-request-failed') {
-            setError('無法連接到伺服器，請檢查您的網路連線並稍後再試。');
-          } else if (err.code === 'permission-denied') {
+          if (err.code === 'permission-denied') {
             setError('您沒有權限訪問這些資料，請聯繫管理員。');
+          } else if (err.code === 'network-request-failed') {
+            setError('無法連接到伺服器，請檢查您的網路連線並稍後再試。');
           } else {
-            setError(`無法載入歷史資料：${err.message}`);
+            setError(`無法載入用戶資料：${err.message}`);
           }
+          setUserData({ ...userData, height: 0, weight: 0, age: 0, gender: '', scores: {} });
         }
       } else {
         setMode('');
-        setHeight(userData.height || '');
-        setWeight(userData.weight || '');
-        setAge(userData.age || '');
+        setHeight(userData.height?.toString() || '');
+        setWeight(userData.weight?.toString() || '');
+        setAge(userData.age?.toString() || '');
         setGender(userData.gender || '');
         setError(null);
+        setUserData({ ...userData, height: 0, weight: 0, age: 0, gender: '', scores: userData.scores || {} });
+        console.log('未登入狀態 - userData:', userData);
       }
     });
 
     return () => unsubscribe();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [setUserData, userData]);
 
   // 登出功能
   const handleSignOut = async () => {
@@ -129,12 +128,12 @@ function UserInfo() {
     }
 
     const updatedUserData = {
-      ...userData,
       height: parseFloat(height),
       weight: parseFloat(weight),
       age: parseInt(age, 10),
       gender,
       updatedAt: new Date().toISOString(),
+      scores: userData.scores || {},
     };
 
     setUserData(updatedUserData);
@@ -146,7 +145,7 @@ function UserInfo() {
     }, 2000);
   };
 
-  // 登入模式儲存（直接儲存到 Firestore）
+  // 登入模式儲存（儲存到 Firestore 的 users/{userId}）
   const handleLoginSave = async (e) => {
     e.preventDefault();
     setError(null);
@@ -159,28 +158,24 @@ function UserInfo() {
     }
 
     try {
-      await addDoc(collection(db, 'users'), {
-        userId: currentUser.uid,
+      const userRef = doc(db, 'users', currentUser.uid);
+      const updatedUserData = {
         height: parseFloat(height),
         weight: parseFloat(weight),
         age: parseInt(age, 10),
         gender,
         updatedAt: new Date().toISOString(),
-      });
+        scores: userData.scores || {},
+      };
+      await setDoc(userRef, updatedUserData, { merge: true });
       setUserData({
         ...userData,
-        height: parseFloat(height),
-        weight: parseFloat(weight),
-        age: parseInt(age, 10),
-        gender,
-        updatedAt: new Date().toISOString(),
+        ...updatedUserData,
       });
       setIsSaved(true);
     } catch (err) {
       console.error('儲存到 Firestore 失敗：', err);
-      console.error('錯誤代碼：', err.code);
-      console.error('錯誤訊息：', err.message);
-      if (err.code === 'auth/network-request-failed') {
+      if (err.code === 'network-request-failed') {
         setError('無法連接到伺服器，請檢查您的網路連線並稍後再試。');
       } else if (err.code === 'permission-denied') {
         setError('您沒有權限儲存資料，請聯繫管理員。');
@@ -205,12 +200,17 @@ function UserInfo() {
 
     try {
       const historyRef = collection(db, 'users', user.uid, 'history');
-      const q = query(historyRef, orderBy('timestamp', 'desc')); // 按時間降序排序
+      const q = query(historyRef, orderBy('timestamp', 'desc'));
       const querySnapshot = await getDocs(q);
-      const history = querySnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
+      const history = querySnapshot.docs.map((doc) => {
+        const data = doc.data();
+        console.log('歷史記錄文檔：', data);
+        return {
+          id: doc.id,
+          ...data,
+        };
+      });
+      console.log('提取的歷史數據：', history);
       setHistoryData(history);
     } catch (error) {
       console.error('獲取歷史數據失敗:', error);
@@ -229,32 +229,37 @@ function UserInfo() {
     setShowModal(false);
   };
 
-  // 格式化數據顯示
+  // 格式化數據顯示，添加更多容錯處理
   const formatData = (type, data) => {
+    if (!data || typeof data !== 'object') {
+      return '無數據';
+    }
     switch (type) {
       case 'cardio':
-        return `跑步距離: ${data.distance} 公尺, 分數: ${data.score}, 評語: ${data.comment}`;
+        return `跑步距離: ${data.distance ?? '未知'} 公尺, 分數: ${data.score ?? '未知'}, 評語: ${data.comment ?? '無評語'}`;
       case 'muscle':
-        return `SMM: ${data.smm} kg, SM%: ${data.smPercent}%, SMM 分數: ${data.smmScore}, SM% 分數: ${data.smPercentScore}, 最終分數: ${data.finalScore}`;
+        return `SMM: ${data.smm ?? '未知'} kg, SM%: ${data.smPercent ?? '未知'}%, SMM 分數: ${data.smmScore ?? '未知'}, SM% 分數: ${data.smPercentScore ?? '未知'}, 最終分數: ${data.finalScore ?? '未知'}`;
       case 'ffmi':
-        return `體脂肪率: ${data.bodyFat}%, FFMI: ${data.ffmi}, FFMI 評分: ${data.ffmiScore}, 等級: ${data.ffmiCategory}`;
+        return `體脂肪率: ${data.bodyFat ?? '未知'}%, FFMI: ${data.ffmi ?? '未知'}, FFMI 評分: ${data.ffmiScore ?? '未知'}, 等級: ${data.ffmiCategory ?? '未知'}`;
       case 'strength':
-        return `深蹲: ${data.squat} kg, 分數: ${data.squatScore}, 硬舉: ${data.deadlift} kg, 分數: ${data.deadliftScore}, 臥推: ${data.bench} kg, 分數: ${data.benchScore}, 最終分數: ${data.finalScore}`;
+        return `深蹲: ${data.squat ?? '未知'} (重量: ${data.squatWeight ?? '未知'} kg, 次數: ${data.squatReps ?? '未知'}), 硬舉: ${data.deadlift ?? '未知'} (重量: ${data.deadliftWeight ?? '未知'} kg, 次數: ${data.deadliftReps ?? '未知'}), 臥推: ${data.benchPress ?? '未知'} (重量: ${data.benchPressWeight ?? '未知'} kg, 次數: ${data.benchPressReps ?? '未知'}), 滑輪下拉: ${data.latPulldown ?? '未知'} (重量: ${data.latPulldownWeight ?? '未知'} kg, 次數: ${data.latPulldownReps ?? '未知'}), 站姿肩推: ${data.shoulderPress ?? '未知'} (重量: ${data.shoulderPressWeight ?? '未知'} kg, 次數: ${data.shoulderPressReps ?? '未知'}), 平均分數: ${data.averageScore ?? '未知'}`;
       case 'power':
-        return `垂直跳: ${data.jumpHeight} cm, 分數: ${data.jumpScore}, 立定跳遠: ${data.jumpDistance} cm, 分數: ${data.distanceScore}, 最終分數: ${data.finalScore}`;
+        return `垂直跳: ${data.jumpHeight ?? '未知'} cm, 分數: ${data.jumpScore ?? '未知'}, 立定跳遠: ${data.jumpDistance ?? '未知'} cm, 分數: ${data.distanceScore ?? '未知'}, 最終分數: ${data.finalScore ?? '未知'}`;
       default:
-        return JSON.stringify(data);
+        return JSON.stringify(data, null, 2);
     }
   };
 
+  // 計算平均分數，確保數據為數值
   const calculateAverageScore = () => {
     const scoreValues = [
-      userData.scores?.strength || 0,
-      userData.scores?.explosivePower || 0,
-      userData.scores?.cardio || 0,
-      userData.scores?.muscleMass || 0,
-      userData.scores?.bodyFat || 0,
+      Number(userData.scores?.strength) || 0,
+      Number(userData.scores?.explosivePower) || 0,
+      Number(userData.scores?.cardio) || 0,
+      Number(userData.scores?.muscleMass) || 0,
+      Number(userData.scores?.bodyFat) || 0,
     ];
+    console.log('計算平均分數的數據：', scoreValues);
     const completedScores = scoreValues.filter((score) => score > 0);
     if (completedScores.length === 0) return 0;
     const total = completedScores.reduce((sum, score) => sum + score, 0);
@@ -283,20 +288,33 @@ function UserInfo() {
     return isMale ? slogansMale[index] : slogansFemale[index];
   };
 
-  const averageScore = calculateAverageScore();
-  const scoreSlogan = getScoreSlogan(averageScore, gender);
+  // 檢查 scores 是否為空，並確保數據為數值
+  const scoresToUse = userData.scores || {};
+  const scoreValues = {
+    strength: Number(scoresToUse.strength) || 0,
+    explosivePower: Number(scoresToUse.explosivePower) || 0,
+    cardio: Number(scoresToUse.cardio) || 0,
+    muscleMass: Number(scoresToUse.muscleMass) || 0,
+    bodyFat: Number(scoresToUse.bodyFat) || 0,
+  };
+  const hasScores = Object.values(scoreValues).some((score) => score > 0);
+  console.log('hasScores:', hasScores);
+  console.log('userData.scores:', userData.scores);
+  console.log('scoresToUse:', scoresToUse);
+  console.log('scoreValues:', scoreValues);
 
+  // 設置雷達圖數據，確保數據為數值
   const radarData = {
     labels: ['力量', '爆發力', '心肺耐力', '骨骼肌肉量', 'FFMI'],
     datasets: [
       {
         label: '您的表現',
         data: [
-          userData.scores?.strength || 0,
-          userData.scores?.explosivePower || 0,
-          userData.scores?.cardio || 0,
-          userData.scores?.muscleMass || 0,
-          userData.scores?.bodyFat || 0,
+          scoreValues.strength,
+          scoreValues.explosivePower,
+          scoreValues.cardio,
+          scoreValues.muscleMass,
+          scoreValues.bodyFat,
         ],
         backgroundColor: 'rgba(34, 202, 236, 0.2)',
         borderColor: 'rgba(34, 202, 236, 1)',
@@ -305,6 +323,7 @@ function UserInfo() {
     ],
   };
 
+  // 設置雷達圖選項，禁用動畫以避免 eval
   const radarOptions = {
     scales: {
       r: {
@@ -316,7 +335,11 @@ function UserInfo() {
     plugins: {
       legend: { position: 'top' },
     },
+    animation: false, // 明確禁用動畫
   };
+
+  const averageScore = calculateAverageScore();
+  const scoreSlogan = getScoreSlogan(averageScore, gender);
 
   return (
     <div className="user-info-container">
@@ -361,8 +384,9 @@ function UserInfo() {
           {error && <p className="error-message">{error}</p>}
           <form className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700">性別</label>
+              <label htmlFor="gender" className="block text-sm font-medium text-gray-700">性別</label>
               <select
+                id="gender"
                 value={gender}
                 onChange={(e) => setGender(e.target.value)}
                 className="input-field"
@@ -375,8 +399,9 @@ function UserInfo() {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">身高 (cm)</label>
+              <label htmlFor="height" className="block text-sm font-medium text-gray-700">身高 (cm)</label>
               <input
+                id="height"
                 type="number"
                 value={height}
                 onChange={(e) => setHeight(e.target.value)}
@@ -387,8 +412,9 @@ function UserInfo() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">體重 (kg)</label>
+              <label htmlFor="weight" className="block text-sm font-medium text-gray-700">體重 (kg)</label>
               <input
+                id="weight"
                 type="number"
                 value={weight}
                 onChange={(e) => setWeight(e.target.value)}
@@ -399,8 +425,9 @@ function UserInfo() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">年齡</label>
+              <label htmlFor="age" className="block text-sm font-medium text-gray-700">年齡</label>
               <input
+                id="age"
                 type="number"
                 value={age}
                 onChange={(e) => setAge(e.target.value)}
@@ -424,10 +451,16 @@ function UserInfo() {
         </>
       )}
 
-      {/* 雷達圖和導航按鈕始終顯示 */}
+      {/* 雷達圖和導航按鈕 */}
       <div className="radar-section">
         <h2 className="text-xl font-semibold text-center mb-4">表現總覽</h2>
-        <Radar data={radarData} options={radarOptions} />
+        {hasScores ? (
+          <div style={{ width: '100%', maxWidth: '500px', margin: '0 auto' }}>
+            <Radar data={radarData} options={radarOptions} />
+          </div>
+        ) : (
+          <p className="error-message">請先完成至少一項評測以顯示表現總覽</p>
+        )}
         {averageScore > 0 && (
           <div className="score-section">
             <p className="average-score">
@@ -456,7 +489,6 @@ function UserInfo() {
         <button onClick={() => navigate('/celebrity-comparison')} className="nav-btn">
           名人數據參照表
         </button>
-        {/* 僅在登入模式下顯示「歷史數據」按鈕 */}
         {currentUser && (
           <button onClick={handleShowHistory} className="nav-btn history-btn">
             歷史數據
@@ -486,7 +518,7 @@ function UserInfo() {
                     {historyData.map((entry) => (
                       <tr key={entry.id}>
                         <td>{entry.data?.date || '未知日期'}</td>
-                        <td>{entry.type}</td>
+                        <td>{entry.type || '未知類型'}</td>
                         <td>{formatData(entry.type, entry.data)}</td>
                       </tr>
                     ))}
@@ -505,7 +537,7 @@ function UserInfo() {
 
 export default UserInfo;
 
-// 修改後的響應式 CSS，添加模態框和表格樣式
+// 響應式 CSS（保持不變）
 const styles = `
   .user-info-container {
     max-width: 100%;

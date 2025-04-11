@@ -6,7 +6,7 @@ import { Radar } from 'react-chartjs-2';
 import { Chart as ChartJS, RadialLinearScale, PointElement, LineElement, Filler, Tooltip, Legend } from 'chart.js';
 import * as standards from './standards'; // 導入基準標準
 import { db, auth } from './firebase'; // 引入 Firebase 配置
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore'; // 引入模組化語法
+import { collection, addDoc, serverTimestamp, query, where, orderBy, limit, getDocs } from 'firebase/firestore'; // 引入模組化語法
 
 ChartJS.register(RadialLinearScale, PointElement, LineElement, Filler, Tooltip, Legend);
 
@@ -21,9 +21,67 @@ function Strength() {
   const [latPulldown, setLatPulldown] = useState({ weight: '', reps: '', max: null, score: null });
   const [shoulderPress, setShoulderPress] = useState({ weight: '', reps: '', max: null, score: null });
   const [history, setHistory] = useState([]);
-  // 新增：管理展開/收起狀態
   const [isExpanded, setIsExpanded] = useState(false);
 
+  // 自動填入上一次數據
+  useEffect(() => {
+    const fetchLastData = async () => {
+      const user = auth.currentUser;
+      if (!user) {
+        console.log('用戶未登入，無法獲取歷史數據');
+        return;
+      }
+
+      try {
+        const historyRef = collection(db, 'users', user.uid, 'history');
+        const q = query(
+          historyRef,
+          where('type', '==', 'strength'),
+          orderBy('timestamp', 'desc'),
+          limit(1)
+        );
+        const querySnapshot = await getDocs(q);
+        if (!querySnapshot.empty) {
+          const lastEntry = querySnapshot.docs[0].data();
+          console.log('最新 Strength 數據:', lastEntry);
+          // 自動填入表單欄位
+          setBenchPress((prev) => ({
+            ...prev,
+            weight: lastEntry.data.benchPressWeight?.toString() || '',
+            reps: lastEntry.data.benchPressReps?.toString() || '',
+          }));
+          setSquat((prev) => ({
+            ...prev,
+            weight: lastEntry.data.squatWeight?.toString() || '',
+            reps: lastEntry.data.squatReps?.toString() || '',
+          }));
+          setDeadlift((prev) => ({
+            ...prev,
+            weight: lastEntry.data.deadliftWeight?.toString() || '',
+            reps: lastEntry.data.deadliftReps?.toString() || '',
+          }));
+          setLatPulldown((prev) => ({
+            ...prev,
+            weight: lastEntry.data.latPulldownWeight?.toString() || '',
+            reps: lastEntry.data.latPulldownReps?.toString() || '',
+          }));
+          setShoulderPress((prev) => ({
+            ...prev,
+            weight: lastEntry.data.shoulderPressWeight?.toString() || '',
+            reps: lastEntry.data.shoulderPressReps?.toString() || '',
+          }));
+        } else {
+          console.log('沒有找到 Strength 歷史數據');
+        }
+      } catch (error) {
+        console.error('獲取 Strength 歷史數據失敗:', error);
+      }
+    };
+
+    fetchLastData();
+  }, []);
+
+  // 載入本地歷史記錄
   useEffect(() => {
     const savedHistory = JSON.parse(localStorage.getItem('strengthHistory')) || [];
     setHistory(savedHistory);
@@ -177,26 +235,33 @@ function Strength() {
       return;
     }
 
-    // 確認用戶已登入
     const user = auth.currentUser;
     if (!user) {
       alert('請先登入！');
       return;
     }
 
-    // 準備歷史記錄數據
     const newHistoryEntry = {
       date: new Date().toLocaleString(),
       benchPress: benchPress.score,
+      benchPressWeight: parseFloat(benchPress.weight) || null, // 儲存重量
+      benchPressReps: parseFloat(benchPress.reps) || null, // 儲存次數
       squat: squat.score,
+      squatWeight: parseFloat(squat.weight) || null,
+      squatReps: parseFloat(squat.reps) || null,
       deadlift: deadlift.score,
+      deadliftWeight: parseFloat(deadlift.weight) || null,
+      deadliftReps: parseFloat(deadlift.reps) || null,
       latPulldown: latPulldown.score,
+      latPulldownWeight: parseFloat(latPulldown.weight) || null,
+      latPulldownReps: parseFloat(latPulldown.reps) || null,
       shoulderPress: shoulderPress.score,
+      shoulderPressWeight: parseFloat(shoulderPress.weight) || null,
+      shoulderPressReps: parseFloat(shoulderPress.reps) || null,
       averageScore,
       comment: getAverageScoreComment(averageScore, gender),
     };
 
-    // 儲存到 Firebase
     try {
       const userHistoryRef = collection(db, 'users', user.uid, 'history');
       await addDoc(userHistoryRef, {
@@ -211,12 +276,10 @@ function Strength() {
       return;
     }
 
-    // 儲存到本地歷史記錄
     const updatedHistory = [...history, newHistoryEntry];
     setHistory(updatedHistory);
     localStorage.setItem('strengthHistory', JSON.stringify(updatedHistory));
 
-    // 更新 UserContext
     setUserData({
       ...userData,
       scores: {
@@ -242,7 +305,6 @@ function Strength() {
         </button>
       </div>
 
-      {/* 修改：將評測標準說明改為可展開/收起的卡片 */}
       <div className="standards-card">
         <div
           className="standards-header"
@@ -405,11 +467,11 @@ function Strength() {
             {history.map((entry, index) => (
               <li key={index} className="history-item">
                 <p>日期: {entry.date}</p>
-                <p>臥推: {entry.benchPress}</p>
-                <p>深蹲: {entry.squat}</p>
-                <p>硬舉: {entry.deadlift}</p>
-                <p>滑輪下拉: {entry.latPulldown}</p>
-                <p>站姿肩推: {entry.shoulderPress}</p>
+                <p>臥推: {entry.benchPress} (重量: {entry.benchPressWeight} kg, 次數: {entry.benchPressReps})</p>
+                <p>深蹲: {entry.squat} (重量: {entry.squatWeight} kg, 次數: {entry.squatReps})</p>
+                <p>硬舉: {entry.deadlift} (重量: {entry.deadliftWeight} kg, 次數: {entry.deadliftReps})</p>
+                <p>滑輪下拉: {entry.latPulldown} (重量: {entry.latPulldownWeight} kg, 次數: {entry.latPulldownReps})</p>
+                <p>站姿肩推: {entry.shoulderPress} (重量: {entry.shoulderPressWeight} kg, 次數: {entry.shoulderPressReps})</p>
                 <p>平均分數: {entry.averageScore}</p>
                 <p>評語: {entry.comment}</p>
               </li>
@@ -429,7 +491,7 @@ function Strength() {
 
 export default Strength;
 
-// 響應式 CSS
+// 響應式 CSS（保持不變）
 const styles = `
   .strength-container {
     max-width: 100%;
@@ -472,7 +534,7 @@ const styles = `
   .score-display {
     font-size: 1.5rem;
     font-weight: bold;
-    color: #1E90FF; /* 亮眼的藍色 */
+    color: #1E90FF;
     margin-top: 0.5rem;
   }
 
@@ -484,7 +546,7 @@ const styles = `
   .average-score-display {
     font-size: 2rem;
     font-weight: bold;
-    color: #1E90FF; /* 亮眼的藍色 */
+    color: #1E90FF;
     margin-top: 0.5rem;
   }
 
@@ -521,7 +583,6 @@ const styles = `
     margin-bottom: 1rem;
   }
 
-  /* 修改：卡片式設計的樣式 */
   .standards-card {
     margin-bottom: 1.5rem;
     background-color: #fff;
@@ -587,12 +648,12 @@ const styles = `
 
   @media (max-width: 767px) {
     .score-display {
-      font-size: 1.25rem; /* 手機端稍小 */
+      font-size: 1.25rem;
     }
 
     .average-score-display {
-      font-size: 1.5rem; /* 手機端稍小 */
-      word-break: break-word; /* 自動換行 */
+      font-size: 1.5rem;
+      word-break: break-word;
     }
 
     .standards-content {
