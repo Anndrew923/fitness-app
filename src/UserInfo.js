@@ -23,20 +23,27 @@ function UserInfo({ isGuestMode, testData, onLogout, clearTestData, onGuestMode 
   const [historyData, setHistoryData] = useState([]);
   const navigate = useNavigate();
 
+  // 檢查 auth 和 db 是否正確初始化
+  console.log('auth:', auth);
+  console.log('db:', db);
+
   // 監聽用戶登入狀態並從 Firestore 載入資料
   useEffect(() => {
-    console.log('UserInfo useEffect 觸發, isGuestMode:', isGuestMode, 'auth.currentUser:', auth.currentUser);
+    console.log('UserInfo useEffect 觸發, isGuestMode:', isGuestMode, 'auth.currentUser:', auth?.currentUser);
     if (!auth) {
       console.error('auth 未初始化');
-      setError('無法初始化身份驗證，請稍後再試。');
+      setError('無法初始化身份驗證，請檢查 Firebase 配置並稍後再試。');
       return;
     }
 
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
+      console.log('onAuthStateChanged 觸發, user:', user);
       setCurrentUser(user);
       if (user && !isGuestMode) {
-        // 僅在登入模式下載入 Firestore 數據
         try {
+          if (!db) {
+            throw new Error('Firestore 未初始化');
+          }
           const userRef = doc(db, 'users', user.uid);
           const userSnap = await getDoc(userRef);
           if (userSnap.exists()) {
@@ -72,7 +79,6 @@ function UserInfo({ isGuestMode, testData, onLogout, clearTestData, onGuestMode 
           setUserData((prev) => ({ ...prev, height: 0, weight: 0, age: 0, gender: '', scores: {} }));
         }
       } else {
-        // 訪客模式或未登入，重置部分狀態
         setHeight(userData.height?.toString() || '');
         setWeight(userData.weight?.toString() || '');
         setAge(userData.age?.toString() || '');
@@ -82,7 +88,7 @@ function UserInfo({ isGuestMode, testData, onLogout, clearTestData, onGuestMode 
     });
 
     return () => unsubscribe();
-  }, [setUserData, isGuestMode]);
+  }, [setUserData, isGuestMode, userData.height, userData.weight, userData.age, userData.gender]);
 
   // 訪客模式儲存（僅更新本地狀態）
   const handleGuestSave = (e) => {
@@ -126,6 +132,12 @@ function UserInfo({ isGuestMode, testData, onLogout, clearTestData, onGuestMode 
       return;
     }
 
+    if (!currentUser || !db) {
+      setError('無法儲存資料：Firebase 未正確初始化。');
+      setLoading(false);
+      return;
+    }
+
     try {
       const userRef = doc(db, 'users', currentUser.uid);
       const updatedUserData = {
@@ -161,10 +173,15 @@ function UserInfo({ isGuestMode, testData, onLogout, clearTestData, onGuestMode 
 
   // 獲取歷史數據
   const fetchHistory = async () => {
-    const user = auth.currentUser;
+    const user = auth?.currentUser;
     if (!user || isGuestMode) {
       console.log('fetchHistory: 用戶未登入或為訪客模式，跳過歷史數據載入');
       alert('請使用登入模式以查看歷史數據！');
+      return;
+    }
+
+    if (!db) {
+      alert('無法載入歷史數據：Firebase 未正確初始化。');
       return;
     }
 
@@ -316,6 +333,9 @@ function UserInfo({ isGuestMode, testData, onLogout, clearTestData, onGuestMode 
 
   return (
     <div className="user-info-container">
+      {/* 顯示錯誤訊息，即使未進入訪客或登入模式 */}
+      {error && <p className="error-message">{error}</p>}
+
       {/* 顯示登入狀態 */}
       {isGuestMode ? (
         <div className="user-status">
@@ -361,7 +381,6 @@ function UserInfo({ isGuestMode, testData, onLogout, clearTestData, onGuestMode 
       {(isGuestMode || currentUser) && (
         <>
           <h1 className="text-2xl font-bold text-center mb-6">身體狀態與表現總覽</h1>
-          {error && <p className="error-message">{error}</p>} {/* 修復語法錯誤 */}
           <form className="space-y-4">
             <div>
               <label htmlFor="gender" className="block text-sm font-medium text-gray-700">性別</label>
