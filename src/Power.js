@@ -3,6 +3,8 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from './UserContext';
 import * as standards from './standards';
+import { db, auth } from './firebase'; // 引入 Firebase 配置
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore'; // 引入模組化語法
 
 function Power() {
   const { userData, setUserData } = useUser();
@@ -132,9 +134,16 @@ function Power() {
   };
 
   // 提交結果並儲存
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!result.finalScore) {
       alert('請先計算爆發力分數！');
+      return;
+    }
+
+    // 確認用戶已登入
+    const user = auth.currentUser;
+    if (!user) {
+      alert('請先登入！');
       return;
     }
 
@@ -150,6 +159,22 @@ function Power() {
       finalScore: result.finalScore,
     };
 
+    // 儲存到 Firebase
+    try {
+      const userHistoryRef = collection(db, 'users', user.uid, 'history');
+      await addDoc(userHistoryRef, {
+        timestamp: serverTimestamp(),
+        type: 'power',
+        data: newHistoryEntry,
+      });
+      console.log('數據成功儲存到 Firebase！');
+    } catch (error) {
+      console.error('儲存到 Firebase 失敗:', error);
+      alert('儲存數據失敗，請稍後再試！');
+      return;
+    }
+
+    // 儲存到本地歷史記錄
     const updatedHistory = [...history, newHistoryEntry];
     setHistory(updatedHistory);
     localStorage.setItem('powerHistory', JSON.stringify(updatedHistory));

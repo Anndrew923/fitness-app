@@ -5,6 +5,8 @@ import { useUser } from './UserContext';
 import { Radar } from 'react-chartjs-2';
 import { Chart as ChartJS, RadialLinearScale, PointElement, LineElement, Filler, Tooltip, Legend } from 'chart.js';
 import * as standards from './standards'; // 導入基準標準
+import { db, auth } from './firebase'; // 引入 Firebase 配置
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore'; // 引入模組化語法
 
 ChartJS.register(RadialLinearScale, PointElement, LineElement, Filler, Tooltip, Legend);
 
@@ -169,12 +171,20 @@ function Strength() {
   ].filter((score) => score !== null);
   const averageScore = scores.length > 0 ? (scores.reduce((a, b) => a + parseFloat(b), 0) / scores.length).toFixed(0) : null;
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!averageScore) {
       alert('請至少完成一項評測！');
       return;
     }
 
+    // 確認用戶已登入
+    const user = auth.currentUser;
+    if (!user) {
+      alert('請先登入！');
+      return;
+    }
+
+    // 準備歷史記錄數據
     const newHistoryEntry = {
       date: new Date().toLocaleString(),
       benchPress: benchPress.score,
@@ -186,10 +196,27 @@ function Strength() {
       comment: getAverageScoreComment(averageScore, gender),
     };
 
+    // 儲存到 Firebase
+    try {
+      const userHistoryRef = collection(db, 'users', user.uid, 'history');
+      await addDoc(userHistoryRef, {
+        timestamp: serverTimestamp(),
+        type: 'strength',
+        data: newHistoryEntry,
+      });
+      console.log('數據成功儲存到 Firebase！');
+    } catch (error) {
+      console.error('儲存到 Firebase 失敗:', error);
+      alert('儲存數據失敗，請稍後再試！');
+      return;
+    }
+
+    // 儲存到本地歷史記錄
     const updatedHistory = [...history, newHistoryEntry];
     setHistory(updatedHistory);
     localStorage.setItem('strengthHistory', JSON.stringify(updatedHistory));
 
+    // 更新 UserContext
     setUserData({
       ...userData,
       scores: {
