@@ -5,9 +5,9 @@ const UserContext = createContext();
 export function UserProvider({ children }) {
   const [userData, setUserData] = useState({
     gender: '',
-    height: 0, // 改為 0
-    weight: 0, // 改為 0
-    age: 0,    // 改為 0
+    height: 0,
+    weight: 0,
+    age: 0,
     scores: {
       strength: 0,
       explosivePower: 0,
@@ -35,6 +35,12 @@ export function UserProvider({ children }) {
       updatedData.height = Number(updatedData.height) || 0;
       updatedData.weight = Number(updatedData.weight) || 0;
       updatedData.age = Number(updatedData.age) || 0;
+      // 驗證 gender
+      updatedData.gender =
+        updatedData.gender === 'male' || updatedData.gender === 'female'
+          ? updatedData.gender
+          : '';
+      console.log('UserContext 更新後的 userData:', updatedData); // 添加日誌
       return updatedData;
     });
   };

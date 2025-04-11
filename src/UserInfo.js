@@ -54,14 +54,28 @@ function UserInfo({ isGuestMode, testData, onLogout, clearTestData, onGuestMode 
             setWeight(userDoc.weight?.toString() || '');
             setAge(userDoc.age?.toString() || '');
             setGender(userDoc.gender || '');
-            setUserData((prev) => ({
-              ...prev,
+            const updatedData = {
+              ...userData,
               height: userDoc.height || 0,
               weight: userDoc.weight || 0,
               age: userDoc.age || 0,
               gender: userDoc.gender || '',
               scores: userDoc.scores || {},
-            }));
+            };
+            setUserData(updatedData);
+            console.log('更新後的 userData:', updatedData);
+            // 如果缺少必要數據，提示用戶填寫
+            if (
+              !updatedData.height ||
+              updatedData.height <= 0 ||
+              !updatedData.weight ||
+              updatedData.weight <= 0 ||
+              !updatedData.age ||
+              updatedData.age <= 0 ||
+              !updatedData.gender
+            ) {
+              setError('請填寫並儲存您的身高、體重、年齡和性別！');
+            }
           } else {
             console.log('沒有找到該用戶的資料');
             setError('沒有找到用戶資料，請填寫並儲存新資料。');
@@ -88,7 +102,7 @@ function UserInfo({ isGuestMode, testData, onLogout, clearTestData, onGuestMode 
     });
 
     return () => unsubscribe();
-  }, [setUserData, isGuestMode, userData.height, userData.weight, userData.age, userData.gender]);
+  }, [setUserData, isGuestMode, userData]);
 
   // 訪客模式儲存（僅更新本地狀態）
   const handleGuestSave = (e) => {
@@ -102,16 +116,33 @@ function UserInfo({ isGuestMode, testData, onLogout, clearTestData, onGuestMode 
       return;
     }
 
+    const heightNum = parseFloat(height);
+    const weightNum = parseFloat(weight);
+    const ageNum = parseInt(age, 10);
+
+    if (heightNum <= 0 || weightNum <= 0 || ageNum <= 0) {
+      setError('身高、體重和年齡必須大於 0');
+      setLoading(false);
+      return;
+    }
+
+    if (gender !== 'male' && gender !== 'female') {
+      setError('請選擇有效的性別（男性或女性）');
+      setLoading(false);
+      return;
+    }
+
     const updatedUserData = {
-      height: parseFloat(height),
-      weight: parseFloat(weight),
-      age: parseInt(age, 10),
+      height: heightNum,
+      weight: weightNum,
+      age: ageNum,
       gender,
       updatedAt: new Date().toISOString(),
       scores: userData.scores || {},
     };
 
-    setUserData(updatedUserData);
+    setUserData(updatedUserData); // 修復：將 updatedData 改為 updatedUserData
+    console.log('訪客模式儲存後的 userData:', updatedUserData);
     setIsSaved(true);
 
     setTimeout(() => {
@@ -132,6 +163,22 @@ function UserInfo({ isGuestMode, testData, onLogout, clearTestData, onGuestMode 
       return;
     }
 
+    const heightNum = parseFloat(height);
+    const weightNum = parseFloat(weight);
+    const ageNum = parseInt(age, 10);
+
+    if (heightNum <= 0 || weightNum <= 0 || ageNum <= 0) {
+      setError('身高、體重和年齡必須大於 0');
+      setLoading(false);
+      return;
+    }
+
+    if (gender !== 'male' && gender !== 'female') {
+      setError('請選擇有效的性別（男性或女性）');
+      setLoading(false);
+      return;
+    }
+
     if (!currentUser || !db) {
       setError('無法儲存資料：Firebase 未正確初始化。');
       setLoading(false);
@@ -141,9 +188,9 @@ function UserInfo({ isGuestMode, testData, onLogout, clearTestData, onGuestMode 
     try {
       const userRef = doc(db, 'users', currentUser.uid);
       const updatedUserData = {
-        height: parseFloat(height),
-        weight: parseFloat(weight),
-        age: parseInt(age, 10),
+        height: heightNum,
+        weight: weightNum,
+        age: ageNum,
         gender,
         updatedAt: new Date().toISOString(),
         scores: userData.scores || {},
@@ -153,6 +200,7 @@ function UserInfo({ isGuestMode, testData, onLogout, clearTestData, onGuestMode 
         ...prev,
         ...updatedUserData,
       }));
+      console.log('登入模式儲存後的 userData:', updatedUserData);
       setIsSaved(true);
     } catch (err) {
       console.error('儲存到 Firestore 失敗：', err);
