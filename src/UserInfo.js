@@ -23,10 +23,10 @@ const GENDER_OPTIONS = ['male', 'female'];
 
 function UserInfo({ isGuestMode, setIsGuestMode, testData, onLogout, clearTestData }) {
   const { userData, setUserData } = useUser();
-  const [height, setHeight] = useState('');
-  const [weight, setWeight] = useState('');
-  const [age, setAge] = useState('');
-  const [gender, setGender] = useState('');
+  const [height, setHeight] = useState(userData.height?.toString() || '');
+  const [weight, setWeight] = useState(userData.weight?.toString() || '');
+  const [age, setAge] = useState(userData.age?.toString() || '');
+  const [gender, setGender] = useState(userData.gender || '');
   const [isSaved, setIsSaved] = useState(false);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -35,12 +35,14 @@ function UserInfo({ isGuestMode, setIsGuestMode, testData, onLogout, clearTestDa
   const [historyData, setHistoryData] = useState([]);
   const navigate = useNavigate();
 
-  // 監聽用戶登入狀態並從 Firestore 載入資料
+  // 監聽用戶登入狀態並從 Firestore 載入資料（僅初次載入）
   useEffect(() => {
     if (!auth) {
       setError('無法初始化身份驗證，請檢查 Firebase 配置並稍後再試。');
       return;
     }
+
+    console.log('useEffect triggered: isGuestMode=', isGuestMode, 'currentUser=', currentUser);
 
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
       setCurrentUser(user);
@@ -50,7 +52,7 @@ function UserInfo({ isGuestMode, setIsGuestMode, testData, onLogout, clearTestDa
           const userSnap = await getDoc(userRef);
           if (userSnap.exists()) {
             const userDoc = userSnap.data();
-            console.log('Firebase userDoc.scores:', userDoc.scores); // 添加日誌檢查 Firebase 數據
+            console.log('Firebase userDoc.scores:', JSON.stringify(userDoc.scores, null, 2));
             const updatedData = {
               height: userDoc.height || undefined,
               weight: userDoc.weight || undefined,
@@ -58,11 +60,13 @@ function UserInfo({ isGuestMode, setIsGuestMode, testData, onLogout, clearTestDa
               gender: userDoc.gender || '',
               scores: userDoc.scores || DEFAULT_SCORES,
             };
+            // 更新 userData
             setUserData(updatedData);
-            setHeight(userDoc.height > 0 ? userDoc.height.toString() : '');
-            setWeight(userDoc.weight > 0 ? userDoc.weight.toString() : '');
-            setAge(userDoc.age > 0 ? userDoc.age.toString() : '');
-            setGender(userDoc.gender || '');
+            // 僅在第一次載入時設置表單值，避免覆蓋用戶更改
+            if (!height && updatedData.height) setHeight(updatedData.height.toString());
+            if (!weight && updatedData.weight) setWeight(updatedData.weight.toString());
+            if (!age && updatedData.age) setAge(updatedData.age.toString());
+            if (!gender && updatedData.gender) setGender(updatedData.gender);
             if (!updatedData.height || !updatedData.weight || !updatedData.age || !updatedData.gender) {
               setError('請填寫並儲存您的身高、體重、年齡和性別！');
             }
@@ -74,11 +78,17 @@ function UserInfo({ isGuestMode, setIsGuestMode, testData, onLogout, clearTestDa
           setError(`無法載入用戶資料：${err.message}`);
           setUserData({ scores: DEFAULT_SCORES });
         }
+      } else if (isGuestMode) {
+        // 訪客模式下，僅在第一次載入時設置表單值
+        if (!height && userData.height) setHeight(userData.height.toString());
+        if (!weight && userData.weight) setWeight(userData.weight.toString());
+        if (!age && userData.age) setAge(userData.age.toString());
+        if (!gender && userData.gender) setGender(userData.gender);
       }
     });
 
     return () => unsubscribe();
-  }, [setUserData, isGuestMode]);
+  }, [isGuestMode]); // 移除 setUserData 依賴，僅依賴 isGuestMode
 
   // 驗證數據
   const validateData = useCallback(() => {
@@ -119,7 +129,7 @@ function UserInfo({ isGuestMode, setIsGuestMode, testData, onLogout, clearTestDa
         age: ageNum,
         gender,
         updatedAt: new Date().toISOString(),
-        scores: userData.scores || DEFAULT_SCORES,
+        scores: userData.scores || DEFAULT_SCORES, // 保留現有 scores
       };
       try {
         if (!isGuestMode && currentUser) {
@@ -226,7 +236,7 @@ function UserInfo({ isGuestMode, setIsGuestMode, testData, onLogout, clearTestDa
   // 設置雷達圖數據
   const radarData = useMemo(() => {
     const scores = userData.scores || DEFAULT_SCORES;
-    console.log('Radar Data Scores:', scores); // 添加日誌檢查雷達圖數據
+    console.log('Radar Data Scores:', JSON.stringify(scores, null, 2));
     return {
       labels: ['力量', '爆發力', '心肺耐力', '骨骼肌肉量', 'FFMI'],
       datasets: [{
@@ -292,7 +302,10 @@ function UserInfo({ isGuestMode, setIsGuestMode, testData, onLogout, clearTestDa
                 id="gender"
                 name="gender"
                 value={gender}
-                onChange={(e) => setGender(e.target.value)}
+                onChange={(e) => {
+                  console.log('Gender changed:', e.target.value);
+                  setGender(e.target.value);
+                }}
                 className="input-field"
                 required
                 autoComplete="sex"
@@ -309,7 +322,10 @@ function UserInfo({ isGuestMode, setIsGuestMode, testData, onLogout, clearTestDa
                 name="height"
                 type="number"
                 value={height}
-                onChange={(e) => setHeight(e.target.value)}
+                onChange={(e) => {
+                  console.log('Height changed:', e.target.value);
+                  setHeight(e.target.value);
+                }}
                 placeholder="身高 (cm)"
                 className="input-field"
                 required
@@ -323,7 +339,10 @@ function UserInfo({ isGuestMode, setIsGuestMode, testData, onLogout, clearTestDa
                 name="weight"
                 type="number"
                 value={weight}
-                onChange={(e) => setWeight(e.target.value)}
+                onChange={(e) => {
+                  console.log('Weight changed:', e.target.value);
+                  setWeight(e.target.value);
+                }}
                 placeholder="體重 (kg)"
                 className="input-field"
                 required
@@ -337,7 +356,10 @@ function UserInfo({ isGuestMode, setIsGuestMode, testData, onLogout, clearTestDa
                 name="age"
                 type="number"
                 value={age}
-                onChange={(e) => setAge(e.target.value)}
+                onChange={(e) => {
+                  console.log('Age changed:', e.target.value);
+                  setAge(e.target.value);
+                }}
                 placeholder="年齡"
                 className="input-field"
                 required
@@ -369,7 +391,7 @@ function UserInfo({ isGuestMode, setIsGuestMode, testData, onLogout, clearTestDa
 
       <div className="radar-section">
         <h2 className="text-xl font-semibold text-center mb-4">表現總覽</h2>
-        {console.log('Rendering radar section, scores:', userData.scores)} {/* 添加日誌檢查渲染邏輯 */}
+        {console.log('Rendering radar section, scores:', JSON.stringify(userData.scores, null, 2))}
         {Object.values(userData.scores || DEFAULT_SCORES).some((score) => score > 0) ? (
           <div style={{ width: '100%', maxWidth: '500px', margin: '0 auto' }}>
             <Radar data={radarData} options={radarOptions} />
@@ -437,7 +459,7 @@ function UserInfo({ isGuestMode, setIsGuestMode, testData, onLogout, clearTestDa
 
 export default UserInfo;
 
-// 響應式 CSS（優化手機體驗）
+// 響應式 CSS（保持不變）
 const styles = `
   .user-info-container {
     max-width: 100%;
