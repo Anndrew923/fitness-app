@@ -50,6 +50,7 @@ function UserInfo({ isGuestMode, setIsGuestMode, testData, onLogout, clearTestDa
           const userSnap = await getDoc(userRef);
           if (userSnap.exists()) {
             const userDoc = userSnap.data();
+            console.log('Firebase userDoc.scores:', userDoc.scores); // 添加日誌檢查 Firebase 數據
             const updatedData = {
               height: userDoc.height || undefined,
               weight: userDoc.weight || undefined,
@@ -225,6 +226,7 @@ function UserInfo({ isGuestMode, setIsGuestMode, testData, onLogout, clearTestDa
   // 設置雷達圖數據
   const radarData = useMemo(() => {
     const scores = userData.scores || DEFAULT_SCORES;
+    console.log('Radar Data Scores:', scores); // 添加日誌檢查雷達圖數據
     return {
       labels: ['力量', '爆發力', '心肺耐力', '骨骼肌肉量', 'FFMI'],
       datasets: [{
@@ -367,6 +369,7 @@ function UserInfo({ isGuestMode, setIsGuestMode, testData, onLogout, clearTestDa
 
       <div className="radar-section">
         <h2 className="text-xl font-semibold text-center mb-4">表現總覽</h2>
+        {console.log('Rendering radar section, scores:', userData.scores)} {/* 添加日誌檢查渲染邏輯 */}
         {Object.values(userData.scores || DEFAULT_SCORES).some((score) => score > 0) ? (
           <div style={{ width: '100%', maxWidth: '500px', margin: '0 auto' }}>
             <Radar data={radarData} options={radarOptions} />
