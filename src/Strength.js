@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from './UserContext';
 import { Radar } from 'react-chartjs-2';
@@ -37,14 +37,15 @@ function Strength() {
   const calculateScore = (value, standard) => {
     const { Beginner, Novice, Intermediate, Advanced, Elite } = standard;
     if (value < Beginner) return 0;
-    if (value >= Beginner && value < Novice) return 20 + ((40 - 20) * (value - Beginner)) / (Novice - Beginner);
-    if (value >= Novice && value < Intermediate) return 40 + ((60 - 40) * (value - Novice)) / (Intermediate - Novice);
-    if (value >= Intermediate && value < Advanced) return 60 + ((80 - 60) * (value - Intermediate)) / (Advanced - Intermediate);
-    if (value >= Advanced && value < Elite) return 80 + ((100 - 80) * (value - Advanced)) / (Elite - Advanced);
-    return 100;
+    if (value >= Elite) return 100;
+    if (value >= Advanced) return 80 + ((100 - 80) * (value - Advanced)) / (Elite - Advanced);
+    if (value >= Intermediate) return 60 + ((80 - 60) * (value - Intermediate)) / (Advanced - Intermediate);
+    if (value >= Novice) return 40 + ((60 - 40) * (value - Novice)) / (Intermediate - Novice);
+    if (value >= Beginner) return 20 + ((40 - 20) * (value - Beginner)) / (Novice - Beginner);
+    return 0;
   };
 
-  const standardMap = {
+  const standardMap = useMemo(() => ({
     benchPress: {
       bodyweight: gender === 'female' ? standards.bodyweightStandardsFemaleBenchPress : standards.bodyweightStandardsMaleBenchPress,
       age: gender === 'female' ? standards.ageStandardsFemaleBenchPress : standards.ageStandardsMaleBenchPress,
@@ -65,13 +66,13 @@ function Strength() {
       bodyweight: gender === 'female' ? standards.bodyweightStandardsFemaleShoulderPress : standards.bodyweightStandardsMaleShoulderPress,
       age: gender === 'female' ? standards.ageStandardsFemaleShoulderPress : standards.ageStandardsMaleShoulderPress,
     },
-  };
+  }), [gender]);
 
-  const calculateMaxStrength = (weight, reps, setState, type) => {
+  const calculateMaxStrength = useCallback((weight, reps, setState, type) => {
     if (!weight || !reps) return alert('請輸入重量和次數！');
     const weightNum = parseFloat(weight);
     const repsNum = parseFloat(reps);
-    const userWeight = parseFloat(weight);
+    const userWeight = parseFloat(userData.weight);  // 修正：使用 userData.weight
     const userAge = parseFloat(age);
     if (!userWeight || !userAge) return alert('請確保已輸入有效的體重和年齡！');
     if (repsNum > 12) {
@@ -93,7 +94,7 @@ function Strength() {
     const finalScore = ((scoreByBodyweight + scoreByAge) / 2).toFixed(0);
 
     setState(prev => ({ ...prev, max: valueToCompare.toFixed(1), score: finalScore }));
-  };
+  }, [standardMap, userData.weight, age]);
 
   const getAverageScoreComment = (score, gender) => {
     const genderValue = gender === '男性' || gender.toLowerCase() === 'male' ? 'male' : 'female';
@@ -104,7 +105,7 @@ function Strength() {
     return genderValue === 'male' ? '兄弟，該衝了！全力以赴，突破自己！' : '親愛的，還有進步空間，繼續加油哦！';
   };
 
-  const radarData = {
+  const radarData = useMemo(() => ({
     labels: ['臥推', '深蹲', '硬舉', '滑輪下拉', '站姿肩推'],
     datasets: [{
       label: '力量評測分數',
@@ -113,12 +114,12 @@ function Strength() {
       borderColor: 'rgba(75, 192, 192, 1)',
       borderWidth: 2,
     }],
-  };
+  }), [benchPress.score, squat.score, deadlift.score, latPulldown.score, shoulderPress.score]);
 
-  const radarOptions = {
+  const radarOptions = useMemo(() => ({
     scales: { r: { min: 0, max: 100, ticks: { stepSize: 20 } } },
     plugins: { legend: { position: 'top' } },
-  };
+  }), []);
 
   const scores = [benchPress.score, squat.score, deadlift.score, latPulldown.score, shoulderPress.score].filter(score => score !== null);
   const averageScore = scores.length > 0 ? (scores.reduce((a, b) => a + parseFloat(b), 0) / scores.length).toFixed(0) : null;
@@ -128,10 +129,8 @@ function Strength() {
     try {
       const updatedScores = { ...userData.scores, strength: parseFloat(averageScore) };
       await setUserData({ ...userData, scores: updatedScores });
-      console.log('Strength.js - 已更新 userData.scores.strength:', updatedScores);
       navigate('/user-info', { replace: false });
     } catch (error) {
-      console.error('Strength.js - 更新 UserContext 或導航失敗:', error);
       alert('更新用戶數據或導航失敗，請稍後再試！');
     }
   };
@@ -224,107 +223,3 @@ function Strength() {
 }
 
 export default Strength;
-
-const styles = `
-  .strength-container {
-    max-width: 100%;
-    padding: 1rem;
-    margin: 0 auto;
-    background-color: #f9f9f9;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  }
-  .exercise-section { margin-bottom: 1.5rem; }
-  .input-field {
-    width: 100%;
-    padding: 0.5rem;
-    margin: 0.5rem 0;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-size: 1rem;
-  }
-  .calculate-btn {
-    width: 100%;
-    padding: 0.5rem;
-    background-color: #4bc0c0;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    font-size: 1rem;
-    cursor: pointer;
-    margin-top: 0.5rem;
-  }
-  .calculate-btn:hover { background-color: #3aa0a0; }
-  .score-display {
-    font-size: 1.5rem;
-    font-weight: bold;
-    color: #1E90FF;
-    margin-top: 0.5rem;
-  }
-  .average-score-section { text-align: center; margin: 1rem 0; }
-  .average-score-display {
-    font-size: 2rem;
-    font-weight: bold;
-    color: #1E90FF;
-    margin-top: 0.5rem;
-  }
-  .radar-chart { max-width: 100%; margin: 1.5rem 0; }
-  .button-group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    margin-top: 1.5rem;
-  }
-  .instructions-btn-container { margin-bottom: 1rem; }
-  .standards-card {
-    margin-bottom: 1.5rem;
-    background-color: #fff;
-    border-radius: 4px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    overflow: hidden;
-  }
-  .standards-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1rem;
-    cursor: pointer;
-    background-color: #f1f1f1;
-    transition: background-color 0.3s ease;
-  }
-  .standards-header:hover { background-color: #e0e0e0; }
-  .standards-content {
-    padding: 1rem;
-    background-color: #fff;
-    transition: max-height 0.3s ease;
-  }
-  .arrow { font-size: 1rem; transition: transform 0.3s ease; }
-  .arrow.expanded { transform: rotate(180deg); }
-  .nav-btn, .submit-btn {
-    width: 100%;
-    padding: 0.75rem;
-    font-size: 1rem;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-  }
-  .nav-btn { background-color: #666; }
-  .nav-btn:hover { background-color: #555; }
-  .submit-btn { background-color: #4bc0c0; }
-  .submit-btn:hover { background-color: #3aa0a0; }
-  @media (max-width: 767px) {
-    .score-display { font-size: 1.25rem; }
-    .average-score-display { font-size: 1.5rem; word-break: break-word; }
-    .standards-content { font-size: 0.9rem; }
-  }
-  @media (min-width: 768px) {
-    .strength-container { max-width: 800px; }
-    .button-group { flex-direction: row; justify-content: space-between; }
-    .nav-btn, .submit-btn { width: 48%; }
-  }
-`;
-
-const styleSheet = document.createElement('style');
-styleSheet.innerText = styles;
-document.head.appendChild(styleSheet);
