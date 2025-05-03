@@ -1,34 +1,13 @@
 import { useNavigate } from 'react-router-dom';
 import { useUser } from './UserContext';
-import { auth } from './firebase';
 
-function Welcome({ onLogin, setIsGuestMode }) { // 接受 onLogin 和 setIsGuestMode 作為 props
+// 移除 setIsGuestMode prop 和相關邏輯
+function Welcome({ onLogin }) {
   const navigate = useNavigate();
-  const { setUserData } = useUser();
-
-  const handleGuestMode = () => {
-    console.log('Welcome handleGuestMode 觸發');
-    setIsGuestMode(true); // 設置為訪客模式
-    // 重置 userData
-    setUserData({
-      gender: '',
-      height: 0,
-      weight: 0,
-      age: 0,
-      scores: {
-        strength: 0,
-        explosivePower: 0,
-        cardio: 0,
-        muscleMass: 0,
-        bodyFat: 0,
-      },
-    });
-    if (auth.currentUser) {
-      auth.signOut();
-    }
-  };
+  const { clearUserData } = useUser();
 
   const handleLoginRedirect = () => {
+    clearUserData(); // 清理用戶數據
     navigate('/login'); // 跳轉到登入頁面
   };
 
@@ -39,14 +18,11 @@ function Welcome({ onLogin, setIsGuestMode }) { // 接受 onLogin 和 setIsGuest
         <p className="welcome-subtitle">探索你的身體潛能，開啟健康新旅程！</p>
         <div className="button-group-mode">
           <div className="button-with-tooltip">
-            <button onClick={handleGuestMode} className="mode-btn guest-btn">
-              訪客模式
-            </button>
-            <span className="tooltip">僅儲存到本地，重新整理後可能遺失</span>
-          </div>
-          <div className="button-with-tooltip">
-            <button onClick={handleLoginRedirect} className="mode-btn login-btn">
-              登入模式
+            <button
+              onClick={handleLoginRedirect}
+              className="mode-btn login-btn"
+            >
+              登入
             </button>
             <span className="tooltip">將數據保存到雲端，隨時隨地訪問</span>
           </div>
@@ -58,7 +34,7 @@ function Welcome({ onLogin, setIsGuestMode }) { // 接受 onLogin 和 setIsGuest
 
 export default Welcome;
 
-// 歡迎頁 CSS（添加按鈕樣式，移除加載條）
+// CSS 保持不變，但移除訪客模式相關樣式
 const styles = `
   .welcome-container {
     position: relative;
@@ -118,14 +94,6 @@ const styles = `
     font-size: 1rem;
     cursor: pointer;
     transition: background-color 0.3s ease;
-  }
-
-  .guest-btn {
-    background-color: #4bc0c0;
-  }
-
-  .guest-btn:hover {
-    background-color: #3aa0a0;
   }
 
   .login-btn {
@@ -196,6 +164,6 @@ const styles = `
   }
 `;
 
-const styleSheet = document.createElement("style");
+const styleSheet = document.createElement('style');
 styleSheet.innerText = styles;
 document.head.appendChild(styleSheet);

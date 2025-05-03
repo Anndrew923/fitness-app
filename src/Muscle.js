@@ -1,15 +1,27 @@
-// src/Muscle.js
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from './UserContext';
 import * as standards from './standards';
-import { Bar } from 'react-chartjs-2'; // 導入 Bar 組件
-import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js'; // 導入 Chart.js 組件
-import { db, auth } from './firebase'; // 引入 Firebase 配置
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore'; // 引入模組化語法
+import { Bar } from 'react-chartjs-2';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+} from 'chart.js';
 
 // 註冊 Chart.js 組件
-ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend
+);
 
 function Muscle() {
   const { userData, setUserData } = useUser();
@@ -17,18 +29,16 @@ function Muscle() {
   const { weight, age, gender } = userData;
 
   // 管理骨骼肌肉量輸入和結果
-  const [smm, setSmm] = useState(''); // 骨骼肌肉量 (Skeletal Muscle Mass, SMM)
-  const [result, setResult] = useState({ smmScore: null, smPercent: null, smPercentScore: null, finalScore: null }); // 結果
-  const [history, setHistory] = useState([]); // 歷史記錄
-
-  // 載入歷史記錄
-  useEffect(() => {
-    const savedHistory = JSON.parse(localStorage.getItem('muscleHistory')) || [];
-    setHistory(savedHistory);
-  }, []);
+  const [smm, setSmm] = useState(''); // 骨骼肌肉量 (SMM)
+  const [result, setResult] = useState({
+    smmScore: null,
+    smPercent: null,
+    smPercentScore: null,
+    finalScore: null,
+  }); // 結果
 
   // 根據年齡確定年齡段
-  const getAgeRange = (age) => {
+  const getAgeRange = age => {
     if (!age) return null;
     const ageNum = parseInt(age);
     if (ageNum >= 10 && ageNum <= 12) return '10-12';
@@ -45,51 +55,17 @@ function Muscle() {
   // 根據標準計算分數
   const calculateScoreFromStandard = (value, standard, label) => {
     console.log(`[${label}] 比較值：`, value, '標準：', standard);
-    if (value >= standard[100]) {
-      console.log(`[${label}] >= 100: ${value} >= ${standard[100]}`);
-      return 100;
-    }
-    if (value >= standard[90]) {
-      console.log(`[${label}] >= 90: ${value} >= ${standard[90]}`);
-      return 90;
-    }
-    if (value >= standard[80]) {
-      console.log(`[${label}] >= 80: ${value} >= ${standard[80]}`);
-      return 80;
-    }
-    if (value >= standard[70]) {
-      console.log(`[${label}] >= 70: ${value} >= ${standard[70]}`);
-      return 70;
-    }
-    if (value >= standard[60]) {
-      console.log(`[${label}] >= 60: ${value} >= ${standard[60]}`);
-      return 60;
-    }
-    if (value >= standard[50]) {
-      console.log(`[${label}] >= 50: ${value} >= ${standard[50]}`);
-      return 50;
-    }
-    if (value >= standard[40]) {
-      console.log(`[${label}] >= 40: ${value} >= ${standard[40]}`);
-      return 40;
-    }
-    if (value >= standard[30]) {
-      console.log(`[${label}] >= 30: ${value} >= ${standard[30]}`);
-      return 30;
-    }
-    if (value >= standard[20]) {
-      console.log(`[${label}] >= 20: ${value} >= ${standard[20]}`);
-      return 20;
-    }
-    if (value >= standard[10]) {
-      console.log(`[${label}] >= 10: ${value} >= ${standard[10]}`);
-      return 10;
-    }
-    if (value >= standard[0]) {
-      console.log(`[${label}] >= 0: ${value} >= ${standard[0]}`);
-      return 0;
-    }
-    console.log(`[${label}] 小於最低標準: ${value} < ${standard[0]}`);
+    if (value >= standard[100]) return 100;
+    if (value >= standard[90]) return 90;
+    if (value >= standard[80]) return 80;
+    if (value >= standard[70]) return 70;
+    if (value >= standard[60]) return 60;
+    if (value >= standard[50]) return 50;
+    if (value >= standard[40]) return 40;
+    if (value >= standard[30]) return 30;
+    if (value >= standard[20]) return 20;
+    if (value >= standard[10]) return 10;
+    if (value >= standard[0]) return 0;
     return 0; // 小於最低標準得 0 分
   };
 
@@ -110,12 +86,23 @@ function Muscle() {
     }
 
     // 計算 SM% (骨骼肌肉量百分比)
-    const smPercent = (smmNum / weightNum * 100).toFixed(1);
+    const smPercent = ((smmNum / weightNum) * 100).toFixed(1);
 
     // 根據性別和年齡選擇標準
-    const genderValue = gender === '男性' || gender.toLowerCase() === 'male' ? 'male' : gender === '女性' || gender.toLowerCase() === 'female' ? 'female' : null;
-    const smmStandards = genderValue === 'male' ? standards.muscleStandardsMaleSMM : standards.muscleStandardsFemaleSMM;
-    const smPercentStandards = genderValue === 'male' ? standards.muscleStandardsMaleSMPercent : standards.muscleStandardsFemaleSMPercent;
+    const genderValue =
+      gender === '男性' || gender.toLowerCase() === 'male'
+        ? 'male'
+        : gender === '女性' || gender.toLowerCase() === 'female'
+          ? 'female'
+          : null;
+    const smmStandards =
+      genderValue === 'male'
+        ? standards.muscleStandardsMaleSMM
+        : standards.muscleStandardsFemaleSMM;
+    const smPercentStandards =
+      genderValue === 'male'
+        ? standards.muscleStandardsMaleSMPercent
+        : standards.muscleStandardsFemaleSMPercent;
 
     const smmStandard = smmStandards[ageRange];
     const smPercentStandard = smPercentStandards[ageRange];
@@ -126,13 +113,23 @@ function Muscle() {
     }
 
     // 日誌：顯示輸入值和選擇的標準
-    console.log('輸入值：', { weightNum, smmNum, smPercent, ageRange, genderValue });
+    console.log('輸入值：', {
+      weightNum,
+      smmNum,
+      smPercent,
+      ageRange,
+      genderValue,
+    });
     console.log('SMM 標準：', smmStandard);
     console.log('SM% 標準：', smPercentStandard);
 
     // 計算 SMM 分數和 SM% 分數
     const smmScore = calculateScoreFromStandard(smmNum, smmStandard, 'SMM');
-    const smPercentScore = calculateScoreFromStandard(parseFloat(smPercent), smPercentStandard, 'SM%');
+    const smPercentScore = calculateScoreFromStandard(
+      parseFloat(smPercent),
+      smPercentStandard,
+      'SM%'
+    );
 
     // 日誌：顯示計算結果
     console.log('計算結果：', { smmScore, smPercentScore });
@@ -144,7 +141,12 @@ function Muscle() {
     console.log('最終分數：', finalScore);
 
     setResult({ smmScore, smPercent, smPercentScore, finalScore });
-    console.log('設置的 result：', { smmScore, smPercent, smPercentScore, finalScore });
+    console.log('設置的 result：', {
+      smmScore,
+      smPercent,
+      smPercentScore,
+      finalScore,
+    });
   };
 
   // 提交結果並儲存
@@ -154,53 +156,23 @@ function Muscle() {
       return;
     }
 
-    // 確認用戶已登入
-    const user = auth.currentUser;
-    if (!user) {
-      alert('請先登入！');
-      return;
-    }
-
-    // 儲存歷史記錄
-    const newHistoryEntry = {
-      date: new Date().toLocaleString(),
-      smm: parseFloat(smm),
-      smPercent: result.smPercent,
-      smmScore: result.smmScore,
-      smPercentScore: result.smPercentScore,
-      finalScore: result.finalScore,
-    };
-
-    // 儲存到 Firebase
     try {
-      const userHistoryRef = collection(db, 'users', user.uid, 'history');
-      await addDoc(userHistoryRef, {
-        timestamp: serverTimestamp(),
-        type: 'muscle',
-        data: newHistoryEntry,
-      });
-      console.log('數據成功儲存到 Firebase！');
-    } catch (error) {
-      console.error('儲存到 Firebase 失敗:', error);
-      alert('儲存數據失敗，請稍後再試！');
-      return;
-    }
-
-    // 儲存到本地歷史記錄
-    const updatedHistory = [...history, newHistoryEntry];
-    setHistory(updatedHistory);
-    localStorage.setItem('muscleHistory', JSON.stringify(updatedHistory));
-
-    // 更新 UserContext
-    setUserData({
-      ...userData,
-      scores: {
+      const updatedScores = {
         ...userData.scores,
         muscleMass: parseFloat(result.finalScore),
-      },
-    });
-
-    navigate('/user-info');
+      };
+      const updatedUserData = {
+        ...userData,
+        scores: updatedScores,
+      };
+      await setUserData(updatedUserData);
+      console.log('Muscle.js - 已更新 userData.scores.muscleMass:', updatedScores);
+      navigate('/user-info', { replace: false });
+      console.log('Muscle.js - 導航調用完成');
+    } catch (error) {
+      console.error('Muscle.js - 更新 UserContext 或導航失敗:', error);
+      alert('更新用戶數據或導航失敗，請稍後再試！');
+    }
   };
 
   // 長條圖數據：SMM 和 SM% 分數
@@ -213,7 +185,7 @@ function Muscle() {
         backgroundColor: ['#4bc0c0', '#ff9f40'],
         borderColor: ['#3aa0a0', '#e08e36'],
         borderWidth: 1,
-        barPercentage: 0.4, // 調整長條粗度為現有的一半（預設 0.8，現在設為 0.4）
+        barPercentage: 0.4,
       },
     ],
   };
@@ -228,7 +200,7 @@ function Muscle() {
         backgroundColor: ['#36a2eb'],
         borderColor: ['#2a82cb'],
         borderWidth: 1,
-        barPercentage: 0.4, // 調整長條粗度為現有的一半（預設 0.8，現在設為 0.4）
+        barPercentage: 0.4,
       },
     ],
   };
@@ -265,7 +237,7 @@ function Muscle() {
       },
       tooltip: {
         callbacks: {
-          label: (context) => `${context.dataset.label}: ${context.raw}`,
+          label: context => `${context.dataset.label}: ${context.raw}`,
         },
       },
     },
@@ -284,16 +256,28 @@ function Muscle() {
           type="number"
           placeholder="骨骼肌肉量 (kg)"
           value={smm}
-          onChange={(e) => setSmm(e.target.value)}
+          onChange={e => setSmm(e.target.value)}
           className="input-field"
         />
         <button onClick={calculateMuscleScore} className="calculate-btn">
           計算
         </button>
-        {result.smmScore && <p className="score-text">骨骼肌肉量 (SMM) 分數: {result.smmScore}</p>}
-        {result.smPercent && <p className="score-text">骨骼肌肉量百分比 (SM%): {result.smPercent}%</p>}
-        {result.smPercentScore && <p className="score-text">骨骼肌肉量百分比 (SM%) 分數: {result.smPercentScore}</p>}
-        {result.finalScore && <p className="score-text">最終分數: {result.finalScore}</p>}
+        {result.smmScore && (
+          <p className="score-text">骨骼肌肉量 (SMM) 分數: {result.smmScore}</p>
+        )}
+        {result.smPercent && (
+          <p className="score-text">
+            骨骼肌肉量百分比 (SM%): {result.smPercent}%
+          </p>
+        )}
+        {result.smPercentScore && (
+          <p className="score-text">
+            骨骼肌肉量百分比 (SM%) 分數: {result.smPercentScore}
+          </p>
+        )}
+        {result.finalScore && (
+          <p className="score-text">最終分數: {result.finalScore}</p>
+        )}
       </div>
 
       {/* 長條圖區域 */}
@@ -310,24 +294,6 @@ function Muscle() {
         </div>
       )}
 
-      {history.length > 0 && (
-        <div className="history-section">
-          <h2 className="text-lg font-semibold">歷史記錄</h2>
-          <ul className="history-list">
-            {history.map((entry, index) => (
-              <li key={index} className="history-item">
-                <p>日期: {entry.date}</p>
-                <p>SMM: {entry.smm} kg</p>
-                <p>SM%: {entry.smPercent}%</p>
-                <p>SMM 分數: {entry.smmScore}</p>
-                <p>SM% 分數: {entry.smPercentScore}</p>
-                <p>最終分數: {entry.finalScore}</p>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-
       <div className="button-group">
         <button onClick={handleSubmit} className="submit-btn">
           提交並返回總覽
@@ -339,7 +305,7 @@ function Muscle() {
 
 export default Muscle;
 
-// 響應式 CSS（添加圖表相關樣式）
+// 響應式 CSS（移除歷史記錄相關樣式）
 const styles = `
   .muscle-container {
     max-width: 100%;
@@ -398,23 +364,6 @@ const styles = `
     margin-bottom: 1rem;
   }
 
-  .history-section {
-    margin-top: 1.5rem;
-  }
-
-  .history-list {
-    list-style: none;
-    padding: 0;
-  }
-
-  .history-item {
-    background-color: #fff;
-    padding: 1rem;
-    margin-bottom: 0.5rem;
-    border-radius: 4px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  }
-
   .button-group {
     display: flex;
     flex-direction: column;
@@ -462,6 +411,6 @@ const styles = `
   }
 `;
 
-const styleSheet = document.createElement("style");
+const styleSheet = document.createElement('style');
 styleSheet.innerText = styles;
 document.head.appendChild(styleSheet);

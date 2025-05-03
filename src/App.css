@@ -11,7 +11,15 @@ body {
 }
 
 /* 手機優先設計 */
-.gender-selection, .user-info, .overview, .strength, .strength-instructions, .cardio, .power, .muscle, .ffmi {
+.gender-selection,
+.user-info,
+.overview,
+.strength,
+.strength-instructions,
+.cardio,
+.power,
+.muscle,
+.ffmi {
   text-align: center;
   padding: 1rem;
 }
@@ -30,7 +38,8 @@ p {
   margin: 0.5rem 0;
 }
 
-button, input {
+button,
+input {
   display: block;
   width: 100%;
   max-width: 300px;
@@ -74,7 +83,8 @@ button:disabled {
   p {
     font-size: 1rem; /* 16px */
   }
-  button, input {
+  button,
+  input {
     width: 80%;
     max-width: 400px;
   }

@@ -436,14 +436,14 @@ function CelebrityComparison() {
   const [expandedCards, setExpandedCards] = useState({}); // 記錄每個卡片的展開狀態
 
   // 篩選名人數據
-  const filteredCelebrities = celebrities.filter((celeb) => {
+  const filteredCelebrities = celebrities.filter(celeb => {
     if (genderFilter === 'all') return true;
     return celeb.gender === genderFilter;
   });
 
   // 切換卡片展開/折疊狀態
-  const toggleCard = (index) => {
-    setExpandedCards((prev) => ({
+  const toggleCard = index => {
+    setExpandedCards(prev => ({
       ...prev,
       [index]: !prev[index],
     }));
@@ -451,9 +451,11 @@ function CelebrityComparison() {
 
   return (
     <div className="celebrity-comparison-container">
-      <h1 className="text-2xl font-bold text-center mb-4">與名人運動數據比較</h1>
+      <h1 className="text-2xl font-bold text-center mb-4">
+        與名人運動數據比較
+      </h1>
       <p className="text-center mb-4">
-      以下內容提供了關於知名運動員和訓練有素的娛樂明星的全面數據，盡可能從可靠來源獲取詳細數據，但也可能有所誤差。對於無法找到確切數字的部分，使用了估計值或「N/A」作為占位，以保持完整性，供大家參考。你可以與自己的分數進行比較，也許差距沒想像中大喔!
+        以下內容提供了關於知名運動員和訓練有素的娛樂明星的全面數據，盡可能從可靠來源獲取詳細數據，但也可能有所誤差。對於無法找到確切數字的部分，使用了估計值或「N/A」作為占位，以保持完整性，供大家參考。你可以與自己的分數進行比較，也許差距沒想像中大喔!
       </p>
 
       {/* 性別篩選 */}
@@ -461,7 +463,7 @@ function CelebrityComparison() {
         <label className="filter-label">篩選性別：</label>
         <select
           value={genderFilter}
-          onChange={(e) => setGenderFilter(e.target.value)}
+          onChange={e => setGenderFilter(e.target.value)}
           className="filter-select"
         >
           <option value="all">全部</option>
@@ -516,26 +518,56 @@ function CelebrityComparison() {
           <div key={index} className="celebrity-card">
             <h3 className="card-title">{celeb.name}</h3>
             <div className="card-content">
-              <p><strong>性別：</strong>{celeb.gender}</p>
-              <p><strong>職業：</strong>{celeb.profession}</p>
-              <p><strong>身高：</strong>{celeb.height}</p>
-              <p><strong>體重：</strong>{celeb.weight}</p>
-              <p><strong>體脂百分比：</strong>{celeb.bodyFat}</p>
+              <p>
+                <strong>性別：</strong>
+                {celeb.gender}
+              </p>
+              <p>
+                <strong>職業：</strong>
+                {celeb.profession}
+              </p>
+              <p>
+                <strong>身高：</strong>
+                {celeb.height}
+              </p>
+              <p>
+                <strong>體重：</strong>
+                {celeb.weight}
+              </p>
+              <p>
+                <strong>體脂百分比：</strong>
+                {celeb.bodyFat}
+              </p>
               {expandedCards[index] && (
                 <div className="expanded-content">
-                  <p><strong>臥推：</strong>{celeb.benchPress}</p>
-                  <p><strong>硬拉：</strong>{celeb.deadlift}</p>
-                  <p><strong>深蹲：</strong>{celeb.squat}</p>
-                  <p><strong>垂直跳：</strong>{celeb.verticalJump}</p>
-                  <p><strong>立定跳遠：</strong>{celeb.standingLongJump}</p>
-                  <p><strong>100米衝刺：</strong>{celeb.sprint}</p>
+                  <p>
+                    <strong>臥推：</strong>
+                    {celeb.benchPress}
+                  </p>
+                  <p>
+                    <strong>硬拉：</strong>
+                    {celeb.deadlift}
+                  </p>
+                  <p>
+                    <strong>深蹲：</strong>
+                    {celeb.squat}
+                  </p>
+                  <p>
+                    <strong>垂直跳：</strong>
+                    {celeb.verticalJump}
+                  </p>
+                  <p>
+                    <strong>立定跳遠：</strong>
+                    {celeb.standingLongJump}
+                  </p>
+                  <p>
+                    <strong>100米衝刺：</strong>
+                    {celeb.sprint}
+                  </p>
                 </div>
               )}
             </div>
-            <button
-              onClick={() => toggleCard(index)}
-              className="toggle-btn"
-            >
+            <button onClick={() => toggleCard(index)} className="toggle-btn">
               {expandedCards[index] ? '收起' : '展開更多'}
             </button>
           </div>
@@ -730,6 +762,6 @@ const styles = `
   }
 `;
 
-const styleSheet = document.createElement("style");
+const styleSheet = document.createElement('style');
 styleSheet.innerText = styles;
 document.head.appendChild(styleSheet);

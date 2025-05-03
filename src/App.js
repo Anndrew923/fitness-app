@@ -1,5 +1,10 @@
 import { useState, Component } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from 'react-router-dom';
 import { UserProvider, useUser } from './UserContext';
 import { auth } from './firebase';
 import { signInWithEmailAndPassword, signOut } from 'firebase/auth';
@@ -37,19 +42,17 @@ class ErrorBoundary extends Component {
 }
 
 function App() {
-  const [isGuestMode, setIsGuestMode] = useState(false);
   const [testData, setTestData] = useState(null);
 
   // 處理登入
   const handleLogin = async (email, password) => {
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      setIsGuestMode(false);
       setTestData(null);
       console.log('登入成功, auth.currentUser:', auth.currentUser);
     } catch (error) {
       console.error('登入失敗:', error);
-      alert('登入失敗，請檢查帳號密碼！');
+      throw error; // 讓 Login.js 處理錯誤
     }
   };
 
@@ -58,7 +61,6 @@ function App() {
     if (auth.currentUser) {
       signOut(auth)
         .then(() => {
-          setIsGuestMode(false);
           setTestData(null);
           console.log('登出成功');
         })
@@ -66,8 +68,6 @@ function App() {
           console.error('登出失敗:', error);
         });
     } else {
-      // 訪客模式下僅重置狀態
-      setIsGuestMode(false);
       setTestData(null);
       console.log('訪客模式下重置數據');
     }
@@ -85,38 +85,37 @@ function App() {
     console.log('測驗數據已清除');
   };
 
-  // 保護路由：確保未登入且未選擇訪客模式時不能訪問評測頁面，並檢查必要數據
+  // 保護路由
   const ProtectedRoute = ({ element }) => {
-    const { userData } = useUser();
-    console.log('ProtectedRoute 檢查 - auth.currentUser:', auth.currentUser, 'isGuestMode:', isGuestMode, 'userData:', userData);
+    const { userData, isGuestMode } = useUser();
+    console.log(
+      'ProtectedRoute 檢查 - auth.currentUser:',
+      auth.currentUser,
+      'isGuestMode:',
+      isGuestMode,
+      'userData:',
+      userData
+    );
 
-    // 檢查是否登入或在訪客模式
     if (!auth.currentUser && !isGuestMode) {
       console.log('未登入且未選擇訪客模式，重定向到 /');
       return <Navigate to="/" />;
     }
 
-    // 檢查是否填寫了必要數據
-    const isHeightValid = typeof userData?.height === 'number' && userData.height > 0;
-    const isWeightValid = typeof userData?.weight === 'number' && userData.weight > 0;
-    const isAgeValid = typeof userData?.age === 'number' && userData.age > 0;
-    const isGenderValid = userData?.gender === 'male' || userData?.gender === 'female';
+    const currentPath = window.location.pathname;
+    if (currentPath !== '/user-info') {
+      const isHeightValid = typeof userData?.height === 'number' && userData.height > 0;
+      const isWeightValid = typeof userData?.weight === 'number' && userData.weight > 0;
+      const isAgeValid = typeof userData?.age === 'number' && userData.age > 0;
+      const isGenderValid = userData?.gender === 'male' || userData?.gender === 'female';
 
-    if (!isHeightValid || !isWeightValid || !isAgeValid || !isGenderValid) {
-      console.log('缺少必要數據或數據無效，重定向到 /user-info');
-      console.log('檢查詳情:', {
-        height: userData?.height,
-        isHeightValid,
-        weight: userData?.weight,
-        isWeightValid,
-        age: userData?.age,
-        isAgeValid,
-        gender: userData?.gender,
-        isGenderValid,
-      });
-      return <Navigate to="/user-info" />;
+      if (!isHeightValid || !isWeightValid || !isAgeValid || !isGenderValid) {
+        console.log('缺少必要數據或數據無效，重定向到 /user-info');
+        return <Navigate to="/user-info" />;
+      }
     }
 
+    console.log('ProtectedRoute 檢查通過，渲染組件');
     return element;
   };
 
@@ -129,27 +128,18 @@ function App() {
             <Route
               path="/"
               element={
-                auth.currentUser || isGuestMode ? (
+                auth.currentUser ? (
                   <Navigate to="/user-info" />
                 ) : (
-                  <Welcome onLogin={handleLogin} setIsGuestMode={setIsGuestMode} />
+                  <Welcome onLogin={handleLogin} />
                 )
               }
             />
-            <Route
-              path="/home"
-              element={
-                <ProtectedRoute
-                  element={<Home isGuestMode={isGuestMode} />}
-                />
-              }
-            />
+            <Route path="/home" element={<ProtectedRoute element={<Home />} />} />
             <Route
               path="/user-info"
               element={
                 <UserInfo
-                  isGuestMode={isGuestMode}
-                  setIsGuestMode={setIsGuestMode}
                   testData={testData}
                   onLogout={handleLogout}
                   clearTestData={clearTestData}
@@ -160,13 +150,7 @@ function App() {
               path="/strength"
               element={
                 <ProtectedRoute
-                  element={
-                    <Strength
-                      isGuestMode={isGuestMode}
-                      onComplete={handleTestComplete}
-                      clearTestData={clearTestData}
-                    />
-                  }
+                  element={<Strength onComplete={handleTestComplete} clearTestData={clearTestData} />}
                 />
               }
             />
@@ -174,13 +158,7 @@ function App() {
               path="/cardio"
               element={
                 <ProtectedRoute
-                  element={
-                    <Cardio
-                      isGuestMode={isGuestMode}
-                      onComplete={handleTestComplete}
-                      clearTestData={clearTestData}
-                    />
-                  }
+                  element={<Cardio onComplete={handleTestComplete} clearTestData={clearTestData} />}
                 />
               }
             />
@@ -188,13 +166,7 @@ function App() {
               path="/explosive-power"
               element={
                 <ProtectedRoute
-                  element={
-                    <Power
-                      isGuestMode={isGuestMode}
-                      onComplete={handleTestComplete}
-                      clearTestData={clearTestData}
-                    />
-                  }
+                  element={<Power onComplete={handleTestComplete} clearTestData={clearTestData} />}
                 />
               }
             />
@@ -202,13 +174,7 @@ function App() {
               path="/muscle-mass"
               element={
                 <ProtectedRoute
-                  element={
-                    <Muscle
-                      isGuestMode={isGuestMode}
-                      onComplete={handleTestComplete}
-                      clearTestData={clearTestData}
-                    />
-                  }
+                  element={<Muscle onComplete={handleTestComplete} clearTestData={clearTestData} />}
                 />
               }
             />
@@ -216,20 +182,14 @@ function App() {
               path="/body-fat"
               element={
                 <ProtectedRoute
-                  element={
-                    <FFMI
-                      isGuestMode={isGuestMode}
-                      onComplete={handleTestComplete}
-                      clearTestData={clearTestData}
-                    />
-                  }
+                  element={<FFMI onComplete={handleTestComplete} clearTestData={clearTestData} />}
                 />
               }
             />
             <Route path="/strength-instructions" element={<StrengthInstructions />} />
             <Route
               path="/celebrity-comparison"
-              element={<ProtectedRoute element={<CelebrityComparison isGuestMode={isGuestMode} />} />}
+              element={<ProtectedRoute element={<CelebrityComparison />} />}
             />
             <Route path="/login" element={<Login onLogin={handleLogin} />} />
             <Route path="*" element={<div>404 - 頁面未找到</div>} />

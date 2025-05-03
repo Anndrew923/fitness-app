@@ -1,13 +1,37 @@
-// src/Home.js
-import { useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom'; // 引入 useLocation
 import { useUser } from './UserContext';
+import { auth } from './firebase';
 
 function Home() {
   const navigate = useNavigate();
-  const { setUserData } = useUser();
+  const location = useLocation(); // 獲取當前路由
+  const { userData, setUserData, isGuestMode } = useUser();
 
-  const handleGenderSelect = (gender) => {
-    setUserData((prev) => ({ ...prev, gender }));
+  // 檢查 userData.gender 是否已設置
+  useEffect(() => {
+    console.log(
+      'Home.js - 當前模式:',
+      isGuestMode ? '訪客模式' : '登入模式',
+      'auth.currentUser:',
+      auth.currentUser
+    );
+    console.log('Home.js - 當前路由:', location.pathname);
+    console.log('Home.js - userData.gender:', userData.gender);
+
+    // 僅在當前路由為 /home 時執行導航
+    if (
+      location.pathname === '/home' &&
+      (userData.gender === 'male' || userData.gender === 'female')
+    ) {
+      console.log('性別已設置，導航到 /user-info');
+      navigate('/user-info', { replace: true }); // 使用 replace 避免導航堆疊
+    }
+  }, [userData.gender, navigate, isGuestMode, location]);
+
+  const handleGenderSelect = gender => {
+    console.log('Home.js - 選擇性別:', gender);
+    setUserData(prev => ({ ...prev, gender }));
     navigate('/user-info');
   };
 
@@ -34,7 +58,7 @@ function Home() {
 
 export default Home;
 
-// 內聯 CSS（美化並適配手機）
+// CSS 保持不變
 const styles = `
   .home-container {
     max-width: 100%;
