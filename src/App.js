@@ -67,9 +67,6 @@ function App() {
         .catch((error) => {
           console.error('登出失敗:', error);
         });
-    } else {
-      setTestData(null);
-      console.log('訪客模式下重置數據');
     }
   };
 
@@ -87,19 +84,17 @@ function App() {
 
   // 保護路由
   const ProtectedRoute = ({ element }) => {
-    const { userData, isGuestMode } = useUser();
+    const { userData } = useUser();
     console.log(
       'ProtectedRoute 檢查 - auth.currentUser:',
       auth.currentUser,
-      'isGuestMode:',
-      isGuestMode,
       'userData:',
       userData
     );
 
-    if (!auth.currentUser && !isGuestMode) {
-      console.log('未登入且未選擇訪客模式，重定向到 /');
-      return <Navigate to="/" />;
+    if (!auth.currentUser) {
+      console.log('未登入，重定向到 /login');
+      return <Navigate to="/login" />;
     }
 
     const currentPath = window.location.pathname;

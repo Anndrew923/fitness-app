@@ -5,7 +5,7 @@ import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
 } from 'firebase/auth';
-import { collection, addDoc } from 'firebase/firestore';
+import { doc, setDoc } from 'firebase/firestore';
 
 // 響應式 CSS
 const styles = `
@@ -52,31 +52,17 @@ const styles = `
     width: 100%;
     padding: 0.5rem;
     margin-top: 1rem;
-    background: none;
-    color: #4bc0c0;
-    border: none;
-    font-size: 0.875rem;
-    cursor: pointer;
-    text-align: center;
-  }
-
-  .toggle-btn:hover {
-    color: #3aa0a0;
-  }
-
-  .back-btn {
-    width: 100%;
-    padding: 0.5rem;
-    margin-top: 1rem;
     background-color: #cccccc;
     color: white;
     border: none;
     border-radius: 4px;
     font-size: 1rem;
     cursor: pointer;
+    text-align: center;
+    transition: background-color 0.3s ease;
   }
 
-  .back-btn:hover {
+  .toggle-btn:hover {
     background-color: #b3b3b3;
   }
 
@@ -85,6 +71,18 @@ const styles = `
     font-size: 0.875rem;
     margin-bottom: 1rem;
     text-align: center;
+  }
+
+  .checkbox-container {
+    display: flex;
+    align-items: center;
+    margin-top: 0.5rem;
+  }
+
+  .checkbox-label {
+    margin-left: 0.5rem;
+    font-size: 0.875rem;
+    color: #333;
   }
 
   @media (min-width: 768px) {
@@ -104,14 +102,30 @@ function Login({ onLogin }) {
   const [error, setError] = useState(null);
   const [isRegistering, setIsRegistering] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
   const { height, weight, age } = location.state || {};
 
+  // 頁面加載時檢查 localStorage 是否有儲存的帳號密碼
   useEffect(() => {
+    if (!auth) {
+      setError('Firebase 未正確初始化，請檢查配置');
+      return;
+    }
     if (auth.currentUser) {
       navigate('/user-info');
+      return;
+    }
+
+    // 從 localStorage 讀取帳號密碼
+    const savedEmail = localStorage.getItem('savedEmail');
+    const savedPassword = localStorage.getItem('savedPassword');
+    if (savedEmail && savedPassword) {
+      setEmail(savedEmail);
+      setPassword(savedPassword);
+      setRememberMe(true);
     }
   }, [navigate]);
 
@@ -120,33 +134,50 @@ function Login({ onLogin }) {
     setError(null);
     setLoading(true);
 
+    if (!auth || !db) {
+      setError('Firebase 未正確初始化，請檢查配置');
+      setLoading(false);
+      return;
+    }
+
     try {
       let userCredential;
       if (isRegistering) {
         userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+        if (height && weight && age) {
+          const userRef = doc(db, 'users', user.uid);
+          const updatedUserData = {
+            height: parseFloat(height),
+            weight: parseFloat(weight),
+            age: parseInt(age, 10),
+            updatedAt: new Date().toISOString(),
+            email: user.email,
+          };
+          await setDoc(userRef, updatedUserData);
+          console.log('用戶數據已儲存，文檔 ID:', user.uid);
+        }
       } else {
         userCredential = await signInWithEmailAndPassword(auth, email, password);
       }
 
       const user = userCredential.user;
+      onLogin(user.email, password); // 調用父組件的回調
 
-      if (height && weight && age) {
-        const updatedUserData = {
-          height: parseFloat(height),
-          weight: parseFloat(weight),
-          age: parseInt(age, 10),
-          updatedAt: new Date().toISOString(),
-          userId: user.uid,
-        };
-        await addDoc(collection(db, 'users'), updatedUserData);
-        console.log('用戶數據已儲存，文檔 ID:', user.uid);
+      // 如果勾選「記住我的帳號」，則儲存到 localStorage
+      if (rememberMe) {
+        localStorage.setItem('savedEmail', email);
+        localStorage.setItem('savedPassword', password);
+      } else {
+        // 如果未勾選，則清除 localStorage
+        localStorage.removeItem('savedEmail');
+        localStorage.removeItem('savedPassword');
       }
 
-      onLogin(email, password); // 調用父組件的回調
       navigate('/user-info');
     } catch (error) {
       console.error('登入/註冊失敗：', error);
-      setError(error.message);
+      setError(`發生錯誤：${error.message}`);
     } finally {
       setLoading(false);
     }
@@ -187,6 +218,15 @@ function Login({ onLogin }) {
             disabled={loading}
           />
         </div>
+        <div className="checkbox-container">
+          <input
+            type="checkbox"
+            checked={rememberMe}
+            onChange={(e) => setRememberMe(e.target.checked)}
+            disabled={loading}
+          />
+          <label className="checkbox-label">記住我的帳號(登出時清除資料)</label>
+        </div>
         <button type="submit" className="submit-btn" disabled={loading}>
           {loading ? '處理中...' : isRegistering ? '註冊' : '登入'}
         </button>
@@ -196,9 +236,6 @@ function Login({ onLogin }) {
         className="toggle-btn"
       >
         {isRegistering ? '已有帳號？點此登入' : '沒有帳號？點此註冊'}
-      </button>
-      <button onClick={() => navigate('/user-info')} className="back-btn">
-        返回
       </button>
     </div>
   );

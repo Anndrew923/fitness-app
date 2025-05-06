@@ -3,30 +3,18 @@ import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 
 // 檢查環境變量
-console.log(
-  'REACT_APP_FIREBASE_API_KEY:',
-  process.env.REACT_APP_FIREBASE_API_KEY
-);
-console.log(
-  'REACT_APP_FIREBASE_AUTH_DOMAIN:',
-  process.env.REACT_APP_FIREBASE_AUTH_DOMAIN
-);
-console.log(
-  'REACT_APP_FIREBASE_PROJECT_ID:',
-  process.env.REACT_APP_FIREBASE_PROJECT_ID
-);
-console.log(
-  'REACT_APP_FIREBASE_STORAGE_BUCKET:',
-  process.env.REACT_APP_FIREBASE_STORAGE_BUCKET
-);
-console.log(
-  'REACT_APP_FIREBASE_MESSAGING_SENDER_ID:',
-  process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID
-);
-console.log(
-  'REACT_APP_FIREBASE_APP_ID:',
-  process.env.REACT_APP_FIREBASE_APP_ID
-);
+const requiredEnvVars = [
+  'REACT_APP_FIREBASE_API_KEY',
+  'REACT_APP_FIREBASE_AUTH_DOMAIN',
+  'REACT_APP_FIREBASE_PROJECT_ID',
+  'REACT_APP_FIREBASE_STORAGE_BUCKET',
+  'REACT_APP_FIREBASE_MESSAGING_SENDER_ID',
+  'REACT_APP_FIREBASE_APP_ID',
+];
+
+requiredEnvVars.forEach((envVar) => {
+  console.log(`${envVar}:`, process.env[envVar]);
+});
 
 const firebaseConfig = {
   apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
@@ -37,19 +25,22 @@ const firebaseConfig = {
   appId: process.env.REACT_APP_FIREBASE_APP_ID,
 };
 
-// 檢查環境變量是否正確
+// 檢查配置是否完整
 console.log('Firebase Config:', firebaseConfig);
+
 let app, auth, db;
+
 try {
-  if (!firebaseConfig.apiKey || !firebaseConfig.projectId) {
-    console.error('Firebase 配置缺失，請檢查環境變量！');
-    throw new Error('Firebase 配置缺失');
+  const missingVars = requiredEnvVars.filter((envVar) => !process.env[envVar]);
+  if (missingVars.length > 0) {
+    throw new Error(`缺少環境變量：${missingVars.join(', ')}`);
   }
   app = initializeApp(firebaseConfig);
   auth = getAuth(app);
   db = getFirestore(app);
+  console.log('Firebase 初始化成功');
 } catch (error) {
-  console.error('Firebase 初始化失敗:', error);
+  console.error('Firebase 初始化失敗:', error.message);
   auth = null;
   db = null;
 }

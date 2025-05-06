@@ -5,7 +5,7 @@ import {
   useEffect,
   useCallback,
 } from 'react';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc, updateDoc, arrayUnion } from 'firebase/firestore';
 import { db, auth } from './firebase';
 
 const UserContext = createContext();
@@ -30,6 +30,7 @@ export function UserProvider({ children }) {
             muscleMass: 0,
             bodyFat: 0,
           },
+          history: [],
         };
       default:
         return state;
@@ -48,6 +49,7 @@ export function UserProvider({ children }) {
       muscleMass: 0,
       bodyFat: 0,
     },
+    history: [],
   });
 
   const loadUserData = useCallback(async () => {
@@ -64,25 +66,33 @@ export function UserProvider({ children }) {
         muscleMass: 0,
         bodyFat: 0,
       },
+      history: [],
     };
 
-    if (auth.currentUser) {
-      try {
-        const userRef = doc(db, 'users', auth.currentUser.uid);
-        const userSnap = await getDoc(userRef);
-        if (userSnap.exists()) {
-          const firebaseData = userSnap.data();
-          console.log('UserContext.js - 從 Firebase 載入:', firebaseData);
-          dispatch({ type: 'UPDATE_USER_DATA', payload: { ...defaultData, ...firebaseData } });
-        } else {
-          console.log('UserContext.js - Firebase 中無資料，使用預設值');
-          dispatch({ type: 'UPDATE_USER_DATA', payload: defaultData });
-        }
-      } catch (err) {
-        console.error('UserContext.js - 載入 Firebase 資料失敗:', err);
-      }
+    if (!auth.currentUser) {
+      console.log('UserContext.js - 用戶未登入，使用預設值');
+      dispatch({ type: 'UPDATE_USER_DATA', payload: defaultData });
+      return;
     }
-  }, []);
+
+    try {
+      const userRef = doc(db, 'users', auth.currentUser.uid);
+      const userSnap = await getDoc(userRef);
+      if (userSnap.exists()) {
+        const firebaseData = userSnap.data();
+        console.log('UserContext.js - 從 Firebase 載入:', firebaseData);
+        dispatch({ type: 'UPDATE_USER_DATA', payload: { ...defaultData, ...firebaseData } });
+      } else {
+        console.log('UserContext.js - Firebase 中無資料，創建預設資料');
+        const initialData = { ...defaultData, userId: auth.currentUser.uid };
+        await setDoc(userRef, initialData);
+        dispatch({ type: 'UPDATE_USER_DATA', payload: initialData });
+      }
+    } catch (err) {
+      console.error('UserContext.js - 載入 Firebase 資料失敗:', err);
+      throw err; // 重新拋出錯誤以便上層處理
+    }
+  }, []); // 移除 auth.currentUser 依賴項
 
   const saveUserData = useCallback(async (data) => {
     console.log('UserContext.js - 儲存 userData, data:', data);
@@ -90,17 +100,44 @@ export function UserProvider({ children }) {
       console.error('UserContext.js - saveUserData 接收到無效數據:', data);
       return;
     }
-    if (auth.currentUser) {
-      try {
-        const userRef = doc(db, 'users', auth.currentUser.uid);
-        await setDoc(userRef, data, { merge: true });
-        console.log('UserContext.js - Firebase 儲存成功');
-      } catch (err) {
-        console.error('UserContext.js - 儲存 Firebase 資料失敗:', err);
-      }
+    if (!auth.currentUser) {
+      console.error('UserContext.js - 用戶未登入，無法儲存數據');
+      return;
     }
-    dispatch({ type: 'UPDATE_USER_DATA', payload: data });
-  }, []);
+    try {
+      const userRef = doc(db, 'users', auth.currentUser.uid);
+      const dataWithUserId = { ...data, userId: auth.currentUser.uid };
+      await setDoc(userRef, dataWithUserId, { merge: true });
+      console.log('UserContext.js - Firebase 儲存成功');
+      await loadUserData(); // 儲存後重新載入數據
+    } catch (err) {
+      console.error('UserContext.js - 儲存 Firebase 資料失敗:', err);
+      throw err; // 重新拋出錯誤
+    }
+  }, [loadUserData]);
+
+  const saveHistory = useCallback(async (record) => {
+    if (!auth.currentUser) {
+      console.error('UserContext.js - 用戶未登入，無法儲存歷史紀錄');
+      return;
+    }
+    try {
+      const userRef = doc(db, 'users', auth.currentUser.uid);
+      const recordWithUserId = {
+        ...record,
+        userId: auth.currentUser.uid,
+        timestamp: new Date().toISOString(), // 添加時間戳
+      };
+      await updateDoc(userRef, {
+        history: arrayUnion(recordWithUserId),
+      });
+      console.log('UserContext.js - 歷史紀錄儲存成功');
+      await loadUserData(); // 儲存後重新載入數據
+    } catch (err) {
+      console.error('UserContext.js - 儲存歷史紀錄失敗:', err);
+      throw err; // 重新拋出錯誤
+    }
+  }, [loadUserData]);
 
   const setUserData = useCallback((update) => {
     if (typeof update === 'function') {
@@ -117,7 +154,12 @@ export function UserProvider({ children }) {
   }, []);
 
   useEffect(() => {
-    loadUserData();
+    // 監聽身份驗證狀態變化
+    const unsubscribe = auth.onAuthStateChanged(() => {
+      console.log('Auth state changed, reloading user data');
+      loadUserData();
+    });
+    return () => unsubscribe(); // 清理訂閱
   }, [loadUserData]);
 
   return (
@@ -126,6 +168,7 @@ export function UserProvider({ children }) {
         userData,
         setUserData,
         saveUserData,
+        saveHistory,
         clearUserData,
       }}
     >
