@@ -20,6 +20,7 @@ import FFMI from './FFMI';
 import StrengthInstructions from './StrengthInstructions';
 import CelebrityComparison from './CelebrityComparison';
 import Login from './Login';
+import History from './History'; // 新增導入
 
 // 錯誤邊界組件
 class ErrorBoundary extends Component {
@@ -187,6 +188,7 @@ function App() {
               element={<ProtectedRoute element={<CelebrityComparison />} />}
             />
             <Route path="/login" element={<Login onLogin={handleLogin} />} />
+            <Route path="/history" element={<ProtectedRoute element={<History />} />} /> {/* 新增歷史紀錄路徑 */}
             <Route path="*" element={<div>404 - 頁面未找到</div>} />
           </Routes>
         </ErrorBoundary>
