@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from './UserContext';
 import { Radar } from 'react-chartjs-2';
@@ -27,12 +27,51 @@ function Strength() {
   const navigate = useNavigate();
   const { gender, height, weight, age } = userData;
 
-  const [benchPress, setBenchPress] = useState({ weight: '', reps: '', max: null, score: null });
-  const [squat, setSquat] = useState({ weight: '', reps: '', max: null, score: null });
-  const [deadlift, setDeadlift] = useState({ weight: '', reps: '', max: null, score: null });
-  const [latPulldown, setLatPulldown] = useState({ weight: '', reps: '', max: null, score: null });
-  const [shoulderPress, setShoulderPress] = useState({ weight: '', reps: '', max: null, score: null });
+  const [benchPress, setBenchPress] = useState({
+    weight: userData.testInputs?.strength?.benchPress?.weight || '',
+    reps: userData.testInputs?.strength?.benchPress?.reps || '',
+    max: null,
+    score: null,
+  });
+  const [squat, setSquat] = useState({
+    weight: userData.testInputs?.strength?.squat?.weight || '',
+    reps: userData.testInputs?.strength?.squat?.reps || '',
+    max: null,
+    score: null,
+  });
+  const [deadlift, setDeadlift] = useState({
+    weight: userData.testInputs?.strength?.deadlift?.weight || '',
+    reps: userData.testInputs?.strength?.deadlift?.reps || '',
+    max: null,
+    score: null,
+  });
+  const [latPulldown, setLatPulldown] = useState({
+    weight: userData.testInputs?.strength?.latPulldown?.weight || '',
+    reps: userData.testInputs?.strength?.latPulldown?.reps || '',
+    max: null,
+    score: null,
+  });
+  const [shoulderPress, setShoulderPress] = useState({
+    weight: userData.testInputs?.strength?.shoulderPress?.weight || '',
+    reps: userData.testInputs?.strength?.shoulderPress?.reps || '',
+    max: null,
+    score: null,
+  });
   const [isExpanded, setIsExpanded] = useState(false);
+
+  useEffect(() => {
+    const updatedTestInputs = {
+      ...userData.testInputs,
+      strength: {
+        benchPress: { weight: benchPress.weight, reps: benchPress.reps },
+        squat: { weight: squat.weight, reps: squat.reps },
+        deadlift: { weight: deadlift.weight, reps: deadlift.reps },
+        latPulldown: { weight: latPulldown.weight, reps: latPulldown.reps },
+        shoulderPress: { weight: shoulderPress.weight, reps: shoulderPress.reps },
+      },
+    };
+    setUserData({ ...userData, testInputs: updatedTestInputs });
+  }, [benchPress, squat, deadlift, latPulldown, shoulderPress, userData, setUserData]);
 
   const calculateScore = (value, standard) => {
     const { Beginner, Novice, Intermediate, Advanced, Elite } = standard;
@@ -72,7 +111,7 @@ function Strength() {
     if (!weight || !reps) return alert('請輸入重量和次數！');
     const weightNum = parseFloat(weight);
     const repsNum = parseFloat(reps);
-    const userWeight = parseFloat(userData.weight);  // 修正：使用 userData.weight
+    const userWeight = parseFloat(userData.weight);
     const userAge = parseFloat(age);
     if (!userWeight || !userAge) return alert('請確保已輸入有效的體重和年齡！');
     if (repsNum > 12) {

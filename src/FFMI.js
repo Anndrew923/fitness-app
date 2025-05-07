@@ -1,15 +1,29 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from './UserContext';
 
 function FFMI() {
   const { userData, setUserData } = useUser();
   const navigate = useNavigate();
-  const [bodyFat, setBodyFat] = useState('');
+  const [bodyFat, setBodyFat] = useState(userData.testInputs?.ffmi?.bodyFat || '');
   const [ffmi, setFfmi] = useState(null);
   const [ffmiScore, setFfmiScore] = useState(null);
   const [ffmiCategory, setFfmiCategory] = useState('');
   const [isExpanded, setIsExpanded] = useState(false);
+
+  // 當 bodyFat 變化時，保存到 userData.testInputs
+  useEffect(() => {
+    if (bodyFat) {
+      const updatedTestInputs = {
+        ...userData.testInputs,
+        ffmi: {
+          ...userData.testInputs?.ffmi,
+          bodyFat,
+        },
+      };
+      setUserData({ ...userData, testInputs: updatedTestInputs });
+    }
+  }, [bodyFat, userData, setUserData]);
 
   const calculateScores = () => {
     if (!userData.gender || !userData.height || !userData.weight || !userData.age) {

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from './UserContext';
 import * as standards from './standards';
@@ -8,19 +8,30 @@ function Power() {
   const navigate = useNavigate();
   const { age, gender } = userData;
 
-  const [verticalJump, setVerticalJump] = useState(''); // 垂直彈跳 (公分)
-  const [standingLongJump, setStandingLongJump] = useState(''); // 立定跳遠 (公分)
-  const [sprint, setSprint] = useState(''); // 100公尺衝刺跑 (秒)
+  const [verticalJump, setVerticalJump] = useState(userData.testInputs?.power?.verticalJump || '');
+  const [standingLongJump, setStandingLongJump] = useState(userData.testInputs?.power?.standingLongJump || '');
+  const [sprint, setSprint] = useState(userData.testInputs?.power?.sprint || '');
   const [result, setResult] = useState({
     verticalJumpScore: null,
     standingLongJumpScore: null,
     sprintScore: null,
     finalScore: null,
-  }); // 結果
-  const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false); // 動作說明
-  const [isStandardsExpanded, setIsStandardsExpanded] = useState(false); // 檢測標準說明
+  });
+  const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
+  const [isStandardsExpanded, setIsStandardsExpanded] = useState(false);
 
-  // 根據年齡確定年齡段
+  useEffect(() => {
+    const updatedTestInputs = {
+      ...userData.testInputs,
+      power: {
+        verticalJump,
+        standingLongJump,
+        sprint,
+      },
+    };
+    setUserData({ ...userData, testInputs: updatedTestInputs });
+  }, [verticalJump, standingLongJump, sprint, userData, setUserData]);
+
   const getAgeRange = age => {
     if (!age) return null;
     const ageNum = parseInt(age);
@@ -35,7 +46,6 @@ function Power() {
     return null;
   };
 
-  // 計算分數（值越大分數越高，例如垂直彈跳和立定跳遠）
   const calculateScoreIncreasing = (value, standard) => {
     if (value < standard[0]) return 0;
     if (value >= standard[100]) return 100;
@@ -43,7 +53,6 @@ function Power() {
     return 50 + ((value - standard[50]) / (standard[100] - standard[50])) * 50;
   };
 
-  // 計算分數（值越小分數越高，例如100公尺衝刺跑）
   const calculateScoreDecreasing = (value, standard) => {
     if (value > standard[0]) return 0;
     if (value <= standard[100]) return 100;
@@ -51,7 +60,6 @@ function Power() {
     return 50 + ((standard[50] - value) / (standard[50] - standard[100])) * 50;
   };
 
-  // 計算爆發力分數
   const calculatePowerScore = () => {
     if (!age || !gender) return alert('請確保已在用戶信息中輸入年齡和性別！');
     if (!verticalJump && !standingLongJump && !sprint) return alert('請至少輸入一項動作數據！');
@@ -91,7 +99,6 @@ function Power() {
     });
   };
 
-  // 提交結果並儲存
   const handleSubmit = async () => {
     if (!result.finalScore) return alert('請先計算爆發力分數！');
     try {
@@ -178,7 +185,6 @@ function Power() {
 
 export default Power;
 
-// 響應式 CSS
 const styles = `
   .power-container {
     max-width: 100%;

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from './UserContext';
 import * as standards from './standards';
@@ -8,9 +8,23 @@ function Cardio() {
   const navigate = useNavigate();
   const { age, gender } = userData;
 
-  const [distance, setDistance] = useState('');
+  const [distance, setDistance] = useState(userData.testInputs?.cardio?.distance || '');
   const [score, setScore] = useState(null);
   const [isExpanded, setIsExpanded] = useState(false);
+
+  // 當 distance 變化時，保存到 userData.testInputs
+  useEffect(() => {
+    if (distance) {
+      const updatedTestInputs = {
+        ...userData.testInputs,
+        cardio: {
+          ...userData.testInputs?.cardio,
+          distance,
+        },
+      };
+      setUserData({ ...userData, testInputs: updatedTestInputs });
+    }
+  }, [distance, userData, setUserData]);
 
   const getAgeRange = age => {
     if (!age) return null;

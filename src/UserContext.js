@@ -31,6 +31,7 @@ export function UserProvider({ children }) {
             bodyFat: 0,
           },
           history: [],
+          testInputs: {}, // Added testInputs field
         };
       default:
         return state;
@@ -50,6 +51,7 @@ export function UserProvider({ children }) {
       bodyFat: 0,
     },
     history: [],
+    testInputs: {}, // Initialize testInputs
   });
 
   const loadUserData = useCallback(async () => {
@@ -67,6 +69,7 @@ export function UserProvider({ children }) {
         bodyFat: 0,
       },
       history: [],
+      testInputs: {},
     };
 
     if (!auth.currentUser) {
@@ -90,9 +93,9 @@ export function UserProvider({ children }) {
       }
     } catch (err) {
       console.error('UserContext.js - 載入 Firebase 資料失敗:', err);
-      throw err; // 重新拋出錯誤以便上層處理
+      throw err;
     }
-  }, []); // 移除 auth.currentUser 依賴項
+  }, []);
 
   const saveUserData = useCallback(async (data) => {
     console.log('UserContext.js - 儲存 userData, data:', data);
@@ -109,10 +112,10 @@ export function UserProvider({ children }) {
       const dataWithUserId = { ...data, userId: auth.currentUser.uid };
       await setDoc(userRef, dataWithUserId, { merge: true });
       console.log('UserContext.js - Firebase 儲存成功');
-      await loadUserData(); // 儲存後重新載入數據
+      await loadUserData();
     } catch (err) {
       console.error('UserContext.js - 儲存 Firebase 資料失敗:', err);
-      throw err; // 重新拋出錯誤
+      throw err;
     }
   }, [loadUserData]);
 
@@ -126,16 +129,16 @@ export function UserProvider({ children }) {
       const recordWithUserId = {
         ...record,
         userId: auth.currentUser.uid,
-        timestamp: new Date().toISOString(), // 添加時間戳
+        timestamp: new Date().toISOString(),
       };
       await updateDoc(userRef, {
         history: arrayUnion(recordWithUserId),
       });
       console.log('UserContext.js - 歷史紀錄儲存成功');
-      await loadUserData(); // 儲存後重新載入數據
+      await loadUserData();
     } catch (err) {
       console.error('UserContext.js - 儲存歷史紀錄失敗:', err);
-      throw err; // 重新拋出錯誤
+      throw err;
     }
   }, [loadUserData]);
 
@@ -154,12 +157,11 @@ export function UserProvider({ children }) {
   }, []);
 
   useEffect(() => {
-    // 監聽身份驗證狀態變化
     const unsubscribe = auth.onAuthStateChanged(() => {
       console.log('Auth state changed, reloading user data');
       loadUserData();
     });
-    return () => unsubscribe(); // 清理訂閱
+    return () => unsubscribe();
   }, [loadUserData]);
 
   return (

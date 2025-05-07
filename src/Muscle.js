@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from './UserContext';
 import * as standards from './standards';
@@ -29,13 +29,27 @@ function Muscle() {
   const { weight, age, gender } = userData;
 
   // 管理骨骼肌肉量輸入和結果
-  const [smm, setSmm] = useState(''); // 骨骼肌肉量 (SMM)
+  const [smm, setSmm] = useState(userData.testInputs?.muscle?.smm || '');
   const [result, setResult] = useState({
     smmScore: null,
     smPercent: null,
     smPercentScore: null,
     finalScore: null,
-  }); // 結果
+  });
+
+  // 當 smm 變化時，保存到 userData.testInputs
+  useEffect(() => {
+    if (smm) {
+      const updatedTestInputs = {
+        ...userData.testInputs,
+        muscle: {
+          ...userData.testInputs?.muscle,
+          smm,
+        },
+      };
+      setUserData({ ...userData, testInputs: updatedTestInputs });
+    }
+  }, [smm, userData, setUserData]);
 
   // 根據年齡確定年齡段
   const getAgeRange = age => {

@@ -20,7 +20,7 @@ import FFMI from './FFMI';
 import StrengthInstructions from './StrengthInstructions';
 import CelebrityComparison from './CelebrityComparison';
 import Login from './Login';
-import History from './History'; // 新增導入
+import History from './History';
 
 // 錯誤邊界組件
 class ErrorBoundary extends Component {
@@ -86,19 +86,14 @@ function App() {
   // 保護路由
   const ProtectedRoute = ({ element }) => {
     const { userData } = useUser();
-    console.log(
-      'ProtectedRoute 檢查 - auth.currentUser:',
-      auth.currentUser,
-      'userData:',
-      userData
-    );
+    const currentPath = window.location.pathname;
 
+    // 未登入則重定向到登入頁面
     if (!auth.currentUser) {
-      console.log('未登入，重定向到 /login');
       return <Navigate to="/login" />;
     }
 
-    const currentPath = window.location.pathname;
+    // 檢查用戶數據是否完整（除了 /user-info 頁面）
     if (currentPath !== '/user-info') {
       const isHeightValid = typeof userData?.height === 'number' && userData.height > 0;
       const isWeightValid = typeof userData?.weight === 'number' && userData.weight > 0;
@@ -106,12 +101,10 @@ function App() {
       const isGenderValid = userData?.gender === 'male' || userData?.gender === 'female';
 
       if (!isHeightValid || !isWeightValid || !isAgeValid || !isGenderValid) {
-        console.log('缺少必要數據或數據無效，重定向到 /user-info');
         return <Navigate to="/user-info" />;
       }
     }
 
-    console.log('ProtectedRoute 檢查通過，渲染組件');
     return element;
   };
 
@@ -188,7 +181,7 @@ function App() {
               element={<ProtectedRoute element={<CelebrityComparison />} />}
             />
             <Route path="/login" element={<Login onLogin={handleLogin} />} />
-            <Route path="/history" element={<ProtectedRoute element={<History />} />} /> {/* 新增歷史紀錄路徑 */}
+            <Route path="/history" element={<ProtectedRoute element={<History />} />} />
             <Route path="*" element={<div>404 - 頁面未找到</div>} />
           </Routes>
         </ErrorBoundary>

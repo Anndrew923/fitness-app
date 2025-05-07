@@ -42,7 +42,7 @@ function debounce(func, wait) {
 }
 
 function UserInfo({ testData, onLogout, clearTestData }) {
-  const { userData, setUserData, saveUserData, saveHistory, clearUserData } = useUser();
+  const { userData, setUserData, saveUserData, saveHistory } = useUser();
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
@@ -171,24 +171,17 @@ function UserInfo({ testData, onLogout, clearTestData }) {
   );
 
   const handleLogout = useCallback(() => {
-    // 清除 localStorage 中的帳號和密碼
     localStorage.removeItem('savedEmail');
     localStorage.removeItem('savedPassword');
     
-    // 清除用戶數據
-    clearUserData();
-    
-    // 登出 Firebase 認證
     if (auth.currentUser) {
       auth.signOut().catch(err => console.error('UserInfo.js - 登出失敗:', err));
     }
     
-    // 調用父組件的 onLogout 回調（如果有）
     onLogout();
     
-    // 導航到登入頁面
     navigate('/login');
-  }, [clearUserData, onLogout, navigate]);
+  }, [onLogout, navigate]);
 
   const scoreSlogan = useMemo(() => {
     const slogansMale = [
@@ -361,7 +354,7 @@ function UserInfo({ testData, onLogout, clearTestData }) {
         </div>
       )}
 
-      <div className="radar-section" style={{ position: 'relative' }}>
+      <div id="radar-section" className="radar-section" style={{ position: 'relative' }}>
         <h2 className="text-xl font-semibold text-center mb-4">表現總覽</h2>
         <div style={{ width: '100%', maxWidth: '500px', margin: '0 auto' }}>
           <Radar data={radarData} options={radarOptions} />
