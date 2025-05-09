@@ -14,8 +14,8 @@ function Welcome({ onLogin }) {
   return (
     <div className="welcome-container">
       <div className="welcome-content">
-        <h1 className="welcome-title">歡迎體驗健身評測</h1>
-        <p className="welcome-subtitle">探索你的身體潛能，開啟健康新旅程！</p>
+        <h1 className="welcome-title">歡迎來到評測小能手</h1>
+        <p className="welcome-subtitle">留下運動數據，進步多少馬上知道</p>
         <div className="button-group-mode">
           <div className="button-with-tooltip">
             <button
