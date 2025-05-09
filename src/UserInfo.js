@@ -46,6 +46,7 @@ function UserInfo({ testData, onLogout, clearTestData }) {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
+  const [radarChartData, setRadarChartData] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -65,23 +66,67 @@ function UserInfo({ testData, onLogout, clearTestData }) {
   }, [navigate]);
 
   useEffect(() => {
+    let timer;
     if (testData && Object.keys(testData).length > 0) {
-      setUserData(prev => {
-        const updatedScores = {
-          ...prev.scores,
-          ...(testData.distance && { cardio: testData.score || 0 }),
-          ...(testData.squat && { strength: testData.averageScore || 0 }),
-          ...(testData.jumpHeight && { explosivePower: testData.finalScore || 0 }),
-          ...(testData.smm && { muscleMass: testData.finalScore || 0 }),
-          ...(testData.bodyFat && { bodyFat: testData.ffmiScore || 0 }),
-        };
-        if (JSON.stringify(prev.scores) !== JSON.stringify(updatedScores)) {
-          return { ...prev, scores: updatedScores };
-        }
-        return prev;
+      setLoading(true);
+      const updatedScores = {
+        ...userData.scores,
+        ...(testData.distance && { cardio: testData.score || 0 }),
+        ...(testData.squat && { strength: testData.averageScore || 0 }),
+        ...(testData.jumpHeight && { explosivePower: testData.finalScore || 0 }),
+        ...(testData.smm && { muscleMass: testData.finalScore || 0 }),
+        ...(testData.bodyFat && { bodyFat: testData.ffmiScore || 0 }),
+      };
+
+      setUserData(prev => ({ ...prev, scores: updatedScores }));
+
+      const newRadarData = {
+        labels: ['力量', '爆發力', '心肺耐力', '骨骼肌肉量', 'FFMI'],
+        datasets: [
+          {
+            label: '您的表現',
+            data: [
+              updatedScores.strength || 0,
+              updatedScores.explosivePower || 0,
+              updatedScores.cardio || 0,
+              updatedScores.muscleMass || 0,
+              updatedScores.bodyFat || 0,
+            ],
+            backgroundColor: 'rgba(34, 202, 236, 0.2)',
+            borderColor: 'rgba(34, 202, 236, 1)',
+            borderWidth: 2,
+          },
+        ],
+      };
+
+      timer = setTimeout(() => {
+        setRadarChartData(newRadarData);
+        setLoading(false);
+      }, 1000);
+    } else {
+      const scores = userData?.scores || DEFAULT_SCORES;
+      setRadarChartData({
+        labels: ['力量', '爆發力', '心肺耐力', '骨骼肌肉量', 'FFMI'],
+        datasets: [
+          {
+            label: '您的表現',
+            data: [
+              scores.strength || 0,
+              scores.explosivePower || 0,
+              scores.cardio || 0,
+              scores.muscleMass || 0,
+              scores.bodyFat || 0,
+            ],
+            backgroundColor: 'rgba(34, 202, 236, 0.2)',
+            borderColor: 'rgba(34, 202, 236, 1)',
+            borderWidth: 2,
+          },
+        ],
       });
     }
-  }, [testData, setUserData]);
+
+    return () => clearTimeout(timer);
+  }, [testData, userData?.scores, setUserData]);
 
   const validateData = useCallback(() => {
     const { height, weight, age, gender } = userData;
@@ -122,6 +167,24 @@ function UserInfo({ testData, onLogout, clearTestData }) {
 
       try {
         await saveUserData(updatedUserData);
+        setRadarChartData({
+          labels: ['力量', '爆發力', '心肺耐力', '骨骼肌肉量', 'FFMI'],
+          datasets: [
+            {
+              label: '您的表現',
+              data: [
+                updatedUserData.scores.strength || 0,
+                updatedUserData.scores.explosivePower || 0,
+                updatedUserData.scores.cardio || 0,
+                updatedUserData.scores.muscleMass || 0,
+                updatedUserData.scores.bodyFat || 0,
+              ],
+              backgroundColor: 'rgba(34, 202, 236, 0.2)',
+              borderColor: 'rgba(34, 202, 236, 1)',
+              borderWidth: 2,
+            },
+          ],
+        });
       } catch (err) {
         setError(`儲存失敗：${err.message}`);
       } finally {
@@ -206,28 +269,6 @@ function UserInfo({ testData, onLogout, clearTestData }) {
     return userData?.gender === 'male' ? slogansMale[index] : slogansFemale[index];
   }, [averageScore, userData?.gender]);
 
-  const radarData = useMemo(() => {
-    const scores = userData?.scores || DEFAULT_SCORES;
-    return {
-      labels: ['力量', '爆發力', '心肺耐力', '骨骼肌肉量', 'FFMI'],
-      datasets: [
-        {
-          label: '您的表現',
-          data: [
-            scores.strength || 0,
-            scores.explosivePower || 0,
-            scores.cardio || 0,
-            scores.muscleMass || 0,
-            scores.bodyFat || 0,
-          ],
-          backgroundColor: 'rgba(34, 202, 236, 0.2)',
-          borderColor: 'rgba(34, 202, 236, 1)',
-          borderWidth: 2,
-        },
-      ],
-    };
-  }, [userData?.scores]);
-
   const radarOptions = useMemo(() => ({
     scales: {
       r: {
@@ -251,7 +292,7 @@ function UserInfo({ testData, onLogout, clearTestData }) {
   );
 
   const debouncedHandleInputChange = useMemo(
-    () => debounce((name, value) => handleInputChange({ target: { name, value } }), 100),
+    () => debounce((name, value) => handleInputChange({ target: { name, value } }), 300),
     [handleInputChange]
   );
 
@@ -356,43 +397,48 @@ function UserInfo({ testData, onLogout, clearTestData }) {
 
       <div id="radar-section" className="radar-section" style={{ position: 'relative' }}>
         <h2 className="text-xl font-semibold text-center mb-4">表現總覽</h2>
-        <div style={{ width: '100%', maxWidth: '500px', margin: '0 auto' }}>
-          <Radar data={radarData} options={radarOptions} />
-        </div>
-        {averageScore > 0 && (
+        {loading ? (
+          <p>正在載入數據...</p>
+        ) : (
+          <div style={{ width: '100%', maxWidth: '500px', margin: '0 auto' }}>
+            {radarChartData && <Radar data={radarChartData} options={radarOptions} />}
+          </div>
+        )}
+        {averageScore > 0 && !loading && (
           <div className="score-section">
             <p className="average-score">平均分數: <span className="score-value">{averageScore}</span></p>
             <p className="score-slogan">{scoreSlogan}</p>
           </div>
         )}
+        <button
+          onClick={handleSaveResults}
+          className="save-results-btn"
+          style={{
+            position: 'absolute',
+            top: '10px', // 向上移動，固定在容器頂部
+            right: '20px',
+            backgroundColor: 'rgba(34, 202, 236, 1)',
+            color: '#fff',
+            padding: '8px 16px',
+            border: 'none',
+            borderRadius: '5px',
+            cursor: 'pointer',
+            fontSize: '14px',
+            margin: '0' // 移除多餘邊距，精確控制位置
+          }}
+        >
+          儲存結果至歷史紀錄
+        </button>
       </div>
 
-      <button
-        onClick={handleSaveResults}
-        className="save-results-btn"
-        style={{
-          width: '33.33%',
-          backgroundColor: 'rgba(34, 202, 236, 1)',
-          color: '#fff',
-          padding: '10px 20px',
-          border: 'none',
-          borderRadius: '5px',
-          cursor: 'pointer',
-          margin: '10px auto',
-          display: 'block'
-        }}
-      >
-        儲存結果
-      </button>
-
-      <div className="button-group">
+      <div className="button-group" style={{ marginTop: '40px' }}> {/* 向下移動按鈕組 */}
         <button onClick={() => handleNavigation('/strength')} className="nav-btn">力量評測</button>
         <button onClick={() => handleNavigation('/explosive-power')} className="nav-btn">爆發力測試</button>
         <button onClick={() => handleNavigation('/cardio')} className="nav-btn">心肺耐力測試</button>
         <button onClick={() => handleNavigation('/muscle-mass')} className="nav-btn">骨骼肌肉量</button>
         <button onClick={() => handleNavigation('/body-fat')} className="nav-btn">體脂肪率與FFMI</button>
-        <button onClick={() => handleNavigation('/celebrity-comparison')} className="nav-btn">名人數據參照表</button>
-        <button onClick={() => navigate('/history')} className="nav-btn">歷史紀錄</button>
+        <button onClick={() => handleNavigation('/celebrity-comparison')} className="nav-btn special-btn">名人數據參照表</button>
+        <button onClick={() => navigate('/history')} className="nav-btn special-btn">歷史紀錄</button>
       </div>
     </div>
   );

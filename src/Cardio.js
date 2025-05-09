@@ -45,6 +45,11 @@ function Cardio() {
     if (value >= standard[80]) return 80;
     if (value >= standard[70]) return 70;
     if (value >= standard[60]) return 60;
+    // 低於最低標準，按比例計算0到60分
+    const minDistance = standard[60];
+    if (value > 0) {
+      return Math.round((value / minDistance) * 60);
+    }
     return 0;
   };
 

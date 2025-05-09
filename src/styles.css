@@ -3,7 +3,9 @@
   padding: 1rem;
   max-width: 100%;
   margin: 0 auto;
+  position: relative; /* 確保儲存結果按鈕的絕對定位正常 */
 }
+
 .input-field {
   width: 100%;
   padding: 0.5rem;
@@ -11,6 +13,7 @@
   border: 1px solid #ccc;
   border-radius: 0.25rem;
 }
+
 .submit-btn {
   width: 100%;
   padding: 0.5rem;
@@ -20,10 +23,12 @@
   border-radius: 0.25rem;
   cursor: pointer;
 }
+
 .submit-btn:disabled {
   background-color: #6c757d;
   cursor: not-allowed;
 }
+
 .nav-btn {
   width: 100%;
   padding: 0.5rem;
@@ -34,6 +39,16 @@
   border-radius: 0.25rem;
   cursor: pointer;
 }
+
+.special-btn {
+  background-color: #4B5EAA; /* 淺藍灰色 */
+  color: white;
+}
+
+.special-btn:hover {
+  background-color: #3A4A8B; /* 滑鼠懸停時的深藍灰色 */
+}
+
 .signout-btn {
   padding: 0.5rem;
   background-color: #dc3545;
@@ -42,6 +57,7 @@
   border-radius: 0.25rem;
   cursor: pointer;
 }
+
 .mode-btn {
   padding: 0.5rem;
   margin: 0.25rem;
@@ -49,31 +65,38 @@
   border-radius: 0.25rem;
   cursor: pointer;
 }
+
 .guest-btn {
   background-color: #6c757d;
   color: white;
 }
+
 .login-btn {
   background-color: #007bff;
   color: white;
 }
+
 .button-group {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
 }
+
 .button-group-mode {
   display: flex;
   justify-content: center;
   gap: 1rem;
 }
+
 .radar-section {
   margin: 1rem 0;
 }
+
 .error-message {
   color: #dc3545;
   text-align: center;
 }
+
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -85,6 +108,7 @@
   justify-content: center;
   align-items: center;
 }
+
 .modal-content {
   background: white;
   padding: 1rem;
@@ -92,22 +116,26 @@
   width: 90%;
   max-width: 500px;
 }
+
 .modal-close-btn {
   background: none;
   border: none;
   font-size: 1.5rem;
   cursor: pointer;
 }
+
 .history-table {
   width: 100%;
   border-collapse: collapse;
 }
+
 .history-table th,
 .history-table td {
   border: 1px solid #ddd;
   padding: 0.5rem;
   text-align: left;
 }
+
 .score-section {
   text-align: center;
   padding: 10px;
@@ -115,12 +143,14 @@
   border-radius: 8px;
   margin-top: 20px;
 }
+
 .average-score {
   font-size: 24px;
   font-weight: 600;
   color: #000080;
   margin-bottom: 5px;
 }
+
 .score-value {
   font-size: 32px;
   font-weight: 700;
@@ -134,6 +164,7 @@
   .input-field { font-size: 0.9rem; }
   .submit-btn { font-size: 0.9rem; }
   .nav-btn { font-size: 0.9rem; }
+  .special-btn { font-size: 0.9rem; }
   .signout-btn { width: 100%; font-size: 0.9rem; }
   .mode-btn { width: 100%; font-size: 0.9rem; }
   .button-group { flex-direction: column; }
@@ -146,4 +177,3 @@
   .average-score { font-size: 20px; }
   .score-value { font-size: 28px; text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5); }
 }
-

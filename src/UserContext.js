@@ -14,10 +14,8 @@ export function UserProvider({ children }) {
   const userReducer = (state, action) => {
     switch (action.type) {
       case 'UPDATE_USER_DATA':
-        console.log('UserContext.js - 更新 userData:', action.payload);
         return { ...state, ...action.payload };
       case 'RESET_USER_DATA':
-        console.log('UserContext.js - 重置 userData');
         return {
           gender: '',
           height: 0,
@@ -31,7 +29,7 @@ export function UserProvider({ children }) {
             bodyFat: 0,
           },
           history: [],
-          testInputs: {}, // Added testInputs field
+          testInputs: {},
         };
       default:
         return state;
@@ -51,11 +49,10 @@ export function UserProvider({ children }) {
       bodyFat: 0,
     },
     history: [],
-    testInputs: {}, // Initialize testInputs
+    testInputs: {},
   });
 
-  const loadUserData = useCallback(async () => {
-    console.log('UserContext.js - 載入 userData');
+  const loadUserData = useCallback(async (currentUser) => {
     const defaultData = {
       gender: '',
       height: 0,
@@ -72,75 +69,81 @@ export function UserProvider({ children }) {
       testInputs: {},
     };
 
-    if (!auth.currentUser) {
-      console.log('UserContext.js - 用戶未登入，使用預設值');
+    // 先從 localStorage 載入，作為初始值
+    const localData = JSON.parse(localStorage.getItem('userData')) || defaultData;
+    dispatch({ type: 'UPDATE_USER_DATA', payload: localData });
+
+    if (!currentUser) {
       dispatch({ type: 'UPDATE_USER_DATA', payload: defaultData });
       return;
     }
 
     try {
-      const userRef = doc(db, 'users', auth.currentUser.uid);
+      const userRef = doc(db, 'users', currentUser.uid);
       const userSnap = await getDoc(userRef);
       if (userSnap.exists()) {
         const firebaseData = userSnap.data();
-        console.log('UserContext.js - 從 Firebase 載入:', firebaseData);
-        dispatch({ type: 'UPDATE_USER_DATA', payload: { ...defaultData, ...firebaseData } });
+        const mergedData = { ...defaultData, ...firebaseData };
+        dispatch({ type: 'UPDATE_USER_DATA', payload: mergedData });
+        // 更新 localStorage
+        localStorage.setItem('userData', JSON.stringify(mergedData));
       } else {
-        console.log('UserContext.js - Firebase 中無資料，創建預設資料');
-        const initialData = { ...defaultData, userId: auth.currentUser.uid };
+        const initialData = { ...defaultData, userId: currentUser.uid };
         await setDoc(userRef, initialData);
         dispatch({ type: 'UPDATE_USER_DATA', payload: initialData });
+        localStorage.setItem('userData', JSON.stringify(initialData));
       }
     } catch (err) {
-      console.error('UserContext.js - 載入 Firebase 資料失敗:', err);
-      throw err;
+      // 如果 Firebase 載入失敗，使用 localStorage 數據
+      dispatch({ type: 'UPDATE_USER_DATA', payload: localData });
     }
   }, []);
 
   const saveUserData = useCallback(async (data) => {
-    console.log('UserContext.js - 儲存 userData, data:', data);
     if (typeof data !== 'object' || data === null) {
-      console.error('UserContext.js - saveUserData 接收到無效數據:', data);
       return;
     }
     if (!auth.currentUser) {
-      console.error('UserContext.js - 用戶未登入，無法儲存數據');
       return;
     }
     try {
       const userRef = doc(db, 'users', auth.currentUser.uid);
       const dataWithUserId = { ...data, userId: auth.currentUser.uid };
       await setDoc(userRef, dataWithUserId, { merge: true });
-      console.log('UserContext.js - Firebase 儲存成功');
-      await loadUserData();
+      // 更新 localStorage
+      localStorage.setItem('userData', JSON.stringify(dataWithUserId));
+      await loadUserData(auth.currentUser);
     } catch (err) {
-      console.error('UserContext.js - 儲存 Firebase 資料失敗:', err);
-      throw err;
+      // 如果 Firebase 儲存失敗，僅更新本地
+      localStorage.setItem('userData', JSON.stringify(data));
+      dispatch({ type: 'UPDATE_USER_DATA', payload: data });
     }
   }, [loadUserData]);
 
   const saveHistory = useCallback(async (record) => {
     if (!auth.currentUser) {
-      console.error('UserContext.js - 用戶未登入，無法儲存歷史紀錄');
       return;
     }
+    // 將 recordWithUserId 定義在 try-catch 外部
+    const recordWithUserId = {
+      ...record,
+      userId: auth.currentUser.uid,
+      timestamp: new Date().toISOString(),
+    };
     try {
       const userRef = doc(db, 'users', auth.currentUser.uid);
-      const recordWithUserId = {
-        ...record,
-        userId: auth.currentUser.uid,
-        timestamp: new Date().toISOString(),
-      };
       await updateDoc(userRef, {
         history: arrayUnion(recordWithUserId),
       });
-      console.log('UserContext.js - 歷史紀錄儲存成功');
-      await loadUserData();
+      await loadUserData(auth.currentUser);
     } catch (err) {
-      console.error('UserContext.js - 儲存歷史紀錄失敗:', err);
-      throw err;
+      // 使用外部定義的 recordWithUserId
+      const newHistory = [...userData.history, recordWithUserId];
+      const updatedData = { ...userData, history: newHistory };
+      localStorage.setItem('userData', JSON.stringify(updatedData));
+      dispatch({ type: 'UPDATE_USER_DATA', payload: updatedData });
     }
-  }, [loadUserData]);
+  }, [userData, loadUserData]);
 
   const setUserData = useCallback((update) => {
     if (typeof update === 'function') {
@@ -152,17 +155,20 @@ export function UserProvider({ children }) {
   }, [userData, saveUserData]);
 
   const clearUserData = useCallback(() => {
-    console.log('UserContext.js - 清除 userData');
+    localStorage.removeItem('userData');
     dispatch({ type: 'RESET_USER_DATA' });
   }, []);
 
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged(() => {
-      console.log('Auth state changed, reloading user data');
-      loadUserData();
+    const unsubscribe = auth.onAuthStateChanged(user => {
+      if (user) {
+        loadUserData(user);
+      } else {
+        clearUserData();
+      }
     });
     return () => unsubscribe();
-  }, [loadUserData]);
+  }, [loadUserData, clearUserData]);
 
   return (
     <UserContext.Provider
