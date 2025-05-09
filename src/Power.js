@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from './UserContext';
 import * as standards from './standards';
+import './Power.css'; // 引入外部 CSS
 
 function Power() {
   const { userData, setUserData } = useUser();
@@ -184,104 +185,3 @@ function Power() {
 }
 
 export default Power;
-
-const styles = `
-  .power-container {
-    max-width: 100%;
-    padding: 1rem;
-    margin: 0 auto;
-    background-color: #f9f9f9;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  }
-
-  .input-section { margin-bottom: 2rem; }
-  .exercise-section { margin-bottom: 1.5rem; }
-  .input-field {
-    width: 100%;
-    padding: 0.5rem;
-    margin: 0.5rem 0;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-size: 1rem;
-  }
-  .calculate-btn {
-    width: 100%;
-    padding: 0.5rem;
-    background-color: #4bc0c0;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    font-size: 1rem;
-    cursor: pointer;
-    margin-top: 0.5rem;
-  }
-  .calculate-btn:hover { background-color: #3aa0a0; }
-  .score-display {
-    font-size: 1.5rem;
-    font-weight: bold;
-    color: #1E90FF;
-    margin-top: 0.5rem;
-  }
-  .description-section { margin-top: 2rem; }
-  .description-card, .standards-card {
-    margin-bottom: 1.5rem;
-    background-color: #fff;
-    border-radius: 4px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    overflow: hidden;
-  }
-  .description-header, .standards-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1rem;
-    cursor: pointer;
-    background-color: #f1f1f1;
-    transition: background-color 0.3s ease;
-  }
-  .description-header:hover, .standards-header:hover { background-color: #e0e0e0; }
-  .description-content, .standards-content {
-    padding: 1rem;
-    background-color: #fff;
-    transition: max-height 0.3s ease, padding 0.3s ease;
-    line-height: 1.6;
-  }
-  .arrow { font-size: 1rem; transition: transform 0.3s ease; }
-  .arrow.expanded { transform: rotate(180deg); }
-  .exercise-title { font-size: 1.125rem; font-weight: 600; color: #333; }
-  .exercise-description { font-size: 1rem; color: #555; }
-  .button-group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    margin-top: 1.5rem;
-    margin-bottom: 1.5rem;
-  }
-  .submit-btn {
-    width: 100%;
-    padding: 0.75rem;
-    font-size: 1rem;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    background-color: #4bc0c0;
-  }
-  .submit-btn:hover { background-color: #3aa0a0; }
-  @media (max-width: 767px) {
-    .score-display { font-size: 1.25rem; }
-    .description-content, .standards-content { font-size: 0.9rem; }
-    .exercise-title { font-size: 1rem; }
-    .exercise-description { font-size: 0.875rem; }
-  }
-  @media (min-width: 768px) {
-    .power-container { max-width: 800px; }
-    .button-group { flex-direction: row; justify-content: space-between; }
-    .submit-btn { width: 48%; }
-  }
-`;
-
-const styleSheet = document.createElement('style');
-styleSheet.innerText = styles;
-document.head.appendChild(styleSheet);

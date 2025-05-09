@@ -1,0 +1,72 @@
+.history-container {
+    max-width: 100%;
+    padding: 1rem;
+    margin: 0 auto;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .sync-button-container {
+    text-align: right;
+    margin-bottom: 0.625rem;
+  }
+  
+  .sync-button {
+    padding: 0.5rem 1rem;
+    background-color: #ccc;
+    color: #fff;
+    border: none;
+    border-radius: 0.3125rem;
+    cursor: not-allowed;
+  }
+  
+  .history-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 1rem;
+  }
+  
+  .history-table th,
+  .history-table td {
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    text-align: center;
+  }
+  
+  .action-buttons {
+    text-align: right;
+    margin-top: 0.625rem;
+  }
+  
+  .toggle-delete-btn {
+    padding: 0.5rem 1rem;
+    color: #fff;
+    border: none;
+    border-radius: 0.3125rem;
+    margin-right: 0.625rem;
+    cursor: pointer;
+  }
+  
+  .toggle-delete-btn.cleanup {
+    background-color: #4caf50;
+  }
+  
+  .toggle-delete-btn.cancel {
+    background-color: #f44336;
+  }
+  
+  .delete-selected-btn {
+    padding: 0.5rem 1rem;
+    background-color: #f44336;
+    color: #fff;
+    border: none;
+    border-radius: 0.3125rem;
+    cursor: pointer;
+  }
+  
+  .text-center {
+    text-align: center;
+    font-size: 1rem;
+    color: #666;
+  }

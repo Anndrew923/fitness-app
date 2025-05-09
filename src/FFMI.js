@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from './UserContext';
+import './FFMI.css'; // 引入外部 CSS
 
 function FFMI() {
   const { userData, setUserData } = useUser();
@@ -11,7 +12,6 @@ function FFMI() {
   const [ffmiCategory, setFfmiCategory] = useState('');
   const [isExpanded, setIsExpanded] = useState(false);
 
-  // 當 bodyFat 變化時，保存到 userData.testInputs
   useEffect(() => {
     if (bodyFat) {
       const updatedTestInputs = {
@@ -40,24 +40,22 @@ function FFMI() {
     const weight = parseFloat(userData.weight);
     const bodyFatValue = parseFloat(bodyFat) / 100;
 
-    // 計算 FFMI
     const fatFreeMass = weight * (1 - bodyFatValue);
     const rawFfmi = fatFreeMass / (heightInMeters * heightInMeters);
     const adjustedFfmi = heightInMeters > 1.8 ? rawFfmi + 6.0 * (heightInMeters - 1.8) : rawFfmi;
     setFfmi(adjustedFfmi.toFixed(1));
 
-    // 計算 FFMI 分數（分段線性插值）
     let newFfmiScore;
     if (isMale) {
-      const baseFfmi = 18.5; // 60 分基準
-      const maxFfmi = 28; // 100 分上限
+      const baseFfmi = 18.5;
+      const maxFfmi = 28;
       if (adjustedFfmi <= 0) newFfmiScore = 0;
       else if (adjustedFfmi <= baseFfmi) newFfmiScore = (adjustedFfmi / baseFfmi) * 60;
       else if (adjustedFfmi < maxFfmi) newFfmiScore = 60 + ((adjustedFfmi - baseFfmi) / (maxFfmi - baseFfmi)) * 40;
       else newFfmiScore = 100;
     } else {
-      const baseFfmi = 15.5; // 60 分基準
-      const maxFfmi = 22; // 100 分上限
+      const baseFfmi = 15.5;
+      const maxFfmi = 22;
       if (adjustedFfmi <= 0) newFfmiScore = 0;
       else if (adjustedFfmi <= baseFfmi) newFfmiScore = (adjustedFfmi / baseFfmi) * 60;
       else if (adjustedFfmi < maxFfmi) newFfmiScore = 60 + ((adjustedFfmi - baseFfmi) / (maxFfmi - baseFfmi)) * 40;
@@ -65,7 +63,6 @@ function FFMI() {
     }
     setFfmiScore(newFfmiScore.toFixed(1));
 
-    // FFMI 等級評價
     if (isMale) {
       if (adjustedFfmi < 16) setFfmiCategory('肌肉量低於平均');
       else if (adjustedFfmi < 18) setFfmiCategory('肌肉量在平均值');
@@ -83,7 +80,6 @@ function FFMI() {
     }
   };
 
-  // 提交結果並儲存
   const handleSubmit = async () => {
     if (!ffmi || !ffmiScore) return alert('請先計算 FFMI 分數！');
     try {
@@ -97,7 +93,6 @@ function FFMI() {
     }
   };
 
-  // 男性 FFMI 對照表數據
   const maleFfmiTable = [
     { range: '16 - 17', description: '肌肉量低於平均' },
     { range: '18 - 19', description: '肌肉量在平均值' },
@@ -108,7 +103,6 @@ function FFMI() {
     { range: '28 - 30', description: '不用藥不可能達到的數值' },
   ];
 
-  // 女性 FFMI 對照表數據
   const femaleFfmiTable = [
     { range: '13 - 14', description: '肌肉量低於平均' },
     { range: '15 - 16', description: '肌肉量在平均值' },
@@ -117,7 +111,6 @@ function FFMI() {
     { range: '> 22', description: '不用藥不可能達到的數值' },
   ];
 
-  // 根據性別選擇對照表
   const ffmiTable = userData.gender === 'male' || userData.gender === '男性' ? maleFfmiTable : femaleFfmiTable;
 
   return (
@@ -125,7 +118,13 @@ function FFMI() {
       <h1 className="ffmi-title">體脂肪率與 FFMI</h1>
       <div className="input-section">
         <label className="input-label">體脂肪率 (%)</label>
-        <input type="number" value={bodyFat} onChange={e => setBodyFat(e.target.value)} placeholder="輸入體脂肪率 (%)" className="input-field" />
+        <input
+          type="number"
+          value={bodyFat}
+          onChange={(e) => setBodyFat(e.target.value)}
+          placeholder="輸入體脂肪率 (%)"
+          className="input-field"
+        />
         <button onClick={calculateScores} className="calculate-btn">計算分數</button>
       </div>
       {ffmi && (
@@ -158,8 +157,20 @@ function FFMI() {
       <div className="table-section">
         <h2 className="table-title">FFMI 對照表 ({userData.gender === 'male' || userData.gender === '男性' ? '男性' : '女性'})</h2>
         <table className="ffmi-table">
-          <thead><tr><th>FFMI 範圍</th><th>評價</th></tr></thead>
-          <tbody>{ffmiTable.map((row, index) => (<tr key={index}><td>{row.range}</td><td>{row.description}</td></tr>))}</tbody>
+          <thead>
+            <tr>
+              <th>FFMI 範圍</th>
+              <th>評價</th>
+            </tr>
+          </thead>
+          <tbody>
+            {ffmiTable.map((row, index) => (
+              <tr key={index}>
+                <td>{row.range}</td>
+                <td>{row.description}</td>
+              </tr>
+            ))}
+          </tbody>
         </table>
       </div>
       <button onClick={handleSubmit} className="back-btn">提交並返回總覽</button>
@@ -168,56 +179,3 @@ function FFMI() {
 }
 
 export default FFMI;
-
-// 內聯 CSS
-const styles = `
-  .ffmi-container {
-    max-width: 100%;
-    padding: 1rem;
-    margin: 0 auto;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    background-color: #f9fafb;
-    min-height: 100vh;
-  }
-  .ffmi-title { font-size: 1.5rem; font-weight: bold; color: #1f2937; margin-bottom: 1.5rem; text-align: center; }
-  .input-section { width: 90%; max-width: 400px; background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); margin-bottom: 1.5rem; }
-  .input-label { display: block; font-size: 0.875rem; font-weight: 500; color: #374151; margin-bottom: 0.5rem; text-align: left; }
-  .input-field { width: 100%; padding: 0.75rem; font-size: 1rem; border: 1px solid #d1d5db; border-radius: 6px; outline: none; transition: border-color 0.2s; }
-  .input-field:focus { border-color: #3b82f6; box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2); }
-  .calculate-btn { width: 100%; margin-top: 1rem; padding: 0.75rem; font-size: 1rem; font-weight: 500; color: white; background: linear-gradient(90deg, #3b82f6, #60a5fa); border: none; border-radius: 6px; cursor: pointer; transition: background 0.3s; }
-  .calculate-btn:hover { background: linear-gradient(90deg, #2563eb, #3b82f6); }
-  .result-section { width: 90%; max-width: 400px; background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); margin-bottom: 1.5rem; }
-  .result-title { font-size: 1.25rem; font-weight: 600; color: #1f2937; margin-bottom: 1rem; text-align: center; }
-  .result-text { font-size: 0.875rem; color: #4b5563; margin: 0.5rem 0; text-align: center; }
-  .score-text { font-size: 1.25rem; font-weight: bold; color: #3b82f6; margin: 0.5rem 0; text-align: center; }
-  .category-text { font-size: 1.125rem; font-weight: 600; color: #3b82f6; margin: 0.5rem 0; text-align: center; }
-  .description-section { width: 90%; max-width: 400px; margin-bottom: 1.5rem; }
-  .description-card { background: white; border-radius: 8px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); overflow: hidden; }
-  .description-header { display: flex; justify-content: space-between; align-items: center; padding: 1.5rem; cursor: pointer; background-color: #f1f1f1; transition: background-color 0.3s ease; }
-  .description-header:hover { background-color: #e0e0e0; }
-  .description-title { font-size: 1.25rem; font-weight: 600; color: #1f2937; margin: 0; }
-  .description-content { padding: 1.5rem; font-size: 0.875rem; color: #4b5563; line-height: 1.6; background-color: white; transition: max-height 0.3s ease, padding 0.3s ease; }
-  .arrow { font-size: 1rem; transition: transform 0.3s ease; }
-  .arrow.expanded { transform: rotate(180deg); }
-  .table-section { width: 90%; max-width: 400px; margin-bottom: 1.5rem; }
-  .table-title { font-size: 1.25rem; font-weight: 600; color: #1f2937; margin-bottom: 1rem; text-align: center; }
-  .ffmi-table { width: 100%; border-collapse: collapse; background: white; border-radius: 8px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); }
-  .ffmi-table th, .ffmi-table td { padding: 0.75rem; font-size: 0.875rem; color: #4b5563; border-bottom: 1px solid #e5e7eb; text-align: center; }
-  .ffmi-table th { background-color: #f3f4f6; font-weight: 600; color: #1f2937; }
-  .ffmi-table tr:last-child td { border-bottom: none; }
-  .back-btn { width: 90%; max-width: 400px; padding: 0.75rem; font-size: 1rem; font-weight: 500; color: white; background: linear-gradient(90deg, #3b82f6, #60a5fa); border: none; border-radius: 6px; cursor: pointer; transition: background 0.3s; }
-  .back-btn:hover { background: linear-gradient(90deg, #2563eb, #3b82f6); }
-  @media (min-width: 768px) {
-    .ffmi-title { font-size: 2rem; }
-    .result-title, .table-title, .description-title { font-size: 1.5rem; }
-    .result-text, .ffmi-table th, .ffmi-table td, .description-content { font-size: 1rem; }
-    .score-text { font-size: 1.5rem; }
-    .category-text { font-size: 1.25rem; }
-  }
-`;
-
-const styleSheet = document.createElement('style');
-styleSheet.innerText = styles;
-document.head.appendChild(styleSheet);

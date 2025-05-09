@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from './UserContext';
 import * as standards from './standards';
+import './Cardio.css'; // 引入外部 CSS
 
 function Cardio() {
   const { userData, setUserData } = useUser();
@@ -12,7 +13,6 @@ function Cardio() {
   const [score, setScore] = useState(null);
   const [isExpanded, setIsExpanded] = useState(false);
 
-  // 當 distance 變化時，保存到 userData.testInputs
   useEffect(() => {
     if (distance) {
       const updatedTestInputs = {
@@ -26,7 +26,7 @@ function Cardio() {
     }
   }, [distance, userData, setUserData]);
 
-  const getAgeRange = age => {
+  const getAgeRange = (age) => {
     if (!age) return null;
     const ageNum = parseInt(age);
     if (ageNum >= 13 && ageNum <= 14) return '13-14';
@@ -45,7 +45,6 @@ function Cardio() {
     if (value >= standard[80]) return 80;
     if (value >= standard[70]) return 70;
     if (value >= standard[60]) return 60;
-    // 低於最低標準，按比例計算0到60分
     const minDistance = standard[60];
     if (value > 0) {
       return Math.round((value / minDistance) * 60);
@@ -172,7 +171,7 @@ function Cardio() {
             type="number"
             placeholder="跑步距離 (公尺)"
             value={distance}
-            onChange={e => setDistance(e.target.value)}
+            onChange={(e) => setDistance(e.target.value)}
             className="input-field"
           />
           <button onClick={calculateCardioScore} className="calculate-btn">
@@ -201,29 +200,22 @@ function Cardio() {
               <div className="description-content">
                 <p className="font-semibold">Cooper Test 簡介</p>
                 <p>
-                  傳統心肺耐力測試需在實驗室以極限強度測量最大攝氧量（VO₂
-                  Max），但難以普及。Kenneth H. Cooper 博士發現 12
-                  分鐘跑步距離與 VO₂ Max 高度相關，於 1968 年設計 Cooper
-                  Test，廣泛應用於美軍體測，簡化測量並提升效率。測試以年齡、性別和跑步距離估算
-                  VO₂ Max。
+                  傳統心肺耐力測試需在實驗室以極限強度測量最大攝氧量（VO₂ Max），但難以普及。Kenneth H. Cooper 博士發現 12 分鐘跑步距離與 VO₂ Max 高度相關，於 1968 年設計 Cooper Test，廣泛應用於美軍體測，簡化測量並提升效率。測試以年齡、性別和跑步距離估算 VO₂ Max。
                 </p>
                 <p className="font-semibold mt-2">測量方式</p>
                 <ul className="list-disc pl-5">
                   <li>
-                    <strong>地點</strong>
-                    ：選擇田徑場或安全跑步環境，方便記錄距離和配速。
+                    <strong>地點</strong>：選擇田徑場或安全跑步環境，方便記錄距離和配速。
                   </li>
                   <li>
-                    <strong>記錄</strong>：用圈數或運動手錶記錄 12
-                    分鐘跑步距離。
+                    <strong>記錄</strong>：用圈數或運動手錶記錄 12 分鐘跑步距離。
                   </li>
                   <li>
                     <strong>熱身</strong>：跑前動態熱身 10-15 分鐘，避免受傷。
                   </li>
                 </ul>
                 <p className="mt-2 text-sm text-gray-600">
-                  本 Cooper 測試標準表可在 Cooper Test Chart 找到，由 Carl
-                  Magnus Swahn 設計。
+                  本 Cooper 測試標準表可在 Cooper Test Chart 找到，由 Carl Magnus Swahn 設計。
                 </p>
               </div>
             )}
@@ -241,145 +233,3 @@ function Cardio() {
 }
 
 export default Cardio;
-
-// 響應式 CSS（保持不變）
-const styles = `
-  .cardio-container {
-    max-width: 100%;
-    padding: 1rem;
-    margin: 0 auto;
-    background-color: #f9f9f9;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  }
-
-  .input-section {
-    margin-bottom: 1.5rem;
-  }
-
-  .exercise-section {
-    margin-bottom: 1.5rem;
-  }
-
-  .input-field {
-    width: 100%;
-    padding: 0.5rem;
-    margin: 0.5rem 0;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-size: 1rem;
-  }
-
-  .calculate-btn {
-    width: 100%;
-    padding: 0.5rem;
-    background-color: #4bc0c0;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    font-size: 1rem;
-    cursor: pointer;
-    margin-top: 0.5rem;
-  }
-
-  .calculate-btn:hover {
-    background-color: #3aa0a0;
-  }
-
-  .score-display {
-    font-size: 1.5rem;
-    font-weight: bold;
-    color: #1E90FF;
-    margin-top: 0.5rem;
-  }
-
-  .description-section {
-    margin-bottom: 1.5rem;
-  }
-
-  .description-card {
-    background-color: #fff;
-    border-radius: 4px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    overflow: hidden;
-  }
-
-  .description-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1rem;
-    cursor: pointer;
-    background-color: #f1f1f1;
-    transition: background-color 0.3s ease;
-  }
-
-  .description-header:hover {
-    background-color: #e0e0e0;
-  }
-
-  .description-content {
-    padding: 1rem;
-    background-color: #fff;
-  }
-
-  .arrow {
-    font-size: 1rem;
-    transition: transform 0.3s ease;
-  }
-
-  .arrow.expanded {
-    transform: rotate(180deg);
-  }
-
-  .button-group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    margin-top: 1.5rem;
-  }
-
-  .submit-btn {
-    width: 100%;
-    padding: 0.75rem;
-    background-color: #4bc0c0;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    font-size: 1rem;
-    cursor: pointer;
-  }
-
-  .submit-btn:hover {
-    background-color: #3aa0a0;
-  }
-
-  @media (max-width: 767px) {
-    .score-display {
-      font-size: 1.25rem;
-    }
-
-    .description-content {
-      font-size: 0.9rem;
-    }
-  }
-
-  @media (min-width: 768px) {
-    .cardio-container {
-      max-width: 800px;
-    }
-
-    .button-group {
-      flex-direction: row;
-      justify-content: space-between;
-    }
-
-    .submit-btn {
-      width: 48%;
-    }
-  }
-`;
-
-const styleSheet = document.createElement('style');
-styleSheet.innerText = styles;
-document.head.appendChild(styleSheet);

@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useUser } from './UserContext';
 import { Radar } from 'react-chartjs-2';
 import {
@@ -48,6 +48,28 @@ function UserInfo({ testData, onLogout, clearTestData }) {
   const [currentUser, setCurrentUser] = useState(null);
   const [radarChartData, setRadarChartData] = useState(null);
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const updateRadarData = (scores) => {
+    return {
+      labels: ['力量', '爆發力', '心肺耐力', '骨骼肌肉量', 'FFMI'],
+      datasets: [
+        {
+          label: '您的表現',
+          data: [
+            scores.strength || 0,
+            scores.explosivePower || 0,
+            scores.cardio || 0,
+            scores.muscleMass || 0,
+            scores.bodyFat || 0,
+          ],
+          backgroundColor: 'rgba(34, 202, 236, 0.2)',
+          borderColor: 'rgba(34, 202, 236, 1)',
+          borderWidth: 2,
+        },
+      ],
+    };
+  };
 
   useEffect(() => {
     if (!auth) {
@@ -55,7 +77,7 @@ function UserInfo({ testData, onLogout, clearTestData }) {
       return;
     }
 
-    const unsubscribe = auth.onAuthStateChanged(user => {
+    const unsubscribe = auth.onAuthStateChanged((user) => {
       setCurrentUser(user);
       if (!user) {
         navigate('/login');
@@ -67,6 +89,8 @@ function UserInfo({ testData, onLogout, clearTestData }) {
 
   useEffect(() => {
     let timer;
+    const isReturningFromEval = location.state?.fromEvaluation || (testData && Object.keys(testData).length > 0);
+
     if (testData && Object.keys(testData).length > 0) {
       setLoading(true);
       const updatedScores = {
@@ -78,55 +102,25 @@ function UserInfo({ testData, onLogout, clearTestData }) {
         ...(testData.bodyFat && { bodyFat: testData.ffmiScore || 0 }),
       };
 
-      setUserData(prev => ({ ...prev, scores: updatedScores }));
+      setUserData((prev) => ({ ...prev, scores: updatedScores }));
+      const newRadarData = updateRadarData(updatedScores);
 
-      const newRadarData = {
-        labels: ['力量', '爆發力', '心肺耐力', '骨骼肌肉量', 'FFMI'],
-        datasets: [
-          {
-            label: '您的表現',
-            data: [
-              updatedScores.strength || 0,
-              updatedScores.explosivePower || 0,
-              updatedScores.cardio || 0,
-              updatedScores.muscleMass || 0,
-              updatedScores.bodyFat || 0,
-            ],
-            backgroundColor: 'rgba(34, 202, 236, 0.2)',
-            borderColor: 'rgba(34, 202, 236, 1)',
-            borderWidth: 2,
-          },
-        ],
-      };
-
-      timer = setTimeout(() => {
+      if (isReturningFromEval) {
+        timer = setTimeout(() => {
+          setRadarChartData(newRadarData);
+          setLoading(false);
+        }, 1500);
+      } else {
         setRadarChartData(newRadarData);
         setLoading(false);
-      }, 1000);
+      }
     } else {
       const scores = userData?.scores || DEFAULT_SCORES;
-      setRadarChartData({
-        labels: ['力量', '爆發力', '心肺耐力', '骨骼肌肉量', 'FFMI'],
-        datasets: [
-          {
-            label: '您的表現',
-            data: [
-              scores.strength || 0,
-              scores.explosivePower || 0,
-              scores.cardio || 0,
-              scores.muscleMass || 0,
-              scores.bodyFat || 0,
-            ],
-            backgroundColor: 'rgba(34, 202, 236, 0.2)',
-            borderColor: 'rgba(34, 202, 236, 1)',
-            borderWidth: 2,
-          },
-        ],
-      });
+      setRadarChartData(updateRadarData(scores));
     }
 
     return () => clearTimeout(timer);
-  }, [testData, userData?.scores, setUserData]);
+  }, [testData, userData?.scores, setUserData, location.state]);
 
   const validateData = useCallback(() => {
     const { height, weight, age, gender } = userData;
@@ -146,7 +140,7 @@ function UserInfo({ testData, onLogout, clearTestData }) {
   }, [userData]);
 
   const saveData = useCallback(
-    async e => {
+    async (e) => {
       e.preventDefault();
       setError(null);
       setLoading(true);
@@ -167,24 +161,7 @@ function UserInfo({ testData, onLogout, clearTestData }) {
 
       try {
         await saveUserData(updatedUserData);
-        setRadarChartData({
-          labels: ['力量', '爆發力', '心肺耐力', '骨骼肌肉量', 'FFMI'],
-          datasets: [
-            {
-              label: '您的表現',
-              data: [
-                updatedUserData.scores.strength || 0,
-                updatedUserData.scores.explosivePower || 0,
-                updatedUserData.scores.cardio || 0,
-                updatedUserData.scores.muscleMass || 0,
-                updatedUserData.scores.bodyFat || 0,
-              ],
-              backgroundColor: 'rgba(34, 202, 236, 0.2)',
-              borderColor: 'rgba(34, 202, 236, 1)',
-              borderWidth: 2,
-            },
-          ],
-        });
+        setRadarChartData(updateRadarData(updatedUserData.scores));
       } catch (err) {
         setError(`儲存失敗：${err.message}`);
       } finally {
@@ -196,7 +173,7 @@ function UserInfo({ testData, onLogout, clearTestData }) {
 
   const averageScore = useMemo(() => {
     const scores = userData?.scores || DEFAULT_SCORES;
-    const scoreValues = Object.values(scores).filter(score => score > 0);
+    const scoreValues = Object.values(scores).filter((score) => score > 0);
     return scoreValues.length
       ? (scoreValues.reduce((sum, score) => sum + score, 0) / scoreValues.length).toFixed(0)
       : 0;
@@ -217,7 +194,7 @@ function UserInfo({ testData, onLogout, clearTestData }) {
   }, [userData.scores, averageScore, saveHistory]);
 
   const handleNavigation = useCallback(
-    async path => {
+    async (path) => {
       if (!userData.height || !userData.weight || !userData.age || !userData.gender) {
         setError('請先填寫並儲存您的身高、體重、年齡和性別！');
         return;
@@ -225,7 +202,7 @@ function UserInfo({ testData, onLogout, clearTestData }) {
 
       if (validateData()) {
         await saveData({ preventDefault: () => {} });
-        navigate(path);
+        navigate(path, { state: { fromEvaluation: false } });
       } else {
         setError('請確保資料已正確保存後再進行評測！');
       }
@@ -236,13 +213,12 @@ function UserInfo({ testData, onLogout, clearTestData }) {
   const handleLogout = useCallback(() => {
     localStorage.removeItem('savedEmail');
     localStorage.removeItem('savedPassword');
-    
+
     if (auth.currentUser) {
-      auth.signOut().catch(err => console.error('UserInfo.js - 登出失敗:', err));
+      auth.signOut().catch((err) => console.error('UserInfo.js - 登出失敗:', err));
     }
-    
+
     onLogout();
-    
     navigate('/login');
   }, [onLogout, navigate]);
 
@@ -286,13 +262,13 @@ function UserInfo({ testData, onLogout, clearTestData }) {
   const handleInputChange = useCallback(
     ({ target: { name, value } }) => {
       const newValue = name === 'gender' ? value : isNaN(Number(value)) ? 0 : Number(value);
-      setUserData(prev => ({ ...prev, [name]: newValue }));
+      setUserData((prev) => ({ ...prev, [name]: newValue }));
     },
     [setUserData]
   );
 
   const debouncedHandleInputChange = useMemo(
-    () => debounce((name, value) => handleInputChange({ target: { name, value } }), 300),
+    () => debounce((name, value) => handleInputChange({ target: { name, value } }), 150),
     [handleInputChange]
   );
 
@@ -395,7 +371,7 @@ function UserInfo({ testData, onLogout, clearTestData }) {
         </div>
       )}
 
-      <div id="radar-section" className="radar-section" style={{ position: 'relative' }}>
+      <div id="radar-section" className="radar-section">
         <h2 className="text-xl font-semibold text-center mb-4">表現總覽</h2>
         {loading ? (
           <p>正在載入數據...</p>
@@ -410,34 +386,20 @@ function UserInfo({ testData, onLogout, clearTestData }) {
             <p className="score-slogan">{scoreSlogan}</p>
           </div>
         )}
-        <button
-          onClick={handleSaveResults}
-          className="save-results-btn"
-          style={{
-            position: 'absolute',
-            top: '10px', // 向上移動，固定在容器頂部
-            right: '20px',
-            backgroundColor: 'rgba(34, 202, 236, 1)',
-            color: '#fff',
-            padding: '8px 16px',
-            border: 'none',
-            borderRadius: '5px',
-            cursor: 'pointer',
-            fontSize: '14px',
-            margin: '0' // 移除多餘邊距，精確控制位置
-          }}
-        >
+      </div>
+
+      <div className="save-button-container">
+        <button onClick={handleSaveResults} className="save-results-btn">
           儲存結果至歷史紀錄
         </button>
       </div>
 
-      <div className="button-group" style={{ marginTop: '40px' }}> {/* 向下移動按鈕組 */}
+      <div className="button-group" style={{ marginTop: '40px' }}>
         <button onClick={() => handleNavigation('/strength')} className="nav-btn">力量評測</button>
         <button onClick={() => handleNavigation('/explosive-power')} className="nav-btn">爆發力測試</button>
         <button onClick={() => handleNavigation('/cardio')} className="nav-btn">心肺耐力測試</button>
         <button onClick={() => handleNavigation('/muscle-mass')} className="nav-btn">骨骼肌肉量</button>
         <button onClick={() => handleNavigation('/body-fat')} className="nav-btn">體脂肪率與FFMI</button>
-        <button onClick={() => handleNavigation('/celebrity-comparison')} className="nav-btn special-btn">名人數據參照表</button>
         <button onClick={() => navigate('/history')} className="nav-btn special-btn">歷史紀錄</button>
       </div>
     </div>

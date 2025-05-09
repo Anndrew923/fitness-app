@@ -6,95 +6,7 @@ import {
   createUserWithEmailAndPassword,
 } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
-
-// 響應式 CSS
-const styles = `
-  .login-container {
-    max-width: 100%;
-    padding: 1rem;
-    margin: 0 auto;
-    background-color: #f9f9f9;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  }
-
-  .input-field {
-    width: 100%;
-    padding: 0.5rem;
-    margin: 0.5rem 0;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-size: 1rem;
-  }
-
-  .submit-btn {
-    width: 100%;
-    padding: 0.75rem;
-    background-color: #4bc0c0;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-  }
-
-  .submit-btn:hover {
-    background-color: #3aa0a0;
-  }
-
-  .submit-btn:disabled {
-    background-color: #cccccc;
-    cursor: not-allowed;
-  }
-
-  .toggle-btn {
-    width: 100%;
-    padding: 0.5rem;
-    margin-top: 1rem;
-    background-color: #cccccc;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    font-size: 1rem;
-    cursor: pointer;
-    text-align: center;
-    transition: background-color 0.3s ease;
-  }
-
-  .toggle-btn:hover {
-    background-color: #b3b3b3;
-  }
-
-  .error-message {
-    color: #d32f2f;
-    font-size: 0.875rem;
-    margin-bottom: 1rem;
-    text-align: center;
-  }
-
-  .checkbox-container {
-    display: flex;
-    align-items: center;
-    margin-top: 0.5rem;
-  }
-
-  .checkbox-label {
-    margin-left: 0.5rem;
-    font-size: 0.875rem;
-    color: #333;
-  }
-
-  @media (min-width: 768px) {
-    .login-container {
-      max-width: 400px;
-    }
-  }
-`;
-
-const styleSheet = document.createElement('style');
-styleSheet.innerText = styles;
-document.head.appendChild(styleSheet);
+import './Login.css'; // 引入外部 CSS
 
 function Login({ onLogin }) {
   const [email, setEmail] = useState('');
@@ -108,7 +20,6 @@ function Login({ onLogin }) {
 
   const { height, weight, age } = location.state || {};
 
-  // 頁面加載時檢查 localStorage 是否有儲存的帳號密碼
   useEffect(() => {
     if (!auth) {
       setError('Firebase 未正確初始化，請檢查配置');
@@ -119,7 +30,6 @@ function Login({ onLogin }) {
       return;
     }
 
-    // 從 localStorage 讀取帳號密碼
     const savedEmail = localStorage.getItem('savedEmail');
     const savedPassword = localStorage.getItem('savedPassword');
     if (savedEmail && savedPassword) {
@@ -162,14 +72,12 @@ function Login({ onLogin }) {
       }
 
       const user = userCredential.user;
-      onLogin(user.email, password); // 調用父組件的回調
+      onLogin(user.email, password);
 
-      // 如果勾選「記住我的帳號」，則儲存到 localStorage
       if (rememberMe) {
         localStorage.setItem('savedEmail', email);
         localStorage.setItem('savedPassword', password);
       } else {
-        // 如果未勾選，則清除 localStorage
         localStorage.removeItem('savedEmail');
         localStorage.removeItem('savedPassword');
       }

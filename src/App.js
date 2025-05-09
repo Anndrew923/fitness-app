@@ -10,7 +10,6 @@ import { auth } from './firebase';
 import { signInWithEmailAndPassword, signOut } from 'firebase/auth';
 import ScrollToTop from './ScrollToTop';
 import Welcome from './Welcome';
-import Home from './Home';
 import UserInfo from './UserInfo';
 import Strength from './Strength';
 import Cardio from './Cardio';
@@ -18,11 +17,9 @@ import Power from './Power';
 import Muscle from './Muscle';
 import FFMI from './FFMI';
 import StrengthInstructions from './StrengthInstructions';
-import CelebrityComparison from './CelebrityComparison';
 import Login from './Login';
 import History from './History';
 
-// 錯誤邊界組件
 class ErrorBoundary extends Component {
   state = { hasError: false };
 
@@ -45,7 +42,6 @@ class ErrorBoundary extends Component {
 function App() {
   const [testData, setTestData] = useState(null);
 
-  // 處理登入
   const handleLogin = async (email, password) => {
     try {
       await signInWithEmailAndPassword(auth, email, password);
@@ -53,11 +49,10 @@ function App() {
       console.log('登入成功, auth.currentUser:', auth.currentUser);
     } catch (error) {
       console.error('登入失敗:', error);
-      throw error; // 讓 Login.js 處理錯誤
+      throw error;
     }
   };
 
-  // 處理登出
   const handleLogout = () => {
     if (auth.currentUser) {
       signOut(auth)
@@ -71,29 +66,24 @@ function App() {
     }
   };
 
-  // 處理測驗完成
   const handleTestComplete = (data) => {
     setTestData(data);
     console.log('測驗完成, testData:', data);
   };
 
-  // 清除測驗數據
   const clearTestData = () => {
     setTestData(null);
     console.log('測驗數據已清除');
   };
 
-  // 保護路由
   const ProtectedRoute = ({ element }) => {
     const { userData } = useUser();
     const currentPath = window.location.pathname;
 
-    // 未登入則重定向到登入頁面
     if (!auth.currentUser) {
       return <Navigate to="/login" />;
     }
 
-    // 檢查用戶數據是否完整（除了 /user-info 頁面）
     if (currentPath !== '/user-info') {
       const isHeightValid = typeof userData?.height === 'number' && userData.height > 0;
       const isWeightValid = typeof userData?.weight === 'number' && userData.weight > 0;
@@ -124,7 +114,6 @@ function App() {
                 )
               }
             />
-            <Route path="/home" element={<ProtectedRoute element={<Home />} />} />
             <Route
               path="/user-info"
               element={
@@ -176,10 +165,6 @@ function App() {
               }
             />
             <Route path="/strength-instructions" element={<StrengthInstructions />} />
-            <Route
-              path="/celebrity-comparison"
-              element={<ProtectedRoute element={<CelebrityComparison />} />}
-            />
             <Route path="/login" element={<Login onLogin={handleLogin} />} />
             <Route path="/history" element={<ProtectedRoute element={<History />} />} />
             <Route path="*" element={<div>404 - 頁面未找到</div>} />

@@ -1,10 +1,10 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useUser } from './UserContext';
-import './styles.css';
+import './History.css'; // 引入外部 CSS
 
 function History() {
   const { userData, setUserData } = useUser();
-  const history = useMemo(() => userData?.history || [], [userData]); // Cache history with useMemo
+  const history = useMemo(() => userData?.history || [], [userData]);
   const [showDeleteOptions, setShowDeleteOptions] = useState(false);
   const [selectedRecords, setSelectedRecords] = useState([]);
 
@@ -15,12 +15,12 @@ function History() {
 
   const toggleDeleteOptions = () => {
     setShowDeleteOptions(!showDeleteOptions);
-    setSelectedRecords([]); // Reset selection
+    setSelectedRecords([]);
   };
 
   const handleSelectRecord = (index) => {
     if (selectedRecords.includes(index)) {
-      setSelectedRecords(selectedRecords.filter(i => i !== index));
+      setSelectedRecords(selectedRecords.filter((i) => i !== index));
     } else {
       setSelectedRecords([...selectedRecords, index]);
     }
@@ -38,19 +38,8 @@ function History() {
   return (
     <div className="history-container">
       <h1 className="text-2xl font-bold text-center mb-6">歷史紀錄</h1>
-      <div style={{ textAlign: 'right', marginBottom: '10px' }}>
-        <button 
-          disabled 
-          style={{ 
-            padding: '8px 16px', 
-            backgroundColor: '#ccc', 
-            color: '#fff', 
-            border: 'none', 
-            borderRadius: '5px' 
-          }}
-        >
-          同步資料（功能製作中）
-        </button>
+      <div className="sync-button-container">
+        <button disabled className="sync-button">同步資料（功能製作中）</button>
       </div>
       {history.length > 0 ? (
         <>
@@ -90,31 +79,15 @@ function History() {
               ))}
             </tbody>
           </table>
-          <div style={{ textAlign: 'right', marginTop: '10px' }}>
-            <button 
+          <div className="action-buttons">
+            <button
               onClick={toggleDeleteOptions}
-              style={{ 
-                padding: '8px 16px', 
-                backgroundColor: showDeleteOptions ? '#f44336' : '#4CAF50', 
-                color: '#fff', 
-                border: 'none', 
-                borderRadius: '5px',
-                marginRight: '10px'
-              }}
+              className={`toggle-delete-btn ${showDeleteOptions ? 'cancel' : 'cleanup'}`}
             >
               {showDeleteOptions ? '取消' : '清理資料'}
             </button>
             {showDeleteOptions && (
-              <button 
-                onClick={handleDeleteSelected}
-                style={{ 
-                  padding: '8px 16px', 
-                  backgroundColor: '#f44336', 
-                  color: '#fff', 
-                  border: 'none', 
-                  borderRadius: '5px' 
-                }}
-              >
+              <button onClick={handleDeleteSelected} className="delete-selected-btn">
                 刪除所選
               </button>
             )}

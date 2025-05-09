@@ -1,0 +1,15 @@
+.average-score-section {
+    margin-top: 20px;
+    text-align: center;
+  }
+  
+  .average-score {
+    font-size: 28px;
+    font-weight: bold;
+    color: #ff0000;
+  }
+  
+  .average-comment {
+    font-size: 20px;
+    color: #0000ff;
+  }
