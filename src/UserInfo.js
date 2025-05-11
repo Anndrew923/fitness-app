@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useUser } from './UserContext';
 import { Radar } from 'react-chartjs-2';
 import {
@@ -48,7 +48,6 @@ function UserInfo({ testData, onLogout, clearTestData }) {
   const [currentUser, setCurrentUser] = useState(null);
   const [radarChartData, setRadarChartData] = useState(null);
   const navigate = useNavigate();
-  const location = useLocation();
 
   const updateRadarData = (scores) => {
     return {
@@ -77,7 +76,7 @@ function UserInfo({ testData, onLogout, clearTestData }) {
       return;
     }
 
-    const unsubscribe = auth.onAuthStateChanged((user) => {
+    const unsubscribe = auth.onAuthStateChanged(user => {
       setCurrentUser(user);
       if (!user) {
         navigate('/login');
@@ -88,11 +87,7 @@ function UserInfo({ testData, onLogout, clearTestData }) {
   }, [navigate]);
 
   useEffect(() => {
-    let timer;
-    const isReturningFromEval = location.state?.fromEvaluation || (testData && Object.keys(testData).length > 0);
-
     if (testData && Object.keys(testData).length > 0) {
-      setLoading(true);
       const updatedScores = {
         ...userData.scores,
         ...(testData.distance && { cardio: testData.score || 0 }),
@@ -101,26 +96,28 @@ function UserInfo({ testData, onLogout, clearTestData }) {
         ...(testData.smm && { muscleMass: testData.finalScore || 0 }),
         ...(testData.bodyFat && { bodyFat: testData.ffmiScore || 0 }),
       };
+      setUserData(prev => ({ ...prev, scores: updatedScores }));
+    }
+  }, [testData, setUserData]);
 
-      setUserData((prev) => ({ ...prev, scores: updatedScores }));
-      const newRadarData = updateRadarData(updatedScores);
+  useEffect(() => {
+    let timer;
+    const isReturningFromEval = testData && Object.keys(testData).length > 0;
 
-      if (isReturningFromEval) {
-        timer = setTimeout(() => {
-          setRadarChartData(newRadarData);
-          setLoading(false);
-        }, 1500);
-      } else {
+    if (isReturningFromEval) {
+      setLoading(true);
+      timer = setTimeout(() => {
+        const newRadarData = updateRadarData(userData.scores || DEFAULT_SCORES);
         setRadarChartData(newRadarData);
         setLoading(false);
-      }
+      }, 1500);
     } else {
-      const scores = userData?.scores || DEFAULT_SCORES;
-      setRadarChartData(updateRadarData(scores));
+      const newRadarData = updateRadarData(userData.scores || DEFAULT_SCORES);
+      setRadarChartData(newRadarData);
     }
 
     return () => clearTimeout(timer);
-  }, [testData, userData?.scores, setUserData, location.state]);
+  }, [testData, userData.scores]); // 直接包含 userData.scores 作為依賴項
 
   const validateData = useCallback(() => {
     const { height, weight, age, gender } = userData;
@@ -140,7 +137,7 @@ function UserInfo({ testData, onLogout, clearTestData }) {
   }, [userData]);
 
   const saveData = useCallback(
-    async (e) => {
+    async e => {
       e.preventDefault();
       setError(null);
       setLoading(true);
@@ -173,7 +170,7 @@ function UserInfo({ testData, onLogout, clearTestData }) {
 
   const averageScore = useMemo(() => {
     const scores = userData?.scores || DEFAULT_SCORES;
-    const scoreValues = Object.values(scores).filter((score) => score > 0);
+    const scoreValues = Object.values(scores).filter(score => score > 0);
     return scoreValues.length
       ? (scoreValues.reduce((sum, score) => sum + score, 0) / scoreValues.length).toFixed(0)
       : 0;
@@ -194,7 +191,7 @@ function UserInfo({ testData, onLogout, clearTestData }) {
   }, [userData.scores, averageScore, saveHistory]);
 
   const handleNavigation = useCallback(
-    async (path) => {
+    async path => {
       if (!userData.height || !userData.weight || !userData.age || !userData.gender) {
         setError('請先填寫並儲存您的身高、體重、年齡和性別！');
         return;
@@ -213,11 +210,11 @@ function UserInfo({ testData, onLogout, clearTestData }) {
   const handleLogout = useCallback(() => {
     localStorage.removeItem('savedEmail');
     localStorage.removeItem('savedPassword');
-
+    
     if (auth.currentUser) {
-      auth.signOut().catch((err) => console.error('UserInfo.js - 登出失敗:', err));
+      auth.signOut().catch(err => console.error('UserInfo.js - 登出失敗:', err));
     }
-
+    
     onLogout();
     navigate('/login');
   }, [onLogout, navigate]);
@@ -262,7 +259,7 @@ function UserInfo({ testData, onLogout, clearTestData }) {
   const handleInputChange = useCallback(
     ({ target: { name, value } }) => {
       const newValue = name === 'gender' ? value : isNaN(Number(value)) ? 0 : Number(value);
-      setUserData((prev) => ({ ...prev, [name]: newValue }));
+      setUserData(prev => ({ ...prev, [name]: newValue }));
     },
     [setUserData]
   );

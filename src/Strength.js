@@ -12,8 +12,7 @@ import {
   Legend,
 } from 'chart.js';
 import * as standards from './standards';
-import debounce from 'lodash/debounce';
-import './Strength.css'; // 引入外部 CSS 文件
+import './Strength.css';
 
 ChartJS.register(
   RadialLinearScale,
@@ -61,13 +60,14 @@ function Strength() {
   });
   const [isExpanded, setIsExpanded] = useState(false);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const debouncedSetUserData = useCallback(
-    debounce((newUserData) => {
-      setUserData(newUserData);
-    }, 1000),
-    [setUserData]
-  );
+  // Inlined debounce logic with cleanup
+  const debouncedSetUserData = useCallback((newUserData) => {
+    let timeoutId;
+    const updateData = () => setUserData(newUserData);
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(updateData, 1000);
+    return () => clearTimeout(timeoutId); // Cleanup function
+  }, [setUserData]);
 
   useEffect(() => {
     const updatedTestInputs = {
@@ -81,7 +81,8 @@ function Strength() {
       },
     };
     const newUserData = { ...userData, testInputs: updatedTestInputs };
-    debouncedSetUserData(newUserData);
+    const cleanup = debouncedSetUserData(newUserData);
+    return cleanup; // Cleanup timer on unmount or dependency change
   }, [benchPress, squat, deadlift, latPulldown, shoulderPress, userData, debouncedSetUserData]);
 
   const calculateScore = (value, standard) => {
@@ -179,7 +180,18 @@ function Strength() {
     try {
       const updatedScores = { ...userData.scores, strength: parseFloat(averageScore) };
       await setUserData({ ...userData, scores: updatedScores });
-      navigate('/user-info', { replace: false });
+      navigate('/user-info', {
+        state: {
+          testData: {
+            benchPress: benchPress.max ? { weight: benchPress.weight, reps: benchPress.reps, max: benchPress.max, score: benchPress.score } : null,
+            squat: squat.max ? { weight: squat.weight, reps: squat.reps, max: squat.max, score: squat.score } : null,
+            deadlift: deadlift.max ? { weight: deadlift.weight, reps: deadlift.reps, max: deadlift.max, score: deadlift.score } : null,
+            latPulldown: latPulldown.max ? { weight: latPulldown.weight, reps: latPulldown.reps, max: latPulldown.max, score: latPulldown.score } : null,
+            shoulderPress: shoulderPress.max ? { weight: shoulderPress.weight, reps: shoulderPress.reps, max: shoulderPress.max, score: shoulderPress.score } : null,
+            averageScore,
+          },
+        },
+      });
     } catch (error) {
       alert('更新用戶數據或導航失敗，請稍後再試！');
     }

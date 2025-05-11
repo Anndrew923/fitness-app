@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from './UserContext';
 import * as standards from './standards';
-import './Power.css'; // 引入外部 CSS
+import './Power.css';
 
 function Power() {
   const { userData, setUserData } = useUser();
@@ -24,11 +24,7 @@ function Power() {
   useEffect(() => {
     const updatedTestInputs = {
       ...userData.testInputs,
-      power: {
-        verticalJump,
-        standingLongJump,
-        sprint,
-      },
+      power: { verticalJump, standingLongJump, sprint },
     };
     setUserData({ ...userData, testInputs: updatedTestInputs });
   }, [verticalJump, standingLongJump, sprint, userData, setUserData]);
@@ -106,7 +102,16 @@ function Power() {
       const updatedScores = { ...userData.scores, explosivePower: parseFloat(result.finalScore) };
       await setUserData({ ...userData, scores: updatedScores });
       console.log('Power.js - 已更新 userData.scores.explosivePower:', updatedScores);
-      navigate('/user-info', { replace: false });
+      navigate('/user-info', {
+        state: {
+          testData: {
+            verticalJump: verticalJump || null,
+            standingLongJump: standingLongJump || null,
+            sprint: sprint || null,
+            finalScore: result.finalScore,
+          },
+        },
+      });
     } catch (error) {
       console.error('Power.js - 更新 UserContext 或導航失敗:', error);
       alert('更新用戶數據或導航失敗，請稍後再試！');

@@ -12,7 +12,7 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
-import './Muscle.css'; // 引入外部 CSS
+import './Muscle.css';
 
 ChartJS.register(
   CategoryScale,
@@ -40,10 +40,7 @@ function Muscle() {
     if (smm) {
       const updatedTestInputs = {
         ...userData.testInputs,
-        muscle: {
-          ...userData.testInputs?.muscle,
-          smm,
-        },
+        muscle: { ...userData.testInputs?.muscle, smm },
       };
       setUserData({ ...userData, testInputs: updatedTestInputs });
     }
@@ -96,20 +93,9 @@ function Muscle() {
 
     const smPercent = ((smmNum / weightNum) * 100).toFixed(1);
 
-    const genderValue =
-      gender === '男性' || gender.toLowerCase() === 'male'
-        ? 'male'
-        : gender === '女性' || gender.toLowerCase() === 'female'
-          ? 'female'
-          : null;
-    const smmStandards =
-      genderValue === 'male'
-        ? standards.muscleStandardsMaleSMM
-        : standards.muscleStandardsFemaleSMM;
-    const smPercentStandards =
-      genderValue === 'male'
-        ? standards.muscleStandardsMaleSMPercent
-        : standards.muscleStandardsFemaleSMPercent;
+    const genderValue = gender === '男性' || gender.toLowerCase() === 'male' ? 'male' : 'female';
+    const smmStandards = genderValue === 'male' ? standards.muscleStandardsMaleSMM : standards.muscleStandardsFemaleSMM;
+    const smPercentStandards = genderValue === 'male' ? standards.muscleStandardsMaleSMPercent : standards.muscleStandardsFemaleSMPercent;
 
     const smmStandard = smmStandards[ageRange];
     const smPercentStandard = smPercentStandards[ageRange];
@@ -143,14 +129,19 @@ function Muscle() {
     }
 
     try {
-      const updatedScores = {
-        ...userData.scores,
-        muscleMass: parseFloat(result.finalScore),
-      };
+      const updatedScores = { ...userData.scores, muscleMass: parseFloat(result.finalScore) };
       const updatedUserData = { ...userData, scores: updatedScores };
       await setUserData(updatedUserData);
       console.log('Muscle.js - 已更新 userData.scores.muscleMass:', updatedScores);
-      navigate('/user-info', { replace: false });
+      navigate('/user-info', {
+        state: {
+          testData: {
+            smm: smm || null,
+            smPercent: result.smPercent || null,
+            finalScore: result.finalScore,
+          },
+        },
+      });
       console.log('Muscle.js - 導航調用完成');
     } catch (error) {
       console.error('Muscle.js - 更新 UserContext 或導航失敗:', error);
@@ -190,22 +181,12 @@ function Muscle() {
     responsive: true,
     maintainAspectRatio: false,
     scales: {
-      y: {
-        beginAtZero: true,
-        max: 100,
-        title: { display: true, text: '分數', font: { size: 14 } },
-      },
-      x: {
-        title: { display: true, text: '項目', font: { size: 14 } },
-      },
+      y: { beginAtZero: true, max: 100, title: { display: true, text: '分數', font: { size: 14 } } },
+      x: { title: { display: true, text: '項目', font: { size: 14 } } },
     },
     plugins: {
       legend: { display: false },
-      tooltip: {
-        callbacks: {
-          label: context => `${context.dataset.label}: ${context.raw}`,
-        },
-      },
+      tooltip: { callbacks: { label: context => `${context.dataset.label}: ${context.raw}` } },
     },
   };
 
@@ -218,16 +199,8 @@ function Muscle() {
 
       <div className="exercise-section">
         <h2 className="text-lg font-semibold">骨骼肌肉量 (SMM)</h2>
-        <input
-          type="number"
-          placeholder="骨骼肌肉量 (kg)"
-          value={smm}
-          onChange={e => setSmm(e.target.value)}
-          className="input-field"
-        />
-        <button onClick={calculateMuscleScore} className="calculate-btn">
-          計算
-        </button>
+        <input type="number" placeholder="骨骼肌肉量 (kg)" value={smm} onChange={e => setSmm(e.target.value)} className="input-field" />
+        <button onClick={calculateMuscleScore} className="calculate-btn">計算</button>
         {result.smmScore && <p className="score-text">骨骼肌肉量 (SMM) 分數: {result.smmScore}</p>}
         {result.smPercent && <p className="score-text">骨骼肌肉量百分比 (SM%): {result.smPercent}%</p>}
         {result.smPercentScore && <p className="score-text">骨骼肌肉量百分比 (SM%) 分數: {result.smPercentScore}</p>}

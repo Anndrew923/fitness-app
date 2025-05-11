@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from './UserContext';
-import './FFMI.css'; // 引入外部 CSS
+import './FFMI.css';
 
 function FFMI() {
   const { userData, setUserData } = useUser();
@@ -16,10 +16,7 @@ function FFMI() {
     if (bodyFat) {
       const updatedTestInputs = {
         ...userData.testInputs,
-        ffmi: {
-          ...userData.testInputs?.ffmi,
-          bodyFat,
-        },
+        ffmi: { ...userData.testInputs?.ffmi, bodyFat },
       };
       setUserData({ ...userData, testInputs: updatedTestInputs });
     }
@@ -86,7 +83,15 @@ function FFMI() {
       const updatedScores = { ...userData.scores, bodyFat: parseFloat(ffmiScore) };
       await setUserData({ ...userData, scores: updatedScores });
       console.log('FFMI.js - 已更新 userData.scores.bodyFat:', updatedScores);
-      navigate('/user-info', { replace: false });
+      navigate('/user-info', {
+        state: {
+          testData: {
+            bodyFat: bodyFat || null,
+            ffmi: ffmi || null,
+            ffmiScore,
+          },
+        },
+      });
     } catch (error) {
       console.error('FFMI.js - 更新 UserContext 或導航失敗:', error);
       alert('更新用戶數據或導航失敗，請稍後再試！');
@@ -118,13 +123,7 @@ function FFMI() {
       <h1 className="ffmi-title">體脂肪率與 FFMI</h1>
       <div className="input-section">
         <label className="input-label">體脂肪率 (%)</label>
-        <input
-          type="number"
-          value={bodyFat}
-          onChange={(e) => setBodyFat(e.target.value)}
-          placeholder="輸入體脂肪率 (%)"
-          className="input-field"
-        />
+        <input type="number" value={bodyFat} onChange={e => setBodyFat(e.target.value)} placeholder="輸入體脂肪率 (%)" className="input-field" />
         <button onClick={calculateScores} className="calculate-btn">計算分數</button>
       </div>
       {ffmi && (
