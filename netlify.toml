@@ -1,9 +1,8 @@
-[[headers]]
-  for = "/*"
-  [headers.values]
-    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; connect-src 'self' https://*.googleapis.com wss://*.firebaseio.com; font-src 'self'; img-src 'self' data:"
-
 [build]
   command = "yarn build"
-  publish = "build"
-  environment = { NODE_VERSION = "20", CI = "false" }
+  publish = "dist"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
