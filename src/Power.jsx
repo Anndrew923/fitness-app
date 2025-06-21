@@ -2,10 +2,11 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from './UserContext';
 import * as standards from './standards';
+import PropTypes from 'prop-types';
 import './Power.css';
 
-function Power() {
-  const { userData, setUserData } = useUser();
+function Power({ onComplete, clearTestData }) {
+  const { userData, setUserData, saveUserData } = useUser();
   const navigate = useNavigate();
   const { age, gender } = userData;
 
@@ -26,8 +27,8 @@ function Power() {
       ...userData.testInputs,
       power: { verticalJump, standingLongJump, sprint },
     };
-    setUserData({ ...userData, testInputs: updatedTestInputs });
-  }, [verticalJump, standingLongJump, sprint, userData, setUserData]);
+    setUserData(prev => ({ ...prev, testInputs: updatedTestInputs }));
+  }, [verticalJump, standingLongJump, sprint]);
 
   const getAgeRange = age => {
     if (!age) return null;
@@ -58,11 +59,20 @@ function Power() {
   };
 
   const calculatePowerScore = () => {
-    if (!age || !gender) return alert('請確保已在用戶信息中輸入年齡和性別！');
-    if (!verticalJump && !standingLongJump && !sprint) return alert('請至少輸入一項動作數據！');
+    if (!age || !gender) {
+      alert('請確保已在用戶信息中輸入年齡和性別！');
+      return;
+    }
+    if (!verticalJump && !standingLongJump && !sprint) {
+      alert('請至少輸入一項動作數據！');
+      return;
+    }
 
     const ageRange = getAgeRange(age);
-    if (!ageRange) return alert('請輸入有效的年齡！');
+    if (!ageRange) {
+      alert('請輸入有效的年齡！');
+      return;
+    }
 
     const genderValue = gender === '男性' || gender.toLowerCase() === 'male' ? 'male' : 'female';
     const verticalJumpStandards = genderValue === 'male' ? standards.verticalJumpStandardsMale : standards.verticalJumpStandardsFemale;
@@ -73,7 +83,10 @@ function Power() {
     const standingLongJumpStandard = standingLongJumpStandards[ageRange];
     const sprintStandard = sprintStandards[ageRange];
 
-    if (!verticalJumpStandard || !standingLongJumpStandard || !sprintStandard) return alert('無法找到對應的評測標準，請檢查年齡和性別！');
+    if (!verticalJumpStandard || !standingLongJumpStandard || !sprintStandard) {
+      alert('無法找到對應的評測標準，請檢查年齡和性別！');
+      return;
+    }
 
     const verticalJumpNum = verticalJump ? parseFloat(verticalJump) : null;
     const standingLongJumpNum = standingLongJump ? parseFloat(standingLongJump) : null;
@@ -84,7 +97,10 @@ function Power() {
     const sprintScore = sprintNum !== null ? calculateScoreDecreasing(sprintNum, sprintStandard) : null;
 
     const scores = [verticalJumpScore, standingLongJumpScore, sprintScore].filter(score => score !== null);
-    if (scores.length === 0) return alert('請至少完成一項動作的測量！');
+    if (scores.length === 0) {
+      alert('請至少完成一項動作的測量！');
+      return;
+    }
 
     const finalScore = (scores.reduce((sum, score) => sum + score, 0) / scores.length).toFixed(0);
 
@@ -97,24 +113,56 @@ function Power() {
   };
 
   const handleSubmit = async () => {
-    if (!result.finalScore) return alert('請先計算爆發力分數！');
+    if (!result.finalScore) {
+      alert('請先計算爆發力分數！');
+      return;
+    }
+    
     try {
-      const updatedScores = { ...userData.scores, explosivePower: parseFloat(result.finalScore) };
-      await setUserData({ ...userData, scores: updatedScores });
-      console.log('Power.js - 已更新 userData.scores.explosivePower:', updatedScores);
-      navigate('/user-info', {
-        state: {
-          testData: {
-            verticalJump: verticalJump || null,
-            standingLongJump: standingLongJump || null,
-            sprint: sprint || null,
-            finalScore: result.finalScore,
-          },
-        },
-      });
+      // 準備更新的數據
+      const updatedScores = { 
+        ...userData.scores, 
+        explosivePower: parseFloat(result.finalScore) 
+      };
+      
+      const updatedUserData = {
+        ...userData,
+        scores: updatedScores
+      };
+      
+      // 先更新本地狀態
+      setUserData(updatedUserData);
+      
+      // 保存到 Firebase
+      const success = await saveUserData(updatedUserData);
+      
+      if (success) {
+        console.log('Power.js - 成功更新爆發力分數');
+        
+        // 準備測試數據
+        const testData = {
+          verticalJump: verticalJump || null,
+          standingLongJump: standingLongJump || null,
+          sprint: sprint || null,
+          finalScore: result.finalScore,
+        };
+        
+        // 如果有 onComplete prop，呼叫它
+        if (onComplete && typeof onComplete === 'function') {
+          onComplete(testData);
+        }
+        
+        // 延遲導航，確保數據已更新
+        setTimeout(() => {
+          navigate('/user-info');
+        }, 100);
+      } else {
+        throw new Error('保存數據失敗');
+      }
+      
     } catch (error) {
       console.error('Power.js - 更新 UserContext 或導航失敗:', error);
-      alert('更新用戶數據或導航失敗，請稍後再試！');
+      alert('更新用戶數據失敗，請稍後再試！');
     }
   };
 
@@ -127,9 +175,36 @@ function Power() {
 
         <div className="exercise-section">
           <h2 className="text-lg font-semibold">爆發力動作</h2>
-          <input type="number" placeholder="垂直彈跳 (公分)" value={verticalJump} onChange={e => setVerticalJump(e.target.value)} className="input-field" />
-          <input type="number" placeholder="立定跳遠 (公分)" value={standingLongJump} onChange={e => setStandingLongJump(e.target.value)} className="input-field" />
-          <input type="number" placeholder="100公尺衝刺跑 (秒)" value={sprint} onChange={e => setSprint(e.target.value)} className="input-field" />
+          <label htmlFor="verticalJump" className="block text-sm font-medium text-gray-700">垂直彈跳 (公分)</label>
+          <input
+            id="verticalJump"
+            name="verticalJump"
+            type="number"
+            placeholder="垂直彈跳 (公分)"
+            value={verticalJump}
+            onChange={e => setVerticalJump(e.target.value)}
+            className="input-field"
+          />
+          <label htmlFor="standingLongJump" className="block text-sm font-medium text-gray-700">立定跳遠 (公分)</label>
+          <input
+            id="standingLongJump"
+            name="standingLongJump"
+            type="number"
+            placeholder="立定跳遠 (公分)"
+            value={standingLongJump}
+            onChange={e => setStandingLongJump(e.target.value)}
+            className="input-field"
+          />
+          <label htmlFor="sprint" className="block text-sm font-medium text-gray-700">100公尺衝刺跑 (秒)</label>
+          <input
+            id="sprint"
+            name="sprint"
+            type="number"
+            placeholder="100公尺衝刺跑 (秒)"
+            value={sprint}
+            onChange={e => setSprint(e.target.value)}
+            className="input-field"
+          />
           <button onClick={calculatePowerScore} className="calculate-btn">計算</button>
           {result.finalScore && (
             <>
@@ -188,5 +263,10 @@ function Power() {
     </div>
   );
 }
+
+Power.propTypes = {
+  onComplete: PropTypes.func,
+  clearTestData: PropTypes.func,
+};
 
 export default Power;

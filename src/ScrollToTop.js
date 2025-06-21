@@ -20,12 +20,12 @@ function ScrollToTop() {
       if (isFromLogin) {
         window.scrollTo(0, 0);
       } else {
-        setTimeout(() => {
+        requestAnimationFrame(() => {
           const radarSection = document.getElementById('radar-section');
           if (radarSection) {
             radarSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
           }
-        }, 100); // 100ms delay to ensure DOM is rendered
+        });
       }
     } else {
       window.scrollTo(0, 0);

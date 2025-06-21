@@ -1,27 +1,10 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from './UserContext';
-import { Radar } from 'react-chartjs-2';
-import {
-  Chart as ChartJS,
-  RadialLinearScale,
-  PointElement,
-  LineElement,
-  Filler,
-  Tooltip,
-  Legend,
-} from 'chart.js';
+import { RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, ResponsiveContainer } from 'recharts';
 import { auth } from './firebase';
+import PropTypes from 'prop-types';
 import './styles.css';
-
-ChartJS.register(
-  RadialLinearScale,
-  PointElement,
-  LineElement,
-  Filler,
-  Tooltip,
-  Legend
-);
 
 const DEFAULT_SCORES = {
   strength: 0,
@@ -33,46 +16,28 @@ const DEFAULT_SCORES = {
 
 const GENDER_OPTIONS = ['male', 'female'];
 
-function debounce(func, wait) {
-  let timeout;
-  return function (...args) {
-    clearTimeout(timeout);
-    timeout = setTimeout(() => func.apply(this, args), wait);
-  };
-}
-
 function UserInfo({ testData, onLogout, clearTestData }) {
-  const { userData, setUserData, saveUserData, saveHistory } = useUser();
+  const { userData, setUserData, saveUserData, saveHistory, loadUserData } = useUser();
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
-  const [radarChartData, setRadarChartData] = useState(null);
   const navigate = useNavigate();
 
-  const updateRadarData = (scores) => {
-    return {
-      labels: ['力量', '爆發力', '心肺耐力', '骨骼肌肉量', 'FFMI'],
-      datasets: [
-        {
-          label: '您的表現',
-          data: [
-            scores.strength || 0,
-            scores.explosivePower || 0,
-            scores.cardio || 0,
-            scores.muscleMass || 0,
-            scores.bodyFat || 0,
-          ],
-          backgroundColor: 'rgba(34, 202, 236, 0.2)',
-          borderColor: 'rgba(34, 202, 236, 1)',
-          borderWidth: 2,
-        },
-      ],
-    };
-  };
+  const radarChartData = useMemo(() => {
+    const scores = userData.scores || DEFAULT_SCORES;
+    return [
+      { name: '力量', value: scores.strength || 0 },
+      { name: '爆發力', value: scores.explosivePower || 0 },
+      { name: '心肺耐力', value: scores.cardio || 0 },
+      { name: '骨骼肌肉量', value: scores.muscleMass || 0 },
+      { name: 'FFMI', value: scores.bodyFat || 0 },
+    ];
+  }, [userData.scores]);
 
   useEffect(() => {
     if (!auth) {
       setError('無法初始化身份驗證，請檢查 Firebase 配置並稍後再試。');
+      console.error('auth 未初始化');
       return;
     }
 
@@ -86,38 +51,34 @@ function UserInfo({ testData, onLogout, clearTestData }) {
     return () => unsubscribe();
   }, [navigate]);
 
+  // 處理 testData 更新
   useEffect(() => {
     if (testData && Object.keys(testData).length > 0) {
-      const updatedScores = {
-        ...userData.scores,
-        ...(testData.distance && { cardio: testData.score || 0 }),
-        ...(testData.squat && { strength: testData.averageScore || 0 }),
-        ...(testData.jumpHeight && { explosivePower: testData.finalScore || 0 }),
-        ...(testData.smm && { muscleMass: testData.finalScore || 0 }),
-        ...(testData.bodyFat && { bodyFat: testData.ffmiScore || 0 }),
-      };
-      setUserData(prev => ({ ...prev, scores: updatedScores }));
+      console.log('收到測試數據:', testData);
+      
+      // 使用 setUserData 更新分數
+      setUserData(prev => {
+        const updatedScores = {
+          ...prev.scores,
+          ...(testData.distance !== undefined && { cardio: testData.score || 0 }),
+          ...(testData.squat !== undefined && { strength: testData.averageScore || 0 }),
+          ...(testData.jumpHeight !== undefined && { explosivePower: testData.finalScore || 0 }),
+          ...(testData.smm !== undefined && { muscleMass: testData.finalScore || 0 }),
+          ...(testData.bodyFat !== undefined && { bodyFat: testData.ffmiScore || 0 }),
+        };
+        
+        return {
+          ...prev,
+          scores: updatedScores
+        };
+      });
+      
+      // 清除 testData 
+      if (clearTestData) {
+        setTimeout(clearTestData, 1000);
+      }
     }
-  }, [testData, setUserData]);
-
-  useEffect(() => {
-    let timer;
-    const isReturningFromEval = testData && Object.keys(testData).length > 0;
-
-    if (isReturningFromEval) {
-      setLoading(true);
-      timer = setTimeout(() => {
-        const newRadarData = updateRadarData(userData.scores || DEFAULT_SCORES);
-        setRadarChartData(newRadarData);
-        setLoading(false);
-      }, 1500);
-    } else {
-      const newRadarData = updateRadarData(userData.scores || DEFAULT_SCORES);
-      setRadarChartData(newRadarData);
-    }
-
-    return () => clearTimeout(timer);
-  }, [testData, userData.scores]); // 直接包含 userData.scores 作為依賴項
+  }, [testData, setUserData, clearTestData]);
 
   const validateData = useCallback(() => {
     const { height, weight, age, gender } = userData;
@@ -130,7 +91,7 @@ function UserInfo({ testData, onLogout, clearTestData }) {
       return false;
     }
     if (!GENDER_OPTIONS.includes(gender)) {
-      setError('請選擇有效的性別（男性或女性）');
+      setError('請選擇有效的性別');
       return false;
     }
     return true;
@@ -148,32 +109,38 @@ function UserInfo({ testData, onLogout, clearTestData }) {
       }
 
       const updatedUserData = {
-        height: Number(userData.height),
-        weight: Number(userData.weight),
-        age: Number(userData.age),
+        ...userData,
+        height: Number(userData.height) || 0,
+        weight: Number(userData.weight) || 0,
+        age: Number(userData.age) || 0,
         gender: userData.gender,
-        updatedAt: new Date().toISOString(),
         scores: userData.scores || DEFAULT_SCORES,
       };
 
       try {
-        await saveUserData(updatedUserData);
-        setRadarChartData(updateRadarData(updatedUserData.scores));
+        const success = await saveUserData(updatedUserData);
+        if (success) {
+          await loadUserData();
+          alert('資料已儲存成功！');
+        } else {
+          setError('儲存失敗，請稍後再試');
+        }
       } catch (err) {
         setError(`儲存失敗：${err.message}`);
       } finally {
         setLoading(false);
       }
     },
-    [userData, validateData, saveUserData]
+    [userData, validateData, saveUserData, loadUserData]
   );
 
   const averageScore = useMemo(() => {
     const scores = userData?.scores || DEFAULT_SCORES;
     const scoreValues = Object.values(scores).filter(score => score > 0);
-    return scoreValues.length
+    const avg = scoreValues.length
       ? (scoreValues.reduce((sum, score) => sum + score, 0) / scoreValues.length).toFixed(0)
       : 0;
+    return avg;
   }, [userData?.scores]);
 
   const handleSaveResults = useCallback(() => {
@@ -198,13 +165,12 @@ function UserInfo({ testData, onLogout, clearTestData }) {
       }
 
       if (validateData()) {
-        await saveData({ preventDefault: () => {} });
-        navigate(path, { state: { fromEvaluation: false } });
+        navigate(path);
       } else {
         setError('請確保資料已正確保存後再進行評測！');
       }
     },
-    [userData, validateData, saveData, navigate]
+    [userData, validateData, navigate]
   );
 
   const handleLogout = useCallback(() => {
@@ -212,7 +178,7 @@ function UserInfo({ testData, onLogout, clearTestData }) {
     localStorage.removeItem('savedPassword');
     
     if (auth.currentUser) {
-      auth.signOut().catch(err => console.error('UserInfo.js - 登出失敗:', err));
+      auth.signOut().catch(err => console.error('登出失敗:', err));
     }
     
     onLogout();
@@ -239,34 +205,26 @@ function UserInfo({ testData, onLogout, clearTestData }) {
       '你是最棒的，繼續保持！', '完美無瑕，閃耀全場！',
     ];
     const index = Math.min(Math.floor(Number(averageScore) / 5), 19);
-    return userData?.gender === 'male' ? slogansMale[index] : slogansFemale[index];
+    const slogan = userData?.gender === 'male' ? slogansMale[index] : slogansFemale[index];
+    return slogan;
   }, [averageScore, userData?.gender]);
 
-  const radarOptions = useMemo(() => ({
-    scales: {
-      r: {
-        min: 0,
-        max: 100,
-        ticks: { stepSize: 20 },
-      },
-    },
-    plugins: {
-      legend: { position: 'top' },
-    },
-    animation: false,
-  }), []);
-
+  // 處理輸入變更
   const handleInputChange = useCallback(
-    ({ target: { name, value } }) => {
-      const newValue = name === 'gender' ? value : isNaN(Number(value)) ? 0 : Number(value);
-      setUserData(prev => ({ ...prev, [name]: newValue }));
+    (e) => {
+      const { name, value } = e.target;
+      let processedValue = value;
+      
+      if (name !== 'gender') {
+        processedValue = value === '' ? 0 : Number(value);
+      }
+      
+      setUserData(prev => ({
+        ...prev,
+        [name]: processedValue
+      }));
     },
     [setUserData]
-  );
-
-  const debouncedHandleInputChange = useMemo(
-    () => debounce((name, value) => handleInputChange({ target: { name, value } }), 150),
-    [handleInputChange]
   );
 
   return (
@@ -285,7 +243,7 @@ function UserInfo({ testData, onLogout, clearTestData }) {
       {currentUser && (
         <>
           <h1 className="text-2xl font-bold text-center mb-6">身體狀態與表現總覽</h1>
-          <form className="space-y-4">
+          <form className="space-y-4" onSubmit={saveData}>
             <div>
               <label htmlFor="gender" className="block text-sm font-medium text-gray-700">性別</label>
               <select
@@ -295,7 +253,6 @@ function UserInfo({ testData, onLogout, clearTestData }) {
                 onChange={handleInputChange}
                 className="input-field"
                 required
-                autoComplete="sex"
               >
                 <option value="">請選擇性別</option>
                 <option value="male">男性</option>
@@ -309,12 +266,12 @@ function UserInfo({ testData, onLogout, clearTestData }) {
                 name="height"
                 type="number"
                 value={userData?.height || ''}
-                onChange={(e) => debouncedHandleInputChange(e.target.name, e.target.value)}
+                onChange={handleInputChange}
                 placeholder="身高 (cm)"
                 className="input-field"
                 required
-                autoComplete="height"
                 min="0"
+                step="0.1"
               />
             </div>
             <div>
@@ -324,12 +281,12 @@ function UserInfo({ testData, onLogout, clearTestData }) {
                 name="weight"
                 type="number"
                 value={userData?.weight || ''}
-                onChange={(e) => debouncedHandleInputChange(e.target.name, e.target.value)}
+                onChange={handleInputChange}
                 placeholder="體重 (kg)"
                 className="input-field"
                 required
-                autoComplete="weight"
                 min="0"
+                step="0.1"
               />
             </div>
             <div>
@@ -339,16 +296,16 @@ function UserInfo({ testData, onLogout, clearTestData }) {
                 name="age"
                 type="number"
                 value={userData?.age || ''}
-                onChange={(e) => debouncedHandleInputChange(e.target.name, e.target.value)}
+                onChange={handleInputChange}
                 placeholder="年齡"
                 className="input-field"
                 required
-                autoComplete="age"
                 min="0"
+                step="1"
               />
             </div>
             <div className="button-group-submit">
-              <button type="button" onClick={saveData} className="submit-btn" disabled={loading}>
+              <button type="submit" className="submit-btn" disabled={loading}>
                 {loading ? '儲存中...' : '儲存資料'}
               </button>
             </div>
@@ -356,27 +313,37 @@ function UserInfo({ testData, onLogout, clearTestData }) {
         </>
       )}
 
-      {testData && (
-        <div>
-          <h2 className="text-xl font-semibold text-center mb-4">最新測驗結果</h2>
-          <p>
-            類型:{' '}
-            {testData.squat ? '力量' : testData.distance ? '心肺耐力' : testData.jumpHeight ? '爆發力' : testData.smm ? '骨骼肌肉量' : testData.bodyFat ? '體脂肪率與FFMI' : '其他'}
-          </p>
-          <p>數據: {JSON.stringify(testData)}</p>
-          <button onClick={clearTestData} className="nav-btn">清除測驗數據</button>
-        </div>
-      )}
-
       <div id="radar-section" className="radar-section">
         <h2 className="text-xl font-semibold text-center mb-4">表現總覽</h2>
         {loading ? (
           <p>正在載入數據...</p>
         ) : (
-          <div style={{ width: '100%', maxWidth: '500px', margin: '0 auto' }}>
-            {radarChartData && <Radar data={radarChartData} options={radarOptions} />}
+          <div style={{ width: '100%', maxWidth: '600px', margin: '0 auto' }}>
+            <ResponsiveContainer width="100%" height={400}>
+              <RadarChart data={radarChartData}>
+                <PolarGrid gridType="polygon" />
+                <PolarAngleAxis 
+                  dataKey="name"
+                  tick={{ fontSize: 14 }}
+                />
+                <PolarRadiusAxis 
+                  angle={90}
+                  domain={[0, 100]}
+                  tickCount={5}
+                />
+                <Radar
+                  name="您的表現"
+                  dataKey="value"
+                  stroke="#22CAEC"
+                  fill="#22CAEC"
+                  fillOpacity={0.4}
+                  strokeWidth={2}
+                />
+              </RadarChart>
+            </ResponsiveContainer>
           </div>
         )}
+        
         {averageScore > 0 && !loading && (
           <div className="score-section">
             <p className="average-score">平均分數: <span className="score-value">{averageScore}</span></p>
@@ -402,5 +369,21 @@ function UserInfo({ testData, onLogout, clearTestData }) {
     </div>
   );
 }
+
+UserInfo.propTypes = {
+  testData: PropTypes.shape({
+    distance: PropTypes.number,
+    score: PropTypes.number,
+    squat: PropTypes.number,
+    averageScore: PropTypes.number,
+    jumpHeight: PropTypes.number,
+    finalScore: PropTypes.number,
+    smm: PropTypes.number,
+    bodyFat: PropTypes.number,
+    ffmiScore: PropTypes.number,
+  }),
+  onLogout: PropTypes.func.isRequired,
+  clearTestData: PropTypes.func.isRequired,
+};
 
 export default UserInfo;

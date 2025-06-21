@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from './UserContext';
+import PropTypes from 'prop-types';
 import './FFMI.css';
 
-function FFMI() {
-  const { userData, setUserData } = useUser();
+function FFMI({ onComplete, clearTestData }) {
+  const { userData, setUserData, saveUserData } = useUser();
   const navigate = useNavigate();
   const [bodyFat, setBodyFat] = useState(userData.testInputs?.ffmi?.bodyFat || '');
   const [ffmi, setFfmi] = useState(null);
@@ -18,9 +19,9 @@ function FFMI() {
         ...userData.testInputs,
         ffmi: { ...userData.testInputs?.ffmi, bodyFat },
       };
-      setUserData({ ...userData, testInputs: updatedTestInputs });
+      setUserData(prev => ({ ...prev, testInputs: updatedTestInputs }));
     }
-  }, [bodyFat, userData, setUserData]);
+  }, [bodyFat]);
 
   const calculateScores = () => {
     if (!userData.gender || !userData.height || !userData.weight || !userData.age) {
@@ -78,23 +79,55 @@ function FFMI() {
   };
 
   const handleSubmit = async () => {
-    if (!ffmi || !ffmiScore) return alert('請先計算 FFMI 分數！');
+    if (!ffmi || !ffmiScore) {
+      alert('請先計算 FFMI 分數！');
+      return;
+    }
+    
     try {
-      const updatedScores = { ...userData.scores, bodyFat: parseFloat(ffmiScore) };
-      await setUserData({ ...userData, scores: updatedScores });
-      console.log('FFMI.js - 已更新 userData.scores.bodyFat:', updatedScores);
-      navigate('/user-info', {
-        state: {
-          testData: {
-            bodyFat: bodyFat || null,
-            ffmi: ffmi || null,
-            ffmiScore,
-          },
-        },
-      });
+      // 準備更新的數據
+      const updatedScores = { 
+        ...userData.scores, 
+        bodyFat: parseFloat(ffmiScore) 
+      };
+      
+      const updatedUserData = {
+        ...userData,
+        scores: updatedScores
+      };
+      
+      // 先更新本地狀態
+      setUserData(updatedUserData);
+      
+      // 保存到 Firebase
+      const success = await saveUserData(updatedUserData);
+      
+      if (success) {
+        console.log('FFMI.js - 成功更新 FFMI 分數');
+        
+        // 準備測試數據
+        const testData = {
+          bodyFat: parseFloat(bodyFat),
+          ffmi: parseFloat(ffmi),
+          ffmiScore: parseFloat(ffmiScore),
+        };
+        
+        // 如果有 onComplete prop，呼叫它
+        if (onComplete && typeof onComplete === 'function') {
+          onComplete(testData);
+        }
+        
+        // 延遲導航，確保數據已更新
+        setTimeout(() => {
+          navigate('/user-info');
+        }, 100);
+      } else {
+        throw new Error('保存數據失敗');
+      }
+      
     } catch (error) {
-      console.error('FFMI.js - 更新 UserContext 或導航失敗:', error);
-      alert('更新用戶數據或導航失敗，請稍後再試！');
+      console.error('提交失敗:', error);
+      alert('更新用戶數據失敗，請稍後再試！');
     }
   };
 
@@ -122,8 +155,17 @@ function FFMI() {
     <div className="ffmi-container">
       <h1 className="ffmi-title">體脂肪率與 FFMI</h1>
       <div className="input-section">
-        <label className="input-label">體脂肪率 (%)</label>
-        <input type="number" value={bodyFat} onChange={e => setBodyFat(e.target.value)} placeholder="輸入體脂肪率 (%)" className="input-field" />
+        <label htmlFor="bodyFat" className="input-label">體脂肪率 (%)</label>
+        <input
+          id="bodyFat"
+          name="bodyFat"
+          type="number"
+          value={bodyFat}
+          onChange={e => setBodyFat(e.target.value)}
+          placeholder="輸入體脂肪率 (%)"
+          className="input-field"
+          required
+        />
         <button onClick={calculateScores} className="calculate-btn">計算分數</button>
       </div>
       {ffmi && (
@@ -176,5 +218,10 @@ function FFMI() {
     </div>
   );
 }
+
+FFMI.propTypes = {
+  onComplete: PropTypes.func,
+  clearTestData: PropTypes.func,
+};
 
 export default FFMI;

@@ -2,51 +2,34 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from './UserContext';
 import * as standards from './standards';
-import { Bar } from 'react-chartjs-2';
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend,
-} from 'chart.js';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import PropTypes from 'prop-types';
 import './Muscle.css';
 
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend
-);
-
-function Muscle() {
-  const { userData, setUserData } = useUser();
+function Muscle({ onComplete, clearTestData }) {
+  const { userData, setUserData, saveUserData } = useUser();
   const navigate = useNavigate();
   const { weight, age, gender } = userData;
 
   const [smm, setSmm] = useState(userData.testInputs?.muscle?.smm || '');
-  const [result, setResult] = useState({
-    smmScore: null,
-    smPercent: null,
-    smPercentScore: null,
-    finalScore: null,
+  const [result, setResult] = useState({ 
+    smmScore: null, 
+    smPercent: null, 
+    smPercentScore: null, 
+    finalScore: null 
   });
 
   useEffect(() => {
     if (smm) {
-      const updatedTestInputs = {
-        ...userData.testInputs,
-        muscle: { ...userData.testInputs?.muscle, smm },
+      const updatedTestInputs = { 
+        ...userData.testInputs, 
+        muscle: { ...userData.testInputs?.muscle, smm } 
       };
-      setUserData({ ...userData, testInputs: updatedTestInputs });
+      setUserData(prev => ({ ...prev, testInputs: updatedTestInputs }));
     }
-  }, [smm, userData, setUserData]);
+  }, [smm]);
 
-  const getAgeRange = age => {
+  const getAgeRange = (age) => {
     if (!age) return null;
     const ageNum = parseInt(age);
     if (ageNum >= 10 && ageNum <= 12) return '10-12';
@@ -81,45 +64,27 @@ function Muscle() {
       alert('請確保已在用戶信息中輸入體重、年齡和性別，並在此輸入骨骼肌肉量！');
       return;
     }
-
     const weightNum = parseFloat(weight);
     const smmNum = parseFloat(smm);
     const ageRange = getAgeRange(age);
-
     if (!weightNum || !smmNum || !ageRange) {
       alert('請輸入有效的體重、骨骼肌肉量和年齡！');
       return;
     }
-
     const smPercent = ((smmNum / weightNum) * 100).toFixed(1);
-
     const genderValue = gender === '男性' || gender.toLowerCase() === 'male' ? 'male' : 'female';
     const smmStandards = genderValue === 'male' ? standards.muscleStandardsMaleSMM : standards.muscleStandardsFemaleSMM;
     const smPercentStandards = genderValue === 'male' ? standards.muscleStandardsMaleSMPercent : standards.muscleStandardsFemaleSMPercent;
-
     const smmStandard = smmStandards[ageRange];
     const smPercentStandard = smPercentStandards[ageRange];
-
     if (!smmStandard || !smPercentStandard) {
       alert('無法找到對應的評測標準，請檢查年齡和性別！');
       return;
     }
-
-    console.log('輸入值：', { weightNum, smmNum, smPercent, ageRange, genderValue });
-    console.log('SMM 標準：', smmStandard);
-    console.log('SM% 標準：', smPercentStandard);
-
     const smmScore = calculateScoreFromStandard(smmNum, smmStandard, 'SMM');
     const smPercentScore = calculateScoreFromStandard(parseFloat(smPercent), smPercentStandard, 'SM%');
-
-    console.log('計算結果：', { smmScore, smPercentScore });
-
     const finalScore = ((smmScore + smPercentScore) / 2).toFixed(0);
-
-    console.log('最終分數：', finalScore);
-
     setResult({ smmScore, smPercent, smPercentScore, finalScore });
-    console.log('設置的 result：', { smmScore, smPercent, smPercentScore, finalScore });
   };
 
   const handleSubmit = async () => {
@@ -127,68 +92,63 @@ function Muscle() {
       alert('請先計算骨骼肌肉量分數！');
       return;
     }
-
+    
     try {
-      const updatedScores = { ...userData.scores, muscleMass: parseFloat(result.finalScore) };
-      const updatedUserData = { ...userData, scores: updatedScores };
-      await setUserData(updatedUserData);
-      console.log('Muscle.js - 已更新 userData.scores.muscleMass:', updatedScores);
-      navigate('/user-info', {
-        state: {
-          testData: {
-            smm: smm || null,
-            smPercent: result.smPercent || null,
-            finalScore: result.finalScore,
-          },
-        },
-      });
-      console.log('Muscle.js - 導航調用完成');
+      // 準備更新的數據
+      const updatedScores = { 
+        ...userData.scores, 
+        muscleMass: parseFloat(result.finalScore) 
+      };
+      
+      const updatedUserData = {
+        ...userData,
+        scores: updatedScores
+      };
+      
+      // 先更新本地狀態
+      setUserData(updatedUserData);
+      
+      // 保存到 Firebase
+      const success = await saveUserData(updatedUserData);
+      
+      if (success) {
+        console.log('Muscle.js - 成功更新骨骼肌肉量分數');
+        
+        // 準備測試數據
+        const testData = {
+          smm: parseFloat(smm),
+          smPercent: parseFloat(result.smPercent),
+          finalScore: parseFloat(result.finalScore),
+        };
+        
+        // 如果有 onComplete prop，呼叫它
+        if (onComplete && typeof onComplete === 'function') {
+          onComplete(testData);
+        }
+        
+        // 延遲導航，確保數據已更新
+        setTimeout(() => {
+          navigate('/user-info');
+        }, 100);
+      } else {
+        throw new Error('保存數據失敗');
+      }
+      
     } catch (error) {
-      console.error('Muscle.js - 更新 UserContext 或導航失敗:', error);
-      alert('更新用戶數據或導航失敗，請稍後再試！');
+      console.error('提交失敗:', error);
+      alert('更新用戶數據失敗，請稍後再試！');
     }
   };
 
-  const barData1 = {
-    labels: ['骨骼肌肉量 (SMM)', '肌肉量百分比 (SM%)'],
-    datasets: [
-      {
-        label: '分數',
-        data: [result.smmScore || 0, result.smPercentScore || 0],
-        backgroundColor: ['#4bc0c0', '#ff9f40'],
-        borderColor: ['#3aa0a0', '#e08e36'],
-        borderWidth: 1,
-        barPercentage: 0.4,
-      },
-    ],
-  };
+  // 準備圖表數據
+  const barData1 = [
+    { name: '骨骼肌肉量 (SMM)', value: result.smmScore || 0 },
+    { name: '肌肉量百分比 (SM%)', value: result.smPercentScore || 0 }
+  ];
 
-  const barData2 = {
-    labels: ['最終分數'],
-    datasets: [
-      {
-        label: '分數',
-        data: [result.finalScore || 0],
-        backgroundColor: ['#36a2eb'],
-        borderColor: ['#2a82cb'],
-        borderWidth: 1,
-        barPercentage: 0.4,
-      },
-    ],
-  };
-
-  const barOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    scales: {
-      y: { beginAtZero: true, max: 100, title: { display: true, text: '分數', font: { size: 14 } } },
-      x: { title: { display: true, text: '項目', font: { size: 14 } } },
-    },
-    plugins: {
-      legend: { display: false },
-      tooltip: { callbacks: { label: context => `${context.dataset.label}: ${context.raw}` } },
-    },
-  };
+  const barData2 = [
+    { name: '最終分數', value: result.finalScore || 0 }
+  ];
 
   return (
     <div className="muscle-container">
@@ -196,35 +156,72 @@ function Muscle() {
       <p>體重：{weight ? `${weight} 公斤` : '未輸入'}</p>
       <p>年齡：{age || '未輸入'}</p>
       <p>性別：{gender || '未選擇'}</p>
-
+      
       <div className="exercise-section">
         <h2 className="text-lg font-semibold">骨骼肌肉量 (SMM)</h2>
-        <input type="number" placeholder="骨骼肌肉量 (kg)" value={smm} onChange={e => setSmm(e.target.value)} className="input-field" />
+        <label htmlFor="smm" className="block text-sm font-medium text-gray-700">骨骼肌肉量 (kg)</label>
+        <input 
+          id="smm" 
+          name="smm" 
+          type="number" 
+          placeholder="骨骼肌肉量 (kg)" 
+          value={smm} 
+          onChange={e => setSmm(e.target.value)} 
+          className="input-field" 
+        />
         <button onClick={calculateMuscleScore} className="calculate-btn">計算</button>
-        {result.smmScore && <p className="score-text">骨骼肌肉量 (SMM) 分數: {result.smmScore}</p>}
-        {result.smPercent && <p className="score-text">骨骼肌肉量百分比 (SM%): {result.smPercent}%</p>}
-        {result.smPercentScore && <p className="score-text">骨骼肌肉量百分比 (SM%) 分數: {result.smPercentScore}</p>}
-        {result.finalScore && <p className="score-text">最終分數: {result.finalScore}</p>}
+        
+        {result.smmScore !== null && (
+          <>
+            <p className="score-text">骨骼肌肉量 (SMM) 分數: {result.smmScore}</p>
+            <p className="score-text">骨骼肌肉量百分比 (SM%): {result.smPercent}%</p>
+            <p className="score-text">骨骼肌肉量百分比 (SM%) 分數: {result.smPercentScore}</p>
+            <p className="score-text final-score">最終分數: {result.finalScore}</p>
+          </>
+        )}
       </div>
-
+      
       {result.finalScore && (
         <div className="chart-section">
-          <h2 className="text-lg font-semibold mb-2">數值比較</h2>
+          <h2 className="text-lg font-semibold mb-4">數值比較</h2>
           <div className="chart-container">
-            <Bar data={barData1} options={barOptions} />
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={barData1}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" />
+                <YAxis domain={[0, 100]} />
+                <Tooltip />
+                <Legend />
+                <Bar dataKey="value" fill="#4bc0c0" name="分數" />
+              </BarChart>
+            </ResponsiveContainer>
           </div>
-          <h2 className="text-lg font-semibold mt-4 mb-2">最終分數</h2>
+          
+          <h2 className="text-lg font-semibold mt-6 mb-4">最終分數</h2>
           <div className="chart-container">
-            <Bar data={barData2} options={barOptions} />
+            <ResponsiveContainer width="100%" height={200}>
+              <BarChart data={barData2}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" />
+                <YAxis domain={[0, 100]} />
+                <Tooltip />
+                <Bar dataKey="value" fill="#36a2eb" name="分數" />
+              </BarChart>
+            </ResponsiveContainer>
           </div>
         </div>
       )}
-
+      
       <div className="button-group">
         <button onClick={handleSubmit} className="submit-btn">提交並返回總覽</button>
       </div>
     </div>
   );
 }
+
+Muscle.propTypes = {
+  onComplete: PropTypes.func,
+  clearTestData: PropTypes.func,
+};
 
 export default Muscle;

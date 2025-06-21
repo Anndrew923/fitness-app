@@ -2,10 +2,11 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from './UserContext';
 import * as standards from './standards';
+import PropTypes from 'prop-types';
 import './Cardio.css';
 
-function Cardio() {
-  const { userData, setUserData } = useUser();
+function Cardio({ onComplete, clearTestData }) {
+  const { userData, setUserData, saveUserData } = useUser();
   const navigate = useNavigate();
   const { age, gender } = userData;
 
@@ -19,9 +20,9 @@ function Cardio() {
         ...userData.testInputs,
         cardio: { ...userData.testInputs?.cardio, distance },
       };
-      setUserData({ ...userData, testInputs: updatedTestInputs });
+      setUserData(prev => ({ ...prev, testInputs: updatedTestInputs }));
     }
-  }, [distance, userData, setUserData]);
+  }, [distance]);
 
   const getAgeRange = (age) => {
     if (!age) return null;
@@ -119,22 +120,48 @@ function Cardio() {
     }
 
     try {
-      const updatedScores = { ...userData.scores, cardio: parseFloat(score) };
-      const updatedUserData = { ...userData, scores: updatedScores };
-      await setUserData(updatedUserData);
-      console.log('Cardio.js - 已更新 userData.scores.cardio:', updatedScores);
-      navigate('/user-info', {
-        state: {
-          testData: {
-            distance: distance || null,
-            score,
-          },
-        },
-      });
-      console.log('Cardio.js - 導航調用完成');
+      // 準備更新的數據
+      const updatedScores = { 
+        ...userData.scores, 
+        cardio: parseFloat(score) 
+      };
+      
+      const updatedUserData = {
+        ...userData,
+        scores: updatedScores
+      };
+      
+      // 先更新本地狀態
+      setUserData(updatedUserData);
+      
+      // 保存到 Firebase
+      const success = await saveUserData(updatedUserData);
+      
+      if (success) {
+        console.log('Cardio.js - 成功更新心肺耐力分數');
+        
+        // 準備測試數據
+        const testData = {
+          distance: parseFloat(distance),
+          score: parseFloat(score),
+        };
+        
+        // 如果有 onComplete prop，呼叫它
+        if (onComplete && typeof onComplete === 'function') {
+          onComplete(testData);
+        }
+        
+        // 延遲導航，確保數據已更新
+        setTimeout(() => {
+          navigate('/user-info');
+        }, 100);
+      } else {
+        throw new Error('保存數據失敗');
+      }
+      
     } catch (error) {
-      console.error('Cardio.js - 更新 UserContext 或導航失敗:', error);
-      alert('更新用戶數據或導航失敗，請稍後再試！');
+      console.error('提交失敗:', error);
+      alert('更新用戶數據失敗，請稍後再試！');
     }
   };
 
@@ -147,7 +174,17 @@ function Cardio() {
 
         <div className="exercise-section">
           <h2 className="text-lg font-semibold">Cooper 12 分鐘跑步測試</h2>
-          <input type="number" placeholder="跑步距離 (公尺)" value={distance} onChange={e => setDistance(e.target.value)} className="input-field" />
+          <label htmlFor="distance" className="block text-sm font-medium text-gray-700">跑步距離 (公尺)</label>
+          <input
+            id="distance"
+            name="distance"
+            type="number"
+            placeholder="跑步距離 (公尺)"
+            value={distance}
+            onChange={e => setDistance(e.target.value)}
+            className="input-field"
+            required
+          />
           <button onClick={calculateCardioScore} className="calculate-btn">計算</button>
           {score !== null && (
             <>
@@ -186,5 +223,10 @@ function Cardio() {
     </div>
   );
 }
+
+Cardio.propTypes = {
+  onComplete: PropTypes.func,
+  clearTestData: PropTypes.func,
+};
 
 export default Cardio;

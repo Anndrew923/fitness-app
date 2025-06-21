@@ -8,6 +8,7 @@ import {
 import { UserProvider, useUser } from './UserContext';
 import { auth } from './firebase';
 import { signInWithEmailAndPassword, signOut } from 'firebase/auth';
+import PropTypes from 'prop-types';
 import ScrollToTop from './ScrollToTop';
 import Welcome from './Welcome';
 import UserInfo from './UserInfo';
@@ -23,7 +24,7 @@ import History from './History';
 class ErrorBoundary extends Component {
   state = { hasError: false };
 
-  static getDerivedStateFromError(error) {
+  static getDerivedStateFromError() {
     return { hasError: true };
   }
 
@@ -39,6 +40,10 @@ class ErrorBoundary extends Component {
   }
 }
 
+ErrorBoundary.propTypes = {
+  children: PropTypes.node.isRequired,
+};
+
 function App() {
   const [testData, setTestData] = useState(null);
 
@@ -46,10 +51,12 @@ function App() {
     try {
       await signInWithEmailAndPassword(auth, email, password);
       setTestData(null);
-      console.log('登入成功, auth.currentUser:', auth.currentUser);
+      if (process.env.NODE_ENV === 'development') {
+        console.log('登入成功, auth.currentUser:', auth.currentUser);
+      }
     } catch (error) {
       console.error('登入失敗:', error);
-      throw error;
+      throw new Error('登入失敗');
     }
   };
 
@@ -58,7 +65,9 @@ function App() {
       signOut(auth)
         .then(() => {
           setTestData(null);
-          console.log('登出成功');
+          if (process.env.NODE_ENV === 'development') {
+            console.log('登出成功');
+          }
         })
         .catch((error) => {
           console.error('登出失敗:', error);
@@ -68,12 +77,16 @@ function App() {
 
   const handleTestComplete = (data) => {
     setTestData(data);
-    console.log('測驗完成, testData:', data);
+    if (process.env.NODE_ENV === 'development') {
+      console.log('測驗完成, testData:', data);
+    }
   };
 
   const clearTestData = () => {
     setTestData(null);
-    console.log('測驗數據已清除');
+    if (process.env.NODE_ENV === 'development') {
+      console.log('測驗數據已清除');
+    }
   };
 
   const ProtectedRoute = ({ element }) => {
@@ -84,7 +97,8 @@ function App() {
       return <Navigate to="/login" />;
     }
 
-    if (currentPath !== '/user-info') {
+    // 如果不是在 user-info 頁面，檢查基本資料是否完整
+    if (currentPath !== '/user-info' && currentPath !== '/login') {
       const isHeightValid = typeof userData?.height === 'number' && userData.height > 0;
       const isWeightValid = typeof userData?.weight === 'number' && userData.weight > 0;
       const isAgeValid = typeof userData?.age === 'number' && userData.age > 0;
@@ -96,6 +110,10 @@ function App() {
     }
 
     return element;
+  };
+
+  ProtectedRoute.propTypes = {
+    element: PropTypes.element.isRequired,
   };
 
   return (
@@ -117,10 +135,14 @@ function App() {
             <Route
               path="/user-info"
               element={
-                <UserInfo
-                  testData={testData}
-                  onLogout={handleLogout}
-                  clearTestData={clearTestData}
+                <ProtectedRoute
+                  element={
+                    <UserInfo
+                      testData={testData}
+                      onLogout={handleLogout}
+                      clearTestData={clearTestData}
+                    />
+                  }
                 />
               }
             />
@@ -128,7 +150,12 @@ function App() {
               path="/strength"
               element={
                 <ProtectedRoute
-                  element={<Strength onComplete={handleTestComplete} clearTestData={clearTestData} />}
+                  element={
+                    <Strength 
+                      onComplete={handleTestComplete} 
+                      clearTestData={clearTestData} 
+                    />
+                  }
                 />
               }
             />
@@ -136,7 +163,12 @@ function App() {
               path="/cardio"
               element={
                 <ProtectedRoute
-                  element={<Cardio onComplete={handleTestComplete} clearTestData={clearTestData} />}
+                  element={
+                    <Cardio 
+                      onComplete={handleTestComplete} 
+                      clearTestData={clearTestData} 
+                    />
+                  }
                 />
               }
             />
@@ -144,7 +176,12 @@ function App() {
               path="/explosive-power"
               element={
                 <ProtectedRoute
-                  element={<Power onComplete={handleTestComplete} clearTestData={clearTestData} />}
+                  element={
+                    <Power 
+                      onComplete={handleTestComplete} 
+                      clearTestData={clearTestData} 
+                    />
+                  }
                 />
               }
             />
@@ -152,7 +189,12 @@ function App() {
               path="/muscle-mass"
               element={
                 <ProtectedRoute
-                  element={<Muscle onComplete={handleTestComplete} clearTestData={clearTestData} />}
+                  element={
+                    <Muscle 
+                      onComplete={handleTestComplete} 
+                      clearTestData={clearTestData} 
+                    />
+                  }
                 />
               }
             />
@@ -160,14 +202,35 @@ function App() {
               path="/body-fat"
               element={
                 <ProtectedRoute
-                  element={<FFMI onComplete={handleTestComplete} clearTestData={clearTestData} />}
+                  element={
+                    <FFMI 
+                      onComplete={handleTestComplete} 
+                      clearTestData={clearTestData} 
+                    />
+                  }
                 />
               }
             />
-            <Route path="/strength-instructions" element={<StrengthInstructions />} />
-            <Route path="/login" element={<Login onLogin={handleLogin} />} />
-            <Route path="/history" element={<ProtectedRoute element={<History />} />} />
-            <Route path="*" element={<div>404 - 頁面未找到</div>} />
+            <Route 
+              path="/strength-instructions" 
+              element={<StrengthInstructions />} 
+            />
+            <Route 
+              path="/login" 
+              element={<Login onLogin={handleLogin} />} 
+            />
+            <Route 
+              path="/history" 
+              element={
+                <ProtectedRoute 
+                  element={<History />} 
+                />
+              } 
+            />
+            <Route 
+              path="*" 
+              element={<div>404 - 頁面未找到</div>} 
+            />
           </Routes>
         </ErrorBoundary>
       </Router>

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useUser } from './UserContext';
 import './History.css'; // 引入外部 CSS
 

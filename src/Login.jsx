@@ -6,7 +6,8 @@ import {
   createUserWithEmailAndPassword,
 } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
-import './Login.css'; // 引入外部 CSS
+import PropTypes from 'prop-types';
+import './Login.css';
 
 function Login({ onLogin }) {
   const [email, setEmail] = useState('');
@@ -21,11 +22,13 @@ function Login({ onLogin }) {
   const { height, weight, age } = location.state || {};
 
   useEffect(() => {
+    console.log('檢查 auth 初始化狀態:', auth);
     if (!auth) {
       setError('Firebase 未正確初始化，請檢查配置');
       return;
     }
     if (auth.currentUser) {
+      console.log('已有登入用戶:', auth.currentUser.email);
       navigate('/user-info');
       return;
     }
@@ -33,6 +36,7 @@ function Login({ onLogin }) {
     const savedEmail = localStorage.getItem('savedEmail');
     const savedPassword = localStorage.getItem('savedPassword');
     if (savedEmail && savedPassword) {
+      console.log('從 localStorage 恢復帳號:', savedEmail);
       setEmail(savedEmail);
       setPassword(savedPassword);
       setRememberMe(true);
@@ -44,8 +48,10 @@ function Login({ onLogin }) {
     setError(null);
     setLoading(true);
 
+    console.log('開始處理表單提交，isRegistering:', isRegistering, 'email:', email);
     if (!auth || !db) {
       setError('Firebase 未正確初始化，請檢查配置');
+      console.error('auth 或 db 未初始化:', { auth, db });
       setLoading(false);
       return;
     }
@@ -53,8 +59,10 @@ function Login({ onLogin }) {
     try {
       let userCredential;
       if (isRegistering) {
+        console.log('嘗試註冊用戶:', email);
         userCredential = await createUserWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
+        console.log('註冊成功，用戶:', user.email, 'UID:', user.uid);
         if (height && weight && age) {
           const userRef = doc(db, 'users', user.uid);
           const updatedUserData = {
@@ -64,28 +72,34 @@ function Login({ onLogin }) {
             updatedAt: new Date().toISOString(),
             email: user.email,
           };
+          console.log('儲存用戶數據:', updatedUserData);
           await setDoc(userRef, updatedUserData);
           console.log('用戶數據已儲存，文檔 ID:', user.uid);
         }
       } else {
+        console.log('嘗試登入用戶:', email);
         userCredential = await signInWithEmailAndPassword(auth, email, password);
+        console.log('登入成功，用戶:', userCredential.user.email, 'UID:', userCredential.user.uid);
       }
 
       const user = userCredential.user;
       onLogin(user.email, password);
 
       if (rememberMe) {
+        console.log('儲存帳號到 localStorage:', email);
         localStorage.setItem('savedEmail', email);
         localStorage.setItem('savedPassword', password);
       } else {
+        console.log('清除 localStorage 中的帳號');
         localStorage.removeItem('savedEmail');
         localStorage.removeItem('savedPassword');
       }
 
+      console.log('導航到 /user-info');
       navigate('/user-info');
     } catch (error) {
-      console.error('登入/註冊失敗：', error);
-      setError(`發生錯誤：${error.message}`);
+      console.error('登入/註冊失敗:', error.code, error.message);
+      setError(`發生錯誤：${error.message} (代碼: ${error.code})`);
     } finally {
       setLoading(false);
     }
@@ -148,5 +162,9 @@ function Login({ onLogin }) {
     </div>
   );
 }
+
+Login.propTypes = {
+  onLogin: PropTypes.func.isRequired,
+};
 
 export default Login;

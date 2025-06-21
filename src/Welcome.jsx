@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { useUser } from './UserContext';
 import './Welcome.css';
 
-function Welcome({ onLogin }) {
+function Welcome() {
   const navigate = useNavigate();
   const { clearUserData } = useUser();
 
