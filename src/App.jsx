@@ -4,6 +4,7 @@ import {
   Routes,
   Route,
   Navigate,
+  Link,
 } from 'react-router-dom';
 import { UserProvider, useUser } from './UserContext';
 import { auth } from './firebase';
@@ -20,6 +21,7 @@ import FFMI from './FFMI';
 import StrengthInstructions from './StrengthInstructions';
 import Login from './Login';
 import History from './History';
+import PrivacyPolicy from './PrivacyPolicy';
 
 class ErrorBoundary extends Component {
   state = { hasError: false };
@@ -97,7 +99,6 @@ function App() {
       return <Navigate to="/login" />;
     }
 
-    // 如果不是在 user-info 頁面，檢查基本資料是否完整
     if (currentPath !== '/user-info' && currentPath !== '/login') {
       const isHeightValid = typeof userData?.height === 'number' && userData.height > 0;
       const isWeightValid = typeof userData?.weight === 'number' && userData.weight > 0;
@@ -119,120 +120,117 @@ function App() {
   return (
     <UserProvider>
       <Router>
-        <ScrollToTop />
-        <ErrorBoundary>
-          <Routes>
-            <Route
-              path="/"
-              element={
-                auth.currentUser ? (
-                  <Navigate to="/user-info" />
-                ) : (
-                  <Welcome onLogin={handleLogin} />
-                )
-              }
-            />
-            <Route
-              path="/user-info"
-              element={
-                <ProtectedRoute
+        <div className="app-container">
+          <ScrollToTop />
+          <ErrorBoundary>
+            <div className="main-content">
+              <Routes>
+                <Route
+                  path="/"
                   element={
-                    <UserInfo
-                      testData={testData}
-                      onLogout={handleLogout}
-                      clearTestData={clearTestData}
+                    auth.currentUser ? (
+                      <Navigate to="/user-info" />
+                    ) : (
+                      <Welcome onLogin={handleLogin} />
+                    )
+                  }
+                />
+                <Route
+                  path="/user-info"
+                  element={
+                    <ProtectedRoute
+                      element={
+                        <UserInfo
+                          testData={testData}
+                          onLogout={handleLogout}
+                          clearTestData={clearTestData}
+                        />
+                      }
                     />
                   }
                 />
-              }
-            />
-            <Route
-              path="/strength"
-              element={
-                <ProtectedRoute
+                <Route
+                  path="/strength"
                   element={
-                    <Strength 
-                      onComplete={handleTestComplete} 
-                      clearTestData={clearTestData} 
+                    <ProtectedRoute
+                      element={
+                        <Strength
+                          onComplete={handleTestComplete}
+                          clearTestData={clearTestData}
+                        />
+                      }
                     />
                   }
                 />
-              }
-            />
-            <Route
-              path="/cardio"
-              element={
-                <ProtectedRoute
+                <Route
+                  path="/cardio"
                   element={
-                    <Cardio 
-                      onComplete={handleTestComplete} 
-                      clearTestData={clearTestData} 
+                    <ProtectedRoute
+                      element={
+                        <Cardio
+                          onComplete={handleTestComplete}
+                          clearTestData={clearTestData}
+                        />
+                      }
                     />
                   }
                 />
-              }
-            />
-            <Route
-              path="/explosive-power"
-              element={
-                <ProtectedRoute
+                <Route
+                  path="/explosive-power"
                   element={
-                    <Power 
-                      onComplete={handleTestComplete} 
-                      clearTestData={clearTestData} 
+                    <ProtectedRoute
+                      element={
+                        <Power
+                          onComplete={handleTestComplete}
+                          clearTestData={clearTestData}
+                        />
+                      }
                     />
                   }
                 />
-              }
-            />
-            <Route
-              path="/muscle-mass"
-              element={
-                <ProtectedRoute
+                <Route
+                  path="/muscle-mass"
                   element={
-                    <Muscle 
-                      onComplete={handleTestComplete} 
-                      clearTestData={clearTestData} 
+                    <ProtectedRoute
+                      element={
+                        <Muscle
+                          onComplete={handleTestComplete}
+                          clearTestData={clearTestData}
+                        />
+                      }
                     />
                   }
                 />
-              }
-            />
-            <Route
-              path="/body-fat"
-              element={
-                <ProtectedRoute
+                <Route
+                  path="/body-fat"
                   element={
-                    <FFMI 
-                      onComplete={handleTestComplete} 
-                      clearTestData={clearTestData} 
+                    <ProtectedRoute
+                      element={
+                        <FFMI
+                          onComplete={handleTestComplete}
+                          clearTestData={clearTestData}
+                        />
+                      }
                     />
                   }
                 />
-              }
-            />
-            <Route 
-              path="/strength-instructions" 
-              element={<StrengthInstructions />} 
-            />
-            <Route 
-              path="/login" 
-              element={<Login onLogin={handleLogin} />} 
-            />
-            <Route 
-              path="/history" 
-              element={
-                <ProtectedRoute 
-                  element={<History />} 
+                <Route path="/strength-instructions" element={<StrengthInstructions />} />
+                <Route path="/login" element={<Login onLogin={handleLogin} />} />
+                <Route
+                  path="/history"
+                  element={
+                    <ProtectedRoute element={<History />} />
+                  }
                 />
-              } 
-            />
-            <Route 
-              path="*" 
-              element={<div>404 - 頁面未找到</div>} 
-            />
-          </Routes>
-        </ErrorBoundary>
+                <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+                <Route path="*" element={<div>404 - 頁面未找到</div>} />
+              </Routes>
+            </div>
+          </ErrorBoundary>
+          <footer className="app-footer">
+            <Link to="/privacy-policy">隱私權政策</Link>
+          </footer>
+        </div>
       </Router>
     </UserProvider>
   );
