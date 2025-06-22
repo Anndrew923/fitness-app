@@ -5,6 +5,7 @@ import {
   useEffect,
   useCallback,
   useRef,
+  useState,
 } from 'react';
 import { doc, getDoc, setDoc, updateDoc, arrayUnion } from 'firebase/firestore';
 import { db, auth } from './firebase';
@@ -30,6 +31,8 @@ const initialState = {
 
 export function UserProvider({ children }) {
   const isMountedRef = useRef(true);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   
   const userReducer = (state, action) => {
     switch (action.type) {
@@ -49,8 +52,12 @@ export function UserProvider({ children }) {
   // 從 Firebase 載入用戶數據
   const loadUserData = useCallback(async (currentUser) => {
     if (!currentUser || !isMountedRef.current) {
-      return;
+      setIsLoading(false);
+      return false;
     }
+
+    console.log('開始載入用戶資料:', currentUser.uid);
+    setIsLoading(true);
 
     try {
       const userRef = doc(db, 'users', currentUser.uid);
@@ -58,6 +65,8 @@ export function UserProvider({ children }) {
       
       if (userSnap.exists()) {
         const firebaseData = userSnap.data();
+        console.log('從 Firebase 載入的資料:', firebaseData);
+        
         // 確保數據結構完整
         const mergedData = {
           ...initialState,
@@ -66,13 +75,21 @@ export function UserProvider({ children }) {
             ...initialState.scores,
             ...(firebaseData.scores || {}),
           },
+          // 確保數值類型正確
+          height: Number(firebaseData.height) || 0,
+          weight: Number(firebaseData.weight) || 0,
+          age: Number(firebaseData.age) || 0,
         };
         
         if (isMountedRef.current) {
           dispatch({ type: 'SET_USER_DATA', payload: mergedData });
           localStorage.setItem('userData', JSON.stringify(mergedData));
+          console.log('用戶資料載入成功');
         }
+        setIsLoading(false);
+        return true;
       } else {
+        console.log('用戶文檔不存在，創建新的');
         // 如果用戶文檔不存在，創建一個新的
         const newUserData = { ...initialState, userId: currentUser.uid };
         await setDoc(userRef, newUserData);
@@ -81,19 +98,28 @@ export function UserProvider({ children }) {
           dispatch({ type: 'SET_USER_DATA', payload: newUserData });
           localStorage.setItem('userData', JSON.stringify(newUserData));
         }
+        setIsLoading(false);
+        return true;
       }
     } catch (error) {
       console.error('載入用戶數據失敗:', error);
+      
       // 嘗試從 localStorage 載入
-      const localData = localStorage.getItem('userData');
-      if (localData && isMountedRef.current) {
-        try {
+      try {
+        const localData = localStorage.getItem('userData');
+        if (localData && isMountedRef.current) {
           const parsedData = JSON.parse(localData);
+          console.log('從本地載入用戶資料:', parsedData);
           dispatch({ type: 'SET_USER_DATA', payload: parsedData });
-        } catch (e) {
-          console.error('解析本地數據失敗:', e);
+          setIsLoading(false);
+          return true;
         }
+      } catch (e) {
+        console.error('解析本地數據失敗:', e);
       }
+      
+      setIsLoading(false);
+      return false;
     }
   }, []);
 
@@ -110,6 +136,10 @@ export function UserProvider({ children }) {
         ...data,
         userId: auth.currentUser.uid,
         updatedAt: new Date().toISOString(),
+        // 確保數值類型正確
+        height: Number(data.height) || 0,
+        weight: Number(data.weight) || 0,
+        age: Number(data.age) || 0,
       };
       
       await setDoc(userRef, dataToSave, { merge: true });
@@ -124,7 +154,7 @@ export function UserProvider({ children }) {
     }
   }, []);
 
-  // 更新用戶數據 - 修復版本
+  // 更新用戶數據
   const setUserData = useCallback((update) => {
     let newData;
     
@@ -140,8 +170,10 @@ export function UserProvider({ children }) {
     // 立即更新本地狀態
     dispatch({ type: 'UPDATE_USER_DATA', payload: newData });
     
-    // 異步保存到 Firebase
-    saveUserData(newData);
+    // 異步保存到 Firebase（不等待）
+    if (auth.currentUser) {
+      saveUserData(newData);
+    }
   }, [userData, saveUserData]);
 
   // 保存歷史記錄
@@ -185,20 +217,24 @@ export function UserProvider({ children }) {
 
   // 清除用戶數據
   const clearUserData = useCallback(() => {
+    console.log('清除用戶資料');
     localStorage.removeItem('userData');
     dispatch({ type: 'RESET_USER_DATA' });
+    setIsLoading(false);
   }, []);
 
   // 監聽認證狀態變化
   useEffect(() => {
     isMountedRef.current = true;
     
-    const unsubscribe = auth.onAuthStateChanged((user) => {
+    const unsubscribe = auth.onAuthStateChanged(async (user) => {
       if (user) {
-        console.log('用戶已登入:', user.email);
-        loadUserData(user);
+        console.log('認證狀態變更 - 用戶已登入:', user.email);
+        setIsAuthenticated(true);
+        await loadUserData(user);
       } else {
-        console.log('用戶未登入');
+        console.log('認證狀態變更 - 用戶未登入');
+        setIsAuthenticated(false);
         clearUserData();
       }
     });
@@ -211,10 +247,11 @@ export function UserProvider({ children }) {
 
   // 定期同步數據到 Firebase（每 30 秒）
   useEffect(() => {
-    if (!auth.currentUser || !userData) return;
+    if (!auth.currentUser || !userData || Object.keys(userData).length === 0) return;
 
     const syncInterval = setInterval(() => {
-      if (auth.currentUser && userData) {
+      if (auth.currentUser && userData && userData.height) {
+        console.log('定期同步用戶資料到 Firebase');
         saveUserData(userData);
       }
     }, 30000);
@@ -231,6 +268,8 @@ export function UserProvider({ children }) {
         saveHistory,
         clearUserData,
         loadUserData: () => loadUserData(auth.currentUser),
+        isLoading,
+        isAuthenticated,
       }}
     >
       {children}

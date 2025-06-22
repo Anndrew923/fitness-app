@@ -27,12 +27,16 @@ function Login({ onLogin }) {
       setError('Firebase 未正確初始化，請檢查配置');
       return;
     }
-    if (auth.currentUser) {
-      console.log('已有登入用戶:', auth.currentUser.email);
-      navigate('/user-info');
-      return;
-    }
+    
+    // 檢查是否已登入
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      if (user) {
+        console.log('用戶已登入:', user.email);
+        navigate('/user-info');
+      }
+    });
 
+    // 載入已儲存的憑證
     const savedEmail = localStorage.getItem('savedEmail');
     const savedPassword = localStorage.getItem('savedPassword');
     if (savedEmail && savedPassword) {
@@ -41,6 +45,8 @@ function Login({ onLogin }) {
       setPassword(savedPassword);
       setRememberMe(true);
     }
+
+    return () => unsubscribe();
   }, [navigate]);
 
   const handleSubmit = async (e) => {
@@ -63,19 +69,32 @@ function Login({ onLogin }) {
         userCredential = await createUserWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
         console.log('註冊成功，用戶:', user.email, 'UID:', user.uid);
-        if (height && weight && age) {
-          const userRef = doc(db, 'users', user.uid);
-          const updatedUserData = {
-            height: parseFloat(height),
-            weight: parseFloat(weight),
-            age: parseInt(age, 10),
-            updatedAt: new Date().toISOString(),
-            email: user.email,
-          };
-          console.log('儲存用戶數據:', updatedUserData);
-          await setDoc(userRef, updatedUserData);
-          console.log('用戶數據已儲存，文檔 ID:', user.uid);
-        }
+        
+        // 初始化用戶資料
+        const userRef = doc(db, 'users', user.uid);
+        const initialUserData = {
+          email: user.email,
+          userId: user.uid,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          gender: '',
+          height: height ? parseFloat(height) : 0,
+          weight: weight ? parseFloat(weight) : 0,
+          age: age ? parseInt(age, 10) : 0,
+          scores: {
+            strength: 0,
+            explosivePower: 0,
+            cardio: 0,
+            muscleMass: 0,
+            bodyFat: 0,
+          },
+          history: [],
+          testInputs: {},
+        };
+        
+        console.log('儲存初始用戶數據:', initialUserData);
+        await setDoc(userRef, initialUserData);
+        console.log('用戶數據已儲存，文檔 ID:', user.uid);
       } else {
         console.log('嘗試登入用戶:', email);
         userCredential = await signInWithEmailAndPassword(auth, email, password);
@@ -95,8 +114,11 @@ function Login({ onLogin }) {
         localStorage.removeItem('savedPassword');
       }
 
-      console.log('導航到 /user-info');
-      navigate('/user-info');
+      // 等待一下確保 UserContext 有時間載入資料
+      setTimeout(() => {
+        console.log('導航到 /user-info');
+        navigate('/user-info');
+      }, 500);
     } catch (error) {
       console.error('登入/註冊失敗:', error.code, error.message);
       setError(`發生錯誤：${error.message} (代碼: ${error.code})`);

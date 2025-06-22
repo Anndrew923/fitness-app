@@ -17,10 +17,11 @@ const DEFAULT_SCORES = {
 const GENDER_OPTIONS = ['male', 'female'];
 
 function UserInfo({ testData, onLogout, clearTestData }) {
-  const { userData, setUserData, saveUserData, saveHistory, loadUserData } = useUser();
+  const { userData, setUserData, saveUserData, saveHistory, loadUserData, isLoading } = useUser();
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
+  const [dataLoaded, setDataLoaded] = useState(false);
   const navigate = useNavigate();
 
   const radarChartData = useMemo(() => {
@@ -34,6 +35,7 @@ function UserInfo({ testData, onLogout, clearTestData }) {
     ];
   }, [userData.scores]);
 
+  // 監聽認證狀態
   useEffect(() => {
     if (!auth) {
       setError('無法初始化身份驗證，請檢查 Firebase 配置並稍後再試。');
@@ -42,6 +44,7 @@ function UserInfo({ testData, onLogout, clearTestData }) {
     }
 
     const unsubscribe = auth.onAuthStateChanged(user => {
+      console.log('UserInfo - 認證狀態變更:', user?.email);
       setCurrentUser(user);
       if (!user) {
         navigate('/login');
@@ -50,6 +53,25 @@ function UserInfo({ testData, onLogout, clearTestData }) {
 
     return () => unsubscribe();
   }, [navigate]);
+
+  // 確保資料載入完成
+  useEffect(() => {
+    const checkDataLoaded = async () => {
+      if (currentUser && !dataLoaded && !isLoading) {
+        console.log('UserInfo - 檢查資料載入狀態');
+        
+        // 如果資料為空，嘗試重新載入
+        if (!userData.height && !userData.weight && !userData.age) {
+          console.log('UserInfo - 資料為空，嘗試重新載入');
+          await loadUserData();
+        }
+        
+        setDataLoaded(true);
+      }
+    };
+
+    checkDataLoaded();
+  }, [currentUser, dataLoaded, isLoading, userData, loadUserData]);
 
   // 處理 testData 更新
   useEffect(() => {
@@ -120,7 +142,6 @@ function UserInfo({ testData, onLogout, clearTestData }) {
       try {
         const success = await saveUserData(updatedUserData);
         if (success) {
-          await loadUserData();
           alert('資料已儲存成功！');
         } else {
           setError('儲存失敗，請稍後再試');
@@ -131,7 +152,7 @@ function UserInfo({ testData, onLogout, clearTestData }) {
         setLoading(false);
       }
     },
-    [userData, validateData, saveUserData, loadUserData]
+    [userData, validateData, saveUserData]
   );
 
   const averageScore = useMemo(() => {
@@ -226,6 +247,17 @@ function UserInfo({ testData, onLogout, clearTestData }) {
     },
     [setUserData]
   );
+
+  // 顯示載入中狀態
+  if (isLoading && !dataLoaded) {
+    return (
+      <div className="user-info-container">
+        <div className="loading-message">
+          <p>正在載入用戶資料...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="user-info-container">

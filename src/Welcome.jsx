@@ -1,13 +1,62 @@
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from './UserContext';
+import { auth } from './firebase';
+import { signInWithEmailAndPassword } from 'firebase/auth';
 import './Welcome.css';
 
 function Welcome() {
   const navigate = useNavigate();
-  const { clearUserData } = useUser();
+  const { clearUserData, isAuthenticated, isLoading } = useUser();
+  const [autoLoginAttempted, setAutoLoginAttempted] = useState(false);
+
+  useEffect(() => {
+    const tryAutoLogin = async () => {
+      if (autoLoginAttempted || isAuthenticated) return;
+      
+      const savedEmail = localStorage.getItem('savedEmail');
+      const savedPassword = localStorage.getItem('savedPassword');
+      
+      if (savedEmail && savedPassword && !autoLoginAttempted) {
+        console.log('Welcome - 嘗試自動登入:', savedEmail);
+        setAutoLoginAttempted(true);
+        
+        try {
+          // 嘗試自動登入
+          const userCredential = await signInWithEmailAndPassword(auth, savedEmail, savedPassword);
+          console.log('Welcome - 自動登入成功:', userCredential.user.email);
+          
+          // 等待一小段時間確保資料載入
+          setTimeout(() => {
+            navigate('/user-info');
+          }, 500);
+        } catch (error) {
+          console.error('Welcome - 自動登入失敗:', error);
+          // 清除無效的憑證
+          localStorage.removeItem('savedEmail');
+          localStorage.removeItem('savedPassword');
+        }
+      }
+    };
+
+    // 延遲執行自動登入，確保 Firebase 已初始化
+    const timer = setTimeout(() => {
+      tryAutoLogin();
+    }, 100);
+
+    return () => clearTimeout(timer);
+  }, [autoLoginAttempted, isAuthenticated, navigate]);
+
+  // 如果已經認證，直接導航到 user-info
+  useEffect(() => {
+    if (isAuthenticated && !isLoading) {
+      console.log('Welcome - 用戶已認證，導航到 user-info');
+      navigate('/user-info');
+    }
+  }, [isAuthenticated, isLoading, navigate]);
 
   const handleLoginRedirect = () => {
-    clearUserData();
+    // 不清除用戶資料，讓用戶可以正常登入
     navigate('/login');
   };
 
@@ -15,7 +64,7 @@ function Welcome() {
     <div className="welcome-container">
       <div className="welcome-content">
         <h1 className="welcome-title">歡迎來到評測小能手</h1>
-        <p className="welcome-subtitle">留下運動數據，進步多少馬上知道</p>
+        <p className="welcome-subtitle">留下運動數據,進步多少馬上知道</p>
         <div className="button-group-mode">
           <div className="button-with-tooltip">
             <button
@@ -24,7 +73,7 @@ function Welcome() {
             >
               登入
             </button>
-            <span className="tooltip">將數據保存到雲端，隨時隨地訪問</span>
+            <span className="tooltip">將數據保存到雲端,隨時隨地訪問</span>
           </div>
         </div>
       </div>
