@@ -181,6 +181,14 @@ function Login({ onLogin }) {
       >
         {isRegistering ? '已有帳號？點此登入' : '沒有帳號？點此註冊'}
       </button>
+      <div className="instructions-container">
+        <h2 className="instructions-title">使用說明</h2>
+        <ul className="instructions-list">
+          <li><strong>公平評測</strong>：依性別、年齡、身高、體重，結合科學統計，分數化呈現，簡單易懂。</li>
+          <li><strong>全面分析</strong>：五邊形雷達圖顯示弱項，指引補強方向。</li>
+          <li><strong>成長追蹤</strong>：記錄進步軌跡，優化課表效率。</li>
+        </ul>
+      </div>
     </div>
   );
 }
