@@ -129,10 +129,12 @@ function Strength({ onComplete, clearTestData }) {
 
   const getAverageScoreComment = (score, gender) => {
     const genderValue = gender === '男性' || gender.toLowerCase() === 'male' ? 'male' : 'female';
-    if (score >= 80) return genderValue === 'male' ? '無敵強者！你是力量之王，繼續稱霸！' : '太驚艷了！你是力量女神，超棒的！';
-    if (score >= 70) return genderValue === 'male' ? '超猛表現！頂尖水準，衝向巔峰吧！' : '真的很傑出！表現超棒，繼續保持哦！';
-    if (score >= 60) return genderValue === 'male' ? '很強！超越業餘極限，再拼一把！' : '表現超棒！超越大多數人，你很厲害！';
-    if (score >= 50) return genderValue === 'male' ? '不錯的水準！再加把勁，突破極限！' : '很棒的水準！再努力一點，你會更好！';
+    if (score >= 90) return genderValue === 'male' ? '頂尖表現！你已達建力、舉重專項運動員水平！接受掌聲吧！' : '我願稱你為神力女超人!';
+    if (score >= 80) return genderValue === 'male' ? '千里挑一！你已達到職業運動員水平(非健力、舉重專項)，繼續稱霸！' : '太驚艷了！你是力量女神，超棒的！';
+    if (score >= 70) return genderValue === 'male' ? '超越常人！許多國手的力量指標也落在這邊(非健力、舉重專項)，相當厲害!' : '真的很傑出！表現超棒，繼續保持哦！';
+    if (score >= 60) return genderValue === 'male' ? '很強！業餘運動愛好者中的佼佼者，再拼一把！' : '表現超棒！超越大多數人，你很厲害！';
+    if (score >= 50) return genderValue === 'male' ? '不錯的水準！訓練痕跡肉眼可見！' : '很棒的水準！再努力一點，你會更好！';
+    if (score >= 40) return genderValue === 'male' ? '已經有基礎了，繼續進步，一切大有可為!' : '有規律良好的運動習慣了!再接再厲';
     return genderValue === 'male' ? '兄弟，該衝了！全力以赴，突破自己！' : '親愛的，還有進步空間，繼續加油哦！';
   };
 
