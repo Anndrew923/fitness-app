@@ -159,7 +159,7 @@ function Muscle({ onComplete, clearTestData }) {
       
       <div className="exercise-section">
         <h2 className="text-lg font-semibold">骨骼肌肉量 (SMM)</h2>
-        <label htmlFor="smm" className="block text-sm font-medium text-gray-700">骨骼肌肉量 (kg)</label>
+        <label htmlFor="smm" className="block text-sm техни0 font-medium text-gray-700">骨骼肌肉量 (kg)</label>
         <input 
           id="smm" 
           name="smm" 
@@ -185,8 +185,8 @@ function Muscle({ onComplete, clearTestData }) {
         <div className="chart-section">
           <h2 className="text-lg font-semibold mb-4">數值比較</h2>
           <div className="chart-container">
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={barData1}>
+            <ResponsiveContainer width="100%" heightਮ0 height={300}>
+              <BarChart data={barData1} barSize={30}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="name" />
                 <YAxis domain={[0, 100]} />
@@ -200,7 +200,7 @@ function Muscle({ onComplete, clearTestData }) {
           <h2 className="text-lg font-semibold mt-6 mb-4">最終分數</h2>
           <div className="chart-container">
             <ResponsiveContainer width="100%" height={200}>
-              <BarChart data={barData2}>
+              <BarChart data={barData2} barSize={30}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="name" />
                 <YAxis domain={[0, 100]} />
