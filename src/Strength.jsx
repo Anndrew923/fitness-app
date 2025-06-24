@@ -130,8 +130,8 @@ function Strength({ onComplete, clearTestData }) {
   const getAverageScoreComment = (score, gender) => {
     const genderValue = gender === '男性' || gender.toLowerCase() === 'male' ? 'male' : 'female';
     if (score >= 90) return genderValue === 'male' ? '頂尖表現！你已達建力、舉重專項運動員水平！接受掌聲吧！' : '我願稱你為神力女超人!';
-    if (score >= 80) return genderValue === 'male' ? '萬里挑一！你已達到職業運動員水平(非健力、舉重專項)，繼續稱霸！' : '太驚艷了！你應該是朋友圈裡最強的吧？超棒的！';
-    if (score >= 70) return genderValue === 'male' ? '超越常人！許多國手的力量指標也落在這邊(非健力、舉重專項)，相當厲害!' : '真的很傑出！表現超棒，繼續保持哦！';
+    if (score >= 80) return genderValue === 'male' ? '萬里挑一！你已達到職業運動員水平，繼續稱霸！' : '太驚艷了！你應該是朋友圈裡最強的吧？超棒的！';
+    if (score >= 70) return genderValue === 'male' ? '超越常人！許多國手的力量指標也落在這，相當厲害!' : '真的很傑出！表現超棒，繼續保持哦！';
     if (score >= 60) return genderValue === 'male' ? '很強！業餘運動愛好者中的佼佼者，再拼一把！' : '表現超棒！超越大多數人，你很厲害！';
     if (score >= 50) return genderValue === 'male' ? '不錯的水準！訓練痕跡肉眼可見！' : '很棒的水準！再努力一點，你會更好！';
     if (score >= 40) return genderValue === 'male' ? '已經有基礎了，繼續進步，一切大有可為!' : '有規律良好的運動習慣了!再接再厲';
@@ -149,24 +149,20 @@ function Strength({ onComplete, clearTestData }) {
   const scores = [benchPress.score, squat.score, deadlift.score, latPulldown.score, shoulderPress.score].filter(score => score !== null);
   const averageScore = scores.length > 0 ? (scores.reduce((a, b) => a + parseFloat(b), 0) / scores.length).toFixed(0) : null;
 
-  // 修復：handleSubmit 函數
   const handleSubmit = async () => {
     if (!averageScore) return alert('請至少完成一項評測！');
     
     try {
-      // 先更新分數到 UserContext
       const updatedScores = { 
         ...userData.scores, 
         strength: parseFloat(averageScore) 
       };
       
-      // 使用 setUserData 更新（會自動同步到 Firebase）
       await setUserData(prev => ({
         ...prev,
         scores: updatedScores
       }));
       
-      // 準備測試數據
       const testData = {
         squat: squat.max ? { 
           weight: squat.weight, 
@@ -201,12 +197,10 @@ function Strength({ onComplete, clearTestData }) {
         averageScore: parseFloat(averageScore),
       };
       
-      // 如果有 onComplete prop，呼叫它
       if (onComplete) {
         onComplete(testData);
       }
       
-      // 延遲導航，確保數據已更新
       setTimeout(() => {
         navigate('/user-info');
       }, 500);
@@ -216,6 +210,16 @@ function Strength({ onComplete, clearTestData }) {
       alert('更新用戶數據或導航失敗，請稍後再試！');
     }
   };
+
+  const scoreTableData = [
+    { range: '90~100', description: '專業舉重、健力專項運動員、大力士水平，如魔山、輪子哥、阿諾、John Cena' },
+    { range: '80~90', description: '職業運動員水平；職業格鬥、橄欖球運動員，如巨石強森、GSP(UFC次中量級世界冠軍)' },
+    { range: '70~80', description: '國手水平、球類運動員，如大谷翔平、LBJ、傑森史塔森' },
+    { range: '60~70', description: '業餘運動愛好者中的高手，如休傑克曼、克里斯漢斯沃、亨利卡維爾' },
+    { range: '50~60', description: '中階運動愛好者' },
+    { range: '40~50', description: '開始步入軌道' },
+    { range: '40分以下', description: '初學者' },
+  ];
 
   return (
     <div className="strength-container">
@@ -403,6 +407,26 @@ function Strength({ onComplete, clearTestData }) {
           <p className="average-comment">{getAverageScoreComment(averageScore, gender)}</p>
         </div>
       )}
+
+      <div className="score-table">
+        <h2 className="text-lg font-semibold text-center mb-4">分數說明</h2>
+        <table className="table">
+          <thead>
+            <tr>
+              <th>分數範圍</th>
+              <th>說明</th>
+            </tr>
+          </thead>
+          <tbody>
+            {scoreTableData.map((row, index) => (
+              <tr key={index}>
+                <td>{row.range}</td>
+                <td>{row.description}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
       
       <div className="button-group">
         <button onClick={handleSubmit} className="submit-btn">提交並返回總覽</button>

@@ -1,15 +1,197 @@
+.strength-container {
+  max-width: 100%;
+  padding: 1rem;
+  margin: 0 auto;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.instructions-btn-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+}
+
+.nav-btn {
+  padding: 0.5rem 1rem;
+  background-color: #4bc0c0;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.nav-btn:hover {
+  background-color: #3aa0a0;
+}
+
+.standards-card {
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background-color: #ffffff;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+}
+
+.standards-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  padding: 0.5rem;
+  background-color: #f3f4f6;
+  border-radius: 4px;
+}
+
+.standards-header:hover {
+  background-color: #e5e7eb;
+}
+
+.arrow {
+  font-size: 1rem;
+  transition: transform 0.3s ease;
+}
+
+.arrow.expanded {
+  transform: rotate(180deg);
+}
+
+.standards-content {
+  margin-top: 1rem;
+  padding: 0 0.5rem;
+  font-size: 0.875rem;
+  color: #4b5563;
+}
+
+.exercise-section {
+  margin-bottom: 1.5rem;
+}
+
+.input-field {
+  width: 100%;
+  padding: 0.5rem;
+  margin: 0.5rem 0;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+.calculate-btn {
+  width: 100%;
+  padding: 0.5rem;
+  background-color: #4bc0c0;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  cursor: pointer;
+  margin-top: 0.5rem;
+}
+
+.calculate-btn:hover {
+  background-color: #3aa0a0;
+}
+
+.score-display {
+  font-size: 1.5rem;
+  color: #d32f2f;
+  font-weight: 600;
+  margin: 0.5rem 0;
+}
+
+.radar-chart {
+  margin-top: 1.5rem;
+}
+
 .average-score-section {
-    margin-top: 20px;
-    text-align: center;
+  margin-top: 1.5rem;
+  text-align: center;
+}
+
+.average-score {
+  font-size: 28px;
+  font-weight: bold;
+  color: #ff0000;
+}
+
+.average-comment {
+  font-size: 20px;
+  color: #0000ff;
+}
+
+.score-table {
+  width: 100%;
+  margin-top: 1.5rem;
+  margin-bottom: 2rem;
+  border-collapse: collapse;
+  background-color: #ffffff;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  overflow: hidden;
+}
+
+.table th,
+.table td {
+  padding: 0.75rem;
+  text-align: left;
+  font-size: 0.9rem;
+  color: #4b5563;
+}
+
+.table th {
+  background-color: #f3f4f6;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.table td {
+  border-top: 1px solid #e5e7eb;
+}
+
+.table tr:nth-child(even) {
+  background-color: #f9fafb;
+}
+
+.table tr:hover {
+  background-color: #f1f5f9;
+}
+
+.button-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 1.5rem;
+}
+
+.submit-btn {
+  width: 100%;
+  padding: 0.75rem;
+  font-size: 1rem;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  background-color: #4bc0c0;
+}
+
+.submit-btn:hover {
+  background-color: #3aa0a0;
+}
+
+@media (min-width: 768px) {
+  .strength-container {
+    max-width: 800px;
   }
-  
-  .average-score {
-    font-size: 28px;
-    font-weight: bold;
-    color: #ff0000;
+
+  .button-group {
+    flex-direction: row;
+    justify-content: space-between;
   }
-  
-  .average-comment {
-    font-size: 20px;
-    color: #0000ff;
+
+  .submit-btn {
+    width: 48%;
   }
+}
