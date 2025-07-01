@@ -202,7 +202,8 @@ function Strength({ onComplete, clearTestData }) {
       }
       
       setTimeout(() => {
-        navigate('/user-info');
+        // 導航時傳遞來源資訊
+        navigate('/user-info', { state: { from: '/strength' } });
       }, 500);
       
     } catch (error) {

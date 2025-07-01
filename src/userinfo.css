@@ -1,0 +1,112 @@
+/* 儲存按鈕容器 */
+.save-button-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 20px;
+  margin-bottom: 30px;
+  align-items: stretch; /* 改為 stretch 確保按鈕拉伸 */
+}
+
+/* 儲存結果按鈕 - 調整為與 .nav-btn 一致 */
+.save-results-btn {
+  background-color: #10b981; /* 綠色系 */
+  color: white;
+  padding: 12px 20px; /* 統一 padding 為 20px */
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 150px; /* 統一為 150px */
+}
+
+.save-results-btn:hover {
+  background-color: #059669;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.save-results-btn:active {
+  transform: translateY(0);
+}
+
+/* 歷史紀錄按鈕 - 與儲存按鈕相同顏色系 */
+.history-btn {
+  background-color: #10b981; /* 綠色系，與儲存按鈕相同 */
+  color: white;
+  padding: 12px 20px; /* 統一 padding 為 20px */
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 150px; /* 統一為 150px */
+}
+
+.history-btn:hover {
+  background-color: #059669;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.history-btn:active {
+  transform: translateY(0);
+}
+
+/* 評測入口按鈕 - 使用不同的顏色系 */
+.nav-btn {
+  background-color: #3b82f6; /* 藍色系 */
+  color: white;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  flex: 1;
+  min-width: 150px;
+}
+
+.nav-btn:hover {
+  background-color: #2563eb;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.nav-btn:active {
+  transform: translateY(0);
+}
+
+/* 按鈕群組樣式 */
+.button-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 40px;
+}
+
+/* 響應式設計 */
+@media (max-width: 768px) {
+  .save-button-container {
+    width: 100%;
+  }
+  
+  .save-results-btn,
+  .history-btn {
+    width: 100%;
+    min-width: unset; /* 移除 min-width 限制，讓 width: 100% 生效 */
+  }
+  
+  .button-group {
+    flex-direction: column;
+  }
+  
+  .nav-btn {
+    width: 100%;
+  }
+}

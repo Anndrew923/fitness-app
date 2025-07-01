@@ -1,5 +1,5 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useUser } from './UserContext';
 import { RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, ResponsiveContainer } from 'recharts';
 import { auth } from './firebase';
@@ -23,6 +23,8 @@ function UserInfo({ testData, onLogout, clearTestData }) {
   const [currentUser, setCurrentUser] = useState(null);
   const [dataLoaded, setDataLoaded] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+  const radarSectionRef = useRef(null);
 
   const radarChartData = useMemo(() => {
     const scores = userData.scores || DEFAULT_SCORES;
@@ -72,6 +74,25 @@ function UserInfo({ testData, onLogout, clearTestData }) {
 
     checkDataLoaded();
   }, [currentUser, dataLoaded, isLoading, userData, loadUserData]);
+
+  // 處理從評測頁面返回時自動滾動到雷達圖
+  useEffect(() => {
+    // 檢查是否從評測頁面返回
+    const fromTestPages = ['/strength', '/explosive-power', '/cardio', '/muscle-mass', '/body-fat'];
+    const previousPath = location.state?.from;
+    
+    if (previousPath && fromTestPages.includes(previousPath)) {
+      // 延遲執行以確保頁面完全載入
+      setTimeout(() => {
+        if (radarSectionRef.current) {
+          radarSectionRef.current.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'center' 
+          });
+        }
+      }, 300);
+    }
+  }, [location]);
 
   // 處理 testData 更新
   useEffect(() => {
@@ -186,7 +207,8 @@ function UserInfo({ testData, onLogout, clearTestData }) {
       }
 
       if (validateData()) {
-        navigate(path);
+        // 傳遞當前路徑作為狀態，以便返回時知道從哪裡來
+        navigate(path, { state: { from: '/user-info' } });
       } else {
         setError('請確保資料已正確保存後再進行評測！');
       }
@@ -345,7 +367,7 @@ function UserInfo({ testData, onLogout, clearTestData }) {
         </>
       )}
 
-      <div id="radar-section" className="radar-section">
+      <div id="radar-section" className="radar-section" ref={radarSectionRef}>
         <h2 className="text-xl font-semibold text-center mb-4">表現總覽</h2>
         {loading ? (
           <p>正在載入數據...</p>
@@ -388,6 +410,9 @@ function UserInfo({ testData, onLogout, clearTestData }) {
         <button onClick={handleSaveResults} className="save-results-btn">
           儲存結果至歷史紀錄
         </button>
+        <button onClick={() => navigate('/history')} className="history-btn">
+          歷史紀錄
+        </button>
       </div>
 
       <div className="button-group" style={{ marginTop: '40px' }}>
@@ -396,7 +421,6 @@ function UserInfo({ testData, onLogout, clearTestData }) {
         <button onClick={() => handleNavigation('/cardio')} className="nav-btn">心肺耐力測試</button>
         <button onClick={() => handleNavigation('/muscle-mass')} className="nav-btn">骨骼肌肉量</button>
         <button onClick={() => handleNavigation('/body-fat')} className="nav-btn">體脂肪率與FFMI</button>
-        <button onClick={() => navigate('/history')} className="nav-btn special-btn">歷史紀錄</button>
       </div>
     </div>
   );

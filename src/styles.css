@@ -1,288 +1,289 @@
-/* styles.css */
+/* 在你的 styles.css 中添加或更新以下樣式 */
 
-/* UserInfo 相關樣式 */
+/* 通用容器寬度限制 */
 .user-info-container {
-  padding: 1rem;
-  max-width: 100%;
+  max-width: 800px;
   margin: 0 auto;
-  position: relative; /* 確保儲存結果按鈕的絕對定位正常 */
+  padding: 20px;
 }
 
-.input-field {
+/* 儲存按鈕容器 - 與下方按鈕群組對齊 */
+.save-button-container {
+  display: flex;
+  flex-direction: row;
+  gap: 12px;
+  margin-top: 20px;
+  margin-bottom: 30px;
   width: 100%;
-  padding: 0.5rem;
-  margin-top: 0.25rem;
-  border: 1px solid #ccc;
-  border-radius: 0.25rem;
+  max-width: 100%; /* 移除固定寬度，讓它與父容器一致 */
 }
 
-.submit-btn {
-  width: 100%;
-  padding: 0.5rem;
-  background-color: #007bff;
+/* 儲存結果按鈕 - 優化樣式 */
+.save-results-btn {
+  background-color: #10b981;
   color: white;
+  padding: 14px 20px;
   border: none;
-  border-radius: 0.25rem;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 600;
   cursor: pointer;
+  transition: all 0.3s ease;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.submit-btn:disabled {
-  background-color: #6c757d;
-  cursor: not-allowed;
+.save-results-btn:hover {
+  background-color: #059669;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.3);
 }
 
+.save-results-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* 歷史紀錄按鈕 - 優化外觀設計 */
+.history-btn {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  padding: 14px 20px;
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+/* 歷史紀錄按鈕的裝飾性元素 */
+.history-btn::before {
+  content: '📊';
+  position: absolute;
+  left: 20px;
+  font-size: 20px;
+  opacity: 0.8;
+}
+
+.history-btn:hover {
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+}
+
+.history-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* 評測入口按鈕 - 保持原樣 */
 .nav-btn {
-  width: 100%;
-  padding: 0.5rem;
-  margin: 0.25rem 0;
-  background-color: #28a745;
+  background-color: #3b82f6;
   color: white;
+  padding: 12px 20px;
   border: none;
-  border-radius: 0.25rem;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 500;
   cursor: pointer;
+  transition: all 0.3s ease;
+  flex: 1;
+  min-width: 150px;
+  min-height: 48px; /* 確保高度一致 */
 }
 
-.special-btn {
-  background-color: #4B5EAA; /* 淺藍灰色 */
-  color: white;
+.nav-btn:hover {
+  background-color: #2563eb;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
 }
 
-.special-btn:hover {
-  background-color: #3A4A8B; /* 滑鼠懸停時的深藍灰色 */
+.nav-btn:active {
+  transform: translateY(0);
 }
 
-.signout-btn {
-  padding: 0.5rem;
-  background-color: #dc3545;
-  color: white;
-  border: none;
-  border-radius: 0.25rem;
-  cursor: pointer;
-}
-
-.mode-btn {
-  padding: 0.5rem;
-  margin: 0.25rem;
-  border: none;
-  border-radius: 0.25rem;
-  cursor: pointer;
-}
-
-.guest-btn {
-  background-color: #6c757d;
-  color: white;
-}
-
-.login-btn {
-  background-color: #007bff;
-  color: white;
-}
-
+/* 按鈕群組樣式 - 確保寬度一致 */
 .button-group {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
-}
-
-.button-group-mode {
-  display: flex;
+  gap: 12px;
   justify-content: center;
-  gap: 1rem;
+  margin-top: 40px;
+  width: 100%; /* 確保與上方容器寬度一致 */
 }
 
+/* 雷達圖區域 */
 .radar-section {
-  margin: 1rem 0;
+  margin: 40px 0;
+  padding: 20px;
+  background-color: #f9fafb;
+  border-radius: 12px;
 }
 
-.error-message {
-  color: #dc3545;
-  text-align: center;
-}
-
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.modal-content {
-  background: white;
-  padding: 1rem;
-  border-radius: 0.25rem;
-  width: 90%;
-  max-width: 500px;
-}
-
-.modal-close-btn {
-  background: none;
-  border: none;
-  font-size: 1.5rem;
-  cursor: pointer;
-}
-
-.history-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.history-table th,
-.history-table td {
-  border: 1px solid #ddd;
-  padding: 0.5rem;
-  text-align: left;
-}
-
+/* 分數區域 */
 .score-section {
   text-align: center;
-  padding: 10px;
-  background-color: #f0f8ff;
-  border-radius: 8px;
   margin-top: 20px;
 }
 
 .average-score {
   font-size: 24px;
-  font-weight: 600;
-  color: #000080;
-  margin-bottom: 5px;
+  font-weight: bold;
+  color: #1f2937;
+  margin-bottom: 8px;
 }
 
 .score-value {
+  color: #10b981;
   font-size: 32px;
-  font-weight: 700;
-  color: #FF4444;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
 }
 
-/* 新增 save-button-container 樣式 */
-.save-button-container {
-  display: flex;
-  justify-content: flex-end;
-  margin-top: 20px;
+.score-slogan {
+  font-size: 18px;
+  color: #6b7280;
+  font-style: italic;
 }
 
-/* 修改後的 save-results-btn 樣式，去掉絕對定位 */
-.save-results-btn {
-  background-color: rgba(34, 202, 236, 1);
-  color: #fff;
-  padding: 8px 16px;
+/* 表單樣式 */
+.input-field {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 16px;
+  transition: border-color 0.3s ease;
+}
+
+.input-field:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* 提交按鈕 */
+.submit-btn {
+  background-color: #3b82f6;
+  color: white;
+  padding: 10px 24px;
   border: none;
-  border-radius: 5px;
+  border-radius: 6px;
+  font-size: 16px;
+  font-weight: 500;
   cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.submit-btn:hover:not(:disabled) {
+  background-color: #2563eb;
+}
+
+.submit-btn:disabled {
+  background-color: #9ca3af;
+  cursor: not-allowed;
+}
+
+/* 錯誤訊息 */
+.error-message {
+  background-color: #fee2e2;
+  color: #dc2626;
+  padding: 12px;
+  border-radius: 6px;
+  margin-bottom: 16px;
   font-size: 14px;
 }
 
-.save-results-btn:hover {
-  background-color: rgba(34, 182, 216, 1);
-}
-
-/* Welcome.js 相關樣式 */
-.welcome-container {
-  position: relative;
-  height: 100vh;
+/* 用戶狀態區域 */
+.user-status {
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
-  background-image: url('https://images.unsplash.com/photo-1502224562085-639556652f33?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
+  margin-bottom: 20px;
+  padding: 12px;
+  background-color: #f3f4f6;
+  border-radius: 8px;
 }
 
-.welcome-container::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.5);
-}
-
-.welcome-content {
-  position: relative;
-  text-align: center;
+.signout-btn {
+  background-color: #ef4444;
   color: white;
-  z-index: 1;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
 }
 
-.welcome-title {
-  font-size: 3rem;
-  font-weight: bold;
-  margin-bottom: 1rem;
-  animation: fadeIn 1.5s ease-in-out;
-}
-
-.welcome-subtitle {
-  font-size: 1.5rem;
-  margin-bottom: 2rem;
-  animation: fadeIn 2s ease-in-out;
-}
-
-.button-with-tooltip {
-  position: relative;
-  width: 100%;
-}
-
-.tooltip {
-  visibility: hidden;
-  width: 200px;
-  background-color: #555;
-  color: #fff;
-  text-align: center;
-  border-radius: 4px;
-  padding: 5px;
-  position: absolute;
-  z-index: 1;
-  bottom: 125%;
-  left: 50%;
-  transform: translateX(-50%);
-  opacity: 0;
-  transition: opacity 0.3s;
-  font-size: 0.75rem;
-}
-
-.button-with-tooltip:hover .tooltip {
-  visibility: visible;
-  opacity: 1;
-}
-
-@keyframes fadeIn {
-  0% { opacity: 0; transform: translateY(20px); }
-  100% { opacity: 1; transform: translateY(0); }
+.signout-btn:hover {
+  background-color: #dc2626;
 }
 
 /* 響應式設計 */
 @media (max-width: 768px) {
-  .user-info-container { padding: 0.5rem; }
-  .input-field { font-size: 0.9rem; }
-  .submit-btn { font-size: 0.9rem; }
-  .nav-btn { font-size: 0.9rem; }
-  .special-btn { font-size: 0.9rem; }
-  .signout-btn { width: 100%; font-size: 0.9rem; }
-  .mode-btn { width: 100%; font-size: 0.9rem; }
-  .button-group { flex-direction: column; }
-  .button-group-mode { flex-direction: column; gap: 0.5rem; }
-  .radar-section { padding: 0.5rem; }
-  .modal-content { width: 95%; padding: 0.5rem; }
-  .history-table th,
-  .history-table td { font-size: 0.8rem; padding: 0.3rem; }
-  .score-section { padding: 8px; margin-top: 15px; }
-  .average-score { font-size: 20px; }
-  .score-value { font-size: 28px; text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5); }
-  .welcome-title { font-size: 2rem; }
-  .welcome-subtitle { font-size: 1.2rem; }
-  .button-group-mode { gap: 0.75rem; }
-  .save-results-btn { width: 100%; } /* 在小螢幕下確保按鈕適應寬度 */
+  .user-info-container {
+    padding: 16px;
+  }
+  
+  .save-button-container {
+    gap: 8px;
+  }
+  
+  .button-group {
+    gap: 8px;
+  }
+  
+  /* 平板尺寸時，評測按鈕可以 2x3 排列 */
+  .nav-btn {
+    min-width: calc(50% - 4px);
+  }
 }
 
-@media (min-width: 768px) {
-  .button-group-mode { flex-direction: row; gap: 1rem; }
-  .button-with-tooltip { width: 48%; }
+/* 手機尺寸 */
+@media (max-width: 480px) {
+  .save-button-container {
+    flex-direction: column;
+  }
+  
+  .save-results-btn,
+  .history-btn {
+    width: 100%;
+  }
+  
+  /* 移除歷史按鈕的絕對定位圖標，改為內聯 */
+  .history-btn::before {
+    position: static;
+    margin-right: 8px;
+  }
+  
+  .button-group {
+    flex-direction: column;
+  }
+  
+  .nav-btn {
+    width: 100%;
+    min-width: unset;
+  }
+  
+  .user-status {
+    flex-direction: column;
+    gap: 12px;
+    text-align: center;
+  }
+  
+  .signout-btn {
+    width: 100%;
+  }
 }

@@ -152,9 +152,9 @@ function Power({ onComplete, clearTestData }) {
           onComplete(testData);
         }
         
-        // 延遲導航，確保數據已更新
+        // 延遲導航，確保數據已更新，並傳遞來源資訊
         setTimeout(() => {
-          navigate('/user-info');
+          navigate('/user-info', { state: { from: '/explosive-power' } });
         }, 100);
       } else {
         throw new Error('保存數據失敗');

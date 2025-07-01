@@ -126,9 +126,9 @@ function Muscle({ onComplete, clearTestData }) {
           onComplete(testData);
         }
         
-        // 延遲導航，確保數據已更新
+        // 延遲導航，確保數據已更新，並傳遞來源資訊
         setTimeout(() => {
-          navigate('/user-info');
+          navigate('/user-info', { state: { from: '/muscle-mass' } });
         }, 100);
       } else {
         throw new Error('保存數據失敗');
@@ -159,7 +159,7 @@ function Muscle({ onComplete, clearTestData }) {
       
       <div className="exercise-section">
         <h2 className="text-lg font-semibold">骨骼肌肉量 (SMM)</h2>
-        <label htmlFor="smm" className="block text-sm техни0 font-medium text-gray-700">骨骼肌肉量 (kg)</label>
+        <label htmlFor="smm" className="block text-sm font-medium text-gray-700">骨骼肌肉量 (kg)</label>
         <input 
           id="smm" 
           name="smm" 
@@ -185,7 +185,7 @@ function Muscle({ onComplete, clearTestData }) {
         <div className="chart-section">
           <h2 className="text-lg font-semibold mb-4">數值比較</h2>
           <div className="chart-container">
-            <ResponsiveContainer width="100%" heightਮ0 height={300}>
+            <ResponsiveContainer width="100%" height={300}>
               <BarChart data={barData1} barSize={30}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="name" />
