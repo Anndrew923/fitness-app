@@ -62,18 +62,18 @@ function FFMI({ onComplete, clearTestData }) {
     setFfmiScore(newFfmiScore.toFixed(1));
 
     if (isMale) {
-      if (adjustedFfmi < 16) setFfmiCategory('肌肉量低於平均');
-      else if (adjustedFfmi < 18) setFfmiCategory('肌肉量在平均值');
-      else if (adjustedFfmi < 20) setFfmiCategory('肌肉量高於平均值');
-      else if (adjustedFfmi < 22) setFfmiCategory('肌肉量很高');
-      else if (adjustedFfmi < 25) setFfmiCategory('肌肉量極高');
+      if (adjustedFfmi < 18) setFfmiCategory('肌肉量低於平均');
+      else if (adjustedFfmi < 20) setFfmiCategory('肌肉量在平均值');
+      else if (adjustedFfmi < 22) setFfmiCategory('肌肉量高於平均值');
+      else if (adjustedFfmi < 23) setFfmiCategory('肌肉量很高');
+      else if (adjustedFfmi < 26) setFfmiCategory('肌肉量極高');
       else if (adjustedFfmi < 28) setFfmiCategory('肌肉量已經高到可能有使用藥物');
       else setFfmiCategory('不用藥不可能達到的數值');
     } else {
-      if (adjustedFfmi < 13) setFfmiCategory('肌肉量低於平均');
-      else if (adjustedFfmi < 15) setFfmiCategory('肌肉量在平均值');
-      else if (adjustedFfmi < 17) setFfmiCategory('肌肉量高於平均值');
-      else if (adjustedFfmi < 19) setFfmiCategory('肌肉量很高');
+      if (adjustedFfmi < 15) setFfmiCategory('肌肉量低於平均');
+      else if (adjustedFfmi < 17) setFfmiCategory('肌肉量在平均值');
+      else if (adjustedFfmi < 19) setFfmiCategory('肌肉量高於平均值');
+      else if (adjustedFfmi < 22) setFfmiCategory('肌肉量很高');
       else setFfmiCategory('不用藥不可能達到的數值');
     }
   };
