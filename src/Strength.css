@@ -66,6 +66,73 @@
   color: #4b5563;
 }
 
+/* 新增的分數等級表格樣式 */
+.score-levels-table {
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background-color: #ffffff;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+}
+
+.score-levels-table h3 {
+  margin: 0;
+  color: #1f2937;
+}
+
+.levels-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.level-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.level-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.875rem;
+}
+
+.level-name {
+  font-weight: 600;
+  color: #374151;
+}
+
+.level-score {
+  font-weight: 700;
+  color: #1f2937;
+  font-size: 1rem;
+}
+
+.level-bar-container {
+  width: 100%;
+  height: 24px;
+  background-color: #f3f4f6;
+  border-radius: 12px;
+  overflow: hidden;
+  position: relative;
+}
+
+.level-bar {
+  height: 100%;
+  border-radius: 12px;
+  transition: width 0.5s ease-in-out;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 8px;
+  color: white;
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
 .exercise-section {
   margin-bottom: 1.5rem;
 }
@@ -193,5 +260,21 @@
 
   .submit-btn {
     width: 48%;
+  }
+  
+  /* 橫向顯示分數等級 */
+  .levels-container {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 1rem;
+  }
+  
+  .level-item {
+    flex: 1;
+  }
+  
+  .level-bar-container {
+    height: 32px;
   }
 }

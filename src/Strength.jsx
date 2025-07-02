@@ -99,7 +99,7 @@ function Strength({ onComplete, clearTestData }) {
       bodyweight: gender === 'female' ? standards.bodyweightStandardsFemaleShoulderPress : standards.bodyweightStandardsMaleShoulderPress, 
       age: gender === 'female' ? standards.ageStandardsFemaleShoulderPress : standards.ageStandardsMaleShoulderPress 
     },
-  }), [gender]);
+  }), [gender, standards]);
 
   const calculateMaxStrength = useCallback((weight, reps, setState, type) => {
     if (!weight || !reps) return alert('請輸入重量和次數！');
@@ -202,7 +202,6 @@ function Strength({ onComplete, clearTestData }) {
       }
       
       setTimeout(() => {
-        // 導航時傳遞來源資訊
         navigate('/user-info', { state: { from: '/strength' } });
       }, 500);
       
@@ -220,6 +219,14 @@ function Strength({ onComplete, clearTestData }) {
     { range: '50~60', description: '中階運動愛好者' },
     { range: '40~50', description: '開始步入軌道' },
     { range: '40分以下', description: '初學者' },
+  ];
+
+  const scoreLevels = [
+    { level: '初階-運動習慣培養中', score: 20, color: '#FF6B6B' },
+    { level: '入門-業餘運動愛好者', score: 40, color: '#FFA726' },
+    { level: '中等-訓練痕跡肉眼可見', score: 60, color: '#FFEE58' },
+    { level: '高階-職業運動員等級', score: 80, color: '#66BB6A' },
+    { level: '精英-舉重、健力運動員', score: 100, color: '#42A5F5' }
   ];
 
   return (
@@ -247,6 +254,30 @@ function Strength({ onComplete, clearTestData }) {
             </p>
           </div>
         )}
+      </div>
+
+      {/* 新增的分數等級表格 */}
+      <div className="score-levels-table">
+        <h3 className="text-lg font-semibold mb-3">分數等級</h3>
+        <div className="levels-container">
+          {scoreLevels.map((item, index) => (
+            <div key={index} className="level-item">
+              <div className="level-header">
+                <span className="level-name">{item.level}</span>
+                <span className="level-score">{item.score}</span>
+              </div>
+              <div className="level-bar-container">
+                <div 
+                  className="level-bar" 
+                  style={{ 
+                    width: `${item.score}%`,
+                    background: `linear-gradient(to right, ${item.color}dd, ${item.color})`
+                  }}
+                />
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
       
       <div className="exercise-section">
