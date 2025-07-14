@@ -202,15 +202,20 @@ function UserInfo({ testData, onLogout, clearTestData }) {
         if (success) {
           alert('資料已儲存成功！');
         } else {
-          setError('儲存失敗，請稍後再試');
+          // 僅登入用戶才顯示錯誤，訪客模式不顯示
+          if (!isGuest) {
+            setError('儲存失敗，請稍後再試');
+          }
         }
       } catch (err) {
-        setError(`儲存失敗：${err.message}`);
+        if (!isGuest) {
+          setError(`儲存失敗：${err.message}`);
+        }
       } finally {
         setLoading(false);
       }
     },
-    [userData, validateData, saveUserData]
+    [userData, validateData, saveUserData, isGuest]
   );
 
   const averageScore = useMemo(() => {
@@ -392,14 +397,6 @@ function UserInfo({ testData, onLogout, clearTestData }) {
       {error && <p className="error-message">{error}</p>}
 
       {/* 只保留 currentUser 狀態區塊，移除載入提示 */}
-      {currentUser && (
-        <div className="user-status">
-          <p>歡迎，{currentUser.email}！</p>
-          <button onClick={handleLogout} className="signout-btn">
-            登出
-          </button>
-        </div>
-      )}
       {(currentUser || isGuest) && (
         <>
           <h1 className="text-2xl font-bold text-center mb-6">
@@ -413,7 +410,10 @@ function UserInfo({ testData, onLogout, clearTestData }) {
               >
                 暱稱
               </label>
-              <div className="nickname-input-group">
+              <div
+                className="nickname-input-group"
+                style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+              >
                 <input
                   id="nickname"
                   name="nickname"
@@ -431,6 +431,62 @@ function UserInfo({ testData, onLogout, clearTestData }) {
                 >
                   生成暱稱
                 </button>
+                {currentUser && (
+                  <div
+                    style={{ position: 'relative', display: 'inline-block' }}
+                  >
+                    <button
+                      type="button"
+                      onClick={handleLogout}
+                      title="登出"
+                      style={{
+                        width: '36px',
+                        height: '36px',
+                        borderRadius: '50%',
+                        background: '#ff6f61',
+                        color: '#fff',
+                        border: 'none',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontWeight: 'bold',
+                        fontSize: '16px',
+                        marginLeft: '8px',
+                        cursor: 'pointer',
+                        boxShadow: '0 2px 8px rgba(255,111,97,0.08)',
+                      }}
+                      onMouseEnter={e => {
+                        const tooltip = document.createElement('div');
+                        tooltip.innerText = '登出';
+                        tooltip.style.position = 'absolute';
+                        tooltip.style.bottom = '44px';
+                        tooltip.style.left = '50%';
+                        tooltip.style.transform = 'translateX(-50%)';
+                        tooltip.style.background = 'rgba(60,60,60,0.95)';
+                        tooltip.style.color = '#fff';
+                        tooltip.style.padding = '6px 14px';
+                        tooltip.style.borderRadius = '6px';
+                        tooltip.style.fontSize = '13px';
+                        tooltip.style.whiteSpace = 'nowrap';
+                        tooltip.style.pointerEvents = 'none';
+                        tooltip.style.zIndex = '1001';
+                        tooltip.className = 'logout-tooltip';
+                        e.currentTarget.parentNode.appendChild(tooltip);
+                      }}
+                      onMouseLeave={e => {
+                        const tooltip =
+                          e.currentTarget.parentNode.querySelector(
+                            '.logout-tooltip'
+                          );
+                        if (tooltip) tooltip.remove();
+                      }}
+                    >
+                      <span style={{ fontSize: '18px', fontWeight: 'bold' }}>
+                        ⎋
+                      </span>
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
             <div>
