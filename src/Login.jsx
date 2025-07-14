@@ -27,9 +27,9 @@ function Login({ onLogin }) {
       setError('Firebase 未正確初始化，請檢查配置');
       return;
     }
-    
+
     // 檢查是否已登入
-    const unsubscribe = auth.onAuthStateChanged((user) => {
+    const unsubscribe = auth.onAuthStateChanged(user => {
       if (user) {
         console.log('用戶已登入:', user.email);
         navigate('/user-info');
@@ -49,12 +49,17 @@ function Login({ onLogin }) {
     return () => unsubscribe();
   }, [navigate]);
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async e => {
     e.preventDefault();
     setError(null);
     setLoading(true);
 
-    console.log('開始處理表單提交，isRegistering:', isRegistering, 'email:', email);
+    console.log(
+      '開始處理表單提交，isRegistering:',
+      isRegistering,
+      'email:',
+      email
+    );
     if (!auth || !db) {
       setError('Firebase 未正確初始化，請檢查配置');
       console.error('auth 或 db 未初始化:', { auth, db });
@@ -66,10 +71,14 @@ function Login({ onLogin }) {
       let userCredential;
       if (isRegistering) {
         console.log('嘗試註冊用戶:', email);
-        userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        userCredential = await createUserWithEmailAndPassword(
+          auth,
+          email,
+          password
+        );
         const user = userCredential.user;
         console.log('註冊成功，用戶:', user.email, 'UID:', user.uid);
-        
+
         // 初始化用戶資料
         const userRef = doc(db, 'users', user.uid);
         const initialUserData = {
@@ -91,14 +100,23 @@ function Login({ onLogin }) {
           history: [],
           testInputs: {},
         };
-        
+
         console.log('儲存初始用戶數據:', initialUserData);
         await setDoc(userRef, initialUserData);
         console.log('用戶數據已儲存，文檔 ID:', user.uid);
       } else {
         console.log('嘗試登入用戶:', email);
-        userCredential = await signInWithEmailAndPassword(auth, email, password);
-        console.log('登入成功，用戶:', userCredential.user.email, 'UID:', userCredential.user.uid);
+        userCredential = await signInWithEmailAndPassword(
+          auth,
+          email,
+          password
+        );
+        console.log(
+          '登入成功，用戶:',
+          userCredential.user.email,
+          'UID:',
+          userCredential.user.uid
+        );
       }
 
       const user = userCredential.user;
@@ -141,7 +159,7 @@ function Login({ onLogin }) {
           <input
             type="email"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={e => setEmail(e.target.value)}
             placeholder="輸入你的電子郵件"
             className="input-field"
             required
@@ -155,21 +173,42 @@ function Login({ onLogin }) {
           <input
             type="password"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={e => setPassword(e.target.value)}
             placeholder="輸入你的密碼"
             className="input-field"
             required
             disabled={loading}
           />
         </div>
-        <div className="checkbox-container">
-          <input
-            type="checkbox"
-            checked={rememberMe}
-            onChange={(e) => setRememberMe(e.target.checked)}
-            disabled={loading}
-          />
-          <label className="checkbox-label">記住我的帳號(登出時清除資料)</label>
+        <div
+          style={{
+            width: '100%',
+            display: 'flex',
+            justifyContent: 'flex-end',
+            marginBottom: '8px',
+          }}
+        >
+          <label
+            htmlFor="rememberMe"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              cursor: 'pointer',
+              whiteSpace: 'nowrap',
+              fontSize: '14px',
+              color: '#555',
+            }}
+          >
+            <input
+              id="rememberMe"
+              type="checkbox"
+              checked={rememberMe}
+              onChange={e => setRememberMe(e.target.checked)}
+              disabled={loading}
+              style={{ margin: 0 }}
+            />
+            <span style={{ marginLeft: '6px' }}>記住我的帳號</span>
+          </label>
         </div>
         <button type="submit" className="submit-btn" disabled={loading}>
           {loading ? '處理中...' : isRegistering ? '註冊' : '登入'}
@@ -184,9 +223,16 @@ function Login({ onLogin }) {
       <div className="instructions-container">
         <h2 className="instructions-title">使用說明</h2>
         <ul className="instructions-list">
-          <li><strong>公平評測</strong>：依性別、年齡、身高、體重，結合科學統計，分數化呈現，簡單易懂。</li>
-          <li><strong>全面分析</strong>：五邊形雷達圖顯示弱項，指引補強方向。</li>
-          <li><strong>成長追蹤</strong>：記錄進步軌跡，優化課表效率。</li>
+          <li>
+            <strong>公平評測</strong>
+            ：依性別、年齡、身高、體重，結合科學統計，分數化呈現，簡單易懂。
+          </li>
+          <li>
+            <strong>全面分析</strong>：五邊形雷達圖顯示弱項，指引補強方向。
+          </li>
+          <li>
+            <strong>成長追蹤</strong>：記錄進步軌跡，優化課表效率。
+          </li>
         </ul>
       </div>
     </div>

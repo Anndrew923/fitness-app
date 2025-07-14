@@ -18,6 +18,19 @@ const initialState = {
   height: 0,
   weight: 0,
   age: 0,
+  // 新增欄位
+  nickname: '',
+  avatarUrl: '',
+  ageGroup: '', // 年齡段分類
+  friends: [], // 好友列表
+  friendRequests: [], // 好友邀請
+  blockedUsers: [], // 封鎖用戶
+  ladderScore: 0, // 天梯總分
+  ladderRank: 0, // 天梯排名
+  ladderHistory: [], // 天梯歷史
+  isGuest: false, // 訪客模式標記
+  lastActive: new Date().toISOString(),
+  // 原有欄位
   scores: {
     strength: 0,
     explosivePower: 0,
@@ -33,7 +46,7 @@ export function UserProvider({ children }) {
   const isMountedRef = useRef(true);
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  
+
   const userReducer = (state, action) => {
     switch (action.type) {
       case 'UPDATE_USER_DATA':
@@ -50,7 +63,7 @@ export function UserProvider({ children }) {
   const [userData, dispatch] = useReducer(userReducer, initialState);
 
   // 從 Firebase 載入用戶數據
-  const loadUserData = useCallback(async (currentUser) => {
+  const loadUserData = useCallback(async currentUser => {
     if (!currentUser || !isMountedRef.current) {
       setIsLoading(false);
       return false;
@@ -62,11 +75,11 @@ export function UserProvider({ children }) {
     try {
       const userRef = doc(db, 'users', currentUser.uid);
       const userSnap = await getDoc(userRef);
-      
+
       if (userSnap.exists()) {
         const firebaseData = userSnap.data();
         console.log('從 Firebase 載入的資料:', firebaseData);
-        
+
         // 確保數據結構完整
         const mergedData = {
           ...initialState,
@@ -80,7 +93,7 @@ export function UserProvider({ children }) {
           weight: Number(firebaseData.weight) || 0,
           age: Number(firebaseData.age) || 0,
         };
-        
+
         if (isMountedRef.current) {
           dispatch({ type: 'SET_USER_DATA', payload: mergedData });
           localStorage.setItem('userData', JSON.stringify(mergedData));
@@ -93,7 +106,7 @@ export function UserProvider({ children }) {
         // 如果用戶文檔不存在，創建一個新的
         const newUserData = { ...initialState, userId: currentUser.uid };
         await setDoc(userRef, newUserData);
-        
+
         if (isMountedRef.current) {
           dispatch({ type: 'SET_USER_DATA', payload: newUserData });
           localStorage.setItem('userData', JSON.stringify(newUserData));
@@ -103,7 +116,7 @@ export function UserProvider({ children }) {
       }
     } catch (error) {
       console.error('載入用戶數據失敗:', error);
-      
+
       // 嘗試從 localStorage 載入
       try {
         const localData = localStorage.getItem('userData');
@@ -117,14 +130,14 @@ export function UserProvider({ children }) {
       } catch (e) {
         console.error('解析本地數據失敗:', e);
       }
-      
+
       setIsLoading(false);
       return false;
     }
   }, []);
 
   // 保存用戶數據到 Firebase
-  const saveUserData = useCallback(async (data) => {
+  const saveUserData = useCallback(async data => {
     if (!auth.currentUser || !data) {
       console.warn('無法保存數據：用戶未登入或數據無效');
       return false;
@@ -141,7 +154,7 @@ export function UserProvider({ children }) {
         weight: Number(data.weight) || 0,
         age: Number(data.age) || 0,
       };
-      
+
       await setDoc(userRef, dataToSave, { merge: true });
       localStorage.setItem('userData', JSON.stringify(dataToSave));
       console.log('數據保存成功');
@@ -155,65 +168,71 @@ export function UserProvider({ children }) {
   }, []);
 
   // 更新用戶數據
-  const setUserData = useCallback((update) => {
-    let newData;
-    
-    if (typeof update === 'function') {
-      // 函數式更新
-      const currentData = userData;
-      newData = update(currentData);
-    } else {
-      // 直接更新
-      newData = { ...userData, ...update };
-    }
-    
-    // 立即更新本地狀態
-    dispatch({ type: 'UPDATE_USER_DATA', payload: newData });
-    
-    // 異步保存到 Firebase（不等待）
-    if (auth.currentUser) {
-      saveUserData(newData);
-    }
-  }, [userData, saveUserData]);
+  const setUserData = useCallback(
+    update => {
+      let newData;
+
+      if (typeof update === 'function') {
+        // 函數式更新
+        const currentData = userData;
+        newData = update(currentData);
+      } else {
+        // 直接更新
+        newData = { ...userData, ...update };
+      }
+
+      // 立即更新本地狀態
+      dispatch({ type: 'UPDATE_USER_DATA', payload: newData });
+
+      // 異步保存到 Firebase（不等待）
+      if (auth.currentUser) {
+        saveUserData(newData);
+      }
+    },
+    [userData, saveUserData]
+  );
 
   // 保存歷史記錄
-  const saveHistory = useCallback(async (record) => {
-    if (!auth.currentUser) {
-      console.warn('無法保存歷史記錄：用戶未登入');
-      return;
-    }
+  const saveHistory = useCallback(
+    async record => {
+      if (!auth.currentUser) {
+        console.warn('無法保存歷史記錄：用戶未登入');
+        return;
+      }
 
-    const recordWithMetadata = {
-      ...record,
-      userId: auth.currentUser.uid,
-      timestamp: new Date().toISOString(),
-      id: Date.now().toString(),
-    };
+      const recordWithMetadata = {
+        ...record,
+        userId: auth.currentUser.uid,
+        timestamp: new Date().toISOString(),
+        id: Date.now().toString(),
+      };
 
-    try {
-      const userRef = doc(db, 'users', auth.currentUser.uid);
-      await updateDoc(userRef, {
-        history: arrayUnion(recordWithMetadata),
-      });
-      
-      // 更新本地 state
-      const newHistory = [...(userData.history || []), recordWithMetadata];
-      dispatch({
-        type: 'UPDATE_USER_DATA',
-        payload: { history: newHistory },
-      });
-      
-      console.log('歷史記錄保存成功');
-    } catch (error) {
-      console.error('保存歷史記錄失敗:', error);
-      // 至少更新本地 state
-      const newHistory = [...(userData.history || []), recordWithMetadata];
-      dispatch({
-        type: 'UPDATE_USER_DATA',
-        payload: { history: newHistory },
-      });
-    }
-  }, [userData.history]);
+      try {
+        const userRef = doc(db, 'users', auth.currentUser.uid);
+        await updateDoc(userRef, {
+          history: arrayUnion(recordWithMetadata),
+        });
+
+        // 更新本地 state
+        const newHistory = [...(userData.history || []), recordWithMetadata];
+        dispatch({
+          type: 'UPDATE_USER_DATA',
+          payload: { history: newHistory },
+        });
+
+        console.log('歷史記錄保存成功');
+      } catch (error) {
+        console.error('保存歷史記錄失敗:', error);
+        // 至少更新本地 state
+        const newHistory = [...(userData.history || []), recordWithMetadata];
+        dispatch({
+          type: 'UPDATE_USER_DATA',
+          payload: { history: newHistory },
+        });
+      }
+    },
+    [userData.history]
+  );
 
   // 清除用戶數據
   const clearUserData = useCallback(() => {
@@ -226,8 +245,8 @@ export function UserProvider({ children }) {
   // 監聽認證狀態變化
   useEffect(() => {
     isMountedRef.current = true;
-    
-    const unsubscribe = auth.onAuthStateChanged(async (user) => {
+
+    const unsubscribe = auth.onAuthStateChanged(async user => {
       if (user) {
         console.log('認證狀態變更 - 用戶已登入:', user.email);
         setIsAuthenticated(true);
@@ -247,7 +266,8 @@ export function UserProvider({ children }) {
 
   // 定期同步數據到 Firebase（每 30 秒）
   useEffect(() => {
-    if (!auth.currentUser || !userData || Object.keys(userData).length === 0) return;
+    if (!auth.currentUser || !userData || Object.keys(userData).length === 0)
+      return;
 
     const syncInterval = setInterval(() => {
       if (auth.currentUser && userData && userData.height) {

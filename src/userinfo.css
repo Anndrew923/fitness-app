@@ -1,3 +1,55 @@
+/* 暱稱輸入組 */
+.nickname-input-group {
+  display: flex;
+  gap: 8px;
+  align-items: stretch;
+}
+
+.nickname-input-group .input-field {
+  flex: 1;
+}
+
+.generate-nickname-btn {
+  background-color: #6b7280;
+  color: white;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.generate-nickname-btn:hover {
+  background-color: #4b5563;
+}
+
+/* 天梯排行榜按鈕 */
+.ladder-btn {
+  background-color: #8b5cf6; /* 紫色系 */
+  color: white;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 150px;
+}
+
+.ladder-btn:hover {
+  background-color: #7c3aed;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+}
+
+.ladder-btn:active {
+  transform: translateY(0);
+}
+
 /* 儲存按鈕容器 */
 .save-button-container {
   display: flex;
@@ -95,18 +147,27 @@
   .save-button-container {
     width: 100%;
   }
-  
+
   .save-results-btn,
-  .history-btn {
+  .history-btn,
+  .ladder-btn {
     width: 100%;
     min-width: unset; /* 移除 min-width 限制，讓 width: 100% 生效 */
   }
-  
+
   .button-group {
     flex-direction: column;
   }
-  
+
   .nav-btn {
     width: 100%;
+  }
+
+  .nickname-input-group {
+    flex-direction: column;
+  }
+
+  .generate-nickname-btn {
+    align-self: flex-start;
   }
 }

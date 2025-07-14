@@ -1,70 +1,210 @@
-# Getting Started with Create React App
+# Fitness App 跨平台升級與功能擴充
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## 專案概述
 
-## Available Scripts
+這是一個基於 React + Firebase 的健身評測應用，提供多種身體素質評測功能，支援跨平台部署和國際化。
 
-In the project directory, you can run:
+## 新功能特色
 
-### `npm start`
+### 🆕 訪客模式
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+- 無需註冊即可體驗完整評測功能
+- 本地儲存評測結果
+- 隨時可註冊同步資料到雲端
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+### 🆕 天梯排行榜
 
-### `npm test`
+- 綜合評測分數排名
+- 年齡段篩選功能
+- 個人排名顯示
+- 好友排行榜（開發中）
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### 🆕 用戶暱稱系統
 
-### `npm run build`
+- 自定義暱稱設定
+- 自動生成暱稱功能
+- 暱稱唯一性驗證
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+### 🆕 多語系支援
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+- 中文（繁體）
+- 英文
+- 語言設定記憶功能
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+### 🆕 廣告系統預留
 
-### `npm run eject`
+- 廣告區塊預留
+- 開發環境測試廣告
+- 正式環境 AdMob 整合準備
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+## 技術架構
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+### 前端技術
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+- **React 19** - 最新版本 React
+- **Vite** - 快速建構工具
+- **React Router** - 路由管理
+- **Recharts** - 圖表庫
+- **react-i18next** - 國際化
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+### 後端服務
 
-## Learn More
+- **Firebase Auth** - 用戶認證
+- **Firestore** - 資料庫
+- **Firebase Storage** - 檔案儲存
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+### 評測項目
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+1. **力量評測** - 深蹲測試
+2. **爆發力測試** - 垂直跳躍
+3. **心肺耐力** - 跑步測試
+4. **骨骼肌肉量** - 身體組成分析
+5. **體脂肪率與 FFMI** - 體脂評估
 
-### Code Splitting
+## 開發環境設置
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+### 必要環境變數
 
-### Analyzing the Bundle Size
+```env
+VITE_FIREBASE_API_KEY=your_api_key
+VITE_FIREBASE_AUTH_DOMAIN=your_auth_domain
+VITE_FIREBASE_PROJECT_ID=your_project_id
+VITE_FIREBASE_STORAGE_BUCKET=your_storage_bucket
+VITE_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
+VITE_FIREBASE_APP_ID=your_app_id
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+### 安裝依賴
 
-### Making a Progressive Web App
+```bash
+npm install
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+### 開發模式
 
-### Advanced Configuration
+```bash
+npm run dev
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+### 建構生產版本
 
-### Deployment
+```bash
+npm run build
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+## 資料結構
 
-### `npm run build` fails to minify
+### 用戶資料 (users collection)
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+```javascript
+{
+  userId: string,
+  email: string,
+  nickname: string,
+  avatarUrl: string,
+  gender: 'male' | 'female',
+  height: number,
+  weight: number,
+  age: number,
+  ageGroup: string,
+  ladderScore: number,
+  ladderRank: number,
+  friends: string[],
+  friendRequests: string[],
+  blockedUsers: string[],
+  isGuest: boolean,
+  scores: {
+    strength: number,
+    explosivePower: number,
+    cardio: number,
+    muscleMass: number,
+    bodyFat: number,
+  },
+  history: array,
+  lastActive: string,
+  updatedAt: string,
+}
+```
+
+## 功能開發進度
+
+### ✅ 已完成
+
+- [x] 基礎評測功能
+- [x] 用戶認證系統
+- [x] 訪客模式
+- [x] 天梯排行榜
+- [x] 暱稱系統
+- [x] 多語系支援
+- [x] 廣告區塊預留
+- [x] 響應式設計
+
+### 🚧 開發中
+
+- [ ] 好友系統
+- [ ] 頭像上傳
+- [ ] 推播通知
+- [ ] 社交互動功能
+
+### 📋 計劃中
+
+- [ ] Capacitor 跨平台打包
+- [ ] AdMob 廣告整合
+- [ ] App Store / Google Play 上架
+- [ ] 進階數據分析
+- [ ] 個人化建議
+
+## 部署
+
+### Web 部署
+
+```bash
+npm run build
+# 部署 dist 資料夾到您的 Web 伺服器
+```
+
+### 行動應用部署
+
+```bash
+# 安裝 Capacitor
+npm install @capacitor/core @capacitor/cli
+npx cap init
+
+# 添加平台
+npx cap add android
+npx cap add ios
+
+# 同步建構
+npx cap sync
+
+# 開啟開發工具
+npx cap open android
+npx cap open ios
+```
+
+## 貢獻指南
+
+1. Fork 專案
+2. 創建功能分支 (`git checkout -b feature/AmazingFeature`)
+3. 提交變更 (`git commit -m 'Add some AmazingFeature'`)
+4. 推送到分支 (`git push origin feature/AmazingFeature`)
+5. 開啟 Pull Request
+
+## 授權
+
+本專案採用 MIT 授權 - 詳見 [LICENSE](LICENSE) 檔案
+
+## 聯絡資訊
+
+如有任何問題或建議，請透過以下方式聯絡：
+
+- 專案 Issues
+- Email: [your-email@example.com]
+
+---
+
+**注意事項：**
+
+- 訪客模式資料僅儲存在本地，清除瀏覽器資料會遺失
+- 建議定期註冊帳號以同步資料到雲端
+- 評測結果僅供參考，請諮詢專業醫療人員

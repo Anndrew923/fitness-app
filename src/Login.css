@@ -77,9 +77,11 @@
 }
 
 .checkbox-label {
-  margin-left: 0.5rem;
-  font-size: 0.875rem;
-  color: #4b5563;
+  margin-left: 4px !important;
+  display: inline !important;
+  font-size: 14px;
+  color: #555;
+  cursor: pointer;
 }
 
 .instructions-container {

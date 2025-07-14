@@ -1,0 +1,114 @@
+.ad-banner {
+  width: 100%;
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  overflow: hidden;
+  margin: 8px 0;
+}
+
+.ad-banner--top {
+  margin-bottom: 16px;
+}
+
+.ad-banner--bottom {
+  margin-top: 16px;
+}
+
+.ad-banner--inline {
+  margin: 8px 0;
+}
+
+/* 測試廣告樣式 */
+.ad-banner__test {
+  height: 50px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.ad-banner__test-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.ad-banner__test-label {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.ad-banner__test-size {
+  font-size: 10px;
+  opacity: 0.8;
+}
+
+/* 正式廣告樣式 */
+.ad-banner__placeholder {
+  height: 50px;
+  background: #f8f9fa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ad-banner__content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
+.ad-banner__loading {
+  display: flex;
+  gap: 4px;
+}
+
+.ad-banner__loading-dot {
+  width: 6px;
+  height: 6px;
+  background: #6c757d;
+  border-radius: 50%;
+  animation: loading 1.4s ease-in-out infinite both;
+}
+
+.ad-banner__loading-dot:nth-child(1) {
+  animation-delay: -0.32s;
+}
+
+.ad-banner__loading-dot:nth-child(2) {
+  animation-delay: -0.16s;
+}
+
+@keyframes loading {
+  0%,
+  80%,
+  100% {
+    transform: scale(0);
+    opacity: 0.5;
+  }
+  40% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* 響應式設計 */
+@media (max-width: 768px) {
+  .ad-banner {
+    margin: 4px 0;
+  }
+
+  .ad-banner--top {
+    margin-bottom: 12px;
+  }
+
+  .ad-banner--bottom {
+    margin-top: 12px;
+  }
+}
