@@ -83,51 +83,48 @@ function FFMI({ onComplete, clearTestData }) {
       alert('請先計算 FFMI 分數！');
       return;
     }
-    
+
+    const isGuest = sessionStorage.getItem('guestMode') === 'true';
+
     try {
       // 準備更新的數據
       const updatedScores = { 
         ...userData.scores, 
         bodyFat: parseFloat(ffmiScore) 
       };
-      
       const updatedUserData = {
         ...userData,
         scores: updatedScores
       };
-      
-      // 先更新本地狀態
+
       setUserData(updatedUserData);
-      
-      // 保存到 Firebase
-      const success = await saveUserData(updatedUserData);
-      
-      if (success) {
-        console.log('FFMI.js - 成功更新 FFMI 分數');
-        
-        // 準備測試數據
-        const testData = {
-          bodyFat: parseFloat(bodyFat),
-          ffmi: parseFloat(ffmi),
-          ffmiScore: parseFloat(ffmiScore),
-        };
-        
-        // 如果有 onComplete prop，呼叫它
-        if (onComplete && typeof onComplete === 'function') {
-          onComplete(testData);
-        }
-        
-        // 延遲導航，確保數據已更新，並傳遞來源資訊
-        setTimeout(() => {
-          navigate('/user-info', { state: { from: '/body-fat' } });
-        }, 100);
-      } else {
-        throw new Error('保存數據失敗');
+
+      if (!isGuest) {
+        const success = await saveUserData(updatedUserData);
+        if (!success) throw new Error('保存數據失敗');
       }
-      
+
+      // 準備測試數據
+      const testData = {
+        bodyFat: parseFloat(bodyFat),
+        ffmi: parseFloat(ffmi),
+        ffmiScore: parseFloat(ffmiScore),
+      };
+      if (onComplete && typeof onComplete === 'function') {
+        onComplete(testData);
+      }
+      setTimeout(() => {
+        navigate('/user-info', { state: { from: '/body-fat' } });
+      }, 100);
+
     } catch (error) {
       console.error('提交失敗:', error);
-      alert('更新用戶數據失敗，請稍後再試！');
+      if (!isGuest) {
+        alert('更新用戶數據失敗，請稍後再試！');
+      }
+      setTimeout(() => {
+        navigate('/user-info', { state: { from: '/body-fat' } });
+      }, 100);
     }
   };
 

@@ -10,7 +10,9 @@ function Cardio({ onComplete, clearTestData }) {
   const navigate = useNavigate();
   const { age, gender } = userData;
 
-  const [distance, setDistance] = useState(userData.testInputs?.cardio?.distance || '');
+  const [distance, setDistance] = useState(
+    userData.testInputs?.cardio?.distance || ''
+  );
   const [score, setScore] = useState(null);
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -24,7 +26,7 @@ function Cardio({ onComplete, clearTestData }) {
     }
   }, [distance]);
 
-  const getAgeRange = (age) => {
+  const getAgeRange = age => {
     if (!age) return null;
     const ageNum = parseInt(age);
     if (ageNum >= 13 && ageNum <= 14) return '13-14';
@@ -49,7 +51,8 @@ function Cardio({ onComplete, clearTestData }) {
   };
 
   const getComment = (score, gender) => {
-    const genderValue = gender === '男性' || gender.toLowerCase() === 'male' ? 'male' : 'female';
+    const genderValue =
+      gender === '男性' || gender.toLowerCase() === 'male' ? 'male' : 'female';
     const scoreRange = Math.floor(score / 10) * 10;
 
     const comments = {
@@ -98,8 +101,12 @@ function Cardio({ onComplete, clearTestData }) {
       return;
     }
 
-    const genderValue = gender === '男性' || gender.toLowerCase() === 'male' ? 'male' : 'female';
-    const cooperStandards = genderValue === 'male' ? standards.cooperStandardsMale : standards.cooperStandardsFemale;
+    const genderValue =
+      gender === '男性' || gender.toLowerCase() === 'male' ? 'male' : 'female';
+    const cooperStandards =
+      genderValue === 'male'
+        ? standards.cooperStandardsMale
+        : standards.cooperStandardsFemale;
 
     const standard = cooperStandards[ageRange];
 
@@ -110,7 +117,14 @@ function Cardio({ onComplete, clearTestData }) {
 
     const score = calculateScoreFromStandard(distanceNum, standard);
     setScore(score);
-    console.log('Cardio.js - 計算心肺耐力分數:', score, '距離:', distanceNum, '年齡段:', ageRange);
+    console.log(
+      'Cardio.js - 計算心肺耐力分數:',
+      score,
+      '距離:',
+      distanceNum,
+      '年齡段:',
+      ageRange
+    );
   };
 
   const handleSubmit = async () => {
@@ -119,49 +133,45 @@ function Cardio({ onComplete, clearTestData }) {
       return;
     }
 
+    const isGuest = sessionStorage.getItem('guestMode') === 'true';
+
     try {
       // 準備更新的數據
-      const updatedScores = { 
-        ...userData.scores, 
-        cardio: parseFloat(score) 
+      const updatedScores = {
+        ...userData.scores,
+        cardio: parseFloat(score),
       };
-      
       const updatedUserData = {
         ...userData,
-        scores: updatedScores
+        scores: updatedScores,
       };
-      
-      // 先更新本地狀態
+
       setUserData(updatedUserData);
-      
-      // 保存到 Firebase
-      const success = await saveUserData(updatedUserData);
-      
-      if (success) {
-        console.log('Cardio.js - 成功更新心肺耐力分數');
-        
-        // 準備測試數據
-        const testData = {
-          distance: parseFloat(distance),
-          score: parseFloat(score),
-        };
-        
-        // 如果有 onComplete prop，呼叫它
-        if (onComplete && typeof onComplete === 'function') {
-          onComplete(testData);
-        }
-        
-        // 延遲導航，確保數據已更新，並傳遞來源資訊
-        setTimeout(() => {
-          navigate('/user-info', { state: { from: '/cardio' } });
-        }, 100);
-      } else {
-        throw new Error('保存數據失敗');
+
+      if (!isGuest) {
+        const success = await saveUserData(updatedUserData);
+        if (!success) throw new Error('保存數據失敗');
       }
-      
+
+      // 準備測試數據
+      const testData = {
+        distance: parseFloat(distance),
+        score: parseFloat(score),
+      };
+      if (onComplete && typeof onComplete === 'function') {
+        onComplete(testData);
+      }
+      setTimeout(() => {
+        navigate('/user-info', { state: { from: '/cardio' } });
+      }, 100);
     } catch (error) {
       console.error('提交失敗:', error);
-      alert('更新用戶數據失敗，請稍後再試！');
+      if (!isGuest) {
+        alert('更新用戶數據失敗，請稍後再試！');
+      }
+      setTimeout(() => {
+        navigate('/user-info', { state: { from: '/cardio' } });
+      }, 100);
     }
   };
 
@@ -174,7 +184,12 @@ function Cardio({ onComplete, clearTestData }) {
 
         <div className="exercise-section">
           <h2 className="text-lg font-semibold">Cooper 12 分鐘跑步測試</h2>
-          <label htmlFor="distance" className="block text-sm font-medium text-gray-700">跑步距離 (公尺)</label>
+          <label
+            htmlFor="distance"
+            className="block text-sm font-medium text-gray-700"
+          >
+            跑步距離 (公尺)
+          </label>
           <input
             id="distance"
             name="distance"
@@ -185,7 +200,9 @@ function Cardio({ onComplete, clearTestData }) {
             className="input-field"
             required
           />
-          <button onClick={calculateCardioScore} className="calculate-btn">計算</button>
+          <button onClick={calculateCardioScore} className="calculate-btn">
+            計算
+          </button>
           {score !== null && (
             <>
               <p className="score-display">心肺耐力分數: {score}</p>
@@ -196,21 +213,43 @@ function Cardio({ onComplete, clearTestData }) {
 
         <div className="description-section">
           <div className="description-card">
-            <div className="description-header" onClick={() => setIsExpanded(!isExpanded)}>
+            <div
+              className="description-header"
+              onClick={() => setIsExpanded(!isExpanded)}
+            >
               <h2 className="text-lg font-semibold">動作說明</h2>
-              <span className={`arrow ${isExpanded ? 'expanded' : ''}`}>{isExpanded ? '▲' : '▼'}</span>
+              <span className={`arrow ${isExpanded ? 'expanded' : ''}`}>
+                {isExpanded ? '▲' : '▼'}
+              </span>
             </div>
             {isExpanded && (
               <div className="description-content">
                 <p className="font-semibold">Cooper Test 簡介</p>
-                <p>傳統心肺耐力測試需在實驗室以極限強度測量最大攝氧量（VO₂ Max），但難以普及。Kenneth H. Cooper 博士發現 12 分鐘跑步距離與 VO₂ Max 高度相關，於 1968 年設計 Cooper Test，廣泛應用於美軍體測，簡化測量並提升效率。測試以年齡、性別和跑步距離估算 VO₂ Max。</p>
+                <p>
+                  傳統心肺耐力測試需在實驗室以極限強度測量最大攝氧量（VO₂
+                  Max），但難以普及。Kenneth H. Cooper 博士發現 12
+                  分鐘跑步距離與 VO₂ Max 高度相關，於 1968 年設計 Cooper
+                  Test，廣泛應用於美軍體測，簡化測量並提升效率。測試以年齡、性別和跑步距離估算
+                  VO₂ Max。
+                </p>
                 <p className="font-semibold mt-2">測量方式</p>
                 <ul className="list-disc pl-5">
-                  <li><strong>地點</strong>：選擇田徑場或安全跑步環境，方便記錄距離和配速。</li>
-                  <li><strong>記錄</strong>：用圈數或運動手錶記錄 12 分鐘跑步距離。</li>
-                  <li><strong>熱身</strong>：跑前動態熱身 10-15 分鐘，避免受傷。</li>
+                  <li>
+                    <strong>地點</strong>
+                    ：選擇田徑場或安全跑步環境，方便記錄距離和配速。
+                  </li>
+                  <li>
+                    <strong>記錄</strong>：用圈數或運動手錶記錄 12
+                    分鐘跑步距離。
+                  </li>
+                  <li>
+                    <strong>熱身</strong>：跑前動態熱身 10-15 分鐘，避免受傷。
+                  </li>
                 </ul>
-                <p className="mt-2 text-sm text-gray-600">本 Cooper 測試標準表可在 Cooper Test Chart 找到，由 Carl Magnus Swahn 設計。</p>
+                <p className="mt-2 text-sm text-gray-600">
+                  本 Cooper 測試標準表可在 Cooper Test Chart 找到，由 Carl
+                  Magnus Swahn 設計。
+                </p>
               </div>
             )}
           </div>
@@ -218,7 +257,9 @@ function Cardio({ onComplete, clearTestData }) {
       </div>
 
       <div className="button-group">
-        <button onClick={handleSubmit} className="submit-btn">提交並返回總覽</button>
+        <button onClick={handleSubmit} className="submit-btn">
+          提交並返回總覽
+        </button>
       </div>
     </div>
   );
