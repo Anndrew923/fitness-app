@@ -108,11 +108,28 @@ function UserInfo({ testData, onLogout, clearTestData }) {
   const radarChartData = useMemo(() => {
     const scores = userData.scores || DEFAULT_SCORES;
     return [
-      { name: '力量', value: scores.strength || 0 },
-      { name: '爆發力', value: scores.explosivePower || 0 },
-      { name: '心肺耐力', value: scores.cardio || 0 },
-      { name: '骨骼肌肉量', value: scores.muscleMass || 0 },
-      { name: 'FFMI', value: scores.bodyFat || 0 },
+      {
+        name: '力量',
+        value: scores.strength ? Number(scores.strength).toFixed(1) * 1 : 0,
+      },
+      {
+        name: '爆發力',
+        value: scores.explosivePower
+          ? Number(scores.explosivePower).toFixed(1) * 1
+          : 0,
+      },
+      {
+        name: '心肺耐力',
+        value: scores.cardio ? Number(scores.cardio).toFixed(1) * 1 : 0,
+      },
+      {
+        name: '骨骼肌肉量',
+        value: scores.muscleMass ? Number(scores.muscleMass).toFixed(1) * 1 : 0,
+      },
+      {
+        name: 'FFMI',
+        value: scores.bodyFat ? Number(scores.bodyFat).toFixed(1) * 1 : 0,
+      },
     ];
   }, [userData.scores]);
 
@@ -282,9 +299,9 @@ function UserInfo({ testData, onLogout, clearTestData }) {
     const scoreValues = Object.values(scores).filter(score => score > 0);
     const avg = scoreValues.length
       ? (
-          scoreValues.reduce((sum, score) => sum + score, 0) /
+          scoreValues.reduce((sum, score) => sum + Number(score), 0) /
           scoreValues.length
-        ).toFixed(0)
+        ).toFixed(1)
       : 0;
     return avg;
   }, [userData?.scores]);

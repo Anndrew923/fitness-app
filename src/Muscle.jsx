@@ -53,19 +53,27 @@ function Muscle({ onComplete, clearTestData }) {
   };
 
   const calculateScoreFromStandard = (value, standard, label) => {
-    console.log(`[${label}] 比較值：`, value, '標準：', standard);
+    // 讓分數平滑，線性插值，允許小數點一位
     if (value >= standard[100]) return 100;
-    if (value >= standard[90]) return 90;
-    if (value >= standard[80]) return 80;
-    if (value >= standard[70]) return 70;
-    if (value >= standard[60]) return 60;
-    if (value >= standard[50]) return 50;
-    if (value >= standard[40]) return 40;
-    if (value >= standard[30]) return 30;
-    if (value >= standard[20]) return 20;
-    if (value >= standard[10]) return 10;
-    if (value >= standard[0]) return 0;
-    return 0;
+    if (value <= standard[0]) return 0;
+    // 找到分數區間
+    let lower = 0;
+    let upper = 100;
+    for (let i = 10; i <= 100; i += 10) {
+      if (value < standard[i]) {
+        upper = i;
+        lower = i - 10;
+        break;
+      }
+    }
+    // 線性插值
+    const lowerValue = standard[lower];
+    const upperValue = standard[upper];
+    if (upperValue === lowerValue) return upper;
+    const score =
+      lower +
+      ((value - lowerValue) / (upperValue - lowerValue)) * (upper - lower);
+    return Math.round(score * 10) / 10;
   };
 
   const calculateMuscleScore = () => {
@@ -103,7 +111,7 @@ function Muscle({ onComplete, clearTestData }) {
       smPercentStandard,
       'SM%'
     );
-    const finalScore = ((smmScore + smPercentScore) / 2).toFixed(0);
+    const finalScore = ((smmScore + smPercentScore) / 2).toFixed(1);
     setResult({ smmScore, smPercent, smPercentScore, finalScore });
   };
 

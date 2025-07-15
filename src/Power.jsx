@@ -140,16 +140,16 @@ function Power({ onComplete, clearTestData }) {
 
     const finalScore = (
       scores.reduce((sum, score) => sum + score, 0) / scores.length
-    ).toFixed(0);
+    ).toFixed(1);
 
     setResult({
-      verticalJumpScore: verticalJumpScore
-        ? verticalJumpScore.toFixed(0)
-        : null,
-      standingLongJumpScore: standingLongJumpScore
-        ? standingLongJumpScore.toFixed(0)
-        : null,
-      sprintScore: sprintScore ? sprintScore.toFixed(0) : null,
+      verticalJumpScore:
+        verticalJumpScore !== null ? verticalJumpScore.toFixed(1) : null,
+      standingLongJumpScore:
+        standingLongJumpScore !== null
+          ? standingLongJumpScore.toFixed(1)
+          : null,
+      sprintScore: sprintScore !== null ? sprintScore.toFixed(1) : null,
       finalScore,
     });
   };

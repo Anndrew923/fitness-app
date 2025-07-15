@@ -40,14 +40,14 @@ function Cardio({ onComplete, clearTestData }) {
   };
 
   const calculateScoreFromStandard = (value, standard) => {
-    if (value >= standard[100]) return 100;
-    if (value >= standard[90]) return 90;
-    if (value >= standard[80]) return 80;
-    if (value >= standard[70]) return 70;
-    if (value >= standard[60]) return 60;
-    const minDistance = standard[60];
-    if (value > 0) return Math.round((value / minDistance) * 60);
-    return 0;
+    // 取得標準的最小與最大值
+    const min = standard[60]; // 60分對應的距離
+    const max = standard[100]; // 100分對應的距離
+    if (value <= 0) return 0;
+    if (value <= min) return Math.round((value / min) * 60 * 10) / 10; // 0~60分線性
+    if (value >= max) return 100;
+    // 60~100分之間線性插值
+    return Math.round((60 + ((value - min) / (max - min)) * 40) * 10) / 10;
   };
 
   const getComment = (score, gender) => {
