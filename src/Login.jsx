@@ -7,6 +7,7 @@ import {
 } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
 import PropTypes from 'prop-types';
+import SocialLogin from './components/SocialLogin';
 import './Login.css';
 
 function Login({ onLogin }) {
@@ -84,6 +85,8 @@ function Login({ onLogin }) {
         const initialUserData = {
           email: user.email,
           userId: user.uid,
+          nickname: user.email.split('@')[0],
+          avatarUrl: '',
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
           gender: '',
@@ -99,6 +102,14 @@ function Login({ onLogin }) {
           },
           history: [],
           testInputs: {},
+          friends: [],
+          friendRequests: [],
+          blockedUsers: [],
+          ladderScore: 0,
+          ladderRank: 0,
+          ladderHistory: [],
+          isGuest: false,
+          lastActive: new Date().toISOString(),
         };
 
         console.log('儲存初始用戶數據:', initialUserData);
@@ -143,6 +154,20 @@ function Login({ onLogin }) {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleSocialLogin = (email, password) => {
+    onLogin(email, password);
+
+    // 等待一下確保 UserContext 有時間載入資料
+    setTimeout(() => {
+      console.log('社交登入成功，導航到 /user-info');
+      navigate('/user-info');
+    }, 500);
+  };
+
+  const handleSocialError = errorMessage => {
+    setError(errorMessage);
   };
 
   return (
@@ -220,6 +245,12 @@ function Login({ onLogin }) {
       >
         {isRegistering ? '已有帳號？點此登入' : '沒有帳號？點此註冊'}
       </button>
+      
+      <SocialLogin 
+        onLogin={handleSocialLogin}
+        onError={handleSocialError}
+      />
+      
       <div className="instructions-container">
         <h2 className="instructions-title">使用說明</h2>
         <ul className="instructions-list">

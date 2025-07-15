@@ -1,5 +1,9 @@
 import { initializeApp } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
+import {
+  getAuth,
+  GoogleAuthProvider,
+  FacebookAuthProvider,
+} from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 
@@ -73,6 +77,20 @@ try {
   auth = getAuth(app);
   db = getFirestore(app);
   storage = getStorage(app);
+
+  // 初始化社交登入提供者
+  const googleProvider = new GoogleAuthProvider();
+  const facebookProvider = new FacebookAuthProvider();
+
+  // 配置 Google 登入
+  googleProvider.setCustomParameters({
+    prompt: 'select_account',
+  });
+
+  // 配置 Facebook 登入
+  facebookProvider.addScope('email');
+  facebookProvider.addScope('public_profile');
+
   console.log('Firebase 初始化成功');
 } catch (error) {
   console.error('Firebase 初始化失敗:', error.message, error);
@@ -88,6 +106,9 @@ try {
       },
       signInWithEmailAndPassword: async () => {
         throw new Error('Firebase 未配置，無法進行認證');
+      },
+      signInWithPopup: async () => {
+        throw new Error('Firebase 未配置，無法進行社交登入');
       },
       signOut: async () => {
         console.log('模擬登出');
