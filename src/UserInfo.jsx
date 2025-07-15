@@ -10,6 +10,8 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 import { auth } from './firebase';
+import { storage } from './firebase';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import PropTypes from 'prop-types';
 import {
   calculateLadderScore,
@@ -29,6 +31,61 @@ const DEFAULT_SCORES = {
 
 const GENDER_OPTIONS = ['male', 'female'];
 
+// 新增：圖片壓縮工具
+async function compressImage(
+  file,
+  maxSize = 300 * 1024,
+  maxWidth = 192,
+  maxHeight = 192
+) {
+  return new Promise((resolve, reject) => {
+    const img = new window.Image();
+    const reader = new FileReader();
+    reader.onload = e => {
+      img.src = e.target.result;
+    };
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      let width = img.width;
+      let height = img.height;
+      if (width > maxWidth || height > maxHeight) {
+        if (width > height) {
+          height = Math.round((height * maxWidth) / width);
+          width = maxWidth;
+        } else {
+          width = Math.round((width * maxHeight) / height);
+          height = maxHeight;
+        }
+      }
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, width, height);
+      canvas.toBlob(
+        blob => {
+          if (blob.size > maxSize) {
+            // 再壓縮一次
+            canvas.toBlob(
+              blob2 => {
+                resolve(blob2);
+              },
+              'image/jpeg',
+              0.7
+            );
+          } else {
+            resolve(blob);
+          }
+        },
+        'image/jpeg',
+        0.85
+      );
+    };
+    img.onerror = reject;
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
 function UserInfo({ testData, onLogout, clearTestData }) {
   const {
     userData,
@@ -45,6 +102,8 @@ function UserInfo({ testData, onLogout, clearTestData }) {
   const navigate = useNavigate();
   const location = useLocation();
   const radarSectionRef = useRef(null);
+  const [avatarUploading, setAvatarUploading] = useState(false);
+  const [avatarError, setAvatarError] = useState(null);
 
   const radarChartData = useMemo(() => {
     const scores = userData.scores || DEFAULT_SCORES;
@@ -381,6 +440,44 @@ function UserInfo({ testData, onLogout, clearTestData }) {
     [setUserData]
   );
 
+  // 新增：頭像上傳處理
+  const handleAvatarChange = async e => {
+    setAvatarError(null);
+    const file = e.target.files[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      setAvatarError('請選擇圖片檔案');
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      setAvatarError('圖片大小請勿超過 2MB');
+      return;
+    }
+    setAvatarUploading(true);
+    try {
+      // 壓縮圖片
+      const compressed = await compressImage(file, 300 * 1024, 192, 192);
+      if (compressed.size > 350 * 1024) {
+        setAvatarError('壓縮後圖片仍超過 350KB，請選擇更小的圖片');
+        setAvatarUploading(false);
+        return;
+      }
+      // 上傳到 Storage
+      const userId = auth.currentUser?.uid;
+      if (!userId) throw new Error('未登入，無法上傳頭像');
+      const avatarRef = ref(storage, `avatars/${userId}/avatar.jpg`);
+      await uploadBytes(avatarRef, compressed, { contentType: 'image/jpeg' });
+      const url = await getDownloadURL(avatarRef);
+      // 更新 Firestore
+      setUserData(prev => ({ ...prev, avatarUrl: url }));
+      await saveUserData({ ...userData, avatarUrl: url });
+    } catch (err) {
+      setAvatarError('頭像上傳失敗: ' + err.message);
+    } finally {
+      setAvatarUploading(false);
+    }
+  };
+
   // 顯示載入中狀態
   if (isLoading && !dataLoaded) {
     return (
@@ -395,7 +492,44 @@ function UserInfo({ testData, onLogout, clearTestData }) {
   return (
     <div className="user-info-container">
       {error && <p className="error-message">{error}</p>}
-
+      {/* 頭像顯示與上傳 */}
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          marginBottom: 16,
+        }}
+      >
+        <img
+          src={userData?.avatarUrl || '/logo192.png'}
+          alt="頭像"
+          style={{
+            width: 96,
+            height: 96,
+            borderRadius: '50%',
+            objectFit: 'cover',
+            border: '2px solid #eee',
+            marginBottom: 8,
+          }}
+        />
+        <label
+          className="avatar-upload-label"
+          style={{ cursor: 'pointer', color: '#22CAEC', fontWeight: 500 }}
+        >
+          {avatarUploading ? '上傳中...' : '更換頭像'}
+          <input
+            type="file"
+            accept="image/*"
+            style={{ display: 'none' }}
+            onChange={handleAvatarChange}
+            disabled={avatarUploading}
+          />
+        </label>
+        {avatarError && (
+          <div style={{ color: 'red', fontSize: 13 }}>{avatarError}</div>
+        )}
+      </div>
       {/* 只保留 currentUser 狀態區塊，移除載入提示 */}
       {(currentUser || isGuest) && (
         <>
