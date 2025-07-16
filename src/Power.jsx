@@ -148,7 +148,7 @@ function Power({ onComplete, clearTestData }) {
       standingLongJumpScore:
         standingLongJumpScore !== null
           ? standingLongJumpScore.toFixed(1)
-          : null,
+        : null,
       sprintScore: sprintScore !== null ? sprintScore.toFixed(1) : null,
       finalScore,
     });

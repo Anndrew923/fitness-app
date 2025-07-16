@@ -112,6 +112,17 @@ code {
   flex-direction: column;
 }
 
+/* 為固定廣告預留空間的頁面 */
+.app-container.page-with-fixed-ad {
+  padding-bottom: 120px; /* 廣告高度 + 底部導航高度 + 間距 */
+}
+
+@media (max-width: 768px) {
+  .app-container.page-with-fixed-ad {
+    padding-bottom: 114px; /* 手機版調整 */
+  }
+}
+
 .main-content {
   flex: 1;
 }

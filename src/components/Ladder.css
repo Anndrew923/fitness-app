@@ -15,9 +15,31 @@
 
 .ladder__header h2 {
   margin: 0;
-  color: #333;
+  color: #d32f2f; /* 火焰紅色 */
   font-size: 24px;
   font-weight: 700;
+  text-shadow: 0 2px 4px rgba(211, 47, 47, 0.3);
+  position: relative;
+}
+
+.ladder__header h2::before {
+  content: '🔥';
+  position: absolute;
+  left: -30px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 20px;
+  animation: flame 2s ease-in-out infinite;
+}
+
+@keyframes flame {
+  0%,
+  100% {
+    transform: translateY(-50%) scale(1);
+  }
+  50% {
+    transform: translateY(-50%) scale(1.1);
+  }
 }
 
 .ladder__filters {
@@ -40,9 +62,15 @@
   gap: 16px;
   margin-bottom: 24px;
   padding: 16px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(
+    135deg,
+    #ff6b35 0%,
+    #f7931e 50%,
+    #ffd700 100%
+  ); /* 火焰漸層：紅-橙-金 */
   border-radius: 12px;
   color: white;
+  box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3);
 }
 
 .ladder__user-score,
@@ -67,7 +95,8 @@
   background: white;
   border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 20px rgba(255, 107, 53, 0.15);
+  border: 1px solid rgba(255, 107, 53, 0.1);
 }
 
 .ladder__item {
@@ -75,11 +104,47 @@
   align-items: center;
   padding: 16px;
   border-bottom: 1px solid #f0f0f0;
-  transition: background-color 0.2s ease;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.ladder__item:nth-child(1) {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 215, 0, 0.1) 0%,
+    rgba(255, 215, 0, 0.05) 100%
+  );
+  border-left: 4px solid #ffd700;
+}
+
+.ladder__item:nth-child(2) {
+  background: linear-gradient(
+    135deg,
+    rgba(192, 192, 192, 0.1) 0%,
+    rgba(192, 192, 192, 0.05) 100%
+  );
+  border-left: 4px solid #c0c0c0;
+}
+
+.ladder__item:nth-child(3) {
+  background: linear-gradient(
+    135deg,
+    rgba(205, 127, 50, 0.1) 0%,
+    rgba(205, 127, 50, 0.05) 100%
+  );
+  border-left: 4px solid #cd7f32;
 }
 
 .ladder__item:hover {
-  background-color: #f8f9fa;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 107, 53, 0.1) 0%,
+    rgba(247, 147, 30, 0.1) 50%,
+    rgba(255, 215, 0, 0.1) 100%
+  );
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(255, 107, 53, 0.2);
+  transition: all 0.3s ease;
 }
 
 .ladder__item:last-child {
@@ -97,7 +162,25 @@
 .ladder__rank-number {
   font-size: 18px;
   font-weight: 700;
-  color: #333;
+  color: #d32f2f; /* 火焰紅色 */
+}
+
+.ladder__item:nth-child(1) .ladder__rank-number {
+  color: #ffd700; /* 金色 */
+  text-shadow: 0 2px 4px rgba(255, 215, 0, 0.5);
+  font-size: 22px;
+}
+
+.ladder__item:nth-child(2) .ladder__rank-number {
+  color: #c0c0c0; /* 銀色 */
+  text-shadow: 0 2px 4px rgba(192, 192, 192, 0.5);
+  font-size: 20px;
+}
+
+.ladder__item:nth-child(3) .ladder__rank-number {
+  color: #cd7f32; /* 銅色 */
+  text-shadow: 0 2px 4px rgba(205, 127, 50, 0.5);
+  font-size: 20px;
 }
 
 .ladder__rank-badge {
@@ -128,13 +211,27 @@
 .ladder__avatar-placeholder {
   width: 100%;
   height: 100%;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(
+    135deg,
+    #ff6b35 0%,
+    #f7931e 50%,
+    #ffd700 100%
+  ); /* 火焰漸層 */
   display: flex;
   align-items: center;
   justify-content: center;
   color: white;
   font-weight: 600;
   font-size: 16px;
+}
+
+.ladder__avatar-placeholder.anonymous {
+  background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+}
+
+.ladder__user-name.anonymous {
+  color: #6c757d;
+  font-style: italic;
 }
 
 .ladder__user-info {
@@ -160,7 +257,7 @@
 .ladder__score-value {
   font-size: 18px;
   font-weight: 700;
-  color: #667eea;
+  color: #ff6b35; /* 火焰紅色 */
 }
 
 .ladder__score-label {
@@ -203,7 +300,7 @@
   width: 32px;
   height: 32px;
   border: 3px solid #f3f3f3;
-  border-top: 3px solid #667eea;
+  border-top: 3px solid #ff6b35; /* 火焰紅色 */
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin-bottom: 16px;

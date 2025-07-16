@@ -1,0 +1,49 @@
+// Firebase Firestore Security Rules for 好友系統 - 雙向邀請機制
+// 請將以下規則複製到您的 Firebase Console 中的 Firestore 安全規則
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // 用戶文檔規則
+    match /users/{userId} {
+      // 任何登入用戶都可以讀取其他用戶的基本資訊
+      allow read: if request.auth != null;
+      
+      // 只有本人可以完全控制自己的文檔
+      allow write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // 好友邀請規則 - 支持雙向邀請機制
+    match /friendInvitations/{inviteId} {
+      // 任何登入用戶都可以讀取邀請（用於查詢好友關係）
+      allow read: if request.auth != null;
+      
+      // 任何登入用戶都可以創建邀請（包括反向邀請）
+      allow create: if request.auth != null && 
+        request.resource.data.fromUserId == request.auth.uid;
+      
+      // 任何登入用戶都可以更新邀請狀態
+      allow update: if request.auth != null;
+      
+      // 不允許刪除邀請記錄（保留歷史）
+      allow delete: if false;
+    }
+    
+    // 好友訊息規則
+    match /friendMessages/{messageId} {
+      // 任何登入用戶都可以讀取訊息
+      allow read: if request.auth != null;
+      
+      // 任何登入用戶都可以發送訊息
+      allow create: if request.auth != null && 
+        request.resource.data.fromUserId == request.auth.uid;
+      
+      // 允許更新訊息狀態（已讀等）
+      allow update: if request.auth != null;
+      
+      // 不允許刪除訊息
+      allow delete: if false;
+    }
+  }
+} 

@@ -10,14 +10,14 @@ export const getAgeGroup = age => {
 // 計算天梯總分
 export const calculateLadderScore = scores => {
   const { strength, explosivePower, cardio, muscleMass, bodyFat } = scores;
-  return Math.round(
-    (strength + explosivePower + cardio + muscleMass + bodyFat) / 5
-  );
+  const total = strength + explosivePower + cardio + muscleMass + bodyFat;
+  return Math.round((total / 5) * 10) / 10; // 保留一位小數
 };
 
 // 格式化分數顯示
 export const formatScore = score => {
-  return Math.round(score * 10) / 10;
+  if (!score && score !== 0) return '0.0';
+  return Number(score).toFixed(1);
 };
 
 // 生成用戶暱稱（如果未設定）

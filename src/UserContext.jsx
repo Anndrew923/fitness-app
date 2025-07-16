@@ -10,6 +10,7 @@ import {
 import { doc, getDoc, setDoc, updateDoc, arrayUnion } from 'firebase/firestore';
 import { db, auth } from './firebase';
 import PropTypes from 'prop-types';
+import { calculateLadderScore, getAgeGroup } from './utils';
 
 const UserContext = createContext();
 
@@ -29,6 +30,8 @@ const initialState = {
   ladderRank: 0, // 天梯排名
   ladderHistory: [], // 天梯歷史
   isGuest: false, // 訪客模式標記
+  // 天梯隱私設置
+  isAnonymousInLadder: false, // 是否匿名參與天梯（預設不匿名）
   lastActive: new Date().toISOString(),
   // 原有欄位
   scores: {
@@ -179,6 +182,14 @@ export function UserProvider({ children }) {
       } else {
         // 直接更新
         newData = { ...userData, ...update };
+      }
+
+      // 計算天梯分數和年齡段
+      if (newData.scores) {
+        newData.ladderScore = calculateLadderScore(newData.scores);
+        if (newData.age) {
+          newData.ageGroup = getAgeGroup(newData.age);
+        }
       }
 
       // 立即更新本地狀態

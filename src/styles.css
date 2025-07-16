@@ -1,5 +1,84 @@
 /* 在你的 styles.css 中添加或更新以下樣式 */
 
+/* 天梯隱私設置樣式 */
+.ladder-privacy-section {
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 12px;
+  padding: 20px;
+  margin: 20px 0;
+}
+
+.ladder-privacy-section h3 {
+  margin: 0 0 16px 0;
+  color: #333;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.privacy-options {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.privacy-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  cursor: pointer;
+  padding: 16px;
+  border-radius: 8px;
+  background: white;
+  border: 1px solid #e9ecef;
+  transition: all 0.2s ease;
+}
+
+.privacy-option:hover {
+  background-color: rgba(102, 126, 234, 0.05);
+  border-color: #667eea;
+}
+
+.privacy-option input[type='checkbox'] {
+  width: 20px;
+  height: 20px;
+  accent-color: #667eea;
+  cursor: pointer;
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+.privacy-option-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.privacy-option-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  user-select: none;
+}
+
+.privacy-option-desc {
+  font-size: 14px;
+  color: #666;
+  line-height: 1.4;
+  user-select: none;
+}
+
+.privacy-note {
+  font-size: 14px;
+  color: #666;
+  margin: 0;
+  padding: 12px;
+  background: rgba(102, 126, 234, 0.1);
+  border-radius: 6px;
+  border-left: 4px solid #667eea;
+}
+
 /* 通用容器寬度限制 */
 .user-info-container {
   max-width: 800px;
@@ -236,15 +315,15 @@
   .user-info-container {
     padding: 16px;
   }
-  
+
   .save-button-container {
     gap: 8px;
   }
-  
+
   .button-group {
     gap: 8px;
   }
-  
+
   /* 平板尺寸時，評測按鈕可以 2x3 排列 */
   .nav-btn {
     min-width: calc(50% - 4px);
@@ -256,33 +335,33 @@
   .save-button-container {
     flex-direction: column;
   }
-  
+
   .save-results-btn,
   .history-btn {
     width: 100%;
   }
-  
+
   /* 移除歷史按鈕的絕對定位圖標，改為內聯 */
   .history-btn::before {
     position: static;
     margin-right: 8px;
   }
-  
+
   .button-group {
     flex-direction: column;
   }
-  
+
   .nav-btn {
     width: 100%;
     min-width: unset;
   }
-  
+
   .user-status {
     flex-direction: column;
     gap: 12px;
     text-align: center;
   }
-  
+
   .signout-btn {
     width: 100%;
   }

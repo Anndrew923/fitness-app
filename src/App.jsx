@@ -25,6 +25,9 @@ import History from './History';
 import PrivacyPolicy from './PrivacyPolicy';
 import TestPage from './TestPage';
 import BottomNavBar from './components/BottomNavBar';
+import Friends from './components/Friends';
+import Ladder from './components/Ladder';
+import GlobalAdBanner from './components/GlobalAdBanner';
 import './App.css';
 
 class ErrorBoundary extends Component {
@@ -58,6 +61,19 @@ function AppContent() {
     '/strength',
     '/explosive-power',
     '/cardio',
+    '/muscle-mass',
+    '/body-fat',
+  ].some(path => location.pathname.startsWith(path));
+
+  // 檢查是否需要為固定廣告預留空間
+  const showFixedAd = [
+    '/user-info',
+    '/friends',
+    '/ladder',
+    '/history',
+    '/strength',
+    '/cardio',
+    '/explosive-power',
     '/muscle-mass',
     '/body-fat',
   ].some(path => location.pathname.startsWith(path));
@@ -165,7 +181,7 @@ function AppContent() {
   };
 
   return (
-    <div className="app-container">
+    <div className={`app-container ${showFixedAd ? 'page-with-fixed-ad' : ''}`}>
       <ScrollToTop />
       <ErrorBoundary>
         <div className="main-content">
@@ -271,15 +287,27 @@ function AppContent() {
               path="/history"
               element={<ProtectedRoute element={<History />} />}
             />
+            <Route
+              path="/friends"
+              element={<ProtectedRoute element={<Friends />} />}
+            />
+            <Route
+              path="/ladder"
+              element={<ProtectedRoute element={<Ladder />} />}
+            />
             <Route path="/privacy-policy" element={<PrivacyPolicy />} />
             <Route path="/test" element={<TestPage />} />
             <Route path="*" element={<div>404 - 頁面未找到</div>} />
           </Routes>
         </div>
       </ErrorBoundary>
-      <footer className="app-footer">
-        <Link to="/privacy-policy">隱私權政策</Link>
-      </footer>
+      {/* 在好友頁面隱藏頁腳，避免影響訊息界面 */}
+      {location.pathname !== '/friends' && (
+        <footer className="app-footer">
+          <Link to="/privacy-policy">隱私權政策</Link>
+        </footer>
+      )}
+      <GlobalAdBanner />
       {showNavBar && <BottomNavBar />}
     </div>
   );

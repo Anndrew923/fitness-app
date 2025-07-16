@@ -55,12 +55,20 @@ const Ladder = () => {
 
       querySnapshot.forEach(doc => {
         const userData = doc.data();
+        // 所有有分數的用戶都參與天梯排名
         if (userData.ladderScore > 0) {
+          const isAnonymous = userData.isAnonymousInLadder === true;
+
           data.push({
             id: doc.id,
             ...userData,
-            displayName:
-              userData.nickname || userData.email?.split('@')[0] || '匿名用戶',
+            displayName: isAnonymous
+              ? '匿名用戶'
+              : userData.nickname ||
+                userData.email?.split('@')[0] ||
+                '未命名用戶',
+            avatarUrl: isAnonymous ? '' : userData.avatarUrl,
+            isAnonymous: isAnonymous,
           });
         }
       });
@@ -163,20 +171,39 @@ const Ladder = () => {
 
               <div className="ladder__user">
                 <div className="ladder__avatar">
-                  {user.avatarUrl ? (
+                  {user.avatarUrl && !user.isAnonymous ? (
                     <img src={user.avatarUrl} alt="頭像" />
                   ) : (
-                    <div className="ladder__avatar-placeholder">
-                      {user.displayName.charAt(0).toUpperCase()}
+                    <div
+                      className={`ladder__avatar-placeholder ${
+                        user.isAnonymous ? 'anonymous' : ''
+                      }`}
+                    >
+                      {user.isAnonymous
+                        ? '🥷'
+                        : user.displayName.charAt(0).toUpperCase()}
                     </div>
                   )}
                 </div>
 
                 <div className="ladder__user-info">
-                  <div className="ladder__user-name">{user.displayName}</div>
+                  <div
+                    className={`ladder__user-name ${
+                      user.isAnonymous ? 'anonymous' : ''
+                    }`}
+                  >
+                    {user.displayName}
+                    {user.isAnonymous && ' 🔒'}
+                  </div>
                   <div className="ladder__user-details">
-                    {getAgeGroupLabel(user.ageGroup)} •{' '}
-                    {user.gender === 'male' ? '男' : '女'}
+                    {user.isAnonymous ? (
+                      '匿名用戶'
+                    ) : (
+                      <>
+                        {getAgeGroupLabel(user.ageGroup)} •{' '}
+                        {user.gender === 'male' ? '男' : '女'}
+                      </>
+                    )}
                   </div>
                 </div>
               </div>

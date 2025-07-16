@@ -2,7 +2,12 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import './AdBanner.css';
 
-const AdBanner = ({ position = 'bottom', className = '', showAd = true }) => {
+const AdBanner = ({
+  position = 'bottom',
+  className = '',
+  showAd = true,
+  isFixed = true,
+}) => {
   // 開發環境顯示測試廣告
   const isDevelopment = process.env.NODE_ENV === 'development';
 
@@ -12,12 +17,16 @@ const AdBanner = ({ position = 'bottom', className = '', showAd = true }) => {
   }
 
   return (
-    <div className={`ad-banner ad-banner--${position} ${className}`}>
+    <div
+      className={`ad-banner ad-banner--${position} ${
+        isFixed ? 'ad-banner--fixed' : ''
+      } ${className}`}
+    >
       {isDevelopment ? (
         <div className="ad-banner__test">
           <div className="ad-banner__test-content">
-            <span className="ad-banner__test-label">測試廣告</span>
-            <span className="ad-banner__test-size">320x50</span>
+            <span className="ad-banner__test-label">🎯 廣告空間預留 🎯</span>
+            <span className="ad-banner__test-size">點擊體驗優化版設計</span>
           </div>
         </div>
       ) : (
@@ -39,7 +48,8 @@ const AdBanner = ({ position = 'bottom', className = '', showAd = true }) => {
 AdBanner.propTypes = {
   position: PropTypes.oneOf(['top', 'bottom', 'inline']),
   className: PropTypes.string,
-  showAd: PropTypes.bool, // 新增控制是否顯示廣告的 prop
+  showAd: PropTypes.bool,
+  isFixed: PropTypes.bool, // 控制是否固定在底部
 };
 
 export default AdBanner;

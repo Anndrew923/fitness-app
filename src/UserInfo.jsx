@@ -720,6 +720,34 @@ function UserInfo({ testData, onLogout, clearTestData }) {
                 step="1"
               />
             </div>
+
+            {/* 天梯隱私設置 */}
+            <div className="ladder-privacy-section">
+              <h3>🏆 天梯排行榜設置</h3>
+              <div className="privacy-options">
+                <label className="privacy-option">
+                  <input
+                    type="checkbox"
+                    checked={userData.isAnonymousInLadder === true}
+                    onChange={e =>
+                      setUserData(prev => ({
+                        ...prev,
+                        isAnonymousInLadder: e.target.checked,
+                      }))
+                    }
+                  />
+                  <div className="privacy-option-content">
+                    <span className="privacy-option-title">
+                      匿名參與天梯排名
+                    </span>
+                    <span className="privacy-option-desc">
+                      勾選後將隱藏您的暱稱和頭像，以匿名方式顯示在排行榜中
+                    </span>
+                  </div>
+                </label>
+              </div>
+            </div>
+
             <div className="button-group-submit">
               <button type="submit" className="submit-btn" disabled={loading}>
                 {loading ? '儲存中...' : '儲存資料'}
