@@ -48,6 +48,31 @@ const navItems = [
     guestBlock: false,
   },
   {
+    key: 'assessment',
+    label: '開始評測',
+    icon: (
+      <svg
+        width="24"
+        height="24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <path d="M12 2L2 7l10 5 10-5-10-5z" />
+        <path d="M2 17l10 5 10-5" />
+        <path d="M2 12l10 5 10-5" />
+        <circle cx="12" cy="12" r="3" />
+        <path d="M12 9v6" />
+        <path d="M9 12h6" />
+      </svg>
+    ),
+    path: '/user-info',
+    tooltip: '開始評測',
+    guestBlock: false,
+  },
+  {
     key: 'ladder',
     label: '天梯',
     icon: (
@@ -107,7 +132,13 @@ function BottomNavBar() {
       setPendingPath(item.path);
       setModalOpen(true);
     } else {
-      navigate(item.path);
+      if (item.key === 'home') {
+        navigate(item.path, { state: { scrollTo: 'radar' } });
+      } else if (item.key === 'assessment') {
+        navigate(item.path, { state: { scrollTo: 'tests' } });
+      } else {
+        navigate(item.path);
+      }
     }
   };
 

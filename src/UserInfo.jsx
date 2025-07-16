@@ -102,6 +102,7 @@ function UserInfo({ testData, onLogout, clearTestData }) {
   const navigate = useNavigate();
   const location = useLocation();
   const radarSectionRef = useRef(null);
+  const testsSectionRef = useRef(null);
   const [avatarUploading, setAvatarUploading] = useState(false);
   const [avatarError, setAvatarError] = useState(null);
 
@@ -191,6 +192,24 @@ function UserInfo({ testData, onLogout, clearTestData }) {
           radarSectionRef.current.scrollIntoView({
             behavior: 'smooth',
             block: 'center',
+          });
+        }
+      }, 300);
+    }
+
+    // 新增：根據 state.scrollTo 滾動
+    const scrollTo = location.state?.scrollTo;
+    if (scrollTo) {
+      setTimeout(() => {
+        if (scrollTo === 'radar' && radarSectionRef.current) {
+          radarSectionRef.current.scrollIntoView({
+            behavior: 'smooth',
+            block: 'center',
+          });
+        } else if (scrollTo === 'tests' && testsSectionRef.current) {
+          testsSectionRef.current.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start',
           });
         }
       }, 300);
@@ -519,7 +538,7 @@ function UserInfo({ testData, onLogout, clearTestData }) {
             className="user-avatar"
           />
         </div>
-        
+
         <div className="avatar-actions-container">
           <label className="avatar-upload-label">
             {avatarUploading ? '上傳中...' : '更換頭像'}
@@ -532,7 +551,7 @@ function UserInfo({ testData, onLogout, clearTestData }) {
             />
           </label>
         </div>
-        
+
         {avatarError && <div className="avatar-error">{avatarError}</div>}
       </div>
 
@@ -575,7 +594,9 @@ function UserInfo({ testData, onLogout, clearTestData }) {
                       }}
                       onMouseLeave={e => {
                         const tooltip =
-                          e.currentTarget.parentNode.querySelector('.logout-tooltip');
+                          e.currentTarget.parentNode.querySelector(
+                            '.logout-tooltip'
+                          );
                         if (tooltip) tooltip.remove();
                       }}
                     >
@@ -752,6 +773,7 @@ function UserInfo({ testData, onLogout, clearTestData }) {
             </div>
           )}
 
+          {/* 平均分數區域 - 移到雷達圖卡片內 */}
           {averageScore > 0 && !loading && (
             <div className="score-section">
               <p className="average-score">
@@ -763,15 +785,8 @@ function UserInfo({ testData, onLogout, clearTestData }) {
         </div>
       </div>
 
-      {/* 儲存結果按鈕 */}
-      <div className="save-button-container">
-        <button onClick={handleSaveResults} className="save-results-btn">
-          儲存結果至歷史紀錄
-        </button>
-      </div>
-
-      {/* 評測入口按鈕 */}
-      <div className="test-buttons-section">
+      {/* 評測頁面導航 */}
+      <div className="test-buttons-section" ref={testsSectionRef}>
         <h3 className="section-title">開始評測</h3>
         <div className="test-buttons-grid">
           <button
