@@ -21,7 +21,7 @@
   border-radius: 0;
   border-left: none;
   border-right: none;
-  z-index: 900;
+  z-index: 950; /* 調整z-index，在底部導航之下，但在其他內容之上 */
   animation: slideUpAd 0.5s ease-out;
   backdrop-filter: blur(10px);
   background: linear-gradient(

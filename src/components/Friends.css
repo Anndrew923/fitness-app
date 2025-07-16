@@ -638,6 +638,7 @@
     min-height: 0; /* 移除最小高度限制 */
     max-height: none; /* 移除最大高度限制 */
     padding: 12px;
+    padding-bottom: 140px; /* 手機版為輸入框和廣告欄位留空間 */
   }
 
   .chat-header {
@@ -685,8 +686,10 @@
     min-width: 40px;
   }
 
+  /* 手機版輸入框位置調整 */
   .message-input-container {
-    /* 固定輸入框在手機上的樣式已在 JSX 中處理 */
+    bottom: 64px !important; /* 手機版直接放在廣告欄位上方 */
+    z-index: 1002 !important; /* 確保在手機版廣告欄位之上 */
   }
 }
 

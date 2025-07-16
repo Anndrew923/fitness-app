@@ -1043,7 +1043,7 @@ const Friends = () => {
             <div
               className="messages-container"
               style={{
-                paddingBottom: '80px' /* 為固定輸入框留出空間 */,
+                paddingBottom: '120px' /* 為輸入框和廣告欄位留出空間 */,
               }}
             >
               {messages.length === 0 ? (
@@ -1147,14 +1147,14 @@ const Friends = () => {
               className="message-input-container"
               style={{
                 position: 'fixed',
-                bottom: '0',
+                bottom: window.innerWidth <= 768 ? '64px' : '70px', // 直接放在廣告欄位上方
                 left: '0',
                 right: '0',
                 background: 'white',
                 borderTop: '1px solid #e9ecef',
                 padding: '12px 16px',
                 paddingBottom: 'calc(12px + env(safe-area-inset-bottom))',
-                zIndex: 1000,
+                zIndex: 1001, // 確保在廣告欄位之上
                 boxShadow: '0 -2px 8px rgba(0, 0, 0, 0.1)',
               }}
             >
