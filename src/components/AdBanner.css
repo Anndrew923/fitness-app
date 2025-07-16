@@ -90,17 +90,14 @@
 /* 正式廣告樣式 */
 .ad-banner__placeholder {
   height: 50px;
-  background: linear-gradient(
-    135deg,
-    #f8f9fa 0%,
-    #e9ecef 100%
-  ); /* 更協調的灰色 */
+  background: #f5f5f5; /* 淺淺的灰色 */
   display: flex;
   align-items: center;
   justify-content: center;
   border: 1px dashed #adb5bd;
   border-radius: 8px;
   margin: 2px;
+  color: #666; /* 深灰色文字 */
 }
 
 .ad-banner__content {
@@ -118,7 +115,7 @@
 .ad-banner__loading-dot {
   width: 6px;
   height: 6px;
-  background: #6c757d;
+  background: #999; /* 更淺的灰色 */
   border-radius: 50%;
   animation: loading 1.4s ease-in-out infinite both;
 }

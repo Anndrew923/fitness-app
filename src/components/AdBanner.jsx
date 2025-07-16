@@ -22,25 +22,12 @@ const AdBanner = ({
         isFixed ? 'ad-banner--fixed' : ''
       } ${className}`}
     >
-      {isDevelopment ? (
-        <div className="ad-banner__test">
-          <div className="ad-banner__test-content">
-            <span className="ad-banner__test-label">🎯 廣告空間預留 🎯</span>
-            <span className="ad-banner__test-size">點擊體驗優化版設計</span>
-          </div>
+      <div className="ad-banner__test">
+        <div className="ad-banner__test-content">
+          <span className="ad-banner__test-label">🎯 廣告空間預留 🎯</span>
+          <span className="ad-banner__test-size">點擊體驗優化版設計</span>
         </div>
-      ) : (
-        <div className="ad-banner__placeholder">
-          {/* 正式環境將顯示 AdMob 廣告 */}
-          <div className="ad-banner__content">
-            <div className="ad-banner__loading">
-              <div className="ad-banner__loading-dot"></div>
-              <div className="ad-banner__loading-dot"></div>
-              <div className="ad-banner__loading-dot"></div>
-            </div>
-          </div>
-        </div>
-      )}
+      </div>
     </div>
   );
 };

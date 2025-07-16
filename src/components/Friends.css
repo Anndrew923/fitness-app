@@ -530,19 +530,9 @@
   display: block;
 }
 
+/* 固定輸入框容器 - 已移至 JSX 中處理 */
 .message-input-container {
-  background: white;
-  border-top: 1px solid #e9ecef;
-  padding: 12px 16px;
-  margin: -20px -20px 0 -20px;
-  position: sticky;
-  bottom: 0;
-  z-index: 100;
-  border-radius: 0 0 12px 12px;
-  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
-  flex-shrink: 0;
-  margin-top: auto; /* 讓輸入框靠近底部 */
-  padding-bottom: 20px; /* 增加底部間距，避免誤觸廣告 */
+  /* 樣式已在 JSX 中定義 */
 }
 
 .text-input-row {
@@ -696,8 +686,7 @@
   }
 
   .message-input-container {
-    padding: 12px;
-    margin: -20px -20px 0 -20px;
+    /* 固定輸入框在手機上的樣式已在 JSX 中處理 */
   }
 }
 

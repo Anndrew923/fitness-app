@@ -18,6 +18,7 @@ const Ladder = () => {
   const [userRank, setUserRank] = useState(0);
   const [selectedAgeGroup, setSelectedAgeGroup] = useState('all');
   const [loading, setLoading] = useState(true);
+  const [showUserContext, setShowUserContext] = useState(false);
 
   const ageGroups = [
     { value: 'all', label: '全部年齡' },
@@ -35,18 +36,34 @@ const Ladder = () => {
   const loadLadderData = async () => {
     setLoading(true);
     try {
-      let q = query(
-        collection(db, 'users'),
-        orderBy('ladderScore', 'desc'),
-        limit(100)
-      );
+      let q;
+
+      if (showUserContext && userRank > 50) {
+        // 顯示用戶排名範圍（前後各15名）
+        const userContextStart = Math.max(1, userRank - 15);
+        const userContextEnd = userRank + 15;
+
+        // 先獲取用戶排名範圍的數據
+        q = query(
+          collection(db, 'users'),
+          orderBy('ladderScore', 'desc'),
+          limit(userContextEnd)
+        );
+      } else {
+        // 顯示前50名精華區
+        q = query(
+          collection(db, 'users'),
+          orderBy('ladderScore', 'desc'),
+          limit(50)
+        );
+      }
 
       if (selectedAgeGroup !== 'all') {
         q = query(
           collection(db, 'users'),
           where('ageGroup', '==', selectedAgeGroup),
           orderBy('ladderScore', 'desc'),
-          limit(100)
+          limit(showUserContext && userRank > 50 ? userRank + 15 : 50)
         );
       }
 
@@ -80,7 +97,25 @@ const Ladder = () => {
         const userRankIndex = data.findIndex(
           user => user.id === userData.userId
         );
-        setUserRank(userRankIndex >= 0 ? userRankIndex + 1 : 0);
+
+        if (userRankIndex >= 0) {
+          // 用戶在當前顯示範圍內
+          setUserRank(userRankIndex + 1);
+        } else {
+          // 用戶不在當前顯示範圍內，需要計算實際排名
+          try {
+            const userRankQuery = query(
+              collection(db, 'users'),
+              where('ladderScore', '>', userData.ladderScore),
+              orderBy('ladderScore', 'desc')
+            );
+            const rankSnapshot = await getDocs(userRankQuery);
+            setUserRank(rankSnapshot.size + 1);
+          } catch (error) {
+            console.error('計算用戶排名失敗:', error);
+            setUserRank(0);
+          }
+        }
       }
     } catch (error) {
       console.error('載入天梯數據失敗:', error);
@@ -137,23 +172,58 @@ const Ladder = () => {
               </option>
             ))}
           </select>
+          {userRank > 50 && (
+            <button
+              className="ladder__context-btn"
+              onClick={() => setShowUserContext(!showUserContext)}
+              style={{
+                padding: '8px 12px',
+                background: showUserContext ? '#ff6b35' : '#f8f9fa',
+                color: showUserContext ? 'white' : '#666',
+                border: '1px solid #dee2e6',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                fontSize: '12px',
+                fontWeight: '500',
+                transition: 'all 0.3s ease',
+              }}
+            >
+              {showUserContext ? '顯示前50名精華區' : '顯示我的排名範圍'}
+            </button>
+          )}
         </div>
       </div>
 
       <div className="ladder__user-stats">
+        <div className="ladder__user-rank">
+          <span className="ladder__user-label">我的天梯排名</span>
+          <span className="ladder__user-value">{getUserRankDisplay()}</span>
+        </div>
         <div className="ladder__user-score">
-          <span className="ladder__user-label">我的天梯分數</span>
+          <span className="ladder__user-label">我的分數</span>
           <span className="ladder__user-value">
             {userData?.ladderScore ? formatScore(userData.ladderScore) : '0'}
           </span>
         </div>
-        <div className="ladder__user-rank">
-          <span className="ladder__user-label">我的排名</span>
-          <span className="ladder__user-value">{getUserRankDisplay()}</span>
-        </div>
       </div>
 
       <div className="ladder__list">
+        {showUserContext && userRank > 50 && (
+          <div
+            style={{
+              padding: '8px 16px',
+              background: 'linear-gradient(135deg, #ff6b35 0%, #f7931e 100%)',
+              color: 'white',
+              borderRadius: '8px 8px 0 0',
+              fontSize: '12px',
+              fontWeight: '600',
+              textAlign: 'center',
+            }}
+          >
+            🎯 您的排名範圍（第 {Math.max(1, userRank - 15)} - {userRank + 15}{' '}
+            名）
+          </div>
+        )}
         {ladderData.length === 0 ? (
           <div className="ladder__empty">
             <p>暫無排行榜數據</p>
@@ -161,7 +231,22 @@ const Ladder = () => {
           </div>
         ) : (
           ladderData.map((user, index) => (
-            <div key={user.id} className="ladder__item">
+            <div
+              key={user.id}
+              className={`ladder__item ${
+                user.id === userData?.userId ? 'ladder__item--current-user' : ''
+              }`}
+              style={
+                user.id === userData?.userId
+                  ? {
+                      background:
+                        'linear-gradient(135deg, rgba(255, 107, 53, 0.1) 0%, rgba(247, 147, 30, 0.1) 100%)',
+                      borderLeft: '4px solid #ff6b35',
+                      fontWeight: '600',
+                    }
+                  : {}
+              }
+            >
               <div className="ladder__rank">
                 <span className="ladder__rank-number">{index + 1}</span>
                 <span className="ladder__rank-badge">
@@ -190,6 +275,8 @@ const Ladder = () => {
                   <div
                     className={`ladder__user-name ${
                       user.isAnonymous ? 'anonymous' : ''
+                    } ${
+                      user.id === userData?.userId ? 'current-user-flame' : ''
                     }`}
                   >
                     {user.displayName}
@@ -222,6 +309,19 @@ const Ladder = () => {
       <div className="ladder__footer">
         <p>完成所有評測項目即可計算天梯分數</p>
         <p>天梯分數 = (力量 + 爆發力 + 心肺 + 肌肉量 + 體脂) ÷ 5</p>
+        {userRank > 50 && (
+          <p
+            style={{
+              fontSize: '12px',
+              color: '#666',
+              marginTop: '8px',
+              fontStyle: 'italic',
+            }}
+          >
+            💡 提示：您的排名為第 {userRank}{' '}
+            名，可以點擊上方按鈕查看您附近的競爭對手
+          </p>
+        )}
       </div>
     </div>
   );

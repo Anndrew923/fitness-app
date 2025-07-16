@@ -19,7 +19,7 @@ import {
   validateNickname,
   generateNickname,
 } from './utils';
-import './styles.css';
+import './userinfo.css';
 
 const DEFAULT_SCORES = {
   strength: 0,
@@ -509,103 +509,52 @@ function UserInfo({ testData, onLogout, clearTestData }) {
   return (
     <div className="user-info-container">
       {error && <p className="error-message">{error}</p>}
-      {/* 頭像顯示與上傳 */}
-      <div
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          marginBottom: 16,
-        }}
-      >
-        <img
-          src={userData?.avatarUrl || '/logo192.png'}
-          alt="頭像"
-          style={{
-            width: 96,
-            height: 96,
-            borderRadius: '50%',
-            objectFit: 'cover',
-            border: '2px solid #eee',
-            marginBottom: 8,
-          }}
-        />
-        <label
-          className="avatar-upload-label"
-          style={{ cursor: 'pointer', color: '#22CAEC', fontWeight: 500 }}
-        >
-          {avatarUploading ? '上傳中...' : '更換頭像'}
-          <input
-            type="file"
-            accept="image/*"
-            style={{ display: 'none' }}
-            onChange={handleAvatarChange}
-            disabled={avatarUploading}
+
+      {/* 頭像區域 - 美化設計 */}
+      <div className="avatar-section">
+        <div className="avatar-container">
+          <img
+            src={userData?.avatarUrl || '/logo192.png'}
+            alt="頭像"
+            className="user-avatar"
           />
-        </label>
-        {avatarError && (
-          <div style={{ color: 'red', fontSize: 13 }}>{avatarError}</div>
-        )}
+        </div>
+        
+        <div className="avatar-actions-container">
+          <label className="avatar-upload-label">
+            {avatarUploading ? '上傳中...' : '更換頭像'}
+            <input
+              type="file"
+              accept="image/*"
+              style={{ display: 'none' }}
+              onChange={handleAvatarChange}
+              disabled={avatarUploading}
+            />
+          </label>
+        </div>
+        
+        {avatarError && <div className="avatar-error">{avatarError}</div>}
       </div>
+
       {/* 只保留 currentUser 狀態區塊，移除載入提示 */}
       {(currentUser || isGuest) && (
         <>
-          <h1 className="text-2xl font-bold text-center mb-6">
-            身體狀態與表現總覽
-          </h1>
-          <form className="space-y-4" onSubmit={saveData}>
-            <div>
-              <label
-                htmlFor="nickname"
-                className="block text-sm font-medium text-gray-700"
-              >
-                暱稱
-              </label>
-              <div
-                className="nickname-input-group"
-                style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
-              >
-                <input
-                  id="nickname"
-                  name="nickname"
-                  type="text"
-                  value={userData?.nickname || ''}
-                  onChange={handleNicknameChange}
-                  placeholder="請輸入暱稱"
-                  className="input-field"
-                  maxLength="20"
-                />
-                <button
-                  type="button"
-                  onClick={handleGenerateNickname}
-                  className="generate-nickname-btn"
-                >
-                  生成暱稱
-                </button>
-                {currentUser && (
-                  <div
-                    style={{ position: 'relative', display: 'inline-block' }}
-                  >
+          <div className="page-header">
+            <h1 className="page-title">身體狀態與表現總覽</h1>
+            <div className="page-subtitle">完善您的個人資料，開始健身之旅</div>
+          </div>
+
+          <div className="form-card">
+            <form className="user-form" onSubmit={saveData}>
+              <div className="form-section">
+                <div className="section-header">
+                  <h3 className="section-title">基本資料</h3>
+                  {currentUser && (
                     <button
                       type="button"
                       onClick={handleLogout}
                       title="登出"
-                      style={{
-                        width: '36px',
-                        height: '36px',
-                        borderRadius: '50%',
-                        background: '#ff6f61',
-                        color: '#fff',
-                        border: 'none',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontWeight: 'bold',
-                        fontSize: '16px',
-                        marginLeft: '8px',
-                        cursor: 'pointer',
-                        boxShadow: '0 2px 8px rgba(255,111,97,0.08)',
-                      }}
+                      className="logout-btn"
                       onMouseEnter={e => {
                         const tooltip = document.createElement('div');
                         tooltip.innerText = '登出';
@@ -626,205 +575,241 @@ function UserInfo({ testData, onLogout, clearTestData }) {
                       }}
                       onMouseLeave={e => {
                         const tooltip =
-                          e.currentTarget.parentNode.querySelector(
-                            '.logout-tooltip'
-                          );
+                          e.currentTarget.parentNode.querySelector('.logout-tooltip');
                         if (tooltip) tooltip.remove();
                       }}
                     >
-                      <span style={{ fontSize: '18px', fontWeight: 'bold' }}>
-                        ⎋
-                      </span>
+                      <span className="logout-icon">⎋</span>
+                    </button>
+                  )}
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="nickname" className="form-label">
+                    暱稱
+                  </label>
+                  <div className="nickname-input-group">
+                    <input
+                      id="nickname"
+                      name="nickname"
+                      type="text"
+                      value={userData?.nickname || ''}
+                      onChange={handleNicknameChange}
+                      placeholder="請輸入暱稱"
+                      className="form-input"
+                      maxLength="20"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleGenerateNickname}
+                      className="generate-nickname-btn"
+                    >
+                      生成暱稱
                     </button>
                   </div>
-                )}
-              </div>
-            </div>
-            <div>
-              <label
-                htmlFor="gender"
-                className="block text-sm font-medium text-gray-700"
-              >
-                性別
-              </label>
-              <select
-                id="gender"
-                name="gender"
-                value={userData?.gender || ''}
-                onChange={handleInputChange}
-                className="input-field"
-                required
-              >
-                <option value="">請選擇性別</option>
-                <option value="male">男性</option>
-                <option value="female">女性</option>
-              </select>
-            </div>
-            <div>
-              <label
-                htmlFor="height"
-                className="block text-sm font-medium text-gray-700"
-              >
-                身高 (cm)
-              </label>
-              <input
-                id="height"
-                name="height"
-                type="number"
-                value={userData?.height || ''}
-                onChange={handleInputChange}
-                placeholder="身高 (cm)"
-                className="input-field"
-                required
-                min="0"
-                step="0.1"
-              />
-            </div>
-            <div>
-              <label
-                htmlFor="weight"
-                className="block text-sm font-medium text-gray-700"
-              >
-                體重 (kg)
-              </label>
-              <input
-                id="weight"
-                name="weight"
-                type="number"
-                value={userData?.weight || ''}
-                onChange={handleInputChange}
-                placeholder="體重 (kg)"
-                className="input-field"
-                required
-                min="0"
-                step="0.1"
-              />
-            </div>
-            <div>
-              <label
-                htmlFor="age"
-                className="block text-sm font-medium text-gray-700"
-              >
-                年齡
-              </label>
-              <input
-                id="age"
-                name="age"
-                type="number"
-                value={userData?.age || ''}
-                onChange={handleInputChange}
-                placeholder="年齡"
-                className="input-field"
-                required
-                min="0"
-                step="1"
-              />
-            </div>
+                </div>
 
-            {/* 天梯隱私設置 */}
-            <div className="ladder-privacy-section">
-              <h3>🏆 天梯排行榜設置</h3>
-              <div className="privacy-options">
-                <label className="privacy-option">
-                  <input
-                    type="checkbox"
-                    checked={userData.isAnonymousInLadder === true}
-                    onChange={e =>
-                      setUserData(prev => ({
-                        ...prev,
-                        isAnonymousInLadder: e.target.checked,
-                      }))
-                    }
-                  />
-                  <div className="privacy-option-content">
-                    <span className="privacy-option-title">
-                      匿名參與天梯排名
-                    </span>
-                    <span className="privacy-option-desc">
-                      勾選後將隱藏您的暱稱和頭像，以匿名方式顯示在排行榜中
-                    </span>
+                <div className="form-row">
+                  <div className="form-group">
+                    <label htmlFor="gender" className="form-label">
+                      性別
+                    </label>
+                    <select
+                      id="gender"
+                      name="gender"
+                      value={userData?.gender || ''}
+                      onChange={handleInputChange}
+                      className="form-input"
+                      required
+                    >
+                      <option value="">請選擇性別</option>
+                      <option value="male">男性</option>
+                      <option value="female">女性</option>
+                    </select>
                   </div>
-                </label>
-              </div>
-            </div>
 
-            <div className="button-group-submit">
-              <button type="submit" className="submit-btn" disabled={loading}>
-                {loading ? '儲存中...' : '儲存資料'}
-              </button>
-            </div>
-          </form>
+                  <div className="form-group">
+                    <label htmlFor="age" className="form-label">
+                      年齡
+                    </label>
+                    <input
+                      id="age"
+                      name="age"
+                      type="number"
+                      value={userData?.age || ''}
+                      onChange={handleInputChange}
+                      placeholder="年齡"
+                      className="form-input"
+                      required
+                      min="0"
+                      step="1"
+                    />
+                  </div>
+                </div>
+
+                <div className="form-row">
+                  <div className="form-group">
+                    <label htmlFor="height" className="form-label">
+                      身高 (cm)
+                    </label>
+                    <input
+                      id="height"
+                      name="height"
+                      type="number"
+                      value={userData?.height || ''}
+                      onChange={handleInputChange}
+                      placeholder="身高 (cm)"
+                      className="form-input"
+                      required
+                      min="0"
+                      step="0.1"
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label htmlFor="weight" className="form-label">
+                      體重 (kg)
+                    </label>
+                    <input
+                      id="weight"
+                      name="weight"
+                      type="number"
+                      value={userData?.weight || ''}
+                      onChange={handleInputChange}
+                      placeholder="體重 (kg)"
+                      className="form-input"
+                      required
+                      min="0"
+                      step="0.1"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* 天梯隱私設置 */}
+              <div className="form-section">
+                <h3 className="section-title">🏆 天梯排行榜設置</h3>
+                <div className="privacy-options">
+                  <label className="privacy-option">
+                    <input
+                      type="checkbox"
+                      checked={userData.isAnonymousInLadder === true}
+                      onChange={e =>
+                        setUserData(prev => ({
+                          ...prev,
+                          isAnonymousInLadder: e.target.checked,
+                        }))
+                      }
+                    />
+                    <div className="privacy-option-content">
+                      <span className="privacy-option-title">
+                        匿名參與天梯排名
+                      </span>
+                      <span className="privacy-option-desc">
+                        勾選後將隱藏您的暱稱和頭像，以匿名方式顯示在排行榜中
+                      </span>
+                    </div>
+                  </label>
+                </div>
+              </div>
+
+              <div className="form-actions">
+                <button type="submit" className="submit-btn" disabled={loading}>
+                  {loading ? '儲存中...' : '儲存資料'}
+                </button>
+              </div>
+            </form>
+          </div>
         </>
       )}
 
+      {/* 雷達圖區域 */}
       <div id="radar-section" className="radar-section" ref={radarSectionRef}>
-        <h2 className="text-xl font-semibold text-center mb-4">表現總覽</h2>
-        {loading ? (
-          <p>正在載入數據...</p>
-        ) : (
-          <div style={{ width: '100%', maxWidth: '600px', margin: '0 auto' }}>
-            <ResponsiveContainer width="100%" height={400}>
-              <RadarChart data={radarChartData}>
-                <PolarGrid gridType="polygon" />
-                <PolarAngleAxis dataKey="name" tick={{ fontSize: 14 }} />
-                <PolarRadiusAxis angle={90} domain={[0, 100]} tickCount={5} />
-                <Radar
-                  name="您的表現"
-                  dataKey="value"
-                  stroke="#22CAEC"
-                  fill="#22CAEC"
-                  fillOpacity={0.4}
-                  strokeWidth={2}
-                />
-              </RadarChart>
-            </ResponsiveContainer>
-          </div>
-        )}
+        <div className="radar-card">
+          <h2 className="radar-title">表現總覽</h2>
+          {loading ? (
+            <div className="loading-container">
+              <div className="loading-spinner"></div>
+              <p>正在載入數據...</p>
+            </div>
+          ) : (
+            <div className="radar-chart-container">
+              <ResponsiveContainer width="100%" height={400}>
+                <RadarChart data={radarChartData}>
+                  <PolarGrid gridType="polygon" />
+                  <PolarAngleAxis dataKey="name" tick={{ fontSize: 14 }} />
+                  <PolarRadiusAxis angle={90} domain={[0, 100]} tickCount={5} />
+                  <Radar
+                    name="您的表現"
+                    dataKey="value"
+                    stroke="#22CAEC"
+                    fill="#22CAEC"
+                    fillOpacity={0.4}
+                    strokeWidth={2}
+                  />
+                </RadarChart>
+              </ResponsiveContainer>
+            </div>
+          )}
 
-        {averageScore > 0 && !loading && (
-          <div className="score-section">
-            <p className="average-score">
-              平均分數: <span className="score-value">{averageScore}</span>
-            </p>
-            <p className="score-slogan">{scoreSlogan}</p>
-          </div>
-        )}
+          {averageScore > 0 && !loading && (
+            <div className="score-section">
+              <p className="average-score">
+                平均分數: <span className="score-value">{averageScore}</span>
+              </p>
+              <p className="score-slogan">{scoreSlogan}</p>
+            </div>
+          )}
+        </div>
       </div>
 
+      {/* 儲存結果按鈕 */}
       <div className="save-button-container">
         <button onClick={handleSaveResults} className="save-results-btn">
           儲存結果至歷史紀錄
         </button>
       </div>
 
-      <div className="button-group" style={{ marginTop: '40px' }}>
-        <button
-          onClick={() => handleNavigation('/strength')}
-          className="nav-btn"
-        >
-          力量評測
-        </button>
-        <button
-          onClick={() => handleNavigation('/explosive-power')}
-          className="nav-btn"
-        >
-          爆發力測試
-        </button>
-        <button onClick={() => handleNavigation('/cardio')} className="nav-btn">
-          心肺耐力測試
-        </button>
-        <button
-          onClick={() => handleNavigation('/muscle-mass')}
-          className="nav-btn"
-        >
-          骨骼肌肉量
-        </button>
-        <button
-          onClick={() => handleNavigation('/body-fat')}
-          className="nav-btn"
-        >
-          體脂肪率與FFMI
-        </button>
+      {/* 評測入口按鈕 */}
+      <div className="test-buttons-section">
+        <h3 className="section-title">開始評測</h3>
+        <div className="test-buttons-grid">
+          <button
+            onClick={() => handleNavigation('/strength')}
+            className="test-btn strength-btn"
+          >
+            <span className="test-icon">💪</span>
+            <span className="test-label">力量評測</span>
+          </button>
+          <button
+            onClick={() => handleNavigation('/explosive-power')}
+            className="test-btn explosive-btn"
+          >
+            <span className="test-icon">⚡</span>
+            <span className="test-label">爆發力測試</span>
+          </button>
+          <button
+            onClick={() => handleNavigation('/cardio')}
+            className="test-btn cardio-btn"
+          >
+            <span className="test-icon">🏃</span>
+            <span className="test-label">心肺耐力測試</span>
+          </button>
+          <button
+            onClick={() => handleNavigation('/muscle-mass')}
+            className="test-btn muscle-btn"
+          >
+            <span className="test-icon">🏋️</span>
+            <span className="test-label">骨骼肌肉量</span>
+          </button>
+          <button
+            onClick={() => handleNavigation('/body-fat')}
+            className="test-btn bodyfat-btn"
+          >
+            <span className="test-icon">📊</span>
+            <span className="test-label">體脂肪率與FFMI</span>
+          </button>
+        </div>
       </div>
     </div>
   );

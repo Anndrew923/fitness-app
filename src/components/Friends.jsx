@@ -1040,7 +1040,12 @@ const Friends = () => {
               </div>
             </div>
 
-            <div className="messages-container">
+            <div
+              className="messages-container"
+              style={{
+                paddingBottom: '80px' /* 為固定輸入框留出空間 */,
+              }}
+            >
               {messages.length === 0 ? (
                 <div
                   className="empty-messages"
@@ -1137,11 +1142,20 @@ const Friends = () => {
               )}
             </div>
 
+            {/* 輸入框容器 - 固定在底部 */}
             <div
               className="message-input-container"
               style={{
-                marginTop: 'auto',
-                paddingBottom: '25px' /* 增加底部間距，避免誤觸廣告 */,
+                position: 'fixed',
+                bottom: '0',
+                left: '0',
+                right: '0',
+                background: 'white',
+                borderTop: '1px solid #e9ecef',
+                padding: '12px 16px',
+                paddingBottom: 'calc(12px + env(safe-area-inset-bottom))',
+                zIndex: 1000,
+                boxShadow: '0 -2px 8px rgba(0, 0, 0, 0.1)',
               }}
             >
               <div
@@ -1150,6 +1164,8 @@ const Friends = () => {
                   display: 'flex',
                   gap: '8px',
                   alignItems: 'center',
+                  maxWidth: '800px',
+                  margin: '0 auto',
                 }}
               >
                 <input
