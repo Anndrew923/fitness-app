@@ -49,12 +49,15 @@
 /* 標籤導航 */
 .tab-navigation {
   display: flex;
-  gap: 8px;
+  flex-direction: row;
+  gap: 0;
   margin-bottom: 20px;
   padding: 4px;
-  background: #f8f9fa;
+  background: white;
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  width: 100%;
+  overflow: hidden;
 }
 
 .tab-btn {
@@ -75,6 +78,8 @@
   font-size: 13px;
   white-space: nowrap; /* 防止文字換行 */
   min-width: 0; /* 允許 flex 縮小 */
+  flex-shrink: 0;
+  text-align: center;
 }
 
 .tab-label {
@@ -601,13 +606,15 @@
   }
 
   .tab-navigation {
-    gap: 4px;
+    gap: 0;
+    padding: 3px;
   }
 
   .tab-btn {
     text-align: center;
     padding: 10px 6px;
     font-size: 12px;
+    flex: 1;
   }
 
   .friend-card,
@@ -667,7 +674,7 @@
   }
 
   .text-input-row {
-    gap: 8px;
+    gap: 6px;
   }
 
   .text-input-row input {

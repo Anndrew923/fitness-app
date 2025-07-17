@@ -160,7 +160,6 @@ export function UserProvider({ children }) {
 
       await setDoc(userRef, dataToSave, { merge: true });
       localStorage.setItem('userData', JSON.stringify(dataToSave));
-      console.log('數據保存成功');
       return true;
     } catch (error) {
       console.error('保存用戶數據失敗:', error);
@@ -282,7 +281,6 @@ export function UserProvider({ children }) {
 
     const syncInterval = setInterval(() => {
       if (auth.currentUser && userData && userData.height) {
-        console.log('定期同步用戶資料到 Firebase');
         saveUserData(userData);
       }
     }, 30000);

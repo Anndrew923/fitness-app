@@ -211,7 +211,7 @@ function FFMI({ onComplete, clearTestData }) {
           </tbody>
         </table>
       </div>
-      <button onClick={handleSubmit} className="back-btn">提交並返回總覽</button>
+      <button onClick={handleSubmit} className="ffmi-submit-btn">提交並返回總覽</button>
     </div>
   );
 }

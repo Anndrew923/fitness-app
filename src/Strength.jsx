@@ -18,6 +18,9 @@ function Strength({ onComplete, clearTestData }) {
   const navigate = useNavigate();
   const { gender, height, weight, age } = userData;
 
+  // 新增分頁狀態
+  const [currentTab, setCurrentTab] = useState('exercises'); // 'exercises', 'results', 'standards'
+
   const [benchPress, setBenchPress] = useState({
     weight: userData.testInputs?.strength?.benchPress?.weight || '',
     reps: userData.testInputs?.strength?.benchPress?.reps || '',
@@ -105,61 +108,51 @@ function Strength({ onComplete, clearTestData }) {
     return 0;
   };
 
-  const standardMap = useMemo(
-    () => ({
+  const standardMap = useMemo(() => {
+    const isMale = gender === 'male' || gender === '男性';
+    return {
       benchPress: {
-        bodyweight:
-          gender === 'female'
-            ? standards.bodyweightStandardsFemaleBenchPress
-            : standards.bodyweightStandardsMaleBenchPress,
-        age:
-          gender === 'female'
-            ? standards.ageStandardsFemaleBenchPress
-            : standards.ageStandardsMaleBenchPress,
+        bodyweight: isMale
+          ? standards.bodyweightStandardsMaleBenchPress
+          : standards.bodyweightStandardsFemaleBenchPress,
+        age: isMale
+          ? standards.ageStandardsMaleBenchPress
+          : standards.ageStandardsFemaleBenchPress,
       },
       squat: {
-        bodyweight:
-          gender === 'female'
-            ? standards.bodyweightStandardsFemaleSquat
-            : standards.bodyweightStandardsMaleSquat,
-        age:
-          gender === 'female'
-            ? standards.ageStandardsFemaleSquat
-            : standards.ageStandardsMaleSquat,
+        bodyweight: isMale
+          ? standards.bodyweightStandardsMaleSquat
+          : standards.bodyweightStandardsFemaleSquat,
+        age: isMale
+          ? standards.ageStandardsMaleSquat
+          : standards.ageStandardsFemaleSquat,
       },
       deadlift: {
-        bodyweight:
-          gender === 'female'
-            ? standards.bodyweightStandardsFemaleDeadlift
-            : standards.bodyweightStandardsMaleDeadlift,
-        age:
-          gender === 'female'
-            ? standards.ageStandardsFemaleDeadlift
-            : standards.ageStandardsMaleDeadlift,
+        bodyweight: isMale
+          ? standards.bodyweightStandardsMaleDeadlift
+          : standards.bodyweightStandardsFemaleDeadlift,
+        age: isMale
+          ? standards.ageStandardsMaleDeadlift
+          : standards.ageStandardsFemaleDeadlift,
       },
       latPulldown: {
-        bodyweight:
-          gender === 'female'
-            ? standards.bodyweightStandardsFemaleLatPulldown
-            : standards.bodyweightStandardsMaleLatPulldown,
-        age:
-          gender === 'female'
-            ? standards.ageStandardsFemaleLatPulldown
-            : standards.ageStandardsMaleLatPulldown,
+        bodyweight: isMale
+          ? standards.bodyweightStandardsMaleLatPulldown
+          : standards.bodyweightStandardsFemaleLatPulldown,
+        age: isMale
+          ? standards.ageStandardsMaleLatPulldown
+          : standards.ageStandardsFemaleLatPulldown,
       },
       shoulderPress: {
-        bodyweight:
-          gender === 'female'
-            ? standards.bodyweightStandardsFemaleShoulderPress
-            : standards.bodyweightStandardsMaleShoulderPress,
-        age:
-          gender === 'female'
-            ? standards.ageStandardsFemaleShoulderPress
-            : standards.ageStandardsMaleShoulderPress,
+        bodyweight: isMale
+          ? standards.bodyweightStandardsMaleShoulderPress
+          : standards.bodyweightStandardsFemaleShoulderPress,
+        age: isMale
+          ? standards.ageStandardsMaleShoulderPress
+          : standards.ageStandardsFemaleShoulderPress,
       },
-    }),
-    [gender, standards]
-  );
+    };
+  }, [gender]);
 
   const calculateMaxStrength = useCallback(
     (weight, reps, setState, type) => {
@@ -369,40 +362,219 @@ function Strength({ onComplete, clearTestData }) {
     { level: '精英-舉重、健力運動員', score: 100, color: '#42A5F5' },
   ];
 
+  // 運動項目配置
+  const exercises = [
+    {
+      key: 'benchPress',
+      name: '平板臥推',
+      state: benchPress,
+      setState: setBenchPress,
+    },
+    {
+      key: 'squat',
+      name: '深蹲',
+      state: squat,
+      setState: setSquat,
+    },
+    {
+      key: 'deadlift',
+      name: '硬舉',
+    
+      state: deadlift,
+      setState: setDeadlift,
+    },
+    {
+      key: 'latPulldown',
+      name: '滑輪下拉',
+      state: latPulldown,
+      setState: setLatPulldown,
+    },
+    {
+      key: 'shoulderPress',
+      name: '站姿肩推',
+      state: shoulderPress,
+      setState: setShoulderPress,
+    },
+  ];
+
+  // 展開狀態管理
+  const [expandedExercises, setExpandedExercises] = useState(new Set());
+
+  // 渲染運動項目卡片
+  const renderExerciseCard = exercise => {
+    const { key, name, icon, state, setState } = exercise;
+    const hasScore = state.score !== null;
+    const isExpanded = expandedExercises.has(key);
+
+    const toggleExpanded = () => {
+      const newExpanded = new Set(expandedExercises);
+      if (isExpanded) {
+        newExpanded.delete(key);
+      } else {
+        newExpanded.add(key);
+      }
+      setExpandedExercises(newExpanded);
+    };
+
+    return (
+      <div key={key} className={`exercise-card ${hasScore ? 'completed' : ''}`}>
+        <div className="exercise-header" onClick={toggleExpanded}>
+          <div className="exercise-header-left">
+            <span className="exercise-icon">{icon}</span>
+            <h3 className="exercise-name">{name}</h3>
+          </div>
+          <div className="exercise-header-right">
+            {hasScore && <span className="score-badge">{state.score}</span>}
+            <span className={`expand-arrow ${isExpanded ? 'expanded' : ''}`}>
+              {isExpanded ? '▲' : '▼'}
+            </span>
+          </div>
+        </div>
+
+        {isExpanded && (
+          <div className="exercise-content">
+            <div className="exercise-inputs">
+              <div className="input-group">
+                <label htmlFor={`${key}Weight`}>重量 (kg)</label>
+                <input
+                  id={`${key}Weight`}
+                  type="number"
+                  placeholder="重量"
+                  value={state.weight}
+                  onChange={e =>
+                    setState(prev => ({ ...prev, weight: e.target.value }))
+                  }
+                  className="input-field"
+                />
+              </div>
+
+              <div className="input-group">
+                <label htmlFor={`${key}Reps`}>次數</label>
+                <input
+                  id={`${key}Reps`}
+                  type="number"
+                  placeholder="次數"
+                  value={state.reps}
+                  onChange={e =>
+                    setState(prev => ({ ...prev, reps: e.target.value }))
+                  }
+                  className="input-field"
+                />
+              </div>
+
+              <button
+                onClick={() =>
+                  calculateMaxStrength(state.weight, state.reps, setState, key)
+                }
+                className="calculate-btn"
+                disabled={!state.weight || !state.reps}
+              >
+                計算
+              </button>
+            </div>
+
+            {state.max && (
+              <div className="exercise-result">
+                <p className="max-strength">最大力量: {state.max} kg</p>
+                {state.score && (
+                  <p className="score-display">分數: {state.score}</p>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    );
+  };
+
   return (
     <div className="strength-container">
-      <h1 className="text-2xl font-bold text-center mb-4">力量評測</h1>
-      <p>性別：{gender || '未選擇'}</p>
-      <p>身高：{height ? `${height} 公分` : '未輸入'}</p>
-      <p>體重：{weight ? `${weight} 公斤` : '未輸入'}</p>
-      <p>年齡：{age || '未輸入'}</p>
+      <div className="strength-header">
+        <h1 className="strength-title">💪 力量評測</h1>
+        <div className="user-info-summary">
+          <span>{gender || '未選擇'}</span>
+          <span>{height ? `${height}cm` : '未輸入'}</span>
+          <span>{weight ? `${weight}kg` : '未輸入'}</span>
+          <span>{age || '未輸入'}歲</span>
+        </div>
+      </div>
 
-      <div className="instructions-btn-container">
+      {/* 分頁導航 */}
+      <div className="tab-navigation">
         <button
-          onClick={() => navigate('/strength-instructions')}
-          className="nav-btn"
+          className={`tab-btn ${currentTab === 'exercises' ? 'active' : ''}`}
+          onClick={() => setCurrentTab('exercises')}
         >
-          動作說明
+          🏋️ 評測項目
+        </button>
+        <button
+          className={`tab-btn ${currentTab === 'standards' ? 'active' : ''}`}
+          onClick={() => setCurrentTab('standards')}
+        >
+          📋 評測標準
         </button>
       </div>
 
-      <div className="standards-card">
-        <div
-          className="standards-header"
-          onClick={() => setIsExpanded(!isExpanded)}
-        >
-          <h2 className="text-lg font-semibold">評測標準說明</h2>
-          <span className={`arrow ${isExpanded ? 'expanded' : ''}`}>
-            {isExpanded ? '▲' : '▼'}
-          </span>
+      {/* 評測項目分頁 */}
+      {currentTab === 'exercises' && (
+        <div className="exercises-tab">
+          <div className="exercises-grid">
+            {exercises.map(renderExerciseCard)}
+          </div>
+
+          {averageScore && (
+            <div className="results-section">
+              <div className="radar-chart-card">
+                <h3>📈 力量分佈圖</h3>
+                <ResponsiveContainer width="100%" height={300}>
+                  <RadarChart data={radarData}>
+                    <PolarGrid gridType="polygon" />
+                    <PolarAngleAxis dataKey="name" />
+                    <PolarRadiusAxis angle={90} domain={[0, 100]} />
+                    <Radar
+                      name="分數"
+                      dataKey="value"
+                      stroke="#81D8D0"
+                      fill="#81D8D0"
+                      fillOpacity={0.6}
+                    />
+                  </RadarChart>
+                </ResponsiveContainer>
+              </div>
+
+              <div className="score-breakdown-card">
+                <h3>📊 分數詳情</h3>
+                <div className="score-breakdown">
+                  {exercises.map(exercise => (
+                    <div key={exercise.key} className="score-item">
+                      <span className="score-label">{exercise.name}</span>
+                      <span className="score-value">
+                        {exercise.state.score || '未測試'}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+                <div className="average-score-display">
+                  <p className="average-score">平均分數: {averageScore}</p>
+                  <p className="average-comment">
+                    {getAverageScoreComment(averageScore, gender)}
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
-        {isExpanded && (
+      )}
+
+      {/* 評測標準分頁 */}
+      {currentTab === 'standards' && (
+        <div className="standards-tab">
           <div className="standards-content">
             <p>
               我們的評測標準基於 Strength Level 用戶提供的超過 1.34
               億次舉重數據，涵蓋男女標準，適用於臥推、深蹲、硬舉、肩推等多項健身動作。
             </p>
-            <p className="mt-2 text-sm text-gray-600">
+            <p className="source-link">
               來源：
               <a
                 href="https://strengthlevel.com/"
@@ -414,351 +586,60 @@ function Strength({ onComplete, clearTestData }) {
               </a>
             </p>
           </div>
-        )}
-      </div>
 
-      {/* 新增的分數等級表格 */}
-      <div className="score-levels-table">
-        <h3 className="text-lg font-semibold mb-3">分數等級</h3>
-        <div className="levels-container">
-          {scoreLevels.map((item, index) => (
-            <div key={index} className="level-item">
-              <div className="level-header">
-                <span className="level-name">{item.level}</span>
-                <span className="level-score">{item.score}</span>
-              </div>
-              <div className="level-bar-container">
-                <div
-                  className="level-bar"
-                  style={{
-                    width: `${item.score}%`,
-                    background: `linear-gradient(to right, ${item.color}dd, ${item.color})`,
-                  }}
-                />
-              </div>
+          <div className="score-levels-table">
+            <h3>分數等級</h3>
+            <div className="levels-container">
+              {scoreLevels.map((item, index) => (
+                <div key={index} className="level-item">
+                  <div className="level-header">
+                    <span className="level-name">{item.level}</span>
+                    <span className="level-score">{item.score}</span>
+                  </div>
+                  <div className="level-bar-container">
+                    <div
+                      className="level-bar"
+                      style={{
+                        width: `${item.score}%`,
+                        background: `linear-gradient(to right, ${item.color}dd, ${item.color})`,
+                      }}
+                    />
+                  </div>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
-      </div>
+          </div>
 
-      <div className="exercise-section">
-        <h2 className="text-lg font-semibold">臥推</h2>
-        <label
-          htmlFor="benchPressWeight"
-          className="block text-sm font-medium text-gray-700"
-        >
-          重量 (kg)
-        </label>
-        <input
-          id="benchPressWeight"
-          name="benchPressWeight"
-          type="number"
-          placeholder="重量 (kg)"
-          value={benchPress.weight}
-          onChange={e =>
-            setBenchPress(prev => ({ ...prev, weight: e.target.value }))
-          }
-          className="input-field"
-        />
-        <label
-          htmlFor="benchPressReps"
-          className="block text-sm font-medium text-gray-700"
-        >
-          次數 (12次以下較準確)
-        </label>
-        <input
-          id="benchPressReps"
-          name="benchPressReps"
-          type="number"
-          placeholder="次數 (12次以下較準確)"
-          value={benchPress.reps}
-          onChange={e =>
-            setBenchPress(prev => ({ ...prev, reps: e.target.value }))
-          }
-          className="input-field"
-        />
-        <button
-          onClick={() =>
-            calculateMaxStrength(
-              benchPress.weight,
-              benchPress.reps,
-              setBenchPress,
-              'benchPress'
-            )
-          }
-          className="calculate-btn"
-        >
-          計算
-        </button>
-        {benchPress.max && <p>最大力量 (1RM): {benchPress.max} kg</p>}
-        {benchPress.score && (
-          <p className="score-display">分數: {benchPress.score}</p>
-        )}
-      </div>
-
-      <div className="exercise-section">
-        <h2 className="text-lg font-semibold">深蹲</h2>
-        <label
-          htmlFor="squatWeight"
-          className="block text-sm font-medium text-gray-700"
-        >
-          重量 (kg)
-        </label>
-        <input
-          id="squatWeight"
-          name="squatWeight"
-          type="number"
-          placeholder="重量 (kg)"
-          value={squat.weight}
-          onChange={e =>
-            setSquat(prev => ({ ...prev, weight: e.target.value }))
-          }
-          className="input-field"
-        />
-        <label
-          htmlFor="squatReps"
-          className="block text-sm font-medium text-gray-700"
-        >
-          次數 (12次以下較準確)
-        </label>
-        <input
-          id="squatReps"
-          name="squatReps"
-          type="number"
-          placeholder="次數 (12次以下較準確)"
-          value={squat.reps}
-          onChange={e => setSquat(prev => ({ ...prev, reps: e.target.value }))}
-          className="input-field"
-        />
-        <button
-          onClick={() =>
-            calculateMaxStrength(squat.weight, squat.reps, setSquat, 'squat')
-          }
-          className="calculate-btn"
-        >
-          計算
-        </button>
-        {squat.max && <p>最大力量 (1RM): {squat.max} kg</p>}
-        {squat.score && <p className="score-display">分數: {squat.score}</p>}
-      </div>
-
-      <div className="exercise-section">
-        <h2 className="text-lg font-semibold">硬舉</h2>
-        <label
-          htmlFor="deadliftWeight"
-          className="block text-sm font-medium text-gray-700"
-        >
-          重量 (kg)
-        </label>
-        <input
-          id="deadliftWeight"
-          name="deadliftWeight"
-          type="number"
-          placeholder="重量 (kg)"
-          value={deadlift.weight}
-          onChange={e =>
-            setDeadlift(prev => ({ ...prev, weight: e.target.value }))
-          }
-          className="input-field"
-        />
-        <label
-          htmlFor="deadliftReps"
-          className="block text-sm font-medium text-gray-700"
-        >
-          次數 (12次以下較準確)
-        </label>
-        <input
-          id="deadliftReps"
-          name="deadliftReps"
-          type="number"
-          placeholder="次數 (12次以下較準確)"
-          value={deadlift.reps}
-          onChange={e =>
-            setDeadlift(prev => ({ ...prev, reps: e.target.value }))
-          }
-          className="input-field"
-        />
-        <button
-          onClick={() =>
-            calculateMaxStrength(
-              deadlift.weight,
-              deadlift.reps,
-              setDeadlift,
-              'deadlift'
-            )
-          }
-          className="calculate-btn"
-        >
-          計算
-        </button>
-        {deadlift.max && <p>最大力量 (1RM): {deadlift.max} kg</p>}
-        {deadlift.score && (
-          <p className="score-display">分數: {deadlift.score}</p>
-        )}
-      </div>
-
-      <div className="exercise-section">
-        <h2 className="text-lg font-semibold">滑輪下拉</h2>
-        <label
-          htmlFor="latPulldownWeight"
-          className="block text-sm font-medium text-gray-700"
-        >
-          重量 (kg)
-        </label>
-        <input
-          id="latPulldownWeight"
-          name="latPulldownWeight"
-          type="number"
-          placeholder="重量 (kg)"
-          value={latPulldown.weight}
-          onChange={e =>
-            setLatPulldown(prev => ({ ...prev, weight: e.target.value }))
-          }
-          className="input-field"
-        />
-        <label
-          htmlFor="latPulldownReps"
-          className="block text-sm font-medium text-gray-700"
-        >
-          次數 (12次以下較準確)
-        </label>
-        <input
-          id="latPulldownReps"
-          name="latPulldownReps"
-          type="number"
-          placeholder="次數 (12次以下較準確)"
-          value={latPulldown.reps}
-          onChange={e =>
-            setLatPulldown(prev => ({ ...prev, reps: e.target.value }))
-          }
-          className="input-field"
-        />
-        <button
-          onClick={() =>
-            calculateMaxStrength(
-              latPulldown.weight,
-              latPulldown.reps,
-              setLatPulldown,
-              'latPulldown'
-            )
-          }
-          className="calculate-btn"
-        >
-          計算
-        </button>
-        {latPulldown.max && <p>最大力量: {latPulldown.max} kg</p>}
-        {latPulldown.score && (
-          <p className="score-display">分數: {latPulldown.score}</p>
-        )}
-      </div>
-
-      <div className="exercise-section">
-        <h2 className="text-lg font-semibold">站姿肩推</h2>
-        <label
-          htmlFor="shoulderPressWeight"
-          className="block text-sm font-medium text-gray-700"
-        >
-          重量 (kg)
-        </label>
-        <input
-          id="shoulderPressWeight"
-          name="shoulderPressWeight"
-          type="number"
-          placeholder="重量 (kg)"
-          value={shoulderPress.weight}
-          onChange={e =>
-            setShoulderPress(prev => ({ ...prev, weight: e.target.value }))
-          }
-          className="input-field"
-        />
-        <label
-          htmlFor="shoulderPressReps"
-          className="block text-sm font-medium text-gray-700"
-        >
-          次數 (12次以下較準確)
-        </label>
-        <input
-          id="shoulderPressReps"
-          name="shoulderPressReps"
-          type="number"
-          placeholder="次數 (12次以下較準確)"
-          value={shoulderPress.reps}
-          onChange={e =>
-            setShoulderPress(prev => ({ ...prev, reps: e.target.value }))
-          }
-          className="input-field"
-        />
-        <button
-          onClick={() =>
-            calculateMaxStrength(
-              shoulderPress.weight,
-              shoulderPress.reps,
-              setShoulderPress,
-              'shoulderPress'
-            )
-          }
-          className="calculate-btn"
-        >
-          計算
-        </button>
-        {shoulderPress.max && <p>最大力量 (1RM): {shoulderPress.max} kg</p>}
-        {shoulderPress.score && (
-          <p className="score-display">分數: {shoulderPress.score}</p>
-        )}
-      </div>
-
-      <div className="radar-chart">
-        <h2 className="text-lg font-semibold text-center mb-4">
-          力量評測雷達圖
-        </h2>
-        <ResponsiveContainer width="100%" height={400}>
-          <RadarChart data={radarData}>
-            <PolarGrid gridType="polygon" />
-            <PolarAngleAxis dataKey="name" />
-            <PolarRadiusAxis angle={90} domain={[0, 100]} />
-            <Radar
-              name="分數"
-              dataKey="value"
-              stroke="#8884d8"
-              fill="#8884d8"
-              fillOpacity={0.6}
-            />
-          </RadarChart>
-        </ResponsiveContainer>
-      </div>
-
-      {averageScore && (
-        <div className="average-score-section">
-          <p className="average-score">平均分數: {averageScore}</p>
-          <p className="average-comment">
-            {getAverageScoreComment(averageScore, gender)}
-          </p>
+          <div className="score-table">
+            <h3>分數說明</h3>
+            <table className="table">
+              <thead>
+                <tr>
+                  <th>分數範圍</th>
+                  <th>說明</th>
+                </tr>
+              </thead>
+              <tbody>
+                {scoreTableData.map((row, index) => (
+                  <tr key={index}>
+                    <td>{row.range}</td>
+                    <td>{row.description}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
 
-      <div className="score-table">
-        <h2 className="text-lg font-semibold text-center mb-4">分數說明</h2>
-        <table className="table">
-          <thead>
-            <tr>
-              <th>分數範圍</th>
-              <th>說明</th>
-            </tr>
-          </thead>
-          <tbody>
-            {scoreTableData.map((row, index) => (
-              <tr key={index}>
-                <td>{row.range}</td>
-                <td>{row.description}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      <div className="button-group">
-        <button onClick={handleSubmit} className="submit-btn">
-          提交並返回總覽
+      {/* 提交按鈕 */}
+      <div className="submit-section">
+        <button
+          onClick={handleSubmit}
+          className="submit-btn"
+          disabled={!averageScore}
+        >
+          {averageScore ? '✅ 提交並返回總覽' : '請至少完成一項評測'}
         </button>
       </div>
     </div>

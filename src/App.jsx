@@ -19,7 +19,7 @@ import Cardio from './Cardio';
 import Power from './Power';
 import Muscle from './Muscle';
 import FFMI from './FFMI';
-import StrengthInstructions from './StrengthInstructions';
+
 import Login from './Login';
 import History from './History';
 import PrivacyPolicy from './PrivacyPolicy';
@@ -132,11 +132,6 @@ function AppContent() {
     const { userData } = useUser();
     const currentPath = window.location.pathname;
     const isGuest = sessionStorage.getItem('guestMode') === 'true';
-    console.log('ProtectedRoute debug:', {
-      currentPath,
-      isGuest,
-      hasUser: !!auth.currentUser,
-    });
 
     // 先檢查訪客模式，如果符合，直接允許進入
     const guestAllowedPaths = [
@@ -278,10 +273,7 @@ function AppContent() {
                 />
               }
             />
-            <Route
-              path="/strength-instructions"
-              element={<StrengthInstructions />}
-            />
+
             <Route path="/login" element={<Login onLogin={handleLogin} />} />
             <Route
               path="/history"
