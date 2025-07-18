@@ -160,17 +160,21 @@ function UserInfo({ testData, onLogout, clearTestData }) {
       adjustedX = x; // 保持原始x位置
       adjustedY = y - distance * 0.12; // 使用距離的12%作為向上偏移
     } else if (payload.value === '爆發力') {
-      // 爆發力標籤特殊處理：減少偏移，讓標籤更靠近雷達圖
-      adjustedX = x + Math.cos(angle) * (distance * 0.05); // 減少偏移到5%
-      adjustedY = y + Math.sin(angle) * (distance * 0.08);
+      // 爆發力標籤微調：稍微往左、往上移動
+      adjustedX = x + Math.cos(angle) * (distance * 0.03); // 減少到3%
+      adjustedY = y + Math.sin(angle) * (distance * 0.06); // 減少到6%
     } else if (payload.value === 'FFMI') {
-      // FFMI標籤特殊處理：調整到與爆發力相同高度
-      adjustedX = x + Math.cos(angle) * (distance * 0.15); // 保持向左偏移
-      adjustedY = y + Math.sin(angle) * (distance * 0.08); // 調整到與爆發力相同高度
-    } else if (payload.value === '心肺耐力' || payload.value === '骨骼肌肉量') {
-      // 心肺耐力和骨骼肌肉量：調整到相同高度
-      adjustedX = x + Math.cos(angle) * (distance * 0.08); // 減少偏移
-      adjustedY = y + Math.sin(angle) * (distance * 0.08); // 調整到與爆發力相同高度
+      // FFMI標籤微調：遠離雷達圖
+      adjustedX = x + Math.cos(angle) * (distance * -0.2); // 減少到-20%
+      adjustedY = y + Math.sin(angle) * (distance * 0.06); // 保持6%
+    } else if (payload.value === '心肺耐力') {
+      // 心肺耐力標籤：保持不變
+      adjustedX = x + Math.cos(angle) * (distance * 0.01); // 保持1%
+      adjustedY = y + Math.sin(angle) * (distance * 0.06); // 保持6%
+    } else if (payload.value === '骨骼肌肉量') {
+      // 骨骼肌肉量標籤：遠離雷達圖
+      adjustedX = x + Math.cos(angle) * (distance * -0.05); // 調整到-5%
+      adjustedY = y + Math.sin(angle) * (distance * 0.06); // 保持6%
     } else {
       // 其他標籤增加小幅偏移，避免重疊雷達圖
       adjustedX = x + Math.cos(angle) * (distance * 0.1); // 使用距離的10%作為偏移
