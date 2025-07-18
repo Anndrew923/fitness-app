@@ -61,7 +61,6 @@ function History() {
               <span className="legend-item score-good">60-79 良好</span>
               <span className="legend-item score-fair">40-59 一般</span>
               <span className="legend-item score-poor">1-39 待加強</span>
-              <span className="legend-item score-none">0 未測</span>
             </div>
           </div>
 

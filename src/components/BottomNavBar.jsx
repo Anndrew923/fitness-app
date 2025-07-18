@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { auth } from '../firebase';
 import GuestModal from './GuestModal';
 
 const navItems = [
@@ -117,7 +118,16 @@ const navItems = [
 ];
 
 function isGuestMode() {
-  return sessionStorage.getItem('guestMode') === 'true';
+  // 檢查是否為訪客模式，但也要檢查是否有登入用戶
+  const guestMode = sessionStorage.getItem('guestMode') === 'true';
+  const hasAuthUser = auth.currentUser;
+
+  // 如果有登入用戶，就不是訪客模式
+  if (hasAuthUser) {
+    return false;
+  }
+
+  return guestMode;
 }
 
 function BottomNavBar() {

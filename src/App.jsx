@@ -131,7 +131,8 @@ function AppContent() {
   const ProtectedRoute = ({ element }) => {
     const { userData } = useUser();
     const currentPath = window.location.pathname;
-    const isGuest = sessionStorage.getItem('guestMode') === 'true';
+    const isGuest =
+      sessionStorage.getItem('guestMode') === 'true' && !auth.currentUser;
 
     // 先檢查訪客模式，如果符合，直接允許進入
     const guestAllowedPaths = [

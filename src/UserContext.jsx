@@ -97,9 +97,13 @@ export function UserProvider({ children }) {
           weight: Number(firebaseData.weight) || 0,
           age: Number(firebaseData.age) || 0,
           // 確保年齡段被正確計算
-          ageGroup: firebaseData.age ? getAgeGroup(Number(firebaseData.age)) : (firebaseData.ageGroup || ''),
+          ageGroup: firebaseData.age
+            ? getAgeGroup(Number(firebaseData.age))
+            : firebaseData.ageGroup || '',
           // 確保天梯分數被正確計算
-          ladderScore: firebaseData.scores ? calculateLadderScore(firebaseData.scores) : (firebaseData.ladderScore || 0),
+          ladderScore: firebaseData.scores
+            ? calculateLadderScore(firebaseData.scores)
+            : firebaseData.ladderScore || 0,
         };
 
         if (isMountedRef.current) {
@@ -162,9 +166,13 @@ export function UserProvider({ children }) {
         weight: Number(data.weight) || 0,
         age: Number(data.age) || 0,
         // 確保年齡段被計算和保存
-        ageGroup: data.age ? getAgeGroup(Number(data.age)) : (data.ageGroup || ''),
+        ageGroup: data.age
+          ? getAgeGroup(Number(data.age))
+          : data.ageGroup || '',
         // 確保天梯分數被計算和保存
-        ladderScore: data.scores ? calculateLadderScore(data.scores) : (data.ladderScore || 0),
+        ladderScore: data.scores
+          ? calculateLadderScore(data.scores)
+          : data.ladderScore || 0,
       };
 
       await setDoc(userRef, dataToSave, { merge: true });
@@ -260,9 +268,14 @@ export function UserProvider({ children }) {
         await updateDoc(userRef, {
           history: arrayUnion(recordWithMetadata),
         });
-        
+
         // 記錄寫入操作
-        firebaseWriteMonitor.logWrite('updateDoc', 'users', auth.currentUser.uid, { history: 'arrayUnion' });
+        firebaseWriteMonitor.logWrite(
+          'updateDoc',
+          'users',
+          auth.currentUser.uid,
+          { history: 'arrayUnion' }
+        );
 
         // 更新本地 state
         const newHistory = [...(userData.history || []), recordWithMetadata];
@@ -301,6 +314,8 @@ export function UserProvider({ children }) {
       if (user) {
         console.log('認證狀態變更 - 用戶已登入:', user.email);
         setIsAuthenticated(true);
+        // 清除訪客模式標記
+        sessionStorage.removeItem('guestMode');
         await loadUserData(user);
       } else {
         console.log('認證狀態變更 - 用戶未登入');
