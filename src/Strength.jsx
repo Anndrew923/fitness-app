@@ -616,25 +616,25 @@ function Strength({ onComplete, clearTestData }) {
                   <RadarChart data={radarData}>
                     <PolarGrid
                       gridType="polygon"
-                      stroke="rgba(129, 216, 208, 0.15)"
-                      strokeWidth={1.5}
+                      stroke="rgba(129, 216, 208, 0.25)"
+                      strokeWidth={2}
                       strokeDasharray="4 4"
                     />
                     <PolarAngleAxis
                       dataKey="name"
                       tick={{
-                        fontSize: 12,
-                        fill: 'rgba(129, 216, 208, 0.8)',
-                        fontWeight: 600,
+                        fontSize: 13,
+                        fill: '#2d3748',
+                        fontWeight: 700,
                       }}
                     />
                     <PolarRadiusAxis
                       angle={90}
                       domain={[0, 100]}
                       tick={{
-                        fontSize: 11,
-                        fill: 'rgba(129, 216, 208, 0.7)',
-                        fontWeight: 500,
+                        fontSize: 12,
+                        fill: '#2d3748',
+                        fontWeight: 600,
                       }}
                     />
                     <Radar

@@ -62,8 +62,29 @@ function SimpleUserInfo({ testData, onLogout, clearTestData }) {
   // 自定義軸標籤組件
   const CustomAxisTick = ({ payload, x, y, textAnchor }) => {
     const data = radarChartData.find(item => item.name === payload.value);
+
+    // 計算調整後的位置
+    let adjustedX = x;
+    let adjustedY = y;
+
+    // 力量標籤特殊處理：移到正上方
+    if (payload.value === '力量') {
+      adjustedX = 0; // 居中
+      adjustedY = y - 30; // 減少向上移動距離，避免跑出畫面
+    } else if (payload.value === '爆發力') {
+      // 爆發力標籤特殊處理：稍微左移避免被切掉
+      const angle = Math.atan2(y, x);
+      adjustedX = x + Math.cos(angle) * 20; // 減少偏移距離
+      adjustedY = y + Math.sin(angle) * 25;
+    } else {
+      // 其他標籤增加小幅偏移，避免重疊雷達圖
+      const angle = Math.atan2(y, x);
+      adjustedX = x + Math.cos(angle) * 25;
+      adjustedY = y + Math.sin(angle) * 25;
+    }
+
     return (
-      <g transform={`translate(${x},${y})`}>
+      <g transform={`translate(${adjustedX},${adjustedY})`}>
         {/* 圖標背景圓圈 - 更精緻的設計 */}
         <defs>
           <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
@@ -101,11 +122,11 @@ function SimpleUserInfo({ testData, onLogout, clearTestData }) {
           stroke="rgba(129, 216, 208, 0.2)"
           strokeWidth={1}
         />
-        {/* 圖標 */}
+        {/* 圖標 - 垂直排列上方 */}
         <text
           x={0}
-          y={0}
-          textAnchor={textAnchor}
+          y={-8}
+          textAnchor="middle"
           fill="#4a5568"
           fontSize="16"
           fontWeight="600"
@@ -114,16 +135,16 @@ function SimpleUserInfo({ testData, onLogout, clearTestData }) {
         >
           {data?.icon}
         </text>
-        {/* 標籤文字 */}
+        {/* 標籤文字 - 垂直排列下方 */}
         <text
           x={0}
-          y={10}
-          textAnchor={textAnchor}
-          fill="rgba(129, 216, 208, 0.8)"
-          fontSize="12"
-          fontWeight="600"
+          y={12}
+          textAnchor="middle"
+          fill="#2d3748"
+          fontSize="13"
+          fontWeight="700"
           dominantBaseline="middle"
-          filter="drop-shadow(0 1px 2px rgba(255, 255, 255, 0.8))"
+          filter="drop-shadow(0 1px 3px rgba(255, 255, 255, 0.9))"
         >
           {payload.value}
         </text>
@@ -383,7 +404,7 @@ function SimpleUserInfo({ testData, onLogout, clearTestData }) {
         <div
           style={{
             width: '100%',
-            height: '300px',
+            height: '350px',
             padding: '25px',
             background:
               'linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(248, 250, 252, 0.9) 100%)',
@@ -448,8 +469,8 @@ function SimpleUserInfo({ testData, onLogout, clearTestData }) {
             <RadarChart data={radarChartData}>
               <PolarGrid
                 gridType="polygon"
-                stroke="rgba(129, 216, 208, 0.15)"
-                strokeWidth={1.5}
+                stroke="rgba(129, 216, 208, 0.25)"
+                strokeWidth={2}
                 strokeDasharray="4 4"
               />
               <PolarAngleAxis
@@ -462,9 +483,9 @@ function SimpleUserInfo({ testData, onLogout, clearTestData }) {
                 domain={[0, 100]}
                 tickCount={5}
                 tick={{
-                  fontSize: 11,
-                  fill: 'rgba(129, 216, 208, 0.7)',
-                  fontWeight: 500,
+                  fontSize: 12,
+                  fill: '#2d3748',
+                  fontWeight: 600,
                 }}
                 axisLine={false}
               />
