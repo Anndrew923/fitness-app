@@ -24,19 +24,17 @@
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
-.user-info-summary {
-  display: flex;
-  justify-content: center;
-  gap: 1rem;
-  flex-wrap: wrap;
-  font-size: 0.9rem;
-  opacity: 0.9;
-}
-
-.user-info-summary span {
-  background: rgba(255, 255, 255, 0.2);
-  padding: 0.25rem 0.75rem;
-  border-radius: 20px;
+.strength-safety-note {
+  text-align: center;
+  color: #6b7280;
+  font-size: 1rem;
+  margin: 0 0 1rem 0;
+  padding: 0.75rem 1rem;
+  background: rgba(129, 216, 208, 0.1);
+  border-radius: 0.75rem;
+  border-left: 4px solid #81d8d0;
+  font-weight: 500;
+  line-height: 1.5;
   backdrop-filter: blur(10px);
 }
 
@@ -342,19 +340,95 @@
 
 .radar-chart-card,
 .score-breakdown-card {
-  background: white;
-  border-radius: 16px;
-  padding: 1.5rem;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.95) 0%,
+    rgba(248, 250, 252, 0.95) 100%
+  );
+  border-radius: 20px;
+  padding: 2rem;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08),
+    0 8px 16px rgba(129, 216, 208, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(15px);
+  border: 1px solid rgba(129, 216, 208, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.radar-chart-card::before,
+.score-breakdown-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #81d8d0 0%, #5f9ea0 100%);
+  border-radius: 20px 20px 0 0;
+}
+
+/* 添加角落裝飾 */
+.radar-chart-card .corner-decoration,
+.score-breakdown-card .corner-decoration {
+  position: absolute;
+  width: 15px;
+  height: 15px;
+  border: 2px solid rgba(129, 216, 208, 0.3);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.radar-chart-card .corner-decoration.top-left,
+.score-breakdown-card .corner-decoration.top-left {
+  top: 10px;
+  left: 10px;
+  animation: cornerPulse 3s ease-in-out infinite;
+}
+
+.radar-chart-card .corner-decoration.top-right,
+.score-breakdown-card .corner-decoration.top-right {
+  top: 10px;
+  right: 10px;
+  animation: cornerPulse 3s ease-in-out infinite 0.5s;
+}
+
+.radar-chart-card .corner-decoration.bottom-left,
+.score-breakdown-card .corner-decoration.bottom-left {
+  bottom: 10px;
+  left: 10px;
+  animation: cornerPulse 3s ease-in-out infinite 1s;
+}
+
+.radar-chart-card .corner-decoration.bottom-right,
+.score-breakdown-card .corner-decoration.bottom-right {
+  bottom: 10px;
+  right: 10px;
+  animation: cornerPulse 3s ease-in-out infinite 1.5s;
+}
+
+@keyframes cornerPulse {
+  0%,
+  100% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(1.2);
+  }
 }
 
 .radar-chart-card h3,
 .score-breakdown-card h3 {
-  margin: 0 0 1rem 0;
+  margin: 0 0 1.5rem 0;
   font-size: 1.25rem;
   font-weight: 700;
-  color: #1f2937;
+  background: linear-gradient(135deg, #81d8d0 0%, #5f9ea0 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
   text-align: center;
+  position: relative;
 }
 
 .score-breakdown {
@@ -366,7 +440,7 @@
 
 .average-score-display {
   padding-top: 1rem;
-  border-top: 2px solid #f3f4f6;
+  border-top: 2px solid rgba(129, 216, 208, 0.2);
   text-align: center;
 }
 
@@ -375,6 +449,7 @@
   font-weight: 700;
   margin: 0 0 0.5rem 0;
   color: #81d8d0;
+  text-shadow: 0 2px 4px rgba(129, 216, 208, 0.2);
 }
 
 .average-comment {
@@ -384,37 +459,31 @@
   line-height: 1.5;
 }
 
-.radar-chart-card,
-.score-breakdown-card {
-  background: white;
-  border-radius: 16px;
-  padding: 1.5rem;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-}
-
-.radar-chart-card h3,
-.score-breakdown-card h3 {
-  margin: 0 0 1rem 0;
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: #1f2937;
-  text-align: center;
-}
-
-.score-breakdown {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
 .score-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.75rem;
-  background: #f9fafb;
-  border-radius: 8px;
+  padding: 1rem;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.8) 0%,
+    rgba(248, 250, 252, 0.8) 100%
+  );
+  border-radius: 12px;
   border-left: 4px solid #81d8d0;
+  box-shadow: 0 2px 8px rgba(129, 216, 208, 0.1);
+  transition: all 0.3s ease;
+  border: 1px solid rgba(129, 216, 208, 0.1);
+}
+
+.score-item:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(129, 216, 208, 0.2);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.9) 0%,
+    rgba(248, 250, 252, 0.9) 100%
+  );
 }
 
 .score-label {
@@ -424,8 +493,13 @@
 
 .score-value {
   font-weight: 700;
-  color: #dc2626;
-  font-size: 1.1rem;
+  color: #81d8d0;
+  font-size: 1.2rem;
+  text-shadow: 0 1px 2px rgba(129, 216, 208, 0.2);
+  background: linear-gradient(135deg, #81d8d0 0%, #5f9ea0 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 /* 評測標準分頁 */
@@ -612,13 +686,10 @@
     font-size: 1.5rem;
   }
 
-  .user-info-summary {
-    gap: 0.5rem;
-    font-size: 0.8rem;
-  }
-
-  .user-info-summary span {
-    padding: 0.2rem 0.5rem;
+  .strength-safety-note {
+    font-size: 0.9rem;
+    padding: 0.6rem 0.8rem;
+    margin: 0 0 0.8rem 0;
   }
 
   .tab-navigation {
@@ -668,10 +739,10 @@
     font-size: 1.25rem;
   }
 
-  .user-info-summary {
-    flex-direction: column;
-    align-items: center;
-    gap: 0.25rem;
+  .strength-safety-note {
+    font-size: 0.85rem;
+    padding: 0.5rem 0.7rem;
+    margin: 0 0 0.6rem 0;
   }
 
   .tab-navigation {

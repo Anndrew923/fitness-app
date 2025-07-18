@@ -19,6 +19,7 @@ import {
   validateNickname,
   generateNickname,
 } from './utils';
+
 import './userinfo.css';
 
 const DEFAULT_SCORES = {
@@ -112,29 +113,106 @@ function UserInfo({ testData, onLogout, clearTestData }) {
       {
         name: '力量',
         value: scores.strength ? Number(scores.strength).toFixed(1) * 1 : 0,
+        icon: '💪',
       },
       {
         name: '爆發力',
         value: scores.explosivePower
           ? Number(scores.explosivePower).toFixed(1) * 1
           : 0,
+        icon: '⚡',
       },
       {
         name: '心肺耐力',
         value: scores.cardio ? Number(scores.cardio).toFixed(1) * 1 : 0,
+        icon: '❤️',
       },
       {
         name: '骨骼肌肉量',
         value: scores.muscleMass ? Number(scores.muscleMass).toFixed(1) * 1 : 0,
+        icon: '🥩',
       },
       {
         name: 'FFMI',
         value: scores.bodyFat ? Number(scores.bodyFat).toFixed(1) * 1 : 0,
+        icon: '📊',
       },
     ];
   }, [userData.scores]);
 
   const isGuest = sessionStorage.getItem('guestMode') === 'true';
+
+  // 自定義軸標籤組件
+  const CustomAxisTick = ({ payload, x, y, textAnchor }) => {
+    const data = radarChartData.find(item => item.name === payload.value);
+    return (
+      <g transform={`translate(${x},${y})`}>
+        {/* 圖標背景圓圈 - 更精緻的設計 */}
+        <defs>
+          <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur stdDeviation="3" result="coloredBlur" />
+            <feMerge>
+              <feMergeNode in="coloredBlur" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
+        </defs>
+        {/* 外圈光暈 */}
+        <circle
+          cx={0}
+          cy={-15}
+          r={16}
+          fill="rgba(129, 216, 208, 0.1)"
+          filter="url(#glow)"
+        />
+        {/* 主圓圈 */}
+        <circle
+          cx={0}
+          cy={-15}
+          r={14}
+          fill="rgba(255, 255, 255, 0.95)"
+          stroke="rgba(129, 216, 208, 0.4)"
+          strokeWidth={2}
+          filter="drop-shadow(0 2px 4px rgba(129, 216, 208, 0.2))"
+        />
+        {/* 內圈裝飾 */}
+        <circle
+          cx={0}
+          cy={-15}
+          r={10}
+          fill="rgba(129, 216, 208, 0.05)"
+          stroke="rgba(129, 216, 208, 0.2)"
+          strokeWidth={1}
+        />
+        {/* 圖標 */}
+        <text
+          x={0}
+          y={-10}
+          textAnchor={textAnchor}
+          fill="#4a5568"
+          fontSize="16"
+          fontWeight="600"
+          dominantBaseline="middle"
+          filter="drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1))"
+        >
+          {data?.icon}
+        </text>
+        {/* 標籤文字 */}
+        <text
+          x={0}
+          y={10}
+          textAnchor={textAnchor}
+          fill="rgba(129, 216, 208, 0.8)"
+          fontSize="12"
+          fontWeight="600"
+          dominantBaseline="middle"
+          filter="drop-shadow(0 1px 2px rgba(255, 255, 255, 0.8))"
+        >
+          {payload.value}
+        </text>
+      </g>
+    );
+  };
   // 監聽認證狀態
   useEffect(() => {
     if (!auth) {
@@ -406,57 +484,6 @@ function UserInfo({ testData, onLogout, clearTestData }) {
     onLogout();
     navigate('/login');
   }, [onLogout, navigate]);
-
-  const scoreSlogan = useMemo(() => {
-    const slogansMale = [
-      '初試啼聲，繼續努力！',
-      '點燃鬥志，挑戰極限！',
-      '熱血啟動，突破自我！',
-      '戰意初現，堅持到底！',
-      '燃燒吧，展現潛能！',
-      '鬥志昂揚，勇往直前！',
-      '熱血沸騰，超越極限！',
-      '戰力提升，無所畏懼！',
-      '全力以赴，挑戰巔峰！',
-      '強者之路，勢不可擋！',
-      '戰神覺醒，霸氣外露！',
-      '無畏挑戰，征服一切！',
-      '熱血戰士，無人能敵！',
-      '王者之路，勢如破竹！',
-      '戰力爆發，震撼全場！',
-      '不敗之姿，傲視群雄！',
-      '熱血傳奇，無可匹敵！',
-      '戰神降臨，統治全場！',
-      '極限突破，創造奇蹟！',
-      '傳說誕生，永不言敗！',
-    ];
-    const slogansFemale = [
-      '初次嘗試，慢慢來哦！',
-      '小有進步，繼續加油！',
-      '你很努力，保持下去！',
-      '進步中，真的不錯！',
-      '展現潛力，你很棒！',
-      '越來越好，繼續努力！',
-      '表現出色，值得讚賞！',
-      '很棒的進步，加油哦！',
-      '你很厲害，繼續保持！',
-      '表現穩定，超棒的！',
-      '越來越強，你真棒！',
-      '很棒的表現，繼續加油！',
-      '你很出色，令人佩服！',
-      '表現優異，超級棒！',
-      '你很強大，繼續閃耀！',
-      '表現完美，真的很棒！',
-      '你太厲害了，超級棒！',
-      '完美表現，令人驚艷！',
-      '你是最棒的，繼續保持！',
-      '完美無瑕，閃耀全場！',
-    ];
-    const index = Math.min(Math.floor(Number(averageScore) / 5), 19);
-    const slogan =
-      userData?.gender === 'male' ? slogansMale[index] : slogansFemale[index];
-    return slogan;
-  }, [averageScore, userData?.gender]);
 
   // 處理輸入變更
   const handleInputChange = useCallback(
@@ -747,6 +774,12 @@ function UserInfo({ testData, onLogout, clearTestData }) {
       {/* 雷達圖區域 */}
       <div id="radar-section" className="radar-section" ref={radarSectionRef}>
         <div className="radar-card">
+          {/* 裝飾性角落元素 */}
+          <div className="corner-decoration top-left"></div>
+          <div className="corner-decoration top-right"></div>
+          <div className="corner-decoration bottom-left"></div>
+          <div className="corner-decoration bottom-right"></div>
+
           <h2 className="radar-title">表現總覽</h2>
           {loading ? (
             <div className="loading-container">
@@ -757,17 +790,59 @@ function UserInfo({ testData, onLogout, clearTestData }) {
             <div className="radar-chart-container">
               <ResponsiveContainer width="100%" height={400}>
                 <RadarChart data={radarChartData}>
-                  <PolarGrid gridType="polygon" />
-                  <PolarAngleAxis dataKey="name" tick={{ fontSize: 14 }} />
-                  <PolarRadiusAxis angle={90} domain={[0, 100]} tickCount={5} />
+                  <PolarGrid
+                    gridType="polygon"
+                    stroke="rgba(129, 216, 208, 0.15)"
+                    strokeWidth={1.5}
+                    strokeDasharray="4 4"
+                  />
+                  <PolarAngleAxis
+                    dataKey="name"
+                    tick={<CustomAxisTick />}
+                    axisLine={false}
+                  />
+                  <PolarRadiusAxis
+                    angle={90}
+                    domain={[0, 100]}
+                    tickCount={5}
+                    tick={{
+                      fontSize: 11,
+                      fill: 'rgba(129, 216, 208, 0.7)',
+                      fontWeight: 500,
+                    }}
+                    axisLine={false}
+                  />
                   <Radar
                     name="您的表現"
                     dataKey="value"
-                    stroke="#22CAEC"
-                    fill="#22CAEC"
-                    fillOpacity={0.4}
-                    strokeWidth={2}
+                    stroke="#81D8D0"
+                    fill="url(#tiffanyGradient)"
+                    fillOpacity={0.8}
+                    strokeWidth={4}
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
                   />
+                  <defs>
+                    <linearGradient
+                      id="tiffanyGradient"
+                      x1="0%"
+                      y1="0%"
+                      x2="100%"
+                      y2="100%"
+                    >
+                      <stop offset="0%" stopColor="#81D8D0" stopOpacity={0.9} />
+                      <stop
+                        offset="50%"
+                        stopColor="#5F9EA0"
+                        stopOpacity={0.7}
+                      />
+                      <stop
+                        offset="100%"
+                        stopColor="#81D8D0"
+                        stopOpacity={0.6}
+                      />
+                    </linearGradient>
+                  </defs>
                 </RadarChart>
               </ResponsiveContainer>
             </div>
@@ -779,7 +854,6 @@ function UserInfo({ testData, onLogout, clearTestData }) {
               <p className="average-score">
                 平均分數: <span className="score-value">{averageScore}</span>
               </p>
-              <p className="score-slogan">{scoreSlogan}</p>
             </div>
           )}
         </div>
@@ -807,14 +881,14 @@ function UserInfo({ testData, onLogout, clearTestData }) {
             onClick={() => handleNavigation('/cardio')}
             className="test-btn cardio-btn"
           >
-            <span className="test-icon">🏃</span>
+            <span className="test-icon">❤️</span>
             <span className="test-label">心肺耐力測試</span>
           </button>
           <button
             onClick={() => handleNavigation('/muscle-mass')}
             className="test-btn muscle-btn"
           >
-            <span className="test-icon">🏋️</span>
+            <span className="test-icon">🥩</span>
             <span className="test-label">骨骼肌肉量</span>
           </button>
           <button

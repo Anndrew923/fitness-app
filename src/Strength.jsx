@@ -11,6 +11,7 @@ import {
 } from 'recharts';
 import * as standards from './standards';
 import PropTypes from 'prop-types';
+
 import './Strength.css';
 
 function Strength({ onComplete, clearTestData }) {
@@ -24,32 +25,32 @@ function Strength({ onComplete, clearTestData }) {
   const [benchPress, setBenchPress] = useState({
     weight: userData.testInputs?.strength?.benchPress?.weight || '',
     reps: userData.testInputs?.strength?.benchPress?.reps || '',
-    max: null,
-    score: null,
+    max: userData.testInputs?.strength?.benchPress?.max || null,
+    score: userData.testInputs?.strength?.benchPress?.score || null,
   });
   const [squat, setSquat] = useState({
     weight: userData.testInputs?.strength?.squat?.weight || '',
     reps: userData.testInputs?.strength?.squat?.reps || '',
-    max: null,
-    score: null,
+    max: userData.testInputs?.strength?.squat?.max || null,
+    score: userData.testInputs?.strength?.squat?.score || null,
   });
   const [deadlift, setDeadlift] = useState({
     weight: userData.testInputs?.strength?.deadlift?.weight || '',
     reps: userData.testInputs?.strength?.deadlift?.reps || '',
-    max: null,
-    score: null,
+    max: userData.testInputs?.strength?.deadlift?.max || null,
+    score: userData.testInputs?.strength?.deadlift?.score || null,
   });
   const [latPulldown, setLatPulldown] = useState({
     weight: userData.testInputs?.strength?.latPulldown?.weight || '',
     reps: userData.testInputs?.strength?.latPulldown?.reps || '',
-    max: null,
-    score: null,
+    max: userData.testInputs?.strength?.latPulldown?.max || null,
+    score: userData.testInputs?.strength?.latPulldown?.score || null,
   });
   const [shoulderPress, setShoulderPress] = useState({
     weight: userData.testInputs?.strength?.shoulderPress?.weight || '',
     reps: userData.testInputs?.strength?.shoulderPress?.reps || '',
-    max: null,
-    score: null,
+    max: userData.testInputs?.strength?.shoulderPress?.max || null,
+    score: userData.testInputs?.strength?.shoulderPress?.score || null,
   });
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -68,13 +69,35 @@ function Strength({ onComplete, clearTestData }) {
     const updatedTestInputs = {
       ...userData.testInputs,
       strength: {
-        benchPress: { weight: benchPress.weight, reps: benchPress.reps },
-        squat: { weight: squat.weight, reps: squat.reps },
-        deadlift: { weight: deadlift.weight, reps: deadlift.reps },
-        latPulldown: { weight: latPulldown.weight, reps: latPulldown.reps },
+        benchPress: {
+          weight: benchPress.weight,
+          reps: benchPress.reps,
+          max: benchPress.max,
+          score: benchPress.score,
+        },
+        squat: {
+          weight: squat.weight,
+          reps: squat.reps,
+          max: squat.max,
+          score: squat.score,
+        },
+        deadlift: {
+          weight: deadlift.weight,
+          reps: deadlift.reps,
+          max: deadlift.max,
+          score: deadlift.score,
+        },
+        latPulldown: {
+          weight: latPulldown.weight,
+          reps: latPulldown.reps,
+          max: latPulldown.max,
+          score: latPulldown.score,
+        },
         shoulderPress: {
           weight: shoulderPress.weight,
           reps: shoulderPress.reps,
+          max: shoulderPress.max,
+          score: shoulderPress.score,
         },
       },
     };
@@ -229,11 +252,26 @@ function Strength({ onComplete, clearTestData }) {
 
   const radarData = useMemo(
     () => [
-      { name: '臥推', value: parseFloat(benchPress.score) || 0 },
-      { name: '深蹲', value: parseFloat(squat.score) || 0 },
-      { name: '硬舉', value: parseFloat(deadlift.score) || 0 },
-      { name: '滑輪下拉', value: parseFloat(latPulldown.score) || 0 },
-      { name: '站姿肩推', value: parseFloat(shoulderPress.score) || 0 },
+      {
+        name: '臥推',
+        value: parseFloat(benchPress.score) || 0,
+      },
+      {
+        name: '深蹲',
+        value: parseFloat(squat.score) || 0,
+      },
+      {
+        name: '硬舉',
+        value: parseFloat(deadlift.score) || 0,
+      },
+      {
+        name: '滑輪下拉',
+        value: parseFloat(latPulldown.score) || 0,
+      },
+      {
+        name: '站姿肩推',
+        value: parseFloat(shoulderPress.score) || 0,
+      },
     ],
     [
       benchPress.score,
@@ -379,7 +417,7 @@ function Strength({ onComplete, clearTestData }) {
     {
       key: 'deadlift',
       name: '硬舉',
-    
+
       state: deadlift,
       setState: setDeadlift,
     },
@@ -397,7 +435,7 @@ function Strength({ onComplete, clearTestData }) {
     },
   ];
 
-  // 展開狀態管理
+  // 展開狀態管理 - 所有項目初始都是收著的
   const [expandedExercises, setExpandedExercises] = useState(new Set());
 
   // 渲染運動項目卡片
@@ -491,12 +529,9 @@ function Strength({ onComplete, clearTestData }) {
     <div className="strength-container">
       <div className="strength-header">
         <h1 className="strength-title">💪 力量評測</h1>
-        <div className="user-info-summary">
-          <span>{gender || '未選擇'}</span>
-          <span>{height ? `${height}cm` : '未輸入'}</span>
-          <span>{weight ? `${weight}kg` : '未輸入'}</span>
-          <span>{age || '未輸入'}歲</span>
-        </div>
+        <p className="strength-safety-note">
+          挑戰重量時記得綁上腰帶和手套，注意安全喔
+        </p>
       </div>
 
       {/* 分頁導航 */}
@@ -525,19 +560,73 @@ function Strength({ onComplete, clearTestData }) {
           {averageScore && (
             <div className="results-section">
               <div className="radar-chart-card">
+                {/* 裝飾性角落元素 */}
+                <div className="corner-decoration top-left"></div>
+                <div className="corner-decoration top-right"></div>
+                <div className="corner-decoration bottom-left"></div>
+                <div className="corner-decoration bottom-right"></div>
+
                 <h3>📈 力量分佈圖</h3>
                 <ResponsiveContainer width="100%" height={300}>
                   <RadarChart data={radarData}>
-                    <PolarGrid gridType="polygon" />
-                    <PolarAngleAxis dataKey="name" />
-                    <PolarRadiusAxis angle={90} domain={[0, 100]} />
+                    <PolarGrid
+                      gridType="polygon"
+                      stroke="rgba(129, 216, 208, 0.15)"
+                      strokeWidth={1.5}
+                      strokeDasharray="4 4"
+                    />
+                    <PolarAngleAxis
+                      dataKey="name"
+                      tick={{
+                        fontSize: 12,
+                        fill: 'rgba(129, 216, 208, 0.8)',
+                        fontWeight: 600,
+                      }}
+                    />
+                    <PolarRadiusAxis
+                      angle={90}
+                      domain={[0, 100]}
+                      tick={{
+                        fontSize: 11,
+                        fill: 'rgba(129, 216, 208, 0.7)',
+                        fontWeight: 500,
+                      }}
+                    />
                     <Radar
                       name="分數"
                       dataKey="value"
                       stroke="#81D8D0"
-                      fill="#81D8D0"
-                      fillOpacity={0.6}
+                      fill="url(#strengthTiffanyGradient)"
+                      fillOpacity={0.8}
+                      strokeWidth={4}
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
                     />
+                    <defs>
+                      <linearGradient
+                        id="strengthTiffanyGradient"
+                        x1="0%"
+                        y1="0%"
+                        x2="100%"
+                        y2="100%"
+                      >
+                        <stop
+                          offset="0%"
+                          stopColor="#81D8D0"
+                          stopOpacity={0.9}
+                        />
+                        <stop
+                          offset="50%"
+                          stopColor="#5F9EA0"
+                          stopOpacity={0.7}
+                        />
+                        <stop
+                          offset="100%"
+                          stopColor="#81D8D0"
+                          stopOpacity={0.6}
+                        />
+                      </linearGradient>
+                    </defs>
                   </RadarChart>
                 </ResponsiveContainer>
               </div>
