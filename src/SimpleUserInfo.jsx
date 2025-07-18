@@ -77,7 +77,7 @@ function SimpleUserInfo({ testData, onLogout, clearTestData }) {
         {/* 外圈光暈 */}
         <circle
           cx={0}
-          cy={-15}
+          cy={0}
           r={16}
           fill="rgba(129, 216, 208, 0.1)"
           filter="url(#glow)"
@@ -85,7 +85,7 @@ function SimpleUserInfo({ testData, onLogout, clearTestData }) {
         {/* 主圓圈 */}
         <circle
           cx={0}
-          cy={-15}
+          cy={0}
           r={14}
           fill="rgba(255, 255, 255, 0.95)"
           stroke="rgba(129, 216, 208, 0.4)"
@@ -95,7 +95,7 @@ function SimpleUserInfo({ testData, onLogout, clearTestData }) {
         {/* 內圈裝飾 */}
         <circle
           cx={0}
-          cy={-15}
+          cy={0}
           r={10}
           fill="rgba(129, 216, 208, 0.05)"
           stroke="rgba(129, 216, 208, 0.2)"
@@ -104,7 +104,7 @@ function SimpleUserInfo({ testData, onLogout, clearTestData }) {
         {/* 圖標 */}
         <text
           x={0}
-          y={-10}
+          y={0}
           textAnchor={textAnchor}
           fill="#4a5568"
           fontSize="16"
