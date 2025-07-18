@@ -163,6 +163,14 @@ function UserInfo({ testData, onLogout, clearTestData }) {
       // 爆發力標籤特殊處理：減少偏移，讓標籤更靠近雷達圖
       adjustedX = x + Math.cos(angle) * (distance * 0.05); // 減少偏移到5%
       adjustedY = y + Math.sin(angle) * (distance * 0.08);
+    } else if (payload.value === 'FFMI') {
+      // FFMI標籤特殊處理：調整到與爆發力相同高度
+      adjustedX = x + Math.cos(angle) * (distance * 0.15); // 保持向左偏移
+      adjustedY = y + Math.sin(angle) * (distance * 0.08); // 調整到與爆發力相同高度
+    } else if (payload.value === '心肺耐力' || payload.value === '骨骼肌肉量') {
+      // 心肺耐力和骨骼肌肉量：調整到相同高度
+      adjustedX = x + Math.cos(angle) * (distance * 0.08); // 減少偏移
+      adjustedY = y + Math.sin(angle) * (distance * 0.08); // 調整到與爆發力相同高度
     } else {
       // 其他標籤增加小幅偏移，避免重疊雷達圖
       adjustedX = x + Math.cos(angle) * (distance * 0.1); // 使用距離的10%作為偏移
@@ -199,15 +207,7 @@ function UserInfo({ testData, onLogout, clearTestData }) {
           strokeWidth={2}
           filter="drop-shadow(0 2px 4px rgba(129, 216, 208, 0.2))"
         />
-        {/* 內圈裝飾 */}
-        <circle
-          cx={0}
-          cy={0}
-          r={10}
-          fill="rgba(129, 216, 208, 0.05)"
-          stroke="rgba(129, 216, 208, 0.2)"
-          strokeWidth={1}
-        />
+
         {/* 圖標 - 垂直排列上方 */}
         <text
           x={0}
