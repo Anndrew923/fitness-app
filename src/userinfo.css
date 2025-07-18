@@ -526,6 +526,11 @@
   position: relative;
   border: 1px solid rgba(129, 216, 208, 0.1);
   backdrop-filter: blur(10px);
+  /* 確保容器有足夠的空間容納軸標籤 */
+  min-height: 500px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .radar-chart-container::before {
@@ -577,6 +582,9 @@
 .radar-chart-container .recharts-polar-angle-axis-tick {
   filter: drop-shadow(0 2px 4px rgba(129, 216, 208, 0.2));
   animation: fadeInScale 0.8s ease-out;
+  /* 確保軸標籤在各種設備上都能正確顯示 */
+  transform-origin: center;
+  pointer-events: none;
 }
 
 .radar-chart-container .recharts-polar-grid-angle-line {
@@ -919,6 +927,7 @@
 
   .radar-chart-container {
     padding: 15px;
+    min-height: 400px;
   }
 
   .score-section {

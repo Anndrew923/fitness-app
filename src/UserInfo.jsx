@@ -146,24 +146,27 @@ function UserInfo({ testData, onLogout, clearTestData }) {
   const CustomAxisTick = ({ payload, x, y, textAnchor }) => {
     const data = radarChartData.find(item => item.name === payload.value);
 
-    // 計算調整後的位置
+    // 計算調整後的位置 - 使用相對偏移而不是固定像素值
     let adjustedX = x;
     let adjustedY = y;
 
+    // 計算從中心到當前點的距離，用於相對偏移
+    const distance = Math.sqrt(x * x + y * y);
+    const angle = Math.atan2(y, x);
+
     // 力量標籤特殊處理：移到正上方
     if (payload.value === '力量') {
-      adjustedX = 150; // 居中
-      adjustedY = y - 20; // 調整偏移距離，避免跑出畫面
+      // 使用相對位置，保持在正上方
+      adjustedX = x; // 保持原始x位置
+      adjustedY = y - distance * 0.12; // 使用距離的12%作為向上偏移
     } else if (payload.value === '爆發力') {
-      // 爆發力標籤特殊處理：稍微左移避免被切掉
-      const angle = Math.atan2(y, x);
-      adjustedX = x + Math.cos(angle) * 15; // 減少偏移距離
-      adjustedY = y + Math.sin(angle) * 25;
+      // 爆發力標籤特殊處理：減少偏移，讓標籤更靠近雷達圖
+      adjustedX = x + Math.cos(angle) * (distance * 0.05); // 減少偏移到5%
+      adjustedY = y + Math.sin(angle) * (distance * 0.08);
     } else {
       // 其他標籤增加小幅偏移，避免重疊雷達圖
-      const angle = Math.atan2(y, x);
-      adjustedX = x + Math.cos(angle) * 25;
-      adjustedY = y + Math.sin(angle) * 25;
+      adjustedX = x + Math.cos(angle) * (distance * 0.1); // 使用距離的10%作為偏移
+      adjustedY = y + Math.sin(angle) * (distance * 0.1);
     }
 
     return (
@@ -887,7 +890,7 @@ function UserInfo({ testData, onLogout, clearTestData }) {
             </div>
           ) : (
             <div className="radar-chart-container">
-              <ResponsiveContainer width="100%" height={450}>
+              <ResponsiveContainer width="100%" height={400}>
                 <RadarChart data={radarChartData}>
                   <PolarGrid
                     gridType="polygon"
