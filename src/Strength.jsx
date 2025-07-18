@@ -218,6 +218,40 @@ function Strength({ onComplete, clearTestData }) {
     [standardMap, userData.weight, age]
   );
 
+  // 自動計算已有數據的分數（在 calculateMaxStrength 定義之後）
+  useEffect(() => {
+    if (gender && userData.weight && age) {
+      const exercisesToCalculate = [
+        { key: 'benchPress', state: benchPress, setState: setBenchPress },
+        { key: 'squat', state: squat, setState: setSquat },
+        { key: 'deadlift', state: deadlift, setState: setDeadlift },
+        { key: 'latPulldown', state: latPulldown, setState: setLatPulldown },
+        {
+          key: 'shoulderPress',
+          state: shoulderPress,
+          setState: setShoulderPress,
+        },
+      ];
+
+      exercisesToCalculate.forEach(({ key, state, setState }) => {
+        // 如果有重量和次數但沒有分數，則自動計算
+        if (state.weight && state.reps && !state.score) {
+          calculateMaxStrength(state.weight, state.reps, setState, key);
+        }
+      });
+    }
+  }, [
+    gender,
+    userData.weight,
+    age,
+    benchPress,
+    squat,
+    deadlift,
+    latPulldown,
+    shoulderPress,
+    calculateMaxStrength,
+  ]);
+
   const getAverageScoreComment = (score, gender) => {
     const genderValue =
       gender === '男性' || gender.toLowerCase() === 'male' ? 'male' : 'female';
