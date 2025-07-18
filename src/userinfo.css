@@ -964,3 +964,49 @@
 .test-btn:nth-child(5) {
   animation-delay: 0.5s;
 }
+
+/* 訓練背景區域樣式 */
+.training-info-section {
+  margin-top: 24px;
+  padding: 20px;
+  background: linear-gradient(
+    135deg,
+    rgba(129, 216, 208, 0.05) 0%,
+    rgba(95, 158, 160, 0.05) 100%
+  );
+  border-radius: 12px;
+  border: 1px solid rgba(129, 216, 208, 0.1);
+}
+
+.training-info-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #2d3748;
+  margin: 0 0 8px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.training-info-desc {
+  font-size: 14px;
+  color: #718096;
+  margin: 0 0 20px 0;
+  line-height: 1.5;
+}
+
+/* 響應式設計 */
+@media (max-width: 768px) {
+  .training-info-section {
+    padding: 16px;
+    margin-top: 20px;
+  }
+
+  .training-info-title {
+    font-size: 16px;
+  }
+
+  .training-info-desc {
+    font-size: 13px;
+  }
+}

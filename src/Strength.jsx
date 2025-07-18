@@ -57,12 +57,23 @@ function Strength({ onComplete, clearTestData }) {
   const debouncedSetUserData = useCallback(
     newUserData => {
       let timeoutId;
-      const updateData = () => setUserData(newUserData);
+      const updateData = () => {
+        // 只在測試輸入有實質變化時才更新
+        const currentTestInputs = userData.testInputs?.strength || {};
+        const newTestInputs = newUserData.testInputs?.strength || {};
+
+        const hasChanges =
+          JSON.stringify(currentTestInputs) !== JSON.stringify(newTestInputs);
+
+        if (hasChanges) {
+          setUserData(newUserData);
+        }
+      };
       clearTimeout(timeoutId);
-      timeoutId = setTimeout(updateData, 1000);
+      timeoutId = setTimeout(updateData, 2000); // 增加到2秒防抖
       return () => clearTimeout(timeoutId);
     },
-    [setUserData]
+    [setUserData, userData.testInputs]
   );
 
   useEffect(() => {

@@ -598,6 +598,180 @@
   box-shadow: none;
 }
 
+/* 挑戰留言板樣式 */
+.challenge-board {
+  padding: 20px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin: 20px;
+}
+
+.challenge-board h4 {
+  margin: 0 0 20px 0;
+  color: #333;
+  font-size: 20px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.challenge-types {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 20px;
+  justify-content: center;
+}
+
+.challenge-type-btn {
+  background: #f8f9fa;
+  border: 2px solid #e9ecef;
+  border-radius: 8px;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.challenge-type-btn:hover {
+  background: #e9ecef;
+  border-color: #81d8d0;
+}
+
+.challenge-type-btn.active {
+  background: linear-gradient(135deg, #81d8d0 0%, #5f9ea0 100%);
+  color: white;
+  border-color: #81d8d0;
+  box-shadow: 0 2px 8px rgba(129, 216, 208, 0.3);
+}
+
+.challenge-input-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.challenge-input-container textarea {
+  border: 2px solid #e9ecef;
+  border-radius: 8px;
+  padding: 12px;
+  font-size: 14px;
+  outline: none;
+  min-height: 80px;
+  resize: vertical;
+  box-sizing: border-box;
+  transition: border-color 0.3s ease;
+}
+
+.challenge-input-container textarea:focus {
+  border-color: #81d8d0;
+  box-shadow: 0 0 0 3px rgba(129, 216, 208, 0.1);
+}
+
+.challenge-input-container button {
+  align-self: flex-end;
+  background: linear-gradient(135deg, #81d8d0 0%, #5f9ea0 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 16px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+.challenge-input-container button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(129, 216, 208, 0.3);
+}
+
+.challenge-input-container button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.challenge-list {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.challenge-item {
+  background: #f8f9fa;
+  border-radius: 10px;
+  padding: 15px;
+  margin-bottom: 10px;
+  border: 1px solid #e0e0e0;
+  transition: all 0.3s ease;
+}
+
+.challenge-item:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transform: translateY(-1px);
+}
+
+.challenge-item .challenge-content {
+  font-size: 14px;
+  color: #333;
+  margin-bottom: 10px;
+  padding: 8px;
+  background: white;
+  border-radius: 6px;
+  border: 1px solid #e9ecef;
+}
+
+.challenge-item .challenge-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  color: #999;
+  margin-bottom: 10px;
+}
+
+.challenge-item .challenge-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.challenge-item .challenge-actions button {
+  border: none;
+  border-radius: 6px;
+  padding: 6px 12px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+.challenge-item .challenge-actions button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.challenge-item .btn-accept {
+  background: #66bb6a;
+  color: white;
+}
+
+.challenge-item .btn-decline {
+  background: #ef5350;
+  color: white;
+}
+
+.challenge-item .btn-complete {
+  background: #42a5f5;
+  color: white;
+}
+
 /* 響應式設計 */
 @media (max-width: 768px) {
   .friends-page {
@@ -697,6 +871,29 @@
   .message-input-container {
     bottom: 64px !important; /* 手機版直接放在廣告欄位上方 */
     z-index: 1002 !important; /* 確保在手機版廣告欄位之上 */
+  }
+
+  .challenge-board {
+    margin: 10px;
+    padding: 15px;
+  }
+
+  .challenge-types {
+    flex-direction: column;
+  }
+
+  .challenge-type-btn {
+    justify-content: center;
+  }
+
+  .challenge-item .challenge-meta {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+  }
+
+  .challenge-item .challenge-actions {
+    justify-content: center;
   }
 }
 

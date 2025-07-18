@@ -11,6 +11,7 @@ import { doc, getDoc, setDoc, updateDoc, arrayUnion } from 'firebase/firestore';
 import { db, auth } from './firebase';
 import PropTypes from 'prop-types';
 import { calculateLadderScore, getAgeGroup } from './utils';
+import firebaseWriteMonitor from './utils/firebaseMonitor';
 
 const UserContext = createContext();
 
@@ -95,6 +96,10 @@ export function UserProvider({ children }) {
           height: Number(firebaseData.height) || 0,
           weight: Number(firebaseData.weight) || 0,
           age: Number(firebaseData.age) || 0,
+          // 確保年齡段被正確計算
+          ageGroup: firebaseData.age ? getAgeGroup(Number(firebaseData.age)) : (firebaseData.ageGroup || ''),
+          // 確保天梯分數被正確計算
+          ladderScore: firebaseData.scores ? calculateLadderScore(firebaseData.scores) : (firebaseData.ladderScore || 0),
         };
 
         if (isMountedRef.current) {
@@ -156,10 +161,23 @@ export function UserProvider({ children }) {
         height: Number(data.height) || 0,
         weight: Number(data.weight) || 0,
         age: Number(data.age) || 0,
+        // 確保年齡段被計算和保存
+        ageGroup: data.age ? getAgeGroup(Number(data.age)) : (data.ageGroup || ''),
+        // 確保天梯分數被計算和保存
+        ladderScore: data.scores ? calculateLadderScore(data.scores) : (data.ladderScore || 0),
       };
 
       await setDoc(userRef, dataToSave, { merge: true });
       localStorage.setItem('userData', JSON.stringify(dataToSave));
+
+      // 記錄寫入操作
+      firebaseWriteMonitor.logWrite(
+        'setDoc',
+        'users',
+        auth.currentUser.uid,
+        dataToSave
+      );
+
       return true;
     } catch (error) {
       console.error('保存用戶數據失敗:', error);
@@ -194,9 +212,29 @@ export function UserProvider({ children }) {
       // 立即更新本地狀態
       dispatch({ type: 'UPDATE_USER_DATA', payload: newData });
 
-      // 異步保存到 Firebase（不等待）
+      // 優化：只在重要數據變化時才保存到 Firebase
       if (auth.currentUser) {
-        saveUserData(newData);
+        const importantFields = [
+          'scores',
+          'height',
+          'weight',
+          'age',
+          'gender',
+          'nickname',
+        ];
+        const hasImportantChanges = importantFields.some(
+          field =>
+            JSON.stringify(newData[field]) !== JSON.stringify(userData[field])
+        );
+
+        if (hasImportantChanges) {
+          // 使用防抖，避免頻繁寫入
+          const timeoutId = setTimeout(() => {
+            saveUserData(newData);
+          }, 2000); // 2秒防抖
+
+          return () => clearTimeout(timeoutId);
+        }
       }
     },
     [userData, saveUserData]
@@ -222,6 +260,9 @@ export function UserProvider({ children }) {
         await updateDoc(userRef, {
           history: arrayUnion(recordWithMetadata),
         });
+        
+        // 記錄寫入操作
+        firebaseWriteMonitor.logWrite('updateDoc', 'users', auth.currentUser.uid, { history: 'arrayUnion' });
 
         // 更新本地 state
         const newHistory = [...(userData.history || []), recordWithMetadata];
@@ -274,16 +315,23 @@ export function UserProvider({ children }) {
     };
   }, [loadUserData, clearUserData]);
 
-  // 定期同步數據到 Firebase（每 30 秒）
+  // 定期同步數據到 Firebase（每 5 分鐘，減少寫入頻率）
   useEffect(() => {
     if (!auth.currentUser || !userData || Object.keys(userData).length === 0)
       return;
 
     const syncInterval = setInterval(() => {
       if (auth.currentUser && userData && userData.height) {
-        saveUserData(userData);
+        // 只在數據有實質變化時才保存
+        const lastSaved = localStorage.getItem('lastSavedTimestamp');
+        const now = Date.now();
+        if (!lastSaved || now - parseInt(lastSaved) > 300000) {
+          // 5分鐘
+          saveUserData(userData);
+          localStorage.setItem('lastSavedTimestamp', now.toString());
+        }
       }
-    }, 30000);
+    }, 300000); // 改為5分鐘
 
     return () => clearInterval(syncInterval);
   }, [userData, saveUserData]);

@@ -323,6 +323,7 @@ function UserInfo({ testData, onLogout, clearTestData }) {
         return {
           ...prev,
           scores: updatedScores,
+          lastActive: new Date().toISOString(),
         };
       });
 
@@ -368,6 +369,7 @@ function UserInfo({ testData, onLogout, clearTestData }) {
         age: Number(userData.age) || 0,
         gender: userData.gender,
         scores: userData.scores || DEFAULT_SCORES,
+        lastActive: new Date().toISOString(),
       };
 
       try {
@@ -491,7 +493,18 @@ function UserInfo({ testData, onLogout, clearTestData }) {
       const { name, value } = e.target;
       let processedValue = value;
 
-      if (name !== 'gender') {
+      // 處理不同類型的欄位
+      if (name === 'gender') {
+        // 性別欄位保持字符串
+        processedValue = value;
+      } else if (['profession'].includes(name)) {
+        // 職業欄位保持字符串
+        processedValue = value;
+      } else if (['weeklyTrainingHours', 'trainingYears'].includes(name)) {
+        // 訓練相關數字欄位
+        processedValue = value === '' ? '' : Number(value);
+      } else {
+        // 其他數字欄位
         processedValue = value === '' ? 0 : Number(value);
       }
 
@@ -758,6 +771,71 @@ function UserInfo({ testData, onLogout, clearTestData }) {
                       </span>
                     </div>
                   </label>
+                </div>
+
+                {/* 訓練背景信息（選填） */}
+                <div className="training-info-section">
+                  <h4 className="training-info-title">💪 訓練背景（選填）</h4>
+                  <p className="training-info-desc">
+                    分享您的訓練背景，激勵其他健身愛好者！
+                  </p>
+
+                  <div className="form-row">
+                    <div className="form-group">
+                      <label htmlFor="profession" className="form-label">
+                        職業
+                      </label>
+                      <input
+                        id="profession"
+                        name="profession"
+                        type="text"
+                        value={userData?.profession || ''}
+                        onChange={handleInputChange}
+                        placeholder="例如：工程師、學生、教師..."
+                        className="form-input"
+                        maxLength="30"
+                      />
+                    </div>
+
+                    <div className="form-group">
+                      <label
+                        htmlFor="weeklyTrainingHours"
+                        className="form-label"
+                      >
+                        每周訓練時數
+                      </label>
+                      <input
+                        id="weeklyTrainingHours"
+                        name="weeklyTrainingHours"
+                        type="number"
+                        value={userData?.weeklyTrainingHours || ''}
+                        onChange={handleInputChange}
+                        placeholder="小時"
+                        className="form-input"
+                        min="0"
+                        max="168"
+                        step="0.5"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="form-group">
+                    <label htmlFor="trainingYears" className="form-label">
+                      訓練年資
+                    </label>
+                    <input
+                      id="trainingYears"
+                      name="trainingYears"
+                      type="number"
+                      value={userData?.trainingYears || ''}
+                      onChange={handleInputChange}
+                      placeholder="年"
+                      className="form-input"
+                      min="0"
+                      max="50"
+                      step="0.5"
+                    />
+                  </div>
                 </div>
               </div>
 

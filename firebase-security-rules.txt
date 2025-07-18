@@ -45,5 +45,21 @@ service cloud.firestore {
       // 不允許刪除訊息
       allow delete: if false;
     }
+    
+    // 好友挑戰規則 - 新增挑戰留言板功能
+    match /friendChallenges/{challengeId} {
+      // 任何登入用戶都可以讀取挑戰
+      allow read: if request.auth != null;
+      
+      // 任何登入用戶都可以創建挑戰
+      allow create: if request.auth != null && 
+        request.resource.data.fromUserId == request.auth.uid;
+      
+      // 允許更新挑戰狀態（接受、拒絕、完成等）
+      allow update: if request.auth != null;
+      
+      // 不允許刪除挑戰記錄（保留歷史）
+      allow delete: if false;
+    }
   }
 } 

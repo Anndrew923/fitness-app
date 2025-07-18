@@ -1,10 +1,17 @@
-// 年齡段分類
+// 年齡段分類 - 每十歲一個區間
 export const getAgeGroup = age => {
-  if (age < 18) return 'teen';
-  if (age < 25) return 'young';
-  if (age < 35) return 'adult';
-  if (age < 50) return 'middle';
-  return 'senior';
+  // 處理無效年齡
+  if (age === null || age === undefined || age < 0 || age > 150) {
+    return 'unknown';
+  }
+
+  if (age <= 20) return 'under20';
+  if (age <= 30) return '21to30';
+  if (age <= 40) return '31to40';
+  if (age <= 50) return '41to50';
+  if (age <= 60) return '51to60';
+  if (age <= 70) return '61to70';
+  return 'over70';
 };
 
 // 計算天梯總分

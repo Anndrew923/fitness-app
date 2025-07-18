@@ -13,12 +13,14 @@ import {
   arrayRemove,
   orderBy,
   limit,
+  writeBatch,
 } from 'firebase/firestore';
+import firebaseWriteMonitor from '../utils/firebaseMonitor';
 import './Friends.css';
 
 const Friends = () => {
   const { userData, setUserData, loadUserData } = useUser();
-  const [activeTab, setActiveTab] = useState('friends'); // 'friends', 'requests', 'search', 'messages'
+  const [activeTab, setActiveTab] = useState('friends'); // 'friends', 'requests', 'search', 'challenges'
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -29,13 +31,54 @@ const Friends = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
 
-  // 訊息相關狀態
+  // 挑戰相關狀態
   const [selectedFriend, setSelectedFriend] = useState(null);
-  const [messages, setMessages] = useState([]);
-  const [messageInput, setMessageInput] = useState('');
+  const [challenges, setChallenges] = useState([]);
+  const [challengeInput, setChallengeInput] = useState('');
+  const [selectedChallengeType, setSelectedChallengeType] =
+    useState('strength');
+  const [showChallengeForm, setShowChallengeForm] = useState(false);
 
-  // 表情符號 - 改為5個訓練指標相關符號
-  const stickers = ['💪', '🏃', '⚡', '🏆', '🎯']; // 力量、跑步、爆發力、成就、目標
+  // 挑戰類型定義
+  const challengeTypes = [
+    {
+      id: 'strength',
+      name: '力量挑戰',
+      icon: '💪',
+      description: '深蹲、卧推等重量挑戰',
+      examples: ['深蹲 100kg x 5次', '卧推 80kg x 3次', '硬舉 120kg x 1次'],
+    },
+    {
+      id: 'endurance',
+      name: '耐力挑戰',
+      icon: '🏃',
+      description: '跑步、游泳等耐力挑戰',
+      examples: ['跑步 5km 25分鐘內', '游泳 1000m', '騎車 20km'],
+    },
+    {
+      id: 'power',
+      name: '爆發力挑戰',
+      icon: '⚡',
+      description: '短時間高強度挑戰',
+      examples: ['30秒波比跳 15次', '1分鐘引體向上 10次', '2分鐘平板支撐'],
+    },
+    {
+      id: 'comprehensive',
+      name: '綜合挑戰',
+      icon: '🎯',
+      description: '多項目組合挑戰',
+      examples: ['深蹲 + 跑步 + 引體向上', '卧推 + 游泳 + 平板支撐'],
+    },
+  ];
+
+  // 挑戰狀態
+  const challengeStatus = {
+    pending: { label: '等待回應', color: '#ffa726', icon: '⏳' },
+    accepted: { label: '已接受', color: '#66bb6a', icon: '✅' },
+    declined: { label: '已拒絕', color: '#ef5350', icon: '❌' },
+    completed: { label: '已完成', color: '#42a5f5', icon: '🏆' },
+    expired: { label: '已過期', color: '#9e9e9e', icon: '⏰' },
+  };
 
   // 調試函數：檢查雙方好友關係
   const debugFriendship = async friendId => {
@@ -461,12 +504,15 @@ const Friends = () => {
       }
 
       // 發送邀請
-      await addDoc(collection(db, 'friendInvitations'), {
+      const docRef = await addDoc(collection(db, 'friendInvitations'), {
         fromUserId: auth.currentUser.uid,
         toUserId: toUserId,
         status: 'pending',
         createdAt: new Date().toISOString(),
       });
+
+      // 記錄寫入操作
+      firebaseWriteMonitor.logWrite('addDoc', 'friendInvitations', docRef.id);
 
       setSuccess('好友邀請已發送');
 
@@ -495,15 +541,30 @@ const Friends = () => {
         acceptedAt: new Date().toISOString(),
       });
 
+      // 記錄寫入操作
+      firebaseWriteMonitor.logWrite(
+        'updateDoc',
+        'friendInvitations',
+        requestId
+      );
+
       // 2. 只更新當前用戶的好友列表
       const currentUserRef = doc(db, 'users', auth.currentUser.uid);
       await updateDoc(currentUserRef, {
         friends: arrayUnion(fromUserId),
       });
 
+      // 記錄寫入操作
+      firebaseWriteMonitor.logWrite(
+        'updateDoc',
+        'users',
+        auth.currentUser.uid,
+        { friends: 'arrayUnion' }
+      );
+
       // 3. 創建一個反向邀請，狀態直接設為已接受
       // 這樣對方也會有一個已接受的邀請記錄
-      await addDoc(collection(db, 'friendInvitations'), {
+      const reverseDocRef = await addDoc(collection(db, 'friendInvitations'), {
         fromUserId: auth.currentUser.uid,
         toUserId: fromUserId,
         status: 'accepted',
@@ -511,6 +572,9 @@ const Friends = () => {
         acceptedAt: new Date().toISOString(),
         isReverse: true, // 標記為反向邀請
       });
+      
+      // 記錄寫入操作
+      firebaseWriteMonitor.logWrite('addDoc', 'friendInvitations', reverseDocRef.id);
 
       // 4. 立即更新本地狀態
       setUserData(prev => ({
@@ -605,126 +669,176 @@ const Friends = () => {
     }
   };
 
-  // 發送訊息
-  const sendMessage = async (type = 'text', content = messageInput) => {
-    if (!selectedFriend || (!content.trim() && type === 'text')) return;
+  // 發送挑戰
+  const sendChallenge = async () => {
+    if (!selectedFriend || !challengeInput.trim()) return;
 
-    console.log('準備發送訊息:', {
-      type,
-      content,
+    const selectedType = challengeTypes.find(
+      type => type.id === selectedChallengeType
+    );
+
+    console.log('準備發送挑戰:', {
+      type: selectedChallengeType,
+      challenge: challengeInput,
       from: auth.currentUser.uid,
       to: selectedFriend.id,
       toNickname: selectedFriend.nickname,
     });
 
     try {
-      const messageData = {
+      const challengeData = {
         fromUserId: auth.currentUser.uid,
         toUserId: selectedFriend.id,
-        message: content,
-        type: type,
+        fromUserNickname:
+          userData?.nickname || userData?.email?.split('@')[0] || '匿名用戶',
+        toUserNickname: selectedFriend.nickname,
+        type: selectedType,
+        challenge: challengeInput.trim(),
+        status: 'pending',
         timestamp: new Date().toISOString(),
+        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // 7天後過期
         isRead: false,
       };
 
-      console.log('發送訊息數據:', messageData);
+      console.log('發送挑戰數據:', challengeData);
 
       const docRef = await addDoc(
-        collection(db, 'friendMessages'),
-        messageData
+        collection(db, 'friendChallenges'),
+        challengeData
       );
-      console.log('訊息發送成功，文檔ID:', docRef.id);
+      console.log('挑戰發送成功，文檔ID:', docRef.id);
 
-      if (type === 'text') {
-        setMessageInput('');
-      }
+      setChallengeInput('');
+      setSuccess('挑戰發送成功！');
 
-      // 立即重新載入訊息
-      await loadMessages(selectedFriend.id);
+      // 立即重新載入挑戰
+      await loadChallenges(selectedFriend.id);
     } catch (error) {
-      console.error('發送訊息失敗:', error);
+      console.error('發送挑戰失敗:', error);
       console.error('Error details:', {
         code: error.code,
         message: error.message,
       });
-      setError('發送訊息失敗: ' + error.message);
+      setError('發送挑戰失敗: ' + error.message);
     }
   };
 
-  // 載入訊息
-  const loadMessages = async friendId => {
+  // 載入挑戰
+  const loadChallenges = async friendId => {
     try {
-      console.log('🔄 開始載入訊息，參數:', {
+      console.log('🔄 開始載入挑戰，參數:', {
         friendId,
         currentUser: auth.currentUser?.uid,
       });
 
-      // 分別查詢兩個方向的訊息，避免複合索引需求
-      const sentMessagesQuery = query(
-        collection(db, 'friendMessages'),
-        where('fromUserId', '==', auth.currentUser.uid),
-        where('toUserId', '==', friendId)
-      );
-
-      const receivedMessagesQuery = query(
-        collection(db, 'friendMessages'),
-        where('fromUserId', '==', friendId),
-        where('toUserId', '==', auth.currentUser.uid)
-      );
+      // 簡化查詢：只查詢所有相關挑戰，然後在客戶端過濾和排序
+      const challengesQuery = query(collection(db, 'friendChallenges'));
 
       console.log('📡 執行查詢...');
-      const [sentSnapshot, receivedSnapshot] = await Promise.all([
-        getDocs(sentMessagesQuery),
-        getDocs(receivedMessagesQuery),
-      ]);
+      const snapshot = await getDocs(challengesQuery);
 
       console.log('📊 查詢結果:', {
-        sent: sentSnapshot.docs.length,
-        received: receivedSnapshot.docs.length,
+        total: snapshot.docs.length,
       });
 
-      // 詳細顯示查詢到的訊息
-      const sentMessages = sentSnapshot.docs.map(doc => {
-        const data = { id: doc.id, ...doc.data() };
-        console.log('📤 發送的訊息:', data);
-        return data;
+      // 處理挑戰數據：在客戶端過濾相關挑戰
+      const allChallenges = snapshot.docs
+        .map(doc => ({ id: doc.id, ...doc.data() }))
+        .filter(
+          challenge =>
+            (challenge.fromUserId === auth.currentUser.uid &&
+              challenge.toUserId === friendId) ||
+            (challenge.fromUserId === friendId &&
+              challenge.toUserId === auth.currentUser.uid)
+        )
+        .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+      console.log('📤 過濾後的挑戰數量:', allChallenges.length);
+
+      // 檢查過期挑戰（僅在客戶端標記，不觸發數據庫寫入）
+      const now = new Date();
+      const validChallenges = allChallenges.map(challenge => {
+        const expiresAt = new Date(challenge.expiresAt);
+        if (expiresAt < now && challenge.status === 'pending') {
+          // 僅在客戶端標記為過期，不觸發數據庫更新
+          return { ...challenge, status: 'expired', isClientExpired: true };
+        }
+        return challenge;
       });
-
-      const receivedMessages = receivedSnapshot.docs.map(doc => {
-        const data = { id: doc.id, ...doc.data() };
-        console.log('📥 接收的訊息:', data);
-        return data;
-      });
-
-      // 合併並排序所有訊息
-      const allMessages = [...sentMessages, ...receivedMessages].sort(
-        (a, b) => new Date(a.timestamp) - new Date(b.timestamp)
-      );
-
-      // 限制總數為50條最新訊息
-      const recentMessages = allMessages.slice(-50);
 
       console.log(
-        '✅ 最終訊息列表 (共 ' + recentMessages.length + ' 條):',
-        recentMessages
+        '✅ 最終挑戰列表 (共 ' + validChallenges.length + ' 條):',
+        validChallenges
       );
-      console.log('🎯 即將設置 messages 狀態...');
 
-      setMessages(recentMessages);
-
-      console.log(
-        '✨ 訊息狀態已更新，當前 messages.length:',
-        recentMessages.length
-      );
+      setChallenges(validChallenges);
     } catch (error) {
-      console.error('❌ 載入訊息失敗:', error);
+      console.error('❌ 載入挑戰失敗:', error);
       console.error('Error details:', {
         code: error.code,
         message: error.message,
         friendId: friendId,
         currentUser: auth.currentUser?.uid,
       });
-      setError('載入訊息失敗，請稍後再試');
+      setError('載入挑戰失敗，請稍後再試');
+    }
+  };
+
+  // 更新挑戰狀態
+  const updateChallengeStatus = async (challengeId, newStatus) => {
+    try {
+      const challengeRef = doc(db, 'friendChallenges', challengeId);
+      await updateDoc(challengeRef, {
+        status: newStatus,
+        updatedAt: new Date().toISOString(),
+      });
+      console.log(`挑戰 ${challengeId} 狀態更新為: ${newStatus}`);
+    } catch (error) {
+      console.error('更新挑戰狀態失敗:', error);
+    }
+  };
+
+  // 批量更新過期挑戰（可選功能，減少寫入次數）
+  const batchUpdateExpiredChallenges = async expiredChallenges => {
+    if (expiredChallenges.length === 0) return;
+
+    try {
+      const batch = writeBatch(db);
+      expiredChallenges.forEach(challenge => {
+        const challengeRef = doc(db, 'friendChallenges', challenge.id);
+        batch.update(challengeRef, {
+          status: 'expired',
+          updatedAt: new Date().toISOString(),
+        });
+      });
+      await batch.commit();
+      console.log(`批量更新了 ${expiredChallenges.length} 個過期挑戰`);
+    } catch (error) {
+      console.error('批量更新過期挑戰失敗:', error);
+    }
+  };
+
+  // 回應挑戰
+  const respondToChallenge = async (challengeId, response) => {
+    try {
+      await updateChallengeStatus(challengeId, response);
+      setSuccess(`挑戰已${response === 'accepted' ? '接受' : '拒絕'}！`);
+
+      // 優化：直接更新本地狀態，避免重新載入
+      setChallenges(prevChallenges =>
+        prevChallenges.map(challenge =>
+          challenge.id === challengeId
+            ? {
+                ...challenge,
+                status: response,
+                updatedAt: new Date().toISOString(),
+              }
+            : challenge
+        )
+      );
+    } catch (error) {
+      console.error('回應挑戰失敗:', error);
+      setError('回應挑戰失敗: ' + error.message);
     }
   };
 
@@ -765,15 +879,15 @@ const Friends = () => {
               </div>
               <div className="friend-actions">
                 <button
-                  className="btn-message"
+                  className="btn-challenge"
                   onClick={() => {
-                    console.log('💬 點擊訊息按鈕，好友資訊:', friend);
+                    console.log('🏆 點擊挑戰按鈕，好友資訊:', friend);
                     console.log('🎯 設置 selectedFriend 為:', friend);
                     setSelectedFriend(friend);
-                    console.log('📋 切換到 messages 標籤');
-                    setActiveTab('messages');
-                    console.log('📥 開始載入訊息...');
-                    loadMessages(friend.id);
+                    console.log('📋 切換到 challenges 標籤');
+                    setActiveTab('challenges');
+                    console.log('📥 開始載入挑戰...');
+                    loadChallenges(friend.id);
                   }}
                   style={{
                     background:
@@ -786,7 +900,7 @@ const Friends = () => {
                     fontSize: '16px',
                   }}
                 >
-                  💬
+                  🏆
                 </button>
                 <button
                   className="btn-remove"
@@ -922,11 +1036,11 @@ const Friends = () => {
     </div>
   );
 
-  // 渲染訊息標籤頁
-  const renderMessagesTab = () => {
-    console.log('🎨 渲染訊息標籤頁:', {
+  // 渲染挑戰標籤頁
+  const renderChallengesTab = () => {
+    console.log('🎨 渲染挑戰標籤頁:', {
       selectedFriend,
-      messagesCount: messages.length,
+      challengesCount: challenges.length,
       activeTab,
     });
 
@@ -949,7 +1063,7 @@ const Friends = () => {
                     console.log('🔙 返回好友列表');
                     setActiveTab('friends');
                     setSelectedFriend(null);
-                    setMessages([]);
+                    // setMessages([]); // 移除這行
                   }}
                   style={{
                     background: 'rgba(255, 255, 255, 0.2)',
@@ -1046,100 +1160,175 @@ const Friends = () => {
                 paddingBottom: '120px' /* 為輸入框和廣告欄位留出空間 */,
               }}
             >
-              {messages.length === 0 ? (
-                <div
-                  className="empty-messages"
-                  style={{
-                    textAlign: 'center',
-                    padding: '20px',
-                    color: '#666',
-                    fontSize: '16px',
-                    backgroundColor: '#f8f9fa',
-                    borderRadius: '8px',
-                    margin: '10px',
-                    flex: 1,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                  }}
-                >
-                  <p>還沒有訊息記錄</p>
-                  <p>發送第一條訊息開始對話吧！</p>
-                  <p
-                    style={{
-                      fontSize: '12px',
-                      color: '#999',
-                      marginTop: '10px',
-                    }}
-                  >
-                    載入的訊息數量: {messages.length}
-                  </p>
+              {/* 挑戰留言板內容 */}
+              <div className="challenge-board">
+                <h4>挑戰留言板</h4>
+                <div className="challenge-types">
+                  {challengeTypes.map(type => (
+                    <button
+                      key={type.id}
+                      className={`challenge-type-btn ${
+                        selectedChallengeType === type.id ? 'active' : ''
+                      }`}
+                      onClick={() => setSelectedChallengeType(type.id)}
+                    >
+                      {type.icon} {type.name}
+                    </button>
+                  ))}
                 </div>
-              ) : (
-                <>
-                  <div
-                    style={{
-                      padding: '4px 8px',
-                      backgroundColor: '#e3f2fd',
-                      borderRadius: '6px',
-                      marginBottom: '8px',
-                      fontSize: '10px',
-                      color: '#1976d2',
-                      textAlign: 'center',
-                      flexShrink: 0,
+                <div className="challenge-input-container">
+                  <textarea
+                    placeholder={`輸入您的 ${
+                      challengeTypes.find(
+                        type => type.id === selectedChallengeType
+                      )?.examples[0] || '挑戰'
+                    }...`}
+                    value={challengeInput}
+                    onChange={e => setChallengeInput(e.target.value)}
+                    onKeyPress={e => {
+                      if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        sendChallenge();
+                      }
                     }}
+                  />
+                  <button
+                    onClick={sendChallenge}
+                    disabled={!challengeInput.trim()}
                   >
-                    共載入 {messages.length} 條訊息
-                  </div>
-                  {messages.map((message, index) => {
-                    console.log('🗨️ 渲染訊息:', message);
-                    return (
-                      <div
-                        key={message.id || index}
-                        className={`message ${
-                          message.fromUserId === auth.currentUser.uid
-                            ? 'sent'
-                            : 'received'
-                        }`}
+                    發布挑戰
+                  </button>
+                </div>
+                <div className="challenge-list">
+                  {/* 過期挑戰更新提示 */}
+                  {challenges.some(c => c.isClientExpired) && (
+                    <div
+                      style={{
+                        background: '#fff3cd',
+                        border: '1px solid #ffeaa7',
+                        borderRadius: '8px',
+                        padding: '12px',
+                        marginBottom: '15px',
+                        fontSize: '14px',
+                        color: '#856404',
+                      }}
+                    >
+                      <p style={{ margin: '0 0 8px 0' }}>
+                        ⏰ 發現過期挑戰，點擊下方按鈕更新狀態
+                      </p>
+                      <button
+                        onClick={() => {
+                          const expiredChallenges = challenges.filter(
+                            c => c.isClientExpired
+                          );
+                          batchUpdateExpiredChallenges(expiredChallenges);
+                          // 移除客戶端過期標記
+                          setChallenges(prev =>
+                            prev.map(c => ({ ...c, isClientExpired: false }))
+                          );
+                        }}
                         style={{
-                          animation: 'fadeIn 0.3s ease-out',
-                          animationDelay: `${index * 0.1}s`,
+                          background: '#ffc107',
+                          color: '#212529',
+                          border: 'none',
+                          borderRadius: '4px',
+                          padding: '6px 12px',
+                          cursor: 'pointer',
+                          fontSize: '12px',
                         }}
                       >
-                        <div className="message-bubble">
-                          {message.type === 'sticker' ? (
-                            <span
-                              className="sticker"
-                              style={{ fontSize: '24px' }}
-                            >
-                              {message.message}
-                            </span>
-                          ) : (
-                            <p style={{ margin: 0 }}>{message.message}</p>
-                          )}
-                        </div>
+                        更新過期挑戰
+                      </button>
+                    </div>
+                  )}
+
+                  {challenges.length === 0 ? (
+                    <div className="empty-state">
+                      <p>目前沒有挑戰留言</p>
+                      <p>您可以發布一個新的挑戰！</p>
+                    </div>
+                  ) : (
+                    challenges.map(challenge => (
+                      <div key={challenge.id} className="challenge-item">
                         <div
-                          className="message-time"
                           style={{
-                            fontSize: '11px',
-                            color: '#999',
-                            marginTop: '4px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            marginBottom: '10px',
                           }}
                         >
-                          {new Date(message.timestamp).toLocaleTimeString(
-                            'zh-TW',
-                            {
-                              hour: '2-digit',
-                              minute: '2-digit',
-                            }
-                          )}
+                          <span
+                            style={{ fontSize: '18px', marginRight: '10px' }}
+                          >
+                            {challenge.type.icon}
+                          </span>
+                          <span
+                            style={{ fontWeight: 'bold', fontSize: '16px' }}
+                          >
+                            {challenge.type.name}
+                          </span>
                         </div>
+                        <div className="challenge-content">
+                          {challenge.challenge}
+                        </div>
+                        <div className="challenge-meta">
+                          <span>
+                            {challenge.fromUserNickname} 發布於{' '}
+                            {new Date(challenge.timestamp).toLocaleDateString()}
+                          </span>
+                          <span
+                            style={{
+                              color: challengeStatus[challenge.status].color,
+                              fontWeight: 'bold',
+                            }}
+                          >
+                            {challengeStatus[challenge.status].icon}{' '}
+                            {challengeStatus[challenge.status].label}
+                          </span>
+                        </div>
+
+                        {/* 挑戰回應按鈕 - 只有接收方且狀態為pending時顯示 */}
+                        {challenge.toUserId === auth.currentUser.uid &&
+                          challenge.status === 'pending' && (
+                            <div className="challenge-actions">
+                              <button
+                                className="btn-accept"
+                                onClick={() =>
+                                  respondToChallenge(challenge.id, 'accepted')
+                                }
+                              >
+                                ✅ 接受挑戰
+                              </button>
+                              <button
+                                className="btn-decline"
+                                onClick={() =>
+                                  respondToChallenge(challenge.id, 'declined')
+                                }
+                              >
+                                ❌ 拒絕挑戰
+                              </button>
+                            </div>
+                          )}
+
+                        {/* 完成挑戰按鈕 - 只有發起方且狀態為accepted時顯示 */}
+                        {challenge.fromUserId === auth.currentUser.uid &&
+                          challenge.status === 'accepted' && (
+                            <div className="challenge-actions">
+                              <button
+                                className="btn-complete"
+                                onClick={() =>
+                                  respondToChallenge(challenge.id, 'completed')
+                                }
+                              >
+                                🏆 完成挑戰
+                              </button>
+                            </div>
+                          )}
                       </div>
-                    );
-                  })}
-                </>
-              )}
+                    ))
+                  )}
+                </div>
+              </div>
             </div>
 
             {/* 輸入框容器 - 固定在底部 */}
@@ -1170,13 +1359,13 @@ const Friends = () => {
               >
                 <input
                   type="text"
-                  placeholder="輸入訊息..."
-                  value={messageInput}
-                  onChange={e => setMessageInput(e.target.value)}
+                  placeholder="輸入挑戰內容..."
+                  value={challengeInput} // 使用 challengeInput
+                  onChange={e => setChallengeInput(e.target.value)}
                   onKeyPress={e => {
                     if (e.key === 'Enter') {
-                      console.log('⌨️ 按下 Enter 發送訊息');
-                      sendMessage();
+                      console.log('⌨️ 按下 Enter 發送挑戰');
+                      sendChallenge();
                     }
                   }}
                   style={{
@@ -1193,19 +1382,19 @@ const Friends = () => {
                 <button
                   onClick={() => {
                     console.log('🚀 點擊發送按鈕');
-                    sendMessage();
+                    sendChallenge();
                   }}
-                  disabled={!messageInput.trim()}
+                  disabled={!challengeInput.trim()}
                   style={{
                     flex: 1,
                     padding: '12px',
-                    background: messageInput.trim()
+                    background: challengeInput.trim()
                       ? 'linear-gradient(135deg, #81D8D0 0%, #5F9EA0 100%)' /* Tiffany 藍漸變 */
                       : '#ccc',
                     color: 'white',
                     border: 'none',
                     borderRadius: '50%',
-                    cursor: messageInput.trim() ? 'pointer' : 'not-allowed',
+                    cursor: challengeInput.trim() ? 'pointer' : 'not-allowed',
                     minHeight: '40px',
                     minWidth: '40px',
                     display: 'flex',
@@ -1213,7 +1402,7 @@ const Friends = () => {
                     justifyContent: 'center',
                     fontSize: '14px',
                   }}
-                  title="發送訊息"
+                  title="發送挑戰"
                 >
                   ➤
                 </button>
@@ -1230,10 +1419,10 @@ const Friends = () => {
             }}
           >
             <p style={{ fontSize: '18px', marginBottom: '8px' }}>
-              請選擇一位好友開始對話
+              請選擇一位好友開始挑戰
             </p>
             <p style={{ fontSize: '14px', color: '#999' }}>
-              點擊好友列表中的 💬 按鈕
+              點擊好友列表中的 🏆 按鈕
             </p>
           </div>
         )}
@@ -1251,8 +1440,8 @@ const Friends = () => {
         {success && <div className="alert alert-success">{success}</div>}
       </div>
 
-      {/* 標籤導航 - 只在非訊息模式下顯示 */}
-      {activeTab !== 'messages' && (
+      {/* 標籤導航 - 只在非挑戰模式下顯示 */}
+      {activeTab !== 'challenges' && (
         <div className="tab-navigation">
           <div
             className={`tab-btn ${activeTab === 'friends' ? 'active' : ''}`}
@@ -1287,7 +1476,7 @@ const Friends = () => {
         {activeTab === 'friends' && renderFriendsTab()}
         {activeTab === 'requests' && renderRequestsTab()}
         {activeTab === 'search' && renderSearchTab()}
-        {activeTab === 'messages' && renderMessagesTab()}
+        {activeTab === 'challenges' && renderChallengesTab()}
       </div>
     </div>
   );
