@@ -40,6 +40,56 @@ const DEFAULT_SCORES = {
 
 const GENDER_OPTIONS = ['male', 'female'];
 
+// 新增：對話框組件
+const Modal = ({ isOpen, onClose, title, message, type = 'info' }) => {
+  if (!isOpen) return null;
+
+  const getIcon = () => {
+    switch (type) {
+      case 'warning':
+        return '⚠️';
+      case 'success':
+        return '✅';
+      case 'error':
+        return '❌';
+      default:
+        return 'ℹ️';
+    }
+  };
+
+  const getButtonClass = () => {
+    switch (type) {
+      case 'warning':
+        return 'modal-btn modal-btn-warning';
+      case 'success':
+        return 'modal-btn modal-btn-success';
+      case 'error':
+        return 'modal-btn modal-btn-error';
+      default:
+        return 'modal-btn modal-btn-info';
+    }
+  };
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content" onClick={e => e.stopPropagation()}>
+        <div className="modal-header">
+          <span className="modal-icon">{getIcon()}</span>
+          <h3 className="modal-title">{title}</h3>
+        </div>
+        <div className="modal-body">
+          <p className="modal-message">{message}</p>
+        </div>
+        <div className="modal-footer">
+          <button className={getButtonClass()} onClick={onClose}>
+            確定
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // 新增：儀式感動畫系統
 const useCeremonialAnimation = () => {
   const [animationState, setAnimationState] = useState({
@@ -189,6 +239,14 @@ function UserInfo({ testData, onLogout, clearTestData }) {
   const testsSectionRef = useRef(null);
   const [avatarUploading, setAvatarUploading] = useState(false);
   const [avatarError, setAvatarError] = useState(null);
+
+  // 新增：對話框狀態
+  const [modalState, setModalState] = useState({
+    isOpen: false,
+    title: '',
+    message: '',
+    type: 'info',
+  });
 
   // 新增：儀式感動畫系統
   const { animationState, triggerAnimation, completeAnimation, particles } =
@@ -555,16 +613,45 @@ function UserInfo({ testData, onLogout, clearTestData }) {
       try {
         const success = await saveUserData(updatedUserData);
         if (success) {
-          alert('資料已儲存成功！');
+          setModalState({
+            isOpen: true,
+            title: '儲存成功',
+            message: '資料已儲存成功！',
+            type: 'success',
+          });
         } else {
-          // 僅登入用戶才顯示錯誤，訪客模式不顯示
-          if (!isGuest) {
-            setError('儲存失敗，請稍後再試');
+          // 訪客模式顯示特殊提示
+          if (isGuest) {
+            setModalState({
+              isOpen: true,
+              title: '訪客模式',
+              message: '訪客模式下無法保存到雲端，但您現在可以開始進行評測了！',
+              type: 'info',
+            });
+          } else {
+            setModalState({
+              isOpen: true,
+              title: '儲存失敗',
+              message: '儲存失敗，請稍後再試',
+              type: 'error',
+            });
           }
         }
       } catch (err) {
-        if (!isGuest) {
-          setError(`儲存失敗：${err.message}`);
+        if (isGuest) {
+          setModalState({
+            isOpen: true,
+            title: '訪客模式',
+            message: '訪客模式下無法保存到雲端，但您現在可以開始進行評測了！',
+            type: 'info',
+          });
+        } else {
+          setModalState({
+            isOpen: true,
+            title: '儲存失敗',
+            message: `儲存失敗：${err.message}`,
+            type: 'error',
+          });
         }
       } finally {
         setLoading(false);
@@ -693,7 +780,12 @@ function UserInfo({ testData, onLogout, clearTestData }) {
 
   const handleSaveResults = useCallback(() => {
     if (!auth.currentUser) {
-      setError('請先登入以儲存結果');
+      setModalState({
+        isOpen: true,
+        title: '需要登入',
+        message: '請先登入以儲存結果',
+        type: 'warning',
+      });
       return;
     }
     const record = {
@@ -702,7 +794,12 @@ function UserInfo({ testData, onLogout, clearTestData }) {
       averageScore: averageScore,
     };
     saveHistory(record);
-    alert('結果已儲存');
+    setModalState({
+      isOpen: true,
+      title: '儲存成功',
+      message: '結果已儲存',
+      type: 'success',
+    });
   }, [userData.scores, averageScore, saveHistory]);
 
   const handleNavigation = useCallback(
@@ -713,7 +810,12 @@ function UserInfo({ testData, onLogout, clearTestData }) {
         !userData.age ||
         !userData.gender
       ) {
-        setError('請先填寫並儲存您的身高、體重、年齡和性別！');
+        setModalState({
+          isOpen: true,
+          title: '需要基本資料',
+          message: '請先填寫並儲存您的身高、體重、年齡和性別，才能開始評測！',
+          type: 'warning',
+        });
         return;
       }
 
@@ -721,7 +823,12 @@ function UserInfo({ testData, onLogout, clearTestData }) {
         // 傳遞當前路徑作為狀態，以便返回時知道從哪裡來
         navigate(path, { state: { from: '/user-info' } });
       } else {
-        setError('請確保資料已正確保存後再進行評測！');
+        setModalState({
+          isOpen: true,
+          title: '資料未保存',
+          message: '請確保資料已正確保存後再進行評測！',
+          type: 'warning',
+        });
       }
     },
     [userData, validateData, navigate]
@@ -819,6 +926,15 @@ function UserInfo({ testData, onLogout, clearTestData }) {
 
   return (
     <div className="user-info-container">
+      {/* 對話框組件 */}
+      <Modal
+        isOpen={modalState.isOpen}
+        onClose={() => setModalState(prev => ({ ...prev, isOpen: false }))}
+        title={modalState.title}
+        message={modalState.message}
+        type={modalState.type}
+      />
+
       {/* 儀式感動畫粒子效果 */}
       {particles.map(particle => (
         <div

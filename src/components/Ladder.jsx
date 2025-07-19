@@ -335,9 +335,24 @@ const Ladder = () => {
     if (user.isAnonymous) return; // 匿名用戶不顯示信息
 
     const rect = event.currentTarget.getBoundingClientRect();
+    const tooltipHeight = 200; // 預估工具提示的高度
+    const viewportHeight = window.innerHeight;
+    const safeMargin = 20; // 安全邊距
+
+    // 計算最佳位置
+    let y = rect.top - 10;
+    let transformY = -100; // 預設向上顯示
+
+    // 如果向上顯示會被切掉，改為向下顯示
+    if (rect.top - tooltipHeight - safeMargin < 0) {
+      y = rect.bottom + 10;
+      transformY = 0; // 向下顯示
+    }
+
     setTooltipPosition({
       x: rect.left + rect.width / 2,
-      y: rect.top - 10,
+      y: y,
+      transformY: transformY,
     });
     setSelectedUser(user);
   };
@@ -581,7 +596,9 @@ const Ladder = () => {
             position: 'fixed',
             left: tooltipPosition.x,
             top: tooltipPosition.y,
-            transform: 'translateX(-50%) translateY(-100%)',
+            transform: `translateX(-50%) translateY(${
+              tooltipPosition.transformY || -100
+            }%)`,
             zIndex: 1000,
           }}
         >
@@ -627,7 +644,26 @@ const Ladder = () => {
                 )}
             </div>
           </div>
-          <div className="tooltip-arrow"></div>
+          <div
+            className="tooltip-arrow"
+            style={{
+              ...(tooltipPosition.transformY === 0
+                ? {
+                    // 向下顯示時，箭頭在頂部
+                    bottom: 'auto',
+                    top: '-8px',
+                    borderTop: 'none',
+                    borderBottom: '8px solid white',
+                  }
+                : {
+                    // 向上顯示時，箭頭在底部（預設）
+                    bottom: '-8px',
+                    top: 'auto',
+                    borderBottom: 'none',
+                    borderTop: '8px solid white',
+                  }),
+            }}
+          ></div>
         </div>
       )}
 

@@ -54,11 +54,11 @@ function Strength({ onComplete, clearTestData }) {
   });
   const [isExpanded, setIsExpanded] = useState(false);
 
+  // 將 useRef 移到組件頂層
+  const timeoutRef = useRef(null);
+
   const debouncedSetUserData = useCallback(
     newUserData => {
-      // 使用 useRef 來管理 timeout，避免每次重新創建
-      const timeoutRef = useRef(null);
-      
       const updateData = () => {
         // 只在測試輸入有實質變化時才更新
         const currentTestInputs = userData.testInputs?.strength || {};
@@ -74,21 +74,14 @@ function Strength({ onComplete, clearTestData }) {
           console.log('⏭️ 測試輸入無變化，跳過更新');
         }
       };
-      
+
       // 清除之前的定時器
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
       }
-      
+
       // 設置新的定時器
       timeoutRef.current = setTimeout(updateData, 3000); // 增加到3秒防抖
-      
-      // 返回清理函數
-      return () => {
-        if (timeoutRef.current) {
-          clearTimeout(timeoutRef.current);
-        }
-      };
     },
     [setUserData, userData.testInputs]
   );
@@ -130,8 +123,14 @@ function Strength({ onComplete, clearTestData }) {
       },
     };
     const newUserData = { ...userData, testInputs: updatedTestInputs };
-    const cleanup = debouncedSetUserData(newUserData);
-    return cleanup;
+    debouncedSetUserData(newUserData);
+
+    // 清理函數
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
   }, [
     benchPress,
     squat,
