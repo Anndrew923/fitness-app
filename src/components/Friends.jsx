@@ -173,7 +173,9 @@ const Friends = () => {
     try {
       setLoading(true);
 
-      console.log('開始載入好友列表，使用邀請記錄方式');
+      if (process.env.NODE_ENV === 'development') {
+        console.log('開始載入好友列表，使用邀請記錄方式');
+      }
 
       // 從邀請記錄中獲取好友關係
       const friendshipsQuery = query(
@@ -194,7 +196,9 @@ const Friends = () => {
         }
       });
 
-      console.log(`找到 ${friendIds.size} 位好友:`, Array.from(friendIds));
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`找到 ${friendIds.size} 位好友:`, Array.from(friendIds));
+      }
 
       if (friendIds.size === 0) {
         setFriendsList([]);
@@ -211,17 +215,21 @@ const Friends = () => {
       // 獲取每個好友的詳細資料
       for (const friendId of friendIds) {
         try {
-          console.log(`載入好友 ${friendId} 的資料`);
+          if (process.env.NODE_ENV === 'development') {
+            console.log(`載入好友 ${friendId} 的資料`);
+          }
           const friendDoc = await getDocs(
             query(collection(db, 'users'), where('userId', '==', friendId))
           );
 
           if (!friendDoc.empty) {
             const friendData = friendDoc.docs[0].data();
-            console.log(
-              `找到好友資料:`,
-              friendData.nickname || friendData.email
-            );
+            if (process.env.NODE_ENV === 'development') {
+              console.log(
+                `找到好友資料:`,
+                friendData.nickname || friendData.email
+              );
+            }
             friendsData.push({
               id: friendId,
               nickname:
@@ -233,14 +241,18 @@ const Friends = () => {
               lastActive: friendData.lastActive || '',
             });
           } else {
-            console.log(`未找到好友 ${friendId} 的資料`);
+            if (process.env.NODE_ENV === 'development') {
+              console.log(`未找到好友 ${friendId} 的資料`);
+            }
           }
         } catch (error) {
           console.error(`載入好友 ${friendId} 資料失敗:`, error);
         }
       }
 
-      console.log(`成功載入 ${friendsData.length} 位好友`, friendsData);
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`成功載入 ${friendsData.length} 位好友`, friendsData);
+      }
       setFriendsList(friendsData);
 
       // 同時更新 userData 中的 friends 陣列，保持一致性
@@ -572,9 +584,13 @@ const Friends = () => {
         acceptedAt: new Date().toISOString(),
         isReverse: true, // 標記為反向邀請
       });
-      
+
       // 記錄寫入操作
-      firebaseWriteMonitor.logWrite('addDoc', 'friendInvitations', reverseDocRef.id);
+      firebaseWriteMonitor.logWrite(
+        'addDoc',
+        'friendInvitations',
+        reverseDocRef.id
+      );
 
       // 4. 立即更新本地狀態
       setUserData(prev => ({

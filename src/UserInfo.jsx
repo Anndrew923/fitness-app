@@ -41,7 +41,15 @@ const DEFAULT_SCORES = {
 const GENDER_OPTIONS = ['male', 'female'];
 
 // 新增：對話框組件
-const Modal = ({ isOpen, onClose, title, message, type = 'info' }) => {
+const Modal = ({
+  isOpen,
+  onClose,
+  title,
+  message,
+  type = 'info',
+  onAction = null,
+  actionText = null,
+}) => {
   if (!isOpen) return null;
 
   const getIcon = () => {
@@ -70,8 +78,25 @@ const Modal = ({ isOpen, onClose, title, message, type = 'info' }) => {
     }
   };
 
+  const handleClose = () => {
+    console.log('Modal close button clicked');
+    onClose();
+  };
+
+  const handleOverlayClick = () => {
+    console.log('Modal overlay clicked');
+    onClose();
+  };
+
+  const handleAction = () => {
+    if (onAction) {
+      onAction();
+    }
+    onClose();
+  };
+
   return (
-    <div className="modal-overlay" onClick={onClose}>
+    <div className="modal-overlay" onClick={handleOverlayClick}>
       <div className="modal-content" onClick={e => e.stopPropagation()}>
         <div className="modal-header">
           <span className="modal-icon">{getIcon()}</span>
@@ -81,8 +106,94 @@ const Modal = ({ isOpen, onClose, title, message, type = 'info' }) => {
           <p className="modal-message">{message}</p>
         </div>
         <div className="modal-footer">
-          <button className={getButtonClass()} onClick={onClose}>
-            確定
+          {onAction && actionText ? (
+            <div className="modal-footer-actions">
+              <button
+                className="modal-btn modal-btn-secondary"
+                onClick={handleClose}
+              >
+                稍後查看
+              </button>
+              <button
+                className={getButtonClass()}
+                onClick={handleAction}
+                style={{ position: 'relative', zIndex: 10001 }}
+              >
+                {actionText}
+              </button>
+            </div>
+          ) : (
+            <button
+              className={getButtonClass()}
+              onClick={handleClose}
+              style={{ position: 'relative', zIndex: 10001 }}
+            >
+              確定
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// 新增：提交確認對話框組件
+const SubmitConfirmModal = ({
+  isOpen,
+  onConfirm,
+  onCancel,
+  remainingCount,
+}) => {
+  if (!isOpen) return null;
+
+  const handleOverlayClick = e => {
+    if (e.target === e.currentTarget) {
+      onCancel();
+    }
+  };
+
+  return (
+    <div
+      className="modal-overlay submit-confirm-overlay"
+      onClick={handleOverlayClick}
+    >
+      <div
+        className="modal-content submit-confirm-content"
+        onClick={e => e.stopPropagation()}
+      >
+        <div className="modal-header">
+          <span className="modal-icon">🏆</span>
+          <h3 className="modal-title">提交確認</h3>
+        </div>
+        <div className="modal-body">
+          <div className="submit-confirm-message">
+            <p className="confirm-text">
+              為提升天梯參考價值，防止誤植，今天還剩下{' '}
+              <span className="remaining-count">{remainingCount}</span>{' '}
+              次提交機會，每天凌晨12點將重置
+            </p>
+            <div className="confirm-details">
+              <div className="detail-item">
+                <span className="detail-icon">📊</span>
+                <span className="detail-text">確保數據準確性</span>
+              </div>
+              <div className="detail-item">
+                <span className="detail-icon">⏰</span>
+                <span className="detail-text">每日凌晨重置次數</span>
+              </div>
+              <div className="detail-item">
+                <span className="detail-icon">🎯</span>
+                <span className="detail-text">提升天梯參考價值</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="modal-footer submit-confirm-footer">
+          <button className="modal-btn modal-btn-secondary" onClick={onCancel}>
+            還沒填好
+          </button>
+          <button className="modal-btn modal-btn-success" onClick={onConfirm}>
+            確定提交
           </button>
         </div>
       </div>
@@ -90,80 +201,7 @@ const Modal = ({ isOpen, onClose, title, message, type = 'info' }) => {
   );
 };
 
-// 新增：儀式感動畫系統
-const useCeremonialAnimation = () => {
-  const [animationState, setAnimationState] = useState({
-    isActive: false,
-    type: null, // 'score-update', 'level-up', 'achievement'
-    targetElement: null,
-    progress: 0,
-  });
-  const [particles, setParticles] = useState([]);
-  const animationRef = useRef(null);
-
-  const triggerAnimation = useCallback((type, element) => {
-    setAnimationState({
-      isActive: true,
-      type,
-      targetElement: element,
-      progress: 0,
-    });
-
-    // 創建粒子效果
-    createParticleEffect(element);
-  }, []);
-
-  const createParticleEffect = useCallback(element => {
-    if (!element) return;
-
-    const rect = element.getBoundingClientRect();
-    const centerX = rect.left + rect.width / 2;
-    const centerY = rect.top + rect.height / 2;
-
-    const newParticles = [];
-    for (let i = 0; i < 20; i++) {
-      const angle = (Math.PI * 2 * i) / 20 + (Math.random() - 0.5) * 0.5;
-      const distance = 60 + Math.random() * 40;
-      const particleX = Math.cos(angle) * distance;
-      const particleY = Math.sin(angle) * distance;
-
-      newParticles.push({
-        id: i,
-        x: centerX,
-        y: centerY,
-        targetX: centerX + particleX,
-        targetY: centerY + particleY,
-        color: ['#ff6b35', '#f7931e', '#ffd700', '#ff8c42', '#ff4757'][
-          Math.floor(Math.random() * 5)
-        ],
-        size: 3 + Math.random() * 4,
-        delay: i * 0.05,
-      });
-    }
-
-    setParticles(newParticles);
-
-    // 清理粒子
-    setTimeout(() => {
-      setParticles([]);
-    }, 3000);
-  }, []);
-
-  const completeAnimation = useCallback(() => {
-    setAnimationState(prev => ({
-      ...prev,
-      isActive: false,
-      progress: 0,
-    }));
-  }, []);
-
-  return {
-    animationState,
-    triggerAnimation,
-    completeAnimation,
-    particles,
-  };
-};
+// 移除儀式感動畫系統
 
 // 新增：圖片壓縮工具
 async function compressImage(
@@ -246,14 +284,189 @@ function UserInfo({ testData, onLogout, clearTestData }) {
     title: '',
     message: '',
     type: 'info',
+    onAction: null,
+    actionText: null,
   });
 
-  // 新增：儀式感動畫系統
-  const { animationState, triggerAnimation, completeAnimation, particles } =
-    useCeremonialAnimation();
-  const [previousScores, setPreviousScores] = useState(DEFAULT_SCORES);
-  const [scoreAnimations, setScoreAnimations] = useState({});
+  // 移除動畫系統，簡化狀態管理
   const [userRank, setUserRank] = useState(null);
+
+  // 新增：天梯提交相關狀態
+  const [ladderSubmissionState, setLadderSubmissionState] = useState({
+    lastSubmissionTime: null,
+    dailySubmissionCount: 0,
+    lastSubmissionDate: null,
+  });
+
+  // 新增：提交確認對話框狀態
+  const [submitConfirmModal, setSubmitConfirmModal] = useState({
+    isOpen: false,
+    remainingCount: 3, // 暫時固定為3次，之後會動態計算
+  });
+
+  // 新增：檢查天梯提交限制
+  const checkLadderSubmissionLimit = useCallback(() => {
+    const now = new Date();
+    const today = now.toDateString();
+
+    // 檢查是否是新的一天
+    if (ladderSubmissionState.lastSubmissionDate !== today) {
+      setLadderSubmissionState(prev => ({
+        ...prev,
+        dailySubmissionCount: 0,
+        lastSubmissionDate: today,
+      }));
+      return { canSubmit: true, reason: null };
+    }
+
+    // 檢查每日限制
+    if (ladderSubmissionState.dailySubmissionCount >= 3) {
+      return {
+        canSubmit: false,
+        reason: '今日已達提交上限（3次），請明天再試',
+      };
+    }
+
+    // 檢查冷卻時間
+    if (ladderSubmissionState.lastSubmissionTime) {
+      const timeDiff = now - ladderSubmissionState.lastSubmissionTime;
+      const cooldownHours = 2;
+      const cooldownMs = cooldownHours * 60 * 60 * 1000;
+
+      if (timeDiff < cooldownMs) {
+        const remainingMinutes = Math.ceil(
+          (cooldownMs - timeDiff) / (60 * 1000)
+        );
+        return {
+          canSubmit: false,
+          reason: `請等待 ${remainingMinutes} 分鐘後再提交`,
+        };
+      }
+    }
+
+    return { canSubmit: true, reason: null };
+  }, [ladderSubmissionState]);
+
+  // 新增：顯示提交確認對話框
+  const showSubmitConfirmModal = useCallback(() => {
+    // 暫時不啟用實際限制，直接顯示確認對話框
+    const remainingCount =
+      3 - (ladderSubmissionState.dailySubmissionCount || 0);
+    setSubmitConfirmModal({
+      isOpen: true,
+      remainingCount: Math.max(0, remainingCount),
+    });
+  }, [ladderSubmissionState.dailySubmissionCount]);
+
+  // 新增：確認提交到天梯
+  const confirmSubmitToLadder = useCallback(async () => {
+    // 關閉確認對話框
+    setSubmitConfirmModal({ isOpen: false, remainingCount: 0 });
+
+    // 防止重複提交
+    if (loading) {
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      // 計算天梯分數
+      const scores = userData.scores || {};
+      const ladderScore = calculateLadderScore(scores);
+
+      // 更新用戶數據 - 使用 setUserData 而不是直接 saveUserData
+      setUserData({
+        ...userData,
+        ladderScore: ladderScore,
+        lastLadderSubmission: new Date(),
+      });
+
+      // 更新提交狀態
+      const now = new Date();
+      setLadderSubmissionState(prev => ({
+        lastSubmissionTime: now,
+        dailySubmissionCount: prev.dailySubmissionCount + 1,
+        lastSubmissionDate: now.toDateString(),
+      }));
+
+      // 顯示成功訊息
+      setModalState({
+        isOpen: true,
+        title: '提交成功',
+        message: `您的分數 ${ladderScore} 已成功提交到天梯！`,
+        type: 'success',
+        onAction: () => navigate('/ladder'),
+        actionText: '立即查看天梯',
+      });
+
+      // 移除儀式感動畫，直接顯示成功訊息
+
+      // 5秒後自動關閉成功對話框（給用戶時間選擇）
+      setTimeout(() => {
+        setModalState(prev => ({ ...prev, isOpen: false }));
+      }, 5000);
+    } catch (error) {
+      console.error('提交到天梯失敗:', error);
+      setModalState({
+        isOpen: true,
+        title: '提交失敗',
+        message: '提交到天梯時發生錯誤，請稍後再試',
+        type: 'error',
+      });
+    } finally {
+      setLoading(false);
+    }
+  }, [userData, setUserData, loading, navigate]);
+
+  // 新增：取消提交
+  const cancelSubmit = useCallback(() => {
+    setSubmitConfirmModal({ isOpen: false, remainingCount: 0 });
+  }, []);
+
+  // 新增：提交到天梯（修改為顯示確認對話框）
+  const handleSubmitToLadder = useCallback(async () => {
+    if (!auth.currentUser) {
+      setModalState({
+        isOpen: true,
+        title: '需要登入',
+        message: '請先登入以提交到天梯',
+        type: 'warning',
+      });
+      return;
+    }
+
+    // 檢查是否完成全部評測
+    const scores = userData.scores || {};
+    const completedCount = Object.values(scores).filter(
+      score => score > 0
+    ).length;
+
+    if (completedCount < 5) {
+      setModalState({
+        isOpen: true,
+        title: '評測未完成',
+        message: `請先完成全部5項評測（目前完成 ${completedCount}/5 項）`,
+        type: 'warning',
+      });
+      return;
+    }
+
+    // 暫時不啟用實際限制檢查，直接顯示確認對話框
+    // const { canSubmit, reason } = checkLadderSubmissionLimit();
+    // if (!canSubmit) {
+    //   setModalState({
+    //     isOpen: true,
+    //     title: '提交限制',
+    //     message: reason,
+    //     type: 'warning',
+    //   });
+    //   return;
+    // }
+
+    // 顯示提交確認對話框
+    showSubmitConfirmModal();
+  }, [userData, showSubmitConfirmModal]);
 
   const radarChartData = useMemo(() => {
     const scores = userData.scores || DEFAULT_SCORES;
@@ -425,7 +638,7 @@ function UserInfo({ testData, onLogout, clearTestData }) {
     };
 
     checkDataLoaded();
-  }, [currentUser, dataLoaded, isLoading, userData]); // 移除 loadUserData 依賴項
+  }, [currentUser, dataLoaded, isLoading]); // 移除 userData 依賴項，避免重複執行
 
   // 處理從評測頁面返回時自動滾動到雷達圖
   useEffect(() => {
@@ -470,6 +683,43 @@ function UserInfo({ testData, onLogout, clearTestData }) {
     }
   }, [location]);
 
+  // 初始化天梯提交狀態
+  useEffect(() => {
+    const loadSubmissionState = () => {
+      try {
+        const savedState = localStorage.getItem('ladderSubmissionState');
+        if (savedState) {
+          const parsedState = JSON.parse(savedState);
+          // 檢查是否是新的一天，如果是則重置計數
+          const today = new Date().toDateString();
+          if (parsedState.lastSubmissionDate !== today) {
+            setLadderSubmissionState({
+              lastSubmissionTime: null,
+              dailySubmissionCount: 0,
+              lastSubmissionDate: today,
+            });
+          } else {
+            setLadderSubmissionState(parsedState);
+          }
+        }
+      } catch (error) {
+        console.error('載入提交狀態失敗:', error);
+      }
+    };
+
+    loadSubmissionState();
+  }, []);
+
+  // 保存天梯提交狀態到localStorage
+  useEffect(() => {
+    if (ladderSubmissionState.lastSubmissionDate) {
+      localStorage.setItem(
+        'ladderSubmissionState',
+        JSON.stringify(ladderSubmissionState)
+      );
+    }
+  }, [ladderSubmissionState]);
+
   // 處理 testData 更新
   useEffect(() => {
     if (testData && Object.keys(testData).length > 0) {
@@ -498,40 +748,7 @@ function UserInfo({ testData, onLogout, clearTestData }) {
             }),
           };
 
-          // 檢測分數提升
-          const scoreImprovements = {};
-          Object.keys(updatedScores).forEach(key => {
-            const oldScore = currentScores[key] || 0;
-            const newScore = updatedScores[key] || 0;
-            if (newScore > oldScore) {
-              scoreImprovements[key] = {
-                old: oldScore,
-                new: newScore,
-                improvement: newScore - oldScore,
-              };
-            }
-          });
-
-          // 如果有分數提升，觸發動畫
-          if (Object.keys(scoreImprovements).length > 0) {
-            console.log('🎉 檢測到分數提升:', scoreImprovements);
-
-            // 延遲觸發動畫，讓數據先更新
-            setTimeout(() => {
-              if (radarSectionRef.current) {
-                triggerAnimation('score-update', radarSectionRef.current);
-
-                // 設置分數動畫
-                setScoreAnimations(scoreImprovements);
-
-                // 3秒後完成動畫
-                setTimeout(() => {
-                  completeAnimation();
-                  setScoreAnimations({});
-                }, 3000);
-              }
-            }, 500);
-          }
+          // 移除分數提升檢測和動畫
 
           console.log('💾 防抖後更新測試數據分數（5秒防抖）');
           return {
@@ -570,7 +787,7 @@ function UserInfo({ testData, onLogout, clearTestData }) {
 
       return () => clearTimeout(timeoutId);
     }
-  }, [testData, clearTestData, triggerAnimation, completeAnimation]);
+  }, [testData, clearTestData]);
 
   const validateData = useCallback(() => {
     const { height, weight, age, gender } = userData;
@@ -611,32 +828,15 @@ function UserInfo({ testData, onLogout, clearTestData }) {
       };
 
       try {
-        const success = await saveUserData(updatedUserData);
-        if (success) {
-          setModalState({
-            isOpen: true,
-            title: '儲存成功',
-            message: '資料已儲存成功！',
-            type: 'success',
-          });
-        } else {
-          // 訪客模式顯示特殊提示
-          if (isGuest) {
-            setModalState({
-              isOpen: true,
-              title: '訪客模式',
-              message: '訪客模式下無法保存到雲端，但您現在可以開始進行評測了！',
-              type: 'info',
-            });
-          } else {
-            setModalState({
-              isOpen: true,
-              title: '儲存失敗',
-              message: '儲存失敗，請稍後再試',
-              type: 'error',
-            });
-          }
-        }
+        // 使用 setUserData 而不是直接 saveUserData，讓防抖機制生效
+        setUserData(updatedUserData);
+
+        setModalState({
+          isOpen: true,
+          title: '儲存成功',
+          message: '資料已儲存成功！',
+          type: 'success',
+        });
       } catch (err) {
         if (isGuest) {
           setModalState({
@@ -800,6 +1000,11 @@ function UserInfo({ testData, onLogout, clearTestData }) {
       message: '結果已儲存',
       type: 'success',
     });
+
+    // 2秒後自動關閉成功對話框
+    setTimeout(() => {
+      setModalState(prev => ({ ...prev, isOpen: false }));
+    }, 2000);
   }, [userData.scores, averageScore, saveHistory]);
 
   const handleNavigation = useCallback(
@@ -903,9 +1108,8 @@ function UserInfo({ testData, onLogout, clearTestData }) {
       const avatarRef = ref(storage, `avatars/${userId}/avatar.jpg`);
       await uploadBytes(avatarRef, compressed, { contentType: 'image/jpeg' });
       const url = await getDownloadURL(avatarRef);
-      // 更新 Firestore
+      // 更新 Firestore - 使用 setUserData 讓防抖機制生效
       setUserData(prev => ({ ...prev, avatarUrl: url }));
-      await saveUserData({ ...userData, avatarUrl: url });
     } catch (err) {
       setAvatarError('頭像上傳失敗: ' + err.message);
     } finally {
@@ -929,70 +1133,31 @@ function UserInfo({ testData, onLogout, clearTestData }) {
       {/* 對話框組件 */}
       <Modal
         isOpen={modalState.isOpen}
-        onClose={() => setModalState(prev => ({ ...prev, isOpen: false }))}
+        onClose={() => {
+          console.log('Modal onClose triggered, current state:', modalState);
+          setModalState(prev => {
+            console.log('Setting modal state to closed');
+            return { ...prev, isOpen: false };
+          });
+        }}
         title={modalState.title}
         message={modalState.message}
         type={modalState.type}
+        onAction={modalState.onAction}
+        actionText={modalState.actionText}
       />
 
-      {/* 儀式感動畫粒子效果 */}
-      {particles.map(particle => (
-        <div
-          key={particle.id}
-          className="ceremonial-particle"
-          style={{
-            position: 'fixed',
-            left: particle.x,
-            top: particle.y,
-            width: particle.size,
-            height: particle.size,
-            backgroundColor: particle.color,
-            borderRadius: '50%',
-            pointerEvents: 'none',
-            zIndex: 10000,
-            boxShadow: `0 0 ${particle.size * 2}px ${particle.color}`,
-            animation: `particleExplosion 2s ease-out forwards`,
-            animationDelay: `${particle.delay}s`,
-            '--target-x': `${particle.targetX}px`,
-            '--target-y': `${particle.targetY}px`,
-          }}
-        />
-      ))}
+      {/* 提交確認對話框 */}
+      <SubmitConfirmModal
+        isOpen={submitConfirmModal.isOpen}
+        onConfirm={confirmSubmitToLadder}
+        onCancel={cancelSubmit}
+        remainingCount={submitConfirmModal.remainingCount}
+      />
 
-      {/* 分數提升動畫 */}
-      {animationState.isActive && (
-        <div className="score-improvement-overlay">
-          <div className="score-improvement-message">
-            <div className="improvement-icon">🎉</div>
-            <div className="improvement-text">
-              {Object.keys(scoreAnimations).length > 0 && (
-                <div className="improvement-details">
-                  {Object.entries(scoreAnimations).map(([key, data]) => (
-                    <div key={key} className="improvement-item">
-                      <span className="improvement-label">
-                        {key === 'strength'
-                          ? '力量'
-                          : key === 'explosivePower'
-                          ? '爆發力'
-                          : key === 'cardio'
-                          ? '心肺耐力'
-                          : key === 'muscleMass'
-                          ? '骨骼肌肉量'
-                          : key === 'bodyFat'
-                          ? 'FFMI'
-                          : key}
-                      </span>
-                      <span className="improvement-score">
-                        {data.old} → {data.new} (+{data.improvement.toFixed(1)})
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
+      {/* 移除儀式感動畫粒子效果 */}
+
+      {/* 移除分數提升動畫 */}
 
       {error && <p className="error-message">{error}</p>}
 
@@ -1372,9 +1537,40 @@ function UserInfo({ testData, onLogout, clearTestData }) {
                 </div>
               )}
 
+              {/* 按鈕區域 */}
+              <div className="action-buttons-section">
+                {/* 儲存評測結果按鈕 */}
+                {averageScore > 0 && (
+                  <button
+                    onClick={handleSaveResults}
+                    className="action-btn save-results-btn"
+                    disabled={loading}
+                  >
+                    <span className="btn-icon">💾</span>
+                    <span className="btn-text">儲存評測結果</span>
+                  </button>
+                )}
+
+                {/* 提交到天梯按鈕 */}
+                {completionStatus.isFullyCompleted && (
+                  <button
+                    onClick={handleSubmitToLadder}
+                    className="action-btn submit-ladder-btn"
+                    disabled={loading}
+                  >
+                    <span className="btn-icon">🏆</span>
+                    <span className="btn-text">提交到天梯</span>
+                  </button>
+                )}
+              </div>
+
               {/* 天梯排名說明 */}
               <div className="ladder-info-card">
-                <p className="ladder-info-text">完成五項評測，可參與天梯排名</p>
+                <p className="ladder-info-text">
+                  {completionStatus.isFullyCompleted
+                    ? '完成五項評測，可參與天梯排名'
+                    : `完成 ${completionStatus.completedCount}/5 項評測後可參與天梯排名`}
+                </p>
               </div>
             </div>
           )}
@@ -1422,6 +1618,16 @@ function UserInfo({ testData, onLogout, clearTestData }) {
           </button>
         </div>
       </div>
+
+      {/* 提交確認對話框 */}
+      {submitConfirmModal.isOpen && (
+        <SubmitConfirmModal
+          isOpen={submitConfirmModal.isOpen}
+          onConfirm={confirmSubmitToLadder}
+          onCancel={cancelSubmit}
+          remainingCount={submitConfirmModal.remainingCount}
+        />
+      )}
     </div>
   );
 }

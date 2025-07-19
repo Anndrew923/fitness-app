@@ -1172,244 +1172,9 @@
   }
 }
 
-/* 儀式感動畫樣式 */
+/* 移除儀式感動畫樣式 */
 
-/* 粒子爆炸效果 */
-@keyframes particleExplosion {
-  0% {
-    opacity: 1;
-    transform: scale(1) translate(0, 0);
-  }
-  25% {
-    opacity: 0.8;
-    transform: scale(1.5) translate(var(--target-x), var(--target-y));
-  }
-  50% {
-    opacity: 0.6;
-    transform: scale(2)
-      translate(calc(var(--target-x) * 2), calc(var(--target-y) * 2));
-  }
-  75% {
-    opacity: 0.3;
-    transform: scale(1.5)
-      translate(calc(var(--target-x) * 3), calc(var(--target-y) * 3));
-  }
-  100% {
-    opacity: 0;
-    transform: scale(0.5)
-      translate(calc(var(--target-x) * 4), calc(var(--target-y) * 4));
-  }
-}
-
-.ceremonial-particle {
-  position: fixed;
-  pointer-events: none;
-  z-index: 10000;
-  border-radius: 50%;
-  animation: particleExplosion 2s ease-out forwards;
-}
-
-/* 分數提升動畫覆蓋層 */
-.score-improvement-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.7);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 10001;
-  animation: overlayFadeIn 0.5s ease-out;
-}
-
-@keyframes overlayFadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-.score-improvement-message {
-  background: linear-gradient(135deg, #ff6b35 0%, #f7931e 50%, #ffd700 100%);
-  color: white;
-  padding: 30px 40px;
-  border-radius: 20px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-  text-align: center;
-  max-width: 400px;
-  animation: messageSlideIn 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-  backdrop-filter: blur(10px);
-  border: 2px solid rgba(255, 255, 255, 0.2);
-}
-
-@keyframes messageSlideIn {
-  0% {
-    opacity: 0;
-    transform: scale(0.5) translateY(50px);
-  }
-  50% {
-    transform: scale(1.1) translateY(-10px);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
-}
-
-.improvement-icon {
-  font-size: 48px;
-  margin-bottom: 20px;
-  animation: iconBounce 1s ease-in-out infinite;
-}
-
-@keyframes iconBounce {
-  0%,
-  100% {
-    transform: translateY(0) scale(1);
-  }
-  50% {
-    transform: translateY(-10px) scale(1.1);
-  }
-}
-
-.improvement-text {
-  font-size: 18px;
-  font-weight: 700;
-  margin-bottom: 20px;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-}
-
-.improvement-details {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.improvement-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: rgba(255, 255, 255, 0.2);
-  padding: 12px 16px;
-  border-radius: 10px;
-  backdrop-filter: blur(5px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  animation: itemSlideIn 0.5s ease-out;
-}
-
-@keyframes itemSlideIn {
-  from {
-    opacity: 0;
-    transform: translateX(-20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-.improvement-label {
-  font-weight: 600;
-  font-size: 14px;
-}
-
-.improvement-score {
-  font-weight: 700;
-  font-size: 16px;
-  color: #ffd700;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-}
-
-/* 雷達圖動畫增強 */
-.radar-section {
-  position: relative;
-}
-
-.radar-section.animating {
-  animation: radarGlow 2s ease-in-out;
-}
-
-@keyframes radarGlow {
-  0%,
-  100% {
-    box-shadow: 0 4px 20px rgba(129, 216, 208, 0.2);
-  }
-  50% {
-    box-shadow: 0 8px 40px rgba(129, 216, 208, 0.6),
-      0 0 60px rgba(255, 107, 53, 0.4);
-  }
-}
-
-/* 分數值動畫 */
-.score-value.animating {
-  animation: scorePulse 1s ease-in-out;
-}
-
-@keyframes scorePulse {
-  0%,
-  100% {
-    transform: scale(1);
-    color: #ff6b35;
-  }
-  50% {
-    transform: scale(1.2);
-    color: #ffd700;
-  }
-}
-
-/* 響應式設計 */
-@media (max-width: 768px) {
-  .score-improvement-message {
-    margin: 20px;
-    padding: 20px 25px;
-    max-width: 320px;
-  }
-
-  .improvement-icon {
-    font-size: 36px;
-    margin-bottom: 15px;
-  }
-
-  .improvement-text {
-    font-size: 16px;
-    margin-bottom: 15px;
-  }
-
-  .improvement-item {
-    padding: 10px 12px;
-    gap: 8px;
-  }
-
-  .improvement-label {
-    font-size: 13px;
-  }
-
-  .improvement-score {
-    font-size: 14px;
-  }
-}
-
-/* 動畫性能優化 */
-.ceremonial-particle,
-.score-improvement-overlay,
-.score-improvement-message {
-  will-change: transform, opacity;
-}
-
-/* 減少動畫在低端設備上的複雜度 */
-@media (prefers-reduced-motion: reduce) {
-  .ceremonial-particle,
-  .score-improvement-overlay,
-  .score-improvement-message,
-  .improvement-icon,
-  .improvement-item {
-    animation: none !important;
-  }
-}
+/* 移除所有動畫相關的CSS */
 
 /* 天梯排名說明卡 */
 .ladder-info-card {
@@ -1537,6 +1302,16 @@
   justify-content: flex-end;
 }
 
+.modal-footer-actions {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+}
+
+.modal-footer-actions .modal-btn {
+  flex: 1;
+}
+
 .modal-btn {
   padding: 12px 24px;
   border: none;
@@ -1592,6 +1367,17 @@
   box-shadow: 0 4px 12px rgba(245, 101, 101, 0.3);
 }
 
+.modal-btn-secondary {
+  background: linear-gradient(135deg, #718096, #4a5568);
+  color: white;
+}
+
+.modal-btn-secondary:hover {
+  background: linear-gradient(135deg, #4a5568, #2d3748);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(113, 128, 150, 0.3);
+}
+
 /* 響應式設計 */
 @media (max-width: 480px) {
   .modal-content {
@@ -1622,5 +1408,327 @@
   .modal-btn {
     padding: 10px 20px;
     font-size: 14px;
+  }
+}
+
+/* 新增：按鈕區域樣式 */
+.action-buttons-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 20px 0;
+  padding: 0 20px;
+}
+
+.action-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.action-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.action-btn:not(:disabled):hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+.action-btn:not(:disabled):active {
+  transform: translateY(0);
+}
+
+.btn-icon {
+  font-size: 16px;
+}
+
+.btn-text {
+  font-family: 'Noto Sans TC', sans-serif;
+}
+
+/* 儲存評測結果按鈕 */
+.save-results-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.save-results-btn:not(:disabled):hover {
+  background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+}
+
+/* 提交到天梯按鈕 */
+.submit-ladder-btn {
+  background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+  color: white;
+  box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3);
+  position: relative;
+}
+
+.submit-ladder-btn:not(:disabled):hover {
+  background: linear-gradient(135deg, #ff5722 0%, #f57c00 100%);
+  box-shadow: 0 8px 25px rgba(255, 107, 53, 0.4);
+}
+
+.submit-ladder-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  transition: left 0.5s;
+}
+
+.submit-ladder-btn:not(:disabled):hover::before {
+  left: 100%;
+}
+
+/* 按鈕動畫效果 */
+@keyframes buttonPulse {
+  0% {
+    box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3);
+  }
+  50% {
+    box-shadow: 0 4px 20px rgba(255, 107, 53, 0.5);
+  }
+  100% {
+    box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3);
+  }
+}
+
+.submit-ladder-btn:not(:disabled) {
+  animation: buttonPulse 2s infinite;
+}
+
+/* 響應式設計 */
+@media (max-width: 768px) {
+  .action-buttons-section {
+    padding: 0 15px;
+    gap: 10px;
+  }
+
+  .action-btn {
+    padding: 10px 16px;
+    font-size: 13px;
+  }
+
+  .btn-icon {
+    font-size: 14px;
+  }
+}
+
+/* 深色模式適配 */
+@media (prefers-color-scheme: dark) {
+  .save-results-btn {
+    background: linear-gradient(135deg, #4c63d2 0%, #5a3d7a 100%);
+  }
+
+  .submit-ladder-btn {
+    background: linear-gradient(135deg, #e55a2b 0%, #d67a0e 100%);
+  }
+}
+
+/* 提交確認對話框樣式 */
+.submit-confirm-overlay {
+  z-index: 10001; /* 比普通對話框更高 */
+}
+
+.submit-confirm-content {
+  max-width: 450px;
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  border: 2px solid #e2e8f0;
+  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.4);
+}
+
+.submit-confirm-message {
+  text-align: center;
+}
+
+.confirm-text {
+  font-size: 16px;
+  line-height: 1.6;
+  color: #2d3748;
+  margin-bottom: 20px;
+  font-weight: 500;
+}
+
+.remaining-count {
+  background: linear-gradient(135deg, #ff6b35, #f7931e);
+  color: white;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-weight: 700;
+  font-size: 18px;
+  display: inline-block;
+  margin: 0 4px;
+  box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
+}
+
+.confirm-details {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 20px;
+  padding: 16px;
+  background: rgba(129, 216, 208, 0.1);
+  border-radius: 12px;
+  border: 1px solid rgba(129, 216, 208, 0.2);
+}
+
+.detail-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+}
+
+.detail-icon {
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.detail-text {
+  font-size: 14px;
+  color: #4a5568;
+  font-weight: 500;
+}
+
+.submit-confirm-footer {
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+}
+
+.modal-btn-secondary {
+  background: linear-gradient(135deg, #718096, #4a5568);
+  color: white;
+  flex: 1;
+}
+
+.modal-btn-secondary:hover {
+  background: linear-gradient(135deg, #4a5568, #2d3748);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(113, 128, 150, 0.3);
+}
+
+.modal-btn-success {
+  background: linear-gradient(135deg, #48bb78, #38a169);
+  color: white;
+  flex: 1;
+}
+
+.modal-btn-success:hover {
+  background: linear-gradient(135deg, #38a169, #2f855a);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(72, 187, 120, 0.3);
+}
+
+/* 響應式設計 */
+@media (max-width: 480px) {
+  .submit-confirm-content {
+    margin: 20px;
+    max-width: none;
+  }
+
+  .confirm-text {
+    font-size: 15px;
+  }
+
+  .remaining-count {
+    font-size: 16px;
+    padding: 3px 10px;
+  }
+
+  .confirm-details {
+    padding: 12px;
+    gap: 10px;
+  }
+
+  .detail-item {
+    gap: 10px;
+  }
+
+  .detail-icon {
+    font-size: 18px;
+  }
+
+  .detail-text {
+    font-size: 13px;
+  }
+
+  .submit-confirm-footer {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .modal-btn-secondary,
+  .modal-btn-success {
+    width: 100%;
+  }
+}
+
+/* 動畫效果 */
+@keyframes confirmModalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-30px) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.submit-confirm-content {
+  animation: confirmModalSlideIn 0.4s ease-out;
+}
+
+/* 深色模式適配 */
+@media (prefers-color-scheme: dark) {
+  .submit-confirm-content {
+    background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
+    border-color: #4a5568;
+  }
+
+  .confirm-text {
+    color: #e2e8f0;
+  }
+
+  .confirm-details {
+    background: rgba(129, 216, 208, 0.15);
+    border-color: rgba(129, 216, 208, 0.3);
+  }
+
+  .detail-text {
+    color: #cbd5e0;
+  }
+
+  .modal-btn-secondary {
+    background: linear-gradient(135deg, #4a5568, #2d3748);
+  }
+
+  .modal-btn-secondary:hover {
+    background: linear-gradient(135deg, #2d3748, #1a202c);
   }
 }

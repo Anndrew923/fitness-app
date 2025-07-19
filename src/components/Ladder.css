@@ -909,3 +909,225 @@
     font-size: 18px;
   }
 }
+
+/* 第一名浮動卡片金光閃爍效果 */
+.first-place-glow {
+  animation: firstPlaceGlow 2s ease-in-out infinite;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15), 0 4px 15px rgba(0, 0, 0, 0.1),
+    0 0 20px rgba(255, 215, 0, 0.6), 0 0 40px rgba(255, 215, 0, 0.3),
+    0 0 60px rgba(255, 215, 0, 0.1);
+  border: 2px solid rgba(255, 215, 0, 0.8);
+  position: relative;
+  overflow: hidden;
+}
+
+/* 第一名特殊展開樣式 */
+.first-place-glow.expanded {
+  width: 100% !important;
+  max-width: none !important;
+  left: 0 !important;
+  transform: translateX(0) translateY(0) !important;
+  border-radius: 0 0 16px 16px !important;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3), 0 0 20px rgba(255, 215, 0, 0.6),
+    0 0 40px rgba(255, 215, 0, 0.3), 0 0 60px rgba(255, 215, 0, 0.1) !important;
+  z-index: 1001 !important;
+  margin: 0;
+  padding: 20px;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.95),
+    rgba(255, 255, 255, 0.98)
+  );
+  backdrop-filter: blur(10px);
+}
+
+.first-place-glow.expanded::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    45deg,
+    transparent 30%,
+    rgba(255, 215, 0, 0.1) 50%,
+    transparent 70%
+  );
+  animation: goldenShimmer 3s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.first-place-glow.expanded::after {
+  content: '👑';
+  position: absolute;
+  top: 10px;
+  right: 20px;
+  font-size: 24px;
+  animation: crownFloat 2s ease-in-out infinite;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+.first-place-glow::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    45deg,
+    transparent 30%,
+    rgba(255, 215, 0, 0.1) 50%,
+    transparent 70%
+  );
+  animation: goldenShimmer 3s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.first-place-glow::after {
+  content: '👑';
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  font-size: 20px;
+  animation: crownFloat 2s ease-in-out infinite;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+.first-place-arrow {
+  filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.8));
+  animation: arrowGlow 2s ease-in-out infinite;
+}
+
+/* 第一名展開時的箭頭樣式 */
+.first-place-arrow.expanded {
+  left: 50px !important;
+  transform: translateX(-50%) !important;
+  filter: drop-shadow(0 0 12px rgba(255, 215, 0, 1));
+}
+
+@keyframes firstPlaceGlow {
+  0%,
+  100% {
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15), 0 4px 15px rgba(0, 0, 0, 0.1),
+      0 0 20px rgba(255, 215, 0, 0.6), 0 0 40px rgba(255, 215, 0, 0.3),
+      0 0 60px rgba(255, 215, 0, 0.1);
+  }
+  50% {
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15), 0 4px 15px rgba(0, 0, 0, 0.1),
+      0 0 30px rgba(255, 215, 0, 0.8), 0 0 60px rgba(255, 215, 0, 0.5),
+      0 0 90px rgba(255, 215, 0, 0.2);
+  }
+}
+
+@keyframes goldenShimmer {
+  0% {
+    transform: translateX(-100%) translateY(-100%) rotate(45deg);
+  }
+  100% {
+    transform: translateX(100%) translateY(100%) rotate(45deg);
+  }
+}
+
+@keyframes crownFloat {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-3px) rotate(5deg);
+  }
+}
+
+@keyframes arrowGlow {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.8));
+  }
+  50% {
+    filter: drop-shadow(0 0 15px rgba(255, 215, 0, 1));
+  }
+}
+
+/* 第一名浮動卡片的特殊標題樣式 */
+.first-place-glow .tooltip-header h4 {
+  background: linear-gradient(135deg, #ffd700, #ffed4e, #ffd700);
+  background-size: 200% 200%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: titleShimmer 2s ease-in-out infinite;
+  font-weight: 800;
+}
+
+/* 第一名展開時的標題樣式 */
+.first-place-glow.expanded .tooltip-header h4 {
+  font-size: 20px;
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+@keyframes titleShimmer {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+/* 第一名浮動卡片的特殊值樣式 */
+.first-place-glow .tooltip-value {
+  color: #ffd700 !important;
+  font-weight: 700 !important;
+  text-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
+  animation: valuePulse 1.5s ease-in-out infinite;
+}
+
+/* 第一名展開時的值樣式 */
+.first-place-glow.expanded .tooltip-value {
+  font-size: 16px;
+  text-shadow: 0 0 8px rgba(255, 215, 0, 0.8);
+}
+
+@keyframes valuePulse {
+  0%,
+  100% {
+    text-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
+  }
+  50% {
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.8),
+      0 0 20px rgba(255, 215, 0, 0.3);
+  }
+}
+
+/* 第一名展開時的內容樣式 */
+.first-place-glow.expanded .tooltip-body {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  padding: 20px;
+}
+
+.first-place-glow.expanded .tooltip-item {
+  background: rgba(255, 215, 0, 0.1);
+  border-radius: 8px;
+  padding: 15px;
+  border: 1px solid rgba(255, 215, 0, 0.3);
+  margin-bottom: 0;
+}
+
+.first-place-glow.expanded .tooltip-label {
+  font-size: 14px;
+  font-weight: 700;
+  color: #333;
+}
+
+.first-place-glow.expanded .tooltip-value {
+  font-size: 16px;
+  font-weight: 800;
+  color: #ffd700 !important;
+  text-shadow: 0 0 8px rgba(255, 215, 0, 0.8);
+}

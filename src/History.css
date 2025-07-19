@@ -1,11 +1,11 @@
 .history-container {
-  max-width: 100%;
-  padding: 1rem;
+    max-width: 100%;
+    padding: 1rem;
   padding-bottom: 120px; /* 為底部導覽列和廣告留空間 */
-  margin: 0 auto;
-  background-color: #f9f9f9;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin: 0 auto;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   min-height: calc(100vh - 140px); /* 確保頁面有足夠高度 */
 }
 
@@ -17,23 +17,23 @@
     margin: 0;
     min-height: calc(100vh - 120px);
   }
-}
-
-.history-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-bottom: 1rem;
+  }
+  
+  .history-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 1rem;
   background: white;
   border-radius: 8px;
   overflow: hidden;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-
-.history-table th,
-.history-table td {
-  padding: 0.75rem;
-  border: 1px solid #ddd;
-  text-align: center;
+  }
+  
+  .history-table th,
+  .history-table td {
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    text-align: center;
   vertical-align: middle;
 }
 
@@ -178,27 +178,27 @@
   .history-table th .desktop-text {
     font-size: 12px;
   }
-}
-
-.action-buttons {
+  }
+  
+  .action-buttons {
   text-align: center;
-  margin-top: 0.625rem;
+    margin-top: 0.625rem;
   margin-bottom: 20px; /* 增加底部間距 */
   display: flex;
   justify-content: center;
   gap: 10px;
   flex-wrap: wrap;
-}
-
-.toggle-delete-btn {
-  padding: 0.5rem 1rem;
-  color: #fff;
-  border: none;
-  border-radius: 0.3125rem;
-  cursor: pointer;
+  }
+  
+  .toggle-delete-btn {
+    padding: 0.5rem 1rem;
+    color: #fff;
+    border: none;
+    border-radius: 0.3125rem;
+    cursor: pointer;
   transition: all 0.2s ease;
-}
-
+  }
+  
 .toggle-delete-btn:hover {
   transform: translateY(-1px);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
@@ -206,8 +206,8 @@
 
 .delete-selected-btn {
   background-color: #dc3545;
-}
-
+  }
+  
 .delete-selected-btn:hover {
   background-color: #c82333;
 }
@@ -218,8 +218,8 @@
 
 .cancel-delete-btn:hover {
   background-color: #5a6268;
-}
-
+  }
+  
 .edit-mode-btn {
   background-color: #ffc107;
   color: #212529;
@@ -294,8 +294,8 @@
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-}
-
+  }
+  
 .legend-item {
   padding: 4px 8px;
   border-radius: 4px;
@@ -336,4 +336,4 @@
   -webkit-text-fill-color: transparent;
   background-clip: text;
   font-weight: 700;
-}
+  }

@@ -73,7 +73,9 @@ export function UserProvider({ children }) {
       return false;
     }
 
-    console.log('開始載入用戶資料:', currentUser.uid);
+    if (process.env.NODE_ENV === 'development') {
+      console.log('開始載入用戶資料:', currentUser.uid);
+    }
     setIsLoading(true);
 
     try {
@@ -82,7 +84,9 @@ export function UserProvider({ children }) {
 
       if (userSnap.exists()) {
         const firebaseData = userSnap.data();
-        console.log('從 Firebase 載入的資料:', firebaseData);
+        if (process.env.NODE_ENV === 'development') {
+          console.log('從 Firebase 載入的資料:', firebaseData);
+        }
 
         // 確保數據結構完整
         const mergedData = {
@@ -111,7 +115,9 @@ export function UserProvider({ children }) {
         if (isMountedRef.current) {
           dispatch({ type: 'SET_USER_DATA', payload: mergedData });
           localStorage.setItem('userData', JSON.stringify(mergedData));
-          console.log('用戶資料載入成功');
+          if (process.env.NODE_ENV === 'development') {
+            console.log('用戶資料載入成功');
+          }
         }
         setIsLoading(false);
         return true;
@@ -136,7 +142,9 @@ export function UserProvider({ children }) {
         const localData = localStorage.getItem('userData');
         if (localData && isMountedRef.current) {
           const parsedData = JSON.parse(localData);
-          console.log('從本地載入用戶資料:', parsedData);
+          if (process.env.NODE_ENV === 'development') {
+            console.log('從本地載入用戶資料:', parsedData);
+          }
           dispatch({ type: 'SET_USER_DATA', payload: parsedData });
           setIsLoading(false);
           return true;
@@ -201,6 +209,8 @@ export function UserProvider({ children }) {
 
   // 新增：防抖引用
   const setUserDataDebounceRef = useRef(null);
+  const saveHistoryDebounceRef = useRef(null);
+  const lastWriteTimeRef = useRef(0);
 
   // 更新用戶數據
   const setUserData = useCallback(
@@ -246,24 +256,43 @@ export function UserProvider({ children }) {
         );
 
         if (hasImportantChanges) {
-          // 清除之前的防抖定時器
-          if (setUserDataDebounceRef.current) {
-            clearTimeout(setUserDataDebounceRef.current);
-          }
+          // 檢查寫入頻率限制（至少間隔30秒）
+          const now = Date.now();
+          const timeSinceLastWrite = now - lastWriteTimeRef.current;
 
-          // 使用更長的防抖時間（10秒）來大幅減少寫入頻率
-          setUserDataDebounceRef.current = setTimeout(() => {
-            console.log(`🔄 防抖後保存用戶數據（10秒防抖）`);
-            saveUserData(newData);
-            setUserDataDebounceRef.current = null;
-          }, 10000); // 10秒防抖
+          if (timeSinceLastWrite < 30000) {
+            // 如果距離上次寫入不到30秒，延長防抖時間
+            if (setUserDataDebounceRef.current) {
+              clearTimeout(setUserDataDebounceRef.current);
+            }
+
+            setUserDataDebounceRef.current = setTimeout(() => {
+              console.log(`🔄 防抖後保存用戶數據（30秒頻率限制）`);
+              lastWriteTimeRef.current = Date.now();
+              saveUserData(newData);
+              setUserDataDebounceRef.current = null;
+            }, 30000 - timeSinceLastWrite);
+          } else {
+            // 清除之前的防抖定時器
+            if (setUserDataDebounceRef.current) {
+              clearTimeout(setUserDataDebounceRef.current);
+            }
+
+            // 使用更長的防抖時間（15秒）來大幅減少寫入頻率
+            setUserDataDebounceRef.current = setTimeout(() => {
+              console.log(`🔄 防抖後保存用戶數據（15秒防抖）`);
+              lastWriteTimeRef.current = Date.now();
+              saveUserData(newData);
+              setUserDataDebounceRef.current = null;
+            }, 15000); // 15秒防抖
+          }
         }
       }
     },
     [userData, saveUserData]
   );
 
-  // 保存歷史記錄
+  // 保存歷史記錄 - 優化版本
   const saveHistory = useCallback(
     async record => {
       if (!auth.currentUser) {
@@ -278,39 +307,49 @@ export function UserProvider({ children }) {
         id: Date.now().toString(),
       };
 
-      try {
-        const userRef = doc(db, 'users', auth.currentUser.uid);
-        await updateDoc(userRef, {
-          history: arrayUnion(recordWithMetadata),
-        });
+      // 立即更新本地 state
+      const newHistory = [...(userData.history || []), recordWithMetadata];
+      dispatch({
+        type: 'UPDATE_USER_DATA',
+        payload: { history: newHistory },
+      });
 
-        // 記錄寫入操作
-        firebaseWriteMonitor.logWrite(
-          'updateDoc',
-          'users',
-          auth.currentUser.uid,
-          { history: 'arrayUnion' }
-        );
-
-        // 更新本地 state
-        const newHistory = [...(userData.history || []), recordWithMetadata];
-        dispatch({
-          type: 'UPDATE_USER_DATA',
-          payload: { history: newHistory },
-        });
-
-        console.log('歷史記錄保存成功');
-      } catch (error) {
-        console.error('保存歷史記錄失敗:', error);
-        // 至少更新本地 state
-        const newHistory = [...(userData.history || []), recordWithMetadata];
-        dispatch({
-          type: 'UPDATE_USER_DATA',
-          payload: { history: newHistory },
-        });
+      // 使用防抖機制保存到 Firebase
+      if (saveHistoryDebounceRef.current) {
+        clearTimeout(saveHistoryDebounceRef.current);
       }
+
+      saveHistoryDebounceRef.current = setTimeout(async () => {
+        try {
+          const userRef = doc(db, 'users', auth.currentUser.uid);
+
+          // 使用 setDoc 而不是 updateDoc，減少寫入次數
+          const currentData = userData;
+          const updatedData = {
+            ...currentData,
+            history: newHistory,
+            updatedAt: new Date().toISOString(),
+          };
+
+          await setDoc(userRef, updatedData, { merge: true });
+
+          // 記錄寫入操作
+          firebaseWriteMonitor.logWrite(
+            'setDoc',
+            'users',
+            auth.currentUser.uid,
+            { history: 'batch_update' }
+          );
+
+          console.log('歷史記錄批量保存成功');
+        } catch (error) {
+          console.error('保存歷史記錄失敗:', error);
+        } finally {
+          saveHistoryDebounceRef.current = null;
+        }
+      }, 5000); // 5秒防抖，批量處理歷史記錄
     },
-    [userData.history]
+    [userData, saveUserData]
   );
 
   // 清除用戶數據
@@ -345,41 +384,44 @@ export function UserProvider({ children }) {
     };
   }, [loadUserData, clearUserData]);
 
-  // 定期同步數據到 Firebase（每 10 分鐘，大幅減少寫入頻率）
+  // 定期同步數據到 Firebase（每 20 分鐘，大幅減少寫入頻率）
   useEffect(() => {
     if (!auth.currentUser || !userData || Object.keys(userData).length === 0)
       return;
 
     const syncInterval = setInterval(() => {
       if (auth.currentUser && userData && userData.height) {
-        // 只在數據有實質變化時才保存
-        const lastSaved = localStorage.getItem('lastSavedTimestamp');
+        // 檢查距離上次寫入的時間
         const now = Date.now();
-        if (!lastSaved || now - parseInt(lastSaved) > 600000) {
-          // 10分鐘
-          // 檢查是否有實際變化，避免無意義寫入
-          const lastSavedData = localStorage.getItem('lastSavedUserData');
-          const currentDataString = JSON.stringify({
-            scores: userData.scores,
-            height: userData.height,
-            weight: userData.weight,
-            age: userData.age,
-            gender: userData.gender,
-            nickname: userData.nickname,
-            ladderRank: userData.ladderRank,
-          });
+        const timeSinceLastWrite = now - lastWriteTimeRef.current;
 
-          if (lastSavedData !== currentDataString) {
-            console.log('🔄 定期同步：檢測到數據變化，執行保存');
-            saveUserData(userData);
-            localStorage.setItem('lastSavedTimestamp', now.toString());
-            localStorage.setItem('lastSavedUserData', currentDataString);
-          } else {
-            console.log('⏭️ 定期同步：無數據變化，跳過保存');
-          }
+        // 如果距離上次寫入不到5分鐘，跳過同步
+        if (timeSinceLastWrite < 300000) {
+          console.log('⏭️ 定期同步：距離上次寫入時間太短，跳過同步');
+          return;
+        }
+
+        // 檢查是否有實際變化，避免無意義寫入
+        const lastSavedData = localStorage.getItem('lastSavedUserData');
+        const currentDataString = JSON.stringify({
+          scores: userData.scores,
+          height: userData.height,
+          weight: userData.weight,
+          age: userData.age,
+          gender: userData.gender,
+          nickname: userData.nickname,
+          ladderRank: userData.ladderRank,
+        });
+
+        if (lastSavedData !== currentDataString) {
+          console.log('🔄 定期同步：檢測到數據變化，執行保存');
+          saveUserData(userData);
+          localStorage.setItem('lastSavedUserData', currentDataString);
+        } else {
+          console.log('⏭️ 定期同步：無數據變化，跳過保存');
         }
       }
-    }, 600000); // 改為10分鐘
+    }, 1200000); // 改為20分鐘
 
     return () => clearInterval(syncInterval);
   }, [userData, saveUserData]);

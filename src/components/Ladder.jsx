@@ -215,33 +215,61 @@ const Ladder = () => {
     return null; // 動畫已移除，不再顯示提示
   };
 
+  // 獲取排名徽章
+  const getRankBadge = rank => {
+    if (rank === 1) return '🥇';
+    if (rank === 2) return '🥈';
+    if (rank === 3) return '🥉';
+    if (rank <= 10) return '🏆';
+    if (rank <= 50) return '⭐';
+    return '';
+  };
+
+  // 獲取年齡組標籤
+  const getAgeGroupLabel = ageGroup => {
+    const group = ageGroups.find(g => g.value === ageGroup);
+    return group ? group.label : ageGroup;
+  };
+
   // 新增：獲取浮動排名顯示框
-  const getFloatingRankDisplay = () => {
-    console.log('🔍 檢查浮動排名框條件:', {
-      hasUserData: !!userData,
-      hasLadderScore: userData?.ladderScore > 0,
-      userRank,
-      ladderDataLength: ladderData.length,
-    });
+  const floatingRankDisplay = useMemo(() => {
+    // 只在開發環境下輸出詳細日誌
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🔍 檢查浮動排名框條件:', {
+        hasUserData: !!userData,
+        hasLadderScore: userData?.ladderScore > 0,
+        userRank,
+        ladderDataLength: ladderData.length,
+      });
+    }
 
     if (!userData || !userData.ladderScore || userData.ladderScore === 0) {
-      console.log('❌ 浮動框條件1不滿足：用戶數據或分數問題');
+      if (process.env.NODE_ENV === 'development') {
+        console.log('❌ 浮動框條件1不滿足：用戶數據或分數問題');
+      }
       return null;
     }
 
     // 如果用戶排名在前7名內，不顯示浮動框（因為應該在列表中）
     if (userRank > 0 && userRank <= 7) {
-      console.log('❌ 浮動框條件2不滿足：用戶排名前7名內');
+      if (process.env.NODE_ENV === 'development') {
+        console.log('❌ 浮動框條件2不滿足：用戶排名前7名內');
+      }
       return null;
     }
 
     // 如果用戶排名為0或未上榜，不顯示浮動框
     if (userRank === 0) {
-      console.log('❌ 浮動框條件3不滿足：用戶未上榜');
+      if (process.env.NODE_ENV === 'development') {
+        console.log('❌ 浮動框條件3不滿足：用戶未上榜');
+      }
       return null;
     }
 
-    console.log('✅ 浮動框條件滿足，顯示浮動排名框，排名:', userRank);
+    if (process.env.NODE_ENV === 'development') {
+      console.log('✅ 浮動框條件滿足，顯示浮動排名框，排名:', userRank);
+    }
+
     const currentRank = userRank;
     const rankBadge = getRankBadge(currentRank);
 
@@ -290,7 +318,7 @@ const Ladder = () => {
         </div>
       </div>
     );
-  };
+  }, [userData, userRank, ladderData.length]);
 
   const getUserRankDisplay = () => {
     if (!userData) {
@@ -316,20 +344,6 @@ const Ladder = () => {
     return rankToShow > 0 ? `第 ${rankToShow} 名` : '未上榜';
   };
 
-  const getRankBadge = rank => {
-    if (rank === 1) return '🥇';
-    if (rank === 2) return '🥈';
-    if (rank === 3) return '🥉';
-    if (rank <= 10) return '🏆';
-    if (rank <= 50) return '⭐';
-    return '';
-  };
-
-  const getAgeGroupLabel = ageGroup => {
-    const group = ageGroups.find(g => g.value === ageGroup);
-    return group ? group.label : ageGroup;
-  };
-
   // 處理用戶點擊，顯示訓練背景信息
   const handleUserClick = (user, event) => {
     if (user.isAnonymous) return; // 匿名用戶不顯示信息
@@ -339,20 +353,40 @@ const Ladder = () => {
     const viewportHeight = window.innerHeight;
     const safeMargin = 20; // 安全邊距
 
+    // 檢查是否為第一名
+    const isFirstPlace = ladderData.findIndex(u => u.id === user.id) === 0;
+
     // 計算最佳位置
     let y = rect.top - 10;
     let transformY = -100; // 預設向上顯示
+    let tooltipStyle = {}; // 額外的樣式
 
-    // 如果向上顯示會被切掉，改為向下顯示
-    if (rect.top - tooltipHeight - safeMargin < 0) {
-      y = rect.bottom + 10;
+    if (isFirstPlace) {
+      // 第一名特殊處理：向下展開，遮住第二名和第三名
+      y = rect.bottom; // 從第一名底部開始
       transformY = 0; // 向下顯示
+      tooltipStyle = {
+        width: '100%',
+        maxWidth: 'none',
+        left: '0',
+        transform: 'translateX(0) translateY(0)',
+        borderRadius: '0 0 16px 16px',
+        boxShadow: '0 8px 25px rgba(0, 0, 0, 0.3)',
+        zIndex: 1001, // 確保在最上層
+      };
+    } else {
+      // 其他名次：如果向上顯示會被切掉，改為向下顯示
+      if (rect.top - tooltipHeight - safeMargin < 0) {
+        y = rect.bottom + 10;
+        transformY = 0; // 向下顯示
+      }
     }
 
     setTooltipPosition({
       x: rect.left + rect.width / 2,
       y: y,
       transformY: transformY,
+      tooltipStyle: tooltipStyle,
     });
     setSelectedUser(user);
   };
@@ -398,7 +432,7 @@ const Ladder = () => {
       {getPromotionMessage()}
 
       {/* 浮動排名顯示框 - 只在用戶不在列表中且排名超過10名時顯示 */}
-      {getFloatingRankDisplay()}
+      {floatingRankDisplay}
 
       <div className="ladder__header">
         <h2>天梯排行榜</h2>
@@ -600,9 +634,16 @@ const Ladder = () => {
               tooltipPosition.transformY || -100
             }%)`,
             zIndex: 1000,
+            ...tooltipPosition.tooltipStyle,
           }}
         >
-          <div className="tooltip-content">
+          <div
+            className={`tooltip-content ${
+              ladderData.findIndex(u => u.id === selectedUser.id) === 0
+                ? 'first-place-glow expanded'
+                : ''
+            }`}
+          >
             <div className="tooltip-header">
               <h4>{selectedUser.displayName} 的訓練背景</h4>
               <button className="tooltip-close" onClick={closeTooltip}>
@@ -645,7 +686,11 @@ const Ladder = () => {
             </div>
           </div>
           <div
-            className="tooltip-arrow"
+            className={`tooltip-arrow ${
+              ladderData.findIndex(u => u.id === selectedUser.id) === 0
+                ? 'first-place-arrow expanded'
+                : ''
+            }`}
             style={{
               ...(tooltipPosition.transformY === 0
                 ? {
@@ -654,6 +699,12 @@ const Ladder = () => {
                     top: '-8px',
                     borderTop: 'none',
                     borderBottom: '8px solid white',
+                    ...(ladderData.findIndex(u => u.id === selectedUser.id) ===
+                      0 && {
+                      // 第一名的箭頭特殊處理
+                      left: '50px', // 調整箭頭位置
+                      transform: 'translateX(-50%)',
+                    }),
                   }
                 : {
                     // 向上顯示時，箭頭在底部（預設）

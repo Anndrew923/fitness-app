@@ -22,33 +22,33 @@ function Strength({ onComplete, clearTestData }) {
   // 新增分頁狀態
   const [currentTab, setCurrentTab] = useState('exercises'); // 'exercises', 'results', 'standards'
 
-  const [benchPress, setBenchPress] = useState({
-    weight: userData.testInputs?.strength?.benchPress?.weight || '',
-    reps: userData.testInputs?.strength?.benchPress?.reps || '',
+  const [benchPress, setBenchPress] = useState({ 
+    weight: userData.testInputs?.strength?.benchPress?.weight || '', 
+    reps: userData.testInputs?.strength?.benchPress?.reps || '', 
     max: userData.testInputs?.strength?.benchPress?.max || null,
     score: userData.testInputs?.strength?.benchPress?.score || null,
   });
-  const [squat, setSquat] = useState({
-    weight: userData.testInputs?.strength?.squat?.weight || '',
-    reps: userData.testInputs?.strength?.squat?.reps || '',
+  const [squat, setSquat] = useState({ 
+    weight: userData.testInputs?.strength?.squat?.weight || '', 
+    reps: userData.testInputs?.strength?.squat?.reps || '', 
     max: userData.testInputs?.strength?.squat?.max || null,
     score: userData.testInputs?.strength?.squat?.score || null,
   });
-  const [deadlift, setDeadlift] = useState({
-    weight: userData.testInputs?.strength?.deadlift?.weight || '',
-    reps: userData.testInputs?.strength?.deadlift?.reps || '',
+  const [deadlift, setDeadlift] = useState({ 
+    weight: userData.testInputs?.strength?.deadlift?.weight || '', 
+    reps: userData.testInputs?.strength?.deadlift?.reps || '', 
     max: userData.testInputs?.strength?.deadlift?.max || null,
     score: userData.testInputs?.strength?.deadlift?.score || null,
   });
-  const [latPulldown, setLatPulldown] = useState({
-    weight: userData.testInputs?.strength?.latPulldown?.weight || '',
-    reps: userData.testInputs?.strength?.latPulldown?.reps || '',
+  const [latPulldown, setLatPulldown] = useState({ 
+    weight: userData.testInputs?.strength?.latPulldown?.weight || '', 
+    reps: userData.testInputs?.strength?.latPulldown?.reps || '', 
     max: userData.testInputs?.strength?.latPulldown?.max || null,
     score: userData.testInputs?.strength?.latPulldown?.score || null,
   });
-  const [shoulderPress, setShoulderPress] = useState({
-    weight: userData.testInputs?.strength?.shoulderPress?.weight || '',
-    reps: userData.testInputs?.strength?.shoulderPress?.reps || '',
+  const [shoulderPress, setShoulderPress] = useState({ 
+    weight: userData.testInputs?.strength?.shoulderPress?.weight || '', 
+    reps: userData.testInputs?.strength?.shoulderPress?.reps || '', 
     max: userData.testInputs?.strength?.shoulderPress?.max || null,
     score: userData.testInputs?.strength?.shoulderPress?.score || null,
   });
@@ -89,7 +89,7 @@ function Strength({ onComplete, clearTestData }) {
   useEffect(() => {
     const updatedTestInputs = {
       ...userData.testInputs,
-      strength: {
+      strength: { 
         benchPress: {
           weight: benchPress.weight,
           reps: benchPress.reps,
@@ -161,39 +161,39 @@ function Strength({ onComplete, clearTestData }) {
   const standardMap = useMemo(() => {
     const isMale = gender === 'male' || gender === '男性';
     return {
-      benchPress: {
+    benchPress: { 
         bodyweight: isMale
           ? standards.bodyweightStandardsMaleBenchPress
           : standards.bodyweightStandardsFemaleBenchPress,
         age: isMale
           ? standards.ageStandardsMaleBenchPress
           : standards.ageStandardsFemaleBenchPress,
-      },
-      squat: {
+    },
+    squat: { 
         bodyweight: isMale
           ? standards.bodyweightStandardsMaleSquat
           : standards.bodyweightStandardsFemaleSquat,
         age: isMale
           ? standards.ageStandardsMaleSquat
           : standards.ageStandardsFemaleSquat,
-      },
-      deadlift: {
+    },
+    deadlift: { 
         bodyweight: isMale
           ? standards.bodyweightStandardsMaleDeadlift
           : standards.bodyweightStandardsFemaleDeadlift,
         age: isMale
           ? standards.ageStandardsMaleDeadlift
           : standards.ageStandardsFemaleDeadlift,
-      },
-      latPulldown: {
+    },
+    latPulldown: { 
         bodyweight: isMale
           ? standards.bodyweightStandardsMaleLatPulldown
           : standards.bodyweightStandardsFemaleLatPulldown,
         age: isMale
           ? standards.ageStandardsMaleLatPulldown
           : standards.ageStandardsFemaleLatPulldown,
-      },
-      shoulderPress: {
+    },
+    shoulderPress: { 
         bodyweight: isMale
           ? standards.bodyweightStandardsMaleShoulderPress
           : standards.bodyweightStandardsFemaleShoulderPress,
@@ -206,35 +206,35 @@ function Strength({ onComplete, clearTestData }) {
 
   const calculateMaxStrength = useCallback(
     (weight, reps, setState, type) => {
-      if (!weight || !reps) return alert('請輸入重量和次數！');
-      const weightNum = parseFloat(weight);
-      const repsNum = parseFloat(reps);
-      const userWeight = parseFloat(userData.weight);
-      const userAge = parseFloat(age);
+    if (!weight || !reps) return alert('請輸入重量和次數！');
+    const weightNum = parseFloat(weight);
+    const repsNum = parseFloat(reps);
+    const userWeight = parseFloat(userData.weight);
+    const userAge = parseFloat(age);
       if (!userWeight || !userAge)
         return alert('請確保已輸入有效的體重和年齡！');
-      if (repsNum > 12) {
-        alert('可完成次數不得超過12次，請重新輸入！');
-        setState(prev => ({ ...prev, reps: '' }));
-        return;
-      }
-      const valueToCompare = weightNum / (1.0278 - 0.0278 * repsNum);
-      const standardsForType = standardMap[type];
-      const weightKeys = Object.keys(standardsForType.bodyweight).map(Number);
-      const ageKeys = Object.keys(standardsForType.age).map(Number);
+    if (repsNum > 12) {
+      alert('可完成次數不得超過12次，請重新輸入！');
+      setState(prev => ({ ...prev, reps: '' }));
+      return;
+    }
+    const valueToCompare = weightNum / (1.0278 - 0.0278 * repsNum);
+    const standardsForType = standardMap[type];
+    const weightKeys = Object.keys(standardsForType.bodyweight).map(Number);
+    const ageKeys = Object.keys(standardsForType.age).map(Number);
       const closestWeight = weightKeys.reduce((prev, curr) =>
         Math.abs(curr - userWeight) < Math.abs(prev - userWeight) ? curr : prev
       );
       const closestAge = ageKeys.reduce((prev, curr) =>
         Math.abs(curr - userAge) < Math.abs(prev - userAge) ? curr : prev
       );
-      const bodyweightStandard = standardsForType.bodyweight[closestWeight];
-      const ageStandard = standardsForType.age[closestAge];
+    const bodyweightStandard = standardsForType.bodyweight[closestWeight];
+    const ageStandard = standardsForType.age[closestAge];
       const scoreByBodyweight = calculateScore(
         valueToCompare,
         bodyweightStandard
       );
-      const scoreByAge = calculateScore(valueToCompare, ageStandard);
+    const scoreByAge = calculateScore(valueToCompare, ageStandard);
       const finalScore = ((scoreByBodyweight + scoreByAge) / 2).toFixed(1);
       setState(prev => ({
         ...prev,
@@ -359,66 +359,66 @@ function Strength({ onComplete, clearTestData }) {
 
   const handleSubmit = async () => {
     if (!averageScore) return alert('請至少完成一項評測！');
-
+    
     try {
-      const updatedScores = {
-        ...userData.scores,
+      const updatedScores = { 
+        ...userData.scores, 
         strength: parseFloat(averageScore),
       };
-
+      
       await setUserData(prev => ({
         ...prev,
         scores: updatedScores,
       }));
-
+      
       const testData = {
         squat: squat.max
           ? {
-              weight: squat.weight,
-              reps: squat.reps,
-              max: squat.max,
+          weight: squat.weight, 
+          reps: squat.reps, 
+          max: squat.max, 
               score: squat.score,
             }
           : null,
         benchPress: benchPress.max
           ? {
-              weight: benchPress.weight,
-              reps: benchPress.reps,
-              max: benchPress.max,
+          weight: benchPress.weight, 
+          reps: benchPress.reps, 
+          max: benchPress.max, 
               score: benchPress.score,
             }
           : null,
         deadlift: deadlift.max
           ? {
-              weight: deadlift.weight,
-              reps: deadlift.reps,
-              max: deadlift.max,
+          weight: deadlift.weight, 
+          reps: deadlift.reps, 
+          max: deadlift.max, 
               score: deadlift.score,
             }
           : null,
         latPulldown: latPulldown.max
           ? {
-              weight: latPulldown.weight,
-              reps: latPulldown.reps,
-              max: latPulldown.max,
+          weight: latPulldown.weight, 
+          reps: latPulldown.reps, 
+          max: latPulldown.max, 
               score: latPulldown.score,
             }
           : null,
         shoulderPress: shoulderPress.max
           ? {
-              weight: shoulderPress.weight,
-              reps: shoulderPress.reps,
-              max: shoulderPress.max,
+          weight: shoulderPress.weight, 
+          reps: shoulderPress.reps, 
+          max: shoulderPress.max, 
               score: shoulderPress.score,
             }
           : null,
         averageScore: parseFloat(averageScore),
       };
-
+      
       if (onComplete) {
         onComplete(testData);
       }
-
+      
       setTimeout(() => {
         navigate('/user-info', { state: { from: '/strength' } });
       }, 500);
@@ -610,7 +610,7 @@ function Strength({ onComplete, clearTestData }) {
           📋 評測標準
         </button>
       </div>
-
+      
       {/* 評測項目分頁 */}
       {currentTab === 'exercises' && (
         <div className="exercises-tab">
@@ -735,50 +735,50 @@ function Strength({ onComplete, clearTestData }) {
                 https://strengthlevel.com/
               </a>
             </p>
-          </div>
+      </div>
 
-          <div className="score-levels-table">
+      <div className="score-levels-table">
             <h3>分數等級</h3>
-            <div className="levels-container">
-              {scoreLevels.map((item, index) => (
-                <div key={index} className="level-item">
-                  <div className="level-header">
-                    <span className="level-name">{item.level}</span>
-                    <span className="level-score">{item.score}</span>
-                  </div>
-                  <div className="level-bar-container">
-                    <div
-                      className="level-bar"
-                      style={{
-                        width: `${item.score}%`,
+        <div className="levels-container">
+          {scoreLevels.map((item, index) => (
+            <div key={index} className="level-item">
+              <div className="level-header">
+                <span className="level-name">{item.level}</span>
+                <span className="level-score">{item.score}</span>
+              </div>
+              <div className="level-bar-container">
+                <div 
+                  className="level-bar" 
+                  style={{ 
+                    width: `${item.score}%`,
                         background: `linear-gradient(to right, ${item.color}dd, ${item.color})`,
-                      }}
-                    />
-                  </div>
-                </div>
-              ))}
+                  }}
+                />
+              </div>
             </div>
-          </div>
+          ))}
+        </div>
+      </div>
 
-          <div className="score-table">
+      <div className="score-table">
             <h3>分數說明</h3>
-            <table className="table">
-              <thead>
-                <tr>
-                  <th>分數範圍</th>
-                  <th>說明</th>
-                </tr>
-              </thead>
-              <tbody>
-                {scoreTableData.map((row, index) => (
-                  <tr key={index}>
-                    <td>{row.range}</td>
-                    <td>{row.description}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+        <table className="table">
+          <thead>
+            <tr>
+              <th>分數範圍</th>
+              <th>說明</th>
+            </tr>
+          </thead>
+          <tbody>
+            {scoreTableData.map((row, index) => (
+              <tr key={index}>
+                <td>{row.range}</td>
+                <td>{row.description}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
         </div>
       )}
 
