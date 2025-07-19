@@ -104,6 +104,8 @@ export function UserProvider({ children }) {
           ladderScore: firebaseData.scores
             ? calculateLadderScore(firebaseData.scores)
             : firebaseData.ladderScore || 0,
+          // 確保天梯排名被正確讀取
+          ladderRank: Number(firebaseData.ladderRank) || 0,
         };
 
         if (isMountedRef.current) {
@@ -173,6 +175,8 @@ export function UserProvider({ children }) {
         ladderScore: data.scores
           ? calculateLadderScore(data.scores)
           : data.ladderScore || 0,
+        // 確保天梯排名被保存
+        ladderRank: Number(data.ladderRank) || 0,
       };
 
       await setDoc(userRef, dataToSave, { merge: true });
@@ -195,6 +199,9 @@ export function UserProvider({ children }) {
     }
   }, []);
 
+  // 新增：防抖引用
+  const setUserDataDebounceRef = useRef(null);
+
   // 更新用戶數據
   const setUserData = useCallback(
     update => {
@@ -211,7 +218,9 @@ export function UserProvider({ children }) {
 
       // 計算天梯分數和年齡段
       if (newData.scores) {
+        const oldLadderScore = userData.ladderScore || 0;
         newData.ladderScore = calculateLadderScore(newData.scores);
+
         if (newData.age) {
           newData.ageGroup = getAgeGroup(newData.age);
         }
@@ -229,6 +238,7 @@ export function UserProvider({ children }) {
           'age',
           'gender',
           'nickname',
+          'ladderRank',
         ];
         const hasImportantChanges = importantFields.some(
           field =>
@@ -236,12 +246,17 @@ export function UserProvider({ children }) {
         );
 
         if (hasImportantChanges) {
-          // 使用防抖，避免頻繁寫入
-          const timeoutId = setTimeout(() => {
-            saveUserData(newData);
-          }, 2000); // 2秒防抖
+          // 清除之前的防抖定時器
+          if (setUserDataDebounceRef.current) {
+            clearTimeout(setUserDataDebounceRef.current);
+          }
 
-          return () => clearTimeout(timeoutId);
+          // 使用更長的防抖時間（10秒）來大幅減少寫入頻率
+          setUserDataDebounceRef.current = setTimeout(() => {
+            console.log(`🔄 防抖後保存用戶數據（10秒防抖）`);
+            saveUserData(newData);
+            setUserDataDebounceRef.current = null;
+          }, 10000); // 10秒防抖
         }
       }
     },
@@ -330,7 +345,7 @@ export function UserProvider({ children }) {
     };
   }, [loadUserData, clearUserData]);
 
-  // 定期同步數據到 Firebase（每 5 分鐘，減少寫入頻率）
+  // 定期同步數據到 Firebase（每 10 分鐘，大幅減少寫入頻率）
   useEffect(() => {
     if (!auth.currentUser || !userData || Object.keys(userData).length === 0)
       return;
@@ -340,13 +355,31 @@ export function UserProvider({ children }) {
         // 只在數據有實質變化時才保存
         const lastSaved = localStorage.getItem('lastSavedTimestamp');
         const now = Date.now();
-        if (!lastSaved || now - parseInt(lastSaved) > 300000) {
-          // 5分鐘
-          saveUserData(userData);
-          localStorage.setItem('lastSavedTimestamp', now.toString());
+        if (!lastSaved || now - parseInt(lastSaved) > 600000) {
+          // 10分鐘
+          // 檢查是否有實際變化，避免無意義寫入
+          const lastSavedData = localStorage.getItem('lastSavedUserData');
+          const currentDataString = JSON.stringify({
+            scores: userData.scores,
+            height: userData.height,
+            weight: userData.weight,
+            age: userData.age,
+            gender: userData.gender,
+            nickname: userData.nickname,
+            ladderRank: userData.ladderRank,
+          });
+
+          if (lastSavedData !== currentDataString) {
+            console.log('🔄 定期同步：檢測到數據變化，執行保存');
+            saveUserData(userData);
+            localStorage.setItem('lastSavedTimestamp', now.toString());
+            localStorage.setItem('lastSavedUserData', currentDataString);
+          } else {
+            console.log('⏭️ 定期同步：無數據變化，跳過保存');
+          }
         }
       }
-    }, 300000); // 改為5分鐘
+    }, 600000); // 改為10分鐘
 
     return () => clearInterval(syncInterval);
   }, [userData, saveUserData]);

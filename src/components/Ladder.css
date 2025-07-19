@@ -2,6 +2,40 @@
   max-width: 800px;
   margin: 0 auto;
   padding: 20px;
+  background: linear-gradient(135deg, #ff6b35 0%, #f7931e 50%, #ffd700 100%);
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(255, 107, 53, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.ladder::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(
+    circle,
+    rgba(255, 215, 0, 0.1) 0%,
+    rgba(255, 107, 53, 0.05) 50%,
+    transparent 70%
+  );
+  animation: backgroundPulse 8s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes backgroundPulse {
+  0%,
+  100% {
+    transform: rotate(0deg) scale(1);
+    opacity: 0.5;
+  }
+  50% {
+    transform: rotate(180deg) scale(1.1);
+    opacity: 0.8;
+  }
 }
 
 .ladder__header {
@@ -13,11 +47,12 @@
 
 .ladder__header h2 {
   margin: 0;
-  color: #d32f2f; /* 火焰紅色 */
+  color: white; /* 白色文字在金色背景上更突出 */
   font-size: 24px;
   font-weight: 700;
-  text-shadow: 0 2px 4px rgba(211, 47, 47, 0.3);
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
   position: relative;
+  z-index: 1;
 }
 
 .ladder__header h2::before {
@@ -44,47 +79,58 @@
 
 .ladder__filters {
   display: flex;
-  gap: 12px;
+  gap: 8px;
   align-items: center;
   justify-content: center;
   flex-wrap: wrap;
+  margin-bottom: 16px;
 }
 
-/* 優化的年齡選擇框容器 */
+/* 小巧的圖像化選擇器容器 */
 .ladder__filter-container {
   position: relative;
-  background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
-  border-radius: 12px;
-  padding: 2px;
-  box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3);
-}
-
-.ladder__filter-select {
-  padding: 12px 16px;
-  border: none;
-  border-radius: 10px;
-  background: white;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  color: #333;
-  min-width: 140px;
-  appearance: none;
-  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ff6b35' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
-  background-repeat: no-repeat;
-  background-position: right 12px center;
-  background-size: 16px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 20px;
+  padding: 3px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
   transition: all 0.3s ease;
 }
 
-.ladder__filter-select:hover {
+.ladder__filter-container:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(255, 107, 53, 0.2);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.ladder__filter-select {
+  padding: 8px 12px;
+  border: none;
+  border-radius: 17px;
+  background: transparent;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  color: #333;
+  min-width: 100px;
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ff6b35' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  background-size: 12px;
+  transition: all 0.3s ease;
+  text-align: center;
+}
+
+.ladder__filter-select:hover {
+  background-color: rgba(255, 107, 53, 0.1);
+  color: #ff6b35;
 }
 
 .ladder__filter-select:focus {
   outline: none;
-  box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.2);
+  background-color: rgba(255, 107, 53, 0.15);
+  color: #ff6b35;
 }
 
 /* 優化的上下文按鈕 */
@@ -448,7 +494,7 @@
 }
 
 .ladder__score-value {
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 700;
   color: #ff6b35; /* 火焰紅色 */
 }
@@ -470,10 +516,12 @@
 }
 
 .ladder__footer {
-  margin-top: 24px;
+  margin-top: 20px;
+  padding: 16px;
+  background: #f8f9fa;
+  border-radius: 8px;
   text-align: center;
   color: #666;
-  font-size: 14px;
 }
 
 .ladder__footer p {
@@ -490,10 +538,10 @@
 }
 
 .ladder__loading-spinner {
-  width: 32px;
-  height: 32px;
-  border: 3px solid #f3f3f3;
-  border-top: 3px solid #ff6b35; /* 火焰紅色 */
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #ff6b35; /* 火焰紅色 */
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin-bottom: 16px;
@@ -526,18 +574,23 @@
   /* 移除不再使用的tab-container響應式樣式 */
 
   .ladder__filters {
-    flex-direction: column;
-    gap: 8px;
+    flex-direction: row;
+    gap: 6px;
     width: 100%;
+    justify-content: center;
   }
 
   .ladder__filter-container {
-    width: 100%;
+    width: auto;
+    flex: 1;
+    max-width: 120px;
   }
 
   .ladder__filter-select {
     min-width: unset;
     width: 100%;
+    font-size: 11px;
+    padding: 6px 8px;
   }
 
   .ladder__user-stats {
@@ -607,62 +660,58 @@
 /* 最新更新時間戳 */
 .last-update {
   font-size: 11px;
-  color: #718096;
+  color: #999;
   font-style: italic;
 }
 
 /* 訓練背景浮動框 */
 .training-tooltip {
-  animation: tooltipFadeIn 0.3s ease-out;
+  position: fixed;
+  z-index: 1000;
 }
 
 .tooltip-content {
-  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  background: white;
   border-radius: 12px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15),
-    0 4px 16px rgba(129, 216, 208, 0.2);
-  border: 1px solid rgba(129, 216, 208, 0.2);
-  min-width: 280px;
-  max-width: 320px;
-  backdrop-filter: blur(10px);
-  position: relative;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  max-width: 300px;
   overflow: hidden;
+  animation: tooltipFadeIn 0.3s ease-out;
 }
 
 .tooltip-content::before {
   content: '';
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: linear-gradient(90deg, #81d8d0 0%, #5f9ea0 100%);
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-top: 8px solid white;
 }
 
 .tooltip-header {
+  background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+  color: white;
+  padding: 12px 16px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px 20px 12px 20px;
-  border-bottom: 1px solid rgba(129, 216, 208, 0.1);
 }
 
 .tooltip-header h4 {
   margin: 0;
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 600;
-  color: #2d3748;
-  background: linear-gradient(135deg, #81d8d0 0%, #5f9ea0 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
 }
 
 .tooltip-close {
   background: none;
   border: none;
-  font-size: 20px;
-  color: #a0aec0;
+  color: white;
+  font-size: 18px;
   cursor: pointer;
   padding: 0;
   width: 24px;
@@ -671,64 +720,57 @@
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease;
 }
 
 .tooltip-close:hover {
-  background: rgba(129, 216, 208, 0.1);
-  color: #81d8d0;
+  background: rgba(255, 255, 255, 0.2);
 }
 
 .tooltip-body {
-  padding: 16px 20px 20px 20px;
+  padding: 16px;
 }
 
 .tooltip-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 12px;
-  padding: 8px 12px;
-  background: rgba(129, 216, 208, 0.05);
-  border-radius: 8px;
-  border-left: 3px solid #81d8d0;
+  margin-bottom: 8px;
+  padding: 8px 0;
+  border-bottom: 1px solid #f0f0f0;
 }
 
 .tooltip-item:last-child {
+  border-bottom: none;
   margin-bottom: 0;
 }
 
 .tooltip-label {
+  font-weight: 600;
+  color: #333;
   font-size: 13px;
-  font-weight: 500;
-  color: #4a5568;
-  flex-shrink: 0;
 }
 
 .tooltip-value {
-  font-size: 13px;
+  color: #ff6b35;
   font-weight: 600;
-  color: #2d3748;
-  text-align: right;
-  margin-left: 8px;
+  font-size: 13px;
 }
 
 .tooltip-empty {
   text-align: center;
-  padding: 20px 0;
+  color: #666;
+  padding: 20px;
 }
 
 .tooltip-empty p {
-  margin: 0 0 8px 0;
+  margin: 8px 0;
   font-size: 13px;
-  color: #718096;
-  line-height: 1.5;
 }
 
 .tooltip-empty p:last-child {
-  margin-bottom: 0;
-  font-size: 12px;
-  color: #a0aec0;
+  font-style: italic;
+  color: #999;
 }
 
 .tooltip-arrow {
@@ -740,51 +782,130 @@
   height: 0;
   border-left: 8px solid transparent;
   border-right: 8px solid transparent;
-  border-top: 8px solid #ffffff;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+  border-top: 8px solid white;
 }
 
 .tooltip-overlay {
-  background: transparent;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 999;
 }
 
 @keyframes tooltipFadeIn {
   from {
     opacity: 0;
-    transform: translateX(-50%) translateY(-100%) scale(0.9);
+    transform: translateY(10px);
   }
   to {
     opacity: 1;
-    transform: translateX(-50%) translateY(-100%) scale(1);
+    transform: translateY(0);
   }
 }
 
-/* 響應式設計 */
 @media (max-width: 768px) {
   .tooltip-content {
-    min-width: 260px;
-    max-width: 300px;
+    max-width: 280px;
+    margin: 0 16px;
   }
 
   .tooltip-header {
-    padding: 14px 16px 10px 16px;
+    padding: 10px 12px;
   }
 
   .tooltip-header h4 {
-    font-size: 15px;
+    font-size: 13px;
   }
 
   .tooltip-body {
-    padding: 14px 16px 18px 16px;
+    padding: 12px;
   }
 
   .tooltip-item {
-    padding: 6px 10px;
-    margin-bottom: 10px;
+    margin-bottom: 6px;
+    padding: 6px 0;
   }
 
   .tooltip-label,
   .tooltip-value {
     font-size: 12px;
+  }
+}
+
+/* 浮動排名顯示框 */
+.floating-rank-display {
+  position: fixed;
+  bottom: 84px; /* 64px導覽列高度 + 20px間距 */
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 100;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  max-width: 800px; /* 跟天梯容器最大寬度一致 */
+  padding: 0 20px; /* 跟天梯容器的padding一致 */
+  box-sizing: border-box;
+}
+
+.floating-rank-card {
+  background: white;
+  border-radius: 12px;
+  padding: 16px; /* 跟天梯列表項的padding一致 */
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15), 0 4px 15px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: 100%; /* 使用完整寬度 */
+  border: 1px solid #e0e0e0;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.floating-rank-card::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+  border-radius: 2px;
+}
+
+/* 浮動排名顯示框動畫效果 */
+.floating-rank-display:hover .floating-rank-card {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.2), 0 6px 20px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
+}
+
+/* 響應式設計 */
+@media (max-width: 768px) {
+  .floating-rank-display {
+    bottom: 74px; /* 64px導覽列高度 + 10px間距 */
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 0 16px; /* 跟移動版天梯容器的padding一致 */
+  }
+
+  .floating-rank-card {
+    padding: 12px; /* 跟移動版天梯列表項的padding一致 */
+    gap: 12px;
+  }
+
+  .floating-rank-card .ladder__user-name {
+    font-size: 14px;
+  }
+
+  .floating-rank-card .ladder__user-details {
+    font-size: 11px;
+  }
+
+  .floating-rank-card .ladder__score-value {
+    font-size: 18px;
   }
 }

@@ -1019,3 +1019,446 @@
     font-size: 13px;
   }
 }
+
+/* 完成狀態樣式 */
+.completion-status {
+  margin-bottom: 20px;
+  padding: 20px;
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  border-radius: 16px;
+  border: 1px solid rgba(129, 216, 208, 0.2);
+}
+
+.completion-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.completion-label {
+  font-size: 16px;
+  font-weight: 600;
+  color: #2d3748;
+}
+
+.completion-count {
+  font-size: 18px;
+  font-weight: 700;
+  color: #81d8d0;
+  background: rgba(129, 216, 208, 0.1);
+  padding: 4px 12px;
+  border-radius: 20px;
+  border: 2px solid rgba(129, 216, 208, 0.3);
+}
+
+.completion-progress {
+  width: 100%;
+  height: 8px;
+  background: rgba(129, 216, 208, 0.2);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+
+.completion-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #81d8d0 0%, #5f9ea0 100%);
+  border-radius: 4px;
+  transition: width 0.6s ease-out;
+  position: relative;
+}
+
+.completion-bar::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.3) 50%,
+    transparent 100%
+  );
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.completion-message {
+  font-size: 14px;
+  color: #718096;
+  text-align: center;
+  margin: 0;
+  font-style: italic;
+}
+
+.average-score-display {
+  text-align: center;
+}
+
+.ladder-score {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 8px 0 0 0;
+  color: #ff6b35;
+  text-shadow: 0 2px 4px rgba(255, 107, 53, 0.2);
+}
+
+/* 新的分數顯示樣式 */
+.score-value-large {
+  font-size: 28px;
+  font-weight: 700;
+  color: #ff0000;
+  text-shadow: 0 2px 4px rgba(255, 0, 0, 0.3);
+  margin-left: 8px;
+}
+
+.ladder-rank {
+  margin: 8px 0 0 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #2d3748;
+  text-align: center;
+}
+
+.rank-value {
+  font-size: 24px;
+  font-weight: 700;
+  color: #ff6b35;
+  text-shadow: 0 2px 4px rgba(255, 107, 53, 0.3);
+  margin-left: 8px;
+}
+
+/* 響應式設計 */
+@media (max-width: 768px) {
+  .completion-status {
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+
+  .completion-label {
+    font-size: 14px;
+  }
+
+  .completion-count {
+    font-size: 16px;
+    padding: 3px 10px;
+  }
+
+  .completion-message {
+    font-size: 13px;
+  }
+
+  .score-value-large {
+    font-size: 24px;
+  }
+
+  .ladder-rank {
+    font-size: 16px;
+  }
+
+  .rank-value {
+    font-size: 20px;
+  }
+}
+
+/* 儀式感動畫樣式 */
+
+/* 粒子爆炸效果 */
+@keyframes particleExplosion {
+  0% {
+    opacity: 1;
+    transform: scale(1) translate(0, 0);
+  }
+  25% {
+    opacity: 0.8;
+    transform: scale(1.5) translate(var(--target-x), var(--target-y));
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(2)
+      translate(calc(var(--target-x) * 2), calc(var(--target-y) * 2));
+  }
+  75% {
+    opacity: 0.3;
+    transform: scale(1.5)
+      translate(calc(var(--target-x) * 3), calc(var(--target-y) * 3));
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.5)
+      translate(calc(var(--target-x) * 4), calc(var(--target-y) * 4));
+  }
+}
+
+.ceremonial-particle {
+  position: fixed;
+  pointer-events: none;
+  z-index: 10000;
+  border-radius: 50%;
+  animation: particleExplosion 2s ease-out forwards;
+}
+
+/* 分數提升動畫覆蓋層 */
+.score-improvement-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10001;
+  animation: overlayFadeIn 0.5s ease-out;
+}
+
+@keyframes overlayFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.score-improvement-message {
+  background: linear-gradient(135deg, #ff6b35 0%, #f7931e 50%, #ffd700 100%);
+  color: white;
+  padding: 30px 40px;
+  border-radius: 20px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  text-align: center;
+  max-width: 400px;
+  animation: messageSlideIn 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+@keyframes messageSlideIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.5) translateY(50px);
+  }
+  50% {
+    transform: scale(1.1) translateY(-10px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.improvement-icon {
+  font-size: 48px;
+  margin-bottom: 20px;
+  animation: iconBounce 1s ease-in-out infinite;
+}
+
+@keyframes iconBounce {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(-10px) scale(1.1);
+  }
+}
+
+.improvement-text {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 20px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.improvement-details {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.improvement-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 12px 16px;
+  border-radius: 10px;
+  backdrop-filter: blur(5px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  animation: itemSlideIn 0.5s ease-out;
+}
+
+@keyframes itemSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.improvement-label {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.improvement-score {
+  font-weight: 700;
+  font-size: 16px;
+  color: #ffd700;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* 雷達圖動畫增強 */
+.radar-section {
+  position: relative;
+}
+
+.radar-section.animating {
+  animation: radarGlow 2s ease-in-out;
+}
+
+@keyframes radarGlow {
+  0%,
+  100% {
+    box-shadow: 0 4px 20px rgba(129, 216, 208, 0.2);
+  }
+  50% {
+    box-shadow: 0 8px 40px rgba(129, 216, 208, 0.6),
+      0 0 60px rgba(255, 107, 53, 0.4);
+  }
+}
+
+/* 分數值動畫 */
+.score-value.animating {
+  animation: scorePulse 1s ease-in-out;
+}
+
+@keyframes scorePulse {
+  0%,
+  100% {
+    transform: scale(1);
+    color: #ff6b35;
+  }
+  50% {
+    transform: scale(1.2);
+    color: #ffd700;
+  }
+}
+
+/* 響應式設計 */
+@media (max-width: 768px) {
+  .score-improvement-message {
+    margin: 20px;
+    padding: 20px 25px;
+    max-width: 320px;
+  }
+
+  .improvement-icon {
+    font-size: 36px;
+    margin-bottom: 15px;
+  }
+
+  .improvement-text {
+    font-size: 16px;
+    margin-bottom: 15px;
+  }
+
+  .improvement-item {
+    padding: 10px 12px;
+    gap: 8px;
+  }
+
+  .improvement-label {
+    font-size: 13px;
+  }
+
+  .improvement-score {
+    font-size: 14px;
+  }
+}
+
+/* 動畫性能優化 */
+.ceremonial-particle,
+.score-improvement-overlay,
+.score-improvement-message {
+  will-change: transform, opacity;
+}
+
+/* 減少動畫在低端設備上的複雜度 */
+@media (prefers-reduced-motion: reduce) {
+  .ceremonial-particle,
+  .score-improvement-overlay,
+  .score-improvement-message,
+  .improvement-icon,
+  .improvement-item {
+    animation: none !important;
+  }
+}
+
+/* 天梯排名說明卡 */
+.ladder-info-card {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 107, 53, 0.1) 0%,
+    rgba(247, 147, 30, 0.1) 100%
+  );
+  border: 1px solid rgba(255, 107, 53, 0.2);
+  border-radius: 12px;
+  padding: 12px 16px;
+  margin-top: 16px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.ladder-info-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  animation: shimmer 3s infinite;
+}
+
+.ladder-info-text {
+  margin: 0;
+  color: #ff6b35;
+  font-size: 14px;
+  font-weight: 600;
+  position: relative;
+  z-index: 1;
+}
+
+@media (max-width: 768px) {
+  .ladder-info-card {
+    padding: 10px 12px;
+    margin-top: 12px;
+  }
+
+  .ladder-info-text {
+    font-size: 13px;
+  }
+}

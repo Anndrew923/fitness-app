@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useUser } from '../UserContext';
 import { db } from '../firebase';
 import { collection, query, orderBy, limit, getDocs } from 'firebase/firestore';
@@ -35,18 +35,19 @@ const Ladder = () => {
   const loadLadderData = async () => {
     setLoading(true);
     try {
-      let q;
-      const limitCount = showUserContext && userRank > 50 ? userRank + 15 : 50;
+      console.log('🚀 開始載入天梯數據...');
 
-      // 簡化查詢：只按分數排序，在客戶端進行過濾
-      q = query(
+      // 簡化查詢：直接獲取前100名用戶
+      const q = query(
         collection(db, 'users'),
         orderBy('ladderScore', 'desc'),
-        limit(limitCount * 2) // 增加限制以確保有足夠數據進行客戶端過濾
+        limit(100) // 固定獲取前100名，確保第一名不會被過濾掉
       );
 
       const querySnapshot = await getDocs(q);
       let data = [];
+
+      console.log(`📥 從 Firebase 獲取到 ${querySnapshot.size} 個文檔`);
 
       querySnapshot.forEach(doc => {
         const userData = doc.data();
@@ -75,13 +76,20 @@ const Ladder = () => {
         }
       });
 
+      console.log(`📊 過濾後有分數的用戶：${data.length} 名`);
+
       // 客戶端過濾年齡分段
       if (selectedAgeGroup !== 'all') {
+        const beforeFilterCount = data.length;
         data = data.filter(user => user.ageGroup === selectedAgeGroup);
+        console.log(
+          `👥 年齡段過濾：${beforeFilterCount} → ${data.length} 名用戶`
+        );
       }
 
       // 客戶端過濾本周新進榜
       if (selectedTab === 'weekly') {
+        const beforeFilterCount = data.length;
         const oneWeekAgo = new Date();
         oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
         data = data.filter(user => {
@@ -89,15 +97,24 @@ const Ladder = () => {
           const lastActive = new Date(user.lastActive);
           return lastActive >= oneWeekAgo;
         });
+        console.log(
+          `📅 本周新進榜過濾：${beforeFilterCount} → ${data.length} 名用戶`
+        );
       }
 
-      // 重新排序並限制數量
+      // 重新排序並顯示前50名
       data.sort((a, b) => b.ladderScore - a.ladderScore);
-      data = data.slice(0, limitCount);
+      data = data.slice(0, 50); // 固定顯示前50名
+
+      console.log(
+        `📊 天梯數據載入完成：共 ${data.length} 名用戶，最高分：${
+          data[0]?.ladderScore || 0
+        }`
+      );
 
       setLadderData(data);
 
-      // 計算用戶排名
+      // 簡化用戶排名計算
       if (userData && userData.ladderScore > 0) {
         const userRankIndex = data.findIndex(
           user => user.id === userData.userId
@@ -105,11 +122,15 @@ const Ladder = () => {
 
         if (userRankIndex >= 0) {
           // 用戶在當前顯示範圍內
-          setUserRank(userRankIndex + 1);
+          const newRank = userRankIndex + 1;
+          console.log(`🎯 用戶排名：第 ${newRank} 名`);
+          setUserRank(newRank);
         } else {
           // 用戶不在當前顯示範圍內，需要計算實際排名
+          console.log(`📋 用戶不在前50名內，計算實際排名...`);
+
+          // 獲取所有用戶數據進行排名計算
           try {
-            // 獲取所有用戶數據進行排名計算
             const rankQuery = query(
               collection(db, 'users'),
               orderBy('ladderScore', 'desc')
@@ -149,18 +170,24 @@ const Ladder = () => {
               });
             }
 
+            // 重新排序
+            rankData.sort((a, b) => b.ladderScore - a.ladderScore);
+
             // 計算用戶在過濾後數據中的排名
             const userRankIndex = rankData.findIndex(
-              user => user.ladderScore > userData.ladderScore
+              user => user.id === userData.userId
             );
-            setUserRank(
-              userRankIndex >= 0 ? userRankIndex + 1 : rankData.length + 1
-            );
+            const newRank = userRankIndex >= 0 ? userRankIndex + 1 : 0;
+
+            console.log(`🎯 用戶實際排名：第 ${newRank} 名`);
+            setUserRank(newRank);
           } catch (error) {
-            console.error('計算用戶排名失敗:', error);
+            console.error('計算用戶實際排名失敗:', error);
             setUserRank(0);
           }
         }
+      } else {
+        setUserRank(0);
       }
     } catch (error) {
       console.error('載入天梯數據失敗:', error);
@@ -175,11 +202,118 @@ const Ladder = () => {
     }
   };
 
+  // 簡化動畫樣式 - 動畫已移除
+  const getAnimationStyle = useMemo(() => {
+    return (user, index) => {
+      // 動畫已移除，返回空對象
+      return {};
+    };
+  }, []);
+
+  // 新增：獲取晉升提示文字
+  const getPromotionMessage = () => {
+    return null; // 動畫已移除，不再顯示提示
+  };
+
+  // 新增：獲取浮動排名顯示框
+  const getFloatingRankDisplay = () => {
+    console.log('🔍 檢查浮動排名框條件:', {
+      hasUserData: !!userData,
+      hasLadderScore: userData?.ladderScore > 0,
+      userRank,
+      ladderDataLength: ladderData.length,
+    });
+
+    if (!userData || !userData.ladderScore || userData.ladderScore === 0) {
+      console.log('❌ 浮動框條件1不滿足：用戶數據或分數問題');
+      return null;
+    }
+
+    // 如果用戶排名在前7名內，不顯示浮動框（因為應該在列表中）
+    if (userRank > 0 && userRank <= 7) {
+      console.log('❌ 浮動框條件2不滿足：用戶排名前7名內');
+      return null;
+    }
+
+    // 如果用戶排名為0或未上榜，不顯示浮動框
+    if (userRank === 0) {
+      console.log('❌ 浮動框條件3不滿足：用戶未上榜');
+      return null;
+    }
+
+    console.log('✅ 浮動框條件滿足，顯示浮動排名框，排名:', userRank);
+    const currentRank = userRank;
+    const rankBadge = getRankBadge(currentRank);
+
+    return (
+      <div className="floating-rank-display" data-rank={currentRank}>
+        <div className="floating-rank-card">
+          <div className="ladder__rank">
+            <span className="ladder__rank-number">{currentRank}</span>
+            <span className="ladder__rank-badge">{rankBadge}</span>
+          </div>
+
+          <div className="ladder__user">
+            <div className="ladder__avatar">
+              {userData.avatarUrl ? (
+                <img src={userData.avatarUrl} alt="頭像" />
+              ) : (
+                <div className="ladder__avatar-placeholder">
+                  {userData.nickname
+                    ? userData.nickname.charAt(0).toUpperCase()
+                    : 'U'}
+                </div>
+              )}
+            </div>
+
+            <div className="ladder__user-info">
+              <div className="ladder__user-name current-user-flame">
+                {userData.nickname ||
+                  userData.email?.split('@')[0] ||
+                  '未命名用戶'}
+              </div>
+              <div className="ladder__user-details">
+                {getAgeGroupLabel(userData.ageGroup)} •{' '}
+                {userData.gender === 'male' ? '男' : '女'}
+                <br />
+                <span className="last-update">我的排名</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="ladder__score">
+            <span className="ladder__score-value">
+              {formatScore(userData.ladderScore)}
+            </span>
+            <span className="ladder__score-label">分</span>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   const getUserRankDisplay = () => {
-    if (!userData || userData.ladderScore === 0) {
+    if (!userData) {
       return '未參與';
     }
-    return userRank > 0 ? `第 ${userRank} 名` : '未上榜';
+
+    // 檢查是否完成全部5個評測項目
+    const scores = userData.scores || {};
+    const completedCount = Object.values(scores).filter(
+      score => score > 0
+    ).length;
+
+    if (completedCount < 5) {
+      return `完成 ${completedCount}/5 項`;
+    }
+
+    if (userData.ladderScore === 0) {
+      return '未參與';
+    }
+
+    // 使用userRank來顯示排名，讓用戶看到變化過程
+    const rankToShow = userRank > 0 ? userRank : '未上榜';
+    return rankToShow > 0 ? `第 ${rankToShow} 名` : '未上榜';
   };
 
   const getRankBadge = rank => {
@@ -245,30 +379,14 @@ const Ladder = () => {
 
   return (
     <div className="ladder">
+      {/* 晉升動畫提示 */}
+      {getPromotionMessage()}
+
+      {/* 浮動排名顯示框 - 只在用戶不在列表中且排名超過10名時顯示 */}
+      {getFloatingRankDisplay()}
+
       <div className="ladder__header">
         <h2>天梯排行榜</h2>
-
-        {/* 我的天梯排名 - 緊貼標題下方 */}
-        <div className="ladder__user-stats">
-          <div className="ladder__user-rank">
-            <span className="ladder__user-label">
-              {selectedTab === 'weekly' ? '本周排名' : '我的天梯排名'}
-            </span>
-            <span className="ladder__user-value">{getUserRankDisplay()}</span>
-          </div>
-          <div className="ladder__user-score">
-            <span className="ladder__user-label">我的分數</span>
-            <span className="ladder__user-value">
-              {userData?.ladderScore ? formatScore(userData.ladderScore) : '0'}
-            </span>
-          </div>
-          {selectedTab === 'weekly' && (
-            <div className="ladder__user-note">
-              <span className="ladder__user-label">💡 提示</span>
-              <span className="ladder__user-value">顯示本周活躍用戶</span>
-            </div>
-          )}
-        </div>
 
         {/* 合併的選項頁和年齡選擇框 */}
         <div className="ladder__filters">
@@ -345,23 +463,30 @@ const Ladder = () => {
               className={`ladder__item ${
                 user.id === userData?.userId ? 'ladder__item--current-user' : ''
               } ${!user.isAnonymous ? 'clickable' : ''}`}
-              style={
-                user.id === userData?.userId
+              style={{
+                ...(user.id === userData?.userId
                   ? {
                       background:
                         'linear-gradient(135deg, rgba(255, 107, 53, 0.1) 0%, rgba(247, 147, 30, 0.1) 100%)',
                       borderLeft: '4px solid #ff6b35',
                       fontWeight: '600',
                     }
-                  : {}
-              }
+                  : {}),
+                ...getAnimationStyle(user, index),
+              }}
               onClick={
                 !user.isAnonymous ? e => handleUserClick(user, e) : undefined
               }
               title={!user.isAnonymous ? '點擊查看訓練背景' : ''}
             >
               <div className="ladder__rank">
-                <span className="ladder__rank-number">{index + 1}</span>
+                <span
+                  className={`ladder__rank-number ${
+                    user.id === userData?.userId ? 'rank-changing' : ''
+                  }`}
+                >
+                  {index + 1}
+                </span>
                 <span className="ladder__rank-badge">
                   {getRankBadge(index + 1)}
                 </span>
@@ -428,8 +553,6 @@ const Ladder = () => {
       </div>
 
       <div className="ladder__footer">
-        <p>完成所有評測項目即可計算天梯分數</p>
-        <p>天梯分數 = (力量 + 爆發力 + 心肺 + 肌肉量 + 體脂) ÷ 5</p>
         {selectedTab === 'weekly' && (
           <p style={{ fontSize: '12px', color: '#666', marginTop: '8px' }}>
             📅 本周新進榜：顯示過去7天內有活動的用戶

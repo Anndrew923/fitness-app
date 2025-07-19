@@ -9,9 +9,17 @@ import {
   Radar,
   ResponsiveContainer,
 } from 'recharts';
-import { auth } from './firebase';
+import { auth, db } from './firebase';
 import { storage } from './firebase';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import {
+  collection,
+  query,
+  orderBy,
+  limit,
+  getDocs,
+  where,
+} from 'firebase/firestore';
 import PropTypes from 'prop-types';
 import {
   calculateLadderScore,
@@ -31,6 +39,81 @@ const DEFAULT_SCORES = {
 };
 
 const GENDER_OPTIONS = ['male', 'female'];
+
+// 新增：儀式感動畫系統
+const useCeremonialAnimation = () => {
+  const [animationState, setAnimationState] = useState({
+    isActive: false,
+    type: null, // 'score-update', 'level-up', 'achievement'
+    targetElement: null,
+    progress: 0,
+  });
+  const [particles, setParticles] = useState([]);
+  const animationRef = useRef(null);
+
+  const triggerAnimation = useCallback((type, element) => {
+    setAnimationState({
+      isActive: true,
+      type,
+      targetElement: element,
+      progress: 0,
+    });
+
+    // 創建粒子效果
+    createParticleEffect(element);
+  }, []);
+
+  const createParticleEffect = useCallback(element => {
+    if (!element) return;
+
+    const rect = element.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+
+    const newParticles = [];
+    for (let i = 0; i < 20; i++) {
+      const angle = (Math.PI * 2 * i) / 20 + (Math.random() - 0.5) * 0.5;
+      const distance = 60 + Math.random() * 40;
+      const particleX = Math.cos(angle) * distance;
+      const particleY = Math.sin(angle) * distance;
+
+      newParticles.push({
+        id: i,
+        x: centerX,
+        y: centerY,
+        targetX: centerX + particleX,
+        targetY: centerY + particleY,
+        color: ['#ff6b35', '#f7931e', '#ffd700', '#ff8c42', '#ff4757'][
+          Math.floor(Math.random() * 5)
+        ],
+        size: 3 + Math.random() * 4,
+        delay: i * 0.05,
+      });
+    }
+
+    setParticles(newParticles);
+
+    // 清理粒子
+    setTimeout(() => {
+      setParticles([]);
+    }, 3000);
+  }, []);
+
+  const completeAnimation = useCallback(() => {
+    setAnimationState(prev => ({
+      ...prev,
+      isActive: false,
+      progress: 0,
+    }));
+  }, []);
+
+  return {
+    animationState,
+    triggerAnimation,
+    completeAnimation,
+    particles,
+  };
+};
 
 // 新增：圖片壓縮工具
 async function compressImage(
@@ -106,6 +189,13 @@ function UserInfo({ testData, onLogout, clearTestData }) {
   const testsSectionRef = useRef(null);
   const [avatarUploading, setAvatarUploading] = useState(false);
   const [avatarError, setAvatarError] = useState(null);
+
+  // 新增：儀式感動畫系統
+  const { animationState, triggerAnimation, completeAnimation, particles } =
+    useCeremonialAnimation();
+  const [previousScores, setPreviousScores] = useState(DEFAULT_SCORES);
+  const [scoreAnimations, setScoreAnimations] = useState({});
+  const [userRank, setUserRank] = useState(null);
 
   const radarChartData = useMemo(() => {
     const scores = userData.scores || DEFAULT_SCORES;
@@ -277,7 +367,7 @@ function UserInfo({ testData, onLogout, clearTestData }) {
     };
 
     checkDataLoaded();
-  }, [currentUser, dataLoaded, isLoading, userData, loadUserData]);
+  }, [currentUser, dataLoaded, isLoading, userData]); // 移除 loadUserData 依賴項
 
   // 處理從評測頁面返回時自動滾動到雷達圖
   useEffect(() => {
@@ -327,10 +417,76 @@ function UserInfo({ testData, onLogout, clearTestData }) {
     if (testData && Object.keys(testData).length > 0) {
       console.log('收到測試數據:', testData);
 
-      // 使用 setUserData 更新分數
-      setUserData(prev => {
-        const updatedScores = {
-          ...prev.scores,
+      // 使用更長的防抖處理 testData 更新，避免頻繁寫入
+      const timeoutId = setTimeout(() => {
+        setUserData(prev => {
+          const currentScores = prev.scores || DEFAULT_SCORES;
+          const updatedScores = {
+            ...currentScores,
+            ...(testData.distance !== undefined && {
+              cardio: testData.score || 0,
+            }),
+            ...(testData.squat !== undefined && {
+              strength: testData.averageScore || 0,
+            }),
+            ...(testData.jumpHeight !== undefined && {
+              explosivePower: testData.finalScore || 0,
+            }),
+            ...(testData.smm !== undefined && {
+              muscleMass: testData.finalScore || 0,
+            }),
+            ...(testData.bodyFat !== undefined && {
+              bodyFat: testData.ffmiScore || 0,
+            }),
+          };
+
+          // 檢測分數提升
+          const scoreImprovements = {};
+          Object.keys(updatedScores).forEach(key => {
+            const oldScore = currentScores[key] || 0;
+            const newScore = updatedScores[key] || 0;
+            if (newScore > oldScore) {
+              scoreImprovements[key] = {
+                old: oldScore,
+                new: newScore,
+                improvement: newScore - oldScore,
+              };
+            }
+          });
+
+          // 如果有分數提升，觸發動畫
+          if (Object.keys(scoreImprovements).length > 0) {
+            console.log('🎉 檢測到分數提升:', scoreImprovements);
+
+            // 延遲觸發動畫，讓數據先更新
+            setTimeout(() => {
+              if (radarSectionRef.current) {
+                triggerAnimation('score-update', radarSectionRef.current);
+
+                // 設置分數動畫
+                setScoreAnimations(scoreImprovements);
+
+                // 3秒後完成動畫
+                setTimeout(() => {
+                  completeAnimation();
+                  setScoreAnimations({});
+                }, 3000);
+              }
+            }, 500);
+          }
+
+          console.log('💾 防抖後更新測試數據分數（5秒防抖）');
+          return {
+            ...prev,
+            scores: updatedScores,
+            // 移除 lastActive 更新，避免頻繁寫入
+            // lastActive: new Date().toISOString(),
+          };
+        });
+
+        // 更新 previousScores
+        setPreviousScores(prev => ({
+          ...prev,
           ...(testData.distance !== undefined && {
             cardio: testData.score || 0,
           }),
@@ -346,21 +502,17 @@ function UserInfo({ testData, onLogout, clearTestData }) {
           ...(testData.bodyFat !== undefined && {
             bodyFat: testData.ffmiScore || 0,
           }),
-        };
-
-        return {
-          ...prev,
-          scores: updatedScores,
-          lastActive: new Date().toISOString(),
-        };
-      });
+        }));
+      }, 5000); // 增加到5秒防抖
 
       // 清除 testData
       if (clearTestData) {
-        setTimeout(clearTestData, 1000);
+        setTimeout(clearTestData, 6000); // 延長到6秒
       }
+
+      return () => clearTimeout(timeoutId);
     }
-  }, [testData, setUserData, clearTestData]);
+  }, [testData, clearTestData, triggerAnimation, completeAnimation]);
 
   const validateData = useCallback(() => {
     const { height, weight, age, gender } = userData;
@@ -439,23 +591,95 @@ function UserInfo({ testData, onLogout, clearTestData }) {
     return calculateLadderScore(scores);
   }, [userData?.scores]);
 
+  // 計算完成狀態
+  const completionStatus = useMemo(() => {
+    const scores = userData?.scores || DEFAULT_SCORES;
+    const completedCount = Object.values(scores).filter(
+      score => score > 0
+    ).length;
+    const isFullyCompleted = completedCount === 5;
+
+    return {
+      completedCount,
+      isFullyCompleted,
+      progress: (completedCount / 5) * 100,
+    };
+  }, [userData?.scores]);
+
+  // 獲取用戶排名
+  const fetchUserRank = useCallback(async () => {
+    if (!userData?.userId || !completionStatus.isFullyCompleted) {
+      setUserRank(null);
+      return;
+    }
+
+    try {
+      // 獲取前100名用戶
+      const usersRef = collection(db, 'users');
+      const q = query(
+        usersRef,
+        where('ladderScore', '>', 0),
+        orderBy('ladderScore', 'desc'),
+        limit(100)
+      );
+
+      const querySnapshot = await getDocs(q);
+      const users = [];
+
+      querySnapshot.forEach(doc => {
+        const userData = doc.data();
+        if (userData.ladderScore > 0) {
+          users.push({
+            id: doc.id,
+            ...userData,
+          });
+        }
+      });
+
+      // 找到用戶的排名
+      const userIndex = users.findIndex(user => user.id === userData.userId);
+      if (userIndex !== -1) {
+        setUserRank(userIndex + 1);
+      } else {
+        // 如果用戶不在前100名，設置為未上榜
+        setUserRank(null);
+      }
+    } catch (error) {
+      console.error('獲取用戶排名失敗:', error);
+      setUserRank(null);
+    }
+  }, [userData?.userId, completionStatus.isFullyCompleted]);
+
+  // 當用戶數據或完成狀態改變時，獲取用戶排名
+  useEffect(() => {
+    fetchUserRank();
+  }, [fetchUserRank]);
+
   // 計算年齡段
   const ageGroup = useMemo(() => {
     return userData?.age ? getAgeGroup(userData.age) : '';
   }, [userData?.age]);
 
   // 處理暱稱變更
-  const handleNicknameChange = e => {
-    const nickname = e.target.value;
+  const handleNicknameChange = useCallback(
+    e => {
+      const nickname = e.target.value;
 
-    // 允許自由輸入，不進行即時驗證
-    setUserData(prev => ({
-      ...prev,
-      nickname: nickname,
-      ageGroup: ageGroup,
-      ladderScore: ladderScore,
-    }));
-  };
+      // 使用防抖處理暱稱變更，避免每次輸入都觸發 Firebase 寫入
+      const timeoutId = setTimeout(() => {
+        setUserData(prev => ({
+          ...prev,
+          nickname: nickname,
+          ageGroup: ageGroup,
+          ladderScore: ladderScore,
+        }));
+      }, 1000); // 1秒防抖
+
+      // 清理之前的定時器
+      return () => clearTimeout(timeoutId);
+    },
+    [ageGroup, ladderScore]
+  );
 
   // 生成預設暱稱
   const handleGenerateNickname = () => {
@@ -595,6 +819,65 @@ function UserInfo({ testData, onLogout, clearTestData }) {
 
   return (
     <div className="user-info-container">
+      {/* 儀式感動畫粒子效果 */}
+      {particles.map(particle => (
+        <div
+          key={particle.id}
+          className="ceremonial-particle"
+          style={{
+            position: 'fixed',
+            left: particle.x,
+            top: particle.y,
+            width: particle.size,
+            height: particle.size,
+            backgroundColor: particle.color,
+            borderRadius: '50%',
+            pointerEvents: 'none',
+            zIndex: 10000,
+            boxShadow: `0 0 ${particle.size * 2}px ${particle.color}`,
+            animation: `particleExplosion 2s ease-out forwards`,
+            animationDelay: `${particle.delay}s`,
+            '--target-x': `${particle.targetX}px`,
+            '--target-y': `${particle.targetY}px`,
+          }}
+        />
+      ))}
+
+      {/* 分數提升動畫 */}
+      {animationState.isActive && (
+        <div className="score-improvement-overlay">
+          <div className="score-improvement-message">
+            <div className="improvement-icon">🎉</div>
+            <div className="improvement-text">
+              {Object.keys(scoreAnimations).length > 0 && (
+                <div className="improvement-details">
+                  {Object.entries(scoreAnimations).map(([key, data]) => (
+                    <div key={key} className="improvement-item">
+                      <span className="improvement-label">
+                        {key === 'strength'
+                          ? '力量'
+                          : key === 'explosivePower'
+                          ? '爆發力'
+                          : key === 'cardio'
+                          ? '心肺耐力'
+                          : key === 'muscleMass'
+                          ? '骨骼肌肉量'
+                          : key === 'bodyFat'
+                          ? 'FFMI'
+                          : key}
+                      </span>
+                      <span className="improvement-score">
+                        {data.old} → {data.new} (+{data.improvement.toFixed(1)})
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       {error && <p className="error-message">{error}</p>}
 
       {/* 頭像區域 - 美化設計 */}
@@ -954,12 +1237,29 @@ function UserInfo({ testData, onLogout, clearTestData }) {
             </div>
           )}
 
-          {/* 平均分數區域 - 移到雷達圖卡片內 */}
-          {averageScore > 0 && !loading && (
+          {/* 分數顯示區域 */}
+          {!loading && (
             <div className="score-section">
-              <p className="average-score">
-                平均分數: <span className="score-value">{averageScore}</span>
-              </p>
+              {/* 平均分數 */}
+              {averageScore > 0 && (
+                <div className="average-score-display">
+                  <p className="average-score">
+                    ⭐ 戰鬥力{' '}
+                    <span className="score-value-large">{averageScore}</span>
+                  </p>
+                  {completionStatus.isFullyCompleted && (
+                    <p className="ladder-rank">
+                      🏆 :{' '}
+                      <span className="rank-value">{userRank || '未上榜'}</span>
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {/* 天梯排名說明 */}
+              <div className="ladder-info-card">
+                <p className="ladder-info-text">完成五項評測，可參與天梯排名</p>
+              </div>
             </div>
           )}
         </div>

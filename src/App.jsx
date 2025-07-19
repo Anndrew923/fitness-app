@@ -300,7 +300,8 @@ function AppContent() {
           <Link to="/privacy-policy">隱私權政策</Link>
         </footer>
       )}
-      <GlobalAdBanner />
+      {/* 在天梯頁面隱藏廣告，保持頁面乾淨 */}
+      {location.pathname !== '/ladder' && <GlobalAdBanner />}
       {showNavBar && <BottomNavBar />}
     </div>
   );

@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo, useEffect } from 'react';
+import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from './UserContext';
 import {
@@ -56,7 +56,9 @@ function Strength({ onComplete, clearTestData }) {
 
   const debouncedSetUserData = useCallback(
     newUserData => {
-      let timeoutId;
+      // 使用 useRef 來管理 timeout，避免每次重新創建
+      const timeoutRef = useRef(null);
+      
       const updateData = () => {
         // 只在測試輸入有實質變化時才更新
         const currentTestInputs = userData.testInputs?.strength || {};
@@ -66,12 +68,27 @@ function Strength({ onComplete, clearTestData }) {
           JSON.stringify(currentTestInputs) !== JSON.stringify(newTestInputs);
 
         if (hasChanges) {
+          console.log('💾 測試輸入變化，更新用戶數據');
           setUserData(newUserData);
+        } else {
+          console.log('⏭️ 測試輸入無變化，跳過更新');
         }
       };
-      clearTimeout(timeoutId);
-      timeoutId = setTimeout(updateData, 2000); // 增加到2秒防抖
-      return () => clearTimeout(timeoutId);
+      
+      // 清除之前的定時器
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+      
+      // 設置新的定時器
+      timeoutRef.current = setTimeout(updateData, 3000); // 增加到3秒防抖
+      
+      // 返回清理函數
+      return () => {
+        if (timeoutRef.current) {
+          clearTimeout(timeoutRef.current);
+        }
+      };
     },
     [setUserData, userData.testInputs]
   );
