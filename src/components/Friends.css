@@ -535,68 +535,7 @@
   display: block;
 }
 
-/* 固定輸入框容器 - 已移至 JSX 中處理 */
-.message-input-container {
-  /* 樣式已在 JSX 中定義 */
-}
-
-.text-input-row {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-}
-
-.text-input-row input {
-  flex: 9;
-  padding: 12px 16px;
-  border: 2px solid #e9ecef;
-  border-radius: 20px;
-  font-size: 14px;
-  transition: border-color 0.3s ease;
-  min-height: 40px;
-  box-sizing: border-box;
-  min-width: 120px;
-}
-
-.text-input-row input:focus {
-  outline: none;
-  border-color: #81d8d0; /* Tiffany 藍 */
-  box-shadow: 0 0 0 3px rgba(129, 216, 208, 0.1);
-}
-
-.text-input-row button {
-  flex: 1;
-  padding: 12px;
-  background: linear-gradient(
-    135deg,
-    #81d8d0 0%,
-    #5f9ea0 100%
-  ); /* Tiffany 藍漸變 */
-  color: white;
-  border: none;
-  border-radius: 50%;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  min-height: 40px;
-  min-width: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 14px;
-}
-
-.text-input-row button:hover:not(:disabled) {
-  transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(129, 216, 208, 0.3);
-}
-
-.text-input-row button:disabled {
-  background: #ccc;
-  cursor: not-allowed;
-  transform: none;
-  box-shadow: none;
-}
+/* 移除浮動輸入框相關樣式 */
 
 /* 挑戰留言板樣式 */
 .challenge-board {
@@ -847,31 +786,7 @@
     font-size: 14px;
   }
 
-  .text-input-row {
-    gap: 6px;
-  }
-
-  .text-input-row input {
-    flex: 9; /* 手機版也保持90%比例 */
-    font-size: 14px;
-    padding: 12px 16px;
-    min-height: 40px;
-    min-width: 100px;
-  }
-
-  .text-input-row button {
-    flex: 1; /* 手機版發送按鈕10%比例 */
-    padding: 12px;
-    font-size: 16px;
-    min-height: 40px;
-    min-width: 40px;
-  }
-
-  /* 手機版輸入框位置調整 */
-  .message-input-container {
-    bottom: 64px !important; /* 手機版直接放在廣告欄位上方 */
-    z-index: 1002 !important; /* 確保在手機版廣告欄位之上 */
-  }
+  /* 移除手機版浮動輸入框樣式 */
 
   .challenge-board {
     margin: 10px;

@@ -1053,12 +1053,15 @@ const Friends = () => {
   );
 
   // 渲染挑戰標籤頁
-  const renderChallengesTab = () => {
-    console.log('🎨 渲染挑戰標籤頁:', {
-      selectedFriend,
-      challengesCount: challenges.length,
-      activeTab,
-    });
+  const renderChallengesTab = useCallback(() => {
+    // 只在開發環境下輸出日誌，避免頻繁日誌
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🎨 渲染挑戰標籤頁:', {
+        selectedFriend,
+        challengesCount: challenges.length,
+        activeTab,
+      });
+    }
 
     return (
       <div className="messages-section">
@@ -1347,83 +1350,7 @@ const Friends = () => {
               </div>
             </div>
 
-            {/* 輸入框容器 - 固定在底部 */}
-            <div
-              className="message-input-container"
-              style={{
-                position: 'fixed',
-                bottom: window.innerWidth <= 768 ? '64px' : '70px', // 直接放在廣告欄位上方
-                left: '0',
-                right: '0',
-                background: 'white',
-                borderTop: '1px solid #e9ecef',
-                padding: '12px 16px',
-                paddingBottom: 'calc(12px + env(safe-area-inset-bottom))',
-                zIndex: 1001, // 確保在廣告欄位之上
-                boxShadow: '0 -2px 8px rgba(0, 0, 0, 0.1)',
-              }}
-            >
-              <div
-                className="text-input-row"
-                style={{
-                  display: 'flex',
-                  gap: '8px',
-                  alignItems: 'center',
-                  maxWidth: '800px',
-                  margin: '0 auto',
-                }}
-              >
-                <input
-                  type="text"
-                  placeholder="輸入挑戰內容..."
-                  value={challengeInput} // 使用 challengeInput
-                  onChange={e => setChallengeInput(e.target.value)}
-                  onKeyPress={e => {
-                    if (e.key === 'Enter') {
-                      console.log('⌨️ 按下 Enter 發送挑戰');
-                      sendChallenge();
-                    }
-                  }}
-                  style={{
-                    flex: 9,
-                    padding: '12px 16px',
-                    border: '2px solid #e9ecef',
-                    borderRadius: '20px',
-                    fontSize: '14px',
-                    outline: 'none',
-                    transition: 'border-color 0.3s ease',
-                    minHeight: '40px',
-                  }}
-                />
-                <button
-                  onClick={() => {
-                    console.log('🚀 點擊發送按鈕');
-                    sendChallenge();
-                  }}
-                  disabled={!challengeInput.trim()}
-                  style={{
-                    flex: 1,
-                    padding: '12px',
-                    background: challengeInput.trim()
-                      ? 'linear-gradient(135deg, #81D8D0 0%, #5F9EA0 100%)' /* Tiffany 藍漸變 */
-                      : '#ccc',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '50%',
-                    cursor: challengeInput.trim() ? 'pointer' : 'not-allowed',
-                    minHeight: '40px',
-                    minWidth: '40px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: '14px',
-                  }}
-                  title="發送挑戰"
-                >
-                  ➤
-                </button>
-              </div>
-            </div>
+            {/* 移除浮動輸入框容器 */}
           </>
         ) : (
           <div
@@ -1444,7 +1371,18 @@ const Friends = () => {
         )}
       </div>
     );
-  };
+  }, [
+    selectedFriend,
+    challenges.length,
+    activeTab,
+    challengeTypes,
+    selectedChallengeType,
+    challengeInput,
+    challenges,
+    challengeStatus,
+    batchUpdateExpiredChallenges,
+    respondToChallenge,
+  ]);
 
   return (
     <div className="friends-page">
