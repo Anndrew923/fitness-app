@@ -248,6 +248,7 @@ export function UserProvider({ children }) {
           'age',
           'gender',
           'nickname',
+          'avatarUrl',
           'ladderRank',
         ];
         const hasImportantChanges = importantFields.some(
@@ -410,6 +411,7 @@ export function UserProvider({ children }) {
           age: userData.age,
           gender: userData.gender,
           nickname: userData.nickname,
+          avatarUrl: userData.avatarUrl,
           ladderRank: userData.ladderRank,
         });
 

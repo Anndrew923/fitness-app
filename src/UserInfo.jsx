@@ -19,6 +19,8 @@ import {
   limit,
   getDocs,
   where,
+  updateDoc,
+  doc,
 } from 'firebase/firestore';
 import PropTypes from 'prop-types';
 import {
@@ -1108,8 +1110,34 @@ function UserInfo({ testData, onLogout, clearTestData }) {
       const avatarRef = ref(storage, `avatars/${userId}/avatar.jpg`);
       await uploadBytes(avatarRef, compressed, { contentType: 'image/jpeg' });
       const url = await getDownloadURL(avatarRef);
-      // 更新 Firestore - 使用 setUserData 讓防抖機制生效
+      // 更新 Firestore - 頭像上傳需要立即保存，不使用防抖
       setUserData(prev => ({ ...prev, avatarUrl: url }));
+
+      // 立即保存到 Firebase，不等待防抖
+      try {
+        const userRef = doc(db, 'users', userId);
+        await updateDoc(userRef, {
+          avatarUrl: url,
+          updatedAt: new Date().toISOString(),
+        });
+        console.log('頭像已立即保存到 Firebase');
+
+        // 顯示成功提示
+        setModalState({
+          isOpen: true,
+          title: '頭像上傳成功',
+          message: '您的頭像已成功更新！',
+          type: 'success',
+        });
+
+        // 2秒後自動關閉成功對話框
+        setTimeout(() => {
+          setModalState(prev => ({ ...prev, isOpen: false }));
+        }, 2000);
+      } catch (error) {
+        console.error('頭像保存到 Firebase 失敗:', error);
+        setAvatarError('頭像保存失敗: ' + error.message);
+      }
     } catch (err) {
       setAvatarError('頭像上傳失敗: ' + err.message);
     } finally {

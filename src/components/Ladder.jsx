@@ -283,15 +283,30 @@ const Ladder = () => {
 
           <div className="ladder__user">
             <div className="ladder__avatar">
-              {userData.avatarUrl ? (
-                <img src={userData.avatarUrl} alt="頭像" />
-              ) : (
-                <div className="ladder__avatar-placeholder">
-                  {userData.nickname
-                    ? userData.nickname.charAt(0).toUpperCase()
-                    : 'U'}
-                </div>
-              )}
+              {userData.avatarUrl && userData.avatarUrl.trim() !== '' ? (
+                <img
+                  src={userData.avatarUrl}
+                  alt="頭像"
+                  onError={e => {
+                    console.log('頭像載入失敗，使用預設頭像');
+                    e.target.style.display = 'none';
+                    e.target.nextSibling.style.display = 'flex';
+                  }}
+                />
+              ) : null}
+              <div
+                className="ladder__avatar-placeholder"
+                style={{
+                  display:
+                    userData.avatarUrl && userData.avatarUrl.trim() !== ''
+                      ? 'none'
+                      : 'flex',
+                }}
+              >
+                {userData.nickname
+                  ? userData.nickname.charAt(0).toUpperCase()
+                  : 'U'}
+              </div>
             </div>
 
             <div className="ladder__user-info">
@@ -543,19 +558,36 @@ const Ladder = () => {
 
               <div className="ladder__user">
                 <div className="ladder__avatar">
-                  {user.avatarUrl && !user.isAnonymous ? (
-                    <img src={user.avatarUrl} alt="頭像" />
-                  ) : (
-                    <div
-                      className={`ladder__avatar-placeholder ${
-                        user.isAnonymous ? 'anonymous' : ''
-                      }`}
-                    >
-                      {user.isAnonymous
-                        ? '👤'
-                        : user.displayName.charAt(0).toUpperCase()}
-                    </div>
-                  )}
+                  {user.avatarUrl &&
+                  user.avatarUrl.trim() !== '' &&
+                  !user.isAnonymous ? (
+                    <img
+                      src={user.avatarUrl}
+                      alt="頭像"
+                      onError={e => {
+                        console.log('頭像載入失敗，使用預設頭像');
+                        e.target.style.display = 'none';
+                        e.target.nextSibling.style.display = 'flex';
+                      }}
+                    />
+                  ) : null}
+                  <div
+                    className={`ladder__avatar-placeholder ${
+                      user.isAnonymous ? 'anonymous' : ''
+                    }`}
+                    style={{
+                      display:
+                        user.avatarUrl &&
+                        user.avatarUrl.trim() !== '' &&
+                        !user.isAnonymous
+                          ? 'none'
+                          : 'flex',
+                    }}
+                  >
+                    {user.isAnonymous
+                      ? '👤'
+                      : user.displayName.charAt(0).toUpperCase()}
+                  </div>
                 </div>
 
                 <div className="ladder__user-info">

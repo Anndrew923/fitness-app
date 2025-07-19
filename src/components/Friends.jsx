@@ -881,13 +881,28 @@ const Friends = () => {
           friendsList.map(friend => (
             <div key={friend.id} className="friend-card">
               <div className="friend-avatar">
-                {friend.avatarUrl ? (
-                  <img src={friend.avatarUrl} alt={friend.nickname} />
-                ) : (
-                  <div className="avatar-placeholder">
-                    {friend.nickname.charAt(0).toUpperCase()}
-                  </div>
-                )}
+                {friend.avatarUrl && friend.avatarUrl.trim() !== '' ? (
+                  <img
+                    src={friend.avatarUrl}
+                    alt={friend.nickname}
+                    onError={e => {
+                      console.log('好友頭像載入失敗，使用預設頭像');
+                      e.target.style.display = 'none';
+                      e.target.nextSibling.style.display = 'flex';
+                    }}
+                  />
+                ) : null}
+                <div
+                  className="avatar-placeholder"
+                  style={{
+                    display:
+                      friend.avatarUrl && friend.avatarUrl.trim() !== ''
+                        ? 'none'
+                        : 'flex',
+                  }}
+                >
+                  {friend.nickname.charAt(0).toUpperCase()}
+                </div>
               </div>
               <div className="friend-info">
                 <h4>{friend.nickname}</h4>
@@ -943,13 +958,28 @@ const Friends = () => {
         friendRequests.map(request => (
           <div key={request.id} className="request-card">
             <div className="friend-avatar">
-              {request.senderAvatar ? (
-                <img src={request.senderAvatar} alt={request.senderName} />
-              ) : (
-                <div className="avatar-placeholder">
-                  {request.senderName.charAt(0).toUpperCase()}
-                </div>
-              )}
+              {request.senderAvatar && request.senderAvatar.trim() !== '' ? (
+                <img
+                  src={request.senderAvatar}
+                  alt={request.senderName}
+                  onError={e => {
+                    console.log('邀請者頭像載入失敗，使用預設頭像');
+                    e.target.style.display = 'none';
+                    e.target.nextSibling.style.display = 'flex';
+                  }}
+                />
+              ) : null}
+              <div
+                className="avatar-placeholder"
+                style={{
+                  display:
+                    request.senderAvatar && request.senderAvatar.trim() !== ''
+                      ? 'none'
+                      : 'flex',
+                }}
+              >
+                {request.senderName.charAt(0).toUpperCase()}
+              </div>
             </div>
             <div className="friend-info">
               <h4>{request.senderName}</h4>
@@ -1017,13 +1047,28 @@ const Friends = () => {
           searchResults.map(user => (
             <div key={user.id} className="user-card">
               <div className="friend-avatar">
-                {user.avatarUrl ? (
-                  <img src={user.avatarUrl} alt={user.nickname} />
-                ) : (
-                  <div className="avatar-placeholder">
-                    {user.nickname.charAt(0).toUpperCase()}
-                  </div>
-                )}
+                {user.avatarUrl && user.avatarUrl.trim() !== '' ? (
+                  <img
+                    src={user.avatarUrl}
+                    alt={user.nickname}
+                    onError={e => {
+                      console.log('搜尋結果頭像載入失敗，使用預設頭像');
+                      e.target.style.display = 'none';
+                      e.target.nextSibling.style.display = 'flex';
+                    }}
+                  />
+                ) : null}
+                <div
+                  className="avatar-placeholder"
+                  style={{
+                    display:
+                      user.avatarUrl && user.avatarUrl.trim() !== ''
+                        ? 'none'
+                        : 'flex',
+                  }}
+                >
+                  {user.nickname.charAt(0).toUpperCase()}
+                </div>
               </div>
               <div className="friend-info">
                 <h4>{user.nickname}</h4>

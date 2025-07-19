@@ -3,7 +3,6 @@
   "version": "0.1.0",
   "private": true,
   "license": "MIT",
-  "type": "module",
   "dependencies": {
     "firebase": "^11.8.1",
     "i18next": "^25.3.2",

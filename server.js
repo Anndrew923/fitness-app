@@ -13,17 +13,17 @@ if (isProduction) {
       directives: {
         defaultSrc: ["'self'"],
         // 生產環境嚴格CSP（根據需要調整）
-        scriptSrc: ["'self'", "https://apis.google.com"],
-        scriptSrcElem: ["'self'", "https://apis.google.com"],
+        scriptSrc: ["'self'", 'https://apis.google.com'],
+        scriptSrcElem: ["'self'", 'https://apis.google.com'],
         styleSrc: ["'self'", "'unsafe-inline'"],
         connectSrc: [
-          "'self'", 
-          "https://*.googleapis.com",
-          "https://*.firebaseio.com", 
-          "wss://*.firebaseio.com"
+          "'self'",
+          'https://*.googleapis.com',
+          'https://*.firebaseio.com',
+          'wss://*.firebaseio.com',
         ],
-        frameSrc: ["'self'", "https://*.firebaseapp.com"],
-        imgSrc: ["'self'", "data:", "https:"],
+        frameSrc: ["'self'", 'https://*.firebaseapp.com'],
+        imgSrc: ["'self'", 'data:', 'https:'],
         objectSrc: ["'none'"],
         baseUri: ["'self'"],
         formAction: ["'self'"],
@@ -42,9 +42,9 @@ app.get('*', (req, res) => {
 });
 
 const port = process.env.PORT || 3001; // 避免與Vite衝突
-const server = app.listen(port, () => 
+const server = app.listen(port, () =>
   console.log(`Server running on port ${port}`)
 );
-server.on('error', (err) => {
+server.on('error', err => {
   console.error('Server failed to start:', err);
 });
