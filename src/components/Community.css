@@ -1,13 +1,13 @@
-/* 金屬灰主色調變數 */
+/* Tiffany 藍主色調變數 */
 :root {
-  --metal-gray-primary: #2c3e50;
-  --metal-gray-secondary: #34495e;
-  --metal-gray-light: #5d6d7e;
-  --metal-gray-dark: #1b2631;
-  --metal-accent: #7f8c8d;
-  --metal-highlight: #95a5a6;
-  --metal-shadow: rgba(44, 62, 80, 0.2);
-  --metal-glow: rgba(44, 62, 80, 0.1);
+  --tiffany-primary: #81d8d0;
+  --tiffany-secondary: #5f9ea0;
+  --tiffany-light: #a8e6e0;
+  --tiffany-dark: #4a7c7a;
+  --tiffany-accent: #6bb6ae;
+  --tiffany-highlight: #b8f0e8;
+  --tiffany-shadow: rgba(129, 216, 208, 0.2);
+  --tiffany-glow: rgba(129, 216, 208, 0.1);
   --text-primary: #2c3e50;
   --text-secondary: #5d6d7e;
   --text-light: #95a5a6;
@@ -16,7 +16,7 @@
   --background-white: #ffffff;
 }
 
-/* 社群頁面樣式 - 金屬灰主題 */
+/* 社群頁面樣式 - Tiffany 藍主題 */
 .community-page {
   max-width: 800px;
   margin: 0 auto;
@@ -27,7 +27,7 @@
     var(--background-light) 100%
   );
   border-radius: 16px;
-  box-shadow: 0 8px 32px var(--metal-shadow), 0 2px 8px rgba(0, 0, 0, 0.1),
+  box-shadow: 0 8px 32px var(--tiffany-shadow), 0 2px 8px rgba(0, 0, 0, 0.1),
     inset 0 1px 0 rgba(255, 255, 255, 0.8);
   border: 1px solid var(--border-color);
   position: relative;
@@ -45,31 +45,31 @@
   background: linear-gradient(
     90deg,
     transparent,
-    var(--metal-highlight),
+    var(--tiffany-highlight),
     transparent
   );
   opacity: 0.6;
 }
 
-/* 社群頁面標籤導航 - 金屬風格 */
+/* 社群頁面標籤導航 - Tiffany 藍風格 */
 .community-page .tab-navigation {
   display: flex !important;
   flex-direction: row !important;
   flex-wrap: nowrap !important;
   background: linear-gradient(
     135deg,
-    var(--metal-gray-secondary) 0%,
-    var(--metal-gray-primary) 100%
+    var(--tiffany-secondary) 0%,
+    var(--tiffany-primary) 100%
   );
   border-radius: 12px;
   padding: 3px;
   margin-bottom: 16px;
-  box-shadow: 0 4px 16px var(--metal-shadow),
+  box-shadow: 0 4px 16px var(--tiffany-shadow),
     inset 0 1px 0 rgba(255, 255, 255, 0.1);
   overflow-x: auto;
   gap: 3px;
   width: 100%;
-  border: 1px solid var(--metal-gray-dark);
+  border: 1px solid var(--tiffany-dark);
   position: relative;
 }
 
@@ -83,7 +83,7 @@
   background: linear-gradient(
     90deg,
     transparent,
-    var(--metal-highlight),
+    var(--tiffany-highlight),
     transparent
   );
   opacity: 0.4;
@@ -112,24 +112,24 @@
 .community-page .tab-btn:hover {
   background: linear-gradient(
     135deg,
-    var(--metal-highlight) 0%,
-    var(--metal-accent) 100%
+    var(--tiffany-highlight) 0%,
+    var(--tiffany-accent) 100%
   );
   color: var(--background-white);
   transform: translateY(-1px);
-  box-shadow: 0 2px 8px var(--metal-shadow);
+  box-shadow: 0 2px 8px var(--tiffany-shadow);
 }
 
 .community-page .tab-btn.active {
   background: linear-gradient(
     135deg,
-    var(--metal-gray-primary) 0%,
-    var(--metal-gray-dark) 100%
+    var(--tiffany-primary) 0%,
+    var(--tiffany-dark) 100%
   );
   color: var(--background-white);
-  box-shadow: 0 2px 8px var(--metal-shadow),
+  box-shadow: 0 2px 8px var(--tiffany-shadow),
     inset 0 1px 0 rgba(255, 255, 255, 0.2);
-  border: 1px solid var(--metal-highlight);
+  border: 1px solid var(--tiffany-highlight);
   transform: translateY(-1px);
 }
 
@@ -169,11 +169,11 @@
   font-size: 24px;
   font-weight: 700;
   margin: 0;
-  text-shadow: 0 2px 4px var(--metal-shadow);
+  text-shadow: 0 2px 4px var(--tiffany-shadow);
   background: linear-gradient(
     135deg,
-    var(--metal-gray-primary) 0%,
-    var(--metal-gray-secondary) 100%
+    var(--tiffany-primary) 0%,
+    var(--tiffany-secondary) 100%
   );
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -192,7 +192,7 @@
   background: linear-gradient(
     90deg,
     transparent,
-    var(--metal-highlight),
+    var(--tiffany-highlight),
     transparent
   );
 }

@@ -38,10 +38,10 @@
 }
 
 .history-table th {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #81d8d0 0%, #5f9ea0 100%);
   color: white;
   font-weight: 600;
-  border-color: #5a67d8;
+  border-color: #5f9ea0;
   position: sticky;
   top: 0;
   z-index: 10;
@@ -86,7 +86,7 @@
 
 .average-cell {
   background-color: #f8f9fa;
-  border-left: 3px solid #667eea;
+  border-left: 3px solid #81d8d0;
 }
 
 /* 分數色彩系統 */
@@ -120,9 +120,9 @@
 }
 
 .history-table tr:hover {
-  background-color: #e3f2fd;
+  background-color: rgba(129, 216, 208, 0.1);
   transform: translateY(-1px);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 4px rgba(129, 216, 208, 0.2);
   transition: all 0.2s ease;
 }
 
@@ -270,7 +270,7 @@
 .history-checkbox {
   width: 18px;
   height: 18px;
-  accent-color: #667eea;
+  accent-color: #81d8d0;
 }
 
 /* 分數圖例樣式 */
@@ -331,9 +331,11 @@
   color: #333;
   margin-bottom: 20px;
   text-align: center;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #81d8d0 0%, #5f9ea0 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
   font-weight: 700;
+  font-size: 1.8rem;
+  text-shadow: 0 2px 4px rgba(129, 216, 208, 0.3);
 }

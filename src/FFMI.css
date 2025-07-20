@@ -10,12 +10,16 @@
 }
 
 .ffmi-title {
-  font-size: 1.3rem;
-  font-weight: bold;
+  font-size: 1.8rem;
+  font-weight: 700;
   color: #2c5aa0;
   margin-bottom: 1.2rem;
   text-align: center;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  background: linear-gradient(135deg, #81d8d0 0%, #5f9ea0 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 2px 4px rgba(129, 216, 208, 0.3);
 }
 
 .input-section {
@@ -62,18 +66,18 @@
   font-size: 0.9rem;
   font-weight: 600;
   color: white;
-  background: linear-gradient(135deg, #81d4fa 0%, #4fc3f7 100%);
+  background: linear-gradient(135deg, #81d8d0 0%, #5f9ea0 100%);
   border: none;
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(129, 212, 250, 0.3);
+  box-shadow: 0 4px 15px rgba(129, 216, 208, 0.3);
 }
 
 .calculate-btn:hover {
-  background: linear-gradient(135deg, #4fc3f7 0%, #29b6f6 100%);
+  background: linear-gradient(135deg, #5f9ea0 0%, #4a7c7a 100%);
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(129, 212, 250, 0.4);
+  box-shadow: 0 6px 20px rgba(129, 216, 208, 0.4);
 }
 
 .calculate-btn:active {
@@ -231,12 +235,12 @@
   font-size: 1rem;
   font-weight: 600;
   color: white;
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  background: linear-gradient(135deg, #81d8d0 0%, #5f9ea0 100%);
   border: none;
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+  box-shadow: 0 4px 15px rgba(129, 216, 208, 0.3);
   margin-bottom: 2rem;
   display: flex;
   align-items: center;
@@ -248,9 +252,9 @@
 }
 
 .ffmi-submit-btn:hover {
-  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  background: linear-gradient(135deg, #5f9ea0 0%, #4a7c7a 100%);
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+  box-shadow: 0 6px 20px rgba(129, 216, 208, 0.4);
 }
 
 .ffmi-submit-btn:active {
