@@ -1,10 +1,10 @@
 .ladder {
   max-width: 800px;
   margin: 0 auto;
-  padding: 20px;
+  padding: 16px;
   background: linear-gradient(135deg, #ff6b35 0%, #f7931e 50%, #ffd700 100%);
-  border-radius: 20px;
-  box-shadow: 0 10px 30px rgba(255, 107, 53, 0.3);
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(255, 107, 53, 0.3);
   position: relative;
   overflow: hidden;
 }
@@ -41,16 +41,16 @@
 .ladder__header {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  margin-bottom: 24px;
+  gap: 12px;
+  margin-bottom: 20px;
 }
 
 .ladder__header h2 {
   margin: 0;
   color: white; /* 白色文字在金色背景上更突出 */
-  font-size: 24px;
+  font-size: 22px;
   font-weight: 700;
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
   position: relative;
   z-index: 1;
 }
@@ -79,20 +79,20 @@
 
 .ladder__filters {
   display: flex;
-  gap: 8px;
+  gap: 6px;
   align-items: center;
   justify-content: center;
   flex-wrap: wrap;
-  margin-bottom: 16px;
+  margin-bottom: 14px;
 }
 
 /* 小巧的圖像化選擇器容器 */
 .ladder__filter-container {
   position: relative;
   background: rgba(255, 255, 255, 0.9);
-  border-radius: 20px;
-  padding: 3px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  border-radius: 16px;
+  padding: 2px;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.1);
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.3);
   transition: all 0.3s ease;
@@ -104,20 +104,20 @@
 }
 
 .ladder__filter-select {
-  padding: 8px 12px;
+  padding: 6px 10px;
   border: none;
-  border-radius: 17px;
+  border-radius: 14px;
   background: transparent;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 600;
   cursor: pointer;
   color: #333;
-  min-width: 100px;
+  min-width: 90px;
   appearance: none;
   background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ff6b35' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
   background-repeat: no-repeat;
-  background-position: right 8px center;
-  background-size: 12px;
+  background-position: right 6px center;
+  background-size: 10px;
   transition: all 0.3s ease;
   text-align: center;
 }
@@ -135,13 +135,13 @@
 
 /* 優化的上下文按鈕 */
 .ladder__context-btn {
-  padding: 10px 16px;
+  padding: 8px 14px;
   background: #f8f9fa;
   color: #666;
   border: 1px solid #dee2e6;
-  border-radius: 8px;
+  border-radius: 6px;
   cursor: pointer;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 500;
   transition: all 0.3s ease;
 }
@@ -156,18 +156,18 @@
 .ladder__user-stats {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 16px;
-  margin-bottom: 16px;
-  padding: 20px;
+  gap: 14px;
+  margin-bottom: 14px;
+  padding: 16px;
   background: linear-gradient(
     135deg,
     #ff6b35 0%,
     #f7931e 50%,
     #ffd700 100%
   ); /* 火焰漸層：紅-橙-金 */
-  border-radius: 16px;
+  border-radius: 14px;
   color: white;
-  box-shadow: 0 8px 25px rgba(255, 107, 53, 0.4);
+  box-shadow: 0 6px 20px rgba(255, 107, 53, 0.4);
   position: relative;
   overflow: hidden;
 }
@@ -226,24 +226,24 @@
   position: relative;
   z-index: 1;
   background: rgba(255, 255, 255, 0.1);
-  border-radius: 12px;
-  padding: 12px 8px;
+  border-radius: 10px;
+  padding: 10px 6px;
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .ladder__user-label {
   display: block;
-  font-size: 12px;
+  font-size: 11px;
   opacity: 0.9;
-  margin-bottom: 6px;
+  margin-bottom: 4px;
   font-weight: 500;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 .ladder__user-value {
   display: block;
-  font-size: 22px;
+  font-size: 20px;
   font-weight: 700;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
   letter-spacing: 0.5px;
@@ -251,16 +251,16 @@
 
 .ladder__list {
   background: white;
-  border-radius: 12px;
+  border-radius: 10px;
   overflow: hidden;
-  box-shadow: 0 4px 20px rgba(255, 107, 53, 0.15);
+  box-shadow: 0 3px 16px rgba(255, 107, 53, 0.15);
   border: 1px solid rgba(255, 107, 53, 0.1);
 }
 
 .ladder__item {
   display: flex;
   align-items: center;
-  padding: 16px;
+  padding: 12px;
   border-bottom: 1px solid #f0f0f0;
   transition: all 0.3s ease;
   position: relative;
@@ -319,12 +319,12 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-right: 16px;
-  min-width: 40px;
+  margin-right: 12px;
+  min-width: 36px;
 }
 
 .ladder__rank-number {
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 700;
   color: #d32f2f; /* 火焰紅色 */
 }
@@ -359,10 +359,10 @@
 }
 
 .ladder__avatar {
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
-  margin-right: 12px;
+  margin-right: 10px;
   overflow: hidden;
 }
 
@@ -490,24 +490,24 @@
 
 .ladder__score {
   text-align: right;
-  min-width: 80px;
+  min-width: 70px;
 }
 
 .ladder__score-value {
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 700;
   color: #ff6b35; /* 火焰紅色 */
 }
 
 .ladder__score-label {
-  font-size: 12px;
+  font-size: 11px;
   color: #666;
   margin-left: 2px;
 }
 
 .ladder__empty {
   text-align: center;
-  padding: 40px 20px;
+  padding: 32px 16px;
   color: #666;
 }
 
@@ -516,10 +516,10 @@
 }
 
 .ladder__footer {
-  margin-top: 20px;
-  padding: 16px;
+  margin-top: 16px;
+  padding: 12px;
   background: #f8f9fa;
-  border-radius: 8px;
+  border-radius: 6px;
   text-align: center;
   color: #666;
 }
@@ -533,7 +533,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 40px;
+  padding: 32px;
   color: #666;
 }
 
@@ -559,43 +559,49 @@
 /* 響應式設計 */
 @media (max-width: 768px) {
   .ladder {
-    padding: 16px;
+    padding: 12px;
   }
 
   .ladder__header {
     flex-direction: column;
     align-items: stretch;
+    gap: 10px;
+    margin-bottom: 16px;
   }
 
   .ladder__header h2 {
     text-align: center;
+    font-size: 20px;
   }
 
   /* 移除不再使用的tab-container響應式樣式 */
 
   .ladder__filters {
     flex-direction: row;
-    gap: 6px;
+    gap: 4px;
     width: 100%;
     justify-content: center;
+    margin-bottom: 12px;
   }
 
   .ladder__filter-container {
     width: auto;
     flex: 1;
-    max-width: 120px;
+    max-width: 110px;
   }
 
   .ladder__filter-select {
     min-width: unset;
     width: 100%;
-    font-size: 11px;
-    padding: 6px 8px;
+    font-size: 10px;
+    padding: 5px 6px;
   }
 
   .ladder__user-stats {
     grid-template-columns: 1fr;
-    gap: 12px;
+    gap: 10px;
+    padding: 12px;
+    margin-bottom: 12px;
   }
 
   .ladder__user-stats:has(.ladder__user-note) {
@@ -603,41 +609,41 @@
   }
 
   .ladder__item {
-    padding: 12px;
+    padding: 10px;
   }
 
   .ladder__rank {
-    margin-right: 12px;
-    min-width: 32px;
+    margin-right: 10px;
+    min-width: 28px;
   }
 
   .ladder__rank-number {
-    font-size: 16px;
+    font-size: 14px;
   }
 
   .ladder__avatar {
-    width: 32px;
-    height: 32px;
-    margin-right: 8px;
+    width: 28px;
+    height: 28px;
+    margin-right: 6px;
   }
 
   .ladder__score {
-    min-width: 60px;
+    min-width: 50px;
   }
 
   .ladder__score-value {
-    font-size: 16px;
+    font-size: 14px;
   }
 
   /* 手機版火焰邊框效果調整 */
   .ladder__user-name.current-user-flame {
-    padding: 3px 6px;
-    font-size: 14px;
+    padding: 2px 4px;
+    font-size: 13px;
   }
 
   .ladder__user-name.current-user-flame::after {
-    right: -16px;
-    font-size: 12px;
+    right: -14px;
+    font-size: 10px;
   }
 }
 
