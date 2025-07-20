@@ -50,8 +50,8 @@
 }
 
 .user-avatar {
-  width: 140px;
-  height: 140px;
+  width: 336px;
+  height: 336px;
   border-radius: 50%;
   object-fit: cover;
   border: 4px solid rgba(255, 255, 255, 0.3);
@@ -899,8 +899,8 @@
   }
 
   .user-avatar {
-    width: 120px;
-    height: 120px;
+    width: 288px;
+    height: 288px;
   }
 
   .section-header {
