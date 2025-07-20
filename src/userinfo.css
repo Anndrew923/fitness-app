@@ -49,9 +49,9 @@
   display: inline-block;
 }
 
-.user-avatar {
-  width: 336px;
-  height: 336px;
+.user-info-container .user-avatar {
+  width: 200px !important;
+  height: 200px !important;
   border-radius: 50%;
   object-fit: cover;
   border: 4px solid rgba(255, 255, 255, 0.3);
@@ -59,7 +59,7 @@
   transition: all 0.3s ease;
 }
 
-.user-avatar:hover {
+.user-info-container .user-avatar:hover {
   transform: scale(1.05);
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
 }
@@ -898,9 +898,9 @@
     padding: 14px 10px;
   }
 
-  .user-avatar {
-    width: 288px;
-    height: 288px;
+  .user-info-container .user-avatar {
+    width: 160px !important;
+    height: 160px !important;
   }
 
   .section-header {
