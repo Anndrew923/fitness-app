@@ -23,7 +23,6 @@ import FFMI from './FFMI';
 import Login from './Login';
 import History from './History';
 import PrivacyPolicy from './PrivacyPolicy';
-import TestPage from './TestPage';
 import BottomNavBar from './components/BottomNavBar';
 import Friends from './components/Friends';
 import Ladder from './components/Ladder';
@@ -80,6 +79,11 @@ function AppContent() {
 
   const handleLogin = async (email, password) => {
     try {
+      // 檢查密碼是否提供
+      if (!password || password.trim() === '') {
+        throw new Error('密碼不能為空');
+      }
+
       await signInWithEmailAndPassword(auth, email, password);
       // 登入成功後清除 guestMode 標記
       sessionStorage.removeItem('guestMode');
@@ -89,7 +93,8 @@ function AppContent() {
       }
     } catch (error) {
       console.error('登入失敗:', error);
-      throw new Error('登入失敗');
+      // 不要拋出新的錯誤，讓調用者處理原始錯誤
+      throw error;
     }
   };
 
@@ -289,7 +294,6 @@ function AppContent() {
               element={<ProtectedRoute element={<Ladder />} />}
             />
             <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-            <Route path="/test" element={<TestPage />} />
             <Route path="*" element={<div>404 - 頁面未找到</div>} />
           </Routes>
         </div>

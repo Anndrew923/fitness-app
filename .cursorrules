@@ -1,0 +1,27 @@
+# Cursor 配置規則
+# 啟用瀏覽器控制台監控
+
+# 瀏覽器集成設置
+browser_integration: true
+console_monitoring: true
+real_time_logs: true
+
+# 日誌過濾規則
+log_filters:
+  - "console.log"
+  - "console.error"
+  - "console.warn"
+  - "console.info"
+  - "Firebase"
+  - "防抖"
+  - "錯誤"
+  - "Error"
+
+# 自動問題檢測
+auto_problem_detection: true
+performance_monitoring: true
+error_tracking: true
+
+# 開發環境設置
+development_mode: true
+debug_logs: true 

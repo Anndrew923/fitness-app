@@ -1,17 +1,9 @@
-import { useRef, useMemo, useLayoutEffect } from 'react';
+import { useRef, useLayoutEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 
 function ScrollToTop() {
   const { pathname } = useLocation();
   const prevPathnameRef = useRef(null);
-
-  const testPages = useMemo(() => [
-    '/strength',
-    '/cardio',
-    '/explosive-power',
-    '/muscle-mass',
-    '/body-fat',
-  ], []);
 
   useLayoutEffect(() => {
     const isFromLogin = prevPathnameRef.current === '/login' || prevPathnameRef.current === '/';
@@ -32,7 +24,7 @@ function ScrollToTop() {
     }
 
     prevPathnameRef.current = pathname;
-  }, [pathname, testPages]);
+  }, [pathname]);
 
   return null;
 }

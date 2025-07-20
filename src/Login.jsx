@@ -157,13 +157,10 @@ function Login({ onLogin }) {
   };
 
   const handleSocialLogin = (email, password) => {
-    onLogin(email, password);
-
-    // 等待一下確保 UserContext 有時間載入資料
-    setTimeout(() => {
-      console.log('社交登入成功，導航到 /user-info');
-      navigate('/user-info');
-    }, 500);
+    // 社交登入不需要調用 onLogin，因為 Firebase 已經處理了認證
+    // 直接導航到用戶信息頁面
+    console.log('社交登入成功，導航到 /user-info');
+    navigate('/user-info');
   };
 
   const handleSocialError = errorMessage => {
@@ -245,12 +242,9 @@ function Login({ onLogin }) {
       >
         {isRegistering ? '已有帳號？點此登入' : '沒有帳號？點此註冊'}
       </button>
-      
-      <SocialLogin 
-        onLogin={handleSocialLogin}
-        onError={handleSocialError}
-      />
-      
+
+      <SocialLogin onLogin={handleSocialLogin} onError={handleSocialError} />
+
       <div className="instructions-container">
         <h2 className="instructions-title">使用說明</h2>
         <ul className="instructions-list">
