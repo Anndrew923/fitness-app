@@ -1,4 +1,5 @@
-// Firebase Firestore Security Rules for 好友系統 - 雙向邀請機制
+// Firebase Firestore Security Rules for 健身應用 - 完整版
+// 包含：用戶管理、好友系統、社群動態、挑戰系統、評估記錄等
 // 請將以下規則複製到您的 Firebase Console 中的 Firestore 安全規則
 
 rules_version = '2';
@@ -60,6 +61,108 @@ service cloud.firestore {
       
       // 不允許刪除挑戰記錄（保留歷史）
       allow delete: if false;
+    }
+    
+    // 社群動態規則 - 社群頁面功能
+    match /communityPosts/{postId} {
+      // 任何登入用戶都可以讀取動態
+      allow read: if request.auth != null;
+      
+      // 任何登入用戶都可以發布動態
+      allow create: if request.auth != null && 
+        request.resource.data.userId == request.auth.uid;
+      
+      // 只有動態作者可以更新自己的動態
+      allow update: if request.auth != null && 
+        resource.data.userId == request.auth.uid;
+      
+      // 只有動態作者可以刪除自己的動態
+      allow delete: if request.auth != null && 
+        resource.data.userId == request.auth.uid;
+    }
+    
+    // 評估記錄規則 - 力量、爆發力、心肺、肌肉量、體脂等
+    match /assessments/{assessmentId} {
+      // 只有本人可以讀取自己的評估記錄
+      allow read: if request.auth != null && 
+        resource.data.userId == request.auth.uid;
+      
+      // 只有本人可以創建評估記錄
+      allow create: if request.auth != null && 
+        request.resource.data.userId == request.auth.uid;
+      
+      // 只有本人可以更新自己的評估記錄
+      allow update: if request.auth != null && 
+        resource.data.userId == request.auth.uid;
+      
+      // 只有本人可以刪除自己的評估記錄
+      allow delete: if request.auth != null && 
+        resource.data.userId == request.auth.uid;
+    }
+    
+    // 天梯排名規則
+    match /ladderRankings/{rankingId} {
+      // 任何登入用戶都可以讀取排名
+      allow read: if request.auth != null;
+      
+      // 只有本人可以創建自己的排名記錄
+      allow create: if request.auth != null && 
+        request.resource.data.userId == request.auth.uid;
+      
+      // 只有本人可以更新自己的排名記錄
+      allow update: if request.auth != null && 
+        resource.data.userId == request.auth.uid;
+      
+      // 只有本人可以刪除自己的排名記錄
+      allow delete: if request.auth != null && 
+        resource.data.userId == request.auth.uid;
+    }
+    
+    // 歷史記錄規則
+    match /history/{historyId} {
+      // 只有本人可以讀取自己的歷史記錄
+      allow read: if request.auth != null && 
+        resource.data.userId == request.auth.uid;
+      
+      // 只有本人可以創建歷史記錄
+      allow create: if request.auth != null && 
+        request.resource.data.userId == request.auth.uid;
+      
+      // 只有本人可以更新自己的歷史記錄
+      allow update: if request.auth != null && 
+        resource.data.userId == request.auth.uid;
+      
+      // 只有本人可以刪除自己的歷史記錄
+      allow delete: if request.auth != null && 
+        resource.data.userId == request.auth.uid;
+    }
+    
+    // 用戶設定規則
+    match /userSettings/{settingId} {
+      // 只有本人可以讀取自己的設定
+      allow read: if request.auth != null && 
+        settingId == request.auth.uid;
+      
+      // 只有本人可以創建自己的設定
+      allow create: if request.auth != null && 
+        settingId == request.auth.uid;
+      
+      // 只有本人可以更新自己的設定
+      allow update: if request.auth != null && 
+        settingId == request.auth.uid;
+      
+      // 只有本人可以刪除自己的設定
+      allow delete: if request.auth != null && 
+        settingId == request.auth.uid;
+    }
+    
+    // 系統配置規則（如果需要）
+    match /systemConfig/{configId} {
+      // 任何登入用戶都可以讀取系統配置
+      allow read: if request.auth != null;
+      
+      // 只有管理員可以修改系統配置（這裡需要額外的管理員檢查）
+      allow write: if false; // 暫時禁用寫入，需要時可以調整
     }
   }
 } 

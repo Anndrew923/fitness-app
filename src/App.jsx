@@ -24,8 +24,8 @@ import Login from './Login';
 import History from './History';
 import PrivacyPolicy from './PrivacyPolicy';
 import BottomNavBar from './components/BottomNavBar';
-import Friends from './components/Friends';
 import Ladder from './components/Ladder';
+import Community from './components/Community';
 import GlobalAdBanner from './components/GlobalAdBanner';
 import './App.css';
 
@@ -56,7 +56,7 @@ function AppContent() {
     '/user-info',
     '/history',
     '/ladder',
-    '/friends',
+    '/community',
     '/strength',
     '/explosive-power',
     '/cardio',
@@ -67,8 +67,8 @@ function AppContent() {
   // 檢查是否需要為固定廣告預留空間
   const showFixedAd = [
     '/user-info',
-    '/friends',
     '/ladder',
+    '/community',
     '/history',
     '/strength',
     '/cardio',
@@ -286,24 +286,21 @@ function AppContent() {
               element={<ProtectedRoute element={<History />} />}
             />
             <Route
-              path="/friends"
-              element={<ProtectedRoute element={<Friends />} />}
-            />
-            <Route
               path="/ladder"
               element={<ProtectedRoute element={<Ladder />} />}
+            />
+            <Route
+              path="/community"
+              element={<ProtectedRoute element={<Community />} />}
             />
             <Route path="/privacy-policy" element={<PrivacyPolicy />} />
             <Route path="*" element={<div>404 - 頁面未找到</div>} />
           </Routes>
         </div>
       </ErrorBoundary>
-      {/* 在好友頁面隱藏頁腳，避免影響訊息界面 */}
-      {location.pathname !== '/friends' && (
-        <footer className="app-footer">
-          <Link to="/privacy-policy">隱私權政策</Link>
-        </footer>
-      )}
+      <footer className="app-footer">
+        <Link to="/privacy-policy">隱私權政策</Link>
+      </footer>
       {/* 在天梯頁面隱藏廣告，保持頁面乾淨 */}
       {location.pathname !== '/ladder' && <GlobalAdBanner />}
       {showNavBar && <BottomNavBar />}

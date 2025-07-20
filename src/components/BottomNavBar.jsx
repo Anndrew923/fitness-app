@@ -5,8 +5,8 @@ import GuestModal from './GuestModal';
 
 const navItems = [
   {
-    key: 'friends',
-    label: '好友',
+    key: 'community',
+    label: '社群',
     icon: (
       <svg
         width="24"
@@ -23,10 +23,11 @@ const navItems = [
         <path d="M16 3.13a4 4 0 0 1 0 7.75" />
       </svg>
     ),
-    path: '/friends',
-    tooltip: '好友列表',
+    path: '/community',
+    tooltip: '健身社群',
     guestBlock: true,
   },
+
   {
     key: 'home',
     label: '首頁',

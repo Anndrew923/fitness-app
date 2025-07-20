@@ -1,76 +1,76 @@
 .ffmi-container {
-    max-width: 100%;
-    padding: 1rem;
-    margin: 0 auto;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+  max-width: 100%;
+  padding: 0.8rem;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   background: linear-gradient(135deg, #f0f8ff 0%, #e6f3ff 100%);
-    min-height: 100vh;
-  }
-  
-  .ffmi-title {
-    font-size: 1.5rem;
-    font-weight: bold;
+  min-height: 100vh;
+}
+
+.ffmi-title {
+  font-size: 1.3rem;
+  font-weight: bold;
   color: #2c5aa0;
-    margin-bottom: 1.5rem;
-    text-align: center;
+  margin-bottom: 1.2rem;
+  text-align: center;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-  }
-  
-  .input-section {
-    width: 90%;
-    max-width: 400px;
-    background: white;
-    padding: 1.5rem;
+}
+
+.input-section {
+  width: 90%;
+  max-width: 400px;
+  background: white;
+  padding: 1.2rem;
   border-radius: 12px;
   box-shadow: 0 8px 25px rgba(44, 90, 160, 0.15);
-    margin-bottom: 1.5rem;
+  margin-bottom: 1.2rem;
   border: 1px solid rgba(44, 90, 160, 0.1);
-  }
-  
-  .input-label {
-    display: block;
-    font-size: 0.875rem;
+}
+
+.input-label {
+  display: block;
+  font-size: 0.8rem;
   font-weight: 600;
   color: #2c5aa0;
-    margin-bottom: 0.5rem;
-    text-align: left;
-  }
-  
-  .input-field {
-    width: 100%;
-    padding: 0.75rem;
-    font-size: 1rem;
+  margin-bottom: 0.4rem;
+  text-align: left;
+}
+
+.input-field {
+  width: 100%;
+  padding: 0.6rem;
+  font-size: 0.9rem;
   border: 2px solid #e1e8ed;
   border-radius: 8px;
-    outline: none;
+  outline: none;
   transition: all 0.3s ease;
   background-color: #fafbfc;
-  }
-  
-  .input-field:focus {
+}
+
+.input-field:focus {
   border-color: #81d4fa;
   box-shadow: 0 0 0 3px rgba(129, 212, 250, 0.2);
   background-color: white;
-  }
-  
-  .calculate-btn {
-    width: 100%;
-    margin-top: 1rem;
-  padding: 0.875rem;
-    font-size: 1rem;
+}
+
+.calculate-btn {
+  width: 100%;
+  margin-top: 0.8rem;
+  padding: 0.7rem;
+  font-size: 0.9rem;
   font-weight: 600;
-    color: white;
+  color: white;
   background: linear-gradient(135deg, #81d4fa 0%, #4fc3f7 100%);
-    border: none;
+  border: none;
   border-radius: 8px;
-    cursor: pointer;
+  cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: 0 4px 15px rgba(129, 212, 250, 0.3);
-  }
-  
-  .calculate-btn:hover {
+}
+
+.calculate-btn:hover {
   background: linear-gradient(135deg, #4fc3f7 0%, #29b6f6 100%);
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(129, 212, 250, 0.4);
@@ -78,163 +78,163 @@
 
 .calculate-btn:active {
   transform: translateY(0);
-  }
-  
-  .result-section {
-    width: 90%;
-    max-width: 400px;
-    background: white;
-    padding: 1.5rem;
+}
+
+.result-section {
+  width: 90%;
+  max-width: 400px;
+  background: white;
+  padding: 1.5rem;
   border-radius: 12px;
   box-shadow: 0 8px 25px rgba(44, 90, 160, 0.15);
-    margin-bottom: 1.5rem;
+  margin-bottom: 1.5rem;
   border: 1px solid rgba(44, 90, 160, 0.1);
-  }
-  
-  .result-title {
-    font-size: 1.25rem;
-    font-weight: 600;
+}
+
+.result-title {
+  font-size: 1.25rem;
+  font-weight: 600;
   color: #2c5aa0;
-    margin-bottom: 1rem;
-    text-align: center;
-  }
-  
-  .result-text {
-    font-size: 0.875rem;
-    color: #4b5563;
-    margin: 0.5rem 0;
-    text-align: center;
-  }
-  
-  .score-text {
-    font-size: 1.25rem;
-    font-weight: bold;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.result-text {
+  font-size: 0.875rem;
+  color: #4b5563;
+  margin: 0.5rem 0;
+  text-align: center;
+}
+
+.score-text {
+  font-size: 1.25rem;
+  font-weight: bold;
   color: #81d4fa;
-    margin: 0.5rem 0;
-    text-align: center;
+  margin: 0.5rem 0;
+  text-align: center;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-  }
-  
-  .category-text {
-    font-size: 1.125rem;
-    font-weight: 600;
+}
+
+.category-text {
+  font-size: 1.125rem;
+  font-weight: 600;
   color: #4fc3f7;
-    margin: 0.5rem 0;
-    text-align: center;
-  }
-  
-  .description-section {
-    width: 90%;
-    max-width: 400px;
-    margin-bottom: 1.5rem;
-  }
-  
-  .description-card {
-    background: white;
-  border-radius: 12px;
-  box-shadow: 0 8px 25px rgba(44, 90, 160, 0.15);
-    overflow: hidden;
-  border: 1px solid rgba(44, 90, 160, 0.1);
-  }
-  
-  .description-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1.5rem;
-    cursor: pointer;
-  background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
-  transition: all 0.3s ease;
-  }
-  
-  .description-header:hover {
-  background: linear-gradient(135deg, #bbdefb 0%, #e1bee7 100%);
-  }
-  
-  .description-title {
-    font-size: 1.25rem;
-    font-weight: 600;
-  color: #2c5aa0;
-    margin: 0;
-  }
-  
-  .description-content {
-    padding: 1.5rem;
-    font-size: 0.875rem;
-    color: #4b5563;
-    line-height: 1.6;
-    background-color: white;
-    transition: max-height 0.3s ease, padding 0.3s ease;
-  }
-  
-  .arrow {
-    font-size: 1rem;
-  color: #81d4fa;
-    transition: transform 0.3s ease;
-  }
-  
-  .arrow.expanded {
-    transform: rotate(180deg);
-  }
-  
-  .table-section {
-    width: 90%;
-    max-width: 400px;
-    margin-bottom: 1.5rem;
-  }
-  
-  .table-title {
-    font-size: 1.25rem;
-    font-weight: 600;
-  color: #2c5aa0;
-    margin-bottom: 1rem;
-    text-align: center;
-  }
-  
-  .ffmi-table {
-    width: 100%;
-    border-collapse: collapse;
-    background: white;
+  margin: 0.5rem 0;
+  text-align: center;
+}
+
+.description-section {
+  width: 90%;
+  max-width: 400px;
+  margin-bottom: 1.5rem;
+}
+
+.description-card {
+  background: white;
   border-radius: 12px;
   box-shadow: 0 8px 25px rgba(44, 90, 160, 0.15);
   overflow: hidden;
   border: 1px solid rgba(44, 90, 160, 0.1);
-  }
-  
-  .ffmi-table th,
-  .ffmi-table td {
-    padding: 0.75rem;
-    font-size: 0.875rem;
-    color: #4b5563;
-    border-bottom: 1px solid #e5e7eb;
-    text-align: center;
-  }
-  
-  .ffmi-table th {
+}
+
+.description-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  cursor: pointer;
   background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
-    font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.description-header:hover {
+  background: linear-gradient(135deg, #bbdefb 0%, #e1bee7 100%);
+}
+
+.description-title {
+  font-size: 1.25rem;
+  font-weight: 600;
   color: #2c5aa0;
-  }
-  
-  .ffmi-table tr:last-child td {
-    border-bottom: none;
-  }
-  
+  margin: 0;
+}
+
+.description-content {
+  padding: 1.5rem;
+  font-size: 0.875rem;
+  color: #4b5563;
+  line-height: 1.6;
+  background-color: white;
+  transition: max-height 0.3s ease, padding 0.3s ease;
+}
+
+.arrow {
+  font-size: 1rem;
+  color: #81d4fa;
+  transition: transform 0.3s ease;
+}
+
+.arrow.expanded {
+  transform: rotate(180deg);
+}
+
+.table-section {
+  width: 90%;
+  max-width: 400px;
+  margin-bottom: 1.5rem;
+}
+
+.table-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #2c5aa0;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.ffmi-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 8px 25px rgba(44, 90, 160, 0.15);
+  overflow: hidden;
+  border: 1px solid rgba(44, 90, 160, 0.1);
+}
+
+.ffmi-table th,
+.ffmi-table td {
+  padding: 0.75rem;
+  font-size: 0.875rem;
+  color: #4b5563;
+  border-bottom: 1px solid #e5e7eb;
+  text-align: center;
+}
+
+.ffmi-table th {
+  background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
+  font-weight: 600;
+  color: #2c5aa0;
+}
+
+.ffmi-table tr:last-child td {
+  border-bottom: none;
+}
+
 .ffmi-table tr:hover {
   background-color: rgba(129, 212, 250, 0.05);
 }
 
 .ffmi-submit-btn {
-    width: 90%;
-    max-width: 400px;
+  width: 90%;
+  max-width: 400px;
   padding: 0.875rem;
-    font-size: 1rem;
+  font-size: 1rem;
   font-weight: 600;
-    color: white;
+  color: white;
   background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-    border: none;
+  border: none;
   border-radius: 8px;
-    cursor: pointer;
+  cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
   margin-bottom: 2rem;
@@ -245,8 +245,8 @@
   text-align: center;
   text-decoration: none;
   line-height: 1.5;
-  }
-  
+}
+
 .ffmi-submit-btn:hover {
   background: linear-gradient(135deg, #059669 0%, #047857 100%);
   transform: translateY(-2px);
@@ -255,31 +255,31 @@
 
 .ffmi-submit-btn:active {
   transform: translateY(0);
+}
+
+@media (min-width: 768px) {
+  .ffmi-title {
+    font-size: 2rem;
   }
-  
-  @media (min-width: 768px) {
-    .ffmi-title {
-      font-size: 2rem;
-    }
-  
-    .result-title,
-    .table-title,
-    .description-title {
-      font-size: 1.5rem;
-    }
-  
-    .result-text,
-    .ffmi-table th,
-    .ffmi-table td,
-    .description-content {
-      font-size: 1rem;
-    }
-  
-    .score-text {
-      font-size: 1.5rem;
-    }
-  
-    .category-text {
-      font-size: 1.25rem;
-    }
+
+  .result-title,
+  .table-title,
+  .description-title {
+    font-size: 1.5rem;
   }
+
+  .result-text,
+  .ffmi-table th,
+  .ffmi-table td,
+  .description-content {
+    font-size: 1rem;
+  }
+
+  .score-text {
+    font-size: 1.5rem;
+  }
+
+  .category-text {
+    font-size: 1.25rem;
+  }
+}

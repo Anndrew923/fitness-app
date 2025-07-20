@@ -1,7 +1,7 @@
 .login-container {
   max-width: 100%;
-  padding: 1.5rem;
-  margin: 2rem auto;
+  padding: 1.2rem;
+  margin: 1.5rem auto;
   background-color: #ffffff;
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
@@ -9,11 +9,11 @@
 
 .input-field {
   width: 100%;
-  padding: 0.75rem;
-  margin: 0.5rem 0;
+  padding: 0.6rem;
+  margin: 0.4rem 0;
   border: 1px solid #d1d5db;
   border-radius: 6px;
-  font-size: 1rem;
+  font-size: 0.9rem;
   transition: border-color 0.2s ease;
 }
 
@@ -24,12 +24,12 @@
 
 .submit-btn {
   width: 100%;
-  padding: 0.875rem;
+  padding: 0.7rem;
   background-color: #4bc0c0;
   color: white;
   border: none;
   border-radius: 6px;
-  font-size: 1rem;
+  font-size: 0.9rem;
   font-weight: 500;
   cursor: pointer;
   transition: background-color 0.3s ease;
@@ -46,13 +46,13 @@
 
 .toggle-btn {
   width: 100%;
-  padding: 0.75rem;
-  margin-top: 1.25rem;
+  padding: 0.6rem;
+  margin-top: 1rem;
   background-color: #e5e7eb;
   color: #374151;
   border: none;
   border-radius: 6px;
-  font-size: 0.875rem;
+  font-size: 0.8rem;
   font-weight: 500;
   cursor: pointer;
   text-align: center;
@@ -85,18 +85,18 @@
 }
 
 .instructions-container {
-  margin-top: 2rem;
-  padding: 1.25rem;
+  margin-top: 1.5rem;
+  padding: 1rem;
   background-color: #f9fafb;
   border-radius: 8px;
   border: 2px solid #e5e7eb;
 }
 
 .instructions-title {
-  font-size: 1.25rem;
+  font-size: 1.1rem;
   font-weight: 600;
   color: #1f2937;
-  margin-bottom: 1rem;
+  margin-bottom: 0.75rem;
   text-align: center;
 }
 
