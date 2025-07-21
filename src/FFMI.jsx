@@ -7,7 +7,9 @@ import './FFMI.css';
 function FFMI({ onComplete, clearTestData }) {
   const { userData, setUserData, saveUserData } = useUser();
   const navigate = useNavigate();
-  const [bodyFat, setBodyFat] = useState(userData.testInputs?.ffmi?.bodyFat || '');
+  const [bodyFat, setBodyFat] = useState(
+    userData.testInputs?.ffmi?.bodyFat || ''
+  );
   const [ffmi, setFfmi] = useState(null);
   const [ffmiScore, setFfmiScore] = useState(null);
   const [ffmiCategory, setFfmiCategory] = useState('');
@@ -24,7 +26,12 @@ function FFMI({ onComplete, clearTestData }) {
   }, [bodyFat]);
 
   const calculateScores = () => {
-    if (!userData.gender || !userData.height || !userData.weight || !userData.age) {
+    if (
+      !userData.gender ||
+      !userData.height ||
+      !userData.weight ||
+      !userData.age
+    ) {
       alert('請先在用戶信息頁面填寫性別、身高、體重和年齡');
       return;
     }
@@ -40,7 +47,8 @@ function FFMI({ onComplete, clearTestData }) {
 
     const fatFreeMass = weight * (1 - bodyFatValue);
     const rawFfmi = fatFreeMass / (heightInMeters * heightInMeters);
-    const adjustedFfmi = heightInMeters > 1.8 ? rawFfmi + 6.0 * (heightInMeters - 1.8) : rawFfmi;
+    const adjustedFfmi =
+      heightInMeters > 1.8 ? rawFfmi + 6.0 * (heightInMeters - 1.8) : rawFfmi;
     setFfmi(adjustedFfmi.toFixed(1));
 
     let newFfmiScore;
@@ -48,15 +56,21 @@ function FFMI({ onComplete, clearTestData }) {
       const baseFfmi = 18.5;
       const maxFfmi = 28;
       if (adjustedFfmi <= 0) newFfmiScore = 0;
-      else if (adjustedFfmi <= baseFfmi) newFfmiScore = (adjustedFfmi / baseFfmi) * 60;
-      else if (adjustedFfmi < maxFfmi) newFfmiScore = 60 + ((adjustedFfmi - baseFfmi) / (maxFfmi - baseFfmi)) * 40;
+      else if (adjustedFfmi <= baseFfmi)
+        newFfmiScore = (adjustedFfmi / baseFfmi) * 60;
+      else if (adjustedFfmi < maxFfmi)
+        newFfmiScore =
+          60 + ((adjustedFfmi - baseFfmi) / (maxFfmi - baseFfmi)) * 40;
       else newFfmiScore = 100;
     } else {
       const baseFfmi = 15.5;
       const maxFfmi = 22;
       if (adjustedFfmi <= 0) newFfmiScore = 0;
-      else if (adjustedFfmi <= baseFfmi) newFfmiScore = (adjustedFfmi / baseFfmi) * 60;
-      else if (adjustedFfmi < maxFfmi) newFfmiScore = 60 + ((adjustedFfmi - baseFfmi) / (maxFfmi - baseFfmi)) * 40;
+      else if (adjustedFfmi <= baseFfmi)
+        newFfmiScore = (adjustedFfmi / baseFfmi) * 60;
+      else if (adjustedFfmi < maxFfmi)
+        newFfmiScore =
+          60 + ((adjustedFfmi - baseFfmi) / (maxFfmi - baseFfmi)) * 40;
       else newFfmiScore = 100;
     }
     setFfmiScore(newFfmiScore.toFixed(1));
@@ -67,7 +81,8 @@ function FFMI({ onComplete, clearTestData }) {
       else if (adjustedFfmi < 22) setFfmiCategory('肌肉量高於平均值');
       else if (adjustedFfmi < 23) setFfmiCategory('肌肉量很高');
       else if (adjustedFfmi < 26) setFfmiCategory('肌肉量極高');
-      else if (adjustedFfmi < 28) setFfmiCategory('肌肉量已經高到可能有使用藥物');
+      else if (adjustedFfmi < 28)
+        setFfmiCategory('肌肉量已經高到可能有使用藥物');
       else setFfmiCategory('不用藥不可能達到的數值');
     } else {
       if (adjustedFfmi < 15) setFfmiCategory('肌肉量低於平均');
@@ -88,16 +103,20 @@ function FFMI({ onComplete, clearTestData }) {
 
     try {
       // 準備更新的數據
-      const updatedScores = { 
-        ...userData.scores, 
-        bodyFat: parseFloat(ffmiScore) 
+      const updatedScores = {
+        ...userData.scores,
+        bodyFat: parseFloat(ffmiScore),
       };
       const updatedUserData = {
         ...userData,
-        scores: updatedScores
+        scores: updatedScores,
       };
 
-      setUserData(updatedUserData);
+      setUserData({
+        ...updatedUserData,
+        // 保持原有的天梯分數，不自動更新
+        ladderScore: userData.ladderScore || 0,
+      });
 
       if (!isGuest) {
         const success = await saveUserData(updatedUserData);
@@ -116,7 +135,6 @@ function FFMI({ onComplete, clearTestData }) {
       setTimeout(() => {
         navigate('/user-info', { state: { from: '/body-fat' } });
       }, 100);
-
     } catch (error) {
       console.error('提交失敗:', error);
       if (!isGuest) {
@@ -146,13 +164,18 @@ function FFMI({ onComplete, clearTestData }) {
     { range: '> 22', description: '不用藥不可能達到的數值' },
   ];
 
-  const ffmiTable = userData.gender === 'male' || userData.gender === '男性' ? maleFfmiTable : femaleFfmiTable;
+  const ffmiTable =
+    userData.gender === 'male' || userData.gender === '男性'
+      ? maleFfmiTable
+      : femaleFfmiTable;
 
   return (
     <div className="ffmi-container">
       <h1 className="ffmi-title">體脂肪率與 FFMI</h1>
       <div className="input-section">
-        <label htmlFor="bodyFat" className="input-label">體脂肪率 (%)</label>
+        <label htmlFor="bodyFat" className="input-label">
+          體脂肪率 (%)
+        </label>
         <input
           id="bodyFat"
           name="bodyFat"
@@ -163,7 +186,9 @@ function FFMI({ onComplete, clearTestData }) {
           className="input-field"
           required
         />
-        <button onClick={calculateScores} className="calculate-btn">計算分數</button>
+        <button onClick={calculateScores} className="calculate-btn">
+          計算分數
+        </button>
       </div>
       {ffmi && (
         <div className="result-section">
@@ -176,13 +201,22 @@ function FFMI({ onComplete, clearTestData }) {
       )}
       <div className="description-section">
         <div className="description-card">
-          <div className="description-header" onClick={() => setIsExpanded(!isExpanded)}>
+          <div
+            className="description-header"
+            onClick={() => setIsExpanded(!isExpanded)}
+          >
             <h2 className="description-title">FFMI 是什麼？</h2>
-            <span className={`arrow ${isExpanded ? 'expanded' : ''}`}>{isExpanded ? '▲' : '▼'}</span>
+            <span className={`arrow ${isExpanded ? 'expanded' : ''}`}>
+              {isExpanded ? '▲' : '▼'}
+            </span>
           </div>
           {isExpanded && (
             <div className="description-content">
-              <p>FFMI（Fat Free Mass Index 無脂肪質量指數）用來評估肌肉量多寡，考量身高與體脂，比 BMI 更準確。數值越高，代表肌肉量越多，是健身評估常用指標。在以下幾個狀況下易造成結果失真：</p>
+              <p>
+                FFMI（Fat Free Mass Index
+                無脂肪質量指數）用來評估肌肉量多寡，考量身高與體脂，比 BMI
+                更準確。數值越高，代表肌肉量越多，是健身評估常用指標。在以下幾個狀況下易造成結果失真：
+              </p>
               <ol className="list-decimal pl-5 mt-2">
                 <li>受測者身高高於平均標準 (190 以上)</li>
                 <li>受測者體脂肪率顯著高於平均標準</li>
@@ -193,7 +227,13 @@ function FFMI({ onComplete, clearTestData }) {
         </div>
       </div>
       <div className="table-section">
-        <h2 className="table-title">FFMI 對照表 ({userData.gender === 'male' || userData.gender === '男性' ? '男性' : '女性'})</h2>
+        <h2 className="table-title">
+          FFMI 對照表 (
+          {userData.gender === 'male' || userData.gender === '男性'
+            ? '男性'
+            : '女性'}
+          )
+        </h2>
         <table className="ffmi-table">
           <thead>
             <tr>
@@ -211,7 +251,9 @@ function FFMI({ onComplete, clearTestData }) {
           </tbody>
         </table>
       </div>
-      <button onClick={handleSubmit} className="ffmi-submit-btn">提交並返回總覽</button>
+      <button onClick={handleSubmit} className="ffmi-submit-btn">
+        提交並返回總覽
+      </button>
     </div>
   );
 }

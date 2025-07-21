@@ -21,6 +21,7 @@ import {
   where,
   updateDoc,
   doc,
+  setDoc,
 } from 'firebase/firestore';
 import PropTypes from 'prop-types';
 import {
@@ -277,6 +278,7 @@ function UserInfo({ testData, onLogout, clearTestData }) {
   const location = useLocation();
   const radarSectionRef = useRef(null);
   const testsSectionRef = useRef(null);
+  const nicknameTimeoutRef = useRef(null); // 新增：暱稱輸入防抖定時器
   const [avatarUploading, setAvatarUploading] = useState(false);
   const [avatarError, setAvatarError] = useState(null);
 
@@ -377,12 +379,34 @@ function UserInfo({ testData, onLogout, clearTestData }) {
       const scores = userData.scores || {};
       const ladderScore = calculateLadderScore(scores);
 
-      // 更新用戶數據 - 使用 setUserData 而不是直接 saveUserData
-      setUserData({
+      // 更新用戶數據，明確設置天梯分數和提交時間
+      const updatedUserData = {
         ...userData,
         ladderScore: ladderScore,
-        lastLadderSubmission: new Date(),
-      });
+        lastLadderSubmission: new Date().toISOString(),
+      };
+
+      // 立即更新本地狀態
+      setUserData(updatedUserData);
+
+      // 立即保存到 Firebase，不等待防抖
+      try {
+        const userRef = doc(db, 'users', auth.currentUser.uid);
+        await setDoc(
+          userRef,
+          {
+            ladderScore: ladderScore,
+            lastLadderSubmission: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          },
+          { merge: true }
+        );
+
+        console.log('天梯分數已立即保存到 Firebase:', ladderScore);
+      } catch (error) {
+        console.error('保存天梯分數到 Firebase 失敗:', error);
+        throw error;
+      }
 
       // 更新提交狀態
       const now = new Date();
@@ -402,8 +426,6 @@ function UserInfo({ testData, onLogout, clearTestData }) {
         actionText: '立即查看天梯',
       });
 
-      // 移除儀式感動畫，直接顯示成功訊息
-
       // 5秒後自動關閉成功對話框（給用戶時間選擇）
       setTimeout(() => {
         setModalState(prev => ({ ...prev, isOpen: false }));
@@ -419,7 +441,7 @@ function UserInfo({ testData, onLogout, clearTestData }) {
     } finally {
       setLoading(false);
     }
-  }, [userData, setUserData, loading, navigate]);
+  }, [userData.scores, setUserData, loading, navigate]);
 
   // 新增：取消提交
   const cancelSubmit = useCallback(() => {
@@ -621,7 +643,7 @@ function UserInfo({ testData, onLogout, clearTestData }) {
     });
 
     return () => unsubscribe();
-  }, [navigate, isGuest]);
+  }, []); // 移除依賴項，認證監聽只需要在組件掛載時設置一次
 
   // 確保資料載入完成
   useEffect(() => {
@@ -640,7 +662,15 @@ function UserInfo({ testData, onLogout, clearTestData }) {
     };
 
     checkDataLoaded();
-  }, [currentUser, dataLoaded, isLoading]); // 移除 userData 依賴項，避免重複執行
+  }, [
+    currentUser,
+    dataLoaded,
+    isLoading,
+    loadUserData,
+    userData.height,
+    userData.weight,
+    userData.age,
+  ]);
 
   // 處理從評測頁面返回時自動滾動到雷達圖
   useEffect(() => {
@@ -756,6 +786,8 @@ function UserInfo({ testData, onLogout, clearTestData }) {
           return {
             ...prev,
             scores: updatedScores,
+            // 保持原有的天梯分數，不自動更新
+            ladderScore: prev.ladderScore || 0,
             // 移除 lastActive 更新，避免頻繁寫入
             // lastActive: new Date().toISOString(),
           };
@@ -806,7 +838,7 @@ function UserInfo({ testData, onLogout, clearTestData }) {
       return false;
     }
     return true;
-  }, [userData]);
+  }, [userData.height, userData.weight, userData.age, userData.gender]);
 
   const saveData = useCallback(
     async e => {
@@ -826,6 +858,8 @@ function UserInfo({ testData, onLogout, clearTestData }) {
         age: Number(userData.age) || 0,
         gender: userData.gender,
         scores: userData.scores || DEFAULT_SCORES,
+        // 保持原有的天梯分數，不自動更新
+        ladderScore: userData.ladderScore || 0,
         lastActive: new Date().toISOString(),
       };
 
@@ -859,7 +893,16 @@ function UserInfo({ testData, onLogout, clearTestData }) {
         setLoading(false);
       }
     },
-    [userData, validateData, saveUserData, isGuest]
+    [
+      userData.height,
+      userData.weight,
+      userData.age,
+      userData.gender,
+      userData.scores,
+      userData.ladderScore,
+      validateData,
+      isGuest,
+    ]
   );
 
   const averageScore = useMemo(() => {
@@ -874,11 +917,14 @@ function UserInfo({ testData, onLogout, clearTestData }) {
     return avg;
   }, [userData?.scores]);
 
-  // 計算天梯分數
-  const ladderScore = useMemo(() => {
+  // 計算當前天梯分數（用於顯示，不影響已提交的分數）
+  const currentLadderScore = useMemo(() => {
     const scores = userData?.scores || DEFAULT_SCORES;
     return calculateLadderScore(scores);
   }, [userData?.scores]);
+
+  // 獲取已提交的天梯分數
+  const submittedLadderScore = userData?.ladderScore || 0;
 
   // 計算完成狀態
   const completionStatus = useMemo(() => {
@@ -895,9 +941,13 @@ function UserInfo({ testData, onLogout, clearTestData }) {
     };
   }, [userData?.scores]);
 
-  // 獲取用戶排名
+  // 獲取用戶排名（基於已提交的天梯分數）
   const fetchUserRank = useCallback(async () => {
-    if (!userData?.userId || !completionStatus.isFullyCompleted) {
+    if (
+      !userData?.userId ||
+      !submittedLadderScore ||
+      submittedLadderScore <= 0
+    ) {
       setUserRank(null);
       return;
     }
@@ -937,7 +987,7 @@ function UserInfo({ testData, onLogout, clearTestData }) {
       console.error('獲取用戶排名失敗:', error);
       setUserRank(null);
     }
-  }, [userData?.userId, completionStatus.isFullyCompleted]);
+  }, [userData?.userId, submittedLadderScore]);
 
   // 當用戶數據或完成狀態改變時，獲取用戶排名
   useEffect(() => {
@@ -954,20 +1004,23 @@ function UserInfo({ testData, onLogout, clearTestData }) {
     e => {
       const nickname = e.target.value;
 
-      // 使用防抖處理暱稱變更，避免每次輸入都觸發 Firebase 寫入
-      const timeoutId = setTimeout(() => {
-        setUserData(prev => ({
-          ...prev,
-          nickname: nickname,
-          ageGroup: ageGroup,
-          ladderScore: ladderScore,
-        }));
-      }, 1000); // 1秒防抖
+      // 立即更新本地狀態，提供即時反饋
+      setUserData(prev => ({
+        ...prev,
+        nickname: nickname,
+      }));
 
-      // 清理之前的定時器
-      return () => clearTimeout(timeoutId);
+      // 清除之前的定時器
+      if (nicknameTimeoutRef.current) {
+        clearTimeout(nicknameTimeoutRef.current);
+      }
+
+      // 設置新的防抖定時器，延遲保存到 Firebase
+      nicknameTimeoutRef.current = setTimeout(() => {
+        nicknameTimeoutRef.current = null;
+      }, 500); // 500毫秒防抖，平衡響應性和性能
     },
-    [ageGroup, ladderScore]
+    [setUserData]
   );
 
   // 生成預設暱稱
@@ -977,6 +1030,8 @@ function UserInfo({ testData, onLogout, clearTestData }) {
     setUserData(prev => ({
       ...prev,
       nickname: generatedNickname,
+      // 保持原有的天梯分數，不自動更新
+      ladderScore: prev.ladderScore || 0,
     }));
   };
 
@@ -1038,7 +1093,14 @@ function UserInfo({ testData, onLogout, clearTestData }) {
         });
       }
     },
-    [userData, validateData, navigate]
+    [
+      userData.height,
+      userData.weight,
+      userData.age,
+      userData.gender,
+      validateData,
+      navigate,
+    ]
   );
 
   const handleLogout = useCallback(() => {
@@ -1077,6 +1139,8 @@ function UserInfo({ testData, onLogout, clearTestData }) {
       setUserData(prev => ({
         ...prev,
         [name]: processedValue,
+        // 保持原有的天梯分數，不自動更新
+        ladderScore: prev.ladderScore || 0,
       }));
     },
     [setUserData]
@@ -1111,7 +1175,12 @@ function UserInfo({ testData, onLogout, clearTestData }) {
       await uploadBytes(avatarRef, compressed, { contentType: 'image/jpeg' });
       const url = await getDownloadURL(avatarRef);
       // 更新 Firestore - 頭像上傳需要立即保存，不使用防抖
-      setUserData(prev => ({ ...prev, avatarUrl: url }));
+      setUserData(prev => ({
+        ...prev,
+        avatarUrl: url,
+        // 保持原有的天梯分數，不自動更新
+        ladderScore: prev.ladderScore || 0,
+      }));
 
       // 立即保存到 Firebase，不等待防抖
       try {
@@ -1557,10 +1626,32 @@ function UserInfo({ testData, onLogout, clearTestData }) {
                     <span className="score-value-large">{averageScore}</span>
                   </p>
                   {completionStatus.isFullyCompleted && (
-                    <p className="ladder-rank">
-                      🏆 :{' '}
-                      <span className="rank-value">{userRank || '未上榜'}</span>
-                    </p>
+                    <div className="ladder-info">
+                      <p className="ladder-rank">
+                        🏆 天梯排名:{' '}
+                        <span className="rank-value">
+                          {userRank || '未上榜'}
+                        </span>
+                      </p>
+                      {submittedLadderScore > 0 && (
+                        <p className="submitted-score">
+                          已提交分數:{' '}
+                          <span className="score-value">
+                            {submittedLadderScore}
+                          </span>
+                        </p>
+                      )}
+                      {currentLadderScore > 0 &&
+                        currentLadderScore !== submittedLadderScore && (
+                          <p className="current-score">
+                            當前分數:{' '}
+                            <span className="score-value">
+                              {currentLadderScore}
+                            </span>
+                            <span className="score-note">（需提交更新）</span>
+                          </p>
+                        )}
+                    </div>
                   )}
                 </div>
               )}
@@ -1587,7 +1678,9 @@ function UserInfo({ testData, onLogout, clearTestData }) {
                     disabled={loading}
                   >
                     <span className="btn-icon">🏆</span>
-                    <span className="btn-text">提交到天梯</span>
+                    <span className="btn-text">
+                      {submittedLadderScore > 0 ? '更新天梯分數' : '提交到天梯'}
+                    </span>
                   </button>
                 )}
               </div>

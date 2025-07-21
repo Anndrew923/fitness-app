@@ -134,7 +134,11 @@ function Muscle({ onComplete, clearTestData }) {
         scores: updatedScores,
       };
 
-      setUserData(updatedUserData);
+      setUserData({
+        ...updatedUserData,
+        // 保持原有的天梯分數，不自動更新
+        ladderScore: userData.ladderScore || 0,
+      });
 
       if (!isGuest) {
         const success = await saveUserData(updatedUserData);

@@ -104,10 +104,8 @@ export function UserProvider({ children }) {
           ageGroup: firebaseData.age
             ? getAgeGroup(Number(firebaseData.age))
             : firebaseData.ageGroup || '',
-          // 確保天梯分數被正確計算
-          ladderScore: firebaseData.scores
-            ? calculateLadderScore(firebaseData.scores)
-            : firebaseData.ladderScore || 0,
+          // 保持原有的天梯分數，不自動重新計算
+          ladderScore: firebaseData.ladderScore || 0,
           // 確保天梯排名被正確讀取
           ladderRank: Number(firebaseData.ladderRank) || 0,
         };
@@ -179,10 +177,8 @@ export function UserProvider({ children }) {
         ageGroup: data.age
           ? getAgeGroup(Number(data.age))
           : data.ageGroup || '',
-        // 確保天梯分數被計算和保存
-        ladderScore: data.scores
-          ? calculateLadderScore(data.scores)
-          : data.ladderScore || 0,
+        // 保持原有的天梯分數，不自動重新計算
+        ladderScore: data.ladderScore || 0,
         // 確保天梯排名被保存
         ladderRank: Number(data.ladderRank) || 0,
       };
@@ -226,14 +222,9 @@ export function UserProvider({ children }) {
         newData = { ...userData, ...update };
       }
 
-      // 計算天梯分數和年齡段
-      if (newData.scores) {
-        const oldLadderScore = userData.ladderScore || 0;
-        newData.ladderScore = calculateLadderScore(newData.scores);
-
-        if (newData.age) {
-          newData.ageGroup = getAgeGroup(newData.age);
-        }
+      // 計算年齡段（天梯分數不再自動計算）
+      if (newData.age) {
+        newData.ageGroup = getAgeGroup(newData.age);
       }
 
       // 立即更新本地狀態
@@ -257,6 +248,16 @@ export function UserProvider({ children }) {
         );
 
         if (hasImportantChanges) {
+          // 檢查是否只是暱稱變化
+          const isOnlyNicknameChange =
+            JSON.stringify(newData.nickname) !==
+              JSON.stringify(userData.nickname) &&
+            JSON.stringify({ ...newData, nickname: userData.nickname }) ===
+              JSON.stringify({ ...userData, nickname: newData.nickname });
+
+          // 暱稱變化使用較短的防抖時間
+          const debounceTime = isOnlyNicknameChange ? 1000 : 15000; // 暱稱1秒，其他15秒
+
           // 檢查寫入頻率限制（至少間隔30秒）
           const now = Date.now();
           const timeSinceLastWrite = now - lastWriteTimeRef.current;
@@ -279,13 +280,15 @@ export function UserProvider({ children }) {
               clearTimeout(setUserDataDebounceRef.current);
             }
 
-            // 使用更長的防抖時間（15秒）來大幅減少寫入頻率
+            // 使用動態防抖時間
             setUserDataDebounceRef.current = setTimeout(() => {
-              console.log(`🔄 防抖後保存用戶數據（15秒防抖）`);
+              console.log(
+                `🔄 防抖後保存用戶數據（${debounceTime / 1000}秒防抖）`
+              );
               lastWriteTimeRef.current = Date.now();
               saveUserData(newData);
               setUserDataDebounceRef.current = null;
-            }, 15000); // 15秒防抖
+            }, debounceTime);
           }
         }
       }
@@ -293,7 +296,7 @@ export function UserProvider({ children }) {
     [userData, saveUserData]
   );
 
-  // 保存歷史記錄 - 優化版本
+  // 保存歷史記錄 - 優化版本，包含記錄數量限制和自動清理
   const saveHistory = useCallback(
     async record => {
       if (!auth.currentUser) {
@@ -308,7 +311,41 @@ export function UserProvider({ children }) {
         id: Date.now().toString(),
       };
 
-      // 立即更新本地 state
+      // 獲取當前歷史記錄
+      const currentHistory = userData.history || [];
+      const maxRecords = 50;
+
+      // 檢查記錄數量限制
+      if (currentHistory.length >= maxRecords) {
+        console.warn(`歷史記錄已達上限 (${maxRecords})，執行自動清理`);
+
+        // 自動清理：保留最新的 40 條記錄，刪除最舊的 10 條
+        const sortedHistory = [...currentHistory].sort((a, b) => {
+          const dateA = a.timestamp ? new Date(a.timestamp) : new Date(a.date);
+          const dateB = b.timestamp ? new Date(b.timestamp) : new Date(b.date);
+          return dateB - dateA; // 降序排列，最新的在前
+        });
+
+        const cleanedHistory = sortedHistory.slice(0, maxRecords - 10);
+        console.log(
+          `自動清理完成：刪除 ${
+            currentHistory.length - cleanedHistory.length
+          } 條舊記錄`
+        );
+
+        // 更新本地 state
+        dispatch({
+          type: 'UPDATE_USER_DATA',
+          payload: { history: cleanedHistory },
+        });
+
+        // 顯示用戶友好的提示
+        if (typeof window !== 'undefined' && window.alert) {
+          alert(`歷史記錄已達上限，已自動清理最舊的記錄以騰出空間。`);
+        }
+      }
+
+      // 立即更新本地 state（添加新記錄）
       const newHistory = [...(userData.history || []), recordWithMetadata];
       dispatch({
         type: 'UPDATE_USER_DATA',
@@ -342,7 +379,7 @@ export function UserProvider({ children }) {
             { history: 'batch_update' }
           );
 
-          console.log('歷史記錄批量保存成功');
+          console.log(`歷史記錄保存成功 (${newHistory.length}/${maxRecords})`);
         } catch (error) {
           console.error('保存歷史記錄失敗:', error);
         } finally {

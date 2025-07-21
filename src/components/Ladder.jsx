@@ -1,4 +1,10 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, {
+  useState,
+  useEffect,
+  useMemo,
+  useRef,
+  useCallback,
+} from 'react';
 import { useUser } from '../UserContext';
 import { db } from '../firebase';
 import { collection, query, orderBy, limit, getDocs } from 'firebase/firestore';
@@ -15,6 +21,9 @@ const Ladder = () => {
   const [showUserContext, setShowUserContext] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
+  const lastLadderScoreRef = useRef(null);
+  const lastConditionCheckRef = useRef(null);
+  const lastLoadParamsRef = useRef(null);
 
   const ageGroups = [
     { value: 'all', label: '全部年齡' },
@@ -28,14 +37,30 @@ const Ladder = () => {
     { value: 'unknown', label: '未知年齡' },
   ];
 
-  useEffect(() => {
-    loadLadderData();
-  }, [selectedAgeGroup, selectedTab]);
+  // 使用 useCallback 優化 loadLadderData 函數
+  const loadLadderData = useCallback(async () => {
+    // 創建載入參數的鍵值，用於防抖
+    const loadParams = {
+      selectedAgeGroup,
+      selectedTab,
+      userLadderScore: userData?.ladderScore || 0,
+    };
 
-  const loadLadderData = async () => {
+    // 檢查是否與上次載入參數相同，避免重複載入
+    if (
+      lastLoadParamsRef.current &&
+      JSON.stringify(lastLoadParamsRef.current) === JSON.stringify(loadParams)
+    ) {
+      console.log('🔄 載入參數未變化，跳過重複載入');
+      return;
+    }
+
+    // 更新載入參數
+    lastLoadParamsRef.current = loadParams;
+
     setLoading(true);
     try {
-      console.log('🚀 開始載入天梯數據...');
+      console.log('🚀 開始載入天梯數據...', loadParams);
 
       // 簡化查詢：直接獲取前100名用戶
       const q = query(
@@ -50,16 +75,16 @@ const Ladder = () => {
       console.log(`📥 從 Firebase 獲取到 ${querySnapshot.size} 個文檔`);
 
       querySnapshot.forEach(doc => {
-        const userData = doc.data();
+        const docData = doc.data();
         // 所有有分數的用戶都參與天梯排名
-        if (userData.ladderScore > 0) {
-          const isAnonymous = userData.isAnonymousInLadder === true;
+        if (docData.ladderScore > 0) {
+          const isAnonymous = docData.isAnonymousInLadder === true;
           // 確保年齡段被正確計算
           const userWithAgeGroup = {
-            ...userData,
-            ageGroup: userData.age
-              ? getAgeGroup(Number(userData.age))
-              : userData.ageGroup || '',
+            ...docData,
+            ageGroup: docData.age
+              ? getAgeGroup(Number(docData.age))
+              : docData.ageGroup || '',
           };
 
           data.push({
@@ -67,10 +92,10 @@ const Ladder = () => {
             ...userWithAgeGroup,
             displayName: isAnonymous
               ? '匿名用戶'
-              : userData.nickname ||
-                userData.email?.split('@')[0] ||
+              : docData.nickname ||
+                docData.email?.split('@')[0] ||
                 '未命名用戶',
-            avatarUrl: isAnonymous ? '' : userData.avatarUrl,
+            avatarUrl: isAnonymous ? '' : docData.avatarUrl,
             isAnonymous: isAnonymous,
           });
         }
@@ -139,14 +164,15 @@ const Ladder = () => {
             let rankData = [];
 
             rankSnapshot.forEach(doc => {
-              const userData = doc.data();
-              if (userData.ladderScore > 0) {
+              const docData = doc.data();
+              if (docData.ladderScore > 0) {
                 // 確保年齡段被正確計算
                 const userWithAgeGroup = {
-                  ...userData,
-                  ageGroup: userData.age
-                    ? getAgeGroup(Number(userData.age))
-                    : userData.ageGroup || '',
+                  ...docData,
+                  id: doc.id,
+                  ageGroup: docData.age
+                    ? getAgeGroup(Number(docData.age))
+                    : docData.ageGroup || '',
                 };
                 rankData.push(userWithAgeGroup);
               }
@@ -200,7 +226,15 @@ const Ladder = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [selectedAgeGroup, selectedTab, userData?.ladderScore, userData?.userId]);
+
+  // 合併所有載入觸發條件到一個 useEffect
+  useEffect(() => {
+    // 初始化時載入數據
+    if (userData) {
+      loadLadderData();
+    }
+  }, [loadLadderData, userData]);
 
   // 簡化動畫樣式 - 動畫已移除
   const getAnimationStyle = useMemo(() => {
@@ -233,18 +267,31 @@ const Ladder = () => {
 
   // 新增：獲取浮動排名顯示框
   const floatingRankDisplay = useMemo(() => {
-    // 只在開發環境下輸出詳細日誌
-    if (process.env.NODE_ENV === 'development') {
+    // 創建條件檢查的鍵值，用於防抖
+    const conditionKey = `${userData?.ladderScore}-${userRank}-${ladderData.length}-${loading}`;
+
+    // 檢查是否需要輸出日誌（只在條件改變時）
+    const shouldLog =
+      process.env.NODE_ENV === 'development' &&
+      !loading &&
+      ladderData.length > 0 &&
+      lastConditionCheckRef.current !== conditionKey;
+
+    // 只在開發環境下輸出詳細日誌，並且只在數據穩定時輸出，且條件真正改變時
+    if (shouldLog) {
       console.log('🔍 檢查浮動排名框條件:', {
         hasUserData: !!userData,
         hasLadderScore: userData?.ladderScore > 0,
         userRank,
         ladderDataLength: ladderData.length,
       });
+
+      // 更新最後檢查的條件
+      lastConditionCheckRef.current = conditionKey;
     }
 
     if (!userData || !userData.ladderScore || userData.ladderScore === 0) {
-      if (process.env.NODE_ENV === 'development') {
+      if (shouldLog) {
         console.log('❌ 浮動框條件1不滿足：用戶數據或分數問題');
       }
       return null;
@@ -252,7 +299,7 @@ const Ladder = () => {
 
     // 如果用戶排名在前7名內，不顯示浮動框（因為應該在列表中）
     if (userRank > 0 && userRank <= 7) {
-      if (process.env.NODE_ENV === 'development') {
+      if (shouldLog) {
         console.log('❌ 浮動框條件2不滿足：用戶排名前7名內');
       }
       return null;
@@ -260,13 +307,13 @@ const Ladder = () => {
 
     // 如果用戶排名為0或未上榜，不顯示浮動框
     if (userRank === 0) {
-      if (process.env.NODE_ENV === 'development') {
+      if (shouldLog) {
         console.log('❌ 浮動框條件3不滿足：用戶未上榜');
       }
       return null;
     }
 
-    if (process.env.NODE_ENV === 'development') {
+    if (shouldLog) {
       console.log('✅ 浮動框條件滿足，顯示浮動排名框，排名:', userRank);
     }
 
@@ -333,7 +380,17 @@ const Ladder = () => {
         </div>
       </div>
     );
-  }, [userData, userRank, ladderData.length]);
+  }, [
+    userData?.ladderScore,
+    userData?.nickname,
+    userData?.email,
+    userData?.avatarUrl,
+    userData?.ageGroup,
+    userData?.gender,
+    userRank,
+    ladderData.length,
+    loading,
+  ]);
 
   const getUserRankDisplay = () => {
     if (!userData) {

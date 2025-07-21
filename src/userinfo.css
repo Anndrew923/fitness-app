@@ -1146,6 +1146,35 @@
   margin-left: 8px;
 }
 
+/* 新增：天梯信息詳細顯示 */
+.ladder-info {
+  margin-top: 12px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 8px;
+  border: 1px solid rgba(129, 216, 208, 0.2);
+}
+
+.submitted-score,
+.current-score {
+  font-size: 13px;
+  color: #666;
+  margin-bottom: 4px;
+  font-weight: 500;
+}
+
+.score-value {
+  font-weight: 600;
+  color: #4a7c7a;
+}
+
+.score-note {
+  font-size: 11px;
+  color: #ff6b35;
+  font-style: italic;
+  margin-left: 4px;
+}
+
 /* 響應式設計 */
 @media (max-width: 768px) {
   .completion-status {
