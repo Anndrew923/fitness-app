@@ -209,17 +209,21 @@ function History() {
         <div className="chart-wrapper">
           <svg className="chart" viewBox={`0 0 800 800`}>
             {/* 網格線 */}
-            {[...Array(5)].map((_, i) => (
-              <line
-                key={`grid-y-${i}`}
-                x1="50"
-                y1={120 + i * 120}
-                x2="750"
-                y2={120 + i * 120}
-                stroke="#e9ecef"
-                strokeWidth="1"
-              />
-            ))}
+            {[...Array(6)].map((_, i) => {
+              const value = i * 20;
+              const y = 720 - (value * 480) / 100; // 使用與數據點相同的計算方式
+              return (
+                <line
+                  key={`grid-y-${i}`}
+                  x1="50"
+                  y1={y}
+                  x2="750"
+                  y2={y}
+                  stroke="#dee2e6"
+                  strokeWidth="1"
+                />
+              );
+            })}
 
             {/* 數據線 - 只顯示選中的數據集 */}
             {selectedDataset && (
@@ -277,19 +281,23 @@ function History() {
             })}
 
             {/* Y軸標籤 */}
-            {[...Array(5)].map((_, i) => (
-              <text
-                key={`y-label-${i}`}
-                x="30"
-                y={765 - i * 120}
-                textAnchor="end"
-                fontSize={axisFontSize}
-                fontWeight={axisFontWeight}
-                fill="#495057"
-              >
-                {i * 20}
-              </text>
-            ))}
+            {[...Array(6)].map((_, i) => {
+              const value = i * 20;
+              const y = 720 - (value * 480) / 100; // 使用與數據點相同的計算方式
+              return (
+                <text
+                  key={`y-label-${i}`}
+                  x="30"
+                  y={y + 6} // 加上6px的偏移，讓文字垂直居中對齊
+                  textAnchor="end"
+                  fontSize={axisFontSize}
+                  fontWeight={axisFontWeight}
+                  fill="#495057"
+                >
+                  {value}
+                </text>
+              );
+            })}
           </svg>
         </div>
       </div>
