@@ -24,7 +24,7 @@ const navItems = [
       </svg>
     ),
     path: '/community',
-    tooltip: '健身社群',
+
     guestBlock: true,
   },
 
@@ -46,7 +46,7 @@ const navItems = [
       </svg>
     ),
     path: '/user-info',
-    tooltip: '個人主頁',
+
     guestBlock: false,
   },
   {
@@ -71,7 +71,7 @@ const navItems = [
       </svg>
     ),
     path: '/user-info',
-    tooltip: '開始評測',
+
     guestBlock: false,
   },
   {
@@ -92,7 +92,7 @@ const navItems = [
       </svg>
     ),
     path: '/ladder',
-    tooltip: '天梯排行榜',
+
     guestBlock: true,
   },
   {
@@ -113,7 +113,7 @@ const navItems = [
       </svg>
     ),
     path: '/history',
-    tooltip: '歷史紀錄',
+
     guestBlock: false,
   },
 ];
@@ -134,7 +134,7 @@ function isGuestMode() {
 function BottomNavBar() {
   const navigate = useNavigate();
   const location = useLocation();
-  const [hovered, setHovered] = useState(null);
+
   const [modalOpen, setModalOpen] = useState(false);
   const [pendingPath, setPendingPath] = useState('');
 
@@ -184,10 +184,6 @@ function BottomNavBar() {
             <button
               onClick={() => handleNav(item)}
               onMouseDown={e => e.preventDefault()}
-              onMouseEnter={() => setHovered(item.key)}
-              onMouseLeave={() => setHovered(null)}
-              onTouchStart={() => setHovered(item.key)}
-              onTouchEnd={() => setHovered(null)}
               style={{
                 background: 'none',
                 border: 'none',
@@ -209,28 +205,6 @@ function BottomNavBar() {
             >
               {item.icon}
               <span style={{ marginTop: '4px' }}>{item.label}</span>
-              {/* 氣泡提示 */}
-              {hovered === item.key && (
-                <span
-                  style={{
-                    position: 'absolute',
-                    bottom: '70px',
-                    left: '50%',
-                    transform: 'translateX(-50%)',
-                    background: 'rgba(60,60,60,0.95)',
-                    color: '#fff',
-                    padding: '6px 14px',
-                    borderRadius: '6px',
-                    fontSize: '13px',
-                    whiteSpace: 'nowrap',
-                    pointerEvents: 'none',
-                    zIndex: 1001,
-                    boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
-                  }}
-                >
-                  {item.tooltip}
-                </span>
-              )}
             </button>
           </div>
         ))}
