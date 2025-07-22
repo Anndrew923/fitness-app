@@ -150,30 +150,20 @@
   margin: 0;
 }
 
-/* 好友卡片 */
+/* 統一卡片樣式 - 適用於好友列表、邀請通知、搜尋結果 */
 .friend-card,
 .request-card,
 .user-card {
   display: flex !important;
-  align-items: flex-start !important;
-  padding: 10px 12px !important;
+  align-items: center !important;
+  padding: 10px 16px !important;
   border-radius: 8px !important;
-  margin-bottom: 6px !important;
   background: #f8f9fa !important;
-  border: 1px solid #e9ecef !important;
-  transition: all 0.3s ease !important;
-  gap: 10px !important;
+  margin-bottom: 10px !important;
+  gap: 12px !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important;
   width: 100% !important;
   box-sizing: border-box !important;
-  min-height: 60px !important;
-}
-
-.friend-card:hover,
-.request-card:hover,
-.user-card:hover {
-  background: #fff;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-  transform: translateY(-2px);
 }
 
 .friend-avatar {
@@ -182,168 +172,157 @@
   border-radius: 50% !important;
   overflow: hidden !important;
   flex-shrink: 0 !important;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1) !important;
-  margin-top: 2px !important;
+  background: #fff !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
 }
 
 .friend-avatar img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  border-radius: 50% !important;
 }
 
 .avatar-placeholder {
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(135deg, #81d8d0 0%, #5f9ea0 100%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  font-weight: bold;
-  font-size: 20px;
+  width: 100% !important;
+  height: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: #e0e0e0 !important;
+  color: #888 !important;
+  font-size: 20px !important;
+  font-weight: bold !important;
+  border-radius: 50% !important;
 }
 
-.friend-content {
+.friend-info {
   flex: 1 !important;
   display: flex !important;
-  flex-direction: column !important;
-  gap: 2px !important;
+  align-items: center !important;
+  gap: 16px !important;
   min-width: 0 !important;
-  max-width: calc(100% - 50px) !important;
-}
-
-.friend-row-top {
-  display: flex !important;
-  align-items: center !important;
-  gap: 8px !important;
-  width: 100% !important;
-}
-
-.friend-row-bottom {
-  display: flex !important;
-  align-items: center !important;
-  width: 100% !important;
-  margin-left: 0 !important;
 }
 
 .friend-name {
   font-weight: 600 !important;
-  font-size: 14px !important;
+  font-size: 16px !important;
   color: #333 !important;
   white-space: nowrap !important;
   overflow: hidden !important;
   text-overflow: ellipsis !important;
-  max-width: 80px !important;
+  max-width: 100px !important;
   margin: 0 !important;
-  line-height: 20px !important;
-  flex-shrink: 0 !important;
-  display: inline-block !important;
   padding: 0 !important;
+  display: inline !important;
+  line-height: 1.2 !important;
 }
 
 .friend-score {
-  font-size: 12px !important;
-  color: #333 !important;
+  font-size: 14px !important;
+  color: #4b5d67 !important;
   font-weight: 600 !important;
-  margin: 0 !important;
   white-space: nowrap !important;
-  line-height: 20px !important;
-  max-width: 70px !important;
+  max-width: 60px !important;
   overflow: hidden !important;
   text-overflow: ellipsis !important;
-  flex-shrink: 0 !important;
-  display: inline-block !important;
+  margin: 0 !important;
   padding: 0 !important;
+  display: inline !important;
+  line-height: 1.2 !important;
 }
 
 .friend-email {
-  font-size: 11px !important;
+  font-size: 12px !important;
   color: #888 !important;
-  margin: 0 !important;
   white-space: nowrap !important;
   overflow: hidden !important;
   text-overflow: ellipsis !important;
-  max-width: 200px !important;
-  line-height: 16px !important;
-  flex-shrink: 0 !important;
-  display: block !important;
+  max-width: 160px !important;
+  margin: 0 !important;
   padding: 0 !important;
+  display: inline !important;
+  line-height: 1.2 !important;
 }
 
 .friend-actions {
   display: flex !important;
-  gap: 6px !important;
-  margin-left: auto !important;
+  gap: 8px !important;
+  margin-left: 12px !important;
   flex-shrink: 0 !important;
 }
 
+/* 按鈕樣式 */
 .btn-challenge,
-.btn-remove {
-  width: 28px;
-  height: 28px;
-  border-radius: 6px;
-  border: none;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 14px;
-  color: white;
-  transition: all 0.2s ease;
+.btn-remove,
+.btn-accept,
+.btn-reject,
+.btn-add {
+  min-width: 36px !important;
+  height: 36px !important;
+  border-radius: 8px !important;
+  border: none !important;
+  cursor: pointer !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 14px !important;
+  color: white !important;
+  transition: all 0.2s ease !important;
+  padding: 0 12px !important;
 }
 
 .btn-challenge {
-  background: linear-gradient(135deg, #a0d2eb 0%, #e5eaf5 100%);
-  color: #4b5d67;
+  background: linear-gradient(135deg, #a0d2eb 0%, #e5eaf5 100%) !important;
+  color: #4b5d67 !important;
 }
 
 .btn-challenge:hover {
-  transform: scale(1.1);
-  box-shadow: 0 2px 8px rgba(160, 210, 235, 0.4);
+  transform: scale(1.1) !important;
+  box-shadow: 0 2px 8px rgba(160, 210, 235, 0.4) !important;
 }
 
 .btn-remove {
-  background: linear-gradient(135deg, #f7cac9 0%, #f7786b 100%);
-  color: white;
-  font-weight: bold;
+  background: linear-gradient(135deg, #f7cac9 0%, #f7786b 100%) !important;
+  color: white !important;
+  font-weight: bold !important;
 }
 
 .btn-remove:hover {
-  transform: scale(1.1);
-  box-shadow: 0 2px 8px rgba(247, 120, 107, 0.4);
+  transform: scale(1.1) !important;
+  box-shadow: 0 2px 8px rgba(247, 120, 107, 0.4) !important;
 }
 
-/* 保持其他按鈕樣式不變 */
 .btn-accept {
-  background: #2ed573;
-  color: white;
+  background: linear-gradient(135deg, #a8e6cf 0%, #7fcdcd 100%) !important;
+  color: white !important;
 }
 
 .btn-accept:hover {
-  background: #26c662;
-  transform: scale(1.05);
+  transform: scale(1.1) !important;
+  box-shadow: 0 2px 8px rgba(168, 230, 207, 0.4) !important;
 }
 
 .btn-reject {
-  background: #ffa502;
-  color: white;
+  background: linear-gradient(135deg, #ffb3ba 0%, #ff8a80 100%) !important;
+  color: white !important;
 }
 
 .btn-reject:hover {
-  background: #ff9500;
-  transform: scale(1.05);
+  transform: scale(1.1) !important;
+  box-shadow: 0 2px 8px rgba(255, 179, 186, 0.4) !important;
 }
 
 .btn-add {
-  background: #81d8d0; /* Tiffany 藍 */
-  color: white;
-  padding: 10px 20px;
+  background: linear-gradient(135deg, #a0d2eb 0%, #e5eaf5 100%) !important;
+  color: #4b5d67 !important;
 }
 
 .btn-add:hover {
-  background: #5f9ea0; /* 深一點的 Tiffany 藍 */
-  transform: scale(1.05);
+  transform: scale(1.1) !important;
+  box-shadow: 0 2px 8px rgba(160, 210, 235, 0.4) !important;
 }
 
 .btn-add:disabled {
@@ -353,12 +332,40 @@
 }
 
 .status-badge {
-  padding: 6px 12px;
-  background: #e9ecef;
-  color: #666;
-  border-radius: 20px;
-  font-size: 12px;
-  font-weight: 500;
+  padding: 6px 12px !important;
+  border-radius: 6px !important;
+  font-size: 12px !important;
+  color: #666 !important;
+  background: #f0f0f0 !important;
+  border: 1px solid #ddd !important;
+  white-space: nowrap !important;
+}
+
+/* 強制覆蓋全域樣式 */
+.friend-card *,
+.request-card *,
+.user-card * {
+  margin: 0 !important;
+  padding: 0 !important;
+  box-sizing: border-box !important;
+}
+
+.friend-card p,
+.request-card p,
+.user-card p {
+  margin: 0 !important;
+  padding: 0 !important;
+  display: inline !important;
+}
+
+.friend-card h4,
+.request-card h4,
+.user-card h4 {
+  margin: 0 !important;
+  padding: 0 !important;
+  display: inline !important;
+  font-size: inherit !important;
+  font-weight: inherit !important;
 }
 
 /* 搜尋區域 */

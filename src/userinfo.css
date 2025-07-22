@@ -125,38 +125,44 @@
   gap: 8px;
 }
 
-/* 登出按鈕 */
-.logout-btn {
-  position: absolute;
-  right: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #ff6f61 0%, #ff8a80 100%);
-  color: white;
-  border: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: bold;
-  font-size: 12px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(255, 111, 97, 0.3);
-  border: 2px solid white;
-  flex-shrink: 0;
+/* 登出按鈕 - 強制覆蓋 */
+.section-header .logout-btn,
+.user-form .logout-btn,
+.form-card .logout-btn {
+  position: absolute !important;
+  right: 0 !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  width: 32px !important;
+  height: 32px !important;
+  border-radius: 50% !important;
+  background: linear-gradient(135deg, #ff6f61 0%, #ff8a80 100%) !important;
+  color: white !important;
+  border: 2px solid white !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-weight: bold !important;
+  font-size: 14px !important;
+  cursor: pointer !important;
+  transition: all 0.3s ease !important;
+  box-shadow: 0 4px 12px rgba(255, 111, 97, 0.3) !important;
+  flex-shrink: 0 !important;
+  z-index: 10 !important;
 }
 
-.logout-btn:hover {
-  transform: scale(1.1);
-  box-shadow: 0 6px 16px rgba(255, 111, 97, 0.4);
+.section-header .logout-btn:hover,
+.user-form .logout-btn:hover,
+.form-card .logout-btn:hover {
+  transform: scale(1.1) !important;
+  box-shadow: 0 6px 16px rgba(255, 111, 97, 0.4) !important;
 }
 
-.logout-icon {
-  font-size: 12px;
-  font-weight: bold;
+.section-header .logout-icon,
+.user-form .logout-icon,
+.form-card .logout-icon {
+  font-size: 14px !important;
+  font-weight: bold !important;
 }
 
 /* 頁面標題 */
@@ -909,14 +915,18 @@
     padding-right: 6px;
   }
 
-  .logout-btn {
-    width: 24px;
-    height: 24px;
-    margin-left: auto;
+  .section-header .logout-btn,
+  .user-form .logout-btn,
+  .form-card .logout-btn {
+    width: 28px !important;
+    height: 28px !important;
+    margin-left: auto !important;
   }
 
-  .logout-icon {
-    font-size: 10px;
+  .section-header .logout-icon,
+  .user-form .logout-icon,
+  .form-card .logout-icon {
+    font-size: 12px !important;
   }
 
   /* 雷達圖響應式優化 */

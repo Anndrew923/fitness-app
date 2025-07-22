@@ -10,6 +10,7 @@ import {
   doc,
   updateDoc,
   addDoc,
+  deleteDoc,
   arrayUnion,
   arrayRemove,
   orderBy,
@@ -275,6 +276,16 @@ const Friends = () => {
       console.log('🔍 開始載入好友邀請...');
       console.log('當前用戶ID:', auth.currentUser.uid);
 
+      // 先檢查所有發送給當前用戶的邀請
+      const allRequestsQuery = query(
+        collection(db, 'friendInvitations'),
+        where('toUserId', '==', auth.currentUser.uid)
+      );
+
+      const allRequestsSnapshot = await getDocs(allRequestsQuery);
+      console.log('📋 找到所有邀請數量:', allRequestsSnapshot.docs.length);
+
+      // 只顯示pending狀態的邀請
       const requestsQuery = query(
         collection(db, 'friendInvitations'),
         where('toUserId', '==', auth.currentUser.uid),
@@ -282,7 +293,7 @@ const Friends = () => {
       );
 
       const requestsSnapshot = await getDocs(requestsQuery);
-      console.log('📋 找到邀請數量:', requestsSnapshot.docs.length);
+      console.log('📋 找到pending邀請數量:', requestsSnapshot.docs.length);
       const requests = [];
 
       for (const doc of requestsSnapshot.docs) {
@@ -543,8 +554,34 @@ const Friends = () => {
       const existingSnapshot = await getDocs(existingQuery);
 
       if (!existingSnapshot.empty) {
-        setError('已經發送過好友邀請');
-        return;
+        console.log('⚠️ 發現已存在的邀請:', existingSnapshot.docs.length, '個');
+
+        // 檢查邀請是否真的存在且有效
+        const existingInvitation = existingSnapshot.docs[0];
+        const existingData = existingInvitation.data();
+        console.log('現有邀請資料:', existingData);
+
+        // 檢查邀請是否超過24小時，如果是則允許重新發送
+        const invitationTime = new Date(existingData.createdAt);
+        const now = new Date();
+        const hoursDiff = (now - invitationTime) / (1000 * 60 * 60);
+
+        if (hoursDiff > 24) {
+          console.log('📅 邀請已超過24小時，允許重新發送');
+          // 刪除舊邀請
+          await deleteDoc(doc(db, 'friendInvitations', existingInvitation.id));
+          console.log('🗑️ 已刪除舊邀請');
+        } else {
+          // 如果邀請存在但對方沒有收到，可能是資料問題，允許重新發送
+          setError('已經發送過好友邀請，請稍後再試或檢查邀請通知');
+
+          // 清除錯誤訊息，讓用戶可以重試
+          setTimeout(() => {
+            setError('');
+          }, 3000);
+
+          return;
+        }
       }
 
       // 發送邀請
@@ -566,6 +603,18 @@ const Friends = () => {
 
       console.log('✅ 邀請已發送，文檔ID:', docRef.id);
       setSuccess('好友邀請已發送');
+
+      // 立即驗證邀請是否真的被創建
+      try {
+        const verifyDoc = await getDoc(docRef);
+        if (verifyDoc.exists()) {
+          console.log('✅ 邀請驗證成功:', verifyDoc.data());
+        } else {
+          console.error('❌ 邀請驗證失敗：文檔不存在');
+        }
+      } catch (verifyError) {
+        console.error('❌ 邀請驗證失敗:', verifyError);
+      }
 
       // 更新搜尋結果狀態
       setSearchResults(prev =>
@@ -931,67 +980,77 @@ const Friends = () => {
                     src={friend.avatarUrl}
                     alt={friend.nickname}
                     onError={e => {
-                      console.log('好友頭像載入失敗，使用預設頭像');
                       e.target.style.display = 'none';
                       e.target.nextSibling.style.display = 'flex';
                     }}
                   />
-                ) : null}
-                <div
-                  className="avatar-placeholder"
-                  style={{
-                    display:
-                      friend.avatarUrl && friend.avatarUrl.trim() !== ''
-                        ? 'none'
-                        : 'flex',
-                  }}
-                >
-                  {friend.nickname.charAt(0).toUpperCase()}
-                </div>
-              </div>
-              <div className="friend-content">
-                <div className="friend-row-top">
-                  <h4 className="friend-name">{friend.nickname}</h4>
-                  <p className="friend-score">
-                    <span role="img" aria-label="trophy">
-                      🏆
-                    </span>{' '}
-                    {friend.ladderScore}分
-                  </p>
-                  <div className="friend-actions">
-                    <button
-                      className="btn-challenge"
-                      onClick={() => {
-                        console.log('🏆 點擊挑戰按鈕，好友資訊:', friend);
-                        console.log('🎯 設置 selectedFriend 為:', friend);
-                        setSelectedFriend(friend);
-                        console.log('📋 切換到 challenges 標籤');
-                        setActiveTab('challenges');
-                        console.log('📥 開始載入挑戰...');
-                        loadChallenges(friend.id);
-                      }}
-                    >
-                      ...
-                    </button>
-                    <button
-                      className="btn-remove"
-                      onClick={() => removeFriend(friend.id)}
-                    >
-                      &times;
-                    </button>
-                  </div>
-                </div>
-                {friend.email && (
-                  <div className="friend-row-bottom">
-                    <p className="friend-email">{friend.email}</p>
+                ) : (
+                  <div className="avatar-placeholder">
+                    {friend.nickname?.charAt(0).toUpperCase() || '?'}
                   </div>
                 )}
+              </div>
+              <div className="friend-info">
+                <div className="friend-name">{friend.nickname}</div>
+                <div className="friend-score">{friend.ladderScore}分</div>
+                <div className="friend-email">{friend.email}</div>
+              </div>
+              <div className="friend-actions">
+                <button
+                  className="btn-challenge"
+                  onClick={() => {
+                    setSelectedFriend(friend);
+                    setActiveTab('challenges');
+                    loadChallenges(friend.id);
+                  }}
+                >
+                  🏆
+                </button>
+                <button
+                  className="btn-remove"
+                  onClick={() => removeFriend(friend.id)}
+                >
+                  ×
+                </button>
               </div>
             </div>
           ))
         )}
       </div>
     );
+  };
+
+  // 清除舊邀請的函數
+  const clearOldInvitations = async () => {
+    try {
+      console.log('🧹 開始清除舊邀請...');
+
+      // 查詢所有發送給當前用戶的邀請
+      const allRequestsQuery = query(
+        collection(db, 'friendInvitations'),
+        where('toUserId', '==', auth.currentUser.uid)
+      );
+
+      const allRequestsSnapshot = await getDocs(allRequestsQuery);
+      console.log('找到邀請數量:', allRequestsSnapshot.docs.length);
+
+      // 顯示所有邀請的詳細資訊
+      allRequestsSnapshot.docs.forEach((doc, index) => {
+        const data = doc.data();
+        console.log(`邀請 ${index + 1}:`, {
+          id: doc.id,
+          fromUserId: data.fromUserId,
+          toUserId: data.toUserId,
+          status: data.status,
+          createdAt: data.createdAt,
+        });
+      });
+
+      setSuccess('已顯示所有邀請資訊，請查看控制台');
+    } catch (error) {
+      console.error('清除舊邀請失敗:', error);
+      setError('清除失敗');
+    }
   };
 
   // 渲染好友邀請標籤頁
@@ -1010,9 +1069,24 @@ const Friends = () => {
             border: '1px solid #ddd',
             borderRadius: '4px',
             cursor: 'pointer',
+            marginRight: '8px',
           }}
         >
           🔄 重新載入
+        </button>
+        <button
+          onClick={clearOldInvitations}
+          style={{
+            padding: '4px 8px',
+            fontSize: '12px',
+            background: '#ff6b6b',
+            color: 'white',
+            border: '1px solid #ff5252',
+            borderRadius: '4px',
+            cursor: 'pointer',
+          }}
+        >
+          🧹 檢查邀請
         </button>
       </div>
       {friendRequests.length === 0 ? (
@@ -1028,29 +1102,21 @@ const Friends = () => {
                   src={request.senderAvatar}
                   alt={request.senderName}
                   onError={e => {
-                    console.log('邀請者頭像載入失敗，使用預設頭像');
                     e.target.style.display = 'none';
                     e.target.nextSibling.style.display = 'flex';
                   }}
                 />
-              ) : null}
-              <div
-                className="avatar-placeholder"
-                style={{
-                  display:
-                    request.senderAvatar && request.senderAvatar.trim() !== ''
-                      ? 'none'
-                      : 'flex',
-                }}
-              >
-                {request.senderName.charAt(0).toUpperCase()}
-              </div>
+              ) : (
+                <div className="avatar-placeholder">
+                  {request.senderName?.charAt(0).toUpperCase() || '?'}
+                </div>
+              )}
             </div>
             <div className="friend-info">
-              <h4>{request.senderName}</h4>
-              <p>想要加您為好友</p>
+              <div className="friend-name">{request.senderName}</div>
+              <div className="friend-email">想要加您為好友</div>
             </div>
-            <div className="request-actions">
+            <div className="friend-actions">
               <button
                 className="btn-accept"
                 onClick={() =>
@@ -1117,30 +1183,22 @@ const Friends = () => {
                     src={user.avatarUrl}
                     alt={user.nickname}
                     onError={e => {
-                      console.log('搜尋結果頭像載入失敗，使用預設頭像');
                       e.target.style.display = 'none';
                       e.target.nextSibling.style.display = 'flex';
                     }}
                   />
-                ) : null}
-                <div
-                  className="avatar-placeholder"
-                  style={{
-                    display:
-                      user.avatarUrl && user.avatarUrl.trim() !== ''
-                        ? 'none'
-                        : 'flex',
-                  }}
-                >
-                  {user.nickname.charAt(0).toUpperCase()}
-                </div>
+                ) : (
+                  <div className="avatar-placeholder">
+                    {user.nickname?.charAt(0).toUpperCase() || '?'}
+                  </div>
+                )}
               </div>
               <div className="friend-info">
-                <h4>{user.nickname}</h4>
-                <p>{user.email}</p>
-                <p>天梯分數: {user.ladderScore}</p>
+                <div className="friend-name">{user.nickname}</div>
+                <div className="friend-score">{user.ladderScore}分</div>
+                <div className="friend-email">{user.email}</div>
               </div>
-              <div className="user-actions">
+              <div className="friend-actions">
                 {user.isFriend ? (
                   <span className="status-badge">已是好友</span>
                 ) : user.hasPendingRequest ? (

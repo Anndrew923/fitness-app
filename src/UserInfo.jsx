@@ -994,6 +994,35 @@ function UserInfo({ testData, onLogout, clearTestData }) {
     e => {
       const nickname = e.target.value;
 
+      // 檢查字數限制
+      const isChinese = /[\u4e00-\u9fff]/.test(nickname);
+      let isValid = true;
+      let errorMessage = '';
+
+      if (isChinese) {
+        // 中文限制8個字
+        if (nickname.length > 8) {
+          isValid = false;
+          errorMessage = '暱稱不能超過8個中文字';
+        }
+      } else {
+        // 英文限制16個字元
+        if (nickname.length > 16) {
+          isValid = false;
+          errorMessage = '暱稱不能超過16個英文字元';
+        }
+      }
+
+      if (!isValid) {
+        setModalState({
+          isOpen: true,
+          title: '字數限制',
+          message: errorMessage,
+          type: 'warning',
+        });
+        return;
+      }
+
       // 立即更新本地狀態，提供即時反饋
       setUserData(prev => ({
         ...prev,
@@ -1348,7 +1377,7 @@ function UserInfo({ testData, onLogout, clearTestData }) {
                       onChange={handleNicknameChange}
                       placeholder="請輸入暱稱"
                       className="form-input"
-                      maxLength="20"
+                      maxLength="16"
                     />
                     <button
                       type="button"

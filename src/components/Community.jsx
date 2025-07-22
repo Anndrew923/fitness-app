@@ -744,14 +744,14 @@ const Community = () => {
       const snapshot = await getDocs(requestsQuery);
       const requests = [];
 
-      for (const doc of snapshot.docs) {
-        const data = doc.data();
+      for (const docSnapshot of snapshot.docs) {
+        const data = docSnapshot.data();
         try {
           const userDoc = await getDoc(doc(db, 'users', data.fromUserId));
           if (userDoc.exists()) {
             const userData = userDoc.data();
             requests.push({
-              id: doc.id,
+              id: docSnapshot.id,
               fromUserId: data.fromUserId,
               nickname:
                 userData.nickname ||
