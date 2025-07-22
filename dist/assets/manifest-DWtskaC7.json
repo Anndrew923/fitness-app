@@ -1,0 +1,35 @@
+{
+  "name": "我們一起升級",
+  "short_name": "我們一起升級",
+  "description": "看看你有多猛 - 您的健身評測工具",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#4bc0c0",
+  "theme_color": "#4bc0c0",
+  "scope": "/",
+  "lang": "zh-TW",
+  "icons": [
+    {
+      "src": "/logo192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/logo512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["health", "fitness", "sports"],
+  "screenshots": [
+    {
+      "src": "/logo192.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide"
+    }
+  ]
+}
