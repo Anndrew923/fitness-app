@@ -170,20 +170,37 @@ const firebaseWriteMonitor = new FirebaseWriteMonitor();
 if (process.env.NODE_ENV === 'development') {
   firebaseWriteMonitor.start();
 
-  // 每分鐘輸出統計信息
+  // 優化：減少統計輸出頻率，只在有變化時輸出
+  let lastStats = null;
+  let lastSuggestionHash = '';
+
+  // 每5分鐘輸出統計信息，而不是每分鐘
   setInterval(() => {
     const stats = firebaseWriteMonitor.getStats();
     if (stats.totalWrites > 0) {
-      console.log('📊 Firebase 寫入統計:', stats);
+      // 檢查統計是否有變化
+      const currentStatsHash = JSON.stringify({
+        totalWrites: stats.totalWrites,
+        writeCounts: stats.writeCounts,
+      });
 
-      const suggestions =
-        firebaseWriteMonitor.generateOptimizationSuggestions();
-      if (suggestions.length > 0) {
-        console.log('💡 優化建議:');
-        suggestions.forEach(suggestion => console.log(suggestion));
+      if (JSON.stringify(lastStats) !== currentStatsHash) {
+        console.log('📊 Firebase 寫入統計:', stats);
+        lastStats = JSON.parse(currentStatsHash);
+
+        const suggestions =
+          firebaseWriteMonitor.generateOptimizationSuggestions();
+        if (suggestions.length > 0) {
+          const suggestionHash = suggestions.join('|');
+          if (suggestionHash !== lastSuggestionHash) {
+            console.log('💡 優化建議:');
+            suggestions.forEach(suggestion => console.log(suggestion));
+            lastSuggestionHash = suggestionHash;
+          }
+        }
       }
     }
-  }, 60000);
+  }, 300000); // 改為5分鐘
 }
 
 export default firebaseWriteMonitor;

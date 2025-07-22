@@ -67,14 +67,18 @@ export function UserProvider({ children }) {
   const [userData, dispatch] = useReducer(userReducer, initialState);
 
   // 從 Firebase 載入用戶數據
-  const loadUserData = useCallback(async currentUser => {
+  const loadUserData = useCallback(async (currentUser, forceReload = false) => {
     if (!currentUser || !isMountedRef.current) {
       setIsLoading(false);
       return false;
     }
 
     if (process.env.NODE_ENV === 'development') {
-      console.log('開始載入用戶資料:', currentUser.uid);
+      console.log(
+        '開始載入用戶資料:',
+        currentUser.uid,
+        forceReload ? '(強制重新載入)' : ''
+      );
     }
     setIsLoading(true);
 
@@ -207,6 +211,8 @@ export function UserProvider({ children }) {
   const setUserDataDebounceRef = useRef(null);
   const saveHistoryDebounceRef = useRef(null);
   const lastWriteTimeRef = useRef(0);
+  const writeCountRef = useRef(0);
+  const lastWriteCountResetTimeRef = useRef(Date.now());
 
   // 更新用戶數據
   const setUserData = useCallback(
@@ -241,6 +247,7 @@ export function UserProvider({ children }) {
           'nickname',
           'avatarUrl',
           'ladderRank',
+          'history',
         ];
         const hasImportantChanges = importantFields.some(
           field =>
@@ -255,25 +262,42 @@ export function UserProvider({ children }) {
             JSON.stringify({ ...newData, nickname: userData.nickname }) ===
               JSON.stringify({ ...userData, nickname: newData.nickname });
 
-          // 暱稱變化使用較短的防抖時間
-          const debounceTime = isOnlyNicknameChange ? 1000 : 15000; // 暱稱1秒，其他15秒
-
-          // 檢查寫入頻率限制（至少間隔30秒）
+          // 智能寫入頻率控制
           const now = Date.now();
           const timeSinceLastWrite = now - lastWriteTimeRef.current;
+          const timeSinceLastReset = now - lastWriteCountResetTimeRef.current;
 
-          if (timeSinceLastWrite < 30000) {
-            // 如果距離上次寫入不到30秒，延長防抖時間
+          // 每小時重置寫入計數
+          if (timeSinceLastReset > 3600000) {
+            writeCountRef.current = 0;
+            lastWriteCountResetTimeRef.current = now;
+          }
+
+          // 根據寫入頻率動態調整防抖時間
+          let debounceTime = isOnlyNicknameChange ? 2000 : 30000;
+
+          if (writeCountRef.current > 10) {
+            // 如果寫入次數過多，增加防抖時間
+            debounceTime = isOnlyNicknameChange ? 5000 : 60000;
+          } else if (writeCountRef.current > 5) {
+            // 中等寫入頻率
+            debounceTime = isOnlyNicknameChange ? 3000 : 45000;
+          }
+
+          // 檢查寫入頻率限制（至少間隔60秒）
+          if (timeSinceLastWrite < 60000) {
+            // 如果距離上次寫入不到60秒，延長防抖時間
             if (setUserDataDebounceRef.current) {
               clearTimeout(setUserDataDebounceRef.current);
             }
 
             setUserDataDebounceRef.current = setTimeout(() => {
-              console.log(`🔄 防抖後保存用戶數據（30秒頻率限制）`);
+              console.log(`🔄 防抖後保存用戶數據（60秒頻率限制）`);
               lastWriteTimeRef.current = Date.now();
+              writeCountRef.current++;
               saveUserData(newData);
               setUserDataDebounceRef.current = null;
-            }, 30000 - timeSinceLastWrite);
+            }, 60000 - timeSinceLastWrite);
           } else {
             // 清除之前的防抖定時器
             if (setUserDataDebounceRef.current) {
@@ -283,9 +307,12 @@ export function UserProvider({ children }) {
             // 使用動態防抖時間
             setUserDataDebounceRef.current = setTimeout(() => {
               console.log(
-                `🔄 防抖後保存用戶數據（${debounceTime / 1000}秒防抖）`
+                `🔄 防抖後保存用戶數據（${debounceTime / 1000}秒防抖，第${
+                  writeCountRef.current + 1
+                }次寫入）`
               );
               lastWriteTimeRef.current = Date.now();
+              writeCountRef.current++;
               saveUserData(newData);
               setUserDataDebounceRef.current = null;
             }, debounceTime);
@@ -385,7 +412,7 @@ export function UserProvider({ children }) {
         } finally {
           saveHistoryDebounceRef.current = null;
         }
-      }, 5000); // 5秒防抖，批量處理歷史記錄
+      }, 10000); // 增加到10秒防抖，進一步減少寫入頻率
     },
     [userData, saveUserData]
   );
@@ -422,7 +449,7 @@ export function UserProvider({ children }) {
     };
   }, [loadUserData, clearUserData]);
 
-  // 定期同步數據到 Firebase（每 20 分鐘，大幅減少寫入頻率）
+  // 定期同步數據到 Firebase（每 30 分鐘，進一步減少寫入頻率）
   useEffect(() => {
     if (!auth.currentUser || !userData || Object.keys(userData).length === 0)
       return;
@@ -433,8 +460,8 @@ export function UserProvider({ children }) {
         const now = Date.now();
         const timeSinceLastWrite = now - lastWriteTimeRef.current;
 
-        // 如果距離上次寫入不到5分鐘，跳過同步
-        if (timeSinceLastWrite < 300000) {
+        // 如果距離上次寫入不到10分鐘，跳過同步
+        if (timeSinceLastWrite < 600000) {
           console.log('⏭️ 定期同步：距離上次寫入時間太短，跳過同步');
           return;
         }
@@ -460,7 +487,7 @@ export function UserProvider({ children }) {
           console.log('⏭️ 定期同步：無數據變化，跳過保存');
         }
       }
-    }, 1200000); // 改為20分鐘
+    }, 1800000); // 改為30分鐘
 
     return () => clearInterval(syncInterval);
   }, [userData, saveUserData]);
@@ -473,7 +500,8 @@ export function UserProvider({ children }) {
         saveUserData,
         saveHistory,
         clearUserData,
-        loadUserData: () => loadUserData(auth.currentUser),
+        loadUserData: (forceReload = false) =>
+          loadUserData(auth.currentUser, forceReload),
         isLoading,
         isAuthenticated,
       }}

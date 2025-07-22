@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useRef } from 'react';
 import { useUser } from './UserContext';
 import './History.css'; // 引入外部 CSS
 
@@ -10,6 +10,7 @@ function History() {
   const [currentPage, setCurrentPage] = useState(1);
   const [recordsPerPage] = useState(10);
   const [selectedChartData, setSelectedChartData] = useState('total'); // 預設顯示總分
+  const hasLoggedRef = useRef(false); // 追蹤是否已經載入過
 
   // 歷史記錄排序：最新的記錄在最上方
   const sortedHistory = useMemo(() => {
@@ -127,11 +128,14 @@ function History() {
   };
 
   useEffect(() => {
-    console.log('History.js - userData:', userData);
-    console.log('History.js - sortedHistory:', sortedHistory);
-    console.log('History.js - 記錄數量:', recordCount, '/', maxRecords);
-    console.log('History.js - 當前頁面:', currentPage, '/', totalPages);
-  }, [userData, sortedHistory, recordCount, currentPage, totalPages]);
+    if (userData && !hasLoggedRef.current) {
+      console.log('History.js - userData:', userData);
+      console.log('History.js - sortedHistory:', sortedHistory);
+      console.log('History.js - 記錄數量:', recordCount, '/', maxRecords);
+      console.log('History.js - 當前頁面:', currentPage, '/', totalPages);
+      hasLoggedRef.current = true; // 標記已經載入過
+    }
+  }, [userData]); // 只在 userData 變化時執行，避免重複載入
 
   const toggleDeleteOptions = () => {
     setShowDeleteOptions(!showDeleteOptions);
@@ -192,6 +196,7 @@ function History() {
       <div className="chart-container">
         <div className="chart-header">
           <h3>📈 數據趨勢圖</h3>
+          <div className="chart-note">顯示最近六次數據</div>
           <div className="chart-selector">
             <select
               value={selectedChartData}

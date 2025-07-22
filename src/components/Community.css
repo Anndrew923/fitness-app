@@ -14,6 +14,11 @@
   --border-color: #bdc3c7;
   --background-light: #ecf0f1;
   --background-white: #ffffff;
+  --metal-gray-primary: #4a5568;
+  --metal-gray-secondary: #2d3748;
+  --metal-highlight: #718096;
+  --metal-shadow: rgba(74, 85, 104, 0.3);
+  --metal-glow: rgba(74, 85, 104, 0.1);
 }
 
 /* 社群頁面樣式 - Tiffany 藍主題 */
@@ -21,18 +26,11 @@
   max-width: 800px;
   margin: 0 auto;
   padding: 16px;
-  background: linear-gradient(
-    135deg,
-    var(--background-white) 0%,
-    var(--background-light) 100%
-  );
+  background: white;
   border-radius: 16px;
-  box-shadow: 0 8px 32px var(--tiffany-shadow), 0 2px 8px rgba(0, 0, 0, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.8);
-  border: 1px solid var(--border-color);
+  border: 1px solid #ccc;
   position: relative;
-  overflow: hidden;
-  min-height: 100vh;
+  min-height: 50vh;
 }
 
 .community-page::before {
@@ -71,6 +69,7 @@
   width: 100%;
   border: 1px solid var(--tiffany-dark);
   position: relative;
+  margin-top: 35px; /* 為載入指示器留出空間 */
 }
 
 .community-page .tab-navigation::before {
@@ -133,9 +132,17 @@
   transform: translateY(-1px);
 }
 
+.community-page .tab-btn.active .tab-label {
+  color: white;
+  font-weight: 700;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
 .tab-label {
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 .notification-badge {
@@ -251,6 +258,8 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
+  width: 100%;
+  min-width: 0; /* 確保 flex 項目可以縮小 */
 }
 
 .composer-input textarea {
@@ -264,6 +273,11 @@
   color: #1c1e21;
   background: transparent;
   font-family: inherit;
+  box-sizing: border-box;
+  padding: 12px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(0, 0, 0, 0.1);
 }
 
 .composer-input textarea::placeholder {
@@ -412,13 +426,19 @@
 }
 
 .post-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
   margin-bottom: 12px;
+  gap: 12px;
 }
 
 .post-user {
   display: flex;
   align-items: center;
   gap: 12px;
+  flex: 1;
+  min-width: 0; /* 確保可以縮小 */
 }
 
 .post-user .user-avatar {
@@ -428,6 +448,7 @@
 
 .user-info {
   flex: 1;
+  min-width: 0; /* 確保可以縮小 */
 }
 
 .user-name {
@@ -435,6 +456,9 @@
   color: #1c1e21;
   font-size: 15px;
   margin-bottom: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .post-time {
@@ -554,7 +578,7 @@
 }
 
 .comment-item {
-  padding: 8px 0;
+  padding: 12px 0;
   border-bottom: 1px solid #f0f2f5;
 }
 
@@ -562,29 +586,102 @@
   border-bottom: none;
 }
 
-.comment-user {
+.comment-header {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
+  margin-bottom: 8px;
+  width: 100%;
+  position: relative;
+}
+
+.comment-user-info {
+  display: flex;
+  align-items: flex-start;
   gap: 8px;
-  margin-bottom: 4px;
+  flex: 1;
+  min-width: 0;
+}
+
+.comment-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.comment-text-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
 }
 
 .comment-name {
   font-weight: 600;
   color: #1c1e21;
-  font-size: 13px;
+  font-size: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .comment-time {
   font-size: 12px;
   color: #65676b;
+  white-space: nowrap;
+}
+
+/* 刪除按鈕 - 全新簡潔樣式 */
+.comment-delete-btn {
+  position: absolute !important;
+  top: 0 !important;
+  right: 0 !important;
+  width: 16px !important;
+  height: 16px !important;
+  background: transparent !important;
+  border: none !important;
+  color: #ff6b6b !important;
+  cursor: pointer !important;
+  font-size: 12px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  opacity: 0.6 !important;
+  transition: opacity 0.2s ease !important;
+  z-index: 10 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  transform: none !important;
+  min-width: 16px !important;
+  max-width: 16px !important;
+}
+
+.comment-delete-btn:hover {
+  opacity: 1 !important;
+  background: transparent !important;
+  transform: none !important;
+  width: 16px !important;
+  height: 16px !important;
+  min-width: 16px !important;
+  max-width: 16px !important;
+}
+
+/* 移除舊的刪除按鈕樣式 */
+.delete-comment-btn {
+  display: none !important;
 }
 
 .comment-content {
   font-size: 14px;
   color: #1c1e21;
-  line-height: 1.3;
-  margin-left: 0;
+  line-height: 1.4;
+  margin-left: 40px;
+  word-break: break-word;
+  padding-right: 15px;
 }
 
 /* 留言輸入 */
@@ -1038,4 +1135,84 @@
   .search-btn {
     align-self: flex-end;
   }
+}
+
+/* 載入指示器 */
+.loading-indicator {
+  position: absolute;
+  top: -30px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--tiffany-primary);
+  color: white;
+  padding: 5px 12px;
+  border-radius: 15px;
+  font-size: 12px;
+  font-weight: 500;
+  z-index: 10;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+/* 動態刪除按鈕 */
+.delete-post-btn {
+  background: none;
+  border: none;
+  color: #ff6b6b;
+  cursor: pointer;
+  font-size: 16px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  opacity: 0.7;
+  flex-shrink: 0; /* 防止按鈕被壓縮 */
+  min-width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.delete-post-btn:hover {
+  opacity: 1;
+  background: rgba(255, 107, 107, 0.1);
+  transform: scale(1.1);
+}
+
+/* 刪除按鈕尺寸調整 - 留言板 */
+.delete-post-btn,
+.comment-delete-btn {
+  width: 12px !important;
+  height: 12px !important;
+  min-width: 12px !important;
+  max-width: 12px !important;
+  padding: 0 !important;
+  font-size: 8px !important; /* 內部垃圾桶圖示大小 */
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin-left: auto !important; /* 右對齊 */
+  background: transparent !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+.delete-post-btn:hover,
+.comment-delete-btn:hover {
+  background: transparent !important;
+  transform: none !important;
+  width: 12px !important;
+  height: 12px !important;
+  min-width: 12px !important;
+  max-width: 12px !important;
 }

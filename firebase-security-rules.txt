@@ -63,6 +63,26 @@ service cloud.firestore {
       allow delete: if false;
     }
     
+    // 留言板規則 - 新增留言板功能
+    match /messageBoard/{messageId} {
+      // 任何登入用戶都可以讀取留言
+      allow read: if request.auth != null;
+      
+      // 任何登入用戶都可以發布留言
+      allow create: if request.auth != null && 
+        request.resource.data.userId == request.auth.uid;
+      
+      // 只有留言作者或留言板主人可以更新留言
+      allow update: if request.auth != null && 
+        (resource.data.userId == request.auth.uid || 
+         resource.data.boardOwnerId == request.auth.uid);
+      
+      // 只有留言作者或留言板主人可以刪除留言
+      allow delete: if request.auth != null && 
+        (resource.data.userId == request.auth.uid || 
+         resource.data.boardOwnerId == request.auth.uid);
+    }
+    
     // 社群動態規則 - 社群頁面功能
     match /communityPosts/{postId} {
       // 任何登入用戶都可以讀取動態

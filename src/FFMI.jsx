@@ -14,6 +14,7 @@ function FFMI({ onComplete, clearTestData }) {
   const [ffmiScore, setFfmiScore] = useState(null);
   const [ffmiCategory, setFfmiCategory] = useState('');
   const [isExpanded, setIsExpanded] = useState(false);
+  const [isTableExpanded, setIsTableExpanded] = useState(false); // 新增：控制對照表展開狀態
 
   useEffect(() => {
     if (bodyFat) {
@@ -227,29 +228,43 @@ function FFMI({ onComplete, clearTestData }) {
         </div>
       </div>
       <div className="table-section">
-        <h2 className="table-title">
-          FFMI 對照表 (
-          {userData.gender === 'male' || userData.gender === '男性'
-            ? '男性'
-            : '女性'}
-          )
-        </h2>
-        <table className="ffmi-table">
-          <thead>
-            <tr>
-              <th>FFMI 範圍</th>
-              <th>評價</th>
-            </tr>
-          </thead>
-          <tbody>
-            {ffmiTable.map((row, index) => (
-              <tr key={index}>
-                <td>{row.range}</td>
-                <td>{row.description}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <div className="table-card">
+          <div
+            className="table-header"
+            onClick={() => setIsTableExpanded(!isTableExpanded)}
+          >
+            <h2 className="table-title">
+              FFMI 對照表 (
+              {userData.gender === 'male' || userData.gender === '男性'
+                ? '男性'
+                : '女性'}
+              )
+            </h2>
+            <span className={`arrow ${isTableExpanded ? 'expanded' : ''}`}>
+              {isTableExpanded ? '▲' : '▼'}
+            </span>
+          </div>
+          {isTableExpanded && (
+            <div className="table-content">
+              <table className="ffmi-table">
+                <thead>
+                  <tr>
+                    <th>FFMI 範圍</th>
+                    <th>評價</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {ffmiTable.map((row, index) => (
+                    <tr key={index}>
+                      <td>{row.range}</td>
+                      <td>{row.description}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
       </div>
       <button onClick={handleSubmit} className="ffmi-submit-btn">
         提交並返回總覽

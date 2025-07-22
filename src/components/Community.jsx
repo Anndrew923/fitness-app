@@ -1,4 +1,5 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useUser } from '../UserContext';
 import { auth, db } from '../firebase';
 import {
@@ -15,8 +16,10 @@ import {
   arrayUnion,
   arrayRemove,
   where,
+  deleteDoc,
 } from 'firebase/firestore';
 import firebaseWriteMonitor from '../utils/firebaseMonitor';
+
 import './Community.css';
 
 const Community = () => {
@@ -39,9 +42,25 @@ const Community = () => {
   const [likeProcessing, setLikeProcessing] = useState(new Set());
   const [commentProcessing, setCommentProcessing] = useState(new Set());
 
+  // 留言防抖計時器
+  const commentDebounceTimers = useRef(new Map());
+
+  // 批量留言操作
+  const pendingComments = useRef(new Map());
+
+  // 追蹤載入狀態，避免重複載入
+  const hasLoadedFriendsRef = useRef(false);
+  const hasLoadedPostsRef = useRef(false);
+  const hasLoadedRequestsRef = useRef(false);
+
   // 載入動態
   const loadPosts = useCallback(async () => {
     try {
+      // 檢查是否已經載入過
+      if (hasLoadedPostsRef.current) {
+        return;
+      }
+
       setLoading(true);
       console.log('🔄 開始載入社群動態...');
 
@@ -81,6 +100,9 @@ const Community = () => {
 
       console.log(`📊 載入到 ${postsData.length} 條動態`);
       setPosts(postsData);
+
+      // 標記已載入
+      hasLoadedPostsRef.current = true;
     } catch (error) {
       console.error('❌ 載入動態失敗:', error);
       setError('載入動態失敗，請稍後再試');
@@ -109,7 +131,10 @@ const Community = () => {
         userId: auth.currentUser.uid,
         userNickname:
           userData?.nickname || userData?.email?.split('@')[0] || '匿名用戶',
-        userAvatarUrl: userData?.avatarUrl || '',
+        userAvatarUrl: (() => {
+          const isGuest = sessionStorage.getItem('guestMode') === 'true';
+          return isGuest ? '/guest-avatar.svg' : userData?.avatarUrl || '';
+        })(),
         content: newPostContent.trim(),
         type: 'status', // 一般動態
         likes: [],
@@ -125,12 +150,22 @@ const Community = () => {
 
       console.log('✅ 動態發布成功，ID:', docRef.id);
 
+      // 立即更新本地狀態，添加新動態到列表頂部
+      const newPost = {
+        id: docRef.id,
+        ...postData,
+      };
+
+      console.log('🔄 更新本地狀態，添加新動態:', newPost.id);
+      setPosts(prevPosts => {
+        const updatedPosts = [newPost, ...prevPosts];
+        console.log(`📊 更新後動態總數: ${updatedPosts.length}`);
+        return updatedPosts;
+      });
+
       // 清空輸入框
       setNewPostContent('');
       setSuccess('動態發布成功！');
-
-      // 重新載入動態
-      await loadPosts();
 
       // 3秒後清除成功訊息
       setTimeout(() => setSuccess(''), 3000);
@@ -142,7 +177,7 @@ const Community = () => {
     }
   };
 
-  // 點讚/取消點讚 - 優化版本（使用 setDoc + 防抖）
+  // 點讚/取消點讚 - 優化版本（使用樂觀更新）
   const toggleLike = async (postId, currentLikes) => {
     if (!auth.currentUser) {
       setError('請先登入');
@@ -155,18 +190,30 @@ const Community = () => {
       return;
     }
 
+    const currentUserId = auth.currentUser.uid;
+    const isLiked = currentLikes.includes(currentUserId);
+
+    // 計算新的點讚列表
+    const newLikes = isLiked
+      ? currentLikes.filter(id => id !== currentUserId)
+      : [...currentLikes, currentUserId];
+
+    // 立即更新本地狀態（樂觀更新）
+    setPosts(prevPosts =>
+      prevPosts.map(post =>
+        post.id === postId
+          ? {
+              ...post,
+              likes: newLikes,
+            }
+          : post
+      )
+    );
+
+    // 設置處理狀態
+    setLikeProcessing(prev => new Set(prev).add(postId));
+
     try {
-      // 設置處理狀態
-      setLikeProcessing(prev => new Set(prev).add(postId));
-
-      const currentUserId = auth.currentUser.uid;
-      const isLiked = currentLikes.includes(currentUserId);
-
-      // 計算新的點讚列表
-      const newLikes = isLiked
-        ? currentLikes.filter(id => id !== currentUserId)
-        : [...currentLikes, currentUserId];
-
       // 使用 setDoc 替代 updateDoc，減少讀取操作
       const postRef = doc(db, 'communityPosts', postId);
       await setDoc(postRef, { likes: newLikes }, { merge: true });
@@ -176,22 +223,22 @@ const Community = () => {
         likes: `更新為 ${newLikes.length} 個點讚`,
       });
 
-      // 更新本地狀態
+      console.log(`👍 ${isLiked ? '取消點讚' : '點讚'}成功`);
+    } catch (error) {
+      console.error('❌ 點讚操作失敗:', error);
+      setError('點讚失敗，請稍後再試');
+
+      // 回滾本地狀態
       setPosts(prevPosts =>
         prevPosts.map(post =>
           post.id === postId
             ? {
                 ...post,
-                likes: newLikes,
+                likes: currentLikes, // 回滾到原始狀態
               }
             : post
         )
       );
-
-      console.log(`👍 ${isLiked ? '取消點讚' : '點讚'}成功`);
-    } catch (error) {
-      console.error('❌ 點讚操作失敗:', error);
-      setError('操作失敗，請稍後再試');
     } finally {
       // 清除處理狀態
       setLikeProcessing(prev => {
@@ -202,7 +249,7 @@ const Community = () => {
     }
   };
 
-  // 添加留言 - 優化版本（使用 setDoc + 防抖）
+  // 添加留言 - 優化版本（使用防抖 + 批量操作）
   const addComment = async (postId, commentContent) => {
     if (!commentContent.trim()) return;
     if (!auth.currentUser) {
@@ -216,18 +263,99 @@ const Community = () => {
       return;
     }
 
-    try {
-      // 設置處理狀態
-      setCommentProcessing(prev => new Set(prev).add(postId));
-      const comment = {
-        id: Date.now().toString(), // 簡單的ID生成
-        userId: auth.currentUser.uid,
-        userNickname:
-          userData?.nickname || userData?.email?.split('@')[0] || '匿名用戶',
-        content: commentContent.trim(),
-        timestamp: new Date().toISOString(),
-      };
+    const comment = {
+      id: Date.now().toString(), // 簡單的ID生成
+      userId: auth.currentUser.uid,
+      userNickname:
+        userData?.nickname || userData?.email?.split('@')[0] || '匿名用戶',
+      content: commentContent.trim(),
+      timestamp: new Date().toISOString(),
+    };
 
+    // 立即更新本地狀態（樂觀更新）
+    setPosts(prevPosts => {
+      const updatedPosts = prevPosts.map(post => {
+        if (post.id === postId) {
+          const newComments = [...post.comments, comment];
+          return { ...post, comments: newComments };
+        }
+        return post;
+      });
+      return updatedPosts;
+    });
+
+    // 設置處理狀態
+    setCommentProcessing(prev => new Set(prev).add(postId));
+
+    // 清除之前的計時器
+    if (commentDebounceTimers.current.has(postId)) {
+      clearTimeout(commentDebounceTimers.current.get(postId));
+    }
+
+    // 設置新的防抖計時器（500ms）
+    const timer = setTimeout(async () => {
+      try {
+        // 找到對應的動態
+        const currentPost = posts.find(post => post.id === postId);
+        if (!currentPost) {
+          setError('動態不存在');
+          return;
+        }
+
+        // 計算新的留言列表
+        const newComments = [...currentPost.comments, comment];
+
+        // 使用 setDoc 替代 updateDoc
+        const postRef = doc(db, 'communityPosts', postId);
+        await setDoc(postRef, { comments: newComments }, { merge: true });
+
+        // 記錄寫入操作
+        firebaseWriteMonitor.logWrite('setDoc', 'communityPosts', postId, {
+          comments: `新增留言，總計 ${newComments.length} 條`,
+        });
+
+        console.log('💬 留言添加成功');
+      } catch (error) {
+        console.error('❌ 添加留言失敗:', error);
+        setError('留言失敗，請稍後再試');
+
+        // 回滾本地狀態
+        setPosts(prevPosts => {
+          const updatedPosts = prevPosts.map(post => {
+            if (post.id === postId) {
+              const revertedComments = post.comments.filter(
+                c => c.id !== comment.id
+              );
+              return { ...post, comments: revertedComments };
+            }
+            return post;
+          });
+          return updatedPosts;
+        });
+      } finally {
+        // 清除處理狀態
+        setCommentProcessing(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(postId);
+          return newSet;
+        });
+
+        // 清除計時器
+        commentDebounceTimers.current.delete(postId);
+      }
+    }, 500);
+
+    commentDebounceTimers.current.set(postId, timer);
+  };
+
+  // 刪除留言
+  const deleteComment = async (postId, commentId) => {
+    if (!auth.currentUser) {
+      setError('請先登入');
+      return;
+    }
+
+    try {
       // 找到對應的動態
       const currentPost = posts.find(post => post.id === postId);
       if (!currentPost) {
@@ -235,36 +363,115 @@ const Community = () => {
         return;
       }
 
-      // 計算新的留言列表
-      const newComments = [...currentPost.comments, comment];
+      // 找到要刪除的留言
+      const commentToDelete = currentPost.comments.find(
+        comment => comment.id === commentId
+      );
+      if (!commentToDelete) {
+        setError('留言不存在');
+        return;
+      }
 
-      // 使用 setDoc 替代 updateDoc
+      // 檢查刪除權限
+      const currentUserId = auth.currentUser.uid;
+      const isPostOwner = currentPost.userId === currentUserId;
+      const isCommentOwner = commentToDelete.userId === currentUserId;
+
+      if (!isPostOwner && !isCommentOwner) {
+        setError('您沒有權限刪除此留言');
+        return;
+      }
+
+      // 確認刪除
+      const confirmMessage = isPostOwner
+        ? '確定要刪除此留言嗎？'
+        : '確定要刪除您的留言嗎？';
+
+      if (!window.confirm(confirmMessage)) {
+        return;
+      }
+
+      // 計算新的留言列表
+      const newComments = currentPost.comments.filter(
+        comment => comment.id !== commentId
+      );
+
+      // 更新數據庫
       const postRef = doc(db, 'communityPosts', postId);
       await setDoc(postRef, { comments: newComments }, { merge: true });
 
       // 記錄寫入操作
       firebaseWriteMonitor.logWrite('setDoc', 'communityPosts', postId, {
-        comments: `新增留言，總計 ${newComments.length} 條`,
+        comments: `刪除留言，總計 ${newComments.length} 條`,
       });
 
       // 更新本地狀態
-      setPosts(prevPosts =>
-        prevPosts.map(post =>
+      console.log('🔄 更新本地狀態，刪除留言:', commentId);
+      setPosts(prevPosts => {
+        const updatedPosts = prevPosts.map(post =>
           post.id === postId ? { ...post, comments: newComments } : post
-        )
-      );
-
-      console.log('💬 留言添加成功');
-    } catch (error) {
-      console.error('❌ 添加留言失敗:', error);
-      setError('留言失敗，請稍後再試');
-    } finally {
-      // 清除處理狀態
-      setCommentProcessing(prev => {
-        const newSet = new Set(prev);
-        newSet.delete(postId);
-        return newSet;
+        );
+        console.log(`📊 動態 ${postId} 留言數: ${newComments.length}`);
+        return updatedPosts;
       });
+
+      setSuccess('留言已刪除');
+      setTimeout(() => setSuccess(''), 3000);
+    } catch (error) {
+      console.error('❌ 刪除留言失敗:', error);
+      setError('刪除留言失敗，請稍後再試');
+    }
+  };
+
+  // 刪除動態（主要留言）
+  const deletePost = async postId => {
+    if (!auth.currentUser) {
+      setError('請先登入');
+      return;
+    }
+
+    try {
+      // 找到對應的動態
+      const currentPost = posts.find(post => post.id === postId);
+      if (!currentPost) {
+        setError('動態不存在');
+        return;
+      }
+
+      // 檢查刪除權限（只有動態作者可以刪除）
+      const currentUserId = auth.currentUser.uid;
+      if (currentPost.userId !== currentUserId) {
+        setError('您沒有權限刪除此動態');
+        return;
+      }
+
+      // 確認刪除
+      if (!window.confirm('確定要刪除此動態嗎？此操作無法撤銷。')) {
+        return;
+      }
+
+      // 從數據庫刪除
+      const postRef = doc(db, 'communityPosts', postId);
+      await deleteDoc(postRef);
+
+      // 記錄寫入操作
+      firebaseWriteMonitor.logWrite('deleteDoc', 'communityPosts', postId, {
+        action: '刪除動態',
+      });
+
+      // 更新本地狀態
+      console.log('🔄 更新本地狀態，刪除動態:', postId);
+      setPosts(prevPosts => {
+        const updatedPosts = prevPosts.filter(post => post.id !== postId);
+        console.log(`📊 剩餘動態數: ${updatedPosts.length}`);
+        return updatedPosts;
+      });
+
+      setSuccess('動態已刪除');
+      setTimeout(() => setSuccess(''), 3000);
+    } catch (error) {
+      console.error('❌ 刪除動態失敗:', error);
+      setError('刪除動態失敗，請稍後再試');
     }
   };
 
@@ -287,6 +494,11 @@ const Community = () => {
   // 載入好友數據
   const loadFriendsData = useCallback(async () => {
     try {
+      // 檢查是否已經載入過
+      if (hasLoadedFriendsRef.current) {
+        return;
+      }
+
       setLoading(true);
 
       if (process.env.NODE_ENV === 'development') {
@@ -323,6 +535,12 @@ const Community = () => {
           const userDoc = await getDoc(doc(db, 'users', friendId));
           if (userDoc.exists()) {
             const userData = userDoc.data();
+
+            // 確保 userData 存在
+            if (!userData) {
+              console.warn(`好友 ${friendId} 的用戶數據為空`);
+              continue;
+            }
 
             // 獲取好友的運動評分
             let averageScore = 0;
@@ -376,23 +594,37 @@ const Community = () => {
                 userData.nickname ||
                 userData.email?.split('@')[0] ||
                 '未命名用戶',
-              email: userData.email,
+              email: userData.email || '',
               avatarUrl: userData.avatarUrl || '',
+              averageScore:
+                averageScore > 0 ? Number(averageScore).toFixed(1) : null,
+              scoreCount: scoreCount,
               lastActive: userData.lastActive,
-              averageScore,
-              scoreCount,
             });
           }
         } catch (error) {
-          console.error(`獲取好友 ${friendId} 信息失敗:`, error);
+          console.error(`載入好友 ${friendId} 數據失敗:`, error);
         }
       }
 
-      setFriendsList(friendsData);
-      console.log('好友列表載入完成:', friendsData);
+      // 驗證數據完整性
+      const validFriendsData = friendsData.filter(
+        friend => friend && friend.id && typeof friend.nickname === 'string'
+      );
+
+      setFriendsList(validFriendsData);
+
+      if (process.env.NODE_ENV === 'development') {
+        console.log('好友列表載入完成:', validFriendsData);
+      }
+
+      // 標記已載入
+      hasLoadedFriendsRef.current = true;
     } catch (error) {
-      console.error('載入好友列表失敗:', error);
-      setError('載入好友列表失敗');
+      console.error('載入好友數據失敗:', error);
+      setError('載入好友數據失敗，請稍後再試');
+      // 即使載入失敗也要標記為已嘗試載入，避免無限重試
+      hasLoadedFriendsRef.current = true;
     } finally {
       setLoading(false);
     }
@@ -434,8 +666,12 @@ const Community = () => {
       }
 
       setFriendRequests(requests);
+      // 標記已載入
+      hasLoadedRequestsRef.current = true;
     } catch (error) {
       console.error('載入好友邀請失敗:', error);
+      // 即使載入失敗也要標記為已嘗試載入
+      hasLoadedRequestsRef.current = true;
     }
   }, []);
 
@@ -608,15 +844,21 @@ const Community = () => {
     }
   };
 
-  // 跳轉到好友留言板
+  // 跳轉到好友個人版
+  const navigate = useNavigate();
+
   const goToFriendBoard = friendId => {
-    // 這裡可以導航到好友的留言板頁面
-    // 暫時使用 alert 提示，之後可以實現具體的頁面跳轉
+    if (!friendId) {
+      console.error('好友ID為空');
+      return;
+    }
+
     const friend = friendsList.find(f => f.id === friendId);
     if (friend) {
-      alert(`即將前往 ${friend.nickname} 的留言板\n\n功能開發中，敬請期待！`);
-      // TODO: 實現好友留言板頁面跳轉
-      // navigate(`/friend-board/${friendId}`);
+      // 使用 React Router 跳轉到好友的個人版（動態牆）
+      navigate(`/friend-feed/${friendId}`);
+    } else {
+      console.error('找不到好友:', friendId);
     }
   };
 
@@ -669,22 +911,39 @@ const Community = () => {
 
   // 初始載入
   useEffect(() => {
-    // 頁面初始化時載入所有必要數據
-    loadPosts();
-    loadFriendsData();
-    loadFriendRequests();
+    try {
+      // 頁面初始化時載入動態牆數據和好友數據
+      loadPosts();
+      loadFriendsData();
+      loadFriendRequests();
+    } catch (error) {
+      console.error('初始載入失敗:', error);
+      setError('載入數據失敗，請稍後再試');
+    }
+
+    // 組件卸載時清理計時器
+    return () => {
+      commentDebounceTimers.current.forEach(timer => clearTimeout(timer));
+      commentDebounceTimers.current.clear();
+    };
   }, [loadPosts, loadFriendsData, loadFriendRequests]);
 
-  // 標籤切換時的載入
+  // 標籤切換時的載入（備用載入機制）
   useEffect(() => {
-    if (activeTab === 'feed') {
-      loadPosts();
-    } else if (activeTab === 'friends') {
-      loadFriendsData();
-    } else if (activeTab === 'requests') {
-      loadFriendRequests();
+    try {
+      // 如果初始載入失敗，在切換標籤時重試
+      if (activeTab === 'friends' && !hasLoadedFriendsRef.current) {
+        console.log('🔄 標籤切換時重新載入好友數據');
+        loadFriendsData();
+      } else if (activeTab === 'requests' && !hasLoadedRequestsRef.current) {
+        console.log('🔄 標籤切換時重新載入邀請數據');
+        loadFriendRequests();
+      }
+    } catch (error) {
+      console.error('標籤切換載入失敗:', error);
+      setError('載入數據失敗，請稍後再試');
     }
-  }, [activeTab, loadPosts, loadFriendsData, loadFriendRequests]);
+  }, [activeTab, loadFriendsData, loadFriendRequests]);
 
   return (
     <div className="community-page">
@@ -696,8 +955,19 @@ const Community = () => {
         {success && <div className="alert alert-success">{success}</div>}
       </div>
 
+      {/* 錯誤邊界 - 如果出現嚴重錯誤，顯示錯誤信息 */}
+      {!friendsList && (
+        <div className="alert alert-error">
+          載入好友列表時出現錯誤，請刷新頁面重試
+        </div>
+      )}
+
       {/* 標籤導航 */}
       <div className="tab-navigation">
+        {/* 載入狀態提示 */}
+        {!hasLoadedFriendsRef.current && (
+          <div className="loading-indicator">正在載入好友數據...</div>
+        )}
         <div
           className={`tab-btn ${activeTab === 'feed' ? 'active' : ''}`}
           onClick={() => setActiveTab('feed')}
@@ -708,7 +978,9 @@ const Community = () => {
           className={`tab-btn ${activeTab === 'friends' ? 'active' : ''}`}
           onClick={() => setActiveTab('friends')}
         >
-          <span className="tab-label">好友 ({friendsList.length})</span>
+          <span className="tab-label">
+            好友 ({!hasLoadedFriendsRef.current ? '...' : friendsList.length})
+          </span>
         </div>
         <div
           className={`tab-btn ${activeTab === 'requests' ? 'active' : ''}`}
@@ -738,7 +1010,13 @@ const Community = () => {
               <div className="composer-header">
                 <div className="user-avatar">
                   <img
-                    src={userData?.avatarUrl || '/default-avatar.png'}
+                    src={(() => {
+                      const isGuest =
+                        sessionStorage.getItem('guestMode') === 'true';
+                      return isGuest
+                        ? '/guest-avatar.svg'
+                        : userData?.avatarUrl || '/default-avatar.png';
+                    })()}
                     alt="頭像"
                     onError={e => {
                       e.target.src = '/default-avatar.png';
@@ -784,6 +1062,8 @@ const Community = () => {
                     currentUserId={auth.currentUser?.uid}
                     onToggleLike={toggleLike}
                     onAddComment={addComment}
+                    onDeleteComment={deleteComment}
+                    onDeletePost={deletePost}
                     formatTime={formatTime}
                     likeProcessing={likeProcessing}
                     commentProcessing={commentProcessing}
@@ -796,58 +1076,66 @@ const Community = () => {
 
         {activeTab === 'friends' && (
           <div className="friends-tab">
-            {friendsList.length === 0 ? (
+            {!friendsList || friendsList.length === 0 ? (
               <div className="empty-state">
                 <p>還沒有好友</p>
                 <p>去搜尋好友吧！</p>
               </div>
             ) : (
               <div className="friends-list">
-                {friendsList.map(friend => (
-                  <div key={friend.id} className="friend-item">
-                    <div className="friend-info">
-                      <img
-                        src={friend.avatarUrl || '/default-avatar.png'}
-                        alt="頭像"
-                        className="friend-avatar"
-                        onError={e => {
-                          e.target.src = '/default-avatar.png';
-                        }}
-                      />
-                      <div className="friend-details">
-                        <div className="friend-name">{friend.nickname}</div>
-                        <div className="friend-score">
-                          {friend.averageScore > 0 ? (
-                            <>
-                              <span className="score-value">
-                                🏆 {friend.averageScore.toFixed(1)}分
-                              </span>
-                            </>
-                          ) : (
-                            <span className="no-score">尚未評測</span>
-                          )}
+                {friendsList
+                  .filter(friend => friend && friend.id)
+                  .map(friend => (
+                    <div key={friend.id || 'unknown'} className="friend-item">
+                      <div className="friend-info">
+                        <img
+                          src={friend.avatarUrl || '/default-avatar.png'}
+                          alt="頭像"
+                          className="friend-avatar"
+                          onError={e => {
+                            e.target.src = '/default-avatar.png';
+                          }}
+                        />
+                        <div className="friend-details">
+                          <div className="friend-name">
+                            {friend.nickname || '未命名用戶'}
+                          </div>
+                          <div className="friend-score">
+                            {friend.averageScore ? (
+                              <>
+                                <span className="score-value">
+                                  🏆 {friend.averageScore}分
+                                </span>
+                              </>
+                            ) : (
+                              <span className="no-score">尚未評測</span>
+                            )}
+                          </div>
+                          <div className="friend-email">
+                            {friend.email || ''}
+                          </div>
                         </div>
-                        <div className="friend-email">{friend.email}</div>
+                      </div>
+                      <div className="friend-actions">
+                        <button
+                          className="btn-board"
+                          onClick={() =>
+                            friend.id && goToFriendBoard(friend.id)
+                          }
+                          title="查看留言板"
+                        >
+                          💬
+                        </button>
+                        <button
+                          className="btn-remove"
+                          onClick={() => friend.id && removeFriend(friend.id)}
+                          title="移除好友"
+                        >
+                          ❌
+                        </button>
                       </div>
                     </div>
-                    <div className="friend-actions">
-                      <button
-                        className="btn-board"
-                        onClick={() => goToFriendBoard(friend.id)}
-                        title="查看留言板"
-                      >
-                        💬
-                      </button>
-                      <button
-                        className="btn-remove"
-                        onClick={() => removeFriend(friend.id)}
-                        title="移除好友"
-                      >
-                        ❌
-                      </button>
-                    </div>
-                  </div>
-                ))}
+                  ))}
               </div>
             )}
           </div>
@@ -974,6 +1262,8 @@ const PostCard = ({
   currentUserId,
   onToggleLike,
   onAddComment,
+  onDeleteComment,
+  onDeletePost,
   formatTime,
   likeProcessing,
   commentProcessing,
@@ -1010,6 +1300,16 @@ const PostCard = ({
             <div className="post-time">{formatTime(post.timestamp)}</div>
           </div>
         </div>
+        {/* 刪除按鈕 - 只有動態作者可以看到 */}
+        {post.userId === currentUserId && (
+          <button
+            onClick={() => onDeletePost(post.id)}
+            className="delete-post-btn"
+            title="刪除此動態"
+          >
+            🗑️
+          </button>
+        )}
       </div>
 
       {/* 動態內容 */}
@@ -1049,17 +1349,46 @@ const PostCard = ({
           {/* 留言列表 */}
           {post.comments.length > 0 && (
             <div className="comments-list">
-              {post.comments.map(comment => (
-                <div key={comment.id} className="comment-item">
-                  <div className="comment-user">
-                    <span className="comment-name">{comment.userNickname}</span>
-                    <span className="comment-time">
-                      {formatTime(comment.timestamp)}
-                    </span>
+              {post.comments.map(comment => {
+                const isPostOwner = post.userId === currentUserId;
+                const isCommentOwner = comment.userId === currentUserId;
+                const canDelete = isPostOwner || isCommentOwner;
+
+                return (
+                  <div key={comment.id} className="comment-item">
+                    <div className="comment-header">
+                      <div className="comment-user-info">
+                        <img
+                          src="/default-avatar.png"
+                          alt="頭像"
+                          className="comment-avatar"
+                          onError={e => {
+                            e.target.src = '/default-avatar.png';
+                          }}
+                        />
+                        <div className="comment-text-info">
+                          <div className="comment-name">
+                            {comment.userNickname}
+                          </div>
+                          <div className="comment-time">
+                            {formatTime(comment.timestamp)}
+                          </div>
+                        </div>
+                      </div>
+                      {canDelete && (
+                        <button
+                          onClick={() => onDeleteComment(post.id, comment.id)}
+                          className="comment-delete-btn"
+                          title={isPostOwner ? '刪除此留言' : '刪除我的留言'}
+                        >
+                          🗑️
+                        </button>
+                      )}
+                    </div>
+                    <div className="comment-content">{comment.content}</div>
                   </div>
-                  <div className="comment-content">{comment.content}</div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
 

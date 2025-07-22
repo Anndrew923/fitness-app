@@ -104,25 +104,26 @@
 }
 
 .result-text {
-  font-size: 0.875rem;
-  color: #4b5563;
+  font-size: 1rem; /* 統一為 1rem */
+  font-weight: 500; /* 統一粗細 */
+  color: #81d4fa; /* 統一為淺藍色 */
   margin: 0.5rem 0;
   text-align: center;
 }
 
 .score-text {
-  font-size: 1.25rem;
-  font-weight: bold;
-  color: #81d4fa;
+  font-size: 1.25rem; /* 保持與 title 一致 */
+  font-weight: 600; /* 統一為 600 */
+  color: #81d4fa; /* 保持淺藍色 */
   margin: 0.5rem 0;
   text-align: center;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 .category-text {
-  font-size: 1.125rem;
-  font-weight: 600;
-  color: #4fc3f7;
+  font-size: 1.25rem; /* 統一為 1.25rem */
+  font-weight: 600; /* 統一為 600 */
+  color: #81d4fa; /* 統一為淺藍色 */
   margin: 0.5rem 0;
   text-align: center;
 }
@@ -187,22 +188,50 @@
   margin-bottom: 1.5rem;
 }
 
+.table-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 8px 25px rgba(44, 90, 160, 0.15);
+  overflow: hidden;
+  border: 1px solid rgba(44, 90, 160, 0.1);
+}
+
+.table-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  cursor: pointer;
+  background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
+  transition: all 0.3s ease;
+}
+
+.table-header:hover {
+  background: linear-gradient(135deg, #bbdefb 0%, #e1bee7 100%);
+}
+
+.table-content {
+  padding: 0;
+  background-color: white;
+  transition: max-height 0.3s ease, padding 0.3s ease;
+}
+
 .table-title {
   font-size: 1.25rem;
   font-weight: 600;
   color: #2c5aa0;
-  margin-bottom: 1rem;
-  text-align: center;
+  margin: 0; /* 移除 margin-bottom，因為現在在 header 內部 */
+  text-align: left; /* 改為左對齊，因為右邊有箭頭 */
 }
 
 .ffmi-table {
   width: 100%;
   border-collapse: collapse;
   background: white;
-  border-radius: 12px;
-  box-shadow: 0 8px 25px rgba(44, 90, 160, 0.15);
+  border-radius: 0; /* 移除圓角，因為在 card 內部 */
+  box-shadow: none; /* 移除陰影，因為 card 已經有陰影 */
   overflow: hidden;
-  border: 1px solid rgba(44, 90, 160, 0.1);
+  border: none; /* 移除邊框，因為 card 已經有邊框 */
 }
 
 .ffmi-table th,
@@ -276,14 +305,11 @@
   .ffmi-table th,
   .ffmi-table td,
   .description-content {
-    font-size: 1rem;
+    font-size: 1.125rem; /* 統一為 1.125rem */
   }
 
-  .score-text {
-    font-size: 1.5rem;
-  }
-
+  .score-text,
   .category-text {
-    font-size: 1.25rem;
+    font-size: 1.5rem; /* 統一為 1.5rem */
   }
 }

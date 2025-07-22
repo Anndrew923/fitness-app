@@ -26,6 +26,7 @@ import PrivacyPolicy from './PrivacyPolicy';
 import BottomNavBar from './components/BottomNavBar';
 import Ladder from './components/Ladder';
 import Community from './components/Community';
+import FriendFeed from './components/FriendFeed';
 import GlobalAdBanner from './components/GlobalAdBanner';
 import './App.css';
 
@@ -57,6 +58,7 @@ function AppContent() {
     '/history',
     '/ladder',
     '/community',
+    '/friend-feed',
     '/strength',
     '/explosive-power',
     '/cardio',
@@ -69,6 +71,7 @@ function AppContent() {
     '/user-info',
     '/ladder',
     '/community',
+    '/friend-feed',
     '/history',
     '/strength',
     '/cardio',
@@ -293,6 +296,11 @@ function AppContent() {
               path="/community"
               element={<ProtectedRoute element={<Community />} />}
             />
+            <Route
+              path="/friend-feed/:userId"
+              element={<ProtectedRoute element={<FriendFeed />} />}
+            />
+
             <Route path="/privacy-policy" element={<PrivacyPolicy />} />
             <Route path="*" element={<div>404 - 頁面未找到</div>} />
           </Routes>

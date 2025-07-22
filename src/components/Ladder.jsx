@@ -6,13 +6,15 @@ import React, {
   useCallback,
 } from 'react';
 import { useUser } from '../UserContext';
+import { useLocation } from 'react-router-dom';
 import { db } from '../firebase';
 import { collection, query, orderBy, limit, getDocs } from 'firebase/firestore';
 import { calculateLadderScore, formatScore, getAgeGroup } from '../utils';
 import './Ladder.css';
 
 const Ladder = () => {
-  const { userData } = useUser();
+  const { userData, loadUserData } = useUser();
+  const location = useLocation();
   const [ladderData, setLadderData] = useState([]);
   const [userRank, setUserRank] = useState(0);
   const [selectedAgeGroup, setSelectedAgeGroup] = useState('all');
@@ -24,6 +26,9 @@ const Ladder = () => {
   const lastLadderScoreRef = useRef(null);
   const lastConditionCheckRef = useRef(null);
   const lastLoadParamsRef = useRef(null);
+  const forceReloadRef = useRef(false);
+  const loadingRef = useRef(false);
+  const forceReloadProcessedRef = useRef(false);
 
   const ageGroups = [
     { value: 'all', label: '全部年齡' },
@@ -39,6 +44,12 @@ const Ladder = () => {
 
   // 使用 useCallback 優化 loadLadderData 函數
   const loadLadderData = useCallback(async () => {
+    // 防止重複載入
+    if (loadingRef.current) {
+      console.log('🔄 正在載入中，跳過重複請求');
+      return;
+    }
+
     // 創建載入參數的鍵值，用於防抖
     const loadParams = {
       selectedAgeGroup,
@@ -47,7 +58,9 @@ const Ladder = () => {
     };
 
     // 檢查是否與上次載入參數相同，避免重複載入
+    // 但如果是強制重新載入，則忽略這個檢查
     if (
+      !forceReloadRef.current &&
       lastLoadParamsRef.current &&
       JSON.stringify(lastLoadParamsRef.current) === JSON.stringify(loadParams)
     ) {
@@ -55,9 +68,14 @@ const Ladder = () => {
       return;
     }
 
+    // 重置強制重新載入標記
+    forceReloadRef.current = false;
+
     // 更新載入參數
     lastLoadParamsRef.current = loadParams;
 
+    // 設置載入狀態
+    loadingRef.current = true;
     setLoading(true);
     try {
       console.log('🚀 開始載入天梯數據...', loadParams);
@@ -215,6 +233,8 @@ const Ladder = () => {
       } else {
         setUserRank(0);
       }
+
+      // 路由狀態已在 useEffect 中清除，這裡不需要重複清除
     } catch (error) {
       console.error('載入天梯數據失敗:', error);
       console.error('錯誤詳情:', {
@@ -225,16 +245,59 @@ const Ladder = () => {
       });
     } finally {
       setLoading(false);
+      loadingRef.current = false;
+      // 重置強制重新載入處理標記
+      forceReloadProcessedRef.current = false;
     }
-  }, [selectedAgeGroup, selectedTab, userData?.ladderScore, userData?.userId]);
+  }, [
+    selectedAgeGroup,
+    selectedTab,
+    userData?.ladderScore,
+    userData?.userId,
+    userData,
+  ]);
 
   // 合併所有載入觸發條件到一個 useEffect
   useEffect(() => {
     // 初始化時載入數據
-    if (userData) {
+    if (userData && !location.state?.forceReload) {
       loadLadderData();
     }
-  }, [loadLadderData, userData]);
+  }, [
+    userData,
+    selectedAgeGroup,
+    selectedTab,
+    userData?.ladderScore,
+    userData?.userId,
+  ]);
+
+  // 監聽路由狀態變化，處理強制重新載入
+  useEffect(() => {
+    if (
+      location.state?.forceReload &&
+      userData &&
+      !forceReloadProcessedRef.current
+    ) {
+      console.log('🔄 檢測到強制重新載入標記，立即重新載入天梯數據');
+
+      // 設置已處理標記，避免重複處理
+      forceReloadProcessedRef.current = true;
+
+      // 立即清除路由狀態，避免重複觸發
+      window.history.replaceState({}, document.title);
+
+      // 使用 setTimeout 確保在當前渲染週期完成後執行
+      setTimeout(() => {
+        forceReloadRef.current = true;
+        // 清除載入參數緩存，確保重新載入
+        lastLoadParamsRef.current = null;
+
+        // 直接載入天梯數據，不需要重新載入用戶數據
+        // 因為用戶數據已經在 UserInfo 頁面更新過了
+        loadLadderData();
+      }, 0);
+    }
+  }, [location.state, userData]);
 
   // 簡化動畫樣式 - 動畫已移除
   const getAnimationStyle = useMemo(() => {
@@ -330,24 +393,40 @@ const Ladder = () => {
 
           <div className="ladder__user">
             <div className="ladder__avatar">
-              {userData.avatarUrl && userData.avatarUrl.trim() !== '' ? (
-                <img
-                  src={userData.avatarUrl}
-                  alt="頭像"
-                  onError={e => {
-                    console.log('頭像載入失敗，使用預設頭像');
-                    e.target.style.display = 'none';
-                    e.target.nextSibling.style.display = 'flex';
-                  }}
-                />
-              ) : null}
+              {(() => {
+                const isGuest = sessionStorage.getItem('guestMode') === 'true';
+                const avatarUrl = isGuest
+                  ? '/guest-avatar.svg'
+                  : userData.avatarUrl;
+
+                if (avatarUrl && avatarUrl.trim() !== '') {
+                  return (
+                    <img
+                      src={avatarUrl}
+                      alt="頭像"
+                      onError={e => {
+                        console.log('頭像載入失敗，使用預設頭像');
+                        e.target.style.display = 'none';
+                        e.target.nextSibling.style.display = 'flex';
+                      }}
+                    />
+                  );
+                }
+                return null;
+              })()}
               <div
                 className="ladder__avatar-placeholder"
                 style={{
-                  display:
-                    userData.avatarUrl && userData.avatarUrl.trim() !== ''
+                  display: (() => {
+                    const isGuest =
+                      sessionStorage.getItem('guestMode') === 'true';
+                    const avatarUrl = isGuest
+                      ? '/guest-avatar.svg'
+                      : userData.avatarUrl;
+                    return avatarUrl && avatarUrl.trim() !== ''
                       ? 'none'
-                      : 'flex',
+                      : 'flex';
+                  })(),
                 }}
               >
                 {userData.nickname

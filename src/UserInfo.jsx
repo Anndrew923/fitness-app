@@ -422,7 +422,19 @@ function UserInfo({ testData, onLogout, clearTestData }) {
         title: '提交成功',
         message: `您的分數 ${ladderScore} 已成功提交到天梯！`,
         type: 'success',
-        onAction: () => navigate('/ladder'),
+        onAction: () => {
+          // 關閉對話框
+          setModalState(prev => ({ ...prev, isOpen: false }));
+
+          // 導航到天梯頁面時，傳遞強制重新載入的標記
+          navigate('/ladder', {
+            state: {
+              forceReload: true,
+              from: '/user-info',
+              timestamp: Date.now(), // 添加時間戳確保每次都是新的
+            },
+          });
+        },
         actionText: '立即查看天梯',
       });
 
@@ -780,43 +792,21 @@ function UserInfo({ testData, onLogout, clearTestData }) {
             }),
           };
 
-          // 移除分數提升檢測和動畫
-
-          console.log('💾 防抖後更新測試數據分數（5秒防抖）');
+          console.log('💾 防抖後更新測試數據分數（10秒防抖）');
           return {
             ...prev,
             scores: updatedScores,
             // 保持原有的天梯分數，不自動更新
             ladderScore: prev.ladderScore || 0,
-            // 移除 lastActive 更新，避免頻繁寫入
-            // lastActive: new Date().toISOString(),
           };
         });
 
-        // 更新 previousScores
-        setPreviousScores(prev => ({
-          ...prev,
-          ...(testData.distance !== undefined && {
-            cardio: testData.score || 0,
-          }),
-          ...(testData.squat !== undefined && {
-            strength: testData.averageScore || 0,
-          }),
-          ...(testData.jumpHeight !== undefined && {
-            explosivePower: testData.finalScore || 0,
-          }),
-          ...(testData.smm !== undefined && {
-            muscleMass: testData.finalScore || 0,
-          }),
-          ...(testData.bodyFat !== undefined && {
-            bodyFat: testData.ffmiScore || 0,
-          }),
-        }));
-      }, 5000); // 增加到5秒防抖
+        // 移除 previousScores 更新，因為該狀態變量未定義
+      }, 10000); // 增加到10秒防抖
 
       // 清除 testData
       if (clearTestData) {
-        setTimeout(clearTestData, 6000); // 延長到6秒
+        setTimeout(clearTestData, 11000); // 延長到11秒
       }
 
       return () => clearTimeout(timeoutId);
@@ -1018,7 +1008,7 @@ function UserInfo({ testData, onLogout, clearTestData }) {
       // 設置新的防抖定時器，延遲保存到 Firebase
       nicknameTimeoutRef.current = setTimeout(() => {
         nicknameTimeoutRef.current = null;
-      }, 500); // 500毫秒防抖，平衡響應性和性能
+      }, 1000); // 增加到1秒防抖，減少寫入頻率
     },
     [setUserData]
   );
@@ -1262,23 +1252,34 @@ function UserInfo({ testData, onLogout, clearTestData }) {
       <div className="avatar-section">
         <div className="avatar-container">
           <img
-            src={userData?.avatarUrl || '/logo192.png'}
+            src={
+              isGuest
+                ? '/guest-avatar.svg'
+                : userData?.avatarUrl || '/logo192.png'
+            }
             alt="頭像"
             className="user-avatar"
           />
         </div>
 
         <div className="avatar-actions-container">
-          <label className="avatar-upload-label">
-            {avatarUploading ? '上傳中...' : '更換頭像'}
-            <input
-              type="file"
-              accept="image/*"
-              style={{ display: 'none' }}
-              onChange={handleAvatarChange}
-              disabled={avatarUploading}
-            />
-          </label>
+          {!isGuest && (
+            <label className="avatar-upload-label">
+              {avatarUploading ? '上傳中...' : '更換頭像'}
+              <input
+                type="file"
+                accept="image/*"
+                style={{ display: 'none' }}
+                onChange={handleAvatarChange}
+                disabled={avatarUploading}
+              />
+            </label>
+          )}
+          {isGuest && (
+            <div className="guest-avatar-note">
+              <span>訪客模式</span>
+            </div>
+          )}
         </div>
 
         {avatarError && <div className="avatar-error">{avatarError}</div>}
