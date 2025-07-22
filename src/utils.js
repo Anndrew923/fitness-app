@@ -31,13 +31,13 @@ export const calculateLadderScore = scores => {
 
   // 完成全部5個項目後，計算平均分數
   const total = scoreValues.reduce((sum, score) => sum + Number(score), 0);
-  return Math.round((total / 5) * 10) / 10; // 保留一位小數
+  return Math.round((total / 5) * 100) / 100; // 保留兩位小數
 };
 
 // 格式化分數顯示
 export const formatScore = score => {
-  if (!score && score !== 0) return '0.0';
-  return Number(score).toFixed(1);
+  if (!score && score !== 0) return '0.00';
+  return Number(score).toFixed(2);
 };
 
 // 生成用戶暱稱（如果未設定）

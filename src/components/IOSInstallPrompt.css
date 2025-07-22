@@ -1,0 +1,136 @@
+.ios-install-prompt {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  max-width: 90vw;
+  width: 380px;
+  animation: slideUp 0.3s ease-out;
+}
+
+.ios-install-prompt__content {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  color: white;
+  text-align: center;
+}
+
+.ios-install-prompt__icon {
+  font-size: 48px;
+  margin-bottom: 12px;
+}
+
+.ios-install-prompt__text h3 {
+  margin: 0 0 8px 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.ios-install-prompt__text p {
+  margin: 0 0 20px 0;
+  font-size: 14px;
+  opacity: 0.9;
+  line-height: 1.4;
+}
+
+.ios-install-prompt__steps {
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+.ios-install-prompt__step {
+  display: flex;
+  align-items: center;
+  margin-bottom: 12px;
+  font-size: 14px;
+}
+
+.ios-install-prompt__step-number {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+  margin-right: 12px;
+  flex-shrink: 0;
+}
+
+.ios-install-prompt__actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.ios-install-prompt__btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 80px;
+}
+
+.ios-install-prompt__btn--primary {
+  background: #4caf50;
+  color: white;
+}
+
+.ios-install-prompt__btn--primary:hover {
+  background: #45a049;
+  transform: translateY(-1px);
+}
+
+.ios-install-prompt__btn--dismiss {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.ios-install-prompt__btn--dismiss:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+/* 響應式設計 */
+@media (max-width: 480px) {
+  .ios-install-prompt {
+    bottom: 10px;
+    left: 10px;
+    right: 10px;
+    transform: none;
+    width: auto;
+    max-width: none;
+  }
+
+  .ios-install-prompt__content {
+    padding: 16px;
+  }
+
+  .ios-install-prompt__actions {
+    flex-direction: column;
+  }
+
+  .ios-install-prompt__btn {
+    width: 100%;
+  }
+}

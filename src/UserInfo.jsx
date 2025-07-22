@@ -509,29 +509,29 @@ function UserInfo({ testData, onLogout, clearTestData }) {
     return [
       {
         name: '力量',
-        value: scores.strength ? Number(scores.strength).toFixed(1) * 1 : 0,
+        value: scores.strength ? Number(scores.strength).toFixed(2) * 1 : 0,
         icon: '💪',
       },
       {
         name: '爆發力',
         value: scores.explosivePower
-          ? Number(scores.explosivePower).toFixed(1) * 1
+          ? Number(scores.explosivePower).toFixed(2) * 1
           : 0,
         icon: '⚡',
       },
       {
         name: '心肺耐力',
-        value: scores.cardio ? Number(scores.cardio).toFixed(1) * 1 : 0,
+        value: scores.cardio ? Number(scores.cardio).toFixed(2) * 1 : 0,
         icon: '❤️',
       },
       {
         name: '骨骼肌肉量',
-        value: scores.muscleMass ? Number(scores.muscleMass).toFixed(1) * 1 : 0,
+        value: scores.muscleMass ? Number(scores.muscleMass).toFixed(2) * 1 : 0,
         icon: '🥩',
       },
       {
         name: 'FFMI',
-        value: scores.bodyFat ? Number(scores.bodyFat).toFixed(1) * 1 : 0,
+        value: scores.bodyFat ? Number(scores.bodyFat).toFixed(2) * 1 : 0,
         icon: '📊',
       },
     ];
@@ -902,7 +902,7 @@ function UserInfo({ testData, onLogout, clearTestData }) {
       ? (
           scoreValues.reduce((sum, score) => sum + Number(score), 0) /
           scoreValues.length
-        ).toFixed(1)
+        ).toFixed(2)
       : 0;
     return avg;
   }, [userData?.scores]);

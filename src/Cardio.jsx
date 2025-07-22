@@ -44,10 +44,10 @@ function Cardio({ onComplete, clearTestData }) {
     const min = standard[60]; // 60分對應的距離
     const max = standard[100]; // 100分對應的距離
     if (value <= 0) return 0;
-    if (value <= min) return Math.round((value / min) * 60 * 10) / 10; // 0~60分線性
+    if (value <= min) return Math.round((value / min) * 60 * 100) / 100; // 0~60分線性
     if (value >= max) return 100;
     // 60~100分之間線性插值
-    return Math.round((60 + ((value - min) / (max - min)) * 40) * 10) / 10;
+    return Math.round((60 + ((value - min) / (max - min)) * 40) * 100) / 100;
   };
 
   const getComment = (score, gender) => {

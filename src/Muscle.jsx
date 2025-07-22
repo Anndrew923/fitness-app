@@ -73,7 +73,7 @@ function Muscle({ onComplete, clearTestData }) {
     const score =
       lower +
       ((value - lowerValue) / (upperValue - lowerValue)) * (upper - lower);
-    return Math.round(score * 10) / 10;
+    return Math.round(score * 100) / 100;
   };
 
   const calculateMuscleScore = () => {
@@ -88,7 +88,7 @@ function Muscle({ onComplete, clearTestData }) {
       alert('請輸入有效的體重、骨骼肌肉量和年齡！');
       return;
     }
-    const smPercent = ((smmNum / weightNum) * 100).toFixed(1);
+    const smPercent = ((smmNum / weightNum) * 100).toFixed(2);
     const genderValue =
       gender === '男性' || gender.toLowerCase() === 'male' ? 'male' : 'female';
     const smmStandards =
@@ -111,7 +111,7 @@ function Muscle({ onComplete, clearTestData }) {
       smPercentStandard,
       'SM%'
     );
-    const finalScore = ((smmScore + smPercentScore) / 2).toFixed(1);
+    const finalScore = ((smmScore + smPercentScore) / 2).toFixed(2);
     setResult({ smmScore, smPercent, smPercentScore, finalScore });
   };
 

@@ -64,29 +64,29 @@ function History() {
               .filter(s => s > 0)
               .reduce((sum, s) => sum + s, 0) /
             Object.values(scores).filter(s => s > 0).length
-          ).toFixed(1)
+          ).toFixed(2)
         );
       })
       .reverse();
 
     const strengthScores = recentHistory
-      .map(record => (record.scores?.strength || 0).toFixed(1))
+      .map(record => (record.scores?.strength || 0).toFixed(2))
       .reverse();
 
     const explosiveScores = recentHistory
-      .map(record => (record.scores?.explosivePower || 0).toFixed(1))
+      .map(record => (record.scores?.explosivePower || 0).toFixed(2))
       .reverse();
 
     const cardioScores = recentHistory
-      .map(record => (record.scores?.cardio || 0).toFixed(1))
+      .map(record => (record.scores?.cardio || 0).toFixed(2))
       .reverse();
 
     const muscleMassScores = recentHistory
-      .map(record => (record.scores?.muscleMass || 0).toFixed(1))
+      .map(record => (record.scores?.muscleMass || 0).toFixed(2))
       .reverse();
 
     const bodyFatScores = recentHistory
-      .map(record => (record.scores?.bodyFat || 0).toFixed(1))
+      .map(record => (record.scores?.bodyFat || 0).toFixed(2))
       .reverse();
 
     return {
@@ -389,7 +389,7 @@ function History() {
                         .filter(s => s > 0)
                         .reduce((sum, s) => sum + s, 0) /
                       Object.values(scores).filter(s => s > 0).length
-                    ).toFixed(1) ||
+                    ).toFixed(2) ||
                     0;
 
                   return (
@@ -409,38 +409,38 @@ function History() {
                           scores.strength || 0
                         )}`}
                       >
-                        {(scores.strength || 0).toFixed(1)}
+                        {(scores.strength || 0).toFixed(2)}
                       </td>
                       <td
                         className={`score-cell ${getScoreClass(
                           scores.explosivePower || 0
                         )}`}
                       >
-                        {(scores.explosivePower || 0).toFixed(1)}
+                        {(scores.explosivePower || 0).toFixed(2)}
                       </td>
                       <td
                         className={`score-cell ${
                           !showAllColumns ? 'mobile-hidden' : ''
                         } ${getScoreClass(scores.cardio || 0)}`}
                       >
-                        {(scores.cardio || 0).toFixed(1)}
+                        {(scores.cardio || 0).toFixed(2)}
                       </td>
                       <td
                         className={`score-cell ${
                           !showAllColumns ? 'mobile-hidden' : ''
                         } ${getScoreClass(scores.muscleMass || 0)}`}
                       >
-                        {(scores.muscleMass || 0).toFixed(1)}
+                        {(scores.muscleMass || 0).toFixed(2)}
                       </td>
                       <td
                         className={`score-cell ${
                           !showAllColumns ? 'mobile-hidden' : ''
                         } ${getScoreClass(scores.bodyFat || 0)}`}
                       >
-                        {(scores.bodyFat || 0).toFixed(1)}
+                        {(scores.bodyFat || 0).toFixed(2)}
                       </td>
                       <td className={`average-cell ${getScoreClass(avgScore)}`}>
-                        <strong>{Number(avgScore).toFixed(1)}</strong>
+                        <strong>{Number(avgScore).toFixed(2)}</strong>
                       </td>
                       {showDeleteOptions && (
                         <td className="select-cell">

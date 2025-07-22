@@ -29,6 +29,7 @@ import Community from './components/Community';
 import FriendFeed from './components/FriendFeed';
 import GlobalAdBanner from './components/GlobalAdBanner';
 import PWAInstallPrompt from './components/PWAInstallPrompt';
+import IOSInstallPrompt from './components/IOSInstallPrompt';
 import './App.css';
 
 class ErrorBoundary extends Component {
@@ -314,6 +315,7 @@ function AppContent() {
       {location.pathname !== '/ladder' && <GlobalAdBanner />}
       {showNavBar && <BottomNavBar />}
       <PWAInstallPrompt />
+      <IOSInstallPrompt />
     </div>
   );
 }

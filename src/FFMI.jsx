@@ -50,7 +50,7 @@ function FFMI({ onComplete, clearTestData }) {
     const rawFfmi = fatFreeMass / (heightInMeters * heightInMeters);
     const adjustedFfmi =
       heightInMeters > 1.8 ? rawFfmi + 6.0 * (heightInMeters - 1.8) : rawFfmi;
-    setFfmi(adjustedFfmi.toFixed(1));
+    setFfmi(adjustedFfmi.toFixed(2));
 
     let newFfmiScore;
     if (isMale) {
@@ -74,7 +74,7 @@ function FFMI({ onComplete, clearTestData }) {
           60 + ((adjustedFfmi - baseFfmi) / (maxFfmi - baseFfmi)) * 40;
       else newFfmiScore = 100;
     }
-    setFfmiScore(newFfmiScore.toFixed(1));
+    setFfmiScore(newFfmiScore.toFixed(2));
 
     if (isMale) {
       if (adjustedFfmi < 18) setFfmiCategory('肌肉量低於平均');

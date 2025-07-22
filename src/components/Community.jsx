@@ -699,7 +699,7 @@ const Community = () => {
               email: userData.email || '',
               avatarUrl: userData.avatarUrl || '',
               averageScore:
-                averageScore > 0 ? Number(averageScore).toFixed(1) : null,
+                averageScore > 0 ? Number(averageScore).toFixed(2) : null,
               scoreCount: scoreCount,
               lastActive: userData.lastActive,
             });

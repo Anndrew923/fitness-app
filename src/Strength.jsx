@@ -235,10 +235,10 @@ function Strength({ onComplete, clearTestData }) {
         bodyweightStandard
       );
       const scoreByAge = calculateScore(valueToCompare, ageStandard);
-      const finalScore = ((scoreByBodyweight + scoreByAge) / 2).toFixed(1);
+      const finalScore = ((scoreByBodyweight + scoreByAge) / 2).toFixed(2);
       setState(prev => ({
         ...prev,
-        max: valueToCompare.toFixed(1),
+        max: valueToCompare.toFixed(2),
         score: finalScore,
       }));
     },
@@ -353,7 +353,7 @@ function Strength({ onComplete, clearTestData }) {
   const averageScore =
     scores.length > 0
       ? (scores.reduce((a, b) => a + parseFloat(b), 0) / scores.length).toFixed(
-          1
+          2
         )
       : null;
 
