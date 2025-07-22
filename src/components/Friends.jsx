@@ -904,41 +904,43 @@ const Friends = () => {
                   {friend.nickname.charAt(0).toUpperCase()}
                 </div>
               </div>
-              <div className="friend-info">
-                <h4>{friend.nickname}</h4>
-                <p>天梯分數: {friend.ladderScore}</p>
-              </div>
-              <div className="friend-actions">
-                <button
-                  className="btn-challenge"
-                  onClick={() => {
-                    console.log('🏆 點擊挑戰按鈕，好友資訊:', friend);
-                    console.log('🎯 設置 selectedFriend 為:', friend);
-                    setSelectedFriend(friend);
-                    console.log('📋 切換到 challenges 標籤');
-                    setActiveTab('challenges');
-                    console.log('📥 開始載入挑戰...');
-                    loadChallenges(friend.id);
-                  }}
-                  style={{
-                    background:
-                      'linear-gradient(135deg, #81D8D0 0%, #5F9EA0 100%)' /* Tiffany 藍漸變 */,
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '8px',
-                    padding: '8px 12px',
-                    cursor: 'pointer',
-                    fontSize: '16px',
-                  }}
-                >
-                  🏆
-                </button>
-                <button
-                  className="btn-remove"
-                  onClick={() => removeFriend(friend.id)}
-                >
-                  ❌
-                </button>
+              <div className="friend-content">
+                <div className="friend-row-top">
+                  <h4 className="friend-name">{friend.nickname}</h4>
+                  <p className="friend-score">
+                    <span role="img" aria-label="trophy">
+                      🏆
+                    </span>{' '}
+                    {friend.ladderScore}分
+                  </p>
+                  <div className="friend-actions">
+                    <button
+                      className="btn-challenge"
+                      onClick={() => {
+                        console.log('🏆 點擊挑戰按鈕，好友資訊:', friend);
+                        console.log('🎯 設置 selectedFriend 為:', friend);
+                        setSelectedFriend(friend);
+                        console.log('📋 切換到 challenges 標籤');
+                        setActiveTab('challenges');
+                        console.log('📥 開始載入挑戰...');
+                        loadChallenges(friend.id);
+                      }}
+                    >
+                      ...
+                    </button>
+                    <button
+                      className="btn-remove"
+                      onClick={() => removeFriend(friend.id)}
+                    >
+                      &times;
+                    </button>
+                  </div>
+                </div>
+                {friend.email && (
+                  <div className="friend-row-bottom">
+                    <p className="friend-email">{friend.email}</p>
+                  </div>
+                )}
               </div>
             </div>
           ))

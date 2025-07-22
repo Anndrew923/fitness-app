@@ -64,20 +64,15 @@ const Community = () => {
       setLoading(true);
       console.log('🔄 開始載入社群動態...');
 
-      // 獲取好友的用戶ID列表
-      const friendIds = userData?.friends || [];
       const currentUserId = auth.currentUser?.uid;
-
-      // 創建查詢：當前用戶 + 好友的動態
-      const userIds = [currentUserId, ...friendIds].filter(Boolean);
-
-      if (userIds.length === 0) {
-        console.log('📝 沒有好友，只顯示自己的動態');
+      if (!currentUserId) {
+        console.log('❌ 用戶未登入');
         setPosts([]);
         return;
       }
 
-      // 查詢動態（限制為最近50條）
+      // 先載入所有動態，然後在客戶端過濾
+      // 這樣可以避免 Firestore 查詢限制
       const postsQuery = query(
         collection(db, 'communityPosts'),
         orderBy('timestamp', 'desc'),
@@ -89,23 +84,126 @@ const Community = () => {
 
       snapshot.forEach(doc => {
         const postData = doc.data();
-        // 只顯示當前用戶和好友的動態
-        if (userIds.includes(postData.userId)) {
-          postsData.push({
-            id: doc.id,
-            ...postData,
+
+        // 處理留言的頭像資訊
+        if (postData.comments && postData.comments.length > 0) {
+          console.log(
+            `🔍 處理動態 ${doc.id} 的 ${postData.comments.length} 條留言`
+          );
+          postData.comments = postData.comments.map(comment => {
+            // 如果留言沒有 userAvatarUrl，使用預設頭像
+            if (!comment.userAvatarUrl) {
+              console.log(`📝 留言 ${comment.id} 缺少頭像，使用預設頭像`);
+              return {
+                ...comment,
+                userAvatarUrl: '/guest-avatar.svg',
+              };
+            }
+            console.log(
+              `✅ 留言 ${comment.id} 已有頭像: ${comment.userAvatarUrl}`
+            );
+            return comment;
           });
         }
+
+        // 先載入所有動態，後續可以根據好友關係過濾
+        postsData.push({
+          id: doc.id,
+          ...postData,
+        });
       });
 
       console.log(`📊 載入到 ${postsData.length} 條動態`);
-      setPosts(postsData);
+
+      // 等待好友數據載入完成
+      if (!hasLoadedFriendsRef.current) {
+        console.log('⏳ 等待好友數據載入完成...');
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      }
+
+      // 根據好友關係過濾動態
+      const friendIds = userData?.friends || [];
+      const allowedUserIds = [currentUserId, ...friendIds].filter(Boolean);
+
+      console.log(`🔍 允許查看的用戶: ${allowedUserIds.join(', ')}`);
+
+      const filteredPosts = postsData.filter(post => {
+        const isAllowed = allowedUserIds.includes(post.userId);
+        if (!isAllowed) {
+          console.log(`🚫 過濾掉非好友動態: ${post.userId}`);
+        }
+        return isAllowed;
+      });
+
+      console.log(`📊 過濾後剩餘 ${filteredPosts.length} 條動態`);
+
+      // 收集缺少頭像的 userId
+      const missingAvatarUserIds = new Set();
+      filteredPosts.forEach(p => {
+        (p.comments || []).forEach(c => {
+          if (!c.userAvatarUrl && c.userId) {
+            missingAvatarUserIds.add(c.userId);
+          }
+        });
+      });
+
+      if (missingAvatarUserIds.size > 0) {
+        const avatarMap = {};
+        await Promise.all(
+          Array.from(missingAvatarUserIds).map(async uid => {
+            try {
+              const userDoc = await getDoc(doc(db, 'users', uid));
+              if (userDoc.exists()) {
+                const data = userDoc.data();
+                avatarMap[uid] = data.avatarUrl || '/guest-avatar.svg';
+              } else {
+                avatarMap[uid] = '/guest-avatar.svg';
+              }
+            } catch (err) {
+              console.warn(`取得用戶 ${uid} 頭像失敗`, err);
+              avatarMap[uid] = '/guest-avatar.svg';
+            }
+          })
+        );
+
+        // 填補缺少頭像的留言
+        filteredPosts.forEach(p => {
+          (p.comments || []).forEach(c => {
+            // 若留言者和貼文作者相同，直接沿用貼文頭像
+            if (!c.userAvatarUrl && c.userId === p.userId) {
+              c.userAvatarUrl = p.userAvatarUrl;
+            }
+            if (!c.userAvatarUrl && avatarMap[c.userId]) {
+              c.userAvatarUrl = avatarMap[c.userId];
+            }
+          });
+        });
+      }
+
+      // 最終更新狀態
+      setPosts([...filteredPosts]);
 
       // 標記已載入
       hasLoadedPostsRef.current = true;
+
+      // 如果載入成功，清除錯誤訊息
+      if (error.includes('載入動態失敗')) {
+        setError('');
+      }
     } catch (error) {
       console.error('❌ 載入動態失敗:', error);
-      setError('載入動態失敗，請稍後再試');
+
+      // 檢查是否是權限錯誤
+      if (error.code === 'permission-denied') {
+        setError('權限不足，請檢查登入狀態');
+      } else if (error.code === 'unavailable') {
+        setError('網路連線問題，請檢查網路連線');
+      } else {
+        setError('載入動態失敗，請稍後再試');
+      }
+
+      // 重置載入狀態，允許重試
+      hasLoadedPostsRef.current = false;
     } finally {
       setLoading(false);
     }
@@ -268,6 +366,10 @@ const Community = () => {
       userId: auth.currentUser.uid,
       userNickname:
         userData?.nickname || userData?.email?.split('@')[0] || '匿名用戶',
+      userAvatarUrl: (() => {
+        const isGuest = sessionStorage.getItem('guestMode') === 'true';
+        return isGuest ? '/guest-avatar.svg' : userData?.avatarUrl || '';
+      })(),
       content: commentContent.trim(),
       timestamp: new Date().toISOString(),
     };
@@ -913,6 +1015,7 @@ const Community = () => {
   useEffect(() => {
     try {
       // 頁面初始化時載入動態牆數據和好友數據
+      // 先載入動態，再載入好友數據
       loadPosts();
       loadFriendsData();
       loadFriendRequests();
@@ -1002,6 +1105,35 @@ const Community = () => {
       {/* 內容區域 */}
       <div className="tab-content">
         {loading && <div className="loading">載入中...</div>}
+
+        {/* 重試按鈕 */}
+        {error && !loading && (
+          <div className="alert alert-error">
+            {error}
+            <button
+              onClick={() => {
+                hasLoadedPostsRef.current = false;
+                hasLoadedFriendsRef.current = false;
+                hasLoadedRequestsRef.current = false;
+                setError('');
+                loadPosts();
+                loadFriendsData();
+                loadFriendRequests();
+              }}
+              style={{
+                marginLeft: '10px',
+                padding: '5px 10px',
+                background: '#ff6b6b',
+                color: 'white',
+                border: 'none',
+                borderRadius: '4px',
+                cursor: 'pointer',
+              }}
+            >
+              重試
+            </button>
+          </div>
+        )}
 
         {activeTab === 'feed' && (
           <>
@@ -1359,11 +1491,11 @@ const PostCard = ({
                     <div className="comment-header">
                       <div className="comment-user-info">
                         <img
-                          src="/default-avatar.png"
+                          src={comment.userAvatarUrl || '/guest-avatar.svg'}
                           alt="頭像"
                           className="comment-avatar"
                           onError={e => {
-                            e.target.src = '/default-avatar.png';
+                            e.target.src = '/guest-avatar.svg';
                           }}
                         />
                         <div className="comment-text-info">

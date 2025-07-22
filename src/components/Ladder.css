@@ -680,7 +680,8 @@
   background: white;
   border-radius: 12px;
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-  max-width: 300px;
+  max-width: 400px;
+  min-width: 350px;
   overflow: hidden;
   animation: tooltipFadeIn 0.3s ease-out;
 }
@@ -714,7 +715,7 @@
 }
 
 .tooltip-close {
-  background: none;
+  background: transparent !important;
   border: none;
   color: white;
   font-size: 18px;
@@ -727,10 +728,11 @@
   justify-content: center;
   border-radius: 50%;
   transition: background-color 0.2s ease;
+  margin-left: auto;
 }
 
 .tooltip-close:hover {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.1) !important;
 }
 
 .tooltip-body {
@@ -744,6 +746,7 @@
   margin-bottom: 8px;
   padding: 8px 0;
   border-bottom: 1px solid #f0f0f0;
+  white-space: nowrap;
 }
 
 .tooltip-item:last-child {
@@ -755,12 +758,14 @@
   font-weight: 600;
   color: #333;
   font-size: 13px;
+  flex-shrink: 0;
 }
 
 .tooltip-value {
   color: #ff6b35;
   font-weight: 600;
   font-size: 13px;
+  margin-left: 8px;
 }
 
 .tooltip-empty {

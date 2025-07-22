@@ -154,14 +154,18 @@
 .friend-card,
 .request-card,
 .user-card {
-  display: flex;
-  align-items: center;
-  padding: 16px;
-  border-radius: 12px;
-  margin-bottom: 12px;
-  background: #f8f9fa;
-  border: 1px solid #e9ecef;
-  transition: all 0.3s ease;
+  display: flex !important;
+  align-items: flex-start !important;
+  padding: 10px 12px !important;
+  border-radius: 8px !important;
+  margin-bottom: 6px !important;
+  background: #f8f9fa !important;
+  border: 1px solid #e9ecef !important;
+  transition: all 0.3s ease !important;
+  gap: 10px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  min-height: 60px !important;
 }
 
 .friend-card:hover,
@@ -173,12 +177,13 @@
 }
 
 .friend-avatar {
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  margin-right: 16px;
-  overflow: hidden;
-  flex-shrink: 0;
+  width: 40px !important;
+  height: 40px !important;
+  border-radius: 50% !important;
+  overflow: hidden !important;
+  flex-shrink: 0 !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1) !important;
+  margin-top: 2px !important;
 }
 
 .friend-avatar img {
@@ -190,11 +195,7 @@
 .avatar-placeholder {
   width: 100%;
   height: 100%;
-  background: linear-gradient(
-    135deg,
-    #81d8d0 0%,
-    #5f9ea0 100%
-  ); /* Tiffany 藍漸變 */
+  background: linear-gradient(135deg, #81d8d0 0%, #5f9ea0 100%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -203,63 +204,117 @@
   font-size: 20px;
 }
 
-.friend-info {
-  flex: 1;
+.friend-content {
+  flex: 1 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 2px !important;
+  min-width: 0 !important;
+  max-width: calc(100% - 50px) !important;
 }
 
-.friend-info h4 {
-  margin: 0 0 4px 0;
-  color: #333;
-  font-weight: 600;
+.friend-row-top {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  width: 100% !important;
 }
 
-.friend-info p {
-  margin: 0;
-  color: #666;
-  font-size: 14px;
+.friend-row-bottom {
+  display: flex !important;
+  align-items: center !important;
+  width: 100% !important;
+  margin-left: 0 !important;
 }
 
-/* 操作按鈕 */
-.friend-actions,
-.request-actions,
-.user-actions {
-  display: flex;
-  gap: 8px;
+.friend-name {
+  font-weight: 600 !important;
+  font-size: 14px !important;
+  color: #333 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  max-width: 80px !important;
+  margin: 0 !important;
+  line-height: 20px !important;
+  flex-shrink: 0 !important;
+  display: inline-block !important;
+  padding: 0 !important;
 }
 
-.btn-message,
-.btn-remove,
-.btn-accept,
-.btn-reject,
-.btn-add {
-  padding: 8px 12px;
+.friend-score {
+  font-size: 12px !important;
+  color: #333 !important;
+  font-weight: 600 !important;
+  margin: 0 !important;
+  white-space: nowrap !important;
+  line-height: 20px !important;
+  max-width: 70px !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  flex-shrink: 0 !important;
+  display: inline-block !important;
+  padding: 0 !important;
+}
+
+.friend-email {
+  font-size: 11px !important;
+  color: #888 !important;
+  margin: 0 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  max-width: 200px !important;
+  line-height: 16px !important;
+  flex-shrink: 0 !important;
+  display: block !important;
+  padding: 0 !important;
+}
+
+.friend-actions {
+  display: flex !important;
+  gap: 6px !important;
+  margin-left: auto !important;
+  flex-shrink: 0 !important;
+}
+
+.btn-challenge,
+.btn-remove {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
   border: none;
-  border-radius: 8px;
   cursor: pointer;
-  font-weight: 500;
-  transition: all 0.3s ease;
-}
-
-.btn-message {
-  background: #81d8d0; /* Tiffany 藍 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
   color: white;
+  transition: all 0.2s ease;
 }
 
-.btn-message:hover {
-  background: #5f9ea0; /* 深一點的 Tiffany 藍 */
-  transform: scale(1.05);
+.btn-challenge {
+  background: linear-gradient(135deg, #a0d2eb 0%, #e5eaf5 100%);
+  color: #4b5d67;
+}
+
+.btn-challenge:hover {
+  transform: scale(1.1);
+  box-shadow: 0 2px 8px rgba(160, 210, 235, 0.4);
 }
 
 .btn-remove {
-  background: #ff4757;
+  background: linear-gradient(135deg, #f7cac9 0%, #f7786b 100%);
   color: white;
+  font-weight: bold;
 }
 
 .btn-remove:hover {
-  background: #ff3742;
-  transform: scale(1.05);
+  transform: scale(1.1);
+  box-shadow: 0 2px 8px rgba(247, 120, 107, 0.4);
 }
 
+/* 保持其他按鈕樣式不變 */
 .btn-accept {
   background: #2ed573;
   color: white;

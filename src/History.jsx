@@ -380,6 +380,7 @@ function History() {
               </thead>
               <tbody>
                 {currentRecords.map((record, index) => {
+                  const globalIndex = startIndex + index;
                   const scores = record.scores || {};
                   const avgScore =
                     record.averageScore ||
@@ -392,7 +393,7 @@ function History() {
                     0;
 
                   return (
-                    <tr key={record.id || index}>
+                    <tr key={record.id || globalIndex}>
                       <td
                         className={`date-cell ${
                           showAllColumns ? 'mobile-hidden' : ''
@@ -446,8 +447,8 @@ function History() {
                           <input
                             type="checkbox"
                             className="history-checkbox"
-                            checked={selectedRecords.includes(index)}
-                            onChange={() => handleSelectRecord(index)}
+                            checked={selectedRecords.includes(globalIndex)}
+                            onChange={() => handleSelectRecord(globalIndex)}
                           />
                         </td>
                       )}
@@ -489,6 +490,58 @@ function History() {
                 {showAllColumns ? '顯示日期 📅' : '顯示所有指標 📊'}
               </button>
             </div>
+
+            {/* 記錄數量統計和限制提醒 - 移動到這裡 */}
+            {sortedHistory.length > 0 && (
+              <div className="history-stats">
+                <div className="stats-and-actions">
+                  <div className="record-count">
+                    <span className="count-label">📊 記錄數量：</span>
+                    <span
+                      className={`count-value ${
+                        isNearLimit ? 'near-limit' : ''
+                      } ${isAtLimit ? 'at-limit' : ''}`}
+                    >
+                      {recordCount} / {maxRecords}
+                    </span>
+                  </div>
+
+                  {/* 清理資料按鈕移到這裡，與記錄數量左右排列 */}
+                  <div className="action-buttons">
+                    <button
+                      onClick={toggleDeleteOptions}
+                      className={`toggle-delete-btn ${
+                        showDeleteOptions
+                          ? 'cancel-delete-btn'
+                          : 'edit-mode-btn'
+                      }`}
+                    >
+                      {showDeleteOptions ? '取消' : '清理資料'}
+                    </button>
+                    {showDeleteOptions && (
+                      <button
+                        onClick={handleDeleteSelected}
+                        className="toggle-delete-btn delete-selected-btn"
+                      >
+                        刪除所選
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {isNearLimit && !isAtLimit && (
+                  <div className="limit-warning">
+                    ⚠️ 記錄數量接近上限，建議清理舊記錄
+                  </div>
+                )}
+
+                {isAtLimit && (
+                  <div className="limit-error">
+                    🚫 記錄數量已達上限，無法新增記錄，請先清理舊記錄
+                  </div>
+                )}
+              </div>
+            )}
           </>
         ) : (
           <div className="no-history">
@@ -501,56 +554,6 @@ function History() {
 
       {/* 下半部：折線圖 */}
       {sortedHistory.length > 0 && renderChart()}
-
-      {/* 記錄數量統計和限制提醒 - 放在折線圖底下 */}
-      {sortedHistory.length > 0 && (
-        <div className="history-stats">
-          <div className="stats-and-actions">
-            <div className="record-count">
-              <span className="count-label">📊 記錄數量：</span>
-              <span
-                className={`count-value ${isNearLimit ? 'near-limit' : ''} ${
-                  isAtLimit ? 'at-limit' : ''
-                }`}
-              >
-                {recordCount} / {maxRecords}
-              </span>
-            </div>
-
-            {/* 清理資料按鈕移到這裡，與記錄數量左右排列 */}
-            <div className="action-buttons">
-              <button
-                onClick={toggleDeleteOptions}
-                className={`toggle-delete-btn ${
-                  showDeleteOptions ? 'cancel-delete-btn' : 'edit-mode-btn'
-                }`}
-              >
-                {showDeleteOptions ? '取消' : '清理資料'}
-              </button>
-              {showDeleteOptions && (
-                <button
-                  onClick={handleDeleteSelected}
-                  className="toggle-delete-btn delete-selected-btn"
-                >
-                  刪除所選
-                </button>
-              )}
-            </div>
-          </div>
-
-          {isNearLimit && !isAtLimit && (
-            <div className="limit-warning">
-              ⚠️ 記錄數量接近上限，建議清理舊記錄
-            </div>
-          )}
-
-          {isAtLimit && (
-            <div className="limit-error">
-              🚫 記錄數量已達上限，無法新增記錄，請先清理舊記錄
-            </div>
-          )}
-        </div>
-      )}
     </div>
   );
 }

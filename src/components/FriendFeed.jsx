@@ -93,6 +93,28 @@ const FriendFeed = () => {
 
       snapshot.forEach(doc => {
         const postData = doc.data();
+
+        // 處理留言的頭像資訊
+        if (postData.comments && postData.comments.length > 0) {
+          console.log(
+            `🔍 處理好友動態 ${doc.id} 的 ${postData.comments.length} 條留言`
+          );
+          postData.comments = postData.comments.map(comment => {
+            // 如果留言沒有 userAvatarUrl，使用預設頭像
+            if (!comment.userAvatarUrl) {
+              console.log(`📝 好友留言 ${comment.id} 缺少頭像，使用預設頭像`);
+              return {
+                ...comment,
+                userAvatarUrl: '/guest-avatar.svg',
+              };
+            }
+            console.log(
+              `✅ 好友留言 ${comment.id} 已有頭像: ${comment.userAvatarUrl}`
+            );
+            return comment;
+          });
+        }
+
         postsData.push({
           id: doc.id,
           ...postData,
@@ -100,7 +122,51 @@ const FriendFeed = () => {
       });
 
       console.log(`📊 載入到 ${postsData.length} 條動態`);
-      setPosts(postsData);
+
+      // 收集缺少頭像的 userId
+      const missingAvatarUserIds = new Set();
+      postsData.forEach(p => {
+        (p.comments || []).forEach(c => {
+          if (!c.userAvatarUrl && c.userId) {
+            missingAvatarUserIds.add(c.userId);
+          }
+        });
+      });
+
+      if (missingAvatarUserIds.size > 0) {
+        const avatarMap = {};
+        await Promise.all(
+          Array.from(missingAvatarUserIds).map(async uid => {
+            try {
+              const userDoc = await getDoc(doc(db, 'users', uid));
+              if (userDoc.exists()) {
+                const data = userDoc.data();
+                avatarMap[uid] = data.avatarUrl || '/guest-avatar.svg';
+              } else {
+                avatarMap[uid] = '/guest-avatar.svg';
+              }
+            } catch (err) {
+              console.warn(`取得用戶 ${uid} 頭像失敗`, err);
+              avatarMap[uid] = '/guest-avatar.svg';
+            }
+          })
+        );
+
+        // 填補缺少頭像的留言
+        postsData.forEach(p => {
+          (p.comments || []).forEach(c => {
+            if (!c.userAvatarUrl && c.userId === p.userId) {
+              c.userAvatarUrl = p.userAvatarUrl;
+            }
+            if (!c.userAvatarUrl && avatarMap[c.userId]) {
+              c.userAvatarUrl = avatarMap[c.userId];
+            }
+          });
+        });
+      }
+
+      // 最終更新狀態
+      setPosts([...postsData]);
 
       // 標記已載入
       hasLoadedPostsRef.current = true;
@@ -248,6 +314,10 @@ const FriendFeed = () => {
       userId: auth.currentUser.uid,
       userNickname:
         userData?.nickname || userData?.email?.split('@')[0] || '匿名用戶',
+      userAvatarUrl: (() => {
+        const isGuest = sessionStorage.getItem('guestMode') === 'true';
+        return isGuest ? '/guest-avatar.svg' : userData?.avatarUrl || '';
+      })(),
       content: commentContent.trim(),
       timestamp: new Date().toISOString(),
     };
@@ -572,11 +642,11 @@ const FriendFeed = () => {
                       <div className="comment-header">
                         <div className="comment-user-info">
                           <img
-                            src="/default-avatar.png"
+                            src={comment.userAvatarUrl || '/guest-avatar.svg'}
                             alt="頭像"
                             className="comment-avatar"
                             onError={e => {
-                              e.target.src = '/default-avatar.png';
+                              e.target.src = '/guest-avatar.svg';
                             }}
                           />
                           <div className="comment-text-info">
