@@ -1,5 +1,5 @@
 // Service Worker for PWA
-const CACHE_NAME = 'fitness-app-v1.0.0';
+const CACHE_NAME = 'fitness-app-v1.0.1';
 const urlsToCache = [
   '/',
   '/index.html',
@@ -22,7 +22,29 @@ self.addEventListener('install', event => {
 self.addEventListener('fetch', event => {
   event.respondWith(
     caches.match(event.request).then(response => {
-      // 如果找到快取版本，返回快取
+      // 開發模式：優先從網路獲取最新版本
+      if (
+        event.request.url.includes('localhost') ||
+        event.request.url.includes('127.0.0.1')
+      ) {
+        return fetch(event.request)
+          .then(fetchResponse => {
+            // 更新緩存
+            if (fetchResponse && fetchResponse.status === 200) {
+              const responseToCache = fetchResponse.clone();
+              caches.open(CACHE_NAME).then(cache => {
+                cache.put(event.request, responseToCache);
+              });
+            }
+            return fetchResponse;
+          })
+          .catch(() => {
+            // 如果網路請求失敗，返回緩存版本
+            return response;
+          });
+      }
+
+      // 生產模式：優先使用緩存
       if (response) {
         return response;
       }

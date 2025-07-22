@@ -5,6 +5,7 @@ const PWAInstallPrompt = () => {
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [showInstallPrompt, setShowInstallPrompt] = useState(false);
   const [isInstalled, setIsInstalled] = useState(false);
+  const [updateAvailable, setUpdateAvailable] = useState(false);
 
   useEffect(() => {
     // 檢查是否已經安裝
@@ -42,6 +43,19 @@ const PWAInstallPrompt = () => {
         .register('/sw.js')
         .then(registration => {
           console.log('Service Worker註冊成功:', registration);
+
+          // 監聽更新
+          registration.addEventListener('updatefound', () => {
+            const newWorker = registration.installing;
+            newWorker.addEventListener('statechange', () => {
+              if (
+                newWorker.state === 'installed' &&
+                navigator.serviceWorker.controller
+              ) {
+                setUpdateAvailable(true);
+              }
+            });
+          });
         })
         .catch(error => {
           console.log('Service Worker註冊失敗:', error);
@@ -86,6 +100,39 @@ const PWAInstallPrompt = () => {
     setShowInstallPrompt(false);
     setDeferredPrompt(null);
   };
+
+  const handleUpdate = () => {
+    window.location.reload();
+  };
+
+  // 顯示更新提示
+  if (updateAvailable) {
+    return (
+      <div className="pwa-install-prompt">
+        <div className="pwa-install-prompt__content">
+          <div className="pwa-install-prompt__icon">🔄</div>
+          <div className="pwa-install-prompt__text">
+            <h3>有新版本可用</h3>
+            <p>點擊更新以獲取最新功能</p>
+          </div>
+          <div className="pwa-install-prompt__actions">
+            <button
+              className="pwa-install-prompt__btn pwa-install-prompt__btn--primary"
+              onClick={handleUpdate}
+            >
+              立即更新
+            </button>
+            <button
+              className="pwa-install-prompt__btn pwa-install-prompt__btn--dismiss"
+              onClick={() => setUpdateAvailable(false)}
+            >
+              稍後再說
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   // 如果已安裝或沒有提示，不顯示
   if (isInstalled || !showInstallPrompt) {
