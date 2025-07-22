@@ -6,6 +6,7 @@ import {
   query,
   where,
   getDocs,
+  getDoc,
   doc,
   updateDoc,
   addDoc,
@@ -271,6 +272,9 @@ const Friends = () => {
   // 載入好友邀請
   const loadFriendRequests = useCallback(async () => {
     try {
+      console.log('🔍 開始載入好友邀請...');
+      console.log('當前用戶ID:', auth.currentUser.uid);
+
       const requestsQuery = query(
         collection(db, 'friendInvitations'),
         where('toUserId', '==', auth.currentUser.uid),
@@ -278,35 +282,60 @@ const Friends = () => {
       );
 
       const requestsSnapshot = await getDocs(requestsQuery);
+      console.log('📋 找到邀請數量:', requestsSnapshot.docs.length);
       const requests = [];
 
       for (const doc of requestsSnapshot.docs) {
         const requestData = doc.data();
-        const senderDoc = await getDocs(
-          query(
-            collection(db, 'users'),
-            where('userId', '==', requestData.fromUserId)
-          )
-        );
 
-        if (!senderDoc.empty) {
-          const senderData = senderDoc.docs[0].data();
+        try {
+          // 直接使用 doc() 查詢發送者資料，而不是使用 where 查詢
+          const senderDocRef = doc(db, 'users', requestData.fromUserId);
+          const senderDocSnap = await getDoc(senderDocRef);
+
+          if (senderDocSnap.exists()) {
+            const senderData = senderDocSnap.data();
+            requests.push({
+              id: doc.id,
+              fromUserId: requestData.fromUserId,
+              senderName:
+                senderData.nickname ||
+                senderData.email?.split('@')[0] ||
+                '匿名用戶',
+              senderAvatar: senderData.avatarUrl || '',
+              createdAt: requestData.createdAt,
+            });
+          } else {
+            console.warn(`找不到發送者資料: ${requestData.fromUserId}`);
+            // 即使找不到發送者資料，也顯示邀請
+            requests.push({
+              id: doc.id,
+              fromUserId: requestData.fromUserId,
+              senderName: '未知用戶',
+              senderAvatar: '',
+              createdAt: requestData.createdAt,
+            });
+          }
+        } catch (error) {
+          console.error(
+            `載入發送者 ${requestData.fromUserId} 資料失敗:`,
+            error
+          );
+          // 錯誤時也顯示邀請
           requests.push({
             id: doc.id,
             fromUserId: requestData.fromUserId,
-            senderName:
-              senderData.nickname ||
-              senderData.email?.split('@')[0] ||
-              '匿名用戶',
-            senderAvatar: senderData.avatarUrl || '',
+            senderName: '未知用戶',
+            senderAvatar: '',
             createdAt: requestData.createdAt,
           });
         }
       }
 
+      console.log('✅ 載入完成，邀請列表:', requests);
       setFriendRequests(requests);
     } catch (error) {
-      console.error('載入好友邀請失敗:', error);
+      console.error('❌ 載入好友邀請失敗:', error);
       setError('載入好友邀請失敗');
     }
   }, []);
@@ -498,6 +527,9 @@ const Friends = () => {
   // 發送好友邀請
   const sendFriendRequest = async toUserId => {
     try {
+      console.log('📤 開始發送好友邀請...');
+      console.log('發送者ID:', auth.currentUser.uid);
+      console.log('接收者ID:', toUserId);
       setLoading(true);
 
       // 檢查是否已經發送過邀請
@@ -516,16 +548,23 @@ const Friends = () => {
       }
 
       // 發送邀請
-      const docRef = await addDoc(collection(db, 'friendInvitations'), {
+      const invitationData = {
         fromUserId: auth.currentUser.uid,
         toUserId: toUserId,
         status: 'pending',
         createdAt: new Date().toISOString(),
-      });
+      };
+
+      console.log('📝 邀請資料:', invitationData);
+      const docRef = await addDoc(
+        collection(db, 'friendInvitations'),
+        invitationData
+      );
 
       // 記錄寫入操作
       firebaseWriteMonitor.logWrite('addDoc', 'friendInvitations', docRef.id);
 
+      console.log('✅ 邀請已發送，文檔ID:', docRef.id);
       setSuccess('好友邀請已發送');
 
       // 更新搜尋結果狀態
@@ -534,6 +573,12 @@ const Friends = () => {
           user.id === toUserId ? { ...user, hasPendingRequest: true } : user
         )
       );
+
+      // 延遲重新載入邀請列表，確保資料已寫入
+      setTimeout(() => {
+        console.log('🔄 重新載入邀請列表...');
+        loadFriendRequests();
+      }, 1000);
     } catch (error) {
       console.error('發送好友邀請失敗:', error);
       setError('發送邀請失敗');
@@ -952,6 +997,24 @@ const Friends = () => {
   // 渲染好友邀請標籤頁
   const renderRequestsTab = () => (
     <div className="friend-requests">
+      <div style={{ marginBottom: '10px', textAlign: 'right' }}>
+        <button
+          onClick={() => {
+            console.log('🔄 手動重新載入邀請...');
+            loadFriendRequests();
+          }}
+          style={{
+            padding: '4px 8px',
+            fontSize: '12px',
+            background: '#f0f0f0',
+            border: '1px solid #ddd',
+            borderRadius: '4px',
+            cursor: 'pointer',
+          }}
+        >
+          🔄 重新載入
+        </button>
+      </div>
       {friendRequests.length === 0 ? (
         <div className="empty-state">
           <p>沒有待處理的好友邀請</p>
@@ -1454,7 +1517,10 @@ const Friends = () => {
             className={`tab-btn ${activeTab === 'requests' ? 'active' : ''}`}
             onClick={() => setActiveTab('requests')}
           >
-            <span className="tab-label">邀請通知</span>
+            <span className="tab-label">
+              邀請通知{' '}
+              {friendRequests.length > 0 && `(${friendRequests.length})`}
+            </span>
             {friendRequests.length > 0 && (
               <span className="notification-badge">
                 {friendRequests.length}
