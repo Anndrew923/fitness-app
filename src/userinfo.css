@@ -125,10 +125,8 @@
   gap: 8px;
 }
 
-/* 登出按鈕 - 強制覆蓋 */
-.section-header .logout-btn,
-.user-form .logout-btn,
-.form-card .logout-btn {
+/* 登出按鈕 - BEM命名 */
+.user-info__logout-btn {
   position: absolute !important;
   right: 0 !important;
   top: 50% !important;
@@ -151,16 +149,12 @@
   z-index: 10 !important;
 }
 
-.section-header .logout-btn:hover,
-.user-form .logout-btn:hover,
-.form-card .logout-btn:hover {
+.user-info__logout-btn:hover {
   transform: scale(1.1) !important;
   box-shadow: 0 6px 16px rgba(255, 111, 97, 0.4) !important;
 }
 
-.section-header .logout-icon,
-.user-form .logout-icon,
-.form-card .logout-icon {
+.user-info__logout-icon {
   font-size: 14px !important;
   font-weight: bold !important;
 }
@@ -915,17 +909,13 @@
     padding-right: 6px;
   }
 
-  .section-header .logout-btn,
-  .user-form .logout-btn,
-  .form-card .logout-btn {
+  .user-info__logout-btn {
     width: 28px !important;
     height: 28px !important;
     margin-left: auto !important;
   }
 
-  .section-header .logout-icon,
-  .user-form .logout-icon,
-  .form-card .logout-icon {
+  .user-info__logout-icon {
     font-size: 12px !important;
   }
 

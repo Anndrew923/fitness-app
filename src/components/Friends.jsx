@@ -973,8 +973,8 @@ const Friends = () => {
           </div>
         ) : (
           friendsList.map(friend => (
-            <div key={friend.id} className="friend-card">
-              <div className="friend-avatar">
+            <div key={friend.id} className="friends-list__friend-card">
+              <div className="friends-list__friend-avatar">
                 {friend.avatarUrl && friend.avatarUrl.trim() !== '' ? (
                   <img
                     src={friend.avatarUrl}
@@ -985,19 +985,23 @@ const Friends = () => {
                     }}
                   />
                 ) : (
-                  <div className="avatar-placeholder">
+                  <div className="friends-list__avatar-placeholder">
                     {friend.nickname?.charAt(0).toUpperCase() || '?'}
                   </div>
                 )}
               </div>
-              <div className="friend-info">
-                <div className="friend-name">{friend.nickname}</div>
-                <div className="friend-score">{friend.ladderScore}分</div>
-                <div className="friend-email">{friend.email}</div>
+              <div className="friends-list__friend-info">
+                <div className="friends-list__friend-name">
+                  {friend.nickname}
+                </div>
+                <div className="friends-list__friend-score">
+                  {friend.ladderScore}分
+                </div>
+                <div className="friends-list__friend-email">{friend.email}</div>
               </div>
-              <div className="friend-actions">
+              <div className="friends-list__friend-actions">
                 <button
-                  className="btn-challenge"
+                  className="friends-list__btn-challenge"
                   onClick={() => {
                     setSelectedFriend(friend);
                     setActiveTab('challenges');
@@ -1007,7 +1011,7 @@ const Friends = () => {
                   🏆
                 </button>
                 <button
-                  className="btn-remove"
+                  className="friends-list__btn-remove"
                   onClick={() => removeFriend(friend.id)}
                 >
                   ×
@@ -1095,8 +1099,8 @@ const Friends = () => {
         </div>
       ) : (
         friendRequests.map(request => (
-          <div key={request.id} className="request-card">
-            <div className="friend-avatar">
+          <div key={request.id} className="friends-list__request-card">
+            <div className="friends-list__friend-avatar">
               {request.senderAvatar && request.senderAvatar.trim() !== '' ? (
                 <img
                   src={request.senderAvatar}
@@ -1107,18 +1111,20 @@ const Friends = () => {
                   }}
                 />
               ) : (
-                <div className="avatar-placeholder">
+                <div className="friends-list__avatar-placeholder">
                   {request.senderName?.charAt(0).toUpperCase() || '?'}
                 </div>
               )}
             </div>
-            <div className="friend-info">
-              <div className="friend-name">{request.senderName}</div>
-              <div className="friend-email">想要加您為好友</div>
+            <div className="friends-list__friend-info">
+              <div className="friends-list__friend-name">
+                {request.senderName}
+              </div>
+              <div className="friends-list__friend-email">想要加您為好友</div>
             </div>
-            <div className="friend-actions">
+            <div className="friends-list__friend-actions">
               <button
-                className="btn-accept"
+                className="friends-list__btn-accept"
                 onClick={() =>
                   acceptFriendRequest(request.id, request.fromUserId)
                 }
@@ -1126,7 +1132,7 @@ const Friends = () => {
                 接受
               </button>
               <button
-                className="btn-reject"
+                className="friends-list__btn-reject"
                 onClick={() => rejectFriendRequest(request.id)}
               >
                 拒絕
@@ -1176,8 +1182,8 @@ const Friends = () => {
           </div>
         ) : (
           searchResults.map(user => (
-            <div key={user.id} className="user-card">
-              <div className="friend-avatar">
+            <div key={user.id} className="friends-list__user-card">
+              <div className="friends-list__friend-avatar">
                 {user.avatarUrl && user.avatarUrl.trim() !== '' ? (
                   <img
                     src={user.avatarUrl}
@@ -1188,24 +1194,26 @@ const Friends = () => {
                     }}
                   />
                 ) : (
-                  <div className="avatar-placeholder">
+                  <div className="friends-list__avatar-placeholder">
                     {user.nickname?.charAt(0).toUpperCase() || '?'}
                   </div>
                 )}
               </div>
-              <div className="friend-info">
-                <div className="friend-name">{user.nickname}</div>
-                <div className="friend-score">{user.ladderScore}分</div>
-                <div className="friend-email">{user.email}</div>
+              <div className="friends-list__friend-info">
+                <div className="friends-list__friend-name">{user.nickname}</div>
+                <div className="friends-list__friend-score">
+                  {user.ladderScore}分
+                </div>
+                <div className="friends-list__friend-email">{user.email}</div>
               </div>
-              <div className="friend-actions">
+              <div className="friends-list__friend-actions">
                 {user.isFriend ? (
                   <span className="status-badge">已是好友</span>
                 ) : user.hasPendingRequest ? (
                   <span className="status-badge">邀請已發送</span>
                 ) : (
                   <button
-                    className="btn-add"
+                    className="friends-list__btn-add"
                     onClick={() => sendFriendRequest(user.id)}
                     disabled={loading}
                   >

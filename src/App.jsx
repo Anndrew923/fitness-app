@@ -28,6 +28,7 @@ import Ladder from './components/Ladder';
 import Community from './components/Community';
 import FriendFeed from './components/FriendFeed';
 import GlobalAdBanner from './components/GlobalAdBanner';
+import PWAInstallPrompt from './components/PWAInstallPrompt';
 import './App.css';
 
 class ErrorBoundary extends Component {
@@ -312,6 +313,7 @@ function AppContent() {
       {/* 在天梯頁面隱藏廣告，保持頁面乾淨 */}
       {location.pathname !== '/ladder' && <GlobalAdBanner />}
       {showNavBar && <BottomNavBar />}
+      <PWAInstallPrompt />
     </div>
   );
 }

@@ -151,9 +151,9 @@
 }
 
 /* 統一卡片樣式 - 適用於好友列表、邀請通知、搜尋結果 */
-.friend-card,
-.request-card,
-.user-card {
+.friends-list__friend-card,
+.friends-list__request-card,
+.friends-list__user-card {
   display: flex !important;
   align-items: center !important;
   padding: 10px 16px !important;
@@ -166,7 +166,7 @@
   box-sizing: border-box !important;
 }
 
-.friend-avatar {
+.friends-list__friend-avatar {
   width: 40px !important;
   height: 40px !important;
   border-radius: 50% !important;
@@ -178,14 +178,14 @@
   justify-content: center !important;
 }
 
-.friend-avatar img {
+.friends-list__friend-avatar img {
   width: 100% !important;
   height: 100% !important;
   object-fit: cover !important;
   border-radius: 50% !important;
 }
 
-.avatar-placeholder {
+.friends-list__avatar-placeholder {
   width: 100% !important;
   height: 100% !important;
   display: flex !important;
@@ -198,7 +198,7 @@
   border-radius: 50% !important;
 }
 
-.friend-info {
+.friends-list__friend-info {
   flex: 1 !important;
   display: flex !important;
   align-items: center !important;
@@ -206,7 +206,7 @@
   min-width: 0 !important;
 }
 
-.friend-name {
+.friends-list__friend-name {
   font-weight: 600 !important;
   font-size: 16px !important;
   color: #333 !important;
@@ -220,7 +220,7 @@
   line-height: 1.2 !important;
 }
 
-.friend-score {
+.friends-list__friend-score {
   font-size: 14px !important;
   color: #4b5d67 !important;
   font-weight: 600 !important;
@@ -234,7 +234,7 @@
   line-height: 1.2 !important;
 }
 
-.friend-email {
+.friends-list__friend-email {
   font-size: 12px !important;
   color: #888 !important;
   white-space: nowrap !important;
@@ -247,7 +247,7 @@
   line-height: 1.2 !important;
 }
 
-.friend-actions {
+.friends-list__friend-actions {
   display: flex !important;
   gap: 8px !important;
   margin-left: 12px !important;
@@ -255,11 +255,11 @@
 }
 
 /* 按鈕樣式 */
-.btn-challenge,
-.btn-remove,
-.btn-accept,
-.btn-reject,
-.btn-add {
+.friends-list__btn-challenge,
+.friends-list__btn-remove,
+.friends-list__btn-accept,
+.friends-list__btn-reject,
+.friends-list__btn-add {
   min-width: 36px !important;
   height: 36px !important;
   border-radius: 8px !important;
@@ -274,58 +274,58 @@
   padding: 0 12px !important;
 }
 
-.btn-challenge {
+.friends-list__btn-challenge {
   background: linear-gradient(135deg, #a0d2eb 0%, #e5eaf5 100%) !important;
   color: #4b5d67 !important;
 }
 
-.btn-challenge:hover {
+.friends-list__btn-challenge:hover {
   transform: scale(1.1) !important;
   box-shadow: 0 2px 8px rgba(160, 210, 235, 0.4) !important;
 }
 
-.btn-remove {
+.friends-list__btn-remove {
   background: linear-gradient(135deg, #f7cac9 0%, #f7786b 100%) !important;
   color: white !important;
   font-weight: bold !important;
 }
 
-.btn-remove:hover {
+.friends-list__btn-remove:hover {
   transform: scale(1.1) !important;
   box-shadow: 0 2px 8px rgba(247, 120, 107, 0.4) !important;
 }
 
-.btn-accept {
+.friends-list__btn-accept {
   background: linear-gradient(135deg, #a8e6cf 0%, #7fcdcd 100%) !important;
   color: white !important;
 }
 
-.btn-accept:hover {
+.friends-list__btn-accept:hover {
   transform: scale(1.1) !important;
   box-shadow: 0 2px 8px rgba(168, 230, 207, 0.4) !important;
 }
 
-.btn-reject {
+.friends-list__btn-reject {
   background: linear-gradient(135deg, #ffb3ba 0%, #ff8a80 100%) !important;
   color: white !important;
 }
 
-.btn-reject:hover {
+.friends-list__btn-reject:hover {
   transform: scale(1.1) !important;
   box-shadow: 0 2px 8px rgba(255, 179, 186, 0.4) !important;
 }
 
-.btn-add {
+.friends-list__btn-add {
   background: linear-gradient(135deg, #a0d2eb 0%, #e5eaf5 100%) !important;
   color: #4b5d67 !important;
 }
 
-.btn-add:hover {
+.friends-list__btn-add:hover {
   transform: scale(1.1) !important;
   box-shadow: 0 2px 8px rgba(160, 210, 235, 0.4) !important;
 }
 
-.btn-add:disabled {
+.friends-list__btn-add:disabled {
   background: #ccc;
   cursor: not-allowed;
   transform: none;
@@ -342,25 +342,25 @@
 }
 
 /* 強制覆蓋全域樣式 */
-.friend-card *,
-.request-card *,
-.user-card * {
+.friends-list__friend-card *,
+.friends-list__request-card *,
+.friends-list__user-card * {
   margin: 0 !important;
   padding: 0 !important;
   box-sizing: border-box !important;
 }
 
-.friend-card p,
-.request-card p,
-.user-card p {
+.friends-list__friend-card p,
+.friends-list__request-card p,
+.friends-list__user-card p {
   margin: 0 !important;
   padding: 0 !important;
   display: inline !important;
 }
 
-.friend-card h4,
-.request-card h4,
-.user-card h4 {
+.friends-list__friend-card h4,
+.friends-list__request-card h4,
+.friends-list__user-card h4 {
   margin: 0 !important;
   padding: 0 !important;
   display: inline !important;
@@ -792,13 +792,13 @@
     flex: 1;
   }
 
-  .friend-card,
-  .request-card,
-  .user-card {
+  .friends-list__friend-card,
+  .friends-list__request-card,
+  .friends-list__user-card {
     padding: 12px;
   }
 
-  .friend-avatar {
+  .friends-list__friend-avatar {
     width: 40px;
     height: 40px;
     margin-right: 12px;
@@ -886,9 +886,9 @@
   }
 }
 
-.friend-card,
-.request-card,
-.user-card,
+.friends-list__friend-card,
+.friends-list__request-card,
+.friends-list__user-card,
 .message {
   animation: fadeIn 0.3s ease-out;
 }

@@ -1,364 +1,188 @@
-/* 在你的 styles.css 中添加或更新以下樣式 */
+/* CSS 變數系統 - 統一管理所有樣式變數 */
+:root {
+  /* 顏色系統 */
+  --color-primary: #ff6f61;
+  --color-primary-light: #ff8a80;
+  --color-secondary: #81d8d0;
+  --color-secondary-light: #5f9ea0;
+  --color-success: #2ed573;
+  --color-warning: #ffa502;
+  --color-error: #ff4757;
+  --color-info: #3742fa;
 
-/* 天梯隱私設置樣式 */
-.ladder-privacy-section {
-  background: #f8f9fa;
-  border: 1px solid #e9ecef;
-  border-radius: 12px;
-  padding: 20px;
-  margin: 20px 0;
+  /* 中性色 */
+  --color-white: #ffffff;
+  --color-black: #000000;
+  --color-gray-50: #f8f9fa;
+  --color-gray-100: #e9ecef;
+  --color-gray-200: #dee2e6;
+  --color-gray-300: #ced4da;
+  --color-gray-400: #adb5bd;
+  --color-gray-500: #6c757d;
+  --color-gray-600: #495057;
+  --color-gray-700: #343a40;
+  --color-gray-800: #212529;
+  --color-gray-900: #1a1a1a;
+
+  /* 尺寸系統 */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+  --spacing-2xl: 48px;
+
+  /* 字體系統 */
+  --font-size-xs: 12px;
+  --font-size-sm: 14px;
+  --font-size-md: 16px;
+  --font-size-lg: 18px;
+  --font-size-xl: 20px;
+  --font-size-2xl: 24px;
+  --font-size-3xl: 28px;
+
+  /* 字重 */
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  /* 圓角 */
+  --border-radius-sm: 4px;
+  --border-radius-md: 8px;
+  --border-radius-lg: 12px;
+  --border-radius-xl: 16px;
+  --border-radius-full: 50%;
+
+  /* 陰影 */
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.15);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.2);
+  --shadow-xl: 0 12px 32px rgba(0, 0, 0, 0.25);
+
+  /* 過渡 */
+  --transition-fast: 0.15s ease;
+  --transition-normal: 0.3s ease;
+  --transition-slow: 0.5s ease;
+
+  /* Z-index 層級 */
+  --z-dropdown: 1000;
+  --z-sticky: 1020;
+  --z-fixed: 1030;
+  --z-modal-backdrop: 1040;
+  --z-modal: 1050;
+  --z-popover: 1060;
+  --z-tooltip: 1070;
 }
 
-.ladder-privacy-section h3 {
-  margin: 0 0 16px 0;
-  color: #333;
-  font-size: 18px;
-  font-weight: 600;
+/* 組件命名空間 - 避免衝突 */
+.user-info {
+  /* UserInfo組件命名空間 */
 }
 
-.privacy-options {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  margin-bottom: 16px;
+.friends-list {
+  /* Friends組件命名空間 */
 }
 
-.privacy-option {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  cursor: pointer;
-  padding: 16px;
-  border-radius: 8px;
-  background: white;
-  border: 1px solid #e9ecef;
-  transition: all 0.2s ease;
+.community-feed {
+  /* Community組件命名空間 */
 }
 
-.privacy-option:hover {
-  background-color: rgba(102, 126, 234, 0.05);
-  border-color: #667eea;
+.ladder-system {
+  /* Ladder組件命名空間 */
 }
 
-.privacy-option input[type='checkbox'] {
-  width: 20px;
-  height: 20px;
-  accent-color: #667eea;
-  cursor: pointer;
-  margin-top: 2px;
-  flex-shrink: 0;
+.history-page {
+  /* History組件命名空間 */
 }
 
-.privacy-option-content {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
+/* 全域基礎樣式 - 最小化影響 */
+* {
+  box-sizing: border-box;
 }
 
-.privacy-option-title {
-  font-size: 16px;
-  font-weight: 600;
-  color: #333;
-  user-select: none;
-}
-
-.privacy-option-desc {
-  font-size: 14px;
-  color: #666;
-  line-height: 1.4;
-  user-select: none;
-}
-
-.privacy-note {
-  font-size: 14px;
-  color: #666;
+body {
   margin: 0;
-  padding: 12px;
-  background: rgba(102, 126, 234, 0.1);
-  border-radius: 6px;
-  border-left: 4px solid #667eea;
+  padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* 通用容器寬度限制 */
-.user-info-container {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 20px;
-}
-
-/* 儲存按鈕容器 - 與下方按鈕群組對齊 */
-.save-button-container {
-  display: flex;
-  flex-direction: row;
-  gap: 12px;
-  margin-top: 20px;
-  margin-bottom: 30px;
-  width: 100%;
-  max-width: 100%; /* 移除固定寬度，讓它與父容器一致 */
-}
-
-/* 儲存結果按鈕 - 優化樣式 */
-.save-results-btn {
-  background-color: #10b981;
-  color: white;
-  padding: 14px 20px;
-  border: none;
-  border-radius: 12px;
-  font-size: 15px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  flex: 1;
-  display: flex;
+/* 按鈕基礎樣式 - 使用變數 */
+.btn {
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 48px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.save-results-btn:hover {
-  background-color: #059669;
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.3);
-}
-
-.save-results-btn:active {
-  transform: translateY(0);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-/* 歷史紀錄按鈕 - 優化外觀設計 */
-.history-btn {
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-  color: white;
-  padding: 14px 20px;
+  padding: var(--spacing-sm) var(--spacing-md);
   border: none;
-  border-radius: 12px;
-  font-size: 16px;
-  font-weight: 600;
+  border-radius: var(--border-radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
   cursor: pointer;
-  transition: all 0.3s ease;
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 48px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  position: relative;
-  overflow: hidden;
+  transition: all var(--transition-normal);
+  text-decoration: none;
 }
 
-/* 歷史紀錄按鈕的裝飾性元素 */
-.history-btn::before {
-  content: '📊';
-  position: absolute;
-  left: 20px;
-  font-size: 20px;
-  opacity: 0.8;
+.btn:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
 }
 
-.history-btn:hover {
-  background: linear-gradient(135deg, #059669 0%, #047857 100%);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
-}
-
-.history-btn:active {
-  transform: translateY(0);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-/* 評測入口按鈕 - 保持原樣 */
-.nav-btn {
-  background-color: white !important;
-  color: #333 !important;
-  border: 1px solid #e4e6eb !important;
-  padding: 12px 20px;
-  border-radius: 8px;
-  font-size: 16px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  flex: 1;
-  min-width: 150px;
-  min-height: 48px; /* 確保高度一致 */
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
-}
-
-.nav-btn:hover {
-  background-color: #f8f9fa !important;
-  color: #333 !important;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
-}
-
-.nav-btn:active {
+.btn:active {
   transform: translateY(0);
 }
 
-/* 按鈕群組樣式 - 確保寬度一致 */
-.button-group {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  justify-content: center;
-  margin-top: 40px;
-  width: 100%; /* 確保與上方容器寬度一致 */
+/* 卡片基礎樣式 */
+.card {
+  background: var(--color-white);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-sm);
+  padding: var(--spacing-md);
+  transition: all var(--transition-normal);
 }
 
-/* 雷達圖區域 */
-.radar-section {
-  margin: 40px 0;
-  padding: 20px;
-  background-color: #f9fafb;
-  border-radius: 12px;
+.card:hover {
+  box-shadow: var(--shadow-md);
 }
 
-/* 分數區域 */
-.score-section {
-  text-align: center;
-  margin-top: 20px;
-}
-
-.average-score {
-  font-size: 24px;
-  font-weight: bold;
-  color: #1f2937;
-  margin-bottom: 8px;
-}
-
-.score-value {
-  color: #10b981;
-  font-size: 32px;
-}
-
-/* 表單樣式 */
-.input-field {
+/* 輸入框基礎樣式 */
+.input {
   width: 100%;
-  padding: 10px 12px;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  font-size: 16px;
-  transition: border-color 0.3s ease;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: 1px solid var(--color-gray-300);
+  border-radius: var(--border-radius-md);
+  font-size: var(--font-size-sm);
+  transition: border-color var(--transition-fast);
 }
 
-.input-field:focus {
+.input:focus {
   outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(255, 111, 97, 0.1);
 }
 
-/* 提交按鈕 */
-.submit-btn {
-  background-color: #3b82f6;
-  color: white;
-  padding: 10px 24px;
-  border: none;
-  border-radius: 6px;
-  font-size: 16px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.submit-btn:hover:not(:disabled) {
-  background-color: #2563eb;
-}
-
-.submit-btn:disabled {
-  background-color: #9ca3af;
-  cursor: not-allowed;
-}
-
-/* 錯誤訊息 */
-.error-message {
-  background-color: #fee2e2;
-  color: #dc2626;
-  padding: 12px;
-  border-radius: 6px;
-  margin-bottom: 16px;
-  font-size: 14px;
-}
-
-/* 用戶狀態區域 */
-.user-status {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-  padding: 12px;
-  background-color: #f3f4f6;
-  border-radius: 8px;
-}
-
-.signout-btn {
-  background-color: #ef4444;
-  color: white;
-  padding: 8px 16px;
-  border: none;
-  border-radius: 6px;
-  font-size: 14px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.signout-btn:hover {
-  background-color: #dc2626;
-}
-
-/* 響應式設計 */
+/* 響應式斷點 */
 @media (max-width: 768px) {
-  .user-info-container {
-    padding: 16px;
-  }
-
-  .save-button-container {
-    gap: 8px;
-  }
-
-  .button-group {
-    gap: 8px;
-  }
-
-  /* 平板尺寸時，評測按鈕可以 2x3 排列 */
-  .nav-btn {
-    min-width: calc(50% - 4px);
+  :root {
+    --spacing-md: 12px;
+    --spacing-lg: 20px;
+    --spacing-xl: 28px;
+    --font-size-md: 14px;
+    --font-size-lg: 16px;
+    --font-size-xl: 18px;
   }
 }
 
-/* 手機尺寸 */
 @media (max-width: 480px) {
-  .save-button-container {
-    flex-direction: column;
-  }
-
-  .save-results-btn,
-  .history-btn {
-    width: 100%;
-  }
-
-  /* 移除歷史按鈕的絕對定位圖標，改為內聯 */
-  .history-btn::before {
-    position: static;
-    margin-right: 8px;
-  }
-
-  .button-group {
-    flex-direction: column;
-  }
-
-  .nav-btn {
-    width: 100%;
-    min-width: unset;
-  }
-
-  .user-status {
-    flex-direction: column;
-    gap: 12px;
-    text-align: center;
-  }
-
-  .signout-btn {
-    width: 100%;
+  :root {
+    --spacing-md: 10px;
+    --spacing-lg: 16px;
+    --spacing-xl: 24px;
+    --font-size-md: 13px;
+    --font-size-lg: 15px;
+    --font-size-xl: 17px;
   }
 }

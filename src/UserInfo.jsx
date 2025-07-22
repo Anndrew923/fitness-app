@@ -1332,7 +1332,7 @@ function UserInfo({ testData, onLogout, clearTestData }) {
                       type="button"
                       onClick={handleLogout}
                       title="登出"
-                      className="logout-btn"
+                      className="user-info__logout-btn"
                       onMouseEnter={e => {
                         const tooltip = document.createElement('div');
                         tooltip.innerText = '登出';
@@ -1359,7 +1359,7 @@ function UserInfo({ testData, onLogout, clearTestData }) {
                         if (tooltip) tooltip.remove();
                       }}
                     >
-                      <span className="logout-icon">⎋</span>
+                      <span className="user-info__logout-icon">⎋</span>
                     </button>
                   )}
                 </div>
