@@ -547,7 +547,7 @@ function History() {
           <div className="no-history">
             <h3>📋 尚無歷史紀錄</h3>
             <p>完成評測後，您的紀錄就會出現在這裡</p>
-            <p>開始您的健身評測之旅吧！</p>
+            <p>開始您的最強肉體之旅吧！</p>
           </div>
         )}
       </div>

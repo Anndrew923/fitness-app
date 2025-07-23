@@ -33,7 +33,7 @@ const zhTW = {
 
     // 歡迎頁面
     welcome: {
-      title: '歡迎來到評測小能手',
+      title: '歡迎來到最強肉體',
       subtitle: '留下運動數據,進步多少馬上知道',
       login: '登入',
       guestMode: '立即體驗（訪客模式）',
@@ -113,7 +113,7 @@ const zhTW = {
 
     // 訪客模式
     guestMode: {
-      title: '歡迎使用健身評測',
+      title: '歡迎使用最強肉體',
       subtitle: '您可以選擇註冊帳號或直接體驗',
       startGuest: '立即體驗（訪客模式）',
       register: '註冊帳號',

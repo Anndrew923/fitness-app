@@ -407,7 +407,13 @@ const Ladder = () => {
                       onError={e => {
                         console.log('頭像載入失敗，使用預設頭像');
                         e.target.style.display = 'none';
-                        e.target.nextSibling.style.display = 'flex';
+                        const placeholder = e.target.nextSibling;
+                        if (placeholder) {
+                          placeholder.style.display = 'flex';
+                        }
+                      }}
+                      onLoad={() => {
+                        console.log('頭像載入成功');
                       }}
                     />
                   );
@@ -703,7 +709,13 @@ const Ladder = () => {
                       onError={e => {
                         console.log('頭像載入失敗，使用預設頭像');
                         e.target.style.display = 'none';
-                        e.target.nextSibling.style.display = 'flex';
+                        const placeholder = e.target.nextSibling;
+                        if (placeholder) {
+                          placeholder.style.display = 'flex';
+                        }
+                      }}
+                      onLoad={() => {
+                        console.log('頭像載入成功');
                       }}
                     />
                   ) : null}
@@ -744,11 +756,14 @@ const Ladder = () => {
                       <>
                         {getAgeGroupLabel(user.ageGroup)} •{' '}
                         {user.gender === 'male' ? '男' : '女'}
-                        {user.lastActive && (
+                        {(user.lastLadderSubmission || user.lastActive) && (
                           <>
                             <br />
                             <span className="last-update">
-                              更新於 {formatLastUpdate(user.lastActive)}
+                              更新於{' '}
+                              {formatLastUpdate(
+                                user.lastLadderSubmission || user.lastActive
+                              )}
                             </span>
                           </>
                         )}

@@ -112,6 +112,10 @@ export function UserProvider({ children }) {
           ladderScore: firebaseData.ladderScore || 0,
           // 確保天梯排名被正確讀取
           ladderRank: Number(firebaseData.ladderRank) || 0,
+          // 確保天梯提交時間被正確讀取
+          lastLadderSubmission: firebaseData.lastLadderSubmission || null,
+          // 確保最後活動時間被正確讀取
+          lastActive: firebaseData.lastActive || null,
         };
 
         if (isMountedRef.current) {
@@ -185,6 +189,10 @@ export function UserProvider({ children }) {
         ladderScore: data.ladderScore || 0,
         // 確保天梯排名被保存
         ladderRank: Number(data.ladderRank) || 0,
+        // 確保天梯提交時間被保存
+        lastLadderSubmission: data.lastLadderSubmission || null,
+        // 確保最後活動時間被保存
+        lastActive: data.lastActive || null,
       };
 
       await setDoc(userRef, dataToSave, { merge: true });

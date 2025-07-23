@@ -144,7 +144,7 @@ const PWAInstallPrompt = () => {
       <div className="pwa-install-prompt__content">
         <div className="pwa-install-prompt__icon">📱</div>
         <div className="pwa-install-prompt__text">
-          <h3>安裝健身評測小能手</h3>
+          <h3>安裝最強肉體</h3>
           <p>將應用程式安裝到主畫面，享受更快的載入速度和離線使用體驗！</p>
         </div>
         <div className="pwa-install-prompt__actions">

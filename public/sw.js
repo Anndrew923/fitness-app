@@ -50,21 +50,37 @@ self.addEventListener('fetch', event => {
       }
 
       // 否則從網路獲取
-      return fetch(event.request).then(response => {
-        // 檢查是否為有效回應
-        if (!response || response.status !== 200 || response.type !== 'basic') {
+      return fetch(event.request)
+        .catch(error => {
+          console.warn('Service Worker 網路請求失敗:', error.message);
+
+          // 對於頭像請求，提供更好的錯誤處理
+          if (event.request.url.includes('googleusercontent.com')) {
+            console.log('Google 頭像請求失敗，將使用預設頭像');
+          }
+
+          // 返回緩存版本（如果有的話）
           return response;
-        }
+        })
+        .then(response => {
+          // 檢查是否為有效回應
+          if (
+            !response ||
+            response.status !== 200 ||
+            response.type !== 'basic'
+          ) {
+            return response;
+          }
 
-        // 複製回應
-        const responseToCache = response.clone();
+          // 複製回應
+          const responseToCache = response.clone();
 
-        caches.open(CACHE_NAME).then(cache => {
-          cache.put(event.request, responseToCache);
+          caches.open(CACHE_NAME).then(cache => {
+            cache.put(event.request, responseToCache);
+          });
+
+          return response;
         });
-
-        return response;
-      });
     })
   );
 });

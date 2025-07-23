@@ -116,7 +116,7 @@ const GuestMode = ({ onComplete, onRegister }) => {
       <div className="guest-mode">
         <div className="guest-mode__container">
           <div className="guest-mode__header">
-            <h2>歡迎使用健身評測</h2>
+            <h2>歡迎使用最強肉體</h2>
             <p>您可以選擇註冊帳號或直接體驗</p>
           </div>
 

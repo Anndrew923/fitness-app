@@ -1,7 +1,7 @@
 {
-  "name": "我們一起升級",
-  "short_name": "我們一起升級",
-  "description": "看看你有多猛 - 您的健身評測工具",
+  "name": "最強肉體",
+  "short_name": "最強肉體",
+  "description": "打造最強肉體 - 成為全能戰士",
   "start_url": "/",
   "display": "standalone",
   "orientation": "portrait",
@@ -23,10 +23,14 @@
       "purpose": "any maskable"
     }
   ],
-  "categories": ["health", "fitness", "sports"],
+  "categories": [
+    "health",
+    "fitness",
+    "sports"
+  ],
   "screenshots": [
     {
-      "src": "/logo192.png",
+      "src": "/logo512.png",
       "sizes": "1280x720",
       "type": "image/png",
       "form_factor": "wide"
