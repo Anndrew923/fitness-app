@@ -36,6 +36,35 @@ const PWAInstallPrompt = () => {
       setDeferredPrompt(null);
     };
 
+    // 積極檢查更新
+    const checkForUpdates = async registration => {
+      try {
+        // 強制檢查更新
+        await registration.update();
+        console.log('主動檢查更新完成');
+      } catch (error) {
+        console.log('檢查更新失敗:', error);
+      }
+    };
+
+    // 定期檢查更新
+    const startPeriodicUpdateCheck = registration => {
+      // 每小時檢查一次更新
+      setInterval(() => {
+        checkForUpdates(registration);
+      }, 60 * 60 * 1000); // 1小時
+
+      // 頁面獲得焦點時檢查更新
+      const handleFocus = () => {
+        checkForUpdates(registration);
+      };
+      window.addEventListener('focus', handleFocus);
+
+      return () => {
+        window.removeEventListener('focus', handleFocus);
+      };
+    };
+
     // 檢查是否支援PWA
     if ('serviceWorker' in navigator && 'PushManager' in window) {
       // 註冊Service Worker
@@ -43,6 +72,12 @@ const PWAInstallPrompt = () => {
         .register('/sw.js')
         .then(registration => {
           console.log('Service Worker註冊成功:', registration);
+
+          // 立即檢查更新
+          checkForUpdates(registration);
+
+          // 開始定期檢查
+          const cleanup = startPeriodicUpdateCheck(registration);
 
           // 監聽更新
           registration.addEventListener('updatefound', () => {
@@ -52,14 +87,39 @@ const PWAInstallPrompt = () => {
                 newWorker.state === 'installed' &&
                 navigator.serviceWorker.controller
               ) {
+                console.log('檢測到新版本可用');
                 setUpdateAvailable(true);
               }
             });
           });
+
+          // 清理函數
+          return cleanup;
         })
         .catch(error => {
           console.log('Service Worker註冊失敗:', error);
         });
+
+      // 為開發者添加全局更新檢查函數
+      if (process.env.NODE_ENV === 'development') {
+        window.checkPWAUpdate = async () => {
+          if ('serviceWorker' in navigator) {
+            const registration = await navigator.serviceWorker.getRegistration();
+            if (registration) {
+              try {
+                await registration.update();
+                console.log('🔧 開發者手動檢查更新完成');
+                return true;
+              } catch (error) {
+                console.log('🔧 開發者手動檢查更新失敗:', error);
+                return false;
+              }
+            }
+          }
+          return false;
+        };
+        console.log('🔧 開發者工具：使用 window.checkPWAUpdate() 手動檢查更新');
+      }
 
       // 檢查是否已安裝
       if (!checkIfInstalled()) {
@@ -105,6 +165,21 @@ const PWAInstallPrompt = () => {
     window.location.reload();
   };
 
+  // 手動檢查更新
+  const handleManualUpdateCheck = async () => {
+    if ('serviceWorker' in navigator) {
+      const registration = await navigator.serviceWorker.getRegistration();
+      if (registration) {
+        try {
+          await registration.update();
+          console.log('手動檢查更新完成');
+        } catch (error) {
+          console.log('手動檢查更新失敗:', error);
+        }
+      }
+    }
+  };
+
   // 顯示更新提示
   if (updateAvailable) {
     return (
@@ -127,6 +202,13 @@ const PWAInstallPrompt = () => {
               onClick={() => setUpdateAvailable(false)}
             >
               稍後再說
+            </button>
+            <button
+              className="pwa-install-prompt__btn pwa-install-prompt__btn--secondary"
+              onClick={handleManualUpdateCheck}
+              style={{ fontSize: '12px', padding: '4px 8px' }}
+            >
+              檢查更新
             </button>
           </div>
         </div>
