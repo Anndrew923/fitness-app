@@ -53,11 +53,21 @@ const Community = () => {
   const hasLoadedPostsRef = useRef(false);
   const hasLoadedRequestsRef = useRef(false);
 
+  // 快取機制：避免重複載入相同的動態
+  const postsCacheRef = useRef(new Map());
+  const lastLoadTimeRef = useRef(0);
+  const CACHE_DURATION = 5 * 60 * 1000; // 5分鐘快取
+
   // 載入動態
   const loadPosts = useCallback(async () => {
     try {
-      // 檢查是否已經載入過
-      if (hasLoadedPostsRef.current) {
+      // 檢查快取是否有效
+      const now = Date.now();
+      if (
+        hasLoadedPostsRef.current &&
+        now - lastLoadTimeRef.current < CACHE_DURATION
+      ) {
+        console.log('📦 使用快取的動態數據');
         return;
       }
 
@@ -71,71 +81,148 @@ const Community = () => {
         return;
       }
 
-      // 先載入所有動態，然後在客戶端過濾
-      // 這樣可以避免 Firestore 查詢限制
-      const postsQuery = query(
-        collection(db, 'communityPosts'),
-        orderBy('timestamp', 'desc'),
-        limit(50)
-      );
-
-      const snapshot = await getDocs(postsQuery);
-      const postsData = [];
-
-      snapshot.forEach(doc => {
-        const postData = doc.data();
-
-        // 處理留言的頭像資訊
-        if (postData.comments && postData.comments.length > 0) {
-          console.log(
-            `🔍 處理動態 ${doc.id} 的 ${postData.comments.length} 條留言`
-          );
-          postData.comments = postData.comments.map(comment => {
-            // 如果留言沒有 userAvatarUrl，使用預設頭像
-            if (!comment.userAvatarUrl) {
-              console.log(`📝 留言 ${comment.id} 缺少頭像，使用預設頭像`);
-              return {
-                ...comment,
-                userAvatarUrl: '/guest-avatar.svg',
-              };
-            }
-            console.log(
-              `✅ 留言 ${comment.id} 已有頭像: ${comment.userAvatarUrl}`
-            );
-            return comment;
-          });
-        }
-
-        // 先載入所有動態，後續可以根據好友關係過濾
-        postsData.push({
-          id: doc.id,
-          ...postData,
-        });
-      });
-
-      console.log(`📊 載入到 ${postsData.length} 條動態`);
-
       // 等待好友數據載入完成
       if (!hasLoadedFriendsRef.current) {
         console.log('⏳ 等待好友數據載入完成...');
         await new Promise(resolve => setTimeout(resolve, 1000));
       }
 
-      // 根據好友關係過濾動態
+      // 獲取好友列表
       const friendIds = userData?.friends || [];
       const allowedUserIds = [currentUserId, ...friendIds].filter(Boolean);
 
+      console.log(`🔍 當前用戶ID: ${currentUserId}`);
+      console.log(`🔍 好友列表: ${friendIds.join(', ')}`);
       console.log(`🔍 允許查看的用戶: ${allowedUserIds.join(', ')}`);
+      console.log(`🔍 總共 ${allowedUserIds.length} 個用戶的動態需要載入`);
 
-      const filteredPosts = postsData.filter(post => {
-        const isAllowed = allowedUserIds.includes(post.userId);
-        if (!isAllowed) {
-          console.log(`🚫 過濾掉非好友動態: ${post.userId}`);
+      // 簡化查詢：避免複雜的複合查詢
+      const postsData = [];
+
+      // 為每個好友單獨查詢，避免 'in' 查詢的索引問題
+      for (const userId of allowedUserIds) {
+        try {
+          console.log(`🔍 查詢用戶 ${userId} 的動態`);
+
+          const postsQuery = query(
+            collection(db, 'communityPosts'),
+            where('userId', '==', userId),
+            limit(10) // 每個用戶限制數量
+          );
+
+          const snapshot = await getDocs(postsQuery);
+          console.log(`📊 用戶 ${userId} 有 ${snapshot.size} 條動態`);
+
+          snapshot.forEach(doc => {
+            const postData = doc.data();
+            console.log(
+              `📝 載入動態: ${doc.id} - ${postData.content?.substring(
+                0,
+                30
+              )}...`
+            );
+
+            // 處理留言的頭像資訊
+            if (postData.comments && postData.comments.length > 0) {
+              console.log(
+                `🔍 處理動態 ${doc.id} 的 ${postData.comments.length} 條留言`
+              );
+              postData.comments = postData.comments.map(comment => {
+                // 如果留言沒有 userAvatarUrl，使用預設頭像
+                if (!comment.userAvatarUrl) {
+                  console.log(`📝 留言 ${comment.id} 缺少頭像，使用預設頭像`);
+                  return {
+                    ...comment,
+                    userAvatarUrl: '/guest-avatar.svg',
+                  };
+                }
+                console.log(
+                  `✅ 留言 ${comment.id} 已有頭像: ${comment.userAvatarUrl}`
+                );
+                return comment;
+              });
+            }
+
+            postsData.push({
+              id: doc.id,
+              ...postData,
+            });
+          });
+        } catch (error) {
+          console.warn(`查詢用戶 ${userId} 動態失敗:`, error);
         }
-        return isAllowed;
-      });
+      }
+
+      console.log(`📊 載入到 ${postsData.length} 條動態`);
+
+      // 按時間排序
+      const filteredPosts = postsData.sort(
+        (a, b) => new Date(b.timestamp) - new Date(a.timestamp)
+      );
 
       console.log(`📊 過濾後剩餘 ${filteredPosts.length} 條動態`);
+
+      // 如果沒有動態，創建一些測試數據（僅在開發環境）
+      if (
+        filteredPosts.length === 0 &&
+        process.env.NODE_ENV === 'development'
+      ) {
+        console.log('🧪 創建測試動態數據');
+        const testPosts = [
+          {
+            id: 'test-1',
+            userId: currentUserId,
+            userNickname: userData?.nickname || '測試用戶',
+            userAvatarUrl: userData?.avatarUrl || '/default-avatar.png',
+            content: '這是我的第一條測試動態！💪',
+            type: 'status',
+            likes: [],
+            comments: [],
+            timestamp: new Date().toISOString(),
+            privacy: 'friends',
+          },
+          {
+            id: 'test-2',
+            userId: currentUserId,
+            userNickname: userData?.nickname || '測試用戶',
+            userAvatarUrl: userData?.avatarUrl || '/default-avatar.png',
+            content: '今天完成了力量訓練，感覺很棒！🏋️‍♂️',
+            type: 'status',
+            likes: [],
+            comments: [],
+            timestamp: new Date(Date.now() - 3600000).toISOString(), // 1小時前
+            privacy: 'friends',
+          },
+        ];
+
+        // 如果有好友，為好友也創建一些測試動態
+        if (allowedUserIds.length > 1) {
+          const friendIds = allowedUserIds.filter(id => id !== currentUserId);
+          friendIds.forEach((friendId, index) => {
+            testPosts.push({
+              id: `friend-test-${index}`,
+              userId: friendId,
+              userNickname: `好友${index + 1}`,
+              userAvatarUrl: '/default-avatar.png',
+              content: `這是好友${index + 1}的測試動態！🏃‍♂️`,
+              type: 'status',
+              likes: [],
+              comments: [],
+              timestamp: new Date(
+                Date.now() - (index + 1) * 7200000
+              ).toISOString(), // 每2小時一條
+              privacy: 'friends',
+            });
+          });
+        }
+
+        // 將測試數據添加到狀態中
+        setPosts([...testPosts]);
+        postsCacheRef.current.set('posts', testPosts);
+        lastLoadTimeRef.current = now;
+        hasLoadedPostsRef.current = true;
+        return;
+      }
 
       // 收集缺少頭像的 userId
       const missingAvatarUserIds = new Set();
@@ -182,6 +269,10 @@ const Community = () => {
 
       // 最終更新狀態
       setPosts([...filteredPosts]);
+
+      // 更新快取
+      postsCacheRef.current.set('posts', filteredPosts);
+      lastLoadTimeRef.current = now;
 
       // 標記已載入
       hasLoadedPostsRef.current = true;
@@ -644,6 +735,12 @@ const Community = () => {
               continue;
             }
 
+            console.log(
+              `✅ 載入好友資料: ${friendId} - ${
+                userData.nickname || userData.email
+              }`
+            );
+
             // 獲取好友的運動評分
             let averageScore = 0;
             let scoreCount = 0;
@@ -716,8 +813,16 @@ const Community = () => {
 
       setFriendsList(validFriendsData);
 
+      // 更新 userData 中的好友列表
+      const friendIdsArray = Array.from(friendIds);
+      setUserData(prev => ({
+        ...prev,
+        friends: friendIdsArray,
+      }));
+
       if (process.env.NODE_ENV === 'development') {
         console.log('好友列表載入完成:', validFriendsData);
+        console.log('更新 userData.friends:', friendIdsArray);
       }
 
       // 標記已載入
@@ -735,6 +840,31 @@ const Community = () => {
   // 載入好友邀請
   const loadFriendRequests = useCallback(async () => {
     try {
+      console.log('🔍 開始載入好友邀請...');
+      console.log('當前用戶ID:', auth.currentUser.uid);
+
+      // 先檢查所有發送給當前用戶的邀請
+      const allRequestsQuery = query(
+        collection(db, 'friendInvitations'),
+        where('toUserId', '==', auth.currentUser.uid)
+      );
+
+      const allRequestsSnapshot = await getDocs(allRequestsQuery);
+      console.log('📋 找到所有邀請數量:', allRequestsSnapshot.docs.length);
+
+      // 顯示所有邀請的詳細信息
+      allRequestsSnapshot.docs.forEach((doc, index) => {
+        const data = doc.data();
+        console.log(`邀請 ${index + 1}:`, {
+          id: doc.id,
+          fromUserId: data.fromUserId,
+          toUserId: data.toUserId,
+          status: data.status,
+          createdAt: data.createdAt,
+        });
+      });
+
+      // 只顯示pending狀態的邀請
       const requestsQuery = query(
         collection(db, 'friendInvitations'),
         where('toUserId', '==', auth.currentUser.uid),
@@ -742,6 +872,7 @@ const Community = () => {
       );
 
       const snapshot = await getDocs(requestsQuery);
+      console.log('📋 找到pending邀請數量:', snapshot.docs.length);
       const requests = [];
 
       for (const docSnapshot of snapshot.docs) {
@@ -767,6 +898,7 @@ const Community = () => {
         }
       }
 
+      console.log('✅ 載入完成，邀請列表:', requests);
       setFriendRequests(requests);
       // 標記已載入
       hasLoadedRequestsRef.current = true;
@@ -826,33 +958,83 @@ const Community = () => {
   // 發送好友邀請
   const sendFriendRequest = async toUserId => {
     try {
+      console.log('📤 開始發送好友邀請...');
+      console.log('發送者ID:', auth.currentUser.uid);
+      console.log('接收者ID:', toUserId);
       setLoading(true);
 
       // 檢查是否已經發送過邀請
       const existingQuery = query(
         collection(db, 'friendInvitations'),
         where('fromUserId', '==', auth.currentUser.uid),
-        where('toUserId', '==', toUserId)
+        where('toUserId', '==', toUserId),
+        where('status', '==', 'pending')
       );
+
       const existingSnapshot = await getDocs(existingQuery);
 
       if (!existingSnapshot.empty) {
-        setError('已經發送過好友邀請');
-        return;
+        console.log('⚠️ 發現已存在的邀請:', existingSnapshot.docs.length, '個');
+
+        // 檢查邀請是否真的存在且有效
+        const existingInvitation = existingSnapshot.docs[0];
+        const existingData = existingInvitation.data();
+        console.log('現有邀請資料:', existingData);
+
+        // 檢查邀請是否超過24小時，如果是則允許重新發送
+        const invitationTime = new Date(existingData.createdAt);
+        const now = new Date();
+        const hoursDiff = (now - invitationTime) / (1000 * 60 * 60);
+
+        if (hoursDiff > 24) {
+          console.log('📅 邀請已超過24小時，允許重新發送');
+          // 刪除舊邀請
+          await deleteDoc(doc(db, 'friendInvitations', existingInvitation.id));
+          console.log('🗑️ 已刪除舊邀請');
+        } else {
+          // 如果邀請存在但對方沒有收到，可能是資料問題，允許重新發送
+          setError('已經發送過好友邀請，請稍後再試或檢查邀請通知');
+
+          // 清除錯誤訊息，讓用戶可以重試
+          setTimeout(() => {
+            setError('');
+          }, 3000);
+
+          return;
+        }
       }
 
       // 發送邀請
-      const docRef = await addDoc(collection(db, 'friendInvitations'), {
+      const invitationData = {
         fromUserId: auth.currentUser.uid,
         toUserId: toUserId,
         status: 'pending',
         createdAt: new Date().toISOString(),
-      });
+      };
+
+      console.log('📝 邀請資料:', invitationData);
+      const docRef = await addDoc(
+        collection(db, 'friendInvitations'),
+        invitationData
+      );
 
       // 記錄寫入操作
       firebaseWriteMonitor.logWrite('addDoc', 'friendInvitations', docRef.id);
 
+      console.log('✅ 邀請已發送，文檔ID:', docRef.id);
       setSuccess('好友邀請已發送');
+
+      // 立即驗證邀請是否真的被創建
+      try {
+        const verifyDoc = await getDoc(docRef);
+        if (verifyDoc.exists()) {
+          console.log('✅ 邀請驗證成功:', verifyDoc.data());
+        } else {
+          console.error('❌ 邀請驗證失敗：文檔不存在');
+        }
+      } catch (verifyError) {
+        console.error('❌ 邀請驗證失敗:', verifyError);
+      }
 
       // 更新搜尋結果狀態
       setSearchResults(prev =>
@@ -860,6 +1042,11 @@ const Community = () => {
           user.id === toUserId ? { ...user, hasPendingRequest: true } : user
         )
       );
+
+      // 延遲重新載入邀請列表，確保資料已寫入
+      setTimeout(() => {
+        loadFriendRequests();
+      }, 1000);
     } catch (error) {
       console.error('發送好友邀請失敗:', error);
       setError('發送邀請失敗');
@@ -957,15 +1144,30 @@ const Community = () => {
 
     const friend = friendsList.find(f => f.id === friendId);
     if (friend) {
+      console.log('🔄 跳轉到好友個人版:', friendId, friend.nickname);
       // 使用 React Router 跳轉到好友的個人版（動態牆）
       navigate(`/friend-feed/${friendId}`);
     } else {
       console.error('找不到好友:', friendId);
+      console.log('當前好友列表:', friendsList);
     }
   };
 
   // 移除好友
   const removeFriend = async friendId => {
+    // 找到要移除的好友資料
+    const friendToRemove = friendsList.find(friend => friend.id === friendId);
+    const friendName = friendToRemove?.nickname || '好友';
+
+    // 顯示確認對話框
+    const isConfirmed = window.confirm(
+      `確定要移除好友「${friendName}」嗎？\n\n移除後：\n• 雙方將不再是好友關係\n• 無法查看對方的動態\n• 此操作可以重新加好友來恢復`
+    );
+
+    if (!isConfirmed) {
+      return;
+    }
+
     try {
       setLoading(true);
 
@@ -980,8 +1182,7 @@ const Community = () => {
         query(
           collection(db, 'friendInvitations'),
           where('fromUserId', 'in', [auth.currentUser.uid, friendId]),
-          where('toUserId', 'in', [auth.currentUser.uid, friendId]),
-          where('status', '==', 'accepted')
+          where('toUserId', 'in', [auth.currentUser.uid, friendId])
         )
       );
 
@@ -1002,7 +1203,7 @@ const Community = () => {
 
       setFriendsList(prev => prev.filter(friend => friend.id !== friendId));
 
-      setSuccess('已移除好友');
+      setSuccess(`已移除好友「${friendName}」`);
     } catch (error) {
       console.error('移除好友失敗:', error);
       setError(`移除好友失敗: ${error.message}`);
@@ -1115,6 +1316,8 @@ const Community = () => {
                 hasLoadedPostsRef.current = false;
                 hasLoadedFriendsRef.current = false;
                 hasLoadedRequestsRef.current = false;
+                postsCacheRef.current.clear();
+                lastLoadTimeRef.current = 0;
                 setError('');
                 loadPosts();
                 loadFriendsData();
@@ -1131,6 +1334,34 @@ const Community = () => {
               }}
             >
               重試
+            </button>
+          </div>
+        )}
+
+        {/* 手動刷新按鈕 - 只在動態牆分頁顯示 */}
+        {!error && !loading && activeTab === 'feed' && (
+          <div className="refresh-section">
+            <button
+              onClick={() => {
+                hasLoadedPostsRef.current = false;
+                hasLoadedFriendsRef.current = false;
+                postsCacheRef.current.clear();
+                lastLoadTimeRef.current = 0;
+                loadFriendsData();
+                loadPosts();
+              }}
+              style={{
+                padding: '8px 16px',
+                background: 'var(--tiffany-secondary)',
+                color: 'white',
+                border: 'none',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                fontSize: '14px',
+                marginBottom: '10px',
+              }}
+            >
+              🔄 刷新動態
             </button>
           </div>
         )}
@@ -1303,14 +1534,16 @@ const Community = () => {
                         onClick={() =>
                           acceptFriendRequest(request.id, request.fromUserId)
                         }
+                        title="接受邀請"
                       >
-                        ✅ 接受
+                        ✅
                       </button>
                       <button
                         className="btn-decline"
                         onClick={() => declineFriendRequest(request.id)}
+                        title="拒絕邀請"
                       >
-                        ❌ 拒絕
+                        ❌
                       </button>
                     </div>
                   </div>

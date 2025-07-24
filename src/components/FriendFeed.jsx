@@ -8,6 +8,7 @@ import {
   orderBy,
   limit,
   getDocs,
+  getDoc,
   addDoc,
   updateDoc,
   doc,
@@ -47,11 +48,17 @@ const FriendFeed = () => {
         return;
       }
 
+      console.log('🔄 開始載入用戶資料:', userId);
+      console.log('🔄 當前登入用戶:', auth.currentUser?.uid);
+
       const userDocRef = doc(db, 'users', userId);
+      console.log('🔄 查詢文檔路徑:', userDocRef.path);
+
       const userDoc = await getDoc(userDocRef);
 
       if (userDoc.exists()) {
         const userData = userDoc.data();
+        console.log('✅ 用戶資料:', userData);
         setFriendData({
           id: userDoc.id,
           ...userData,
@@ -61,11 +68,17 @@ const FriendFeed = () => {
           userData.nickname || userData.email
         );
       } else {
-        setError('找不到該用戶');
         console.error('❌ 找不到用戶:', userId);
+        console.error('❌ 文檔路徑:', userDocRef.path);
+        setError('找不到該用戶');
       }
     } catch (error) {
       console.error('載入好友資料失敗:', error);
+      console.error('錯誤詳情:', {
+        code: error.code,
+        message: error.message,
+        userId: userId,
+      });
       setError('載入用戶資料失敗');
     }
   }, [userId]);
@@ -80,46 +93,116 @@ const FriendFeed = () => {
       setLoading(true);
       console.log('🔄 開始載入好友動態...');
 
-      // 查詢好友的動態（限制為最近50條）
-      const postsQuery = query(
+      // 簡化查詢，避免索引問題
+      // 先查詢該用戶發布的動態（不使用 orderBy 避免索引問題）
+      const userPostsQuery = query(
         collection(db, 'communityPosts'),
         where('userId', '==', userId),
-        orderBy('timestamp', 'desc'),
         limit(50)
       );
 
-      const snapshot = await getDocs(postsQuery);
+      // 再查詢發給該用戶的動態（不使用 orderBy 避免索引問題）
+      const targetUserPostsQuery = query(
+        collection(db, 'communityPosts'),
+        where('targetUserId', '==', userId),
+        limit(50)
+      );
+
+      // 簡化查詢，避免索引問題
+      let userSnapshot, targetUserSnapshot;
+
+      try {
+        // 先嘗試查詢用戶發布的動態
+        userSnapshot = await getDocs(userPostsQuery);
+        console.log('✅ 用戶動態查詢成功');
+      } catch (queryError) {
+        console.warn('查詢用戶動態失敗，使用空結果:', queryError);
+        userSnapshot = { docs: [] };
+      }
+
+      try {
+        // 再嘗試查詢發給該用戶的動態
+        targetUserSnapshot = await getDocs(targetUserPostsQuery);
+        console.log('✅ 目標用戶動態查詢成功');
+      } catch (queryError) {
+        console.warn('查詢目標用戶動態失敗，使用空結果:', queryError);
+        targetUserSnapshot = { docs: [] };
+      }
+
       const postsData = [];
 
-      snapshot.forEach(doc => {
-        const postData = doc.data();
+      // 處理用戶發布的動態
+      if (userSnapshot && userSnapshot.docs) {
+        userSnapshot.docs.forEach(doc => {
+          const postData = doc.data();
 
-        // 處理留言的頭像資訊
-        if (postData.comments && postData.comments.length > 0) {
-          console.log(
-            `🔍 處理好友動態 ${doc.id} 的 ${postData.comments.length} 條留言`
-          );
-          postData.comments = postData.comments.map(comment => {
-            // 如果留言沒有 userAvatarUrl，使用預設頭像
-            if (!comment.userAvatarUrl) {
-              console.log(`📝 好友留言 ${comment.id} 缺少頭像，使用預設頭像`);
-              return {
-                ...comment,
-                userAvatarUrl: '/guest-avatar.svg',
-              };
-            }
+          // 處理留言的頭像資訊
+          if (postData.comments && postData.comments.length > 0) {
             console.log(
-              `✅ 好友留言 ${comment.id} 已有頭像: ${comment.userAvatarUrl}`
+              `🔍 處理好友動態 ${doc.id} 的 ${postData.comments.length} 條留言`
             );
-            return comment;
-          });
-        }
+            postData.comments = postData.comments.map(comment => {
+              // 如果留言沒有 userAvatarUrl，使用預設頭像
+              if (!comment.userAvatarUrl) {
+                console.log(`📝 好友留言 ${comment.id} 缺少頭像，使用預設頭像`);
+                return {
+                  ...comment,
+                  userAvatarUrl: '/guest-avatar.svg',
+                };
+              }
+              console.log(
+                `✅ 好友留言 ${comment.id} 已有頭像: ${comment.userAvatarUrl}`
+              );
+              return comment;
+            });
+          }
 
-        postsData.push({
-          id: doc.id,
-          ...postData,
+          postsData.push({
+            id: doc.id,
+            ...postData,
+          });
         });
-      });
+      }
+
+      // 處理發給該用戶的動態
+      if (targetUserSnapshot && targetUserSnapshot.docs) {
+        targetUserSnapshot.docs.forEach(doc => {
+          const postData = doc.data();
+          // 避免重複添加
+          if (!postsData.find(p => p.id === doc.id)) {
+            // 處理留言的頭像資訊
+            if (postData.comments && postData.comments.length > 0) {
+              console.log(
+                `🔍 處理發給好友的動態 ${doc.id} 的 ${postData.comments.length} 條留言`
+              );
+              postData.comments = postData.comments.map(comment => {
+                // 如果留言沒有 userAvatarUrl，使用預設頭像
+                if (!comment.userAvatarUrl) {
+                  console.log(
+                    `📝 發給好友的留言 ${comment.id} 缺少頭像，使用預設頭像`
+                  );
+                  return {
+                    ...comment,
+                    userAvatarUrl: '/guest-avatar.svg',
+                  };
+                }
+                console.log(
+                  `✅ 發給好友的留言 ${comment.id} 已有頭像: ${comment.userAvatarUrl}`
+                );
+                return comment;
+              });
+            }
+
+            postsData.push({
+              id: doc.id,
+              ...postData,
+            });
+          }
+        });
+      }
+
+      // 按時間排序
+      postsData.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
       console.log(`📊 載入到 ${postsData.length} 條動態`);
 
@@ -172,7 +255,8 @@ const FriendFeed = () => {
       hasLoadedPostsRef.current = true;
     } catch (error) {
       console.error('❌ 載入動態失敗:', error);
-      setError('載入動態失敗，請稍後再試');
+      // 動態載入失敗不影響整個頁面，只顯示空狀態
+      setPosts([]);
     } finally {
       setLoading(false);
     }
@@ -712,6 +796,11 @@ const FriendFeed = () => {
     }
 
     console.log('🔄 開始載入好友頁面數據...');
+    console.log('🔄 目標用戶ID:', userId);
+
+    // 重置載入狀態
+    hasLoadedPostsRef.current = false;
+
     loadFriendData();
     loadPosts();
 
@@ -720,7 +809,7 @@ const FriendFeed = () => {
       commentDebounceTimers.current.forEach(timer => clearTimeout(timer));
       commentDebounceTimers.current.clear();
     };
-  }, [loadFriendData, loadPosts]);
+  }, [loadFriendData, loadPosts, userId]);
 
   if (loading) {
     return (
@@ -750,10 +839,96 @@ const FriendFeed = () => {
   if (error && !friendData) {
     return (
       <div className="friend-feed-page">
-        <div className="error-message">{error}</div>
-        <button onClick={() => navigate('/community')} className="back-btn">
-          返回社群
-        </button>
+        <div className="friend-feed-header">
+          <button onClick={() => navigate('/community')} className="back-btn">
+            ← 返回社群
+          </button>
+          <div className="friend-info">
+            <img
+              src="/default-avatar.png"
+              alt="頭像"
+              className="friend-avatar"
+              onError={e => {
+                e.target.src = '/default-avatar.png';
+              }}
+            />
+            <div className="friend-details">
+              <h1>用戶 {userId?.substring(0, 8)}...</h1>
+              <p>無法載入用戶資料，但您仍可以留言</p>
+            </div>
+          </div>
+        </div>
+
+        {/* 狀態訊息 */}
+        <div className="alert alert-error">
+          <p>{error}</p>
+          <p>用戶資料載入失敗，但您仍可以發送留言</p>
+        </div>
+
+        {/* 發布動態區域 */}
+        <div className="post-composer">
+          <div className="composer-header">
+            <div className="user-avatar">
+              <img
+                src={(() => {
+                  const isGuest =
+                    sessionStorage.getItem('guestMode') === 'true';
+                  return isGuest
+                    ? '/guest-avatar.svg'
+                    : userData?.avatarUrl || '/default-avatar.png';
+                })()}
+                alt="頭像"
+                onError={e => {
+                  e.target.src = '/default-avatar.png';
+                }}
+              />
+            </div>
+            <div className="composer-input">
+              <textarea
+                placeholder="給用戶留言..."
+                value={newPostContent}
+                onChange={e => setNewPostContent(e.target.value)}
+                maxLength={500}
+                disabled={submitting}
+              />
+              <div className="composer-footer">
+                <span className="char-count">{newPostContent.length}/500</span>
+                <button
+                  onClick={publishPost}
+                  disabled={!newPostContent.trim() || submitting}
+                  className="publish-btn"
+                >
+                  {submitting ? '發布中...' : '發布'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* 動態列表 */}
+        <div className="posts-container">
+          {posts.length === 0 ? (
+            <div className="empty-state">
+              <p>還沒有動態</p>
+              <p>來寫下第一條留言吧！</p>
+            </div>
+          ) : (
+            posts.map(post => (
+              <PostCard
+                key={post.id}
+                post={post}
+                currentUserId={auth.currentUser?.uid}
+                onToggleLike={toggleLike}
+                onAddComment={addComment}
+                onDeleteComment={deleteComment}
+                onDeletePost={deletePost}
+                formatTime={formatTime}
+                likeProcessing={likeProcessing}
+                commentProcessing={commentProcessing}
+              />
+            ))
+          )}
+        </div>
       </div>
     );
   }

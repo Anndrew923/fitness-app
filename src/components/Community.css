@@ -986,7 +986,7 @@
 .request-actions,
 .user-actions {
   display: flex;
-  gap: 8px;
+  gap: 12px;
   align-items: center;
 }
 
@@ -1016,19 +1016,37 @@
 .btn-accept {
   background: #28a745;
   color: white;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  transition: all 0.2s ease;
 }
 
 .btn-accept:hover {
   background: #218838;
+  transform: scale(1.1);
 }
 
 .btn-decline {
   background: #6c757d;
   color: white;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  transition: all 0.2s ease;
 }
 
 .btn-decline:hover {
   background: #5a6268;
+  transform: scale(1.1);
 }
 
 .btn-add {
