@@ -179,10 +179,11 @@ function Power({ onComplete, clearTestData }) {
         ladderScore: userData.ladderScore || 0,
       });
 
-      if (!isGuest) {
-        const success = await saveUserData(updatedUserData);
-        if (!success) throw new Error('保存數據失敗');
-      }
+      // 移除重複的 saveUserData 調用，讓 UserContext 的防抖機制處理
+      // if (!isGuest) {
+      //   const success = await saveUserData(updatedUserData);
+      //   if (!success) throw new Error('保存數據失敗');
+      // }
 
       // 準備測試數據
       const testData = {

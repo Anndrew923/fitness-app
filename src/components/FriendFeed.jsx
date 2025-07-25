@@ -426,7 +426,7 @@ const FriendFeed = () => {
       clearTimeout(commentDebounceTimers.current.get(postId));
     }
 
-    // 設置新的防抖計時器（500ms）
+    // 設置新的防抖計時器（1秒）
     const timer = setTimeout(async () => {
       try {
         // 找到對應的動態

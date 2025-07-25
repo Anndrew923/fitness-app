@@ -281,38 +281,30 @@ export function UserProvider({ children }) {
             lastWriteCountResetTimeRef.current = now;
           }
 
-          // 根據寫入頻率動態調整防抖時間
-          let debounceTime = isOnlyNicknameChange ? 2000 : 30000;
+          // 簡化防抖邏輯：使用固定的防抖時間
+          const debounceTime = isOnlyNicknameChange ? 3000 : 15000; // 暱稱3秒，其他15秒
 
-          if (writeCountRef.current > 10) {
-            // 如果寫入次數過多，增加防抖時間
-            debounceTime = isOnlyNicknameChange ? 5000 : 60000;
-          } else if (writeCountRef.current > 5) {
-            // 中等寫入頻率
-            debounceTime = isOnlyNicknameChange ? 3000 : 45000;
-          }
-
-          // 檢查寫入頻率限制（至少間隔60秒）
-          if (timeSinceLastWrite < 60000) {
-            // 如果距離上次寫入不到60秒，延長防抖時間
+          // 檢查寫入頻率限制（至少間隔30秒）
+          if (timeSinceLastWrite < 30000) {
+            // 如果距離上次寫入不到30秒，延長防抖時間
             if (setUserDataDebounceRef.current) {
               clearTimeout(setUserDataDebounceRef.current);
             }
 
             setUserDataDebounceRef.current = setTimeout(() => {
-              console.log(`🔄 防抖後保存用戶數據（60秒頻率限制）`);
+              console.log(`🔄 防抖後保存用戶數據（30秒頻率限制）`);
               lastWriteTimeRef.current = Date.now();
               writeCountRef.current++;
               saveUserData(newData);
               setUserDataDebounceRef.current = null;
-            }, 60000 - timeSinceLastWrite);
+            }, 30000 - timeSinceLastWrite);
           } else {
             // 清除之前的防抖定時器
             if (setUserDataDebounceRef.current) {
               clearTimeout(setUserDataDebounceRef.current);
             }
 
-            // 使用動態防抖時間
+            // 使用簡化的防抖時間
             setUserDataDebounceRef.current = setTimeout(() => {
               console.log(
                 `🔄 防抖後保存用戶數據（${debounceTime / 1000}秒防抖，第${

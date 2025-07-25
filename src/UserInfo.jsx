@@ -408,6 +408,14 @@ function UserInfo({ testData, onLogout, clearTestData }) {
         throw error;
       }
 
+      // 強制重新載入用戶數據，確保 UserInfo 頁面顯示最新數據
+      try {
+        await loadUserData(auth.currentUser, true);
+        console.log('用戶數據已重新載入，天梯分數已更新');
+      } catch (error) {
+        console.error('重新載入用戶數據失敗:', error);
+      }
+
       // 更新提交狀態
       const now = new Date();
       setLadderSubmissionState(prev => ({
@@ -453,7 +461,7 @@ function UserInfo({ testData, onLogout, clearTestData }) {
     } finally {
       setLoading(false);
     }
-  }, [userData.scores, setUserData, loading, navigate]);
+  }, [userData.scores, setUserData, loading, navigate, loadUserData]);
 
   // 新增：取消提交
   const cancelSubmit = useCallback(() => {
@@ -666,7 +674,7 @@ function UserInfo({ testData, onLogout, clearTestData }) {
         // 如果資料為空，嘗試重新載入
         if (!userData.height && !userData.weight && !userData.age) {
           console.log('UserInfo - 資料為空，嘗試重新載入');
-          await loadUserData();
+          await loadUserData(currentUser, true);
         }
 
         setDataLoaded(true);
@@ -792,7 +800,7 @@ function UserInfo({ testData, onLogout, clearTestData }) {
             }),
           };
 
-          console.log('💾 防抖後更新測試數據分數（10秒防抖）');
+          console.log('💾 防抖後更新測試數據分數（5秒防抖）');
           return {
             ...prev,
             scores: updatedScores,
@@ -800,13 +808,11 @@ function UserInfo({ testData, onLogout, clearTestData }) {
             ladderScore: prev.ladderScore || 0,
           };
         });
-
-        // 移除 previousScores 更新，因為該狀態變量未定義
-      }, 10000); // 增加到10秒防抖
+      }, 5000); // 優化為5秒防抖
 
       // 清除 testData
       if (clearTestData) {
-        setTimeout(clearTestData, 11000); // 延長到11秒
+        setTimeout(clearTestData, 6000); // 優化為6秒
       }
 
       return () => clearTimeout(timeoutId);
@@ -956,11 +962,11 @@ function UserInfo({ testData, onLogout, clearTestData }) {
       const users = [];
 
       querySnapshot.forEach(doc => {
-        const userData = doc.data();
-        if (userData.ladderScore > 0) {
+        const docData = doc.data();
+        if (docData.ladderScore > 0) {
           users.push({
             id: doc.id,
-            ...userData,
+            ...docData,
           });
         }
       });
