@@ -3,7 +3,6 @@ import { auth, db } from '../firebase';
 import {
   signInWithPopup,
   GoogleAuthProvider,
-  FacebookAuthProvider,
 } from 'firebase/auth';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
 import PropTypes from 'prop-types';
@@ -12,26 +11,19 @@ import './SocialLogin.css';
 function SocialLogin({ onLogin, onError }) {
   const [loading, setLoading] = useState(false);
 
-  const handleSocialLogin = async (provider, providerName) => {
+  const handleGoogleLogin = async () => {
     setLoading(true);
 
     try {
-      let authProvider;
-      if (provider === 'google') {
-        authProvider = new GoogleAuthProvider();
-        authProvider.setCustomParameters({
-          prompt: 'select_account',
-        });
-      } else if (provider === 'facebook') {
-        authProvider = new FacebookAuthProvider();
-        authProvider.addScope('email');
-        authProvider.addScope('public_profile');
-      }
+      const authProvider = new GoogleAuthProvider();
+      authProvider.setCustomParameters({
+        prompt: 'select_account',
+      });
 
       const result = await signInWithPopup(auth, authProvider);
       const user = result.user;
 
-      console.log(`${providerName} 登入成功:`, user.email);
+      console.log('Google 登入成功:', user.email);
 
       // 檢查用戶是否已存在
       const userRef = doc(db, 'users', user.uid);
@@ -75,7 +67,7 @@ function SocialLogin({ onLogin, onError }) {
 
       onLogin(user.email, null); // 社交登入不需要密碼
     } catch (error) {
-      console.error(`${providerName} 登入失敗:`, error);
+      console.error('Google 登入失敗:', error);
 
       let errorMessage = '登入失敗';
       if (error.code === 'auth/popup-closed-by-user') {
@@ -106,7 +98,7 @@ function SocialLogin({ onLogin, onError }) {
         <button
           type="button"
           className="social-btn google-btn"
-          onClick={() => handleSocialLogin('google', 'Google')}
+          onClick={handleGoogleLogin}
           disabled={loading}
         >
           <svg className="google-icon" viewBox="0 0 24 24">
@@ -116,18 +108,6 @@ function SocialLogin({ onLogin, onError }) {
             <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
           </svg>
           {loading ? '處理中...' : '使用 Google 登入'}
-        </button>
-
-        <button
-          type="button"
-          className="social-btn facebook-btn"
-          onClick={() => handleSocialLogin('facebook', 'Facebook')}
-          disabled={loading}
-        >
-          <svg className="facebook-icon" viewBox="0 0 24 24">
-            <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
-          </svg>
-          {loading ? '處理中...' : '使用 Facebook 登入'}
         </button>
       </div>
     </div>

@@ -127,6 +127,40 @@
   color: #1f2937;
 }
 
+.privacy-notice {
+  margin: 1.5rem 0;
+  padding: 1rem;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+  text-align: center;
+}
+
+.privacy-notice p {
+  font-size: 0.875rem;
+  color: #6c757d;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.privacy-link {
+  background: none;
+  border: none;
+  color: #4bc0c0;
+  text-decoration: underline;
+  cursor: pointer;
+  font-size: 0.875rem;
+  padding: 0;
+  margin: 0;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.privacy-link:hover {
+  color: #3aa0a0;
+  text-decoration: none;
+}
+
 @media (min-width: 768px) {
   .login-container {
     max-width: 400px;

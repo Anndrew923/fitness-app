@@ -8,6 +8,8 @@ import {
 import { doc, setDoc } from 'firebase/firestore';
 import PropTypes from 'prop-types';
 import SocialLogin from './components/SocialLogin';
+import PrivacyPolicyModal from './components/PrivacyPolicyModal';
+import DataSecurityNotice from './components/DataSecurityNotice';
 import './Login.css';
 
 function Login({ onLogin }) {
@@ -17,6 +19,7 @@ function Login({ onLogin }) {
   const [isRegistering, setIsRegistering] = useState(false);
   const [loading, setLoading] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+  const [showPrivacyPolicy, setShowPrivacyPolicy] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -53,6 +56,10 @@ function Login({ onLogin }) {
   const handleSubmit = async e => {
     e.preventDefault();
     setError(null);
+    await performLogin();
+  };
+
+  const performLogin = async () => {
     setLoading(true);
 
     console.log(
@@ -167,6 +174,11 @@ function Login({ onLogin }) {
     setError(errorMessage);
   };
 
+  const handlePrivacyAccept = () => {
+    // 用戶已查看隱私權政策，可以記錄這個行為
+    localStorage.setItem('privacyPolicyViewed', 'true');
+  };
+
   return (
     <div className="login-container">
       <h1 className="text-2xl font-bold text-center mb-6">
@@ -243,6 +255,10 @@ function Login({ onLogin }) {
         {isRegistering ? '已有帳號？點此登入' : '沒有帳號？點此註冊'}
       </button>
 
+      <DataSecurityNotice
+        onViewPrivacyPolicy={() => setShowPrivacyPolicy(true)}
+      />
+
       <SocialLogin onLogin={handleSocialLogin} onError={handleSocialError} />
 
       <div className="instructions-container">
@@ -260,6 +276,12 @@ function Login({ onLogin }) {
           </li>
         </ul>
       </div>
+
+      <PrivacyPolicyModal
+        isOpen={showPrivacyPolicy}
+        onClose={() => setShowPrivacyPolicy(false)}
+        onAccept={handlePrivacyAccept}
+      />
     </div>
   );
 }

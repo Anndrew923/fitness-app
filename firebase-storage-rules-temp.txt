@@ -1,0 +1,24 @@
+// 🚨 臨時測試用的 Firebase Storage 規則
+// 這是為了解決頭像載入問題的臨時方案
+// 測試通過後請使用更安全的規則
+
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    // 臨時完全開放的規則 - 僅供測試使用
+    match /{allPaths=**} {
+      allow read, write: if request.auth != null;
+    }
+  }
+}
+
+// 🔥 使用步驟：
+// 1. 複製上面的規則到 Firebase Console > Storage > Rules
+// 2. 點擊「發布」
+// 3. 等待 1-2 分鐘
+// 4. 測試頭像功能
+// 5. 如果成功，再換回更安全的規則
+
+// ⚠️ 警告：
+// 這個規則允許所有已登入用戶讀寫任何檔案
+// 僅用於測試，不要在生產環境長期使用

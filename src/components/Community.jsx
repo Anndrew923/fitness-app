@@ -173,7 +173,7 @@ const Community = () => {
             id: 'test-1',
             userId: currentUserId,
             userNickname: userData?.nickname || '測試用戶',
-            userAvatarUrl: userData?.avatarUrl || '/default-avatar.png',
+            userAvatarUrl: userData?.avatarUrl || '/default-avatar.svg',
             content: '這是我的第一條測試動態！💪',
             type: 'status',
             likes: [],
@@ -185,7 +185,7 @@ const Community = () => {
             id: 'test-2',
             userId: currentUserId,
             userNickname: userData?.nickname || '測試用戶',
-            userAvatarUrl: userData?.avatarUrl || '/default-avatar.png',
+            userAvatarUrl: userData?.avatarUrl || '/default-avatar.svg',
             content: '今天完成了力量訓練，感覺很棒！🏋️‍♂️',
             type: 'status',
             likes: [],
@@ -203,7 +203,7 @@ const Community = () => {
               id: `friend-test-${index}`,
               userId: friendId,
               userNickname: `好友${index + 1}`,
-              userAvatarUrl: '/default-avatar.png',
+              userAvatarUrl: '/default-avatar.svg',
               content: `這是好友${index + 1}的測試動態！🏃‍♂️`,
               type: 'status',
               likes: [],
@@ -1378,11 +1378,11 @@ const Community = () => {
                         sessionStorage.getItem('guestMode') === 'true';
                       return isGuest
                         ? '/guest-avatar.svg'
-                        : userData?.avatarUrl || '/default-avatar.png';
+                        : userData?.avatarUrl || '/default-avatar.svg';
                     })()}
                     alt="頭像"
                     onError={e => {
-                      e.target.src = '/default-avatar.png';
+                      e.target.src = '/default-avatar.svg';
                     }}
                   />
                 </div>
@@ -1452,11 +1452,11 @@ const Community = () => {
                     <div key={friend.id || 'unknown'} className="friend-item">
                       <div className="friend-info">
                         <img
-                          src={friend.avatarUrl || '/default-avatar.png'}
+                          src={friend.avatarUrl || '/default-avatar.svg'}
                           alt="頭像"
                           className="friend-avatar"
                           onError={e => {
-                            e.target.src = '/default-avatar.png';
+                            e.target.src = '/default-avatar.svg';
                           }}
                         />
                         <div className="friend-details">
@@ -1516,11 +1516,11 @@ const Community = () => {
                   <div key={request.id} className="request-item">
                     <div className="request-info">
                       <img
-                        src={request.avatarUrl || '/default-avatar.png'}
+                        src={request.avatarUrl || '/default-avatar.svg'}
                         alt="頭像"
                         className="request-avatar"
                         onError={e => {
-                          e.target.src = '/default-avatar.png';
+                          e.target.src = '/default-avatar.svg';
                         }}
                       />
                       <div className="request-details">
@@ -1583,11 +1583,11 @@ const Community = () => {
                   <div key={user.id} className="user-item">
                     <div className="user-info">
                       <img
-                        src={user.avatarUrl || '/default-avatar.png'}
+                        src={user.avatarUrl || '/default-avatar.svg'}
                         alt="頭像"
                         className="user-avatar"
                         onError={e => {
-                          e.target.src = '/default-avatar.png';
+                          e.target.src = '/default-avatar.svg';
                         }}
                       />
                       <div className="user-details">
@@ -1653,11 +1653,11 @@ const PostCard = ({
       <div className="post-header">
         <div className="post-user">
           <img
-            src={post.userAvatarUrl || '/default-avatar.png'}
+            src={post.userAvatarUrl || '/default-avatar.svg'}
             alt="頭像"
             className="user-avatar"
             onError={e => {
-              e.target.src = '/default-avatar.png';
+              e.target.src = '/default-avatar.svg';
             }}
           />
           <div className="user-info">

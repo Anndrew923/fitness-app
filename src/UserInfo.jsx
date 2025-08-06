@@ -33,6 +33,11 @@ import {
 
 import './userinfo.css';
 
+// 開發環境下載入調試工具
+if (process.env.NODE_ENV === 'development') {
+  import('./utils/firebaseDebug');
+}
+
 const DEFAULT_SCORES = {
   strength: 0,
   explosivePower: 0,
@@ -1196,9 +1201,24 @@ function UserInfo({ testData, onLogout, clearTestData }) {
       // 上傳到 Storage
       const userId = auth.currentUser?.uid;
       if (!userId) throw new Error('未登入，無法上傳頭像');
+
+      // 添加更詳細的錯誤處理和調試信息
+      console.log('🔧 開始上傳頭像:', { userId, fileSize: compressed.size });
+
       const avatarRef = ref(storage, `avatars/${userId}/avatar.jpg`);
-      await uploadBytes(avatarRef, compressed, { contentType: 'image/jpeg' });
+      const metadata = {
+        contentType: 'image/jpeg',
+        customMetadata: {
+          'uploaded-by': userId,
+          'upload-time': new Date().toISOString(),
+        },
+      };
+
+      await uploadBytes(avatarRef, compressed, metadata);
+      console.log('✅ 頭像上傳成功');
+
       const url = await getDownloadURL(avatarRef);
+      console.log('✅ 獲取下載 URL 成功:', url);
       // 更新 Firestore - 頭像上傳需要立即保存，不使用防抖
       setUserData(prev => ({
         ...prev,
@@ -1290,10 +1310,13 @@ function UserInfo({ testData, onLogout, clearTestData }) {
             src={
               isGuest
                 ? '/guest-avatar.svg'
-                : userData?.avatarUrl || '/logo192.png'
+                : userData?.avatarUrl || '/default-avatar.svg'
             }
             alt="頭像"
             className="user-avatar"
+            onError={e => {
+              e.target.src = '/default-avatar.svg';
+            }}
           />
         </div>
 

@@ -655,11 +655,11 @@ const FriendFeed = () => {
         <div className="post-header">
           <div className="post-user">
             <img
-              src={post.userAvatarUrl || '/default-avatar.png'}
+              src={post.userAvatarUrl || '/default-avatar.svg'}
               alt="頭像"
               className="user-avatar"
               onError={e => {
-                e.target.src = '/default-avatar.png';
+                e.target.src = '/default-avatar.svg';
               }}
             />
             <div className="user-info">
@@ -845,11 +845,11 @@ const FriendFeed = () => {
           </button>
           <div className="friend-info">
             <img
-              src="/default-avatar.png"
+              src="/default-avatar.svg"
               alt="頭像"
               className="friend-avatar"
               onError={e => {
-                e.target.src = '/default-avatar.png';
+                e.target.src = '/default-avatar.svg';
               }}
             />
             <div className="friend-details">
@@ -875,11 +875,11 @@ const FriendFeed = () => {
                     sessionStorage.getItem('guestMode') === 'true';
                   return isGuest
                     ? '/guest-avatar.svg'
-                    : userData?.avatarUrl || '/default-avatar.png';
+                    : userData?.avatarUrl || '/default-avatar.svg';
                 })()}
                 alt="頭像"
                 onError={e => {
-                  e.target.src = '/default-avatar.png';
+                  e.target.src = '/default-avatar.svg';
                 }}
               />
             </div>
@@ -941,7 +941,7 @@ const FriendFeed = () => {
         </button>
         <div className="friend-info">
           <img
-            src={friendData?.avatarUrl || '/default-avatar.png'}
+            src={friendData?.avatarUrl || '/default-avatar.svg'}
             alt="頭像"
             className="friend-avatar"
             onError={e => {
@@ -968,11 +968,11 @@ const FriendFeed = () => {
                 const isGuest = sessionStorage.getItem('guestMode') === 'true';
                 return isGuest
                   ? '/guest-avatar.svg'
-                  : userData?.avatarUrl || '/default-avatar.png';
+                  : userData?.avatarUrl || '/default-avatar.svg';
               })()}
               alt="頭像"
               onError={e => {
-                e.target.src = '/default-avatar.png';
+                e.target.src = '/default-avatar.svg';
               }}
             />
           </div>

@@ -1,0 +1,37 @@
+// Firebase Storage Security Rules for 健身應用
+// 這些規則允許用戶上傳和存取自己的頭像
+
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    // 頭像存取規則 - 更寬鬆的設定以解決 412 錯誤
+    match /avatars/{userId}/{allPaths=**} {
+      // 允許任何已登入用戶讀取頭像（必要for顯示其他用戶頭像）
+      allow read: if request.auth != null;
+      
+      // 允許本人上傳和管理自己的頭像
+      allow write: if request.auth != null && request.auth.uid == userId;
+      
+      // 允許讀取頭像的元數據
+      allow get: if request.auth != null;
+    }
+    
+    // 臨時規則：如果上面的規則還有問題，可以試試這個更寬鬆的版本
+    // match /{allPaths=**} {
+    //   allow read, write: if request.auth != null;
+    // }
+  }
+}
+
+// 🚨 重要說明：
+// 1. 立即到 Firebase Console > Storage > Rules 更新這些規則
+// 2. 如果還是有問題，可以暫時使用註釋中的寬鬆規則進行測試
+// 3. 更新規則後，等待 1-2 分鐘讓改變生效
+// 4. 清除瀏覽器緩存後重新測試
+
+// 📋 檢查清單：
+// ✅ Firebase Console 中 Storage 規則已更新
+// ✅ 等待規則生效（1-2分鐘）
+// ✅ 清除瀏覽器緩存
+// ✅ 確認用戶已正確登入
+// ✅ 檢查 Storage bucket 名稱正確

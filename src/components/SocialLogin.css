@@ -88,19 +88,7 @@
   fill: #4285f4;
 }
 
-/* Facebook 按鈕樣式 */
-.facebook-btn {
-  color: #374151;
-}
 
-.facebook-btn:hover {
-  border-color: #1877f2;
-  color: #1877f2;
-}
-
-.facebook-icon {
-  fill: #1877f2;
-}
 
 /* 響應式設計 */
 @media (max-width: 480px) {
