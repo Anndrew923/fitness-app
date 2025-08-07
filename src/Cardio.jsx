@@ -5,8 +5,8 @@ import * as standards from './standards';
 import PropTypes from 'prop-types';
 import './Cardio.css';
 
-function Cardio({ onComplete, clearTestData }) {
-  const { userData, setUserData, saveUserData } = useUser();
+function Cardio({ onComplete }) {
+  const { userData, setUserData } = useUser();
   const navigate = useNavigate();
   const { age, gender } = userData;
 
@@ -24,7 +24,7 @@ function Cardio({ onComplete, clearTestData }) {
       };
       setUserData(prev => ({ ...prev, testInputs: updatedTestInputs }));
     }
-  }, [distance]);
+  }, [distance, setUserData, userData.testInputs]);
 
   const getAgeRange = age => {
     if (!age) return null;

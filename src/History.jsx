@@ -135,7 +135,7 @@ function History() {
       console.log('History.js - 當前頁面:', currentPage, '/', totalPages);
       hasLoggedRef.current = true; // 標記已經載入過
     }
-  }, [userData]); // 只在 userData 變化時執行，避免重複載入
+  }, [userData, sortedHistory, recordCount, currentPage, totalPages]); // 只在 userData 變化時執行，避免重複載入
 
   const toggleDeleteOptions = () => {
     setShowDeleteOptions(!showDeleteOptions);
@@ -177,15 +177,15 @@ function History() {
     if (!chartData) return null;
 
     // 檢測是否為手機版
-    const isMobile = window.innerWidth <= 768;
+    // const isMobile = window.innerWidth <= 768;
 
     // 固定X軸和Y軸字體大小為18px
     const axisFontSize = 18;
     const axisFontWeight = '600';
 
     // 圖例字體大小保持響應式
-    const legendFontSize = isMobile ? 12 : 14;
-    const legendFontWeight = isMobile ? '500' : '600';
+    // const legendFontSize = isMobile ? 12 : 14;
+    // const legendFontWeight = isMobile ? '500' : '600';
 
     // 獲取當前選中的數據集
     const selectedDataset = chartData.datasets.find(

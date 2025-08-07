@@ -289,6 +289,8 @@ i18n.use(initReactI18next).init({
 // 清除 localStorage 可能殘留的語言設定
 try {
   localStorage.removeItem('language');
-} catch (e) {}
+} catch {
+  // 忽略錯誤
+}
 
 export default i18n;

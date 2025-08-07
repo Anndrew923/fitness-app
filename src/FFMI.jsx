@@ -4,8 +4,8 @@ import { useUser } from './UserContext';
 import PropTypes from 'prop-types';
 import './FFMI.css';
 
-function FFMI({ onComplete, clearTestData }) {
-  const { userData, setUserData, saveUserData } = useUser();
+function FFMI({ onComplete }) {
+  const { userData, setUserData } = useUser();
   const navigate = useNavigate();
   const [bodyFat, setBodyFat] = useState(
     userData.testInputs?.ffmi?.bodyFat || ''
@@ -24,7 +24,7 @@ function FFMI({ onComplete, clearTestData }) {
       };
       setUserData(prev => ({ ...prev, testInputs: updatedTestInputs }));
     }
-  }, [bodyFat]);
+  }, [bodyFat, setUserData, userData.testInputs]);
 
   const calculateScores = () => {
     if (

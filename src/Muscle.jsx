@@ -15,8 +15,8 @@ import {
 import PropTypes from 'prop-types';
 import './Muscle.css';
 
-function Muscle({ onComplete, clearTestData }) {
-  const { userData, setUserData, saveUserData } = useUser();
+function Muscle({ onComplete }) {
+  const { userData, setUserData } = useUser();
   const navigate = useNavigate();
   const { weight, age, gender } = userData;
 
@@ -36,7 +36,7 @@ function Muscle({ onComplete, clearTestData }) {
       };
       setUserData(prev => ({ ...prev, testInputs: updatedTestInputs }));
     }
-  }, [smm]);
+  }, [smm, setUserData, userData.testInputs]);
 
   const getAgeRange = age => {
     if (!age) return null;
@@ -52,7 +52,7 @@ function Muscle({ onComplete, clearTestData }) {
     return null;
   };
 
-  const calculateScoreFromStandard = (value, standard, label) => {
+  const calculateScoreFromStandard = (value, standard) => {
     // 讓分數平滑，線性插值，允許小數點一位
     if (value >= standard[100]) return 100;
     if (value <= standard[0]) return 0;

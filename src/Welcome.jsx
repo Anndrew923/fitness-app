@@ -9,9 +9,9 @@ import LanguageSwitcher from './components/LanguageSwitcher';
 import './Welcome.css';
 import i18n from './i18n';
 
-function Welcome({ onLogin, onGuestMode }) {
+function Welcome({ onGuestMode }) {
   const navigate = useNavigate();
-  const { clearUserData, isAuthenticated, isLoading } = useUser();
+  const { isAuthenticated, isLoading } = useUser();
   const { t } = useTranslation();
   const [autoLoginAttempted, setAutoLoginAttempted] = useState(false);
 

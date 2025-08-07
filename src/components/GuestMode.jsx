@@ -4,8 +4,8 @@ import { useUser } from '../UserContext';
 import { getGuestData, saveGuestData, clearGuestData } from '../utils';
 import './GuestMode.css';
 
-const GuestMode = ({ onComplete, onRegister }) => {
-  const { userData, setUserData } = useUser();
+const GuestMode = ({ onRegister }) => {
+  const { setUserData } = useUser();
   const [isGuest, setIsGuest] = useState(false);
   const [guestData, setGuestData] = useState(null);
 
@@ -64,6 +64,7 @@ const GuestMode = ({ onComplete, onRegister }) => {
     }
   };
 
+  /*
   const handleComplete = data => {
     if (isGuest) {
       // 更新訪客資料
@@ -78,6 +79,7 @@ const GuestMode = ({ onComplete, onRegister }) => {
     }
     onComplete(data);
   };
+  */
 
   const exitGuestMode = () => {
     setIsGuest(false);

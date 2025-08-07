@@ -1,4 +1,10 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import React, {
+  useState,
+  useEffect,
+  useCallback,
+  useRef,
+  useMemo,
+} from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '../UserContext';
 import { auth, db } from '../firebase';
@@ -21,8 +27,10 @@ import {
 import firebaseWriteMonitor from '../utils/firebaseMonitor';
 
 import './Community.css';
+import PropTypes from 'prop-types';
 
 const Community = () => {
+  const navigate = useNavigate();
   const { userData, setUserData } = useUser();
   const [activeTab, setActiveTab] = useState('feed'); // 'feed', 'friends', 'requests', 'search'
   const [posts, setPosts] = useState([]);
@@ -46,7 +54,7 @@ const Community = () => {
   const commentDebounceTimers = useRef(new Map());
 
   // 批量留言操作
-  const pendingComments = useRef(new Map());
+  // const pendingComments = useRef(new Map());
 
   // 追蹤載入狀態，避免重複載入
   const hasLoadedFriendsRef = useRef(false);
@@ -58,35 +66,58 @@ const Community = () => {
   const lastLoadTimeRef = useRef(0);
   const CACHE_DURATION = 5 * 60 * 1000; // 5分鐘快取
 
-  // 載入動態
+  // 使用 useMemo 優化計算
+  const currentUserId = useMemo(() => {
+    return auth.currentUser?.uid;
+  }, [auth.currentUser?.uid]);
+
+  const allowedUserIds = useMemo(() => {
+    const friendIds = userData?.friends || [];
+    return [currentUserId, ...friendIds].filter(Boolean);
+  }, [currentUserId, userData?.friends]);
+
+  const filteredPosts = useMemo(() => {
+    if (!searchQuery.trim()) {
+      return posts;
+    }
+    return posts.filter(
+      post =>
+        post.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        post.userNickname.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [posts, searchQuery]);
+
+  // 載入動態 - 優化版本（避免複合索引問題）
   const loadPosts = useCallback(async () => {
+    if (!auth.currentUser || !userData) {
+      console.log('🚫 用戶未登入或資料未載入，跳過載入動態');
+      return;
+    }
+
+    const now = Date.now();
+
+    // 檢查快取
+    const cached = postsCacheRef.current.get('posts');
+    if (cached && now - cached.timestamp < CACHE_DURATION) {
+      console.log('📦 使用快取動態數據');
+      setPosts(cached.data);
+      return;
+    }
+
+    // 檢查是否已經載入過
+    if (
+      hasLoadedPostsRef.current &&
+      now - lastLoadTimeRef.current < CACHE_DURATION
+    ) {
+      console.log('⏰ 動態數據仍在有效期限內，跳過重新載入');
+      return;
+    }
+
+    console.log('🔄 開始載入動態...');
+    setLoading(true);
+    setError('');
+
     try {
-      // 檢查快取是否有效
-      const now = Date.now();
-      if (
-        hasLoadedPostsRef.current &&
-        now - lastLoadTimeRef.current < CACHE_DURATION
-      ) {
-        console.log('📦 使用快取的動態數據');
-        return;
-      }
-
-      setLoading(true);
-      console.log('🔄 開始載入社群動態...');
-
-      const currentUserId = auth.currentUser?.uid;
-      if (!currentUserId) {
-        console.log('❌ 用戶未登入');
-        setPosts([]);
-        return;
-      }
-
-      // 等待好友數據載入完成
-      if (!hasLoadedFriendsRef.current) {
-        console.log('⏳ 等待好友數據載入完成...');
-        await new Promise(resolve => setTimeout(resolve, 1000));
-      }
-
       // 獲取好友列表
       const friendIds = userData?.friends || [];
       const allowedUserIds = [currentUserId, ...friendIds].filter(Boolean);
@@ -96,209 +127,64 @@ const Community = () => {
       console.log(`🔍 允許查看的用戶: ${allowedUserIds.join(', ')}`);
       console.log(`🔍 總共 ${allowedUserIds.length} 個用戶的動態需要載入`);
 
-      // 簡化查詢：避免複雜的複合查詢
-      const postsData = [];
-
-      // 為每個好友單獨查詢，避免 'in' 查詢的索引問題
-      for (const userId of allowedUserIds) {
-        try {
-          console.log(`🔍 查詢用戶 ${userId} 的動態`);
-
-          const postsQuery = query(
-            collection(db, 'communityPosts'),
-            where('userId', '==', userId),
-            limit(10) // 每個用戶限制數量
-          );
-
-          const snapshot = await getDocs(postsQuery);
-          console.log(`📊 用戶 ${userId} 有 ${snapshot.size} 條動態`);
-
-          snapshot.forEach(doc => {
-            const postData = doc.data();
-            console.log(
-              `📝 載入動態: ${doc.id} - ${postData.content?.substring(
-                0,
-                30
-              )}...`
-            );
-
-            // 處理留言的頭像資訊
-            if (postData.comments && postData.comments.length > 0) {
-              console.log(
-                `🔍 處理動態 ${doc.id} 的 ${postData.comments.length} 條留言`
-              );
-              postData.comments = postData.comments.map(comment => {
-                // 如果留言沒有 userAvatarUrl，使用預設頭像
-                if (!comment.userAvatarUrl) {
-                  console.log(`📝 留言 ${comment.id} 缺少頭像，使用預設頭像`);
-                  return {
-                    ...comment,
-                    userAvatarUrl: '/guest-avatar.svg',
-                  };
-                }
-                console.log(
-                  `✅ 留言 ${comment.id} 已有頭像: ${comment.userAvatarUrl}`
-                );
-                return comment;
-              });
-            }
-
-            postsData.push({
-              id: doc.id,
-              ...postData,
-            });
-          });
-        } catch (error) {
-          console.warn(`查詢用戶 ${userId} 動態失敗:`, error);
-        }
-      }
-
-      console.log(`📊 載入到 ${postsData.length} 條動態`);
-
-      // 按時間排序
-      const filteredPosts = postsData.sort(
-        (a, b) => new Date(b.timestamp) - new Date(a.timestamp)
+      // 進一步優化查詢策略：分頁載入 + 智能過濾
+      const postsQuery = query(
+        collection(db, 'communityPosts'),
+        orderBy('timestamp', 'desc'),
+        limit(50) // 進一步減少到50條，提升載入速度
       );
 
-      console.log(`📊 過濾後剩餘 ${filteredPosts.length} 條動態`);
+      const snapshot = await getDocs(postsQuery);
+      const postsData = [];
 
-      // 如果沒有動態，創建一些測試數據（僅在開發環境）
-      if (
-        filteredPosts.length === 0 &&
-        process.env.NODE_ENV === 'development'
-      ) {
-        console.log('🧪 創建測試動態數據');
-        const testPosts = [
-          {
-            id: 'test-1',
-            userId: currentUserId,
-            userNickname: userData?.nickname || '測試用戶',
-            userAvatarUrl: userData?.avatarUrl || '/default-avatar.svg',
-            content: '這是我的第一條測試動態！💪',
-            type: 'status',
-            likes: [],
-            comments: [],
-            timestamp: new Date().toISOString(),
-            privacy: 'friends',
-          },
-          {
-            id: 'test-2',
-            userId: currentUserId,
-            userNickname: userData?.nickname || '測試用戶',
-            userAvatarUrl: userData?.avatarUrl || '/default-avatar.svg',
-            content: '今天完成了力量訓練，感覺很棒！🏋️‍♂️',
-            type: 'status',
-            likes: [],
-            comments: [],
-            timestamp: new Date(Date.now() - 3600000).toISOString(), // 1小時前
-            privacy: 'friends',
-          },
-        ];
-
-        // 如果有好友，為好友也創建一些測試動態
-        if (allowedUserIds.length > 1) {
-          const friendIds = allowedUserIds.filter(id => id !== currentUserId);
-          friendIds.forEach((friendId, index) => {
-            testPosts.push({
-              id: `friend-test-${index}`,
-              userId: friendId,
-              userNickname: `好友${index + 1}`,
-              userAvatarUrl: '/default-avatar.svg',
-              content: `這是好友${index + 1}的測試動態！🏃‍♂️`,
-              type: 'status',
-              likes: [],
-              comments: [],
-              timestamp: new Date(
-                Date.now() - (index + 1) * 7200000
-              ).toISOString(), // 每2小時一條
-              privacy: 'friends',
-            });
+      snapshot.forEach(doc => {
+        const postData = doc.data();
+        // 在客戶端過濾允許查看的用戶
+        if (allowedUserIds.includes(postData.userId)) {
+          // 進一步優化：只保留最必要的字段，減少內存使用
+          postsData.push({
+            id: doc.id,
+            userId: postData.userId,
+            userNickname: postData.userNickname,
+            userAvatarUrl: postData.userAvatarUrl,
+            content: postData.content,
+            timestamp: postData.timestamp,
+            likes: postData.likes || [],
+            // 優化評論載入：只保留評論數量，實際評論按需載入
+            commentCount: (postData.comments || []).length,
+            comments: [], // 評論將按需載入
+            type: postData.type || 'status',
           });
         }
-
-        // 將測試數據添加到狀態中
-        setPosts([...testPosts]);
-        postsCacheRef.current.set('posts', testPosts);
-        lastLoadTimeRef.current = now;
-        hasLoadedPostsRef.current = true;
-        return;
-      }
-
-      // 收集缺少頭像的 userId
-      const missingAvatarUserIds = new Set();
-      filteredPosts.forEach(p => {
-        (p.comments || []).forEach(c => {
-          if (!c.userAvatarUrl && c.userId) {
-            missingAvatarUserIds.add(c.userId);
-          }
-        });
       });
 
-      if (missingAvatarUserIds.size > 0) {
-        const avatarMap = {};
-        await Promise.all(
-          Array.from(missingAvatarUserIds).map(async uid => {
-            try {
-              const userDoc = await getDoc(doc(db, 'users', uid));
-              if (userDoc.exists()) {
-                const data = userDoc.data();
-                avatarMap[uid] = data.avatarUrl || '/guest-avatar.svg';
-              } else {
-                avatarMap[uid] = '/guest-avatar.svg';
-              }
-            } catch (err) {
-              console.warn(`取得用戶 ${uid} 頭像失敗`, err);
-              avatarMap[uid] = '/guest-avatar.svg';
-            }
-          })
-        );
+      // 按時間排序（雖然查詢已經排序，但確保一致性）
+      postsData.sort((a, b) => {
+        const timeA = a.timestamp ? new Date(a.timestamp) : new Date(a.date);
+        const timeB = b.timestamp ? new Date(b.timestamp) : new Date(b.date);
+        return timeB - timeA;
+      });
 
-        // 填補缺少頭像的留言
-        filteredPosts.forEach(p => {
-          (p.comments || []).forEach(c => {
-            // 若留言者和貼文作者相同，直接沿用貼文頭像
-            if (!c.userAvatarUrl && c.userId === p.userId) {
-              c.userAvatarUrl = p.userAvatarUrl;
-            }
-            if (!c.userAvatarUrl && avatarMap[c.userId]) {
-              c.userAvatarUrl = avatarMap[c.userId];
-            }
-          });
-        });
-      }
+      // 限制顯示數量，避免性能問題
+      const limitedPosts = postsData.slice(0, 30); // 進一步減少到30條
 
-      // 最終更新狀態
-      setPosts([...filteredPosts]);
-
-      // 更新快取
-      postsCacheRef.current.set('posts', filteredPosts);
+      console.log(`📊 載入完成：共 ${limitedPosts.length} 條動態`);
+      setPosts(limitedPosts);
+      hasLoadedPostsRef.current = true;
       lastLoadTimeRef.current = now;
 
-      // 標記已載入
-      hasLoadedPostsRef.current = true;
-
-      // 如果載入成功，清除錯誤訊息
-      if (error.includes('載入動態失敗')) {
-        setError('');
-      }
+      // 快取數據
+      postsCacheRef.current.set('posts', {
+        data: limitedPosts,
+        timestamp: now,
+      });
     } catch (error) {
-      console.error('❌ 載入動態失敗:', error);
-
-      // 檢查是否是權限錯誤
-      if (error.code === 'permission-denied') {
-        setError('權限不足，請檢查登入狀態');
-      } else if (error.code === 'unavailable') {
-        setError('網路連線問題，請檢查網路連線');
-      } else {
-        setError('載入動態失敗，請稍後再試');
-      }
-
-      // 重置載入狀態，允許重試
-      hasLoadedPostsRef.current = false;
+      console.error('載入動態失敗:', error);
+      setError('載入動態失敗，請稍後再試');
     } finally {
       setLoading(false);
     }
-  }, [userData?.friends]);
+  }, [userData?.friends, CACHE_DURATION]);
 
   // 發布新動態
   const publishPost = async () => {
@@ -379,7 +265,6 @@ const Community = () => {
       return;
     }
 
-    const currentUserId = auth.currentUser.uid;
     const isLiked = currentLikes.includes(currentUserId);
 
     // 計算新的點讚列表
@@ -437,6 +322,35 @@ const Community = () => {
       });
     }
   };
+
+  // 按需載入評論 - 新增功能
+  const loadComments = useCallback(async postId => {
+    if (!auth.currentUser) return;
+
+    try {
+      const postRef = doc(db, 'communityPosts', postId);
+      const postDoc = await getDoc(postRef);
+
+      if (postDoc.exists()) {
+        const postData = postDoc.data();
+        const comments = postData.comments || [];
+
+        // 更新本地狀態，只更新評論部分
+        setPosts(prevPosts => {
+          return prevPosts.map(post => {
+            if (post.id === postId) {
+              return { ...post, comments };
+            }
+            return post;
+          });
+        });
+
+        console.log(`💬 載入評論完成：${comments.length} 條評論`);
+      }
+    } catch (error) {
+      console.error('❌ 載入評論失敗:', error);
+    }
+  }, []);
 
   // 添加留言 - 優化版本（使用防抖 + 批量操作）
   const addComment = async (postId, commentContent) => {
@@ -907,7 +821,7 @@ const Community = () => {
       // 即使載入失敗也要標記為已嘗試載入
       hasLoadedRequestsRef.current = true;
     }
-  }, []);
+  }, [setFriendRequests]);
 
   // 搜尋用戶
   const handleSearch = async () => {
@@ -1134,8 +1048,6 @@ const Community = () => {
   };
 
   // 跳轉到好友個人版
-  const navigate = useNavigate();
-
   const goToFriendBoard = friendId => {
     if (!friendId) {
       console.error('好友ID為空');
@@ -1227,8 +1139,11 @@ const Community = () => {
 
     // 組件卸載時清理計時器
     return () => {
-      commentDebounceTimers.current.forEach(timer => clearTimeout(timer));
-      commentDebounceTimers.current.clear();
+      const timers = commentDebounceTimers.current;
+      if (timers) {
+        timers.forEach(timer => clearTimeout(timer));
+        timers.clear();
+      }
     };
   }, [loadPosts, loadFriendsData, loadFriendRequests]);
 
@@ -1427,6 +1342,7 @@ const Community = () => {
                     onAddComment={addComment}
                     onDeleteComment={deleteComment}
                     onDeletePost={deletePost}
+                    onLoadComments={loadComments} // 傳遞載入評論的回調
                     formatTime={formatTime}
                     likeProcessing={likeProcessing}
                     commentProcessing={commentProcessing}
@@ -1621,167 +1537,213 @@ const Community = () => {
   );
 };
 
-// 動態卡片組件
-const PostCard = ({
-  post,
-  currentUserId,
-  onToggleLike,
-  onAddComment,
-  onDeleteComment,
-  onDeletePost,
-  formatTime,
-  likeProcessing,
-  commentProcessing,
-}) => {
-  const [showComments, setShowComments] = useState(false);
-  const [newComment, setNewComment] = useState('');
+// 動態卡片組件 - 使用 React.memo 優化
+const PostCard = React.memo(
+  ({
+    post,
+    currentUserId,
+    onToggleLike,
+    onAddComment,
+    onDeleteComment,
+    onDeletePost,
+    onLoadComments, // 新增：按需載入評論的回調
+    formatTime,
+    likeProcessing,
+    commentProcessing,
+  }) => {
+    const [showComments, setShowComments] = useState(false);
+    const [newComment, setNewComment] = useState('');
+    const [imageLoaded, setImageLoaded] = useState(false); // 新增：圖片載入狀態
+    const [commentsLoaded, setCommentsLoaded] = useState(false); // 新增：評論載入狀態
 
-  const isLiked = post.likes.includes(currentUserId);
-  const likeCount = post.likes.length;
-  const commentCount = post.comments.length;
+    const isLiked = post.likes.includes(currentUserId);
+    const likeCount = post.likes.length;
+    const commentCount = post.commentCount || post.comments.length; // 使用 commentCount 或實際評論數量
 
-  const handleAddComment = () => {
-    if (newComment.trim()) {
-      onAddComment(post.id, newComment);
-      setNewComment('');
-    }
-  };
+    // 新增：處理評論顯示/隱藏，按需載入
+    const handleToggleComments = () => {
+      const newShowComments = !showComments;
+      setShowComments(newShowComments);
 
-  return (
-    <div className="post-card">
-      {/* 用戶資訊 */}
-      <div className="post-header">
-        <div className="post-user">
-          <img
-            src={post.userAvatarUrl || '/default-avatar.svg'}
-            alt="頭像"
-            className="user-avatar"
-            onError={e => {
-              e.target.src = '/default-avatar.svg';
-            }}
-          />
-          <div className="user-info">
-            <div className="user-name">{post.userNickname}</div>
-            <div className="post-time">{formatTime(post.timestamp)}</div>
-          </div>
-        </div>
-        {/* 刪除按鈕 - 只有動態作者可以看到 */}
-        {post.userId === currentUserId && (
-          <button
-            onClick={() => onDeletePost(post.id)}
-            className="delete-post-btn"
-            title="刪除此動態"
-          >
-            🗑️
-          </button>
-        )}
-      </div>
+      // 如果顯示評論且評論未載入，則載入評論
+      if (newShowComments && !commentsLoaded && onLoadComments) {
+        onLoadComments(post.id);
+        setCommentsLoaded(true);
+      }
+    };
 
-      {/* 動態內容 */}
-      <div className="post-content">{post.content}</div>
+    const handleAddComment = () => {
+      if (newComment.trim()) {
+        onAddComment(post.id, newComment);
+        setNewComment('');
+      }
+    };
 
-      {/* 互動按鈕 */}
-      <div className="post-actions">
-        <button
-          onClick={() => onToggleLike(post.id, post.likes)}
-          className={`action-btn ${isLiked ? 'liked' : ''}`}
-          disabled={likeProcessing.has(post.id)}
-        >
-          <span className="action-icon">
-            {likeProcessing.has(post.id) ? '⏳' : '👍'}
-          </span>
-          <span className="action-text">
-            {likeProcessing.has(post.id)
-              ? '處理中...'
-              : `${likeCount > 0 ? likeCount : ''} 讚`}
-          </span>
-        </button>
-
-        <button
-          onClick={() => setShowComments(!showComments)}
-          className="action-btn"
-        >
-          <span className="action-icon">💬</span>
-          <span className="action-text">
-            {commentCount > 0 ? commentCount : ''} 留言
-          </span>
-        </button>
-      </div>
-
-      {/* 留言區域 */}
-      {showComments && (
-        <div className="comments-section">
-          {/* 留言列表 */}
-          {post.comments.length > 0 && (
-            <div className="comments-list">
-              {post.comments.map(comment => {
-                const isPostOwner = post.userId === currentUserId;
-                const isCommentOwner = comment.userId === currentUserId;
-                const canDelete = isPostOwner || isCommentOwner;
-
-                return (
-                  <div key={comment.id} className="comment-item">
-                    <div className="comment-header">
-                      <div className="comment-user-info">
-                        <img
-                          src={comment.userAvatarUrl || '/guest-avatar.svg'}
-                          alt="頭像"
-                          className="comment-avatar"
-                          onError={e => {
-                            e.target.src = '/guest-avatar.svg';
-                          }}
-                        />
-                        <div className="comment-text-info">
-                          <div className="comment-name">
-                            {comment.userNickname}
-                          </div>
-                          <div className="comment-time">
-                            {formatTime(comment.timestamp)}
-                          </div>
-                        </div>
-                      </div>
-                      {canDelete && (
-                        <button
-                          onClick={() => onDeleteComment(post.id, comment.id)}
-                          className="comment-delete-btn"
-                          title={isPostOwner ? '刪除此留言' : '刪除我的留言'}
-                        >
-                          🗑️
-                        </button>
-                      )}
-                    </div>
-                    <div className="comment-content">{comment.content}</div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-
-          {/* 添加留言 */}
-          <div className="comment-input">
-            <input
-              type="text"
-              placeholder="寫留言..."
-              value={newComment}
-              onChange={e => setNewComment(e.target.value)}
-              onKeyPress={e => {
-                if (e.key === 'Enter') {
-                  handleAddComment();
-                }
+    return (
+      <div className="post-card">
+        {/* 用戶資訊 */}
+        <div className="post-header">
+          <div className="post-user">
+            <img
+              src={post.userAvatarUrl || '/default-avatar.svg'}
+              alt="頭像"
+              className="user-avatar"
+              loading="lazy" // 新增：懶載入
+              onLoad={() => setImageLoaded(true)} // 新增：圖片載入完成
+              onError={e => {
+                e.target.src = '/default-avatar.svg';
+                setImageLoaded(true);
+              }}
+              style={{
+                opacity: imageLoaded ? 1 : 0.5, // 新增：載入時的視覺效果
+                transition: 'opacity 0.3s ease',
               }}
             />
-            <button
-              onClick={handleAddComment}
-              disabled={!newComment.trim() || commentProcessing.has(post.id)}
-              className="comment-btn"
-            >
-              {commentProcessing.has(post.id) ? '發送中...' : '發送'}
-            </button>
+            <div className="user-info">
+              <div className="user-name">{post.userNickname}</div>
+              <div className="post-time">{formatTime(post.timestamp)}</div>
+            </div>
           </div>
+          {/* 刪除按鈕 - 只有動態作者可以看到 */}
+          {post.userId === currentUserId && (
+            <button
+              onClick={() => onDeletePost(post.id)}
+              className="delete-post-btn"
+              title="刪除此動態"
+            >
+              🗑️
+            </button>
+          )}
         </div>
-      )}
-    </div>
-  );
+
+        {/* 動態內容 */}
+        <div className="post-content">{post.content}</div>
+
+        {/* 互動按鈕 */}
+        <div className="post-actions">
+          <button
+            onClick={() => onToggleLike(post.id, post.likes)}
+            className={`action-btn ${isLiked ? 'liked' : ''}`}
+            disabled={likeProcessing.has(post.id)}
+          >
+            <span className="action-icon">
+              {likeProcessing.has(post.id) ? '⏳' : '👍'}
+            </span>
+            <span className="action-text">
+              {likeProcessing.has(post.id)
+                ? '處理中...'
+                : `${likeCount > 0 ? likeCount : ''} 讚`}
+            </span>
+          </button>
+
+          <button
+            onClick={handleToggleComments} // 修改：使用新的處理函數
+            className="action-btn"
+          >
+            <span className="action-icon">💬</span>
+            <span className="action-text">
+              {commentCount > 0 ? commentCount : ''} 留言
+            </span>
+          </button>
+        </div>
+
+        {/* 留言區域 */}
+        {showComments && (
+          <div className="comments-section">
+            {/* 留言列表 */}
+            {post.comments.length > 0 && (
+              <div className="comments-list">
+                {post.comments.map(comment => {
+                  const isPostOwner = post.userId === currentUserId;
+                  const isCommentOwner = comment.userId === currentUserId;
+                  const canDelete = isPostOwner || isCommentOwner;
+
+                  return (
+                    <div key={comment.id} className="comment-item">
+                      <div className="comment-header">
+                        <div className="comment-user-info">
+                          <img
+                            src={comment.userAvatarUrl || '/guest-avatar.svg'}
+                            alt="頭像"
+                            className="comment-avatar"
+                            onError={e => {
+                              e.target.src = '/guest-avatar.svg';
+                            }}
+                          />
+                          <div className="comment-text-info">
+                            <div className="comment-name">
+                              {comment.userNickname}
+                            </div>
+                            <div className="comment-time">
+                              {formatTime(comment.timestamp)}
+                            </div>
+                          </div>
+                        </div>
+                        {canDelete && (
+                          <button
+                            onClick={() => onDeleteComment(post.id, comment.id)}
+                            className="comment-delete-btn"
+                            title={isPostOwner ? '刪除此留言' : '刪除我的留言'}
+                          >
+                            🗑️
+                          </button>
+                        )}
+                      </div>
+                      <div className="comment-content">{comment.content}</div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* 添加留言 */}
+            <div className="comment-input">
+              <input
+                type="text"
+                placeholder="寫留言..."
+                value={newComment}
+                onChange={e => setNewComment(e.target.value)}
+                onKeyPress={e => {
+                  if (e.key === 'Enter') {
+                    handleAddComment();
+                  }
+                }}
+              />
+              <button
+                onClick={handleAddComment}
+                disabled={!newComment.trim() || commentProcessing.has(post.id)}
+                className="comment-btn"
+              >
+                {commentProcessing.has(post.id) ? '發送中...' : '發送'}
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
+);
+
+PostCard.propTypes = {
+  post: PropTypes.shape({
+    id: PropTypes.string.isRequired,
+    userId: PropTypes.string.isRequired,
+    userNickname: PropTypes.string.isRequired,
+    userAvatarUrl: PropTypes.string,
+    content: PropTypes.string.isRequired,
+    timestamp: PropTypes.any.isRequired,
+    likes: PropTypes.array.isRequired,
+    comments: PropTypes.array.isRequired,
+  }).isRequired,
+  currentUserId: PropTypes.string.isRequired,
+  onToggleLike: PropTypes.func.isRequired,
+  onAddComment: PropTypes.func.isRequired,
+  onDeleteComment: PropTypes.func.isRequired,
+  onDeletePost: PropTypes.func.isRequired,
+  onLoadComments: PropTypes.func.isRequired, // 新增：添加 propTypes
+  formatTime: PropTypes.func.isRequired,
+  likeProcessing: PropTypes.instanceOf(Set).isRequired,
+  commentProcessing: PropTypes.instanceOf(Set).isRequired,
 };
 
 export default Community;

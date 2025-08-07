@@ -136,11 +136,11 @@ function BottomNavBar() {
   const location = useLocation();
 
   const [modalOpen, setModalOpen] = useState(false);
-  const [pendingPath, setPendingPath] = useState('');
+  // const [pendingPath, setPendingPath] = useState('');
 
   const handleNav = item => {
     if (item.guestBlock && isGuestMode()) {
-      setPendingPath(item.path);
+      // setPendingPath(item.path);
       setModalOpen(true);
     } else {
       if (item.key === 'home') {

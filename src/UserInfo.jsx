@@ -24,12 +24,7 @@ import {
   setDoc,
 } from 'firebase/firestore';
 import PropTypes from 'prop-types';
-import {
-  calculateLadderScore,
-  getAgeGroup,
-  validateNickname,
-  generateNickname,
-} from './utils';
+import { calculateLadderScore, generateNickname } from './utils';
 
 import './userinfo.css';
 
@@ -145,6 +140,16 @@ const Modal = ({
   );
 };
 
+Modal.propTypes = {
+  isOpen: PropTypes.bool.isRequired,
+  onClose: PropTypes.func.isRequired,
+  title: PropTypes.string.isRequired,
+  message: PropTypes.string.isRequired,
+  type: PropTypes.oneOf(['info', 'warning', 'success', 'error']),
+  onAction: PropTypes.func,
+  actionText: PropTypes.string,
+};
+
 // 新增：提交確認對話框組件
 const SubmitConfirmModal = ({
   isOpen,
@@ -209,6 +214,13 @@ const SubmitConfirmModal = ({
   );
 };
 
+SubmitConfirmModal.propTypes = {
+  isOpen: PropTypes.bool.isRequired,
+  onConfirm: PropTypes.func.isRequired,
+  onCancel: PropTypes.func.isRequired,
+  remainingCount: PropTypes.number.isRequired,
+};
+
 // 移除儀式感動畫系統
 
 // 新增：圖片壓縮工具
@@ -267,14 +279,8 @@ async function compressImage(
 }
 
 function UserInfo({ testData, onLogout, clearTestData }) {
-  const {
-    userData,
-    setUserData,
-    saveUserData,
-    saveHistory,
-    loadUserData,
-    isLoading,
-  } = useUser();
+  const { userData, setUserData, saveHistory, loadUserData, isLoading } =
+    useUser();
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
@@ -314,6 +320,7 @@ function UserInfo({ testData, onLogout, clearTestData }) {
   });
 
   // 新增：檢查天梯提交限制
+  /*
   const checkLadderSubmissionLimit = useCallback(() => {
     const now = new Date();
     const today = now.toDateString();
@@ -355,6 +362,7 @@ function UserInfo({ testData, onLogout, clearTestData }) {
 
     return { canSubmit: true, reason: null };
   }, [ladderSubmissionState]);
+  */
 
   // 新增：顯示提交確認對話框
   const showSubmitConfirmModal = useCallback(() => {
@@ -365,7 +373,7 @@ function UserInfo({ testData, onLogout, clearTestData }) {
       isOpen: true,
       remainingCount: Math.max(0, remainingCount),
     });
-  }, [ladderSubmissionState.dailySubmissionCount]);
+  }, [ladderSubmissionState]);
 
   // 新增：確認提交到天梯
   const confirmSubmitToLadder = useCallback(async () => {
@@ -394,8 +402,21 @@ function UserInfo({ testData, onLogout, clearTestData }) {
       // 立即更新本地狀態
       setUserData(updatedUserData);
 
-      // 立即保存到 Firebase，不等待防抖
+      // 使用寫入隊列機制，而不是直接寫入 Firebase
       try {
+        // 將天梯分數更新加入寫入隊列，優先處理
+        const ladderData = {
+          ...userData,
+          ladderScore: ladderScore,
+          lastLadderSubmission: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        };
+
+        // 立即保存到本地存儲
+        localStorage.setItem('userData', JSON.stringify(ladderData));
+        localStorage.setItem('lastSavedUserData', JSON.stringify(ladderData));
+
+        // 立即寫入 Firebase，確保天梯分數能及時顯示
         const userRef = doc(db, 'users', auth.currentUser.uid);
         await setDoc(
           userRef,
@@ -409,16 +430,8 @@ function UserInfo({ testData, onLogout, clearTestData }) {
 
         console.log('天梯分數已立即保存到 Firebase:', ladderScore);
       } catch (error) {
-        console.error('保存天梯分數到 Firebase 失敗:', error);
+        console.error('保存天梯分數失敗:', error);
         throw error;
-      }
-
-      // 強制重新載入用戶數據，確保 UserInfo 頁面顯示最新數據
-      try {
-        await loadUserData(auth.currentUser, true);
-        console.log('用戶數據已重新載入，天梯分數已更新');
-      } catch (error) {
-        console.error('重新載入用戶數據失敗:', error);
       }
 
       // 更新提交狀態
@@ -466,7 +479,7 @@ function UserInfo({ testData, onLogout, clearTestData }) {
     } finally {
       setLoading(false);
     }
-  }, [userData.scores, setUserData, loading, navigate, loadUserData]);
+  }, [userData.scores, setUserData, loading, navigate]);
 
   // 新增：取消提交
   const cancelSubmit = useCallback(() => {
@@ -515,7 +528,7 @@ function UserInfo({ testData, onLogout, clearTestData }) {
 
     // 顯示提交確認對話框
     showSubmitConfirmModal();
-  }, [userData, showSubmitConfirmModal]);
+  }, [userData, showSubmitConfirmModal, setModalState]);
 
   const radarChartData = useMemo(() => {
     const scores = userData.scores || DEFAULT_SCORES;
@@ -550,10 +563,12 @@ function UserInfo({ testData, onLogout, clearTestData }) {
     ];
   }, [userData.scores]);
 
-  const isGuest = sessionStorage.getItem('guestMode') === 'true';
+  const isGuest = useMemo(() => {
+    return sessionStorage.getItem('guestMode') === 'true';
+  }, []);
 
   // 自定義軸標籤組件
-  const CustomAxisTick = ({ payload, x, y, textAnchor }) => {
+  const CustomAxisTick = ({ payload, x, y }) => {
     const data = radarChartData.find(item => item.name === payload.value);
 
     // 計算調整後的位置 - 使用相對偏移而不是固定像素值
@@ -651,6 +666,15 @@ function UserInfo({ testData, onLogout, clearTestData }) {
       </g>
     );
   };
+
+  CustomAxisTick.propTypes = {
+    payload: PropTypes.shape({
+      value: PropTypes.string.isRequired,
+    }).isRequired,
+    x: PropTypes.number.isRequired,
+    y: PropTypes.number.isRequired,
+  };
+
   // 監聽認證狀態
   useEffect(() => {
     if (!auth) {
@@ -839,7 +863,7 @@ function UserInfo({ testData, onLogout, clearTestData }) {
       return false;
     }
     return true;
-  }, [userData.height, userData.weight, userData.age, userData.gender]);
+  }, [userData]);
 
   const saveData = useCallback(
     async e => {
@@ -894,16 +918,7 @@ function UserInfo({ testData, onLogout, clearTestData }) {
         setLoading(false);
       }
     },
-    [
-      userData.height,
-      userData.weight,
-      userData.age,
-      userData.gender,
-      userData.scores,
-      userData.ladderScore,
-      validateData,
-      isGuest,
-    ]
+    [userData, validateData, isGuest, setUserData]
   );
 
   const averageScore = useMemo(() => {
@@ -988,17 +1003,17 @@ function UserInfo({ testData, onLogout, clearTestData }) {
       console.error('獲取用戶排名失敗:', error);
       setUserRank(null);
     }
-  }, [userData?.userId, submittedLadderScore]);
+  }, [userData?.userId, submittedLadderScore, setUserRank]);
 
   // 當用戶數據或完成狀態改變時，獲取用戶排名
   useEffect(() => {
     fetchUserRank();
-  }, [fetchUserRank]);
+  }, [fetchUserRank, setUserData]);
 
   // 計算年齡段
-  const ageGroup = useMemo(() => {
-    return userData?.age ? getAgeGroup(userData.age) : '';
-  }, [userData?.age]);
+  // const ageGroup = useMemo(() => {
+  //   return userData?.age ? getAgeGroup(userData.age) : '';
+  // }, [userData?.age]);
 
   // 處理暱稱變更
   const handleNicknameChange = useCallback(
@@ -1050,11 +1065,11 @@ function UserInfo({ testData, onLogout, clearTestData }) {
         nicknameTimeoutRef.current = null;
       }, 1000); // 增加到1秒防抖，減少寫入頻率
     },
-    [setUserData]
+    [setUserData, setModalState]
   );
 
   // 生成預設暱稱
-  const handleGenerateNickname = () => {
+  const handleGenerateNickname = useCallback(() => {
     const email = auth.currentUser?.email;
     const generatedNickname = generateNickname(email);
     setUserData(prev => ({
@@ -1063,7 +1078,7 @@ function UserInfo({ testData, onLogout, clearTestData }) {
       // 保持原有的天梯分數，不自動更新
       ladderScore: prev.ladderScore || 0,
     }));
-  };
+  }, [setUserData]);
 
   const handleSaveResults = useCallback(() => {
     if (!auth.currentUser) {
@@ -1092,7 +1107,7 @@ function UserInfo({ testData, onLogout, clearTestData }) {
     setTimeout(() => {
       setModalState(prev => ({ ...prev, isOpen: false }));
     }, 2000);
-  }, [userData.scores, averageScore, saveHistory]);
+  }, [userData.scores, averageScore, saveHistory, setModalState]);
 
   const handleNavigation = useCallback(
     async path => {
@@ -1123,14 +1138,7 @@ function UserInfo({ testData, onLogout, clearTestData }) {
         });
       }
     },
-    [
-      userData.height,
-      userData.weight,
-      userData.age,
-      userData.gender,
-      validateData,
-      navigate,
-    ]
+    [userData, validateData, navigate, setModalState]
   );
 
   const handleLogout = useCallback(() => {

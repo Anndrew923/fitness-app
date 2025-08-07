@@ -1,4 +1,4 @@
-import { useState, Component } from 'react';
+import React, { useState, Component, useEffect } from 'react';
 import {
   BrowserRouter as Router,
   Routes,
@@ -30,26 +30,91 @@ import FriendFeed from './components/FriendFeed';
 import GlobalAdBanner from './components/GlobalAdBanner';
 import PWAInstallPrompt from './components/PWAInstallPrompt';
 import IOSInstallPrompt from './components/IOSInstallPrompt';
+import performanceMonitor from './utils/performanceMonitor';
 import './App.css';
 
 class ErrorBoundary extends Component {
-  state = { hasError: false };
+  state = { hasError: false, error: null, errorInfo: null };
 
-  static getDerivedStateFromError() {
+  static getDerivedStateFromError(error) {
     return { hasError: true };
   }
 
   componentDidCatch(error, errorInfo) {
     console.error('ErrorBoundary 捕獲錯誤:', error, errorInfo);
+
+    // 記錄錯誤到性能監控
+    if (performanceMonitor) {
+      performanceMonitor.logError(error, 'ErrorBoundary');
+    }
+
+    this.setState({
+      error,
+      errorInfo,
+    });
   }
 
   render() {
     if (this.state.hasError) {
-      return <div>發生錯誤，請稍後再試或聯繫支持團隊。</div>;
+      return (
+        <div
+          style={{
+            padding: '20px',
+            textAlign: 'center',
+            backgroundColor: '#f8f9fa',
+            minHeight: '100vh',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
+        >
+          <h2 style={{ color: '#dc3545', marginBottom: '20px' }}>
+            🚨 發生錯誤
+          </h2>
+          <p style={{ marginBottom: '20px', color: '#6c757d' }}>
+            應用程序遇到了一個問題，請稍後再試或聯繫支持團隊。
+          </p>
+          <button
+            onClick={() => window.location.reload()}
+            style={{
+              padding: '10px 20px',
+              backgroundColor: '#007bff',
+              color: 'white',
+              border: 'none',
+              borderRadius: '5px',
+              cursor: 'pointer',
+            }}
+          >
+            重新載入頁面
+          </button>
+          {process.env.NODE_ENV === 'development' && this.state.error && (
+            <details style={{ marginTop: '20px', textAlign: 'left' }}>
+              <summary>錯誤詳情 (開發模式)</summary>
+              <pre
+                style={{
+                  backgroundColor: '#f8f9fa',
+                  padding: '10px',
+                  borderRadius: '5px',
+                  overflow: 'auto',
+                  maxWidth: '100%',
+                }}
+              >
+                {this.state.error.toString()}
+                {this.state.errorInfo.componentStack}
+              </pre>
+            </details>
+          )}
+        </div>
+      );
     }
     return this.props.children;
   }
 }
+
+ErrorBoundary.propTypes = {
+  children: PropTypes.node.isRequired,
+};
 
 // 創建一個內部組件來使用 useNavigate
 function AppContent() {
@@ -81,6 +146,21 @@ function AppContent() {
     '/muscle-mass',
     '/body-fat',
   ].some(path => location.pathname.startsWith(path));
+
+  // 性能監控：監控頁面載入時間
+  useEffect(() => {
+    const pageName = location.pathname || '/';
+
+    // 開始監控頁面載入
+    performanceMonitor.startPageLoad(pageName);
+
+    // 使用 setTimeout 來模擬頁面載入完成
+    const timer = setTimeout(() => {
+      performanceMonitor.measurePageLoad(pageName);
+    }, 100); // 給組件一點時間來渲染
+
+    return () => clearTimeout(timer);
+  }, [location.pathname]);
 
   const handleLogin = async (email, password) => {
     try {

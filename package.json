@@ -18,7 +18,13 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "serve": "NODE_ENV=production node server.js"
+    "serve": "NODE_ENV=production node server.js",
+    "check": "eslint src --ext .js,.jsx --fix",
+    "build-check": "npm run build && echo '構建成功'",
+    "full-check": "npm run check && npm run build-check",
+    "quick-check": "bash quick-check.sh",
+    "weekly-check": "bash weekly-check.sh",
+    "phase-check": "bash phase-check.sh"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.5.0",

@@ -7,13 +7,13 @@ import React, {
 } from 'react';
 import { useUser } from '../UserContext';
 import { useLocation } from 'react-router-dom';
-import { db } from '../firebase';
+import { auth, db } from '../firebase';
 import { collection, query, orderBy, limit, getDocs } from 'firebase/firestore';
-import { calculateLadderScore, formatScore, getAgeGroup } from '../utils';
+import { formatScore, getAgeGroup } from '../utils';
 import './Ladder.css';
 
 const Ladder = () => {
-  const { userData, loadUserData } = useUser();
+  const { userData } = useUser();
   const location = useLocation();
   const [ladderData, setLadderData] = useState([]);
   const [userRank, setUserRank] = useState(0);
@@ -23,24 +23,27 @@ const Ladder = () => {
   const [showUserContext, setShowUserContext] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
-  const lastLadderScoreRef = useRef(null);
+  // const lastLadderScoreRef = useRef(null);
   const lastConditionCheckRef = useRef(null);
   const lastLoadParamsRef = useRef(null);
   const forceReloadRef = useRef(false);
   const loadingRef = useRef(false);
   const forceReloadProcessedRef = useRef(false);
 
-  const ageGroups = [
-    { value: 'all', label: '全部年齡' },
-    { value: 'under20', label: '20歲以下' },
-    { value: '21to30', label: '21~30歲' },
-    { value: '31to40', label: '31~40歲' },
-    { value: '41to50', label: '41~50歲' },
-    { value: '51to60', label: '51~60歲' },
-    { value: '61to70', label: '61~70歲' },
-    { value: 'over70', label: '70歲以上' },
-    { value: 'unknown', label: '未知年齡' },
-  ];
+  const ageGroups = useMemo(
+    () => [
+      { value: 'all', label: '全部年齡' },
+      { value: 'under20', label: '20歲以下' },
+      { value: '21to30', label: '21~30歲' },
+      { value: '31to40', label: '31~40歲' },
+      { value: '41to50', label: '41~50歲' },
+      { value: '51to60', label: '51~60歲' },
+      { value: '61to70', label: '61~70歲' },
+      { value: 'over70', label: '70歲以上' },
+      { value: 'unknown', label: '未知年齡' },
+    ],
+    []
+  );
 
   // 使用 useCallback 優化 loadLadderData 函數
   const loadLadderData = useCallback(async () => {
@@ -80,11 +83,11 @@ const Ladder = () => {
     try {
       console.log('🚀 開始載入天梯數據...', loadParams);
 
-      // 簡化查詢：直接獲取前100名用戶
+      // 優化：使用更大的 limit 來減少查詢次數
       const q = query(
         collection(db, 'users'),
         orderBy('ladderScore', 'desc'),
-        limit(100) // 固定獲取前100名，確保第一名不會被過濾掉
+        limit(200) // 增加到200名，確保涵蓋更多用戶
       );
 
       const querySnapshot = await getDocs(q);
@@ -124,7 +127,25 @@ const Ladder = () => {
       // 客戶端過濾年齡分段
       if (selectedAgeGroup !== 'all') {
         const beforeFilterCount = data.length;
-        data = data.filter(user => user.ageGroup === selectedAgeGroup);
+        console.log(`🔍 年齡段篩選調試 - 選擇的年齡段: ${selectedAgeGroup}`);
+        console.log(
+          `🔍 年齡段篩選調試 - 篩選前的用戶年齡段分布:`,
+          data.reduce((acc, user) => {
+            acc[user.ageGroup] = (acc[user.ageGroup] || 0) + 1;
+            return acc;
+          }, {})
+        );
+
+        data = data.filter(user => {
+          const matches = user.ageGroup === selectedAgeGroup;
+          if (!matches) {
+            console.log(
+              `🔍 用戶 ${user.displayName} (年齡: ${user.age}, 年齡段: ${user.ageGroup}) 不符合篩選條件 ${selectedAgeGroup}`
+            );
+          }
+          return matches;
+        });
+
         console.log(
           `👥 年齡段過濾：${beforeFilterCount} → ${data.length} 名用戶`
         );
@@ -157,10 +178,11 @@ const Ladder = () => {
 
       setLadderData(data);
 
-      // 簡化用戶排名計算
+      // 優化：簡化用戶排名計算，使用已載入的數據
       if (userData && userData.ladderScore > 0) {
         const userRankIndex = data.findIndex(
-          user => user.id === userData.userId
+          user =>
+            user.id === userData.userId || user.id === auth.currentUser?.uid
         );
 
         if (userRankIndex >= 0) {
@@ -172,63 +194,54 @@ const Ladder = () => {
           // 用戶不在當前顯示範圍內，需要計算實際排名
           console.log(`📋 用戶不在前50名內，計算實際排名...`);
 
-          // 獲取所有用戶數據進行排名計算
-          try {
-            const rankQuery = query(
-              collection(db, 'users'),
-              orderBy('ladderScore', 'desc')
-            );
-            const rankSnapshot = await getDocs(rankQuery);
-            let rankData = [];
-
-            rankSnapshot.forEach(doc => {
+          // 使用已載入的完整數據進行排名計算，避免額外的 Firebase 查詢
+          const allUsers = querySnapshot.docs
+            .map(doc => {
               const docData = doc.data();
               if (docData.ladderScore > 0) {
-                // 確保年齡段被正確計算
-                const userWithAgeGroup = {
-                  ...docData,
+                return {
                   id: doc.id,
+                  ...docData,
                   ageGroup: docData.age
                     ? getAgeGroup(Number(docData.age))
                     : docData.ageGroup || '',
                 };
-                rankData.push(userWithAgeGroup);
               }
-            });
+              return null;
+            })
+            .filter(Boolean);
 
-            // 客戶端過濾年齡分段
-            if (selectedAgeGroup !== 'all') {
-              rankData = rankData.filter(
-                user => user.ageGroup === selectedAgeGroup
-              );
-            }
-
-            // 客戶端過濾本周新進榜
-            if (selectedTab === 'weekly') {
-              const oneWeekAgo = new Date();
-              oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-              rankData = rankData.filter(user => {
-                if (!user.lastActive) return false;
-                const lastActive = new Date(user.lastActive);
-                return lastActive >= oneWeekAgo;
-              });
-            }
-
-            // 重新排序
-            rankData.sort((a, b) => b.ladderScore - a.ladderScore);
-
-            // 計算用戶在過濾後數據中的排名
-            const userRankIndex = rankData.findIndex(
-              user => user.id === userData.userId
+          // 客戶端過濾年齡分段
+          let rankData = allUsers;
+          if (selectedAgeGroup !== 'all') {
+            rankData = allUsers.filter(
+              user => user.ageGroup === selectedAgeGroup
             );
-            const newRank = userRankIndex >= 0 ? userRankIndex + 1 : 0;
-
-            console.log(`🎯 用戶實際排名：第 ${newRank} 名`);
-            setUserRank(newRank);
-          } catch (error) {
-            console.error('計算用戶實際排名失敗:', error);
-            setUserRank(0);
           }
+
+          // 客戶端過濾本周新進榜
+          if (selectedTab === 'weekly') {
+            const oneWeekAgo = new Date();
+            oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+            rankData = rankData.filter(user => {
+              if (!user.lastActive) return false;
+              const lastActive = new Date(user.lastActive);
+              return lastActive >= oneWeekAgo;
+            });
+          }
+
+          // 重新排序
+          rankData.sort((a, b) => b.ladderScore - a.ladderScore);
+
+          // 計算用戶在過濾後數據中的排名
+          const userRankIndex = rankData.findIndex(
+            user =>
+              user.id === userData.userId || user.id === auth.currentUser?.uid
+          );
+          const newRank = userRankIndex >= 0 ? userRankIndex + 1 : 0;
+
+          console.log(`🎯 用戶實際排名：第 ${newRank} 名`);
+          setUserRank(newRank);
         }
       } else {
         setUserRank(0);
@@ -249,13 +262,7 @@ const Ladder = () => {
       // 重置強制重新載入處理標記
       forceReloadProcessedRef.current = false;
     }
-  }, [
-    selectedAgeGroup,
-    selectedTab,
-    userData?.ladderScore,
-    userData?.userId,
-    userData,
-  ]);
+  }, [selectedAgeGroup, selectedTab, userData]);
 
   // 合併所有載入觸發條件到一個 useEffect
   useEffect(() => {
@@ -267,8 +274,8 @@ const Ladder = () => {
     userData,
     selectedAgeGroup,
     selectedTab,
-    userData?.ladderScore,
-    userData?.userId,
+    loadLadderData,
+    location.state?.forceReload,
   ]);
 
   // 監聽路由狀態變化，處理強制重新載入
@@ -297,11 +304,11 @@ const Ladder = () => {
         loadLadderData();
       }, 0);
     }
-  }, [location.state, userData]);
+  }, [location.state, userData, loadLadderData]);
 
   // 簡化動畫樣式 - 動畫已移除
   const getAnimationStyle = useMemo(() => {
-    return (user, index) => {
+    return () => {
       // 動畫已移除，返回空對象
       return {};
     };
@@ -323,10 +330,13 @@ const Ladder = () => {
   };
 
   // 獲取年齡組標籤
-  const getAgeGroupLabel = ageGroup => {
-    const group = ageGroups.find(g => g.value === ageGroup);
-    return group ? group.label : ageGroup;
-  };
+  const getAgeGroupLabel = useCallback(
+    ageGroup => {
+      const group = ageGroups.find(g => g.value === ageGroup);
+      return group ? group.label : ageGroup;
+    },
+    [ageGroups]
+  );
 
   // 新增：獲取浮動排名顯示框
   const floatingRankDisplay = useMemo(() => {
@@ -465,41 +475,31 @@ const Ladder = () => {
         </div>
       </div>
     );
-  }, [
-    userData?.ladderScore,
-    userData?.nickname,
-    userData?.email,
-    userData?.avatarUrl,
-    userData?.ageGroup,
-    userData?.gender,
-    userRank,
-    ladderData.length,
-    loading,
-  ]);
+  }, [userData, userRank, ladderData.length, loading, getAgeGroupLabel]);
 
-  const getUserRankDisplay = () => {
-    if (!userData) {
-      return '未參與';
-    }
+  // const getUserRankDisplay = () => {
+  //   if (!userData) {
+  //     return '未參與';
+  //   }
 
-    // 檢查是否完成全部5個評測項目
-    const scores = userData.scores || {};
-    const completedCount = Object.values(scores).filter(
-      score => score > 0
-    ).length;
+  //   // 檢查是否完成全部5個評測項目
+  //   const scores = userData.scores || {};
+  //   const completedCount = Object.values(scores).filter(
+  //     score => score > 0
+  //   ).length;
 
-    if (completedCount < 5) {
-      return `完成 ${completedCount}/5 項`;
-    }
+  //   if (completedCount < 5) {
+  //     return `完成 ${completedCount}/5 項`;
+  //   }
 
-    if (userData.ladderScore === 0) {
-      return '未參與';
-    }
+  //   if (userData.ladderScore === 0) {
+  //     return '未參與';
+  //   }
 
-    // 使用userRank來顯示排名，讓用戶看到變化過程
-    const rankToShow = userRank > 0 ? userRank : '未上榜';
-    return rankToShow > 0 ? `第 ${rankToShow} 名` : '未上榜';
-  };
+  //   // 使用userRank來顯示排名，讓用戶看到變化過程
+  //   const rankToShow = userRank > 0 ? userRank : '未上榜';
+  //   return rankToShow > 0 ? `第 ${rankToShow} 名` : '未上榜';
+  // };
 
   // 處理用戶點擊，顯示訓練背景信息
   const handleUserClick = (user, event) => {
@@ -507,7 +507,7 @@ const Ladder = () => {
 
     const rect = event.currentTarget.getBoundingClientRect();
     const tooltipHeight = 200; // 預估工具提示的高度
-    const viewportHeight = window.innerHeight;
+    // const viewportHeight = window.innerHeight;
     const safeMargin = 20; // 安全邊距
 
     // 檢查是否為第一名

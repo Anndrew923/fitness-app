@@ -5,8 +5,8 @@ import * as standards from './standards';
 import PropTypes from 'prop-types';
 import './Power.css';
 
-function Power({ onComplete, clearTestData }) {
-  const { userData, setUserData, saveUserData } = useUser();
+function Power({ onComplete }) {
+  const { userData, setUserData } = useUser();
   const navigate = useNavigate();
   const { age, gender } = userData;
 
@@ -34,7 +34,13 @@ function Power({ onComplete, clearTestData }) {
       power: { verticalJump, standingLongJump, sprint },
     };
     setUserData(prev => ({ ...prev, testInputs: updatedTestInputs }));
-  }, [verticalJump, standingLongJump, sprint]);
+  }, [
+    verticalJump,
+    standingLongJump,
+    sprint,
+    setUserData,
+    userData.testInputs,
+  ]);
 
   const getAgeRange = age => {
     if (!age) return null;

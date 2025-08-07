@@ -94,7 +94,7 @@ class FirebaseWriteMonitor {
     const anomalies = [];
 
     // 檢測高頻率寫入
-    if (stats.averageWritesPerMinute > 10) {
+    if (stats.averageWritesPerMinute > 5) {
       anomalies.push({
         type: 'high_frequency',
         message: `檢測到高頻率寫入: ${stats.averageWritesPerMinute.toFixed(
@@ -105,7 +105,7 @@ class FirebaseWriteMonitor {
     }
 
     // 檢測特定操作的異常
-    if (stats.writeCounts.updateDoc > 50) {
+    if (stats.writeCounts.updateDoc > 20) {
       anomalies.push({
         type: 'frequent_updates',
         message: `檢測到頻繁的 updateDoc 操作: ${stats.writeCounts.updateDoc} 次`,
@@ -121,7 +121,7 @@ class FirebaseWriteMonitor {
         new Date(recentWrites[0].timestamp);
       const writesPerSecond = recentWrites.length / (timeSpan / 1000);
 
-      if (writesPerSecond > 2) {
+      if (writesPerSecond > 1) {
         anomalies.push({
           type: 'burst_writes',
           message: `檢測到寫入爆發: ${writesPerSecond.toFixed(2)} 次/秒`,
@@ -129,6 +129,25 @@ class FirebaseWriteMonitor {
         });
       }
     }
+
+    // 檢測重複寫入
+    const recentOperations = recentWrites.map(
+      w => `${w.operation}-${w.collection}`
+    );
+    const operationCounts = {};
+    recentOperations.forEach(op => {
+      operationCounts[op] = (operationCounts[op] || 0) + 1;
+    });
+
+    Object.entries(operationCounts).forEach(([op, count]) => {
+      if (count > 5) {
+        anomalies.push({
+          type: 'repeated_operations',
+          message: `檢測到重複操作: ${op} 執行 ${count} 次`,
+          severity: 'warning',
+        });
+      }
+    });
 
     return anomalies;
   }
@@ -151,12 +170,28 @@ class FirebaseWriteMonitor {
       suggestions.push('💡 建議：考慮使用 setDoc 替代頻繁的 updateDoc 操作');
     }
 
-    if (stats.writeCounts.arrayUnion > 10) {
+    if (stats.writeCounts.arrayUnion > 5) {
       suggestions.push('💡 建議：考慮批量處理 arrayUnion 操作');
     }
 
-    if (stats.averageWritesPerMinute > 5) {
+    if (stats.averageWritesPerMinute > 3) {
       suggestions.push('💡 建議：增加防抖機制，減少寫入頻率');
+    }
+
+    // 新增：檢測寫入隊列積壓
+    if (this.writeHistory.length > 50) {
+      suggestions.push('💡 建議：檢查寫入隊列是否有積壓，考慮增加處理頻率');
+    }
+
+    // 新增：檢測特定時間段的寫入模式
+    const now = new Date();
+    const lastHour = now.getTime() - 3600000;
+    const recentWrites = this.writeHistory.filter(
+      w => new Date(w.timestamp).getTime() > lastHour
+    );
+
+    if (recentWrites.length > 30) {
+      suggestions.push('💡 建議：過去一小時寫入頻率過高，考慮優化數據更新策略');
     }
 
     return suggestions;
@@ -173,10 +208,13 @@ if (process.env.NODE_ENV === 'development') {
   // 優化：減少統計輸出頻率，只在有變化時輸出
   let lastStats = null;
   let lastSuggestionHash = '';
+  let lastOutputTime = 0;
 
-  // 每5分鐘輸出統計信息，而不是每分鐘
+  // 每10分鐘輸出統計信息，而不是每5分鐘
   setInterval(() => {
     const stats = firebaseWriteMonitor.getStats();
+    const now = Date.now();
+
     if (stats.totalWrites > 0) {
       // 檢查統計是否有變化
       const currentStatsHash = JSON.stringify({
@@ -184,9 +222,14 @@ if (process.env.NODE_ENV === 'development') {
         writeCounts: stats.writeCounts,
       });
 
-      if (JSON.stringify(lastStats) !== currentStatsHash) {
+      // 只有在統計有變化且距離上次輸出超過5分鐘時才輸出
+      if (
+        JSON.stringify(lastStats) !== currentStatsHash &&
+        now - lastOutputTime > 300000
+      ) {
         console.log('📊 Firebase 寫入統計:', stats);
         lastStats = JSON.parse(currentStatsHash);
+        lastOutputTime = now;
 
         const suggestions =
           firebaseWriteMonitor.generateOptimizationSuggestions();
@@ -200,7 +243,7 @@ if (process.env.NODE_ENV === 'development') {
         }
       }
     }
-  }, 300000); // 改為5分鐘
+  }, 600000); // 改為10分鐘
 }
 
 export default firebaseWriteMonitor;

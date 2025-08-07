@@ -1,4 +1,4 @@
-import React from 'react';
+// import React from 'react';
 import PropTypes from 'prop-types';
 import './AdBanner.css';
 
@@ -9,7 +9,7 @@ const AdBanner = ({
   isFixed = true,
 }) => {
   // 開發環境顯示測試廣告
-  const isDevelopment = process.env.NODE_ENV === 'development';
+  // const isDevelopment = process.env.NODE_ENV === 'development';
 
   // 如果不需要顯示廣告，返回 null
   if (!showAd) {
@@ -22,12 +22,12 @@ const AdBanner = ({
         isFixed ? 'ad-banner--fixed' : ''
       } ${className}`}
     >
-        <div className="ad-banner__test">
-          <div className="ad-banner__test-content">
+      <div className="ad-banner__test">
+        <div className="ad-banner__test-content">
           <span className="ad-banner__test-label">🎯 廣告空間預留 🎯</span>
           <span className="ad-banner__test-size">點擊體驗優化版設計</span>
-          </div>
         </div>
+      </div>
     </div>
   );
 };

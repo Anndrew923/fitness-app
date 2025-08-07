@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useUser } from '../UserContext';
 import { auth, db } from '../firebase';
 import {
@@ -13,7 +13,6 @@ import {
   deleteDoc,
   arrayUnion,
   arrayRemove,
-  orderBy,
   limit,
   writeBatch,
 } from 'firebase/firestore';
@@ -39,50 +38,57 @@ const Friends = () => {
   const [challengeInput, setChallengeInput] = useState('');
   const [selectedChallengeType, setSelectedChallengeType] =
     useState('strength');
-  const [showChallengeForm, setShowChallengeForm] = useState(false);
+  // const [showChallengeForm, setShowChallengeForm] = useState(false);
 
   // 挑戰類型定義
-  const challengeTypes = [
-    {
-      id: 'strength',
-      name: '力量挑戰',
-      icon: '💪',
-      description: '深蹲、卧推等重量挑戰',
-      examples: ['深蹲 100kg x 5次', '卧推 80kg x 3次', '硬舉 120kg x 1次'],
-    },
-    {
-      id: 'endurance',
-      name: '耐力挑戰',
-      icon: '🏃',
-      description: '跑步、游泳等耐力挑戰',
-      examples: ['跑步 5km 25分鐘內', '游泳 1000m', '騎車 20km'],
-    },
-    {
-      id: 'power',
-      name: '爆發力挑戰',
-      icon: '⚡',
-      description: '短時間高強度挑戰',
-      examples: ['30秒波比跳 15次', '1分鐘引體向上 10次', '2分鐘平板支撐'],
-    },
-    {
-      id: 'comprehensive',
-      name: '綜合挑戰',
-      icon: '🎯',
-      description: '多項目組合挑戰',
-      examples: ['深蹲 + 跑步 + 引體向上', '卧推 + 游泳 + 平板支撐'],
-    },
-  ];
+  const challengeTypes = useMemo(
+    () => [
+      {
+        id: 'strength',
+        name: '力量挑戰',
+        icon: '💪',
+        description: '深蹲、卧推等重量挑戰',
+        examples: ['深蹲 100kg x 5次', '卧推 80kg x 3次', '硬舉 120kg x 1次'],
+      },
+      {
+        id: 'endurance',
+        name: '耐力挑戰',
+        icon: '🏃',
+        description: '跑步、游泳等耐力挑戰',
+        examples: ['跑步 5km 25分鐘內', '游泳 1000m', '騎車 20km'],
+      },
+      {
+        id: 'power',
+        name: '爆發力挑戰',
+        icon: '⚡',
+        description: '短時間高強度挑戰',
+        examples: ['30秒波比跳 15次', '1分鐘引體向上 10次', '2分鐘平板支撐'],
+      },
+      {
+        id: 'comprehensive',
+        name: '綜合挑戰',
+        icon: '🎯',
+        description: '多項目組合挑戰',
+        examples: ['深蹲 + 跑步 + 引體向上', '卧推 + 游泳 + 平板支撐'],
+      },
+    ],
+    []
+  );
 
   // 挑戰狀態
-  const challengeStatus = {
-    pending: { label: '等待回應', color: '#ffa726', icon: '⏳' },
-    accepted: { label: '已接受', color: '#66bb6a', icon: '✅' },
-    declined: { label: '已拒絕', color: '#ef5350', icon: '❌' },
-    completed: { label: '已完成', color: '#42a5f5', icon: '🏆' },
-    expired: { label: '已過期', color: '#9e9e9e', icon: '⏰' },
-  };
+  const challengeStatus = useMemo(
+    () => ({
+      pending: { label: '等待回應', color: '#ffa726', icon: '⏳' },
+      accepted: { label: '已接受', color: '#66bb6a', icon: '✅' },
+      declined: { label: '已拒絕', color: '#ef5350', icon: '❌' },
+      completed: { label: '已完成', color: '#42a5f5', icon: '🏆' },
+      expired: { label: '已過期', color: '#9e9e9e', icon: '⏰' },
+    }),
+    []
+  );
 
   // 調試函數：檢查雙方好友關係
+  /*
   const debugFriendship = async friendId => {
     try {
       console.log('=== 🔍 開始全面調試 ===');
@@ -161,7 +167,7 @@ const Friends = () => {
       console.log('✅ 測試訊息發送成功，ID:', testDoc.id);
 
       // 重新載入訊息
-      await loadMessages(friendId);
+      // await loadMessages(friendId); // 暫時註釋，等待實現
 
       console.log('=== 🎯 調試完成 ===');
     } catch (error) {
@@ -169,6 +175,7 @@ const Friends = () => {
       setError('調試失敗: ' + error.message);
     }
   };
+  */
 
   // 載入好友列表
   const loadFriendsData = useCallback(async () => {
@@ -268,7 +275,7 @@ const Friends = () => {
     } finally {
       setLoading(false);
     }
-  }, []); // 移除依賴，改為手動觸發
+  }, [setUserData]); // 移除依賴，改為手動觸發
 
   // 載入好友邀請
   const loadFriendRequests = useCallback(async () => {
@@ -349,7 +356,7 @@ const Friends = () => {
       console.error('❌ 載入好友邀請失敗:', error);
       setError('載入好友邀請失敗');
     }
-  }, []);
+  }, [setFriendRequests]);
 
   useEffect(() => {
     if (auth.currentUser) {
@@ -780,7 +787,7 @@ const Friends = () => {
   };
 
   // 發送挑戰
-  const sendChallenge = async () => {
+  const sendChallenge = useCallback(async () => {
     if (!selectedFriend || !challengeInput.trim()) return;
 
     const selectedType = challengeTypes.find(
@@ -831,10 +838,17 @@ const Friends = () => {
       });
       setError('發送挑戰失敗: ' + error.message);
     }
-  };
+  }, [
+    selectedFriend,
+    challengeInput,
+    selectedChallengeType,
+    challengeTypes,
+    userData,
+    loadChallenges,
+  ]);
 
   // 載入挑戰
-  const loadChallenges = async friendId => {
+  const loadChallenges = useCallback(async friendId => {
     try {
       console.log('🔄 開始載入挑戰，參數:', {
         friendId,
@@ -892,10 +906,10 @@ const Friends = () => {
       });
       setError('載入挑戰失敗，請稍後再試');
     }
-  };
+  }, []);
 
   // 更新挑戰狀態
-  const updateChallengeStatus = async (challengeId, newStatus) => {
+  const updateChallengeStatus = useCallback(async (challengeId, newStatus) => {
     try {
       const challengeRef = doc(db, 'friendChallenges', challengeId);
       await updateDoc(challengeRef, {
@@ -906,10 +920,10 @@ const Friends = () => {
     } catch (error) {
       console.error('更新挑戰狀態失敗:', error);
     }
-  };
+  }, []);
 
   // 批量更新過期挑戰（可選功能，減少寫入次數）
-  const batchUpdateExpiredChallenges = async expiredChallenges => {
+  const batchUpdateExpiredChallenges = useCallback(async expiredChallenges => {
     if (expiredChallenges.length === 0) return;
 
     try {
@@ -926,31 +940,34 @@ const Friends = () => {
     } catch (error) {
       console.error('批量更新過期挑戰失敗:', error);
     }
-  };
+  }, []);
 
   // 回應挑戰
-  const respondToChallenge = async (challengeId, response) => {
-    try {
-      await updateChallengeStatus(challengeId, response);
-      setSuccess(`挑戰已${response === 'accepted' ? '接受' : '拒絕'}！`);
+  const respondToChallenge = useCallback(
+    async (challengeId, response) => {
+      try {
+        await updateChallengeStatus(challengeId, response);
+        setSuccess(`挑戰已${response === 'accepted' ? '接受' : '拒絕'}！`);
 
-      // 優化：直接更新本地狀態，避免重新載入
-      setChallenges(prevChallenges =>
-        prevChallenges.map(challenge =>
-          challenge.id === challengeId
-            ? {
-                ...challenge,
-                status: response,
-                updatedAt: new Date().toISOString(),
-              }
-            : challenge
-        )
-      );
-    } catch (error) {
-      console.error('回應挑戰失敗:', error);
-      setError('回應挑戰失敗: ' + error.message);
-    }
-  };
+        // 優化：直接更新本地狀態，避免重新載入
+        setChallenges(prevChallenges =>
+          prevChallenges.map(challenge =>
+            challenge.id === challengeId
+              ? {
+                  ...challenge,
+                  status: response,
+                  updatedAt: new Date().toISOString(),
+                }
+              : challenge
+          )
+        );
+      } catch (error) {
+        console.error('回應挑戰失敗:', error);
+        setError('回應挑戰失敗: ' + error.message);
+      }
+    },
+    [updateChallengeStatus]
+  );
 
   // 清除提示訊息
   useEffect(() => {
@@ -1549,7 +1566,6 @@ const Friends = () => {
     );
   }, [
     selectedFriend,
-    challenges.length,
     activeTab,
     challengeTypes,
     selectedChallengeType,
@@ -1558,6 +1574,7 @@ const Friends = () => {
     challengeStatus,
     batchUpdateExpiredChallenges,
     respondToChallenge,
+    sendChallenge,
   ]);
 
   return (

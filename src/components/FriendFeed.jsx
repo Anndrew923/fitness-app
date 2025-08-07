@@ -1,11 +1,10 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useUser } from '../UserContext';
 import { auth, db } from '../firebase';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   collection,
   query,
-  orderBy,
   limit,
   getDocs,
   getDoc,
@@ -17,6 +16,7 @@ import {
 } from 'firebase/firestore';
 import firebaseWriteMonitor from '../utils/firebaseMonitor';
 import './FriendFeed.css';
+import PropTypes from 'prop-types';
 
 const FriendFeed = () => {
   const { userData } = useUser();
@@ -623,167 +623,196 @@ const FriendFeed = () => {
     return postTime.toLocaleDateString();
   };
 
-  // 動態卡片組件
-  const PostCard = ({
-    post,
-    currentUserId,
-    onToggleLike,
-    onAddComment,
-    onDeleteComment,
-    onDeletePost,
-    formatTime,
-    likeProcessing,
-    commentProcessing,
-  }) => {
-    const [showComments, setShowComments] = useState(false);
-    const [newComment, setNewComment] = useState('');
+  // 動態卡片組件 - 使用 React.memo 優化
+  const PostCard = React.memo(
+    ({
+      post,
+      currentUserId,
+      onToggleLike,
+      onAddComment,
+      onDeleteComment,
+      onDeletePost,
+      formatTime,
+      likeProcessing,
+      commentProcessing,
+    }) => {
+      const [showComments, setShowComments] = useState(false);
+      const [newComment, setNewComment] = useState('');
 
-    const isLiked = post.likes.includes(currentUserId);
-    const likeCount = post.likes.length;
-    const commentCount = post.comments.length;
+      const isLiked = post.likes.includes(currentUserId);
+      const likeCount = post.likes.length;
+      const commentCount = post.comments.length;
 
-    const handleAddComment = () => {
-      if (newComment.trim()) {
-        onAddComment(post.id, newComment);
-        setNewComment('');
-      }
-    };
+      const handleAddComment = () => {
+        if (newComment.trim()) {
+          onAddComment(post.id, newComment);
+          setNewComment('');
+        }
+      };
 
-    return (
-      <div className="post-card">
-        {/* 用戶資訊 */}
-        <div className="post-header">
-          <div className="post-user">
-            <img
-              src={post.userAvatarUrl || '/default-avatar.svg'}
-              alt="頭像"
-              className="user-avatar"
-              onError={e => {
-                e.target.src = '/default-avatar.svg';
-              }}
-            />
-            <div className="user-info">
-              <div className="user-name">{post.userNickname}</div>
-              <div className="post-time">{formatTime(post.timestamp)}</div>
-            </div>
-          </div>
-          {/* 刪除按鈕 - 只有動態作者可以看到 */}
-          {post.userId === currentUserId && (
-            <button
-              onClick={() => onDeletePost(post.id)}
-              className="delete-post-btn"
-              title="刪除此動態"
-            >
-              🗑️
-            </button>
-          )}
-        </div>
-
-        {/* 動態內容 */}
-        <div className="post-content">{post.content}</div>
-
-        {/* 互動按鈕 */}
-        <div className="post-actions">
-          <button
-            onClick={() => onToggleLike(post.id, post.likes)}
-            className={`action-btn ${isLiked ? 'liked' : ''}`}
-            disabled={likeProcessing.has(post.id)}
-          >
-            <span className="action-icon">
-              {likeProcessing.has(post.id) ? '⏳' : '👍'}
-            </span>
-            <span className="action-text">
-              {likeProcessing.has(post.id)
-                ? '處理中...'
-                : `${likeCount > 0 ? likeCount : ''} 讚`}
-            </span>
-          </button>
-
-          <button
-            onClick={() => setShowComments(!showComments)}
-            className="action-btn"
-          >
-            <span className="action-icon">💬</span>
-            <span className="action-text">
-              {commentCount > 0 ? commentCount : ''} 留言
-            </span>
-          </button>
-        </div>
-
-        {/* 留言區域 */}
-        {showComments && (
-          <div className="comments-section">
-            {/* 留言列表 */}
-            {post.comments.length > 0 && (
-              <div className="comments-list">
-                {post.comments.map(comment => {
-                  const isPostOwner = post.userId === currentUserId;
-                  const isCommentOwner = comment.userId === currentUserId;
-                  const canDelete = isPostOwner || isCommentOwner;
-
-                  return (
-                    <div key={comment.id} className="comment-item">
-                      <div className="comment-header">
-                        <div className="comment-user-info">
-                          <img
-                            src={comment.userAvatarUrl || '/guest-avatar.svg'}
-                            alt="頭像"
-                            className="comment-avatar"
-                            onError={e => {
-                              e.target.src = '/guest-avatar.svg';
-                            }}
-                          />
-                          <div className="comment-text-info">
-                            <div className="comment-name">
-                              {comment.userNickname}
-                            </div>
-                            <div className="comment-time">
-                              {formatTime(comment.timestamp)}
-                            </div>
-                          </div>
-                        </div>
-                        {canDelete && (
-                          <button
-                            onClick={() => onDeleteComment(post.id, comment.id)}
-                            className="comment-delete-btn"
-                            title={isPostOwner ? '刪除此留言' : '刪除我的留言'}
-                          >
-                            🗑️
-                          </button>
-                        )}
-                      </div>
-                      <div className="comment-content">{comment.content}</div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-
-            {/* 添加留言 */}
-            <div className="comment-input">
-              <input
-                type="text"
-                placeholder="寫留言..."
-                value={newComment}
-                onChange={e => setNewComment(e.target.value)}
-                onKeyPress={e => {
-                  if (e.key === 'Enter') {
-                    handleAddComment();
-                  }
+      return (
+        <div className="post-card">
+          {/* 用戶資訊 */}
+          <div className="post-header">
+            <div className="post-user">
+              <img
+                src={post.userAvatarUrl || '/default-avatar.svg'}
+                alt="頭像"
+                className="user-avatar"
+                onError={e => {
+                  e.target.src = '/default-avatar.svg';
                 }}
               />
-              <button
-                onClick={handleAddComment}
-                disabled={!newComment.trim() || commentProcessing.has(post.id)}
-                className="comment-btn"
-              >
-                {commentProcessing.has(post.id) ? '發送中...' : '發送'}
-              </button>
+              <div className="user-info">
+                <div className="user-name">{post.userNickname}</div>
+                <div className="post-time">{formatTime(post.timestamp)}</div>
+              </div>
             </div>
+            {/* 刪除按鈕 - 只有動態作者可以看到 */}
+            {post.userId === currentUserId && (
+              <button
+                onClick={() => onDeletePost(post.id)}
+                className="delete-post-btn"
+                title="刪除此動態"
+              >
+                🗑️
+              </button>
+            )}
           </div>
-        )}
-      </div>
-    );
+
+          {/* 動態內容 */}
+          <div className="post-content">{post.content}</div>
+
+          {/* 互動按鈕 */}
+          <div className="post-actions">
+            <button
+              onClick={() => onToggleLike(post.id, post.likes)}
+              className={`action-btn ${isLiked ? 'liked' : ''}`}
+              disabled={likeProcessing.has(post.id)}
+            >
+              <span className="action-icon">
+                {likeProcessing.has(post.id) ? '⏳' : '👍'}
+              </span>
+              <span className="action-text">
+                {likeProcessing.has(post.id)
+                  ? '處理中...'
+                  : `${likeCount > 0 ? likeCount : ''} 讚`}
+              </span>
+            </button>
+
+            <button
+              onClick={() => setShowComments(!showComments)}
+              className="action-btn"
+            >
+              <span className="action-icon">💬</span>
+              <span className="action-text">
+                {commentCount > 0 ? commentCount : ''} 留言
+              </span>
+            </button>
+          </div>
+
+          {/* 留言區域 */}
+          {showComments && (
+            <div className="comments-section">
+              {/* 留言列表 */}
+              {post.comments.length > 0 && (
+                <div className="comments-list">
+                  {post.comments.map(comment => {
+                    const isPostOwner = post.userId === currentUserId;
+                    const isCommentOwner = comment.userId === currentUserId;
+                    const canDelete = isPostOwner || isCommentOwner;
+
+                    return (
+                      <div key={comment.id} className="comment-item">
+                        <div className="comment-header">
+                          <div className="comment-user-info">
+                            <img
+                              src={comment.userAvatarUrl || '/guest-avatar.svg'}
+                              alt="頭像"
+                              className="comment-avatar"
+                              onError={e => {
+                                e.target.src = '/guest-avatar.svg';
+                              }}
+                            />
+                            <div className="comment-text-info">
+                              <div className="comment-name">
+                                {comment.userNickname}
+                              </div>
+                              <div className="comment-time">
+                                {formatTime(comment.timestamp)}
+                              </div>
+                            </div>
+                          </div>
+                          {canDelete && (
+                            <button
+                              onClick={() =>
+                                onDeleteComment(post.id, comment.id)
+                              }
+                              className="comment-delete-btn"
+                              title={
+                                isPostOwner ? '刪除此留言' : '刪除我的留言'
+                              }
+                            >
+                              🗑️
+                            </button>
+                          )}
+                        </div>
+                        <div className="comment-content">{comment.content}</div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* 添加留言 */}
+              <div className="comment-input">
+                <input
+                  type="text"
+                  placeholder="寫留言..."
+                  value={newComment}
+                  onChange={e => setNewComment(e.target.value)}
+                  onKeyPress={e => {
+                    if (e.key === 'Enter') {
+                      handleAddComment();
+                    }
+                  }}
+                />
+                <button
+                  onClick={handleAddComment}
+                  disabled={
+                    !newComment.trim() || commentProcessing.has(post.id)
+                  }
+                  className="comment-btn"
+                >
+                  {commentProcessing.has(post.id) ? '發送中...' : '發送'}
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    }
+  );
+
+  PostCard.propTypes = {
+    post: PropTypes.shape({
+      id: PropTypes.string.isRequired,
+      userId: PropTypes.string.isRequired,
+      userNickname: PropTypes.string.isRequired,
+      userAvatarUrl: PropTypes.string,
+      content: PropTypes.string.isRequired,
+      timestamp: PropTypes.any.isRequired,
+      likes: PropTypes.array.isRequired,
+      comments: PropTypes.array.isRequired,
+    }).isRequired,
+    currentUserId: PropTypes.string.isRequired,
+    onToggleLike: PropTypes.func.isRequired,
+    onAddComment: PropTypes.func.isRequired,
+    onDeleteComment: PropTypes.func.isRequired,
+    onDeletePost: PropTypes.func.isRequired,
+    formatTime: PropTypes.func.isRequired,
+    likeProcessing: PropTypes.instanceOf(Set).isRequired,
+    commentProcessing: PropTypes.instanceOf(Set).isRequired,
   };
 
   // 初始載入
@@ -806,8 +835,11 @@ const FriendFeed = () => {
 
     // 組件卸載時清理計時器
     return () => {
-      commentDebounceTimers.current.forEach(timer => clearTimeout(timer));
-      commentDebounceTimers.current.clear();
+      const timers = commentDebounceTimers.current;
+      if (timers) {
+        timers.forEach(timer => clearTimeout(timer));
+        timers.clear();
+      }
     };
   }, [loadFriendData, loadPosts, userId]);
 

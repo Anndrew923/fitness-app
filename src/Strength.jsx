@@ -14,10 +14,10 @@ import PropTypes from 'prop-types';
 
 import './Strength.css';
 
-function Strength({ onComplete, clearTestData }) {
+function Strength({ onComplete }) {
   const { userData, setUserData } = useUser();
   const navigate = useNavigate();
-  const { gender, height, weight, age } = userData;
+  const { gender, age } = userData;
 
   // 新增分頁狀態
   const [currentTab, setCurrentTab] = useState('exercises'); // 'exercises', 'results', 'standards'
@@ -52,7 +52,7 @@ function Strength({ onComplete, clearTestData }) {
     max: userData.testInputs?.strength?.shoulderPress?.max || null,
     score: userData.testInputs?.strength?.shoulderPress?.score || null,
   });
-  const [isExpanded, setIsExpanded] = useState(false);
+  // const [isExpanded, setIsExpanded] = useState(false);
 
   // 將 useRef 移到組件頂層
   const timeoutRef = useRef(null);
@@ -80,8 +80,8 @@ function Strength({ onComplete, clearTestData }) {
         clearTimeout(timeoutRef.current);
       }
 
-      // 設置新的定時器
-      timeoutRef.current = setTimeout(updateData, 3000); // 增加到3秒防抖
+      // 設置新的定時器，增加到5秒防抖
+      timeoutRef.current = setTimeout(updateData, 5000);
     },
     [setUserData, userData.testInputs]
   );

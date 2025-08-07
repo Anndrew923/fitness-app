@@ -7,10 +7,10 @@ import {
   useRef,
   useState,
 } from 'react';
-import { doc, getDoc, setDoc, updateDoc, arrayUnion } from 'firebase/firestore';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { db, auth } from './firebase';
 import PropTypes from 'prop-types';
-import { calculateLadderScore, getAgeGroup } from './utils';
+import { getAgeGroup, validateAndCleanUserData } from './utils';
 import firebaseWriteMonitor from './utils/firebaseMonitor';
 
 const UserContext = createContext();
@@ -195,7 +195,7 @@ export function UserProvider({ children }) {
         lastActive: data.lastActive || null,
       };
 
-      await setDoc(userRef, dataToSave, { merge: true });
+      await setDoc(userRef, dataToSave);
       localStorage.setItem('userData', JSON.stringify(dataToSave));
 
       // 記錄寫入操作
@@ -221,6 +221,127 @@ export function UserProvider({ children }) {
   const lastWriteTimeRef = useRef(0);
   const writeCountRef = useRef(0);
   const lastWriteCountResetTimeRef = useRef(Date.now());
+  // const pendingWritesRef = useRef(new Map()); // 新增：待寫入數據緩存
+  const writeQueueRef = useRef([]); // 新增：寫入隊列
+  const isProcessingQueueRef = useRef(false); // 新增：隊列處理狀態
+
+  // 新增：函數引用，避免認證監聽器重複執行
+  const loadUserDataRef = useRef();
+  const clearUserDataRef = useRef();
+
+  // 新增：數據驗證函數
+  const validateUserData = useCallback(data => {
+    const { cleaned, errors, isValid } = validateAndCleanUserData(data);
+
+    if (!isValid) {
+      console.warn('數據驗證失敗:', errors);
+    }
+
+    return {
+      isValid,
+      errors,
+      cleaned,
+    };
+  }, []);
+
+  // 新增：智能寫入隊列處理
+  const processWriteQueue = useCallback(async () => {
+    if (isProcessingQueueRef.current || writeQueueRef.current.length === 0) {
+      return;
+    }
+
+    isProcessingQueueRef.current = true;
+
+    try {
+      const batch = [];
+      const processedIds = [];
+
+      // 處理隊列中的寫入操作
+      while (writeQueueRef.current.length > 0) {
+        const writeOp = writeQueueRef.current.shift();
+
+        // 驗證和清理數據
+        const validation = validateUserData(writeOp.data);
+        if (!validation.isValid) {
+          console.warn('數據驗證失敗，跳過寫入:', validation.errors);
+          continue;
+        }
+
+        // 使用清理後的數據
+        const cleanedData = validation.cleaned;
+        batch.push({
+          ...writeOp,
+          data: cleanedData,
+        });
+        processedIds.push(writeOp.id);
+      }
+
+      if (batch.length > 0) {
+        console.log(`🔄 批量處理 ${batch.length} 個寫入操作`);
+
+        // 執行批量寫入
+        for (const writeOp of batch) {
+          try {
+            const userRef = doc(db, 'users', auth.currentUser.uid);
+            await setDoc(userRef, writeOp.data, { merge: true });
+
+            // 記錄寫入操作
+            firebaseWriteMonitor.logWrite(
+              'setDoc',
+              'users',
+              auth.currentUser.uid,
+              writeOp.data
+            );
+
+            console.log(`✅ 寫入成功: ${writeOp.type}`);
+          } catch (error) {
+            console.error(`❌ 寫入失敗: ${writeOp.type}`, error);
+            // 將失敗的操作重新加入隊列
+            writeQueueRef.current.unshift(writeOp);
+          }
+        }
+
+        // 更新本地存儲
+        const latestData = batch[batch.length - 1].data;
+        localStorage.setItem('userData', JSON.stringify(latestData));
+        localStorage.setItem('lastSavedUserData', JSON.stringify(latestData));
+      }
+    } catch (error) {
+      console.error('批量寫入處理失敗:', error);
+    } finally {
+      isProcessingQueueRef.current = false;
+
+      // 如果隊列中還有待處理的操作，繼續處理
+      if (writeQueueRef.current.length > 0) {
+        setTimeout(() => processWriteQueue(), 1000);
+      }
+    }
+  }, [validateUserData]);
+
+  // 新增：添加到寫入隊列
+  const addToWriteQueue = useCallback(
+    (data, type = 'update') => {
+      const writeOp = {
+        id: Date.now().toString(),
+        type,
+        data,
+        timestamp: Date.now(),
+      };
+
+      writeQueueRef.current.push(writeOp);
+
+      // 限制隊列長度，避免內存洩漏
+      if (writeQueueRef.current.length > 20) {
+        writeQueueRef.current.shift();
+      }
+
+      // 觸發隊列處理
+      if (!isProcessingQueueRef.current) {
+        setTimeout(() => processWriteQueue(), 1000);
+      }
+    },
+    [processWriteQueue]
+  );
 
   // 更新用戶數據
   const setUserData = useCallback(
@@ -256,7 +377,12 @@ export function UserProvider({ children }) {
           'avatarUrl',
           'ladderRank',
           'history',
+          'isAnonymousInLadder',
+          'profession',
+          'weeklyTrainingHours',
+          'trainingYears',
         ];
+
         const hasImportantChanges = importantFields.some(
           field =>
             JSON.stringify(newData[field]) !== JSON.stringify(userData[field])
@@ -282,22 +408,22 @@ export function UserProvider({ children }) {
           }
 
           // 簡化防抖邏輯：使用固定的防抖時間
-          const debounceTime = isOnlyNicknameChange ? 3000 : 15000; // 暱稱3秒，其他15秒
+          const debounceTime = isOnlyNicknameChange ? 5000 : 20000; // 暱稱5秒，其他20秒
 
-          // 檢查寫入頻率限制（至少間隔30秒）
-          if (timeSinceLastWrite < 30000) {
-            // 如果距離上次寫入不到30秒，延長防抖時間
+          // 檢查寫入頻率限制（至少間隔60秒）
+          if (timeSinceLastWrite < 60000) {
+            // 如果距離上次寫入不到60秒，延長防抖時間
             if (setUserDataDebounceRef.current) {
               clearTimeout(setUserDataDebounceRef.current);
             }
 
             setUserDataDebounceRef.current = setTimeout(() => {
-              console.log(`🔄 防抖後保存用戶數據（30秒頻率限制）`);
+              console.log(`🔄 防抖後保存用戶數據（60秒頻率限制）`);
               lastWriteTimeRef.current = Date.now();
               writeCountRef.current++;
-              saveUserData(newData);
+              addToWriteQueue(newData, 'userData');
               setUserDataDebounceRef.current = null;
-            }, 30000 - timeSinceLastWrite);
+            }, 60000 - timeSinceLastWrite);
           } else {
             // 清除之前的防抖定時器
             if (setUserDataDebounceRef.current) {
@@ -313,14 +439,14 @@ export function UserProvider({ children }) {
               );
               lastWriteTimeRef.current = Date.now();
               writeCountRef.current++;
-              saveUserData(newData);
+              addToWriteQueue(newData, 'userData');
               setUserDataDebounceRef.current = null;
             }, debounceTime);
           }
         }
       }
     },
-    [userData, saveUserData]
+    [userData, addToWriteQueue]
   );
 
   // 保存歷史記錄 - 優化版本，包含記錄數量限制和自動清理
@@ -386,35 +512,25 @@ export function UserProvider({ children }) {
 
       saveHistoryDebounceRef.current = setTimeout(async () => {
         try {
-          const userRef = doc(db, 'users', auth.currentUser.uid);
-
-          // 使用 setDoc 而不是 updateDoc，減少寫入次數
-          const currentData = userData;
+          // 使用寫入隊列而不是直接寫入
           const updatedData = {
-            ...currentData,
+            ...userData,
             history: newHistory,
             updatedAt: new Date().toISOString(),
           };
 
-          await setDoc(userRef, updatedData, { merge: true });
-
-          // 記錄寫入操作
-          firebaseWriteMonitor.logWrite(
-            'setDoc',
-            'users',
-            auth.currentUser.uid,
-            { history: 'batch_update' }
+          addToWriteQueue(updatedData, 'history');
+          console.log(
+            `歷史記錄已加入寫入隊列 (${newHistory.length}/${maxRecords})`
           );
-
-          console.log(`歷史記錄保存成功 (${newHistory.length}/${maxRecords})`);
         } catch (error) {
           console.error('保存歷史記錄失敗:', error);
         } finally {
           saveHistoryDebounceRef.current = null;
         }
-      }, 10000); // 增加到10秒防抖，進一步減少寫入頻率
+      }, 15000); // 增加到15秒防抖，進一步減少寫入頻率
     },
-    [userData, saveUserData]
+    [userData, addToWriteQueue]
   );
 
   // 清除用戶數據
@@ -424,6 +540,10 @@ export function UserProvider({ children }) {
     dispatch({ type: 'RESET_USER_DATA' });
     setIsLoading(false);
   }, []);
+
+  // 更新函數引用
+  loadUserDataRef.current = loadUserData;
+  clearUserDataRef.current = clearUserData;
 
   // 監聽認證狀態變化
   useEffect(() => {
@@ -435,11 +555,11 @@ export function UserProvider({ children }) {
         setIsAuthenticated(true);
         // 清除訪客模式標記
         sessionStorage.removeItem('guestMode');
-        await loadUserData(user);
+        await loadUserDataRef.current(user);
       } else {
         console.log('認證狀態變更 - 用戶未登入');
         setIsAuthenticated(false);
-        clearUserData();
+        clearUserDataRef.current();
       }
     });
 
@@ -447,9 +567,9 @@ export function UserProvider({ children }) {
       isMountedRef.current = false;
       unsubscribe();
     };
-  }, [loadUserData, clearUserData]);
+  }, []); // 使用 ref 避免重複執行
 
-  // 定期同步數據到 Firebase（每 30 分鐘，進一步減少寫入頻率）
+  // 定期同步數據到 Firebase（每 60 分鐘，進一步減少寫入頻率）
   useEffect(() => {
     if (!auth.currentUser || !userData || Object.keys(userData).length === 0)
       return;
@@ -460,8 +580,8 @@ export function UserProvider({ children }) {
         const now = Date.now();
         const timeSinceLastWrite = now - lastWriteTimeRef.current;
 
-        // 如果距離上次寫入不到10分鐘，跳過同步
-        if (timeSinceLastWrite < 600000) {
+        // 如果距離上次寫入不到30分鐘，跳過同步
+        if (timeSinceLastWrite < 1800000) {
           console.log('⏭️ 定期同步：距離上次寫入時間太短，跳過同步');
           return;
         }
@@ -477,20 +597,24 @@ export function UserProvider({ children }) {
           nickname: userData.nickname,
           avatarUrl: userData.avatarUrl,
           ladderRank: userData.ladderRank,
+          isAnonymousInLadder: userData.isAnonymousInLadder,
+          profession: userData.profession,
+          weeklyTrainingHours: userData.weeklyTrainingHours,
+          trainingYears: userData.trainingYears,
         });
 
         if (lastSavedData !== currentDataString) {
           console.log('🔄 定期同步：檢測到數據變化，執行保存');
-          saveUserData(userData);
+          addToWriteQueue(userData, 'periodic_sync');
           localStorage.setItem('lastSavedUserData', currentDataString);
         } else {
           console.log('⏭️ 定期同步：無數據變化，跳過保存');
         }
       }
-    }, 1800000); // 改為30分鐘
+    }, 3600000); // 改為60分鐘
 
     return () => clearInterval(syncInterval);
-  }, [userData, saveUserData]);
+  }, [userData, addToWriteQueue]);
 
   return (
     <UserContext.Provider

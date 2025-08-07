@@ -51,7 +51,7 @@ function Login({ onLogin }) {
     }
 
     return () => unsubscribe();
-  }, [navigate]);
+  }, [navigate]); // 移除依賴項，認證監聽只需要在組件掛載時設置一次
 
   const handleSubmit = async e => {
     e.preventDefault();
@@ -163,7 +163,7 @@ function Login({ onLogin }) {
     }
   };
 
-  const handleSocialLogin = (email, password) => {
+  const handleSocialLogin = () => {
     // 社交登入不需要調用 onLogin，因為 Firebase 已經處理了認證
     // 直接導航到用戶信息頁面
     console.log('社交登入成功，導航到 /user-info');
