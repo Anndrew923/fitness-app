@@ -15,6 +15,7 @@ function FFMI({ onComplete }) {
   const [ffmiCategory, setFfmiCategory] = useState('');
   const [isExpanded, setIsExpanded] = useState(false);
   const [isTableExpanded, setIsTableExpanded] = useState(false); // 新增：控制對照表展開狀態
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     if (bodyFat) {
@@ -103,6 +104,8 @@ function FFMI({ onComplete }) {
     const isGuest = sessionStorage.getItem('guestMode') === 'true';
 
     try {
+      if (submitting) return;
+      setSubmitting(true);
       // 準備更新的數據
       const updatedScores = {
         ...userData.scores,
@@ -141,6 +144,8 @@ function FFMI({ onComplete }) {
         alert('更新用戶數據失敗，請稍後再試！');
       }
       navigate('/user-info', { state: { from: '/body-fat' } });
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -263,8 +268,13 @@ function FFMI({ onComplete }) {
           )}
         </div>
       </div>
-      <button type="button" onClick={handleSubmit} className="ffmi-submit-btn">
-        提交並返回總覽
+      <button
+        type="button"
+        onClick={handleSubmit}
+        className="ffmi-submit-btn"
+        disabled={submitting}
+      >
+        {submitting ? '提交中…' : '提交並返回總覽'}
       </button>
     </div>
   );

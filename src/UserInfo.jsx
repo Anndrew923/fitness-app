@@ -292,6 +292,8 @@ function UserInfo({ testData, onLogout, clearTestData }) {
   const nicknameTimeoutRef = useRef(null); // 新增：暱稱輸入防抖定時器
   const [avatarUploading, setAvatarUploading] = useState(false);
   const [avatarError, setAvatarError] = useState(null);
+  // 記錄上一次應用過的 testData，避免重複觸發寫入
+  const lastAppliedTestDataKeyRef = useRef(null);
 
   // 新增：對話框狀態
   const [modalState, setModalState] = useState({
@@ -806,6 +808,13 @@ function UserInfo({ testData, onLogout, clearTestData }) {
     if (testData && Object.keys(testData).length > 0) {
       console.log('收到測試數據:', testData);
 
+      // 防止重複應用相同 testData 導致的重複 setUserData
+      const testDataKey = JSON.stringify(testData);
+      if (lastAppliedTestDataKeyRef.current === testDataKey) {
+        return;
+      }
+      lastAppliedTestDataKeyRef.current = testDataKey;
+
       // 使用更長的防抖處理 testData 更新，避免頻繁寫入
       const timeoutId = setTimeout(() => {
         setUserData(prev => {
@@ -818,7 +827,11 @@ function UserInfo({ testData, onLogout, clearTestData }) {
             ...(testData.squat !== undefined && {
               strength: testData.averageScore || 0,
             }),
-            ...(testData.jumpHeight !== undefined && {
+            // 爆發力測試：使用 finalScore（或存在任一 power 欄位時）
+            ...((testData.finalScore !== undefined ||
+              testData.verticalJump !== undefined ||
+              testData.standingLongJump !== undefined ||
+              testData.sprint !== undefined) && {
               explosivePower: testData.finalScore || 0,
             }),
             ...(testData.smm !== undefined && {

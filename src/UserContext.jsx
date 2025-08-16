@@ -362,6 +362,17 @@ export function UserProvider({ children }) {
         newData.ageGroup = getAgeGroup(newData.age);
       }
 
+      // 如果資料沒有實質變化則跳過，避免無限循環
+      try {
+        const prevString = JSON.stringify(userData);
+        const nextString = JSON.stringify({ ...userData, ...newData });
+        if (prevString === nextString) {
+          return;
+        }
+      } catch (e) {
+        // 若序列化失敗則繼續更新
+      }
+
       // 立即更新本地狀態
       dispatch({ type: 'UPDATE_USER_DATA', payload: newData });
 
@@ -383,10 +394,15 @@ export function UserProvider({ children }) {
           'trainingYears',
         ];
 
-        const hasImportantChanges = importantFields.some(
-          field =>
-            JSON.stringify(newData[field]) !== JSON.stringify(userData[field])
-        );
+        const hasImportantChanges = importantFields.some(field => {
+          try {
+            return (
+              JSON.stringify(newData[field]) !== JSON.stringify(userData[field])
+            );
+          } catch (e) {
+            return true;
+          }
+        });
 
         if (hasImportantChanges) {
           // 檢查是否只是暱稱變化

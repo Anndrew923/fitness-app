@@ -27,6 +27,7 @@ function Muscle({ onComplete }) {
     smPercentScore: null,
     finalScore: null,
   });
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     if (smm) {
@@ -124,6 +125,8 @@ function Muscle({ onComplete }) {
     const isGuest = sessionStorage.getItem('guestMode') === 'true';
 
     try {
+      if (submitting) return;
+      setSubmitting(true);
       // 準備更新的數據
       const updatedScores = {
         ...userData.scores,
@@ -162,6 +165,8 @@ function Muscle({ onComplete }) {
         alert('更新用戶數據失敗，請稍後再試！');
       }
       navigate('/user-info', { state: { from: '/muscle-mass' } });
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -251,8 +256,13 @@ function Muscle({ onComplete }) {
       )}
 
       <div className="button-group">
-        <button type="button" onClick={handleSubmit} className="submit-btn">
-          提交並返回總覽
+        <button
+          type="button"
+          onClick={handleSubmit}
+          className="submit-btn"
+          disabled={submitting}
+        >
+          {submitting ? '提交中…' : '提交並返回總覽'}
         </button>
       </div>
     </div>

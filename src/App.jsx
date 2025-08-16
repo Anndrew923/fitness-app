@@ -25,6 +25,7 @@ import History from './History';
 import PrivacyPolicy from './PrivacyPolicy';
 import BottomNavBar from './components/BottomNavBar';
 import Ladder from './components/Ladder';
+import Settings from './components/Settings';
 const Community = React.lazy(() => import('./components/Community'));
 const FriendFeed = React.lazy(() => import('./components/FriendFeed'));
 import GlobalAdBanner from './components/GlobalAdBanner';
@@ -32,6 +33,7 @@ import PWAInstallPrompt from './components/PWAInstallPrompt';
 import IOSInstallPrompt from './components/IOSInstallPrompt';
 import performanceMonitor from './utils/performanceMonitor';
 import './App.css';
+import PrivacyPolicyModal from './components/PrivacyPolicyModal';
 
 class ErrorBoundary extends Component {
   state = { hasError: false, error: null, errorInfo: null };
@@ -120,6 +122,7 @@ ErrorBoundary.propTypes = {
 function AppContent() {
   const [testData, setTestData] = useState(null);
   const location = useLocation();
+  const [isPrivacyModalOpen, setIsPrivacyModalOpen] = useState(false);
   const showNavBar = [
     '/user-info',
     '/history',
@@ -131,6 +134,7 @@ function AppContent() {
     '/cardio',
     '/muscle-mass',
     '/body-fat',
+    '/settings',
   ].some(path => location.pathname.startsWith(path));
 
   // 檢查是否需要為固定廣告預留空間
@@ -145,6 +149,7 @@ function AppContent() {
     '/explosive-power',
     '/muscle-mass',
     '/body-fat',
+    '/settings',
   ].some(path => location.pathname.startsWith(path));
 
   // 性能監控：監控頁面載入時間
@@ -160,6 +165,15 @@ function AppContent() {
     }, 100); // 給組件一點時間來渲染
 
     return () => clearTimeout(timer);
+  }, [location.pathname]);
+
+  // 首次使用顯示隱私權政策（不佔導覽空間）
+  useEffect(() => {
+    const accepted = localStorage.getItem('privacyAcceptedV1') === 'true';
+    const allowedPages = ['/', '/login', '/user-info'];
+    if (!accepted && allowedPages.some(p => location.pathname.startsWith(p))) {
+      setIsPrivacyModalOpen(true);
+    }
   }, [location.pathname]);
 
   const handleLogin = async (email, password) => {
@@ -376,6 +390,10 @@ function AppContent() {
                 element={<ProtectedRoute element={<Ladder />} />}
               />
               <Route
+                path="/settings"
+                element={<ProtectedRoute element={<Settings />} />}
+              />
+              <Route
                 path="/community"
                 element={<ProtectedRoute element={<Community />} />}
               />
@@ -390,14 +408,25 @@ function AppContent() {
           </div>
         </Suspense>
       </ErrorBoundary>
-      <footer className="app-footer">
-        <Link to="/privacy-policy">隱私權政策</Link>
-      </footer>
+      {/* 依規範：保留主要入口頁政策連結，其餘頁面移除以減少干擾 */}
+      {['/', '/login'].some(path => location.pathname.startsWith(path)) && (
+        <footer className="app-footer">
+          <Link to="/privacy-policy">隱私權政策</Link>
+        </footer>
+      )}
       {/* 在天梯頁面隱藏廣告，保持頁面乾淨 */}
       {location.pathname !== '/ladder' && <GlobalAdBanner />}
       {showNavBar && <BottomNavBar />}
       <PWAInstallPrompt />
       <IOSInstallPrompt />
+      <PrivacyPolicyModal
+        isOpen={isPrivacyModalOpen}
+        onClose={() => setIsPrivacyModalOpen(false)}
+        onAccept={() => {
+          localStorage.setItem('privacyAcceptedV1', 'true');
+          setIsPrivacyModalOpen(false);
+        }}
+      />
     </div>
   );
 }

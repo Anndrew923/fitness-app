@@ -53,6 +53,7 @@ function Strength({ onComplete }) {
     score: userData.testInputs?.strength?.shoulderPress?.score || null,
   });
   // const [isExpanded, setIsExpanded] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   // 將 useRef 移到組件頂層
   const timeoutRef = useRef(null);
@@ -359,6 +360,8 @@ function Strength({ onComplete }) {
 
   const handleSubmit = async () => {
     if (!averageScore) return alert('請至少完成一項評測！');
+    if (submitting) return;
+    setSubmitting(true);
 
     try {
       const updatedScores = {
@@ -366,7 +369,7 @@ function Strength({ onComplete }) {
         strength: parseFloat(averageScore),
       };
 
-      await setUserData(prev => ({
+      setUserData(prev => ({
         ...prev,
         scores: updatedScores,
         // 保持原有的天梯分數，不自動更新
@@ -425,6 +428,9 @@ function Strength({ onComplete }) {
     } catch (error) {
       console.error('提交失敗:', error);
       alert('更新用戶數據或導航失敗，請稍後再試！');
+      navigate('/user-info', { state: { from: '/strength' } });
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -788,9 +794,13 @@ function Strength({ onComplete }) {
           type="button"
           onClick={handleSubmit}
           className="submit-btn"
-          disabled={!averageScore}
+          disabled={!averageScore || submitting}
         >
-          {averageScore ? '✅ 提交並返回總覽' : '請至少完成一項評測'}
+          {submitting
+            ? '提交中…'
+            : averageScore
+            ? '✅ 提交並返回總覽'
+            : '請至少完成一項評測'}
         </button>
       </div>
     </div>
