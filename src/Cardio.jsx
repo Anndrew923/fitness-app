@@ -166,17 +166,13 @@ function Cardio({ onComplete }) {
       if (onComplete && typeof onComplete === 'function') {
         onComplete(testData);
       }
-      setTimeout(() => {
-        navigate('/user-info', { state: { from: '/cardio' } });
-      }, 100);
+      navigate('/user-info', { state: { from: '/cardio' } });
     } catch (error) {
       console.error('提交失敗:', error);
       if (!isGuest) {
         alert('更新用戶數據失敗，請稍後再試！');
       }
-      setTimeout(() => {
-        navigate('/user-info', { state: { from: '/cardio' } });
-      }, 100);
+      navigate('/user-info', { state: { from: '/cardio' } });
     }
   };
 
@@ -262,7 +258,7 @@ function Cardio({ onComplete }) {
       </div>
 
       <div className="button-group">
-        <button onClick={handleSubmit} className="submit-btn">
+        <button type="button" onClick={handleSubmit} className="submit-btn">
           提交並返回總覽
         </button>
       </div>

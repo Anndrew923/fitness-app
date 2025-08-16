@@ -421,9 +421,7 @@ function Strength({ onComplete }) {
         onComplete(testData);
       }
 
-      setTimeout(() => {
-        navigate('/user-info', { state: { from: '/strength' } });
-      }, 500);
+      navigate('/user-info', { state: { from: '/strength' } });
     } catch (error) {
       console.error('提交失敗:', error);
       alert('更新用戶數據或導航失敗，請稍後再試！');
@@ -787,6 +785,7 @@ function Strength({ onComplete }) {
       {/* 提交按鈕 */}
       <div className="submit-section">
         <button
+          type="button"
           onClick={handleSubmit}
           className="submit-btn"
           disabled={!averageScore}

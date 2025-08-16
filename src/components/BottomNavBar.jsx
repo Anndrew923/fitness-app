@@ -182,8 +182,8 @@ function BottomNavBar() {
             style={{ position: 'relative', flex: 1, textAlign: 'center' }}
           >
             <button
+              type="button"
               onClick={() => handleNav(item)}
-              onMouseDown={e => e.preventDefault()}
               style={{
                 background: 'none',
                 border: 'none',

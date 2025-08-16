@@ -201,17 +201,13 @@ function Power({ onComplete }) {
       if (onComplete && typeof onComplete === 'function') {
         onComplete(testData);
       }
-      setTimeout(() => {
-        navigate('/user-info', { state: { from: '/explosive-power' } });
-      }, 100);
+      navigate('/user-info', { state: { from: '/explosive-power' } });
     } catch (error) {
       console.error('Power.js - 更新 UserContext 或導航失敗:', error);
       if (!isGuest) {
         alert('更新用戶數據失敗，請稍後再試！');
       }
-      setTimeout(() => {
-        navigate('/user-info', { state: { from: '/explosive-power' } });
-      }, 100);
+      navigate('/user-info', { state: { from: '/explosive-power' } });
     }
   };
 
@@ -362,7 +358,7 @@ function Power({ onComplete }) {
       </div>
 
       <div className="button-group">
-        <button onClick={handleSubmit} className="submit-btn">
+        <button type="button" onClick={handleSubmit} className="submit-btn">
           提交並返回總覽
         </button>
       </div>
