@@ -1,4 +1,4 @@
-import React, { useState, Component, useEffect } from 'react';
+import React, { useState, Component, useEffect, Suspense } from 'react';
 import {
   BrowserRouter as Router,
   Routes,
@@ -25,8 +25,8 @@ import History from './History';
 import PrivacyPolicy from './PrivacyPolicy';
 import BottomNavBar from './components/BottomNavBar';
 import Ladder from './components/Ladder';
-import Community from './components/Community';
-import FriendFeed from './components/FriendFeed';
+const Community = React.lazy(() => import('./components/Community'));
+const FriendFeed = React.lazy(() => import('./components/FriendFeed'));
 import GlobalAdBanner from './components/GlobalAdBanner';
 import PWAInstallPrompt from './components/PWAInstallPrompt';
 import IOSInstallPrompt from './components/IOSInstallPrompt';
@@ -270,123 +270,125 @@ function AppContent() {
     <div className={`app-container ${showFixedAd ? 'page-with-fixed-ad' : ''}`}>
       <ScrollToTop />
       <ErrorBoundary>
-        <div className="main-content">
-          <Routes>
-            <Route
-              path="/"
-              element={
-                auth.currentUser ? (
-                  <Navigate to="/user-info" />
-                ) : (
-                  <Welcome
-                    onLogin={handleLogin}
-                    onGuestMode={handleGuestMode}
+        <Suspense fallback={<div>載入中...</div>}>
+          <div className="main-content">
+            <Routes>
+              <Route
+                path="/"
+                element={
+                  auth.currentUser ? (
+                    <Navigate to="/user-info" />
+                  ) : (
+                    <Welcome
+                      onLogin={handleLogin}
+                      onGuestMode={handleGuestMode}
+                    />
+                  )
+                }
+              />
+              <Route
+                path="/user-info"
+                element={
+                  <ProtectedRoute
+                    element={
+                      <UserInfo
+                        testData={testData}
+                        onLogout={handleLogout}
+                        clearTestData={clearTestData}
+                      />
+                    }
                   />
-                )
-              }
-            />
-            <Route
-              path="/user-info"
-              element={
-                <ProtectedRoute
-                  element={
-                    <UserInfo
-                      testData={testData}
-                      onLogout={handleLogout}
-                      clearTestData={clearTestData}
-                    />
-                  }
-                />
-              }
-            />
-            <Route
-              path="/strength"
-              element={
-                <ProtectedRoute
-                  element={
-                    <Strength
-                      onComplete={handleTestComplete}
-                      clearTestData={clearTestData}
-                    />
-                  }
-                />
-              }
-            />
-            <Route
-              path="/cardio"
-              element={
-                <ProtectedRoute
-                  element={
-                    <Cardio
-                      onComplete={handleTestComplete}
-                      clearTestData={clearTestData}
-                    />
-                  }
-                />
-              }
-            />
-            <Route
-              path="/explosive-power"
-              element={
-                <ProtectedRoute
-                  element={
-                    <Power
-                      onComplete={handleTestComplete}
-                      clearTestData={clearTestData}
-                    />
-                  }
-                />
-              }
-            />
-            <Route
-              path="/muscle-mass"
-              element={
-                <ProtectedRoute
-                  element={
-                    <Muscle
-                      onComplete={handleTestComplete}
-                      clearTestData={clearTestData}
-                    />
-                  }
-                />
-              }
-            />
-            <Route
-              path="/body-fat"
-              element={
-                <ProtectedRoute
-                  element={
-                    <FFMI
-                      onComplete={handleTestComplete}
-                      clearTestData={clearTestData}
-                    />
-                  }
-                />
-              }
-            />
+                }
+              />
+              <Route
+                path="/strength"
+                element={
+                  <ProtectedRoute
+                    element={
+                      <Strength
+                        onComplete={handleTestComplete}
+                        clearTestData={clearTestData}
+                      />
+                    }
+                  />
+                }
+              />
+              <Route
+                path="/cardio"
+                element={
+                  <ProtectedRoute
+                    element={
+                      <Cardio
+                        onComplete={handleTestComplete}
+                        clearTestData={clearTestData}
+                      />
+                    }
+                  />
+                }
+              />
+              <Route
+                path="/explosive-power"
+                element={
+                  <ProtectedRoute
+                    element={
+                      <Power
+                        onComplete={handleTestComplete}
+                        clearTestData={clearTestData}
+                      />
+                    }
+                  />
+                }
+              />
+              <Route
+                path="/muscle-mass"
+                element={
+                  <ProtectedRoute
+                    element={
+                      <Muscle
+                        onComplete={handleTestComplete}
+                        clearTestData={clearTestData}
+                      />
+                    }
+                  />
+                }
+              />
+              <Route
+                path="/body-fat"
+                element={
+                  <ProtectedRoute
+                    element={
+                      <FFMI
+                        onComplete={handleTestComplete}
+                        clearTestData={clearTestData}
+                      />
+                    }
+                  />
+                }
+              />
 
-            <Route path="/login" element={<Login onLogin={handleLogin} />} />
-            <Route
-              path="/history"
-              element={<ProtectedRoute element={<History />} />}
-            />
-            <Route
-              path="/ladder"
-              element={<ProtectedRoute element={<Ladder />} />}
-            />
-            <Route
-              path="/community"
-              element={<ProtectedRoute element={<Community />} />}
-            />
-            <Route
-              path="/friend-feed/:userId"
-              element={<ProtectedRoute element={<FriendFeed />} />}
-            />
+              <Route path="/login" element={<Login onLogin={handleLogin} />} />
+              <Route
+                path="/history"
+                element={<ProtectedRoute element={<History />} />}
+              />
+              <Route
+                path="/ladder"
+                element={<ProtectedRoute element={<Ladder />} />}
+              />
+              <Route
+                path="/community"
+                element={<ProtectedRoute element={<Community />} />}
+              />
+              <Route
+                path="/friend-feed/:userId"
+                element={<ProtectedRoute element={<FriendFeed />} />}
+              />
 
-            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-            <Route path="*" element={<div>404 - 頁面未找到</div>} />
-          </Routes>
-        </div>
+              <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+              <Route path="*" element={<div>404 - 頁面未找到</div>} />
+            </Routes>
+          </div>
+        </Suspense>
       </ErrorBoundary>
       <footer className="app-footer">
         <Link to="/privacy-policy">隱私權政策</Link>

@@ -93,15 +93,15 @@ const FriendFeed = () => {
       setLoading(true);
       console.log('🔄 開始載入好友動態...');
 
-      // 簡化查詢，避免索引問題
-      // 先查詢該用戶發布的動態（不使用 orderBy 避免索引問題）
+      // 只顯示：
+      // 1) 該用戶自己發布且 privacy 為 friends（或未設置）的動態
+      // 2) 發給該用戶的目標留言
       const userPostsQuery = query(
         collection(db, 'communityPosts'),
         where('userId', '==', userId),
         limit(50)
       );
 
-      // 再查詢發給該用戶的動態（不使用 orderBy 避免索引問題）
       const targetUserPostsQuery = query(
         collection(db, 'communityPosts'),
         where('targetUserId', '==', userId),
@@ -157,10 +157,14 @@ const FriendFeed = () => {
             });
           }
 
-          postsData.push({
-            id: doc.id,
-            ...postData,
-          });
+          // 僅保留好友可見或未設置隱私的貼文
+          const privacy = postData.privacy || 'friends';
+          if (privacy === 'friends') {
+            postsData.push({
+              id: doc.id,
+              ...postData,
+            });
+          }
         });
       }
 
@@ -193,6 +197,7 @@ const FriendFeed = () => {
               });
             }
 
+            // 目標留言一律顯示在好友頁
             postsData.push({
               id: doc.id,
               ...postData,
@@ -292,7 +297,7 @@ const FriendFeed = () => {
         comments: [],
         timestamp: new Date().toISOString(),
         privacy: 'friends', // 好友可見
-        targetUserId: userId, // 標記這是發給特定好友的動態
+        targetUserId: userId, // 發給特定好友
       };
 
       const docRef = await addDoc(collection(db, 'communityPosts'), postData);
@@ -608,7 +613,7 @@ const FriendFeed = () => {
   };
 
   // 格式化時間
-  const formatTime = timestamp => {
+  const formatTime = useCallback(timestamp => {
     const now = new Date();
     const postTime = new Date(timestamp);
     const diffMs = now - postTime;
@@ -621,7 +626,7 @@ const FriendFeed = () => {
     if (diffHours < 24) return `${diffHours}小時前`;
     if (diffDays < 7) return `${diffDays}天前`;
     return postTime.toLocaleDateString();
-  };
+  }, []);
 
   // 動態卡片組件 - 使用 React.memo 優化
   const PostCard = React.memo(
@@ -659,12 +664,21 @@ const FriendFeed = () => {
                 src={post.userAvatarUrl || '/default-avatar.svg'}
                 alt="頭像"
                 className="user-avatar"
+                loading="lazy"
                 onError={e => {
                   e.target.src = '/default-avatar.svg';
                 }}
               />
               <div className="user-info">
-                <div className="user-name">{post.userNickname}</div>
+                <div className="user-name">
+                  {post.userNickname}
+                  {post.targetUserId && (
+                    <span className="to-label">
+                      {' '}
+                      → {friendData?.nickname || '好友'}
+                    </span>
+                  )}
+                </div>
                 <div className="post-time">{formatTime(post.timestamp)}</div>
               </div>
             </div>
@@ -730,6 +744,7 @@ const FriendFeed = () => {
                               src={comment.userAvatarUrl || '/guest-avatar.svg'}
                               alt="頭像"
                               className="comment-avatar"
+                              loading="lazy"
                               onError={e => {
                                 e.target.src = '/guest-avatar.svg';
                               }}
@@ -880,6 +895,7 @@ const FriendFeed = () => {
               src="/default-avatar.svg"
               alt="頭像"
               className="friend-avatar"
+              loading="lazy"
               onError={e => {
                 e.target.src = '/default-avatar.svg';
               }}
@@ -910,6 +926,7 @@ const FriendFeed = () => {
                     : userData?.avatarUrl || '/default-avatar.svg';
                 })()}
                 alt="頭像"
+                loading="lazy"
                 onError={e => {
                   e.target.src = '/default-avatar.svg';
                 }}
@@ -976,6 +993,7 @@ const FriendFeed = () => {
             src={friendData?.avatarUrl || '/default-avatar.svg'}
             alt="頭像"
             className="friend-avatar"
+            loading="lazy"
             onError={e => {
               e.target.src = '/default-avatar.png';
             }}
@@ -1003,6 +1021,7 @@ const FriendFeed = () => {
                   : userData?.avatarUrl || '/default-avatar.svg';
               })()}
               alt="頭像"
+              loading="lazy"
               onError={e => {
                 e.target.src = '/default-avatar.svg';
               }}

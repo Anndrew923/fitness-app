@@ -65,6 +65,9 @@ const Community = () => {
   const postsCacheRef = useRef(new Map());
   const lastLoadTimeRef = useRef(0);
   const CACHE_DURATION = 5 * 60 * 1000; // 5分鐘快取
+  // 目標用戶好友快取，降低重複讀取
+  const targetFriendsCacheRef = useRef(new Map());
+  const targetUserInfoCacheRef = useRef(new Map());
 
   // 使用 useMemo 優化計算
   const currentUserId = useMemo(() => {
@@ -135,38 +138,87 @@ const Community = () => {
       );
 
       const snapshot = await getDocs(postsQuery);
-      const postsData = [];
+      const generalPosts = [];
+      const targetedPosts = [];
 
-      snapshot.forEach(doc => {
-        const postData = doc.data();
-        // 在客戶端過濾允許查看的用戶
-        if (allowedUserIds.includes(postData.userId)) {
-          // 進一步優化：只保留最必要的字段，減少內存使用
-          postsData.push({
-            id: doc.id,
-            userId: postData.userId,
-            userNickname: postData.userNickname,
-            userAvatarUrl: postData.userAvatarUrl,
-            content: postData.content,
-            timestamp: postData.timestamp,
-            likes: postData.likes || [],
-            // 優化評論載入：只保留評論數量，實際評論按需載入
-            commentCount: (postData.comments || []).length,
-            comments: [], // 評論將按需載入
-            type: postData.type || 'status',
-          });
+      snapshot.forEach(docSnap => {
+        const postData = docSnap.data();
+        const base = {
+          id: docSnap.id,
+          userId: postData.userId,
+          userNickname: postData.userNickname,
+          userAvatarUrl: postData.userAvatarUrl,
+          content: postData.content,
+          timestamp: postData.timestamp,
+          likes: postData.likes || [],
+          commentCount: (postData.comments || []).length,
+          comments: [],
+          type: postData.type || 'status',
+          targetUserId: postData.targetUserId,
+        };
+
+        if (postData.targetUserId) {
+          targetedPosts.push(base);
+        } else if (allowedUserIds.includes(postData.userId)) {
+          generalPosts.push(base);
         }
       });
 
+      // 為目標留言取得目標用戶的好友列表（去重 + 快取）
+      const uniqueTargetIds = Array.from(
+        new Set(targetedPosts.map(p => p.targetUserId).filter(Boolean))
+      ).filter(id => !targetFriendsCacheRef.current.has(id));
+
+      if (uniqueTargetIds.length > 0) {
+        await Promise.all(
+          uniqueTargetIds.map(async targetId => {
+            try {
+              const userDoc = await getDoc(doc(db, 'users', targetId));
+              const data = userDoc.exists() ? userDoc.data() : null;
+              const friends = Array.isArray(data?.friends) ? data.friends : [];
+              targetFriendsCacheRef.current.set(targetId, friends);
+              targetUserInfoCacheRef.current.set(targetId, {
+                nickname:
+                  data?.nickname || data?.email?.split('@')[0] || '用戶',
+                avatarUrl: data?.avatarUrl || '',
+              });
+            } catch (e) {
+              console.warn('讀取目標用戶好友失敗:', targetId, e);
+              targetFriendsCacheRef.current.set(targetId, []);
+              targetUserInfoCacheRef.current.set(targetId, {
+                nickname: '用戶',
+                avatarUrl: '',
+              });
+            }
+          })
+        );
+      }
+
+      // 過濾目標留言可見性：作者、目標用戶、目標用戶好友
+      const filteredTargeted = targetedPosts
+        .filter(p => {
+          if (currentUserId === p.userId) return true;
+          if (currentUserId === p.targetUserId) return true;
+          const tFriends =
+            targetFriendsCacheRef.current.get(p.targetUserId) || [];
+          return tFriends.includes(currentUserId);
+        })
+        .map(p => ({
+          ...p,
+          targetUserNickname:
+            targetUserInfoCacheRef.current.get(p.targetUserId)?.nickname || '',
+        }));
+
+      const merged = [...generalPosts, ...filteredTargeted];
+
       // 按時間排序（雖然查詢已經排序，但確保一致性）
-      postsData.sort((a, b) => {
+      merged.sort((a, b) => {
         const timeA = a.timestamp ? new Date(a.timestamp) : new Date(a.date);
         const timeB = b.timestamp ? new Date(b.timestamp) : new Date(b.date);
         return timeB - timeA;
       });
 
-      // 限制顯示數量，避免性能問題
-      const limitedPosts = postsData.slice(0, 30); // 進一步減少到30條
+      const limitedPosts = merged.slice(0, 30);
 
       console.log(`📊 載入完成：共 ${limitedPosts.length} 條動態`);
       setPosts(limitedPosts);
@@ -215,7 +267,8 @@ const Community = () => {
         likes: [],
         comments: [],
         timestamp: new Date().toISOString(),
-        privacy: 'friends', // 好友可見
+        privacy: 'friends', // 預設好友可見
+        // 若此貼文是發給特定用戶的留言，會在好友個人版發佈，該頁的發佈邏輯會附帶 targetUserId
       };
 
       const docRef = await addDoc(collection(db, 'communityPosts'), postData);
@@ -253,75 +306,78 @@ const Community = () => {
   };
 
   // 點讚/取消點讚 - 優化版本（使用樂觀更新）
-  const toggleLike = async (postId, currentLikes) => {
-    if (!auth.currentUser) {
-      setError('請先登入');
-      return;
-    }
+  const toggleLike = useCallback(
+    async (postId, currentLikes) => {
+      if (!auth.currentUser) {
+        setError('請先登入');
+        return;
+      }
 
-    // 防抖：避免重複點擊
-    if (likeProcessing.has(postId)) {
-      console.log('🔄 點讚操作進行中，請稍候...');
-      return;
-    }
+      // 防抖：避免重複點擊
+      if (likeProcessing.has(postId)) {
+        console.log('🔄 點讚操作進行中，請稍候...');
+        return;
+      }
 
-    const isLiked = currentLikes.includes(currentUserId);
+      const isLiked = currentLikes.includes(currentUserId);
 
-    // 計算新的點讚列表
-    const newLikes = isLiked
-      ? currentLikes.filter(id => id !== currentUserId)
-      : [...currentLikes, currentUserId];
+      // 計算新的點讚列表
+      const newLikes = isLiked
+        ? currentLikes.filter(id => id !== currentUserId)
+        : [...currentLikes, currentUserId];
 
-    // 立即更新本地狀態（樂觀更新）
-    setPosts(prevPosts =>
-      prevPosts.map(post =>
-        post.id === postId
-          ? {
-              ...post,
-              likes: newLikes,
-            }
-          : post
-      )
-    );
-
-    // 設置處理狀態
-    setLikeProcessing(prev => new Set(prev).add(postId));
-
-    try {
-      // 使用 setDoc 替代 updateDoc，減少讀取操作
-      const postRef = doc(db, 'communityPosts', postId);
-      await setDoc(postRef, { likes: newLikes }, { merge: true });
-
-      // 記錄寫入操作
-      firebaseWriteMonitor.logWrite('setDoc', 'communityPosts', postId, {
-        likes: `更新為 ${newLikes.length} 個點讚`,
-      });
-
-      console.log(`👍 ${isLiked ? '取消點讚' : '點讚'}成功`);
-    } catch (error) {
-      console.error('❌ 點讚操作失敗:', error);
-      setError('點讚失敗，請稍後再試');
-
-      // 回滾本地狀態
+      // 立即更新本地狀態（樂觀更新）
       setPosts(prevPosts =>
         prevPosts.map(post =>
           post.id === postId
             ? {
                 ...post,
-                likes: currentLikes, // 回滾到原始狀態
+                likes: newLikes,
               }
             : post
         )
       );
-    } finally {
-      // 清除處理狀態
-      setLikeProcessing(prev => {
-        const newSet = new Set(prev);
-        newSet.delete(postId);
-        return newSet;
-      });
-    }
-  };
+
+      // 設置處理狀態
+      setLikeProcessing(prev => new Set(prev).add(postId));
+
+      try {
+        // 使用 setDoc 替代 updateDoc，減少讀取操作
+        const postRef = doc(db, 'communityPosts', postId);
+        await setDoc(postRef, { likes: newLikes }, { merge: true });
+
+        // 記錄寫入操作
+        firebaseWriteMonitor.logWrite('setDoc', 'communityPosts', postId, {
+          likes: `更新為 ${newLikes.length} 個點讚`,
+        });
+
+        console.log(`👍 ${isLiked ? '取消點讚' : '點讚'}成功`);
+      } catch (error) {
+        console.error('❌ 點讚操作失敗:', error);
+        setError('點讚失敗，請稍後再試');
+
+        // 回滾本地狀態
+        setPosts(prevPosts =>
+          prevPosts.map(post =>
+            post.id === postId
+              ? {
+                  ...post,
+                  likes: currentLikes, // 回滾到原始狀態
+                }
+              : post
+          )
+        );
+      } finally {
+        // 清除處理狀態
+        setLikeProcessing(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(postId);
+          return newSet;
+        });
+      }
+    },
+    [likeProcessing, auth.currentUser, setPosts]
+  );
 
   // 按需載入評論 - 新增功能
   const loadComments = useCallback(async postId => {
@@ -353,54 +409,127 @@ const Community = () => {
   }, []);
 
   // 添加留言 - 優化版本（使用防抖 + 批量操作）
-  const addComment = async (postId, commentContent) => {
-    if (!commentContent.trim()) return;
-    if (!auth.currentUser) {
-      setError('請先登入');
-      return;
-    }
+  const addComment = useCallback(
+    async (postId, commentContent) => {
+      if (!commentContent.trim()) return;
+      if (!auth.currentUser) {
+        setError('請先登入');
+        return;
+      }
 
-    // 防抖：避免重複提交
-    if (commentProcessing.has(postId)) {
-      console.log('🔄 留言提交中，請稍候...');
-      return;
-    }
+      // 防抖：避免重複提交
+      if (commentProcessing.has(postId)) {
+        console.log('🔄 留言提交中，請稍候...');
+        return;
+      }
 
-    const comment = {
-      id: Date.now().toString(), // 簡單的ID生成
-      userId: auth.currentUser.uid,
-      userNickname:
-        userData?.nickname || userData?.email?.split('@')[0] || '匿名用戶',
-      userAvatarUrl: (() => {
-        const isGuest = sessionStorage.getItem('guestMode') === 'true';
-        return isGuest ? '/guest-avatar.svg' : userData?.avatarUrl || '';
-      })(),
-      content: commentContent.trim(),
-      timestamp: new Date().toISOString(),
-    };
+      const comment = {
+        id: Date.now().toString(), // 簡單的ID生成
+        userId: auth.currentUser.uid,
+        userNickname:
+          userData?.nickname || userData?.email?.split('@')[0] || '匿名用戶',
+        userAvatarUrl: (() => {
+          const isGuest = sessionStorage.getItem('guestMode') === 'true';
+          return isGuest ? '/guest-avatar.svg' : userData?.avatarUrl || '';
+        })(),
+        content: commentContent.trim(),
+        timestamp: new Date().toISOString(),
+      };
 
-    // 立即更新本地狀態（樂觀更新）
-    setPosts(prevPosts => {
-      const updatedPosts = prevPosts.map(post => {
-        if (post.id === postId) {
-          const newComments = [...post.comments, comment];
-          return { ...post, comments: newComments };
-        }
-        return post;
+      // 立即更新本地狀態（樂觀更新）
+      setPosts(prevPosts => {
+        const updatedPosts = prevPosts.map(post => {
+          if (post.id === postId) {
+            const newComments = [...post.comments, comment];
+            return { ...post, comments: newComments };
+          }
+          return post;
+        });
+        return updatedPosts;
       });
-      return updatedPosts;
-    });
 
-    // 設置處理狀態
-    setCommentProcessing(prev => new Set(prev).add(postId));
+      // 設置處理狀態
+      setCommentProcessing(prev => new Set(prev).add(postId));
 
-    // 清除之前的計時器
-    if (commentDebounceTimers.current.has(postId)) {
-      clearTimeout(commentDebounceTimers.current.get(postId));
-    }
+      // 清除之前的計時器
+      if (commentDebounceTimers.current.has(postId)) {
+        clearTimeout(commentDebounceTimers.current.get(postId));
+      }
 
-    // 設置新的防抖計時器（1秒）
-    const timer = setTimeout(async () => {
+      // 設置新的防抖計時器（1秒）
+      const timer = setTimeout(async () => {
+        try {
+          // 找到對應的動態
+          const currentPost = posts.find(post => post.id === postId);
+          if (!currentPost) {
+            setError('動態不存在');
+            return;
+          }
+
+          // 計算新的留言列表
+          const newComments = [...currentPost.comments, comment];
+
+          // 使用 setDoc 替代 updateDoc
+          const postRef = doc(db, 'communityPosts', postId);
+          await setDoc(postRef, { comments: newComments }, { merge: true });
+
+          // 記錄寫入操作
+          firebaseWriteMonitor.logWrite('setDoc', 'communityPosts', postId, {
+            comments: `新增留言，總計 ${newComments.length} 條`,
+          });
+
+          console.log('💬 留言添加成功');
+        } catch (error) {
+          console.error('❌ 添加留言失敗:', error);
+          setError('留言失敗，請稍後再試');
+
+          // 回滾本地狀態
+          setPosts(prevPosts => {
+            const updatedPosts = prevPosts.map(post => {
+              if (post.id === postId) {
+                const revertedComments = post.comments.filter(
+                  c => c.id !== comment.id
+                );
+                return { ...post, comments: revertedComments };
+              }
+              return post;
+            });
+            return updatedPosts;
+          });
+        } finally {
+          // 清除處理狀態
+          setCommentProcessing(prev => {
+            const newSet = new Set(prev);
+            newSet.delete(postId);
+            return newSet;
+          });
+
+          // 清除計時器
+          commentDebounceTimers.current.delete(postId);
+        }
+      }, 500);
+
+      commentDebounceTimers.current.set(postId, timer);
+    },
+    [
+      auth.currentUser,
+      userData?.nickname,
+      userData?.email,
+      userData?.avatarUrl,
+      commentProcessing,
+      posts,
+      setPosts,
+    ]
+  );
+
+  // 刪除留言
+  const deleteComment = useCallback(
+    async (postId, commentId) => {
+      if (!auth.currentUser) {
+        setError('請先登入');
+        return;
+      }
+
       try {
         // 找到對應的動態
         const currentPost = posts.find(post => post.id === postId);
@@ -409,181 +538,125 @@ const Community = () => {
           return;
         }
 
-        // 計算新的留言列表
-        const newComments = [...currentPost.comments, comment];
+        // 找到要刪除的留言
+        const commentToDelete = currentPost.comments.find(
+          comment => comment.id === commentId
+        );
+        if (!commentToDelete) {
+          setError('留言不存在');
+          return;
+        }
 
-        // 使用 setDoc 替代 updateDoc
+        // 檢查刪除權限
+        const currentUserId = auth.currentUser.uid;
+        const isPostOwner = currentPost.userId === currentUserId;
+        const isCommentOwner = commentToDelete.userId === currentUserId;
+
+        if (!isPostOwner && !isCommentOwner) {
+          setError('您沒有權限刪除此留言');
+          return;
+        }
+
+        // 確認刪除
+        const confirmMessage = isPostOwner
+          ? '確定要刪除此留言嗎？'
+          : '確定要刪除您的留言嗎？';
+
+        if (!window.confirm(confirmMessage)) {
+          return;
+        }
+
+        // 計算新的留言列表
+        const newComments = currentPost.comments.filter(
+          comment => comment.id !== commentId
+        );
+
+        // 更新數據庫
         const postRef = doc(db, 'communityPosts', postId);
         await setDoc(postRef, { comments: newComments }, { merge: true });
 
         // 記錄寫入操作
         firebaseWriteMonitor.logWrite('setDoc', 'communityPosts', postId, {
-          comments: `新增留言，總計 ${newComments.length} 條`,
+          comments: `刪除留言，總計 ${newComments.length} 條`,
         });
 
-        console.log('💬 留言添加成功');
-      } catch (error) {
-        console.error('❌ 添加留言失敗:', error);
-        setError('留言失敗，請稍後再試');
-
-        // 回滾本地狀態
+        // 更新本地狀態
+        console.log('🔄 更新本地狀態，刪除留言:', commentId);
         setPosts(prevPosts => {
-          const updatedPosts = prevPosts.map(post => {
-            if (post.id === postId) {
-              const revertedComments = post.comments.filter(
-                c => c.id !== comment.id
-              );
-              return { ...post, comments: revertedComments };
-            }
-            return post;
-          });
+          const updatedPosts = prevPosts.map(post =>
+            post.id === postId ? { ...post, comments: newComments } : post
+          );
+          console.log(`📊 動態 ${postId} 留言數: ${newComments.length}`);
           return updatedPosts;
         });
-      } finally {
-        // 清除處理狀態
-        setCommentProcessing(prev => {
-          const newSet = new Set(prev);
-          newSet.delete(postId);
-          return newSet;
-        });
 
-        // 清除計時器
-        commentDebounceTimers.current.delete(postId);
+        setSuccess('留言已刪除');
+        setTimeout(() => setSuccess(''), 3000);
+      } catch (error) {
+        console.error('❌ 刪除留言失敗:', error);
+        setError('刪除留言失敗，請稍後再試');
       }
-    }, 500);
-
-    commentDebounceTimers.current.set(postId, timer);
-  };
-
-  // 刪除留言
-  const deleteComment = async (postId, commentId) => {
-    if (!auth.currentUser) {
-      setError('請先登入');
-      return;
-    }
-
-    try {
-      // 找到對應的動態
-      const currentPost = posts.find(post => post.id === postId);
-      if (!currentPost) {
-        setError('動態不存在');
-        return;
-      }
-
-      // 找到要刪除的留言
-      const commentToDelete = currentPost.comments.find(
-        comment => comment.id === commentId
-      );
-      if (!commentToDelete) {
-        setError('留言不存在');
-        return;
-      }
-
-      // 檢查刪除權限
-      const currentUserId = auth.currentUser.uid;
-      const isPostOwner = currentPost.userId === currentUserId;
-      const isCommentOwner = commentToDelete.userId === currentUserId;
-
-      if (!isPostOwner && !isCommentOwner) {
-        setError('您沒有權限刪除此留言');
-        return;
-      }
-
-      // 確認刪除
-      const confirmMessage = isPostOwner
-        ? '確定要刪除此留言嗎？'
-        : '確定要刪除您的留言嗎？';
-
-      if (!window.confirm(confirmMessage)) {
-        return;
-      }
-
-      // 計算新的留言列表
-      const newComments = currentPost.comments.filter(
-        comment => comment.id !== commentId
-      );
-
-      // 更新數據庫
-      const postRef = doc(db, 'communityPosts', postId);
-      await setDoc(postRef, { comments: newComments }, { merge: true });
-
-      // 記錄寫入操作
-      firebaseWriteMonitor.logWrite('setDoc', 'communityPosts', postId, {
-        comments: `刪除留言，總計 ${newComments.length} 條`,
-      });
-
-      // 更新本地狀態
-      console.log('🔄 更新本地狀態，刪除留言:', commentId);
-      setPosts(prevPosts => {
-        const updatedPosts = prevPosts.map(post =>
-          post.id === postId ? { ...post, comments: newComments } : post
-        );
-        console.log(`📊 動態 ${postId} 留言數: ${newComments.length}`);
-        return updatedPosts;
-      });
-
-      setSuccess('留言已刪除');
-      setTimeout(() => setSuccess(''), 3000);
-    } catch (error) {
-      console.error('❌ 刪除留言失敗:', error);
-      setError('刪除留言失敗，請稍後再試');
-    }
-  };
+    },
+    [posts]
+  );
 
   // 刪除動態（主要留言）
-  const deletePost = async postId => {
-    if (!auth.currentUser) {
-      setError('請先登入');
-      return;
-    }
-
-    try {
-      // 找到對應的動態
-      const currentPost = posts.find(post => post.id === postId);
-      if (!currentPost) {
-        setError('動態不存在');
+  const deletePost = useCallback(
+    async postId => {
+      if (!auth.currentUser) {
+        setError('請先登入');
         return;
       }
 
-      // 檢查刪除權限（只有動態作者可以刪除）
-      const currentUserId = auth.currentUser.uid;
-      if (currentPost.userId !== currentUserId) {
-        setError('您沒有權限刪除此動態');
-        return;
+      try {
+        // 找到對應的動態
+        const currentPost = posts.find(post => post.id === postId);
+        if (!currentPost) {
+          setError('動態不存在');
+          return;
+        }
+
+        // 檢查刪除權限（只有動態作者可以刪除）
+        const currentUserId = auth.currentUser.uid;
+        if (currentPost.userId !== currentUserId) {
+          setError('您沒有權限刪除此動態');
+          return;
+        }
+
+        // 確認刪除
+        if (!window.confirm('確定要刪除此動態嗎？此操作無法撤銷。')) {
+          return;
+        }
+
+        // 從數據庫刪除
+        const postRef = doc(db, 'communityPosts', postId);
+        await deleteDoc(postRef);
+
+        // 記錄寫入操作
+        firebaseWriteMonitor.logWrite('deleteDoc', 'communityPosts', postId, {
+          action: '刪除動態',
+        });
+
+        // 更新本地狀態
+        console.log('🔄 更新本地狀態，刪除動態:', postId);
+        setPosts(prevPosts => {
+          const updatedPosts = prevPosts.filter(post => post.id !== postId);
+          console.log(`📊 剩餘動態數: ${updatedPosts.length}`);
+          return updatedPosts;
+        });
+
+        setSuccess('動態已刪除');
+        setTimeout(() => setSuccess(''), 3000);
+      } catch (error) {
+        console.error('❌ 刪除動態失敗:', error);
+        setError('刪除動態失敗，請稍後再試');
       }
-
-      // 確認刪除
-      if (!window.confirm('確定要刪除此動態嗎？此操作無法撤銷。')) {
-        return;
-      }
-
-      // 從數據庫刪除
-      const postRef = doc(db, 'communityPosts', postId);
-      await deleteDoc(postRef);
-
-      // 記錄寫入操作
-      firebaseWriteMonitor.logWrite('deleteDoc', 'communityPosts', postId, {
-        action: '刪除動態',
-      });
-
-      // 更新本地狀態
-      console.log('🔄 更新本地狀態，刪除動態:', postId);
-      setPosts(prevPosts => {
-        const updatedPosts = prevPosts.filter(post => post.id !== postId);
-        console.log(`📊 剩餘動態數: ${updatedPosts.length}`);
-        return updatedPosts;
-      });
-
-      setSuccess('動態已刪除');
-      setTimeout(() => setSuccess(''), 3000);
-    } catch (error) {
-      console.error('❌ 刪除動態失敗:', error);
-      setError('刪除動態失敗，請稍後再試');
-    }
-  };
+    },
+    [posts]
+  );
 
   // 格式化時間
-  const formatTime = timestamp => {
+  const formatTime = useCallback(timestamp => {
     const now = new Date();
     const postTime = new Date(timestamp);
     const diffMs = now - postTime;
@@ -596,7 +669,7 @@ const Community = () => {
     if (diffHours < 24) return `${diffHours}小時前`;
     if (diffDays < 7) return `${diffDays}天前`;
     return postTime.toLocaleDateString();
-  };
+  }, []);
 
   // 載入好友數據
   const loadFriendsData = useCallback(async () => {
@@ -1071,12 +1144,20 @@ const Community = () => {
     const friendToRemove = friendsList.find(friend => friend.id === friendId);
     const friendName = friendToRemove?.nickname || '好友';
 
-    // 顯示確認對話框
+    // 顯示確認對話框（第一層）
     const isConfirmed = window.confirm(
       `確定要移除好友「${friendName}」嗎？\n\n移除後：\n• 雙方將不再是好友關係\n• 無法查看對方的動態\n• 此操作可以重新加好友來恢復`
     );
 
     if (!isConfirmed) {
+      return;
+    }
+
+    // Double Check（第二層確認）
+    const doubleConfirmed = window.confirm(
+      `最後確認：確定要移除好友「${friendName}」嗎？此操作將立即生效。`
+    );
+    if (!doubleConfirmed) {
       return;
     }
 
@@ -1296,6 +1377,7 @@ const Community = () => {
                         : userData?.avatarUrl || '/default-avatar.svg';
                     })()}
                     alt="頭像"
+                    loading="lazy"
                     onError={e => {
                       e.target.src = '/default-avatar.svg';
                     }}
@@ -1371,6 +1453,7 @@ const Community = () => {
                           src={friend.avatarUrl || '/default-avatar.svg'}
                           alt="頭像"
                           className="friend-avatar"
+                          loading="lazy"
                           onError={e => {
                             e.target.src = '/default-avatar.svg';
                           }}
@@ -1435,6 +1518,7 @@ const Community = () => {
                         src={request.avatarUrl || '/default-avatar.svg'}
                         alt="頭像"
                         className="request-avatar"
+                        loading="lazy"
                         onError={e => {
                           e.target.src = '/default-avatar.svg';
                         }}
@@ -1502,6 +1586,7 @@ const Community = () => {
                         src={user.avatarUrl || '/default-avatar.svg'}
                         alt="頭像"
                         className="user-avatar"
+                        loading="lazy"
                         onError={e => {
                           e.target.src = '/default-avatar.svg';
                         }}
@@ -1600,7 +1685,15 @@ const PostCard = React.memo(
               }}
             />
             <div className="user-info">
-              <div className="user-name">{post.userNickname}</div>
+              <div className="user-name">
+                {post.userNickname}
+                {post.targetUserId && (
+                  <span className="to-label">
+                    {' '}
+                    → {post.targetUserNickname || '好友'}
+                  </span>
+                )}
+              </div>
               <div className="post-time">{formatTime(post.timestamp)}</div>
             </div>
           </div>

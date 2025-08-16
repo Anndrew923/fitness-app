@@ -328,7 +328,8 @@
   border: 1px solid var(--border-color);
   transition: all 0.3s ease;
   position: relative;
-  overflow: hidden;
+  overflow: hidden; /* 防止內部元素外溢 */
+  box-sizing: border-box;
 }
 
 .post-card::before {
@@ -397,6 +398,13 @@
   text-overflow: ellipsis;
 }
 
+.to-label {
+  margin-left: 6px;
+  font-weight: 500;
+  font-size: 13px;
+  color: #6c757d;
+}
+
 .post-time {
   font-size: 12px;
   color: var(--text-light);
@@ -415,6 +423,8 @@
   display: flex;
   gap: 10px;
   margin-bottom: 15px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .action-btn {
@@ -429,6 +439,9 @@
   display: flex;
   align-items: center;
   gap: 6px;
+  flex: 1;
+  min-width: 0; /* 允許縮小 */
+  flex-basis: 0; /* 平均分配寬度 */
 }
 
 .action-btn:hover:not(:disabled) {
@@ -751,6 +764,19 @@
   .action-btn {
     padding: 6px 12px;
     font-size: 12px;
+  }
+
+  @media (max-width: 380px) {
+    .action-btn {
+      padding: 6px 8px;
+      font-size: 12px;
+    }
+    .action-text {
+      max-width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
   }
 
   .action-icon {
