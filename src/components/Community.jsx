@@ -28,10 +28,12 @@ import firebaseWriteMonitor from '../utils/firebaseMonitor';
 
 import './Community.css';
 import PropTypes from 'prop-types';
+import { useTranslation } from 'react-i18next';
 
 const Community = () => {
   const navigate = useNavigate();
   const { userData, setUserData } = useUser();
+  const { t, i18n } = useTranslation();
   const [activeTab, setActiveTab] = useState('feed'); // 'feed', 'friends', 'requests', 'search'
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -179,14 +181,16 @@ const Community = () => {
               targetFriendsCacheRef.current.set(targetId, friends);
               targetUserInfoCacheRef.current.set(targetId, {
                 nickname:
-                  data?.nickname || data?.email?.split('@')[0] || '用戶',
+                  data?.nickname ||
+                  data?.email?.split('@')[0] ||
+                  t('community.fallback.user'),
                 avatarUrl: data?.avatarUrl || '',
               });
             } catch (e) {
               console.warn('讀取目標用戶好友失敗:', targetId, e);
               targetFriendsCacheRef.current.set(targetId, []);
               targetUserInfoCacheRef.current.set(targetId, {
-                nickname: '用戶',
+                nickname: t('community.fallback.user'),
                 avatarUrl: '',
               });
             }
@@ -232,7 +236,7 @@ const Community = () => {
       });
     } catch (error) {
       console.error('載入動態失敗:', error);
-      setError('載入動態失敗，請稍後再試');
+      setError(t('community.messages.loadFeedError'));
     } finally {
       setLoading(false);
     }
@@ -241,12 +245,12 @@ const Community = () => {
   // 發布新動態
   const publishPost = async () => {
     if (!newPostContent.trim()) {
-      setError('請輸入動態內容');
+      setError(t('community.messages.emptyPost'));
       return;
     }
 
     if (!auth.currentUser) {
-      setError('請先登入');
+      setError(t('community.messages.needLogin'));
       return;
     }
 
@@ -257,7 +261,9 @@ const Community = () => {
       const postData = {
         userId: auth.currentUser.uid,
         userNickname:
-          userData?.nickname || userData?.email?.split('@')[0] || '匿名用戶',
+          userData?.nickname ||
+          userData?.email?.split('@')[0] ||
+          t('community.fallback.anonymousUser'),
         userAvatarUrl: (() => {
           const isGuest = sessionStorage.getItem('guestMode') === 'true';
           return isGuest ? '/guest-avatar.svg' : userData?.avatarUrl || '';
@@ -293,13 +299,13 @@ const Community = () => {
 
       // 清空輸入框
       setNewPostContent('');
-      setSuccess('動態發布成功！');
+      setSuccess(t('community.messages.publishSuccess'));
 
       // 3秒後清除成功訊息
       setTimeout(() => setSuccess(''), 3000);
     } catch (error) {
       console.error('❌ 發布動態失敗:', error);
-      setError('發布失敗: ' + error.message);
+      setError(`${t('community.messages.publishFail')}: ${error.message}`);
     } finally {
       setSubmitting(false);
     }
@@ -309,7 +315,7 @@ const Community = () => {
   const toggleLike = useCallback(
     async (postId, currentLikes) => {
       if (!auth.currentUser) {
-        setError('請先登入');
+        setError(t('community.messages.needLogin'));
         return;
       }
 
@@ -354,7 +360,7 @@ const Community = () => {
         console.log(`👍 ${isLiked ? '取消點讚' : '點讚'}成功`);
       } catch (error) {
         console.error('❌ 點讚操作失敗:', error);
-        setError('點讚失敗，請稍後再試');
+        setError(t('community.messages.likeFail'));
 
         // 回滾本地狀態
         setPosts(prevPosts =>
@@ -413,7 +419,7 @@ const Community = () => {
     async (postId, commentContent) => {
       if (!commentContent.trim()) return;
       if (!auth.currentUser) {
-        setError('請先登入');
+        setError(t('community.messages.needLogin'));
         return;
       }
 
@@ -427,7 +433,9 @@ const Community = () => {
         id: Date.now().toString(), // 簡單的ID生成
         userId: auth.currentUser.uid,
         userNickname:
-          userData?.nickname || userData?.email?.split('@')[0] || '匿名用戶',
+          userData?.nickname ||
+          userData?.email?.split('@')[0] ||
+          t('community.fallback.anonymousUser'),
         userAvatarUrl: (() => {
           const isGuest = sessionStorage.getItem('guestMode') === 'true';
           return isGuest ? '/guest-avatar.svg' : userData?.avatarUrl || '';
@@ -462,7 +470,7 @@ const Community = () => {
           // 找到對應的動態
           const currentPost = posts.find(post => post.id === postId);
           if (!currentPost) {
-            setError('動態不存在');
+            setError(t('community.messages.postNotFound'));
             return;
           }
 
@@ -481,7 +489,7 @@ const Community = () => {
           console.log('💬 留言添加成功');
         } catch (error) {
           console.error('❌ 添加留言失敗:', error);
-          setError('留言失敗，請稍後再試');
+          setError(t('community.messages.commentFail'));
 
           // 回滾本地狀態
           setPosts(prevPosts => {
@@ -526,7 +534,7 @@ const Community = () => {
   const deleteComment = useCallback(
     async (postId, commentId) => {
       if (!auth.currentUser) {
-        setError('請先登入');
+        setError(t('community.messages.needLogin'));
         return;
       }
 
@@ -534,7 +542,7 @@ const Community = () => {
         // 找到對應的動態
         const currentPost = posts.find(post => post.id === postId);
         if (!currentPost) {
-          setError('動態不存在');
+          setError(t('community.messages.postNotFound'));
           return;
         }
 
@@ -543,7 +551,7 @@ const Community = () => {
           comment => comment.id === commentId
         );
         if (!commentToDelete) {
-          setError('留言不存在');
+          setError(t('community.messages.commentNotFound'));
           return;
         }
 
@@ -553,14 +561,14 @@ const Community = () => {
         const isCommentOwner = commentToDelete.userId === currentUserId;
 
         if (!isPostOwner && !isCommentOwner) {
-          setError('您沒有權限刪除此留言');
+          setError(t('community.messages.noPermission'));
           return;
         }
 
         // 確認刪除
         const confirmMessage = isPostOwner
-          ? '確定要刪除此留言嗎？'
-          : '確定要刪除您的留言嗎？';
+          ? t('community.confirm.deleteComment')
+          : t('community.confirm.deleteMyComment');
 
         if (!window.confirm(confirmMessage)) {
           return;
@@ -590,11 +598,11 @@ const Community = () => {
           return updatedPosts;
         });
 
-        setSuccess('留言已刪除');
+        setSuccess(t('community.messages.deleteCommentSuccess'));
         setTimeout(() => setSuccess(''), 3000);
       } catch (error) {
         console.error('❌ 刪除留言失敗:', error);
-        setError('刪除留言失敗，請稍後再試');
+        setError(t('community.messages.deleteCommentFail'));
       }
     },
     [posts]
@@ -604,7 +612,7 @@ const Community = () => {
   const deletePost = useCallback(
     async postId => {
       if (!auth.currentUser) {
-        setError('請先登入');
+        setError(t('community.messages.needLogin'));
         return;
       }
 
@@ -612,19 +620,19 @@ const Community = () => {
         // 找到對應的動態
         const currentPost = posts.find(post => post.id === postId);
         if (!currentPost) {
-          setError('動態不存在');
+          setError(t('community.messages.postNotFound'));
           return;
         }
 
         // 檢查刪除權限（只有動態作者可以刪除）
         const currentUserId = auth.currentUser.uid;
         if (currentPost.userId !== currentUserId) {
-          setError('您沒有權限刪除此動態');
+          setError(t('community.messages.noPermission'));
           return;
         }
 
         // 確認刪除
-        if (!window.confirm('確定要刪除此動態嗎？此操作無法撤銷。')) {
+        if (!window.confirm(t('community.confirm.deletePost'))) {
           return;
         }
 
@@ -645,31 +653,40 @@ const Community = () => {
           return updatedPosts;
         });
 
-        setSuccess('動態已刪除');
+        setSuccess(t('community.messages.deletePostSuccess'));
         setTimeout(() => setSuccess(''), 3000);
       } catch (error) {
         console.error('❌ 刪除動態失敗:', error);
-        setError('刪除動態失敗，請稍後再試');
+        setError(t('community.messages.deletePostFail'));
       }
     },
     [posts]
   );
 
   // 格式化時間
-  const formatTime = useCallback(timestamp => {
-    const now = new Date();
-    const postTime = new Date(timestamp);
-    const diffMs = now - postTime;
-    const diffMins = Math.floor(diffMs / (1000 * 60));
-    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  const formatTime = useCallback(
+    timestamp => {
+      const now = new Date();
+      const postTime = new Date(timestamp);
+      const diffMs = now - postTime;
+      const diffMins = Math.floor(diffMs / (1000 * 60));
+      const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+      const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
 
-    if (diffMins < 1) return '剛剛';
-    if (diffMins < 60) return `${diffMins}分鐘前`;
-    if (diffHours < 24) return `${diffHours}小時前`;
-    if (diffDays < 7) return `${diffDays}天前`;
-    return postTime.toLocaleDateString();
-  }, []);
+      if (diffMins < 1) return t('community.time.justNow');
+      if (diffMins < 60)
+        return t('community.time.minutesAgo', { count: diffMins });
+      if (diffHours < 24)
+        return t('community.time.hoursAgo', { count: diffHours });
+      if (diffDays < 7) return t('community.time.daysAgo', { count: diffDays });
+      try {
+        return new Intl.DateTimeFormat(i18n.language).format(postTime);
+      } catch {
+        return postTime.toLocaleDateString();
+      }
+    },
+    [i18n.language, t]
+  );
 
   // 載入好友數據
   const loadFriendsData = useCallback(async () => {
@@ -816,7 +833,7 @@ const Community = () => {
       hasLoadedFriendsRef.current = true;
     } catch (error) {
       console.error('載入好友數據失敗:', error);
-      setError('載入好友數據失敗，請稍後再試');
+      setError(t('community.messages.loadFriendsFail'));
       // 即使載入失敗也要標記為已嘗試載入，避免無限重試
       hasLoadedFriendsRef.current = true;
     } finally {
@@ -936,7 +953,7 @@ const Community = () => {
       setSearchResults(results);
     } catch (error) {
       console.error('搜尋用戶失敗:', error);
-      setError('搜尋失敗');
+      setError(t('community.messages.searchFail'));
     } finally {
       setLoading(false);
     }
@@ -980,7 +997,7 @@ const Community = () => {
           console.log('🗑️ 已刪除舊邀請');
         } else {
           // 如果邀請存在但對方沒有收到，可能是資料問題，允許重新發送
-          setError('已經發送過好友邀請，請稍後再試或檢查邀請通知');
+          setError(t('community.messages.inviteSent'));
 
           // 清除錯誤訊息，讓用戶可以重試
           setTimeout(() => {
@@ -1009,7 +1026,7 @@ const Community = () => {
       firebaseWriteMonitor.logWrite('addDoc', 'friendInvitations', docRef.id);
 
       console.log('✅ 邀請已發送，文檔ID:', docRef.id);
-      setSuccess('好友邀請已發送');
+      setSuccess(t('community.messages.inviteSent'));
 
       // 立即驗證邀請是否真的被創建
       try {
@@ -1036,7 +1053,7 @@ const Community = () => {
       }, 1000);
     } catch (error) {
       console.error('發送好友邀請失敗:', error);
-      setError('發送邀請失敗');
+      setError(t('community.messages.inviteSendFail'));
     } finally {
       setLoading(false);
     }
@@ -1084,10 +1101,10 @@ const Community = () => {
       await loadFriendsData();
       await loadFriendRequests();
 
-      setSuccess('已接受好友邀請');
+      setSuccess(t('community.messages.inviteAccepted'));
     } catch (error) {
       console.error('接受好友邀請失敗:', error);
-      setError('接受邀請失敗: ' + error.message);
+      setError(`${t('community.messages.inviteAcceptFail')}: ${error.message}`);
     } finally {
       setLoading(false);
     }
@@ -1111,10 +1128,10 @@ const Community = () => {
       );
 
       await loadFriendRequests();
-      setSuccess('已拒絕好友邀請');
+      setSuccess(t('community.messages.inviteRejected'));
     } catch (error) {
       console.error('拒絕好友邀請失敗:', error);
-      setError('拒絕邀請失敗: ' + error.message);
+      setError(`${t('community.messages.inviteRejectFail')}: ${error.message}`);
     } finally {
       setLoading(false);
     }
@@ -1272,21 +1289,22 @@ const Community = () => {
           className={`tab-btn ${activeTab === 'feed' ? 'active' : ''}`}
           onClick={() => setActiveTab('feed')}
         >
-          <span className="tab-label">動態牆</span>
+          <span className="tab-label">{t('community.tabs.feed')}</span>
         </div>
         <div
           className={`tab-btn ${activeTab === 'friends' ? 'active' : ''}`}
           onClick={() => setActiveTab('friends')}
         >
           <span className="tab-label">
-            好友 ({!hasLoadedFriendsRef.current ? '...' : friendsList.length})
+            {t('community.tabs.friends')} (
+            {!hasLoadedFriendsRef.current ? '...' : friendsList.length})
           </span>
         </div>
         <div
           className={`tab-btn ${activeTab === 'requests' ? 'active' : ''}`}
           onClick={() => setActiveTab('requests')}
         >
-          <span className="tab-label">邀請通知</span>
+          <span className="tab-label">{t('community.tabs.invites')}</span>
           {friendRequests.length > 0 && (
             <span className="notification-badge">{friendRequests.length}</span>
           )}
@@ -1295,7 +1313,7 @@ const Community = () => {
           className={`tab-btn ${activeTab === 'search' ? 'active' : ''}`}
           onClick={() => setActiveTab('search')}
         >
-          <span className="tab-label">搜尋好友</span>
+          <span className="tab-label">{t('community.tabs.search')}</span>
         </div>
       </div>
 
@@ -1357,7 +1375,7 @@ const Community = () => {
                 marginBottom: '10px',
               }}
             >
-              🔄 刷新動態
+              🔄 {t('community.refresh')}
             </button>
           </div>
         )}
@@ -1376,7 +1394,7 @@ const Community = () => {
                         ? '/guest-avatar.svg'
                         : userData?.avatarUrl || '/default-avatar.svg';
                     })()}
-                    alt="頭像"
+                    alt={t('community.ui.avatarAlt')}
                     loading="lazy"
                     onError={e => {
                       e.target.src = '/default-avatar.svg';
@@ -1385,7 +1403,7 @@ const Community = () => {
                 </div>
                 <div className="composer-input">
                   <textarea
-                    placeholder="分享你的健身成果..."
+                    placeholder={t('community.sharePlaceholder')}
                     value={newPostContent}
                     onChange={e => setNewPostContent(e.target.value)}
                     maxLength={500}
@@ -1400,7 +1418,9 @@ const Community = () => {
                       disabled={!newPostContent.trim() || submitting}
                       className="publish-btn"
                     >
-                      {submitting ? '發布中...' : '發布'}
+                      {submitting
+                        ? t('community.publishing')
+                        : t('community.publish')}
                     </button>
                   </div>
                 </div>
@@ -1411,8 +1431,8 @@ const Community = () => {
             <div className="posts-container">
               {posts.length === 0 ? (
                 <div className="empty-state">
-                  <p>還沒有動態</p>
-                  <p>發布第一條動態吧！</p>
+                  <p>{t('community.emptyFeed.title')}</p>
+                  <p>{t('community.emptyFeed.subtitle')}</p>
                 </div>
               ) : (
                 posts.map(post => (
@@ -1439,8 +1459,8 @@ const Community = () => {
           <div className="friends-tab">
             {!friendsList || friendsList.length === 0 ? (
               <div className="empty-state">
-                <p>還沒有好友</p>
-                <p>去搜尋好友吧！</p>
+                <p>{t('community.noFriends')}</p>
+                <p>{t('community.goSearchFriends')}</p>
               </div>
             ) : (
               <div className="friends-list">
@@ -1451,7 +1471,7 @@ const Community = () => {
                       <div className="friend-info">
                         <img
                           src={friend.avatarUrl || '/default-avatar.svg'}
-                          alt="頭像"
+                          alt={t('community.ui.avatarAlt')}
                           className="friend-avatar"
                           loading="lazy"
                           onError={e => {
@@ -1460,17 +1480,21 @@ const Community = () => {
                         />
                         <div className="friend-details">
                           <div className="friend-name">
-                            {friend.nickname || '未命名用戶'}
+                            {friend.nickname ||
+                              t('community.fallback.unnamedUser')}
                           </div>
                           <div className="friend-score">
                             {friend.averageScore ? (
                               <>
                                 <span className="score-value">
-                                  🏆 {friend.averageScore}分
+                                  🏆 {friend.averageScore}
+                                  {t('community.ui.pointsUnit')}
                                 </span>
                               </>
                             ) : (
-                              <span className="no-score">尚未評測</span>
+                              <span className="no-score">
+                                {t('community.ui.noScore')}
+                              </span>
                             )}
                           </div>
                           <div className="friend-email">
@@ -1484,14 +1508,14 @@ const Community = () => {
                           onClick={() =>
                             friend.id && goToFriendBoard(friend.id)
                           }
-                          title="查看留言板"
+                          title={t('community.ui.boardTitle')}
                         >
                           💬
                         </button>
                         <button
                           className="btn-remove"
                           onClick={() => friend.id && removeFriend(friend.id)}
-                          title="移除好友"
+                          title={t('community.friend.remove')}
                         >
                           ❌
                         </button>
@@ -1507,7 +1531,7 @@ const Community = () => {
           <div className="requests-tab">
             {friendRequests.length === 0 ? (
               <div className="empty-state">
-                <p>沒有待處理的邀請</p>
+                <p>{t('community.invites.empty')}</p>
               </div>
             ) : (
               <div className="requests-list">
@@ -1516,7 +1540,7 @@ const Community = () => {
                     <div className="request-info">
                       <img
                         src={request.avatarUrl || '/default-avatar.svg'}
-                        alt="頭像"
+                        alt={t('community.ui.avatarAlt')}
                         className="request-avatar"
                         loading="lazy"
                         onError={e => {
@@ -1534,14 +1558,14 @@ const Community = () => {
                         onClick={() =>
                           acceptFriendRequest(request.id, request.fromUserId)
                         }
-                        title="接受邀請"
+                        title={t('community.invites.accept')}
                       >
                         ✅
                       </button>
                       <button
                         className="btn-decline"
                         onClick={() => declineFriendRequest(request.id)}
-                        title="拒絕邀請"
+                        title={t('community.invites.reject')}
                       >
                         ❌
                       </button>
@@ -1558,7 +1582,7 @@ const Community = () => {
             <div className="search-container">
               <input
                 type="text"
-                placeholder="搜尋暱稱或電子郵件..."
+                placeholder={t('community.search.placeholder')}
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
                 onKeyPress={e => {
@@ -1569,14 +1593,14 @@ const Community = () => {
                 className="search-input"
               />
               <button onClick={handleSearch} className="search-btn">
-                搜尋
+                {t('common.search')}
               </button>
             </div>
 
             <div className="search-results">
               {searchResults.length === 0 && searchQuery.trim() ? (
                 <div className="empty-state">
-                  <p>沒有找到相關用戶</p>
+                  <p>{t('community.search.empty')}</p>
                 </div>
               ) : (
                 searchResults.map(user => (
@@ -1584,7 +1608,7 @@ const Community = () => {
                     <div className="user-info">
                       <img
                         src={user.avatarUrl || '/default-avatar.svg'}
-                        alt="頭像"
+                        alt={t('community.ui.avatarAlt')}
                         className="user-avatar"
                         loading="lazy"
                         onError={e => {
@@ -1598,16 +1622,21 @@ const Community = () => {
                     </div>
                     <div className="user-actions">
                       {user.isFriend ? (
-                        <span className="status-badge">已是好友</span>
+                        <span className="status-badge">
+                          {t('community.friend.badgeFriend')}
+                        </span>
                       ) : user.hasPendingRequest ? (
-                        <span className="status-badge">邀請已發送</span>
+                        <span className="status-badge">
+                          {t('community.friend.badgeInvited')}
+                        </span>
                       ) : (
                         <button
                           className="btn-add"
                           onClick={() => sendFriendRequest(user.id)}
                           disabled={loading}
+                          title={t('community.friend.add')}
                         >
-                          加好友
+                          {t('community.friend.add')}
                         </button>
                       )}
                     </div>
@@ -1636,6 +1665,7 @@ const PostCard = React.memo(
     likeProcessing,
     commentProcessing,
   }) => {
+    const { t } = useTranslation();
     const [showComments, setShowComments] = useState(false);
     const [newComment, setNewComment] = useState('');
     const [imageLoaded, setImageLoaded] = useState(false); // 新增：圖片載入狀態
@@ -1671,7 +1701,7 @@ const PostCard = React.memo(
           <div className="post-user">
             <img
               src={post.userAvatarUrl || '/default-avatar.svg'}
-              alt="頭像"
+              alt={t('community.ui.avatarAlt')}
               className="user-avatar"
               loading="lazy" // 新增：懶載入
               onLoad={() => setImageLoaded(true)} // 新增：圖片載入完成
@@ -1690,7 +1720,9 @@ const PostCard = React.memo(
                 {post.targetUserId && (
                   <span className="to-label">
                     {' '}
-                    → {post.targetUserNickname || '好友'}
+                    →{' '}
+                    {post.targetUserNickname ||
+                      t('community.friend.badgeFriend')}
                   </span>
                 )}
               </div>
@@ -1702,7 +1734,7 @@ const PostCard = React.memo(
             <button
               onClick={() => onDeletePost(post.id)}
               className="delete-post-btn"
-              title="刪除此動態"
+              title={t('community.titles.deletePost')}
             >
               🗑️
             </button>
@@ -1724,8 +1756,8 @@ const PostCard = React.memo(
             </span>
             <span className="action-text">
               {likeProcessing.has(post.id)
-                ? '處理中...'
-                : `${likeCount > 0 ? likeCount : ''} 讚`}
+                ? t('community.processing')
+                : `${likeCount > 0 ? likeCount : ''} ${t('community.like')}`}
             </span>
           </button>
 
@@ -1735,7 +1767,7 @@ const PostCard = React.memo(
           >
             <span className="action-icon">💬</span>
             <span className="action-text">
-              {commentCount > 0 ? commentCount : ''} 留言
+              {commentCount > 0 ? commentCount : ''} {t('community.comment')}
             </span>
           </button>
         </div>
@@ -1757,7 +1789,7 @@ const PostCard = React.memo(
                         <div className="comment-user-info">
                           <img
                             src={comment.userAvatarUrl || '/guest-avatar.svg'}
-                            alt="頭像"
+                            alt={t('community.ui.avatarAlt')}
                             className="comment-avatar"
                             onError={e => {
                               e.target.src = '/guest-avatar.svg';
@@ -1776,7 +1808,11 @@ const PostCard = React.memo(
                           <button
                             onClick={() => onDeleteComment(post.id, comment.id)}
                             className="comment-delete-btn"
-                            title={isPostOwner ? '刪除此留言' : '刪除我的留言'}
+                            title={
+                              isPostOwner
+                                ? t('community.titles.deleteComment')
+                                : t('community.titles.deleteMyComment')
+                            }
                           >
                             🗑️
                           </button>
@@ -1793,7 +1829,7 @@ const PostCard = React.memo(
             <div className="comment-input">
               <input
                 type="text"
-                placeholder="寫留言..."
+                placeholder={t('community.writeComment')}
                 value={newComment}
                 onChange={e => setNewComment(e.target.value)}
                 onKeyPress={e => {
@@ -1807,7 +1843,9 @@ const PostCard = React.memo(
                 disabled={!newComment.trim() || commentProcessing.has(post.id)}
                 className="comment-btn"
               >
-                {commentProcessing.has(post.id) ? '發送中...' : '發送'}
+                {commentProcessing.has(post.id)
+                  ? t('community.sending')
+                  : t('community.send')}
               </button>
             </div>
           </div>

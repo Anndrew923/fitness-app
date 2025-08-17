@@ -4,11 +4,13 @@ import { useUser } from './UserContext';
 import * as standards from './standards';
 import PropTypes from 'prop-types';
 import './Cardio.css';
+import { useTranslation } from 'react-i18next';
 
 function Cardio({ onComplete }) {
   const { userData, setUserData } = useUser();
   const navigate = useNavigate();
   const { age, gender } = userData;
+  const { t } = useTranslation();
 
   const [distance, setDistance] = useState(
     userData.testInputs?.cardio?.distance || ''
@@ -90,7 +92,7 @@ function Cardio({ onComplete }) {
 
   const calculateCardioScore = () => {
     if (!distance || !age || !gender) {
-      alert('請確保已在用戶信息中輸入年齡和性別，並在此輸入跑步距離！');
+      alert(t('tests.cardioErrors.missingPrerequisites'));
       return;
     }
 
@@ -98,7 +100,7 @@ function Cardio({ onComplete }) {
     const ageRange = getAgeRange(age);
 
     if (!distanceNum || !ageRange) {
-      alert('請輸入有效的跑步距離和年齡！');
+      alert(t('tests.cardioErrors.invalidInputs'));
       return;
     }
 
@@ -112,7 +114,7 @@ function Cardio({ onComplete }) {
     const standard = cooperStandards[ageRange];
 
     if (!standard) {
-      alert('無法找到對應的評測標準，請檢查年齡和性別！');
+      alert(t('tests.cardioErrors.standardsNotFound'));
       return;
     }
 
@@ -130,7 +132,7 @@ function Cardio({ onComplete }) {
 
   const handleSubmit = async () => {
     if (!score) {
-      alert('請先計算心肺耐力分數！');
+      alert(t('tests.cardioErrors.needCalculate'));
       return;
     }
 
@@ -173,7 +175,7 @@ function Cardio({ onComplete }) {
     } catch (error) {
       console.error('提交失敗:', error);
       if (!isGuest) {
-        alert('更新用戶數據失敗，請稍後再試！');
+        alert(t('tests.cardioErrors.updateUserFail'));
       }
       navigate('/user-info', { state: { from: '/cardio' } });
     } finally {
@@ -184,34 +186,44 @@ function Cardio({ onComplete }) {
   return (
     <div className="cardio-container">
       <div className="input-section">
-        <h1 className="text-2xl font-bold text-center mb-4">心肺耐力測試</h1>
-        <p>年齡：{age || '未輸入'}</p>
-        <p>性別：{gender || '未選擇'}</p>
+        <h1 className="text-2xl font-bold text-center mb-4">
+          {t('tests.cardioTitle')}
+        </h1>
+        <p>
+          {t('common.ageLabel')}：{age || t('common.notEntered')}
+        </p>
+        <p>
+          {t('common.genderLabel')}：{gender || t('common.notSelected')}
+        </p>
 
         <div className="exercise-section">
-          <h2 className="text-lg font-semibold">Cooper 12 分鐘跑步測試</h2>
+          <h2 className="text-lg font-semibold">
+            {t('tests.cardioInfo.cooperTitle')}
+          </h2>
           <label
             htmlFor="distance"
             className="block text-sm font-medium text-gray-700"
           >
-            跑步距離 (公尺)
+            {t('tests.cardioLabels.distanceMeters')}
           </label>
           <input
             id="distance"
             name="distance"
             type="number"
-            placeholder="跑步距離 (公尺)"
+            placeholder={t('tests.cardioLabels.distanceMeters')}
             value={distance}
             onChange={e => setDistance(e.target.value)}
             className="input-field"
             required
           />
           <button onClick={calculateCardioScore} className="calculate-btn">
-            計算
+            {t('common.calculate')}
           </button>
           {score !== null && (
             <>
-              <p className="score-display">心肺耐力分數: {score}</p>
+              <p className="score-display">
+                {t('tests.cardioLabels.score')}: {score}
+              </p>
               <p className="score-display">{getComment(score, gender)}</p>
             </>
           )}
@@ -223,38 +235,29 @@ function Cardio({ onComplete }) {
               className="description-header"
               onClick={() => setIsExpanded(!isExpanded)}
             >
-              <h2 className="text-lg font-semibold">動作說明</h2>
+              <h2 className="text-lg font-semibold">
+                {t('tests.cardioInfo.sectionTitle')}
+              </h2>
               <span className={`arrow ${isExpanded ? 'expanded' : ''}`}>
                 {isExpanded ? '▲' : '▼'}
               </span>
             </div>
             {isExpanded && (
               <div className="description-content">
-                <p className="font-semibold">Cooper Test 簡介</p>
-                <p>
-                  傳統心肺耐力測試需在實驗室以極限強度測量最大攝氧量（VO₂
-                  Max），但難以普及。Kenneth H. Cooper 博士發現 12
-                  分鐘跑步距離與 VO₂ Max 高度相關，於 1968 年設計 Cooper
-                  Test，廣泛應用於美軍體測，簡化測量並提升效率。測試以年齡、性別和跑步距離估算
-                  VO₂ Max。
+                <p className="font-semibold">
+                  {t('tests.cardioInfo.introTitle')}
                 </p>
-                <p className="font-semibold mt-2">測量方式</p>
+                <p>{t('tests.cardioInfo.introText')}</p>
+                <p className="font-semibold mt-2">
+                  {t('tests.cardioInfo.measureLabel')}
+                </p>
                 <ul className="list-disc pl-5">
-                  <li>
-                    <strong>地點</strong>
-                    ：選擇田徑場或安全跑步環境，方便記錄距離和配速。
-                  </li>
-                  <li>
-                    <strong>記錄</strong>：用圈數或運動手錶記錄 12
-                    分鐘跑步距離。
-                  </li>
-                  <li>
-                    <strong>熱身</strong>：跑前動態熱身 10-15 分鐘，避免受傷。
-                  </li>
+                  <li>{t('tests.cardioInfo.items.place')}</li>
+                  <li>{t('tests.cardioInfo.items.record')}</li>
+                  <li>{t('tests.cardioInfo.items.warmup')}</li>
                 </ul>
                 <p className="mt-2 text-sm text-gray-600">
-                  本 Cooper 測試標準表可在 Cooper Test Chart 找到，由 Carl
-                  Magnus Swahn 設計。
+                  {t('tests.cardioInfo.sourceNote')}
                 </p>
               </div>
             )}
@@ -269,7 +272,7 @@ function Cardio({ onComplete }) {
           className="submit-btn"
           disabled={submitting}
         >
-          {submitting ? '提交中…' : '提交並返回總覽'}
+          {submitting ? t('common.submitting') : t('common.submitAndReturn')}
         </button>
       </div>
     </div>

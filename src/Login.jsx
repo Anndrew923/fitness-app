@@ -11,6 +11,7 @@ import SocialLogin from './components/SocialLogin';
 import PrivacyPolicyModal from './components/PrivacyPolicyModal';
 import DataSecurityNotice from './components/DataSecurityNotice';
 import './Login.css';
+import { useTranslation } from 'react-i18next';
 
 function Login({ onLogin }) {
   const [email, setEmail] = useState('');
@@ -22,6 +23,7 @@ function Login({ onLogin }) {
   const [showPrivacyPolicy, setShowPrivacyPolicy] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const { t } = useTranslation();
 
   const { height, weight, age } = location.state || {};
 
@@ -182,19 +184,19 @@ function Login({ onLogin }) {
   return (
     <div className="login-container">
       <h1 className="text-2xl font-bold text-center mb-6">
-        {isRegistering ? '註冊' : '登入'}
+        {isRegistering ? t('login.register') : t('login.login')}
       </h1>
       {error && <p className="error-message">{error}</p>}
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label className="block text-sm font-medium text-gray-700">
-            電子郵件
+            {t('login.email')}
           </label>
           <input
             type="email"
             value={email}
             onChange={e => setEmail(e.target.value)}
-            placeholder="輸入你的電子郵件"
+            placeholder={t('login.emailPlaceholder')}
             className="input-field"
             required
             disabled={loading}
@@ -202,13 +204,13 @@ function Login({ onLogin }) {
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700">
-            密碼
+            {t('login.password')}
           </label>
           <input
             type="password"
             value={password}
             onChange={e => setPassword(e.target.value)}
-            placeholder="輸入你的密碼"
+            placeholder={t('login.passwordPlaceholder')}
             className="input-field"
             required
             disabled={loading}
@@ -241,18 +243,22 @@ function Login({ onLogin }) {
               disabled={loading}
               style={{ margin: 0 }}
             />
-            <span style={{ marginLeft: '6px' }}>記住我的帳號</span>
+            <span style={{ marginLeft: '6px' }}>{t('login.rememberMe')}</span>
           </label>
         </div>
         <button type="submit" className="submit-btn" disabled={loading}>
-          {loading ? '處理中...' : isRegistering ? '註冊' : '登入'}
+          {loading
+            ? t('common.loading')
+            : isRegistering
+            ? t('login.register')
+            : t('login.login')}
         </button>
       </form>
       <button
         onClick={() => setIsRegistering(!isRegistering)}
         className="toggle-btn"
       >
-        {isRegistering ? '已有帳號？點此登入' : '沒有帳號？點此註冊'}
+        {isRegistering ? t('login.switchToLogin') : t('login.switchToRegister')}
       </button>
 
       <DataSecurityNotice
@@ -262,17 +268,19 @@ function Login({ onLogin }) {
       <SocialLogin onLogin={handleSocialLogin} onError={handleSocialError} />
 
       <div className="instructions-container">
-        <h2 className="instructions-title">使用說明</h2>
+        <h2 className="instructions-title">{t('login.instructions.title')}</h2>
         <ul className="instructions-list">
           <li>
-            <strong>公平評測</strong>
-            ：依性別、年齡、身高、體重，結合科學統計，分數化呈現，簡單易懂。
+            <strong>{t('login.instructions.items.fair.title')}</strong>：
+            {t('login.instructions.items.fair.desc')}
           </li>
           <li>
-            <strong>全面分析</strong>：五邊形雷達圖顯示弱項，指引補強方向。
+            <strong>{t('login.instructions.items.analysis.title')}</strong>：
+            {t('login.instructions.items.analysis.desc')}
           </li>
           <li>
-            <strong>成長追蹤</strong>：記錄進步軌跡，優化課表效率。
+            <strong>{t('login.instructions.items.tracking.title')}</strong>：
+            {t('login.instructions.items.tracking.desc')}
           </li>
         </ul>
       </div>

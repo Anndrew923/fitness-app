@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import PropTypes from 'prop-types';
 import './PrivacyPolicyModal.css';
+import { useTranslation } from 'react-i18next';
 
 function PrivacyPolicyModal({ isOpen, onClose, onAccept }) {
   const [currentLanguage, setCurrentLanguage] = useState('zh');
+  const { t } = useTranslation();
 
   if (!isOpen) return null;
 
@@ -20,7 +22,7 @@ function PrivacyPolicyModal({ isOpen, onClose, onAccept }) {
     <div className="privacy-modal-overlay" onClick={onClose}>
       <div className="privacy-modal" onClick={e => e.stopPropagation()}>
         <div className="privacy-modal-header">
-          <h2>隱私權政策 / Privacy Policy</h2>
+          <h2>{t('privacy.title')} / Privacy Policy</h2>
           <button className="close-btn" onClick={onClose}>
             ×
           </button>
@@ -184,8 +186,8 @@ function PrivacyPolicyModal({ isOpen, onClose, onAccept }) {
               <section>
                 <h3>Third-Party Services</h3>
                 <p>
-                  When you log in using Google, this service will
-                  process your data according to its privacy policy.
+                  When you log in using Google, this service will process your
+                  data according to its privacy policy.
                 </p>
               </section>
 
@@ -200,10 +202,10 @@ function PrivacyPolicyModal({ isOpen, onClose, onAccept }) {
 
         <div className="privacy-modal-footer">
           <button className="privacy-btn secondary" onClick={onClose}>
-            取消
+            {t('common.cancel')}
           </button>
           <button className="privacy-btn primary" onClick={handleAccept}>
-            我同意並繼續
+            {t('privacy.acceptAndContinue')}
           </button>
         </div>
       </div>

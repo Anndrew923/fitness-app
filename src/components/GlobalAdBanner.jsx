@@ -1,4 +1,4 @@
-// import React from 'react';
+import React from 'react';
 import { useLocation } from 'react-router-dom';
 import AdBanner from './AdBanner';
 
@@ -59,4 +59,4 @@ const GlobalAdBanner = () => {
   );
 };
 
-export default GlobalAdBanner;
+export default React.memo(GlobalAdBanner);

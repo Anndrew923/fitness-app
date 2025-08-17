@@ -13,11 +13,13 @@ import * as standards from './standards';
 import PropTypes from 'prop-types';
 
 import './Strength.css';
+import { useTranslation } from 'react-i18next';
 
 function Strength({ onComplete }) {
   const { userData, setUserData } = useUser();
   const navigate = useNavigate();
   const { gender, age } = userData;
+  const { t } = useTranslation();
 
   // 新增分頁狀態
   const [currentTab, setCurrentTab] = useState('exercises'); // 'exercises', 'results', 'standards'
@@ -207,15 +209,16 @@ function Strength({ onComplete }) {
 
   const calculateMaxStrength = useCallback(
     (weight, reps, setState, type) => {
-      if (!weight || !reps) return alert('請輸入重量和次數！');
+      if (!weight || !reps)
+        return alert(t('tests.strengthErrors.missingInputs'));
       const weightNum = parseFloat(weight);
       const repsNum = parseFloat(reps);
       const userWeight = parseFloat(userData.weight);
       const userAge = parseFloat(age);
       if (!userWeight || !userAge)
-        return alert('請確保已輸入有效的體重和年齡！');
+        return alert(t('tests.strengthErrors.missingUserData'));
       if (repsNum > 12) {
-        alert('可完成次數不得超過12次，請重新輸入！');
+        alert(t('tests.strengthErrors.repsTooHigh'));
         setState(prev => ({ ...prev, reps: '' }));
         return;
       }
@@ -281,57 +284,40 @@ function Strength({ onComplete }) {
   ]);
 
   const getAverageScoreComment = (score, gender) => {
-    const genderValue =
-      gender === '男性' || gender.toLowerCase() === 'male' ? 'male' : 'female';
-    if (score >= 90)
-      return genderValue === 'male'
-        ? '頂尖表現！你已達建力、舉重專項運動員水平！接受掌聲吧！'
-        : '我願稱你為神力女超人!';
-    if (score >= 80)
-      return genderValue === 'male'
-        ? '萬里挑一！你已達到職業運動員水平，繼續稱霸！'
-        : '太驚艷了！你應該是朋友圈裡最強的吧？超棒的！';
-    if (score >= 70)
-      return genderValue === 'male'
-        ? '超越常人！許多國手的力量指標也落在這，相當厲害!'
-        : '真的很傑出！表現超棒，繼續保持哦！';
-    if (score >= 60)
-      return genderValue === 'male'
-        ? '很強！業餘運動愛好者中的佼佼者，再拼一把！'
-        : '表現超棒！超越大多數人，你很厲害！';
-    if (score >= 50)
-      return genderValue === 'male'
-        ? '不錯的水準！訓練痕跡肉眼可見！'
-        : '很棒的水準！再努力一點，你會更好！';
-    if (score >= 40)
-      return genderValue === 'male'
-        ? '已經有基礎了，繼續進步，一切大有可為!'
-        : '有規律良好的運動習慣了!再接再厲';
-    return genderValue === 'male'
-      ? '兄弟，該衝了！全力以赴，突破自己！'
-      : '親愛的，還有進步空間，繼續加油哦！';
+    const isMale =
+      gender === '男性' || (gender && gender.toLowerCase() === 'male');
+    const ns = isMale
+      ? 'tests.strengthComments.male'
+      : 'tests.strengthComments.female';
+    if (score >= 90) return t(`${ns}.gte90`);
+    if (score >= 80) return t(`${ns}.gte80`);
+    if (score >= 70) return t(`${ns}.gte70`);
+    if (score >= 60) return t(`${ns}.gte60`);
+    if (score >= 50) return t(`${ns}.gte50`);
+    if (score >= 40) return t(`${ns}.gte40`);
+    return t(`${ns}.below40`);
   };
 
   const radarData = useMemo(
     () => [
       {
-        name: '臥推',
+        name: t('tests.strengthExercises.benchPress'),
         value: parseFloat(benchPress.score) || 0,
       },
       {
-        name: '深蹲',
+        name: t('tests.strengthExercises.squat'),
         value: parseFloat(squat.score) || 0,
       },
       {
-        name: '硬舉',
+        name: t('tests.strengthExercises.deadlift'),
         value: parseFloat(deadlift.score) || 0,
       },
       {
-        name: '滑輪下拉',
+        name: t('tests.strengthExercises.latPulldown'),
         value: parseFloat(latPulldown.score) || 0,
       },
       {
-        name: '站姿肩推',
+        name: t('tests.strengthExercises.shoulderPress'),
         value: parseFloat(shoulderPress.score) || 0,
       },
     ],
@@ -341,6 +327,7 @@ function Strength({ onComplete }) {
       deadlift.score,
       latPulldown.score,
       shoulderPress.score,
+      t,
     ]
   );
 
@@ -359,7 +346,7 @@ function Strength({ onComplete }) {
       : null;
 
   const handleSubmit = async () => {
-    if (!averageScore) return alert('請至少完成一項評測！');
+    if (!averageScore) return alert(t('tests.strengthErrors.needAtLeastOne'));
     if (submitting) return;
     setSubmitting(true);
 
@@ -427,7 +414,7 @@ function Strength({ onComplete }) {
       navigate('/user-info', { state: { from: '/strength' } });
     } catch (error) {
       console.error('提交失敗:', error);
-      alert('更新用戶數據或導航失敗，請稍後再試！');
+      alert(t('tests.strengthErrors.updateFail'));
       navigate('/user-info', { state: { from: '/strength' } });
     } finally {
       setSubmitting(false);
@@ -437,66 +424,92 @@ function Strength({ onComplete }) {
   const scoreTableData = [
     {
       range: '90~100',
-      description:
-        '專業舉重、健力專項運動員、大力士水平，如魔山、輪子哥、阿諾、John Cena',
+      description: t('tests.strengthStandards.guide.items.90_100'),
     },
     {
       range: '80~90',
-      description:
-        '職業運動員水平；職業格鬥、橄欖球運動員，如巨石強森、GSP(UFC次中量級世界冠軍)',
+      description: t('tests.strengthStandards.guide.items.80_90'),
     },
     {
       range: '70~80',
-      description: '國手水平、球類運動員，如大谷翔平、LBJ、傑森史塔森',
+      description: t('tests.strengthStandards.guide.items.70_80'),
     },
     {
       range: '60~70',
-      description:
-        '業餘運動愛好者中的高手，如休傑克曼、克里斯漢斯沃、亨利卡維爾',
+      description: t('tests.strengthStandards.guide.items.60_70'),
     },
-    { range: '50~60', description: '中階運動愛好者' },
-    { range: '40~50', description: '開始步入軌道' },
-    { range: '40分以下', description: '初學者' },
+    {
+      range: '50~60',
+      description: t('tests.strengthStandards.guide.items.50_60'),
+    },
+    {
+      range: '40~50',
+      description: t('tests.strengthStandards.guide.items.40_50'),
+    },
+    {
+      range: t('tests.strengthStandards.guide.rangeBelow40'),
+      description: t('tests.strengthStandards.guide.items.below40'),
+    },
   ];
 
   const scoreLevels = [
-    { level: '初階-運動習慣培養中', score: 20, color: '#FF6B6B' },
-    { level: '入門-業餘運動愛好者', score: 40, color: '#FFA726' },
-    { level: '中等-訓練痕跡肉眼可見', score: 60, color: '#FFEE58' },
-    { level: '高階-職業運動員等級', score: 80, color: '#66BB6A' },
-    { level: '精英-舉重、健力運動員', score: 100, color: '#42A5F5' },
+    {
+      level: t('tests.strengthStandards.levels.beginner'),
+      score: 20,
+      color: '#FF6B6B',
+    },
+    {
+      level: t('tests.strengthStandards.levels.novice'),
+      score: 40,
+      color: '#FFA726',
+    },
+    {
+      level: t('tests.strengthStandards.levels.intermediate'),
+      score: 60,
+      color: '#FFEE58',
+    },
+    {
+      level: t('tests.strengthStandards.levels.advanced'),
+      score: 80,
+      color: '#66BB6A',
+    },
+    {
+      level: t('tests.strengthStandards.levels.elite'),
+      score: 100,
+      color: '#42A5F5',
+    },
   ];
 
   // 運動項目配置
   const exercises = [
     {
       key: 'benchPress',
-      name: '平板臥推',
+      name: t('tests.strengthExercises.benchPress'),
       state: benchPress,
       setState: setBenchPress,
     },
     {
       key: 'squat',
-      name: '深蹲',
+      name: t('tests.strengthExercises.squat'),
       state: squat,
       setState: setSquat,
     },
     {
       key: 'deadlift',
-      name: '硬舉',
+      name: t('tests.strengthExercises.deadlift'),
 
       state: deadlift,
       setState: setDeadlift,
     },
     {
       key: 'latPulldown',
-      name: '滑輪下拉',
+      name: t('tests.strengthExercises.latPulldown'),
       state: latPulldown,
       setState: setLatPulldown,
     },
     {
       key: 'shoulderPress',
-      name: '站姿肩推',
+      name: t('tests.strengthExercises.shoulderPress'),
       state: shoulderPress,
       setState: setShoulderPress,
     },
@@ -540,11 +553,13 @@ function Strength({ onComplete }) {
           <div className="exercise-content">
             <div className="exercise-inputs">
               <div className="input-group">
-                <label htmlFor={`${key}Weight`}>重量 (kg)</label>
+                <label htmlFor={`${key}Weight`}>
+                  {t('tests.strengthLabels.weightKg')}
+                </label>
                 <input
                   id={`${key}Weight`}
                   type="number"
-                  placeholder="重量"
+                  placeholder={t('tests.strengthLabels.weightKg')}
                   value={state.weight}
                   onChange={e =>
                     setState(prev => ({ ...prev, weight: e.target.value }))
@@ -554,11 +569,13 @@ function Strength({ onComplete }) {
               </div>
 
               <div className="input-group">
-                <label htmlFor={`${key}Reps`}>次數</label>
+                <label htmlFor={`${key}Reps`}>
+                  {t('tests.strengthLabels.reps')}
+                </label>
                 <input
                   id={`${key}Reps`}
                   type="number"
-                  placeholder="次數"
+                  placeholder={t('tests.strengthLabels.reps')}
                   value={state.reps}
                   onChange={e =>
                     setState(prev => ({ ...prev, reps: e.target.value }))
@@ -574,15 +591,19 @@ function Strength({ onComplete }) {
                 className="calculate-btn"
                 disabled={!state.weight || !state.reps}
               >
-                計算
+                {t('common.calculate')}
               </button>
             </div>
 
             {state.max && (
               <div className="exercise-result">
-                <p className="max-strength">最大力量: {state.max} kg</p>
+                <p className="max-strength">
+                  {t('tests.strengthLabels.maxStrength')}: {state.max} kg
+                </p>
                 {state.score && (
-                  <p className="score-display">分數: {state.score}</p>
+                  <p className="score-display">
+                    {t('tests.score')}: {state.score}
+                  </p>
                 )}
               </div>
             )}
@@ -595,10 +616,8 @@ function Strength({ onComplete }) {
   return (
     <div className="strength-container">
       <div className="strength-header">
-        <h1 className="strength-title">💪 力量評測</h1>
-        <p className="strength-safety-note">
-          挑戰重量時記得綁上腰帶和手套，注意安全喔
-        </p>
+        <h1 className="strength-title">💪 {t('tests.strengthTitle')}</h1>
+        <p className="strength-safety-note">{t('tests.strengthSafetyNote')}</p>
       </div>
 
       {/* 分頁導航 */}
@@ -607,13 +626,13 @@ function Strength({ onComplete }) {
           className={`tab-btn ${currentTab === 'exercises' ? 'active' : ''}`}
           onClick={() => setCurrentTab('exercises')}
         >
-          🏋️ 評測項目
+          🏋️ {t('tests.startTest')}
         </button>
         <button
           className={`tab-btn ${currentTab === 'standards' ? 'active' : ''}`}
           onClick={() => setCurrentTab('standards')}
         >
-          📋 評測標準
+          📋 {t('tests.strengthStandards.tabTitle')}
         </button>
       </div>
 
@@ -633,7 +652,7 @@ function Strength({ onComplete }) {
                 <div className="corner-decoration bottom-left"></div>
                 <div className="corner-decoration bottom-right"></div>
 
-                <h3>📈 力量分佈圖</h3>
+                <h3>📈 {t('tests.strengthTitle')}</h3>
                 <ResponsiveContainer width="100%" height={300}>
                   <RadarChart data={radarData}>
                     <PolarGrid
@@ -699,7 +718,7 @@ function Strength({ onComplete }) {
               </div>
 
               <div className="score-breakdown-card">
-                <h3>📊 分數詳情</h3>
+                <h3>📊 {t('tests.score')}</h3>
                 <div className="score-breakdown">
                   {exercises.map(exercise => (
                     <div key={exercise.key} className="score-item">
@@ -711,7 +730,9 @@ function Strength({ onComplete }) {
                   ))}
                 </div>
                 <div className="average-score-display">
-                  <p className="average-score">平均分數: {averageScore}</p>
+                  <p className="average-score">
+                    {t('tests.averageScore')}: {averageScore}
+                  </p>
                   <p className="average-comment">
                     {getAverageScoreComment(averageScore, gender)}
                   </p>
@@ -726,12 +747,9 @@ function Strength({ onComplete }) {
       {currentTab === 'standards' && (
         <div className="standards-tab">
           <div className="standards-content">
-            <p>
-              我們的評測標準基於 Strength Level 用戶提供的超過 1.34
-              億次舉重數據，涵蓋男女標準，適用於臥推、深蹲、硬舉、肩推等多項健身動作。
-            </p>
+            <p>{t('tests.strengthStandards.intro')}</p>
             <p className="source-link">
-              來源：
+              {t('tests.strengthStandards.sourceLabel')}
               <a
                 href="https://strengthlevel.com/"
                 target="_blank"
@@ -744,7 +762,7 @@ function Strength({ onComplete }) {
           </div>
 
           <div className="score-levels-table">
-            <h3>分數等級</h3>
+            <h3>{t('tests.strengthStandards.scoreLevelsTitle')}</h3>
             <div className="levels-container">
               {scoreLevels.map((item, index) => (
                 <div key={index} className="level-item">
@@ -767,12 +785,12 @@ function Strength({ onComplete }) {
           </div>
 
           <div className="score-table">
-            <h3>分數說明</h3>
+            <h3>{t('tests.strengthStandards.scoreTableTitle')}</h3>
             <table className="table">
               <thead>
                 <tr>
-                  <th>分數範圍</th>
-                  <th>說明</th>
+                  <th>{t('tests.strengthStandards.table.range')}</th>
+                  <th>{t('tests.strengthStandards.table.description')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -797,10 +815,10 @@ function Strength({ onComplete }) {
           disabled={!averageScore || submitting}
         >
           {submitting
-            ? '提交中…'
+            ? t('common.submitting')
             : averageScore
-            ? '✅ 提交並返回總覽'
-            : '請至少完成一項評測'}
+            ? `✅ ${t('common.submitAndReturn')}`
+            : t('errors.required')}
         </button>
       </div>
     </div>

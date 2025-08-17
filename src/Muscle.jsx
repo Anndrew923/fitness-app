@@ -14,11 +14,13 @@ import {
 } from 'recharts';
 import PropTypes from 'prop-types';
 import './Muscle.css';
+import { useTranslation } from 'react-i18next';
 
 function Muscle({ onComplete }) {
   const { userData, setUserData } = useUser();
   const navigate = useNavigate();
   const { weight, age, gender } = userData;
+  const { t } = useTranslation();
 
   const [smm, setSmm] = useState(userData.testInputs?.muscle?.smm || '');
   const [result, setResult] = useState({
@@ -79,14 +81,14 @@ function Muscle({ onComplete }) {
 
   const calculateMuscleScore = () => {
     if (!weight || !smm || !age || !gender) {
-      alert('請確保已在用戶信息中輸入體重、年齡和性別，並在此輸入骨骼肌肉量！');
+      alert(t('tests.muscleErrors.missingPrerequisites'));
       return;
     }
     const weightNum = parseFloat(weight);
     const smmNum = parseFloat(smm);
     const ageRange = getAgeRange(age);
     if (!weightNum || !smmNum || !ageRange) {
-      alert('請輸入有效的體重、骨骼肌肉量和年齡！');
+      alert(t('tests.muscleErrors.invalidInputs'));
       return;
     }
     const smPercent = ((smmNum / weightNum) * 100).toFixed(2);
@@ -103,7 +105,7 @@ function Muscle({ onComplete }) {
     const smmStandard = smmStandards[ageRange];
     const smPercentStandard = smPercentStandards[ageRange];
     if (!smmStandard || !smPercentStandard) {
-      alert('無法找到對應的評測標準，請檢查年齡和性別！');
+      alert(t('tests.muscleErrors.standardsNotFound'));
       return;
     }
     const smmScore = calculateScoreFromStandard(smmNum, smmStandard, 'SMM');
@@ -118,7 +120,7 @@ function Muscle({ onComplete }) {
 
   const handleSubmit = async () => {
     if (!result.finalScore) {
-      alert('請先計算骨骼肌肉量分數！');
+      alert(t('tests.muscleErrors.needCalculate'));
       return;
     }
 
@@ -162,7 +164,7 @@ function Muscle({ onComplete }) {
     } catch (error) {
       console.error('提交失敗:', error);
       if (!isGuest) {
-        alert('更新用戶數據失敗，請稍後再試！');
+        alert(t('tests.muscleErrors.updateUserFail'));
       }
       navigate('/user-info', { state: { from: '/muscle-mass' } });
     } finally {
@@ -172,53 +174,69 @@ function Muscle({ onComplete }) {
 
   // 準備圖表數據
   const barData1 = [
-    { name: '骨骼肌肉量 (SMM)', value: result.smmScore || 0 },
-    { name: '肌肉量百分比 (SM%)', value: result.smPercentScore || 0 },
+    { name: t('tests.muscleLabels.smmShort'), value: result.smmScore || 0 },
+    {
+      name: t('tests.muscleLabels.smPercentShort'),
+      value: result.smPercentScore || 0,
+    },
   ];
 
-  const barData2 = [{ name: '最終分數', value: result.finalScore || 0 }];
+  const barData2 = [
+    { name: t('tests.muscleLabels.finalScore'), value: result.finalScore || 0 },
+  ];
 
   return (
     <div className="muscle-container">
-      <h1 className="text-2xl font-bold text-center mb-4">骨骼肌肉量評測</h1>
-      <p>體重：{weight ? `${weight} 公斤` : '未輸入'}</p>
-      <p>年齡：{age || '未輸入'}</p>
-      <p>性別：{gender || '未選擇'}</p>
+      <h1 className="text-2xl font-bold text-center mb-4">
+        {t('tests.muscleTitle')}
+      </h1>
+      <p>
+        {t('common.weightLabel')}：
+        {weight ? `${weight} kg` : t('common.notEntered')}
+      </p>
+      <p>
+        {t('common.ageLabel')}：{age || t('common.notEntered')}
+      </p>
+      <p>
+        {t('common.genderLabel')}：{gender || t('common.notSelected')}
+      </p>
 
       <div className="exercise-section">
-        <h2 className="text-lg font-semibold">骨骼肌肉量 (SMM)</h2>
+        <h2 className="text-lg font-semibold">
+          {t('tests.muscleLabels.smmKg')}
+        </h2>
         <label
           htmlFor="smm"
           className="block text-sm font-medium text-gray-700"
         >
-          骨骼肌肉量 (kg)
+          {t('tests.muscleLabels.smmKg')}
         </label>
         <input
           id="smm"
           name="smm"
           type="number"
-          placeholder="骨骼肌肉量 (kg)"
+          placeholder={t('tests.muscleLabels.smmKg')}
           value={smm}
           onChange={e => setSmm(e.target.value)}
           className="input-field"
         />
         <button onClick={calculateMuscleScore} className="calculate-btn">
-          計算
+          {t('common.calculate')}
         </button>
 
         {result.smmScore !== null && (
           <>
             <p className="score-text">
-              骨骼肌肉量 (SMM) 分數: {result.smmScore}
+              {t('tests.muscleLabels.smmShort')}: {result.smmScore}
             </p>
             <p className="score-text">
-              骨骼肌肉量百分比 (SM%): {result.smPercent}%
+              {t('tests.muscleLabels.smPercentShort')}: {result.smPercent}%
             </p>
             <p className="score-text">
-              骨骼肌肉量百分比 (SM%) 分數: {result.smPercentScore}
+              {t('tests.muscleLabels.smPercentScore')}: {result.smPercentScore}
             </p>
             <p className="score-text final-score">
-              最終分數: {result.finalScore}
+              {t('tests.muscleLabels.finalScore')}: {result.finalScore}
             </p>
           </>
         )}
@@ -226,29 +244,69 @@ function Muscle({ onComplete }) {
 
       {result.finalScore && (
         <div className="chart-section">
-          <h2 className="text-lg font-semibold mb-4">數值比較</h2>
+          <h2 className="text-lg font-semibold mb-4">
+            {t('tests.muscleLabels.numbersComparison')}
+          </h2>
           <div className="chart-container">
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={barData1} barSize={30}>
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
-                <YAxis domain={[0, 100]} />
+                <XAxis
+                  dataKey="name"
+                  label={{
+                    value: t('tests.muscleLabels.chartName'),
+                    position: 'insideBottom',
+                    offset: -5,
+                  }}
+                />
+                <YAxis
+                  domain={[0, 100]}
+                  label={{
+                    value: t('tests.muscleLabels.chartScore'),
+                    angle: -90,
+                    position: 'insideLeft',
+                  }}
+                />
                 <Tooltip />
                 <Legend />
-                <Bar dataKey="value" fill="#4bc0c0" name="分數" />
+                <Bar
+                  dataKey="value"
+                  fill="#4bc0c0"
+                  name={t('tests.muscleLabels.chartScore')}
+                />
               </BarChart>
             </ResponsiveContainer>
           </div>
 
-          <h2 className="text-lg font-semibold mt-6 mb-4">最終分數</h2>
+          <h2 className="text-lg font-semibold mt-6 mb-4">
+            {t('tests.muscleLabels.finalScore')}
+          </h2>
           <div className="chart-container">
             <ResponsiveContainer width="100%" height={200}>
               <BarChart data={barData2} barSize={30}>
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
-                <YAxis domain={[0, 100]} />
+                <XAxis
+                  dataKey="name"
+                  label={{
+                    value: t('tests.muscleLabels.chartName'),
+                    position: 'insideBottom',
+                    offset: -5,
+                  }}
+                />
+                <YAxis
+                  domain={[0, 100]}
+                  label={{
+                    value: t('tests.muscleLabels.chartScore'),
+                    angle: -90,
+                    position: 'insideLeft',
+                  }}
+                />
                 <Tooltip />
-                <Bar dataKey="value" fill="#36a2eb" name="分數" />
+                <Bar
+                  dataKey="value"
+                  fill="#36a2eb"
+                  name={t('tests.muscleLabels.chartScore')}
+                />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -262,7 +320,7 @@ function Muscle({ onComplete }) {
           className="submit-btn"
           disabled={submitting}
         >
-          {submitting ? '提交中…' : '提交並返回總覽'}
+          {submitting ? t('common.submitting') : t('common.submitAndReturn')}
         </button>
       </div>
     </div>

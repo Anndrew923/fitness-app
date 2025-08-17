@@ -1,9 +1,11 @@
 import { useEffect, useMemo, useState, useRef } from 'react';
 import { useUser } from './UserContext';
 import './History.css'; // 引入外部 CSS
+import { useTranslation } from 'react-i18next';
 
 function History() {
   const { userData, setUserData } = useUser();
+  const { t, i18n } = useTranslation();
   const [showDeleteOptions, setShowDeleteOptions] = useState(false);
   const [selectedRecords, setSelectedRecords] = useState([]);
   const [showAllColumns, setShowAllColumns] = useState(false);
@@ -47,7 +49,9 @@ function History() {
         const date = record.timestamp
           ? new Date(record.timestamp)
           : new Date(record.date);
-        return date.toLocaleDateString('zh-TW', {
+        const locale =
+          i18n.language && i18n.language.startsWith('zh') ? 'zh-TW' : 'en-US';
+        return date.toLocaleDateString(locale, {
           month: 'numeric',
           day: 'numeric',
         });
@@ -92,30 +96,45 @@ function History() {
     return {
       labels,
       datasets: [
-        { label: '總分', data: totalScores, color: '#28a745', key: 'total' },
         {
-          label: '力量',
+          label: t('history.chart.options.total'),
+          data: totalScores,
+          color: '#28a745',
+          key: 'total',
+        },
+        {
+          label: t('history.chart.options.strength'),
           data: strengthScores,
           color: '#007bff',
           key: 'strength',
         },
         {
-          label: '爆發力',
+          label: t('history.chart.options.explosive'),
           data: explosiveScores,
           color: '#ffc107',
           key: 'explosive',
         },
-        { label: '心肺', data: cardioScores, color: '#dc3545', key: 'cardio' },
         {
-          label: '肌肉量',
+          label: t('history.chart.options.cardio'),
+          data: cardioScores,
+          color: '#dc3545',
+          key: 'cardio',
+        },
+        {
+          label: t('history.chart.options.muscle'),
           data: muscleMassScores,
           color: '#6f42c1',
           key: 'muscle',
         },
-        { label: 'FFMI', data: bodyFatScores, color: '#fd7e14', key: 'ffmi' },
+        {
+          label: t('history.chart.options.ffmi'),
+          data: bodyFatScores,
+          color: '#fd7e14',
+          key: 'ffmi',
+        },
       ],
     };
-  }, [sortedHistory]);
+  }, [sortedHistory, t, i18n.language]);
 
   // 根據分數返回樣式類別
   const getScoreClass = score => {
@@ -195,8 +214,8 @@ function History() {
     return (
       <div className="chart-container">
         <div className="chart-header">
-          <h3>📈 數據趨勢圖</h3>
-          <div className="chart-note">顯示最近六次數據</div>
+          <h3>{t('history.chart.title')}</h3>
+          <div className="chart-note">{t('history.chart.note')}</div>
           <div className="chart-selector">
             <select
               value={selectedChartData}
@@ -311,7 +330,7 @@ function History() {
 
   return (
     <div className="history-container">
-      <h1>歷史紀錄</h1>
+      <h1>{t('history.title')}</h1>
 
       {/* 上半部：數據表格 */}
       <div className="history-table-section">
@@ -319,12 +338,20 @@ function History() {
           <>
             {/* 分數圖例 */}
             <div className="score-legend">
-              <h4>🎯 分數解讀</h4>
+              <h4>{t('history.legendTitle')}</h4>
               <div className="legend-items">
-                <span className="legend-item score-excellent">80+ 優秀</span>
-                <span className="legend-item score-good">60-79 良好</span>
-                <span className="legend-item score-fair">40-59 一般</span>
-                <span className="legend-item score-poor">1-39 待加強</span>
+                <span className="legend-item score-excellent">
+                  {t('history.legendExcellent')}
+                </span>
+                <span className="legend-item score-good">
+                  {t('history.legendGood')}
+                </span>
+                <span className="legend-item score-fair">
+                  {t('history.legendFair')}
+                </span>
+                <span className="legend-item score-poor">
+                  {t('history.legendPoor')}
+                </span>
               </div>
             </div>
 
@@ -337,15 +364,21 @@ function History() {
                     }`}
                   >
                     <span className="icon">📅</span>
-                    <span className="desktop-text">日期</span>
+                    <span className="desktop-text">
+                      {t('history.table.date')}
+                    </span>
                   </th>
                   <th className="score-col">
                     <span className="icon">💪</span>
-                    <span className="desktop-text">力量</span>
+                    <span className="desktop-text">
+                      {t('history.table.strength')}
+                    </span>
                   </th>
                   <th className="score-col">
                     <span className="icon">⚡</span>
-                    <span className="desktop-text">爆發力</span>
+                    <span className="desktop-text">
+                      {t('history.table.explosive')}
+                    </span>
                   </th>
                   <th
                     className={`score-col ${
@@ -353,7 +386,9 @@ function History() {
                     }`}
                   >
                     <span className="icon">❤️</span>
-                    <span className="desktop-text">心肺</span>
+                    <span className="desktop-text">
+                      {t('history.table.cardio')}
+                    </span>
                   </th>
                   <th
                     className={`score-col ${
@@ -361,7 +396,9 @@ function History() {
                     }`}
                   >
                     <span className="icon">🥩</span>
-                    <span className="desktop-text">肌肉量</span>
+                    <span className="desktop-text">
+                      {t('history.table.muscle')}
+                    </span>
                   </th>
                   <th
                     className={`score-col ${
@@ -369,13 +406,19 @@ function History() {
                     }`}
                   >
                     <span className="icon">📊</span>
-                    <span className="desktop-text">FFMI</span>
+                    <span className="desktop-text">
+                      {t('history.table.ffmi')}
+                    </span>
                   </th>
                   <th className="average-col">
                     <span className="icon">🏆</span>
-                    <span className="desktop-text">總分</span>
+                    <span className="desktop-text">
+                      {t('history.table.total')}
+                    </span>
                   </th>
-                  {showDeleteOptions && <th className="select-col">選擇</th>}
+                  {showDeleteOptions && (
+                    <th className="select-col">{t('history.table.select')}</th>
+                  )}
                 </tr>
               </thead>
               <tbody>
@@ -401,7 +444,9 @@ function History() {
                       >
                         {record.date ||
                           new Date(record.timestamp).toLocaleDateString(
-                            'zh-TW'
+                            i18n.language && i18n.language.startsWith('zh')
+                              ? 'zh-TW'
+                              : 'en-US'
                           )}
                       </td>
                       <td
@@ -466,7 +511,7 @@ function History() {
                   disabled={currentPage === 1}
                   className="pagination-btn"
                 >
-                  ← 上一頁
+                  {t('history.pagination.prev')}
                 </button>
                 <span className="page-info">
                   {currentPage}/{totalPages}
@@ -476,7 +521,7 @@ function History() {
                   disabled={currentPage === totalPages}
                   className="pagination-btn"
                 >
-                  下一頁 →
+                  {t('history.pagination.next')}
                 </button>
               </div>
             )}
@@ -487,7 +532,9 @@ function History() {
                 onClick={() => setShowAllColumns(!showAllColumns)}
                 className="toggle-delete-btn mobile-toggle-btn"
               >
-                {showAllColumns ? '顯示日期 📅' : '顯示所有指標 📊'}
+                {showAllColumns
+                  ? t('history.mobileToggle.showDate')
+                  : t('history.mobileToggle.showAll')}
               </button>
             </div>
 
@@ -496,7 +543,9 @@ function History() {
               <div className="history-stats">
                 <div className="stats-and-actions">
                   <div className="record-count">
-                    <span className="count-label">📊 記錄數量：</span>
+                    <span className="count-label">
+                      {t('history.count.label')}
+                    </span>
                     <span
                       className={`count-value ${
                         isNearLimit ? 'near-limit' : ''
@@ -516,14 +565,16 @@ function History() {
                           : 'edit-mode-btn'
                       }`}
                     >
-                      {showDeleteOptions ? '取消' : '清理資料'}
+                      {showDeleteOptions
+                        ? t('history.actions.cancel')
+                        : t('history.actions.clear')}
                     </button>
                     {showDeleteOptions && (
                       <button
                         onClick={handleDeleteSelected}
                         className="toggle-delete-btn delete-selected-btn"
                       >
-                        刪除所選
+                        {t('history.actions.deleteSelected')}
                       </button>
                     )}
                   </div>
@@ -531,13 +582,13 @@ function History() {
 
                 {isNearLimit && !isAtLimit && (
                   <div className="limit-warning">
-                    ⚠️ 記錄數量接近上限，建議清理舊記錄
+                    {t('history.count.nearLimit')}
                   </div>
                 )}
 
                 {isAtLimit && (
                   <div className="limit-error">
-                    🚫 記錄數量已達上限，無法新增記錄，請先清理舊記錄
+                    {t('history.count.atLimit')}
                   </div>
                 )}
               </div>
@@ -545,9 +596,9 @@ function History() {
           </>
         ) : (
           <div className="no-history">
-            <h3>📋 尚無歷史紀錄</h3>
-            <p>完成評測後，您的紀錄就會出現在這裡</p>
-            <p>開始您的最強肉體之旅吧！</p>
+            <h3>{t('history.empty.title')}</h3>
+            <p>{t('history.empty.p1')}</p>
+            <p>{t('history.empty.p2')}</p>
           </div>
         )}
       </div>

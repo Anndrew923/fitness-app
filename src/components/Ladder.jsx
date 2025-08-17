@@ -11,10 +11,12 @@ import { auth, db } from '../firebase';
 import { collection, query, orderBy, limit, getDocs } from 'firebase/firestore';
 import { formatScore, getAgeGroup } from '../utils';
 import './Ladder.css';
+import { useTranslation } from 'react-i18next';
 
 const Ladder = () => {
   const { userData } = useUser();
   const location = useLocation();
+  const { t, i18n } = useTranslation();
   const [ladderData, setLadderData] = useState([]);
   const [userRank, setUserRank] = useState(0);
   const [selectedAgeGroup, setSelectedAgeGroup] = useState('all');
@@ -32,17 +34,17 @@ const Ladder = () => {
 
   const ageGroups = useMemo(
     () => [
-      { value: 'all', label: '全部年齡' },
-      { value: 'under20', label: '20歲以下' },
-      { value: '21to30', label: '21~30歲' },
-      { value: '31to40', label: '31~40歲' },
-      { value: '41to50', label: '41~50歲' },
-      { value: '51to60', label: '51~60歲' },
-      { value: '61to70', label: '61~70歲' },
-      { value: 'over70', label: '70歲以上' },
-      { value: 'unknown', label: '未知年齡' },
+      { value: 'all', label: t('ladder.ageGroups.all') },
+      { value: 'under20', label: t('ladder.ageGroups.under20') },
+      { value: '21to30', label: t('ladder.ageGroups.21to30') },
+      { value: '31to40', label: t('ladder.ageGroups.31to40') },
+      { value: '41to50', label: t('ladder.ageGroups.41to50') },
+      { value: '51to60', label: t('ladder.ageGroups.51to60') },
+      { value: '61to70', label: t('ladder.ageGroups.61to70') },
+      { value: 'over70', label: t('ladder.ageGroups.over70') },
+      { value: 'unknown', label: t('ladder.ageGroups.unknown') },
     ],
-    []
+    [t]
   );
 
   // 使用 useCallback 優化 loadLadderData 函數
@@ -112,10 +114,10 @@ const Ladder = () => {
             id: doc.id,
             ...userWithAgeGroup,
             displayName: isAnonymous
-              ? '匿名用戶'
+              ? t('community.fallback.anonymousUser')
               : docData.nickname ||
                 docData.email?.split('@')[0] ||
-                '未命名用戶',
+                t('community.fallback.unnamedUser'),
             avatarUrl: isAnonymous ? '' : docData.avatarUrl,
             isAnonymous: isAnonymous,
           });
@@ -413,7 +415,8 @@ const Ladder = () => {
                   return (
                     <img
                       src={avatarUrl}
-                      alt="頭像"
+                      alt={t('community.ui.avatarAlt')}
+                      loading="lazy"
                       onError={e => {
                         console.log('頭像載入失敗，使用預設頭像');
                         e.target.style.display = 'none';
@@ -459,7 +462,9 @@ const Ladder = () => {
               </div>
               <div className="ladder__user-details">
                 {getAgeGroupLabel(userData.ageGroup)} •{' '}
-                {userData.gender === 'male' ? '男' : '女'}
+                {userData.gender === 'male'
+                  ? t('userInfo.male')
+                  : t('userInfo.female')}
                 <br />
                 <span className="last-update">我的排名</span>
               </div>
@@ -470,7 +475,9 @@ const Ladder = () => {
             <span className="ladder__score-value">
               {formatScore(userData.ladderScore)}
             </span>
-            <span className="ladder__score-label">分</span>
+            <span className="ladder__score-label">
+              {t('community.ui.pointsUnit')}
+            </span>
           </div>
         </div>
       </div>
@@ -577,7 +584,7 @@ const Ladder = () => {
       <div className="ladder">
         <div className="ladder__loading">
           <div className="ladder__loading-spinner"></div>
-          <p>載入排行榜中...</p>
+          <p>{t('ladder.loading')}</p>
         </div>
       </div>
     );
@@ -592,7 +599,7 @@ const Ladder = () => {
       {floatingRankDisplay}
 
       <div className="ladder__header">
-        <h2>天梯排行榜</h2>
+        <h2>{t('ladder.title')}</h2>
 
         {/* 合併的選項頁和年齡選擇框 */}
         <div className="ladder__filters">
@@ -602,8 +609,8 @@ const Ladder = () => {
               onChange={e => setSelectedTab(e.target.value)}
               className="ladder__filter-select"
             >
-              <option value="total">🏆 總排行榜</option>
-              <option value="weekly">⭐ 本周新進榜</option>
+              <option value="total">{t('ladder.filters.total')}</option>
+              <option value="weekly">{t('ladder.filters.weekly')}</option>
             </select>
           </div>
 
@@ -615,7 +622,7 @@ const Ladder = () => {
             >
               {ageGroups.map(group => (
                 <option key={group.value} value={group.value}>
-                  {group.label}
+                  {t(`ladder.ageGroups.${group.value}`)}
                 </option>
               ))}
             </select>
@@ -626,7 +633,9 @@ const Ladder = () => {
               className="ladder__context-btn"
               onClick={() => setShowUserContext(!showUserContext)}
             >
-              {showUserContext ? '顯示前50名精華區' : '顯示我的排名範圍'}
+              {showUserContext
+                ? t('ladder.buttons.showTop50')
+                : t('ladder.buttons.showMyRange')}
             </button>
           )}
         </div>
@@ -645,25 +654,27 @@ const Ladder = () => {
               textAlign: 'center',
             }}
           >
-            🎯 您的排名範圍（第 {Math.max(1, userRank - 15)} - {userRank + 15}{' '}
-            名）
+            {t('ladder.rangeInfo', {
+              start: Math.max(1, userRank - 15),
+              end: userRank + 15,
+            })}
           </div>
         )}
         {ladderData.length === 0 ? (
           <div className="ladder__empty">
             <p>
               {selectedTab === 'weekly'
-                ? '暫無本周新進榜數據'
-                : '暫無排行榜數據'}
+                ? t('ladder.emptyWeekly.title')
+                : t('ladder.empty.title')}
             </p>
             <p>
               {selectedTab === 'weekly'
-                ? '本周完成評測即可上榜！'
-                : '完成評測即可上榜！'}
+                ? t('ladder.emptyWeekly.subtitle')
+                : t('ladder.empty.subtitle')}
             </p>
           </div>
         ) : (
-          ladderData.map((user, index) => (
+          ladderData.slice(0, 200).map((user, index) => (
             <div
               key={user.id}
               className={`ladder__item ${
@@ -683,7 +694,7 @@ const Ladder = () => {
               onClick={
                 !user.isAnonymous ? e => handleUserClick(user, e) : undefined
               }
-              title={!user.isAnonymous ? '點擊查看訓練背景' : ''}
+              title={!user.isAnonymous ? t('ladder.tooltips.viewTraining') : ''}
             >
               <div className="ladder__rank">
                 <span
@@ -705,7 +716,8 @@ const Ladder = () => {
                   !user.isAnonymous ? (
                     <img
                       src={user.avatarUrl}
-                      alt="頭像"
+                      alt={/* i18n not wired here; use generic alt */ 'avatar'}
+                      loading="lazy"
                       onError={e => {
                         console.log('頭像載入失敗，使用預設頭像');
                         e.target.style.display = 'none';
@@ -755,12 +767,14 @@ const Ladder = () => {
                     ) : (
                       <>
                         {getAgeGroupLabel(user.ageGroup)} •{' '}
-                        {user.gender === 'male' ? '男' : '女'}
+                        {user.gender === 'male'
+                          ? t('userInfo.male')
+                          : t('userInfo.female')}
                         {(user.lastLadderSubmission || user.lastActive) && (
                           <>
                             <br />
                             <span className="last-update">
-                              更新於{' '}
+                              {t('ladder.labels.updatedAt')}{' '}
                               {formatLastUpdate(
                                 user.lastLadderSubmission || user.lastActive
                               )}
@@ -777,7 +791,9 @@ const Ladder = () => {
                 <span className="ladder__score-value">
                   {formatScore(user.ladderScore)}
                 </span>
-                <span className="ladder__score-label">分</span>
+                <span className="ladder__score-label">
+                  {t('community.ui.pointsUnit')}
+                </span>
               </div>
             </div>
           ))

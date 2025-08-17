@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { auth } from '../firebase';
 import GuestModal from './GuestModal';
+import { useTranslation } from 'react-i18next';
 
 const navItems = [
   {
@@ -154,6 +155,7 @@ function isGuestMode() {
 function BottomNavBar() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { t } = useTranslation();
 
   const [modalOpen, setModalOpen] = useState(false);
   // const [pendingPath, setPendingPath] = useState('');
@@ -224,7 +226,13 @@ function BottomNavBar() {
               aria-label={item.label}
             >
               {item.icon}
-              <span style={{ marginTop: '4px' }}>{item.label}</span>
+              <span style={{ marginTop: '4px' }}>
+                {t(
+                  `navbar.${
+                    item.key === 'assessment' ? 'assessment' : item.key
+                  }`
+                )}
+              </span>
             </button>
           </div>
         ))}
@@ -238,4 +246,4 @@ function BottomNavBar() {
   );
 }
 
-export default BottomNavBar;
+export default React.memo(BottomNavBar);

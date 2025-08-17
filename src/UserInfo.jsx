@@ -27,6 +27,7 @@ import PropTypes from 'prop-types';
 import { calculateLadderScore, generateNickname } from './utils';
 
 import './userinfo.css';
+import { useTranslation } from 'react-i18next';
 
 // 開發環境下載入調試工具
 if (process.env.NODE_ENV === 'development') {
@@ -54,6 +55,8 @@ const Modal = ({
   actionText = null,
 }) => {
   if (!isOpen) return null;
+
+  const { t } = useTranslation();
 
   const getIcon = () => {
     switch (type) {
@@ -115,14 +118,14 @@ const Modal = ({
                 className="modal-btn modal-btn-secondary"
                 onClick={handleClose}
               >
-                稍後查看
+                {t('common.cancel')}
               </button>
               <button
                 className={getButtonClass()}
                 onClick={handleAction}
                 style={{ position: 'relative', zIndex: 10001 }}
               >
-                {actionText}
+                {actionText || t('common.confirm')}
               </button>
             </div>
           ) : (
@@ -131,7 +134,7 @@ const Modal = ({
               onClick={handleClose}
               style={{ position: 'relative', zIndex: 10001 }}
             >
-              確定
+              {t('common.confirm')}
             </button>
           )}
         </div>
@@ -159,6 +162,8 @@ const SubmitConfirmModal = ({
 }) => {
   if (!isOpen) return null;
 
+  const { t } = useTranslation();
+
   const handleOverlayClick = e => {
     if (e.target === e.currentTarget) {
       onCancel();
@@ -176,37 +181,43 @@ const SubmitConfirmModal = ({
       >
         <div className="modal-header">
           <span className="modal-icon">🏆</span>
-          <h3 className="modal-title">提交確認</h3>
+          <h3 className="modal-title">{t('userInfo.submitConfirm.title')}</h3>
         </div>
         <div className="modal-body">
           <div className="submit-confirm-message">
             <p className="confirm-text">
-              為提升天梯參考價值，防止誤植，今天還剩下{' '}
+              {t('userInfo.submitConfirm.descPrefix')}{' '}
               <span className="remaining-count">{remainingCount}</span>{' '}
-              次提交機會，每天凌晨12點將重置
+              {t('userInfo.submitConfirm.descSuffix')}
             </p>
             <div className="confirm-details">
               <div className="detail-item">
                 <span className="detail-icon">📊</span>
-                <span className="detail-text">確保數據準確性</span>
+                <span className="detail-text">
+                  {t('userInfo.submitConfirm.ensureAccuracy')}
+                </span>
               </div>
               <div className="detail-item">
                 <span className="detail-icon">⏰</span>
-                <span className="detail-text">每日凌晨重置次數</span>
+                <span className="detail-text">
+                  {t('userInfo.submitConfirm.resetDaily')}
+                </span>
               </div>
               <div className="detail-item">
                 <span className="detail-icon">🎯</span>
-                <span className="detail-text">提升天梯參考價值</span>
+                <span className="detail-text">
+                  {t('userInfo.submitConfirm.improveValue')}
+                </span>
               </div>
             </div>
           </div>
         </div>
         <div className="modal-footer submit-confirm-footer">
           <button className="modal-btn modal-btn-secondary" onClick={onCancel}>
-            還沒填好
+            {t('userInfo.submitConfirm.cancel')}
           </button>
           <button className="modal-btn modal-btn-success" onClick={onConfirm}>
-            確定提交
+            {t('userInfo.submitConfirm.confirm')}
           </button>
         </div>
       </div>
@@ -281,6 +292,7 @@ async function compressImage(
 function UserInfo({ testData, onLogout, clearTestData }) {
   const { userData, setUserData, saveHistory, loadUserData, isLoading } =
     useUser();
+  const { t } = useTranslation();
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
@@ -536,29 +548,29 @@ function UserInfo({ testData, onLogout, clearTestData }) {
     const scores = userData.scores || DEFAULT_SCORES;
     return [
       {
-        name: '力量',
+        name: t('userInfo.radarLabels.strength'),
         value: scores.strength ? Number(scores.strength).toFixed(2) * 1 : 0,
         icon: '💪',
       },
       {
-        name: '爆發力',
+        name: t('userInfo.radarLabels.explosivePower'),
         value: scores.explosivePower
           ? Number(scores.explosivePower).toFixed(2) * 1
           : 0,
         icon: '⚡',
       },
       {
-        name: '心肺耐力',
+        name: t('userInfo.radarLabels.cardio'),
         value: scores.cardio ? Number(scores.cardio).toFixed(2) * 1 : 0,
         icon: '❤️',
       },
       {
-        name: '骨骼肌肉量',
+        name: t('userInfo.radarLabels.muscle'),
         value: scores.muscleMass ? Number(scores.muscleMass).toFixed(2) * 1 : 0,
         icon: '🥩',
       },
       {
-        name: 'FFMI',
+        name: t('userInfo.radarLabels.ffmi'),
         value: scores.bodyFat ? Number(scores.bodyFat).toFixed(2) * 1 : 0,
         icon: '📊',
       },
@@ -582,23 +594,23 @@ function UserInfo({ testData, onLogout, clearTestData }) {
     const angle = Math.atan2(y, x);
 
     // 力量標籤特殊處理：移到正上方
-    if (payload.value === '力量') {
+    if (payload.value === t('userInfo.radarLabels.strength')) {
       // 使用相對位置，保持在正上方
       adjustedX = x; // 保持原始x位置
       adjustedY = y - distance * 0.12; // 使用距離的12%作為向上偏移
-    } else if (payload.value === '爆發力') {
+    } else if (payload.value === t('userInfo.radarLabels.explosivePower')) {
       // 爆發力標籤微調：稍微往左、往上移動
       adjustedX = x + Math.cos(angle) * (distance * 0.03); // 減少到3%
       adjustedY = y + Math.sin(angle) * (distance * 0.06); // 減少到6%
-    } else if (payload.value === 'FFMI') {
+    } else if (payload.value === t('userInfo.radarLabels.ffmi')) {
       // FFMI標籤微調：遠離雷達圖
       adjustedX = x + Math.cos(angle) * (distance * -0.2); // 減少到-20%
       adjustedY = y + Math.sin(angle) * (distance * 0.06); // 保持6%
-    } else if (payload.value === '心肺耐力') {
+    } else if (payload.value === t('userInfo.radarLabels.cardio')) {
       // 心肺耐力標籤：保持不變
       adjustedX = x + Math.cos(angle) * (distance * 0.01); // 保持1%
       adjustedY = y + Math.sin(angle) * (distance * 0.06); // 保持6%
-    } else if (payload.value === '骨骼肌肉量') {
+    } else if (payload.value === t('userInfo.radarLabels.muscle')) {
       // 骨骼肌肉量標籤：遠離雷達圖
       adjustedX = x + Math.cos(angle) * (distance * -0.05); // 調整到-5%
       adjustedY = y + Math.sin(angle) * (distance * 0.06); // 保持6%
@@ -864,15 +876,15 @@ function UserInfo({ testData, onLogout, clearTestData }) {
   const validateData = useCallback(() => {
     const { height, weight, age, gender } = userData;
     if (!height || !weight || !age || !gender) {
-      setError('請填寫所有欄位');
+      setError(t('errors.required'));
       return false;
     }
     if (height <= 0 || weight <= 0 || age <= 0) {
-      setError('身高、體重和年齡必須大於 0');
+      setError(t('userInfo.modal.invalidPositive'));
       return false;
     }
     if (!GENDER_OPTIONS.includes(gender)) {
-      setError('請選擇有效的性別');
+      setError(t('userInfo.modal.invalidGender'));
       return false;
     }
     return true;
@@ -907,8 +919,8 @@ function UserInfo({ testData, onLogout, clearTestData }) {
 
         setModalState({
           isOpen: true,
-          title: '儲存成功',
-          message: '資料已儲存成功！',
+          title: t('userInfo.modal.saveSuccessTitle'),
+          message: t('userInfo.modal.saveSuccessMessage'),
           type: 'success',
         });
       } catch (err) {
@@ -1111,8 +1123,8 @@ function UserInfo({ testData, onLogout, clearTestData }) {
     saveHistory(record);
     setModalState({
       isOpen: true,
-      title: '儲存成功',
-      message: '結果已儲存',
+      title: t('userInfo.modal.resultSaveSuccessTitle'),
+      message: t('userInfo.modal.resultSaveSuccessMessage'),
       type: 'success',
     });
 
@@ -1285,7 +1297,7 @@ function UserInfo({ testData, onLogout, clearTestData }) {
     return (
       <div className="user-info-container">
         <div className="loading-message">
-          <p>正在載入用戶資料...</p>
+          <p>{t('common.loading')}</p>
         </div>
       </div>
     );
@@ -1333,8 +1345,9 @@ function UserInfo({ testData, onLogout, clearTestData }) {
                 ? '/guest-avatar.svg'
                 : userData?.avatarUrl || '/default-avatar.svg'
             }
-            alt="頭像"
+            alt={t('community.ui.avatarAlt')}
             className="user-avatar"
+            loading="lazy"
             onError={e => {
               e.target.src = '/default-avatar.svg';
             }}
@@ -1344,7 +1357,9 @@ function UserInfo({ testData, onLogout, clearTestData }) {
         <div className="avatar-actions-container">
           {!isGuest && (
             <label className="avatar-upload-label">
-              {avatarUploading ? '上傳中...' : '更換頭像'}
+              {avatarUploading
+                ? t('userInfo.avatar.uploading')
+                : t('userInfo.avatar.change')}
               <input
                 type="file"
                 accept="image/*"
@@ -1368,15 +1383,15 @@ function UserInfo({ testData, onLogout, clearTestData }) {
       {(currentUser || isGuest) && (
         <>
           <div className="page-header">
-            <h1 className="page-title">身體狀態與表現總覽</h1>
-            <div className="page-subtitle">完善您的個人資料，開始健身之旅</div>
+            <h1 className="page-title">{t('userInfo.title')}</h1>
+            <div className="page-subtitle">{t('userInfo.subtitle')}</div>
           </div>
 
           <div className="form-card">
             <form className="user-form" onSubmit={saveData}>
               <div className="form-section">
                 <div className="section-header">
-                  <h3 className="section-title">基本資料</h3>
+                  <h3 className="section-title">{t('userInfo.basicInfo')}</h3>
                   {currentUser && (
                     <button
                       type="button"
@@ -1416,7 +1431,7 @@ function UserInfo({ testData, onLogout, clearTestData }) {
 
                 <div className="form-group">
                   <label htmlFor="nickname" className="form-label">
-                    暱稱
+                    {t('userInfo.nickname')}
                   </label>
                   <div className="nickname-input-group">
                     <input
@@ -1425,7 +1440,7 @@ function UserInfo({ testData, onLogout, clearTestData }) {
                       type="text"
                       value={userData?.nickname || ''}
                       onChange={handleNicknameChange}
-                      placeholder="請輸入暱稱"
+                      placeholder={t('userInfo.nicknamePlaceholder')}
                       className="form-input"
                       maxLength="16"
                     />
@@ -1434,7 +1449,7 @@ function UserInfo({ testData, onLogout, clearTestData }) {
                       onClick={handleGenerateNickname}
                       className="generate-nickname-btn"
                     >
-                      生成暱稱
+                      {t('userInfo.generateNickname')}
                     </button>
                   </div>
                 </div>
@@ -1442,7 +1457,7 @@ function UserInfo({ testData, onLogout, clearTestData }) {
                 <div className="form-row">
                   <div className="form-group">
                     <label htmlFor="gender" className="form-label">
-                      性別
+                      {t('userInfo.gender')}
                     </label>
                     <select
                       id="gender"
@@ -1451,16 +1466,20 @@ function UserInfo({ testData, onLogout, clearTestData }) {
                       onChange={handleInputChange}
                       className="form-input"
                       required
+                      onInvalid={e =>
+                        e.currentTarget.setCustomValidity(t('errors.required'))
+                      }
+                      onInput={e => e.currentTarget.setCustomValidity('')}
                     >
-                      <option value="">請選擇性別</option>
-                      <option value="male">男性</option>
-                      <option value="female">女性</option>
+                      <option value="">{t('userInfo.selectGender')}</option>
+                      <option value="male">{t('userInfo.male')}</option>
+                      <option value="female">{t('userInfo.female')}</option>
                     </select>
                   </div>
 
                   <div className="form-group">
                     <label htmlFor="age" className="form-label">
-                      年齡
+                      {t('userInfo.age')}
                     </label>
                     <input
                       id="age"
@@ -1468,9 +1487,13 @@ function UserInfo({ testData, onLogout, clearTestData }) {
                       type="number"
                       value={userData?.age || ''}
                       onChange={handleInputChange}
-                      placeholder="年齡"
+                      placeholder={t('userInfo.age')}
                       className="form-input"
                       required
+                      onInvalid={e =>
+                        e.currentTarget.setCustomValidity(t('errors.required'))
+                      }
+                      onInput={e => e.currentTarget.setCustomValidity('')}
                       min="0"
                       step="1"
                     />
@@ -1480,7 +1503,7 @@ function UserInfo({ testData, onLogout, clearTestData }) {
                 <div className="form-row">
                   <div className="form-group">
                     <label htmlFor="height" className="form-label">
-                      身高 (cm)
+                      {t('userInfo.height')}
                     </label>
                     <input
                       id="height"
@@ -1488,9 +1511,13 @@ function UserInfo({ testData, onLogout, clearTestData }) {
                       type="number"
                       value={userData?.height || ''}
                       onChange={handleInputChange}
-                      placeholder="身高 (cm)"
+                      placeholder={t('userInfo.height')}
                       className="form-input"
                       required
+                      onInvalid={e =>
+                        e.currentTarget.setCustomValidity(t('errors.required'))
+                      }
+                      onInput={e => e.currentTarget.setCustomValidity('')}
                       min="0"
                       step="0.1"
                     />
@@ -1498,7 +1525,7 @@ function UserInfo({ testData, onLogout, clearTestData }) {
 
                   <div className="form-group">
                     <label htmlFor="weight" className="form-label">
-                      體重 (kg)
+                      {t('userInfo.weight')}
                     </label>
                     <input
                       id="weight"
@@ -1506,9 +1533,13 @@ function UserInfo({ testData, onLogout, clearTestData }) {
                       type="number"
                       value={userData?.weight || ''}
                       onChange={handleInputChange}
-                      placeholder="體重 (kg)"
+                      placeholder={t('userInfo.weight')}
                       className="form-input"
                       required
+                      onInvalid={e =>
+                        e.currentTarget.setCustomValidity(t('errors.required'))
+                      }
+                      onInput={e => e.currentTarget.setCustomValidity('')}
                       min="0"
                       step="0.1"
                     />
@@ -1518,7 +1549,9 @@ function UserInfo({ testData, onLogout, clearTestData }) {
 
               {/* 天梯隱私設置 */}
               <div className="form-section">
-                <h3 className="section-title">🏆 天梯排行榜設置</h3>
+                <h3 className="section-title">
+                  🏆 {t('userInfo.ladder.title')}
+                </h3>
                 <div className="privacy-options">
                   <label className="privacy-option">
                     <input
@@ -1533,10 +1566,10 @@ function UserInfo({ testData, onLogout, clearTestData }) {
                     />
                     <div className="privacy-option-content">
                       <span className="privacy-option-title">
-                        匿名參與天梯排名
+                        {t('userInfo.ladder.anonymousTitle')}
                       </span>
                       <span className="privacy-option-desc">
-                        勾選後將隱藏您的暱稱和頭像，以匿名方式顯示在排行榜中
+                        {t('userInfo.ladder.anonymousDesc')}
                       </span>
                     </div>
                   </label>
@@ -1544,15 +1577,17 @@ function UserInfo({ testData, onLogout, clearTestData }) {
 
                 {/* 訓練背景信息（選填） */}
                 <div className="training-info-section">
-                  <h4 className="training-info-title">💪 訓練背景（選填）</h4>
+                  <h4 className="training-info-title">
+                    💪 {t('userInfo.training.title')}
+                  </h4>
                   <p className="training-info-desc">
-                    分享您的訓練背景，激勵其他健身愛好者！
+                    {t('userInfo.training.desc')}
                   </p>
 
                   <div className="form-row">
                     <div className="form-group">
                       <label htmlFor="profession" className="form-label">
-                        職業
+                        {t('userInfo.training.profession')}
                       </label>
                       <input
                         id="profession"
@@ -1560,7 +1595,7 @@ function UserInfo({ testData, onLogout, clearTestData }) {
                         type="text"
                         value={userData?.profession || ''}
                         onChange={handleInputChange}
-                        placeholder="例如：工程師、學生、教師..."
+                        placeholder={t('userInfo.placeholders.profession')}
                         className="form-input"
                         maxLength="100"
                       />
@@ -1571,7 +1606,7 @@ function UserInfo({ testData, onLogout, clearTestData }) {
                         htmlFor="weeklyTrainingHours"
                         className="form-label"
                       >
-                        每周訓練時數
+                        {t('userInfo.training.weeklyHours')}
                       </label>
                       <input
                         id="weeklyTrainingHours"
@@ -1579,7 +1614,7 @@ function UserInfo({ testData, onLogout, clearTestData }) {
                         type="number"
                         value={userData?.weeklyTrainingHours || ''}
                         onChange={handleInputChange}
-                        placeholder="小時"
+                        placeholder={t('userInfo.placeholders.hours')}
                         className="form-input"
                         min="0"
                         max="168"
@@ -1590,7 +1625,7 @@ function UserInfo({ testData, onLogout, clearTestData }) {
 
                   <div className="form-group">
                     <label htmlFor="trainingYears" className="form-label">
-                      訓練年資
+                      {t('userInfo.training.years')}
                     </label>
                     <input
                       id="trainingYears"
@@ -1598,7 +1633,7 @@ function UserInfo({ testData, onLogout, clearTestData }) {
                       type="number"
                       value={userData?.trainingYears || ''}
                       onChange={handleInputChange}
-                      placeholder="年"
+                      placeholder={t('userInfo.placeholders.years')}
                       className="form-input"
                       min="0"
                       max="50"
@@ -1610,7 +1645,7 @@ function UserInfo({ testData, onLogout, clearTestData }) {
 
               <div className="form-actions">
                 <button type="submit" className="submit-btn" disabled={loading}>
-                  {loading ? '儲存中...' : '儲存資料'}
+                  {loading ? t('userInfo.saving') : t('userInfo.saveData')}
                 </button>
               </div>
             </form>
@@ -1627,7 +1662,7 @@ function UserInfo({ testData, onLogout, clearTestData }) {
           <div className="corner-decoration bottom-left"></div>
           <div className="corner-decoration bottom-right"></div>
 
-          <h2 className="radar-title">表現總覽</h2>
+          <h2 className="radar-title">{t('userInfo.radarOverview')}</h2>
           {loading ? (
             <div className="loading-container">
               <div className="loading-spinner"></div>
@@ -1660,7 +1695,7 @@ function UserInfo({ testData, onLogout, clearTestData }) {
                     axisLine={false}
                   />
                   <Radar
-                    name="您的表現"
+                    name={t('userInfo.yourPerformance')}
                     dataKey="value"
                     stroke="#81D8D0"
                     fill="url(#tiffanyGradient)"
@@ -1702,20 +1737,20 @@ function UserInfo({ testData, onLogout, clearTestData }) {
               {averageScore > 0 && (
                 <div className="average-score-display">
                   <p className="average-score">
-                    ⭐ 戰鬥力{' '}
+                    ⭐ {t('userInfo.powerTitle')}{' '}
                     <span className="score-value-large">{averageScore}</span>
                   </p>
                   {completionStatus.isFullyCompleted && (
                     <div className="ladder-info">
                       <p className="ladder-rank">
-                        🏆 天梯排名:{' '}
+                        🏆 {t('userInfo.ladder.rankLabel')}:{' '}
                         <span className="rank-value">
                           {userRank || '未上榜'}
                         </span>
                       </p>
                       {submittedLadderScore > 0 && (
                         <p className="submitted-score">
-                          已提交分數:{' '}
+                          {t('userInfo.ladder.submittedScore')}:{' '}
                           <span className="score-value">
                             {submittedLadderScore}
                           </span>
@@ -1724,11 +1759,13 @@ function UserInfo({ testData, onLogout, clearTestData }) {
                       {currentLadderScore > 0 &&
                         currentLadderScore !== submittedLadderScore && (
                           <p className="current-score">
-                            當前分數:{' '}
+                            {t('userInfo.ladder.currentScore')}:{' '}
                             <span className="score-value">
                               {currentLadderScore}
                             </span>
-                            <span className="score-note">（需提交更新）</span>
+                            <span className="score-note">
+                              {t('userInfo.ladder.needsSubmit')}
+                            </span>
                           </p>
                         )}
                     </div>
@@ -1746,7 +1783,9 @@ function UserInfo({ testData, onLogout, clearTestData }) {
                     disabled={loading}
                   >
                     <span className="btn-icon">💾</span>
-                    <span className="btn-text">儲存評測結果</span>
+                    <span className="btn-text">
+                      {t('userInfo.saveResults')}
+                    </span>
                   </button>
                 )}
 
@@ -1759,7 +1798,9 @@ function UserInfo({ testData, onLogout, clearTestData }) {
                   >
                     <span className="btn-icon">🏆</span>
                     <span className="btn-text">
-                      {submittedLadderScore > 0 ? '更新天梯分數' : '提交到天梯'}
+                      {submittedLadderScore > 0
+                        ? t('userInfo.updateLadderScore')
+                        : t('userInfo.submitToLadder')}
                     </span>
                   </button>
                 )}
@@ -1769,8 +1810,10 @@ function UserInfo({ testData, onLogout, clearTestData }) {
               <div className="ladder-info-card">
                 <p className="ladder-info-text">
                   {completionStatus.isFullyCompleted
-                    ? '完成五項評測，可參與天梯排名'
-                    : `完成 ${completionStatus.completedCount}/5 項評測後可參與天梯排名`}
+                    ? t('userInfo.ladder.ctaCompleted')
+                    : t('userInfo.ladder.ctaNotCompleted', {
+                        count: completionStatus.completedCount,
+                      })}
                 </p>
               </div>
             </div>
@@ -1780,42 +1823,42 @@ function UserInfo({ testData, onLogout, clearTestData }) {
 
       {/* 評測頁面導航 */}
       <div className="test-buttons-section" ref={testsSectionRef}>
-        <h3 className="section-title">開始評測</h3>
+        <h3 className="section-title">{t('userInfo.startTests')}</h3>
         <div className="test-buttons-grid">
           <button
             onClick={() => handleNavigation('/strength')}
             className="test-btn strength-btn"
           >
             <span className="test-icon">💪</span>
-            <span className="test-label">力量評測</span>
+            <span className="test-label">{t('tests.strength')}</span>
           </button>
           <button
             onClick={() => handleNavigation('/explosive-power')}
             className="test-btn explosive-btn"
           >
             <span className="test-icon">⚡</span>
-            <span className="test-label">爆發力測試</span>
+            <span className="test-label">{t('tests.explosivePower')}</span>
           </button>
           <button
             onClick={() => handleNavigation('/cardio')}
             className="test-btn cardio-btn"
           >
             <span className="test-icon">❤️</span>
-            <span className="test-label">心肺耐力測試</span>
+            <span className="test-label">{t('tests.cardio')}</span>
           </button>
           <button
             onClick={() => handleNavigation('/muscle-mass')}
             className="test-btn muscle-btn"
           >
             <span className="test-icon">🥩</span>
-            <span className="test-label">骨骼肌肉量</span>
+            <span className="test-label">{t('tests.muscleMass')}</span>
           </button>
           <button
             onClick={() => handleNavigation('/body-fat')}
             className="test-btn bodyfat-btn"
           >
             <span className="test-icon">📊</span>
-            <span className="test-label">體脂肪率與FFMI</span>
+            <span className="test-label">{t('tests.bodyFat')}</span>
           </button>
         </div>
       </div>

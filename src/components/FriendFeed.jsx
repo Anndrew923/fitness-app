@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useUser } from '../UserContext';
 import { auth, db } from '../firebase';
 import { useParams, useNavigate } from 'react-router-dom';
@@ -23,6 +24,7 @@ const FriendFeed = () => {
   const { userId } = useParams();
   const navigate = useNavigate();
   const [posts, setPosts] = useState([]);
+  const { t, i18n } = useTranslation();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -44,7 +46,7 @@ const FriendFeed = () => {
   const loadFriendData = useCallback(async () => {
     try {
       if (!userId) {
-        setError('用戶ID為空');
+        setError(t('friendFeed.messages.emptyUserId'));
         return;
       }
 
@@ -70,7 +72,7 @@ const FriendFeed = () => {
       } else {
         console.error('❌ 找不到用戶:', userId);
         console.error('❌ 文檔路徑:', userDocRef.path);
-        setError('找不到該用戶');
+        setError(t('friendFeed.messages.userNotFound'));
       }
     } catch (error) {
       console.error('載入好友資料失敗:', error);
@@ -79,7 +81,7 @@ const FriendFeed = () => {
         message: error.message,
         userId: userId,
       });
-      setError('載入用戶資料失敗');
+      setError(t('friendFeed.messages.loadUserFail'));
     }
   }, [userId]);
 
@@ -270,12 +272,12 @@ const FriendFeed = () => {
   // 發布新動態
   const publishPost = async () => {
     if (!newPostContent.trim()) {
-      setError('請輸入動態內容');
+      setError(t('community.messages.emptyPost'));
       return;
     }
 
     if (!auth.currentUser) {
-      setError('請先登入');
+      setError(t('friendFeed.messages.needLoginShort'));
       return;
     }
 
@@ -309,7 +311,7 @@ const FriendFeed = () => {
 
       // 清空輸入框
       setNewPostContent('');
-      setSuccess('動態發布成功！');
+      setSuccess(t('friendFeed.messages.publishSuccess'));
 
       // 重新載入動態
       await loadPosts();
@@ -318,7 +320,7 @@ const FriendFeed = () => {
       setTimeout(() => setSuccess(''), 3000);
     } catch (error) {
       console.error('❌ 發布動態失敗:', error);
-      setError('發布失敗: ' + error.message);
+      setError(`${t('friendFeed.messages.publishFail')}: ${error.message}`);
     } finally {
       setSubmitting(false);
     }
@@ -327,7 +329,7 @@ const FriendFeed = () => {
   // 點讚/取消點讚
   const toggleLike = async (postId, currentLikes) => {
     if (!auth.currentUser) {
-      setError('請先登入');
+      setError(t('friendFeed.messages.needLoginShort'));
       return;
     }
 
@@ -373,7 +375,7 @@ const FriendFeed = () => {
       console.log(`👍 ${isLiked ? '取消點讚' : '點讚'}成功`);
     } catch (error) {
       console.error('❌ 點讚操作失敗:', error);
-      setError('操作失敗，請稍後再試');
+      setError(t('friendFeed.messages.actionFail'));
     } finally {
       // 清除處理狀態
       setLikeProcessing(prev => {
@@ -388,7 +390,7 @@ const FriendFeed = () => {
   const addComment = async (postId, commentContent) => {
     if (!commentContent.trim()) return;
     if (!auth.currentUser) {
-      setError('請先登入');
+      setError(t('friendFeed.messages.needLoginShort'));
       return;
     }
 
@@ -437,7 +439,7 @@ const FriendFeed = () => {
         // 找到對應的動態
         const currentPost = posts.find(post => post.id === postId);
         if (!currentPost) {
-          setError('動態不存在');
+          setError(t('friendFeed.messages.postNotFound'));
           return;
         }
 
@@ -456,7 +458,7 @@ const FriendFeed = () => {
         console.log('💬 留言添加成功');
       } catch (error) {
         console.error('❌ 添加留言失敗:', error);
-        setError('留言失敗，請稍後再試');
+        setError(t('friendFeed.messages.commentFail'));
 
         // 回滾本地狀態
         setPosts(prevPosts => {
@@ -490,7 +492,7 @@ const FriendFeed = () => {
   // 刪除留言
   const deleteComment = async (postId, commentId) => {
     if (!auth.currentUser) {
-      setError('請先登入');
+      setError(t('friendFeed.messages.needLoginShort'));
       return;
     }
 
@@ -498,7 +500,7 @@ const FriendFeed = () => {
       // 找到對應的動態
       const currentPost = posts.find(post => post.id === postId);
       if (!currentPost) {
-        setError('動態不存在');
+        setError(t('friendFeed.messages.postNotFound'));
         return;
       }
 
@@ -507,7 +509,7 @@ const FriendFeed = () => {
         comment => comment.id === commentId
       );
       if (!commentToDelete) {
-        setError('留言不存在');
+        setError(t('community.messages.commentNotFound'));
         return;
       }
 
@@ -517,14 +519,14 @@ const FriendFeed = () => {
       const isCommentOwner = commentToDelete.userId === currentUserId;
 
       if (!isPostOwner && !isCommentOwner) {
-        setError('您沒有權限刪除此留言');
+        setError(t('friendFeed.messages.noPermission'));
         return;
       }
 
       // 確認刪除
       const confirmMessage = isPostOwner
-        ? '確定要刪除此留言嗎？'
-        : '確定要刪除您的留言嗎？';
+        ? t('friendFeed.confirm.deleteComment')
+        : t('friendFeed.confirm.deleteMyComment');
 
       if (!window.confirm(confirmMessage)) {
         return;
@@ -552,18 +554,18 @@ const FriendFeed = () => {
         return updatedPosts;
       });
 
-      setSuccess('留言已刪除');
+      setSuccess(t('friendFeed.messages.deleteCommentSuccess'));
       setTimeout(() => setSuccess(''), 3000);
     } catch (error) {
       console.error('❌ 刪除留言失敗:', error);
-      setError('刪除留言失敗，請稍後再試');
+      setError(t('friendFeed.messages.deleteCommentFail'));
     }
   };
 
   // 刪除動態（主要留言）
   const deletePost = async postId => {
     if (!auth.currentUser) {
-      setError('請先登入');
+      setError(t('friendFeed.messages.needLoginShort'));
       return;
     }
 
@@ -571,19 +573,19 @@ const FriendFeed = () => {
       // 找到對應的動態
       const currentPost = posts.find(post => post.id === postId);
       if (!currentPost) {
-        setError('動態不存在');
+        setError(t('friendFeed.messages.postNotFound'));
         return;
       }
 
       // 檢查刪除權限（只有動態作者可以刪除）
       const currentUserId = auth.currentUser.uid;
       if (currentPost.userId !== currentUserId) {
-        setError('您沒有權限刪除此動態');
+        setError(t('friendFeed.messages.noPermission'));
         return;
       }
 
       // 確認刪除
-      if (!window.confirm('確定要刪除此動態嗎？此操作無法撤銷。')) {
+      if (!window.confirm(t('friendFeed.confirm.deletePost'))) {
         return;
       }
 
@@ -604,11 +606,11 @@ const FriendFeed = () => {
         return updatedPosts;
       });
 
-      setSuccess('動態已刪除');
+      setSuccess(t('friendFeed.messages.deletePostSuccess'));
       setTimeout(() => setSuccess(''), 3000);
     } catch (error) {
       console.error('❌ 刪除動態失敗:', error);
-      setError('刪除動態失敗，請稍後再試');
+      setError(t('friendFeed.messages.deletePostFail'));
     }
   };
 
@@ -621,11 +623,17 @@ const FriendFeed = () => {
     const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
     const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
 
-    if (diffMins < 1) return '剛剛';
-    if (diffMins < 60) return `${diffMins}分鐘前`;
-    if (diffHours < 24) return `${diffHours}小時前`;
-    if (diffDays < 7) return `${diffDays}天前`;
-    return postTime.toLocaleDateString();
+    if (diffMins < 1) return t('friendFeed.time.justNow');
+    if (diffMins < 60)
+      return t('friendFeed.time.minutesAgo', { count: diffMins });
+    if (diffHours < 24)
+      return t('friendFeed.time.hoursAgo', { count: diffHours });
+    if (diffDays < 7) return t('friendFeed.time.daysAgo', { count: diffDays });
+    try {
+      return new Intl.DateTimeFormat(i18n.language).format(postTime);
+    } catch {
+      return postTime.toLocaleDateString();
+    }
   }, []);
 
   // 動態卡片組件 - 使用 React.memo 優化
@@ -662,7 +670,7 @@ const FriendFeed = () => {
             <div className="post-user">
               <img
                 src={post.userAvatarUrl || '/default-avatar.svg'}
-                alt="頭像"
+                alt={t('friendFeed.ui.avatarAlt')}
                 className="user-avatar"
                 loading="lazy"
                 onError={e => {
@@ -675,7 +683,7 @@ const FriendFeed = () => {
                   {post.targetUserId && (
                     <span className="to-label">
                       {' '}
-                      → {friendData?.nickname || '好友'}
+                      → {friendData?.nickname || t('community.friendLabel')}
                     </span>
                   )}
                 </div>
@@ -687,7 +695,7 @@ const FriendFeed = () => {
               <button
                 onClick={() => onDeletePost(post.id)}
                 className="delete-post-btn"
-                title="刪除此動態"
+                title={t('community.titles.deletePost')}
               >
                 🗑️
               </button>
@@ -709,8 +717,8 @@ const FriendFeed = () => {
               </span>
               <span className="action-text">
                 {likeProcessing.has(post.id)
-                  ? '處理中...'
-                  : `${likeCount > 0 ? likeCount : ''} 讚`}
+                  ? t('community.processing')
+                  : `${likeCount > 0 ? likeCount : ''} ${t('community.like')}`}
               </span>
             </button>
 
@@ -720,7 +728,7 @@ const FriendFeed = () => {
             >
               <span className="action-icon">💬</span>
               <span className="action-text">
-                {commentCount > 0 ? commentCount : ''} 留言
+                {commentCount > 0 ? commentCount : ''} {t('community.comment')}
               </span>
             </button>
           </div>
@@ -742,7 +750,7 @@ const FriendFeed = () => {
                           <div className="comment-user-info">
                             <img
                               src={comment.userAvatarUrl || '/guest-avatar.svg'}
-                              alt="頭像"
+                              alt={t('friendFeed.ui.avatarAlt')}
                               className="comment-avatar"
                               loading="lazy"
                               onError={e => {
@@ -765,7 +773,9 @@ const FriendFeed = () => {
                               }
                               className="comment-delete-btn"
                               title={
-                                isPostOwner ? '刪除此留言' : '刪除我的留言'
+                                isPostOwner
+                                  ? t('community.titles.deleteComment')
+                                  : t('community.titles.deleteMyComment')
                               }
                             >
                               🗑️
@@ -783,7 +793,7 @@ const FriendFeed = () => {
               <div className="comment-input">
                 <input
                   type="text"
-                  placeholder="寫留言..."
+                  placeholder={t('friendFeed.ui.inputPlaceholder')}
                   value={newComment}
                   onChange={e => setNewComment(e.target.value)}
                   onKeyPress={e => {
@@ -861,7 +871,7 @@ const FriendFeed = () => {
   if (loading) {
     return (
       <div className="friend-feed-page">
-        <div className="loading">載入中...</div>
+        <div className="loading">{t('friendFeed.ui.loading')}</div>
       </div>
     );
   }
@@ -871,13 +881,13 @@ const FriendFeed = () => {
     return (
       <div className="friend-feed-page">
         <div className="error-message">
-          <p>請先登入後再訪問此頁面</p>
+          <p>{t('friendFeed.messages.needLogin')}</p>
           <button onClick={() => navigate('/login')} className="login-btn">
-            前往登入
+            {t('community.goLogin')}
           </button>
         </div>
         <button onClick={() => navigate('/community')} className="back-btn">
-          返回社群
+          {t('community.back')}
         </button>
       </div>
     );
@@ -888,12 +898,12 @@ const FriendFeed = () => {
       <div className="friend-feed-page">
         <div className="friend-feed-header">
           <button onClick={() => navigate('/community')} className="back-btn">
-            ← 返回社群
+            ← {t('community.back')}
           </button>
           <div className="friend-info">
             <img
               src="/default-avatar.svg"
-              alt="頭像"
+              alt={t('friendFeed.ui.avatarAlt')}
               className="friend-avatar"
               loading="lazy"
               onError={e => {
@@ -901,8 +911,10 @@ const FriendFeed = () => {
               }}
             />
             <div className="friend-details">
-              <h1>用戶 {userId?.substring(0, 8)}...</h1>
-              <p>無法載入用戶資料，但您仍可以留言</p>
+              <h1>
+                {t('friendFeed.ui.pageTitle', { id: userId?.substring(0, 8) })}
+              </h1>
+              <p>{t('friendFeed.messages.loadUserFail')}</p>
             </div>
           </div>
         </div>
@@ -910,7 +922,7 @@ const FriendFeed = () => {
         {/* 狀態訊息 */}
         <div className="alert alert-error">
           <p>{error}</p>
-          <p>用戶資料載入失敗，但您仍可以發送留言</p>
+          <p>{t('friendFeed.messages.loadUserFail')}</p>
         </div>
 
         {/* 發布動態區域 */}
@@ -925,7 +937,7 @@ const FriendFeed = () => {
                     ? '/guest-avatar.svg'
                     : userData?.avatarUrl || '/default-avatar.svg';
                 })()}
-                alt="頭像"
+                alt={t('friendFeed.ui.avatarAlt')}
                 loading="lazy"
                 onError={e => {
                   e.target.src = '/default-avatar.svg';
@@ -934,7 +946,7 @@ const FriendFeed = () => {
             </div>
             <div className="composer-input">
               <textarea
-                placeholder="給用戶留言..."
+                placeholder={t('friendFeed.ui.inputPlaceholder')}
                 value={newPostContent}
                 onChange={e => setNewPostContent(e.target.value)}
                 maxLength={500}
@@ -947,7 +959,9 @@ const FriendFeed = () => {
                   disabled={!newPostContent.trim() || submitting}
                   className="publish-btn"
                 >
-                  {submitting ? '發布中...' : '發布'}
+                  {submitting
+                    ? t('community.publishing')
+                    : t('community.publish')}
                 </button>
               </div>
             </div>
@@ -958,8 +972,8 @@ const FriendFeed = () => {
         <div className="posts-container">
           {posts.length === 0 ? (
             <div className="empty-state">
-              <p>還沒有動態</p>
-              <p>來寫下第一條留言吧！</p>
+              <p>{t('community.emptyFeed.title')}</p>
+              <p>{t('community.emptyFeed.subtitle')}</p>
             </div>
           ) : (
             posts.map(post => (
@@ -986,12 +1000,12 @@ const FriendFeed = () => {
     <div className="friend-feed-page">
       <div className="friend-feed-header">
         <button onClick={() => navigate('/community')} className="back-btn">
-          ← 返回社群
+          ← {t('community.back')}
         </button>
         <div className="friend-info">
           <img
             src={friendData?.avatarUrl || '/default-avatar.svg'}
-            alt="頭像"
+            alt={t('friendFeed.ui.avatarAlt')}
             className="friend-avatar"
             loading="lazy"
             onError={e => {
@@ -999,8 +1013,12 @@ const FriendFeed = () => {
             }}
           />
           <div className="friend-details">
-            <h1>{friendData?.nickname || '用戶'} 的個人版</h1>
-            <p>在這裡給 {friendData?.nickname || '用戶'} 留言吧！</p>
+            <h1>
+              {t('friendFeed.ui.pageTitle', {
+                id: friendData?.nickname || t('community.fallback.user'),
+              })}
+            </h1>
+            <p>{t('friendFeed.ui.inputPlaceholder')}</p>
           </div>
         </div>
       </div>
@@ -1020,7 +1038,7 @@ const FriendFeed = () => {
                   ? '/guest-avatar.svg'
                   : userData?.avatarUrl || '/default-avatar.svg';
               })()}
-              alt="頭像"
+              alt={t('friendFeed.ui.avatarAlt')}
               loading="lazy"
               onError={e => {
                 e.target.src = '/default-avatar.svg';
@@ -1029,7 +1047,7 @@ const FriendFeed = () => {
           </div>
           <div className="composer-input">
             <textarea
-              placeholder={`給 ${friendData?.nickname || '用戶'} 留言...`}
+              placeholder={t('friendFeed.ui.inputPlaceholder')}
               value={newPostContent}
               onChange={e => setNewPostContent(e.target.value)}
               maxLength={500}
@@ -1042,7 +1060,9 @@ const FriendFeed = () => {
                 disabled={!newPostContent.trim() || submitting}
                 className="publish-btn"
               >
-                {submitting ? '發布中...' : '發布'}
+                {submitting
+                  ? t('community.publishing')
+                  : t('community.publish')}
               </button>
             </div>
           </div>
@@ -1053,8 +1073,8 @@ const FriendFeed = () => {
       <div className="posts-container">
         {posts.length === 0 ? (
           <div className="empty-state">
-            <p>還沒有動態</p>
-            <p>來寫下第一條留言吧！</p>
+            <p>{t('community.emptyFeed.title')}</p>
+            <p>{t('community.emptyFeed.subtitle')}</p>
           </div>
         ) : (
           posts.map(post => (

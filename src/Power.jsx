@@ -4,11 +4,13 @@ import { useUser } from './UserContext';
 import * as standards from './standards';
 import PropTypes from 'prop-types';
 import './Power.css';
+import { useTranslation } from 'react-i18next';
 
 function Power({ onComplete }) {
   const { userData, setUserData } = useUser();
   const navigate = useNavigate();
   const { age, gender } = userData;
+  const { t } = useTranslation();
 
   const [verticalJump, setVerticalJump] = useState(
     userData.testInputs?.power?.verticalJump || ''
@@ -75,17 +77,17 @@ function Power({ onComplete }) {
 
   const calculatePowerScore = () => {
     if (!age || !gender) {
-      alert('請確保已在用戶信息中輸入年齡和性別！');
+      alert(t('tests.powerErrors.missingPrerequisites'));
       return;
     }
     if (!verticalJump && !standingLongJump && !sprint) {
-      alert('請至少輸入一項動作數據！');
+      alert(t('tests.powerErrors.noAnyInput'));
       return;
     }
 
     const ageRange = getAgeRange(age);
     if (!ageRange) {
-      alert('請輸入有效的年齡！');
+      alert(t('tests.powerErrors.invalidAge'));
       return;
     }
 
@@ -109,7 +111,7 @@ function Power({ onComplete }) {
     const sprintStandard = sprintStandards[ageRange];
 
     if (!verticalJumpStandard || !standingLongJumpStandard || !sprintStandard) {
-      alert('無法找到對應的評測標準，請檢查年齡和性別！');
+      alert(t('tests.powerErrors.standardsNotFound'));
       return;
     }
 
@@ -141,7 +143,7 @@ function Power({ onComplete }) {
       sprintScore,
     ].filter(score => score !== null);
     if (scores.length === 0) {
-      alert('請至少完成一項動作的測量！');
+      alert(t('tests.powerErrors.needMeasure'));
       return;
     }
 
@@ -163,7 +165,7 @@ function Power({ onComplete }) {
 
   const handleSubmit = async () => {
     if (!result.finalScore) {
-      alert('請先計算爆發力分數！');
+      alert(t('tests.powerErrors.needCalculate'));
       return;
     }
 
@@ -208,7 +210,7 @@ function Power({ onComplete }) {
     } catch (error) {
       console.error('Power.js - 更新 UserContext 或導航失敗:', error);
       if (!isGuest) {
-        alert('更新用戶數據失敗，請稍後再試！');
+        alert(t('tests.powerErrors.updateUserFail'));
       }
       navigate('/user-info', { state: { from: '/explosive-power' } });
     } finally {
@@ -219,23 +221,31 @@ function Power({ onComplete }) {
   return (
     <div className="power-container">
       <div className="input-section">
-        <h1 className="text-2xl font-bold text-center mb-4">爆發力測試</h1>
-        <p>年齡：{age || '未輸入'}</p>
-        <p>性別：{gender || '未選擇'}</p>
+        <h1 className="text-2xl font-bold text-center mb-4">
+          {t('tests.powerTitle')}
+        </h1>
+        <p>
+          {t('common.ageLabel')}：{age || t('common.notEntered')}
+        </p>
+        <p>
+          {t('common.genderLabel')}：{gender || t('common.notSelected')}
+        </p>
 
         <div className="exercise-section">
-          <h2 className="text-lg font-semibold">爆發力動作</h2>
+          <h2 className="text-lg font-semibold">
+            {t('tests.powerLabels.movementsTitle')}
+          </h2>
           <label
             htmlFor="verticalJump"
             className="block text-sm font-medium text-gray-700"
           >
-            垂直彈跳 (公分)
+            {t('tests.powerLabels.verticalJump')}
           </label>
           <input
             id="verticalJump"
             name="verticalJump"
             type="number"
-            placeholder="垂直彈跳 (公分)"
+            placeholder={t('tests.powerLabels.verticalJump')}
             value={verticalJump}
             onChange={e => setVerticalJump(e.target.value)}
             className="input-field"
@@ -244,13 +254,13 @@ function Power({ onComplete }) {
             htmlFor="standingLongJump"
             className="block text-sm font-medium text-gray-700"
           >
-            立定跳遠 (公分)
+            {t('tests.powerLabels.standingLongJump')}
           </label>
           <input
             id="standingLongJump"
             name="standingLongJump"
             type="number"
-            placeholder="立定跳遠 (公分)"
+            placeholder={t('tests.powerLabels.standingLongJump')}
             value={standingLongJump}
             onChange={e => setStandingLongJump(e.target.value)}
             className="input-field"
@@ -259,38 +269,43 @@ function Power({ onComplete }) {
             htmlFor="sprint"
             className="block text-sm font-medium text-gray-700"
           >
-            100公尺衝刺跑 (秒)
+            {t('tests.powerLabels.sprint')}
           </label>
           <input
             id="sprint"
             name="sprint"
             type="number"
-            placeholder="100公尺衝刺跑 (秒)"
+            placeholder={t('tests.powerLabels.sprint')}
             value={sprint}
             onChange={e => setSprint(e.target.value)}
             className="input-field"
           />
           <button onClick={calculatePowerScore} className="calculate-btn">
-            計算
+            {t('common.calculate')}
           </button>
           {result.finalScore && (
             <>
               {result.verticalJumpScore && (
                 <p className="score-display">
-                  垂直彈跳分數: {result.verticalJumpScore}
+                  {t('tests.powerLabels.scoreLabels.verticalJump')}:{' '}
+                  {result.verticalJumpScore}
                 </p>
               )}
               {result.standingLongJumpScore && (
                 <p className="score-display">
-                  立定跳遠分數: {result.standingLongJumpScore}
+                  {t('tests.powerLabels.scoreLabels.standingLongJump')}:{' '}
+                  {result.standingLongJumpScore}
                 </p>
               )}
               {result.sprintScore && (
                 <p className="score-display">
-                  100公尺衝刺跑分數: {result.sprintScore}
+                  {t('tests.powerLabels.scoreLabels.sprint')}:{' '}
+                  {result.sprintScore}
                 </p>
               )}
-              <p className="score-display">最終分數: {result.finalScore}</p>
+              <p className="score-display">
+                {t('tests.powerLabels.scoreLabels.final')}: {result.finalScore}
+              </p>
             </>
           )}
         </div>
@@ -301,7 +316,9 @@ function Power({ onComplete }) {
               className="description-header"
               onClick={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
             >
-              <h2 className="text-lg font-semibold">動作說明</h2>
+              <h2 className="text-lg font-semibold">
+                {t('tests.powerLabels.descriptionTitle')}
+              </h2>
               <span
                 className={`arrow ${isDescriptionExpanded ? 'expanded' : ''}`}
               >
@@ -310,20 +327,26 @@ function Power({ onComplete }) {
             </div>
             {isDescriptionExpanded && (
               <div className="description-content">
-                <p className="exercise-title">垂直彈跳</p>
-                <p className="exercise-description">
-                  測量垂直跳躍高度，反映下肢爆發力。站立時伸手觸及最高點，然後全力跳起觸及最高點，兩者高度差即為垂直彈跳高度（單位：公分）。
+                <p className="exercise-title">
+                  {t('tests.powerLabels.verticalJump')}
                 </p>
-                <p className="exercise-title mt-2">立定跳遠</p>
                 <p className="exercise-description">
-                  測量站立跳躍距離，反映下肢力量和協調性。雙腳站立於起跳線，無助跑直接跳出，測量起跳線(腳尖)到著地點(腳跟)最近處的距離（單位：公分）。
+                  {t('tests.powerInfo.howTo.verticalJump')}
                 </p>
-                <p className="exercise-title mt-2">100公尺衝刺跑</p>
+                <p className="exercise-title mt-2">
+                  {t('tests.powerLabels.standingLongJump')}
+                </p>
                 <p className="exercise-description">
-                  測量短距離衝刺速度，反映全身爆發力和速度。從靜止起跑，盡全力衝刺100公尺，記錄完成時間（單位：秒）。
+                  {t('tests.powerInfo.howTo.standingLongJump')}
+                </p>
+                <p className="exercise-title mt-2">
+                  {t('tests.powerLabels.sprint')}
+                </p>
+                <p className="exercise-description">
+                  {t('tests.powerInfo.howTo.sprint')}
                 </p>
                 <p className="mt-2 text-sm text-gray-600">
-                  建議：測量前充分熱身，避免受傷。使用專業設備或在標準場地進行測量以確保準確性。
+                  {t('tests.powerInfo.howTo.tip')}
                 </p>
               </div>
             )}
@@ -334,7 +357,9 @@ function Power({ onComplete }) {
               className="standards-header"
               onClick={() => setIsStandardsExpanded(!isStandardsExpanded)}
             >
-              <h2 className="text-lg font-semibold">檢測標準說明</h2>
+              <h2 className="text-lg font-semibold">
+                {t('tests.powerLabels.standardsTitle')}
+              </h2>
               <span
                 className={`arrow ${isStandardsExpanded ? 'expanded' : ''}`}
               >
@@ -343,18 +368,20 @@ function Power({ onComplete }) {
             </div>
             {isStandardsExpanded && (
               <div className="standards-content">
-                <p className="font-semibold">來源：</p>
-                <p>
-                  參考教育部體育署體適能網站、美國運動醫學會（ACSM）、世界田徑協會及全國中等學校運動會田徑標準。
+                <p className="font-semibold">
+                  {t('tests.powerLabels.sourceLabel')}
                 </p>
-                <p className="font-semibold mt-2">依據：</p>
+                <p>{t('tests.powerInfo.standards.source')}</p>
+                <p className="font-semibold mt-2">
+                  {t('tests.powerLabels.basisLabel')}
+                </p>
                 <ul className="list-disc pl-5">
-                  <li>原地垂直彈跳：ACSM標準與青少年數據。</li>
-                  <li>立定跳遠：教育部常模與ACSM衰退研究。</li>
-                  <li>100公尺衝刺跑：世界田徑與全國運動會標準。</li>
+                  <li>{t('tests.powerInfo.standards.basedOn.vjump')}</li>
+                  <li>{t('tests.powerInfo.standards.basedOn.slj')}</li>
+                  <li>{t('tests.powerInfo.standards.basedOn.sprint')}</li>
                 </ul>
                 <p className="mt-2 text-sm text-gray-600">
-                  本測驗包含推測值：12-80歲全齡數據不全，依ACSM每10年下降10-15%、性別差異70-90%推估。
+                  {t('tests.powerInfo.standards.remark')}
                 </p>
               </div>
             )}
@@ -369,7 +396,7 @@ function Power({ onComplete }) {
           className="submit-btn"
           disabled={submitting}
         >
-          {submitting ? '提交中…' : '提交並返回總覽'}
+          {submitting ? t('common.submitting') : t('common.submitAndReturn')}
         </button>
       </div>
     </div>

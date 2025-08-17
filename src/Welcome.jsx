@@ -97,14 +97,14 @@ function Welcome({ onGuestMode }) {
             >
               {t('welcome.login')}
             </button>
-            <span className="tooltip">將數據保存到雲端,隨時隨地訪問</span>
+            <span className="tooltip">{t('welcomeTooltips.login')}</span>
           </div>
 
           <div className="button-with-tooltip">
             <button onClick={handleGuestMode} className="mode-btn guest-btn">
               {t('welcome.guestMode')}
             </button>
-            <span className="tooltip">無需註冊,立即開始評測</span>
+            <span className="tooltip">{t('welcomeTooltips.guest')}</span>
           </div>
         </div>
       </div>

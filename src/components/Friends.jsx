@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useUser } from '../UserContext';
 import { auth, db } from '../firebase';
 import {
@@ -21,6 +22,7 @@ import './Friends.css';
 
 const Friends = () => {
   const { userData, setUserData, loadUserData } = useUser();
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState('friends'); // 'friends', 'requests', 'search', 'challenges'
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -271,7 +273,7 @@ const Friends = () => {
       }));
     } catch (error) {
       console.error('載入好友列表失敗:', error);
-      setError('載入好友列表失敗');
+      setError(t('friends.messages.loadFriendsFail'));
     } finally {
       setLoading(false);
     }
@@ -354,7 +356,7 @@ const Friends = () => {
       setFriendRequests(requests);
     } catch (error) {
       console.error('❌ 載入好友邀請失敗:', error);
-      setError('載入好友邀請失敗');
+      setError(t('friends.messages.loadInvitesFail'));
     }
   }, [setFriendRequests]);
 
@@ -536,7 +538,7 @@ const Friends = () => {
       setSearchResults(results);
     } catch (error) {
       console.error('搜尋失敗:', error);
-      setError('搜尋失敗');
+      setError(t('friends.messages.searchFail'));
     } finally {
       setLoading(false);
     }
@@ -580,7 +582,7 @@ const Friends = () => {
           console.log('🗑️ 已刪除舊邀請');
         } else {
           // 如果邀請存在但對方沒有收到，可能是資料問題，允許重新發送
-          setError('已經發送過好友邀請，請稍後再試或檢查邀請通知');
+          setError(t('friends.messages.alreadyInvited'));
 
           // 清除錯誤訊息，讓用戶可以重試
           setTimeout(() => {
@@ -609,7 +611,7 @@ const Friends = () => {
       firebaseWriteMonitor.logWrite('addDoc', 'friendInvitations', docRef.id);
 
       console.log('✅ 邀請已發送，文檔ID:', docRef.id);
-      setSuccess('好友邀請已發送');
+      setSuccess(t('friends.messages.inviteSent'));
 
       // 立即驗證邀請是否真的被創建
       try {
@@ -637,7 +639,7 @@ const Friends = () => {
       }, 1000);
     } catch (error) {
       console.error('發送好友邀請失敗:', error);
-      setError('發送邀請失敗');
+      setError(t('friends.messages.inviteSendFail'));
     } finally {
       setLoading(false);
     }
@@ -702,14 +704,14 @@ const Friends = () => {
       // 5. 移除已處理的邀請
       setFriendRequests(prev => prev.filter(req => req.id !== requestId));
 
-      setSuccess('已接受好友邀請');
+      setSuccess(t('friends.messages.inviteAccepted'));
 
       // 6. 重新載入相關資料
       await loadUserData();
       await loadFriendsData();
     } catch (error) {
       console.error('接受好友邀請失敗:', error);
-      setError(`接受邀請失敗: ${error.message}`);
+      setError(t('friends.messages.inviteAcceptFail'));
     } finally {
       setLoading(false);
     }
@@ -724,16 +726,16 @@ const Friends = () => {
 
       setFriendRequests(prev => prev.filter(req => req.id !== requestId));
 
-      setSuccess('已拒絕好友邀請');
+      setSuccess(t('friends.messages.inviteRejected'));
     } catch (error) {
       console.error('拒絕好友邀請失敗:', error);
-      setError('拒絕邀請失敗');
+      setError(t('friends.messages.inviteRejectFail'));
     }
   };
 
   // 移除好友
   const removeFriend = async friendId => {
-    if (!confirm('確定要移除這位好友嗎？')) return;
+    if (!confirm(t('friends.messages.removeConfirm'))) return;
 
     try {
       setLoading(true);
@@ -777,10 +779,10 @@ const Friends = () => {
         setActiveTab('friends');
       }
 
-      setSuccess('已移除好友');
+      setSuccess(t('friends.messages.removed'));
     } catch (error) {
       console.error('移除好友失敗:', error);
-      setError(`移除好友失敗: ${error.message}`);
+      setError(t('friends.messages.removeFail'));
     } finally {
       setLoading(false);
     }
@@ -826,7 +828,7 @@ const Friends = () => {
       console.log('挑戰發送成功，文檔ID:', docRef.id);
 
       setChallengeInput('');
-      setSuccess('挑戰發送成功！');
+      setSuccess(t('friends.messages.challengeSent'));
 
       // 立即重新載入挑戰
       await loadChallenges(selectedFriend.id);
@@ -836,7 +838,7 @@ const Friends = () => {
         code: error.code,
         message: error.message,
       });
-      setError('發送挑戰失敗: ' + error.message);
+      setError(t('friends.messages.challengeSendFail'));
     }
   }, [
     selectedFriend,
@@ -904,7 +906,7 @@ const Friends = () => {
         friendId: friendId,
         currentUser: auth.currentUser?.uid,
       });
-      setError('載入挑戰失敗，請稍後再試');
+      setError(t('friends.messages.loadChallengesFail'));
     }
   }, []);
 
@@ -963,7 +965,7 @@ const Friends = () => {
         );
       } catch (error) {
         console.error('回應挑戰失敗:', error);
-        setError('回應挑戰失敗: ' + error.message);
+        setError(t('friends.messages.respondFail'));
       }
     },
     [updateChallengeStatus]
@@ -986,7 +988,7 @@ const Friends = () => {
       <div className="friends-list">
         {friendsList.length === 0 ? (
           <div className="empty-state">
-            <p>還沒有好友，去搜尋一些吧！</p>
+            <p>{t('friends.emptyFriends')}</p>
           </div>
         ) : (
           friendsList.map(friend => (
@@ -1012,7 +1014,8 @@ const Friends = () => {
                   {friend.nickname}
                 </div>
                 <div className="friends-list__friend-score">
-                  {friend.ladderScore}分
+                  {friend.ladderScore}
+                  {t('community.ui.pointsUnit')}
                 </div>
                 <div className="friends-list__friend-email">{friend.email}</div>
               </div>
@@ -1067,10 +1070,10 @@ const Friends = () => {
         });
       });
 
-      setSuccess('已顯示所有邀請資訊，請查看控制台');
+      setSuccess(t('friends.messages.shownInvitesInfo'));
     } catch (error) {
       console.error('清除舊邀請失敗:', error);
-      setError('清除失敗');
+      setError(t('friends.messages.clearFail'));
     }
   };
 
@@ -1093,7 +1096,7 @@ const Friends = () => {
             marginRight: '8px',
           }}
         >
-          🔄 重新載入
+          🔄 {t('friends.buttons.reload')}
         </button>
         <button
           onClick={clearOldInvitations}
@@ -1107,12 +1110,12 @@ const Friends = () => {
             cursor: 'pointer',
           }}
         >
-          🧹 檢查邀請
+          🧹 {t('friends.buttons.checkInvitations')}
         </button>
       </div>
       {friendRequests.length === 0 ? (
         <div className="empty-state">
-          <p>沒有待處理的好友邀請</p>
+          <p>{t('friends.emptyRequests')}</p>
         </div>
       ) : (
         friendRequests.map(request => (
@@ -1137,7 +1140,9 @@ const Friends = () => {
               <div className="friends-list__friend-name">
                 {request.senderName}
               </div>
-              <div className="friends-list__friend-email">想要加您為好友</div>
+              <div className="friends-list__friend-email">
+                {t('friends.requestAction.wantsToAdd')}
+              </div>
             </div>
             <div className="friends-list__friend-actions">
               <button
@@ -1146,13 +1151,13 @@ const Friends = () => {
                   acceptFriendRequest(request.id, request.fromUserId)
                 }
               >
-                接受
+                {t('friends.requestAction.accept')}
               </button>
               <button
                 className="friends-list__btn-reject"
                 onClick={() => rejectFriendRequest(request.id)}
               >
-                拒絕
+                {t('friends.requestAction.reject')}
               </button>
             </div>
           </div>
@@ -1167,34 +1172,34 @@ const Friends = () => {
       <div className="search-box">
         <input
           type="text"
-          placeholder="搜尋用戶暱稱或電子郵件..."
+          placeholder={t('friends.search.placeholder')}
           value={searchQuery}
           onChange={e => setSearchQuery(e.target.value)}
           onKeyPress={e => e.key === 'Enter' && handleSearch()}
         />
         <button onClick={handleSearch} disabled={loading}>
-          {loading ? '搜尋中...' : '搜尋'}
+          {loading ? t('common.searching') : t('common.search')}
         </button>
       </div>
 
       <div className="search-tips">
-        <p>💡 搜尋提示：</p>
+        <p>💡 {t('friends.search.tips.title')}</p>
         <ul>
-          <li>輸入暱稱的開頭部分進行搜尋</li>
-          <li>輸入完整的電子郵件地址</li>
-          <li>搜尋結果會自動排除自己</li>
+          <li>{t('friends.search.tips.nicknamePrefix')}</li>
+          <li>{t('friends.search.tips.fullEmail')}</li>
+          <li>{t('friends.search.tips.excludeSelf')}</li>
         </ul>
       </div>
 
       <div className="search-results">
         {searchResults.length === 0 && searchQuery.trim() && !loading ? (
           <div className="empty-state">
-            <p>沒有找到匹配的用戶</p>
-            <p>請嘗試：</p>
+            <p>{t('friends.search.empty.title')}</p>
+            <p>{t('friends.search.empty.try')}</p>
             <ul>
-              <li>檢查拼寫是否正確</li>
-              <li>嘗試暱稱的開頭部分</li>
-              <li>使用完整的電子郵件地址</li>
+              <li>{t('friends.search.empty.checkSpelling')}</li>
+              <li>{t('friends.search.empty.prefix')}</li>
+              <li>{t('friends.search.empty.fullEmail')}</li>
             </ul>
           </div>
         ) : (
@@ -1219,22 +1224,27 @@ const Friends = () => {
               <div className="friends-list__friend-info">
                 <div className="friends-list__friend-name">{user.nickname}</div>
                 <div className="friends-list__friend-score">
-                  {user.ladderScore}分
+                  {user.ladderScore}
+                  {t('community.ui.pointsUnit')}
                 </div>
                 <div className="friends-list__friend-email">{user.email}</div>
               </div>
               <div className="friends-list__friend-actions">
                 {user.isFriend ? (
-                  <span className="status-badge">已是好友</span>
+                  <span className="status-badge">
+                    {t('community.friend.badgeFriend')}
+                  </span>
                 ) : user.hasPendingRequest ? (
-                  <span className="status-badge">邀請已發送</span>
+                  <span className="status-badge">
+                    {t('community.friend.badgeInvited')}
+                  </span>
                 ) : (
                   <button
                     className="friends-list__btn-add"
                     onClick={() => sendFriendRequest(user.id)}
                     disabled={loading}
                   >
-                    加好友
+                    {t('community.friend.add')}
                   </button>
                 )}
               </div>
@@ -1374,7 +1384,7 @@ const Friends = () => {
             >
               {/* 挑戰留言板內容 */}
               <div className="challenge-board">
-                <h4>挑戰留言板</h4>
+                <h4>{t('friends.challenge.boardTitle')}</h4>
                 <div className="challenge-types">
                   {challengeTypes.map(type => (
                     <button
@@ -1384,17 +1394,18 @@ const Friends = () => {
                       }`}
                       onClick={() => setSelectedChallengeType(type.id)}
                     >
-                      {type.icon} {type.name}
+                      {type.icon} {t(`friends.challenge.types.${type.id}`)}
                     </button>
                   ))}
                 </div>
                 <div className="challenge-input-container">
                   <textarea
-                    placeholder={`輸入您的 ${
-                      challengeTypes.find(
-                        type => type.id === selectedChallengeType
-                      )?.examples[0] || '挑戰'
-                    }...`}
+                    placeholder={t('friends.challenge.inputPlaceholder', {
+                      example:
+                        challengeTypes.find(
+                          type => type.id === selectedChallengeType
+                        )?.examples[0] || 'challenge',
+                    })}
                     value={challengeInput}
                     onChange={e => setChallengeInput(e.target.value)}
                     onKeyPress={e => {
@@ -1408,7 +1419,7 @@ const Friends = () => {
                     onClick={sendChallenge}
                     disabled={!challengeInput.trim()}
                   >
-                    發布挑戰
+                    {t('friends.challenge.publish')}
                   </button>
                 </div>
                 <div className="challenge-list">
@@ -1426,7 +1437,7 @@ const Friends = () => {
                       }}
                     >
                       <p style={{ margin: '0 0 8px 0' }}>
-                        ⏰ 發現過期挑戰，點擊下方按鈕更新狀態
+                        {t('friends.challenge.expiredWarning')}
                       </p>
                       <button
                         onClick={() => {
@@ -1449,15 +1460,15 @@ const Friends = () => {
                           fontSize: '12px',
                         }}
                       >
-                        更新過期挑戰
+                        {t('friends.challenge.updateExpired')}
                       </button>
                     </div>
                   )}
 
                   {challenges.length === 0 ? (
                     <div className="empty-state">
-                      <p>目前沒有挑戰留言</p>
-                      <p>您可以發布一個新的挑戰！</p>
+                      <p>{t('friends.challenge.empty.title')}</p>
+                      <p>{t('friends.challenge.empty.subtitle')}</p>
                     </div>
                   ) : (
                     challenges.map(challenge => (
@@ -1485,7 +1496,8 @@ const Friends = () => {
                         </div>
                         <div className="challenge-meta">
                           <span>
-                            {challenge.fromUserNickname} 發布於{' '}
+                            {challenge.fromUserNickname}{' '}
+                            {t('friends.challenge.publishedBy')}{' '}
                             {new Date(challenge.timestamp).toLocaleDateString()}
                           </span>
                           <span
@@ -1509,7 +1521,7 @@ const Friends = () => {
                                   respondToChallenge(challenge.id, 'accepted')
                                 }
                               >
-                                ✅ 接受挑戰
+                                ✅ {t('friends.challenge.accept')}
                               </button>
                               <button
                                 className="btn-decline"
@@ -1517,7 +1529,7 @@ const Friends = () => {
                                   respondToChallenge(challenge.id, 'declined')
                                 }
                               >
-                                ❌ 拒絕挑戰
+                                ❌ {t('friends.challenge.reject')}
                               </button>
                             </div>
                           )}
@@ -1532,7 +1544,7 @@ const Friends = () => {
                                   respondToChallenge(challenge.id, 'completed')
                                 }
                               >
-                                🏆 完成挑戰
+                                🏆 {t('friends.challenge.complete')}
                               </button>
                             </div>
                           )}
@@ -1555,10 +1567,10 @@ const Friends = () => {
             }}
           >
             <p style={{ fontSize: '18px', marginBottom: '8px' }}>
-              請選擇一位好友開始挑戰
+              {t('friends.challenge.selectFriend.title')}
             </p>
             <p style={{ fontSize: '14px', color: '#999' }}>
-              點擊好友列表中的 🏆 按鈕
+              {t('friends.challenge.selectFriend.subtitle')}
             </p>
           </div>
         )}
@@ -1580,7 +1592,7 @@ const Friends = () => {
   return (
     <div className="friends-page">
       <div className="friends-header">
-        <h1>好友系統</h1>
+        <h1>{t('friends.title')}</h1>
 
         {/* 狀態訊息 */}
         {error && <div className="alert alert-error">{error}</div>}
@@ -1594,14 +1606,16 @@ const Friends = () => {
             className={`tab-btn ${activeTab === 'friends' ? 'active' : ''}`}
             onClick={() => setActiveTab('friends')}
           >
-            <span className="tab-label">好友列表 ({friendsList.length})</span>
+            <span className="tab-label">
+              {t('friends.tabs.friends')} ({friendsList.length})
+            </span>
           </div>
           <div
             className={`tab-btn ${activeTab === 'requests' ? 'active' : ''}`}
             onClick={() => setActiveTab('requests')}
           >
             <span className="tab-label">
-              邀請通知{' '}
+              {t('friends.tabs.requests')}{' '}
               {friendRequests.length > 0 && `(${friendRequests.length})`}
             </span>
             {friendRequests.length > 0 && (
@@ -1614,14 +1628,14 @@ const Friends = () => {
             className={`tab-btn ${activeTab === 'search' ? 'active' : ''}`}
             onClick={() => setActiveTab('search')}
           >
-            <span className="tab-label">搜尋好友</span>
+            <span className="tab-label">{t('friends.tabs.search')}</span>
           </div>
         </div>
       )}
 
       {/* 內容區域 */}
       <div className="tab-content">
-        {loading && <div className="loading">載入中...</div>}
+        {loading && <div className="loading">{t('common.loading')}</div>}
 
         {activeTab === 'friends' && renderFriendsTab()}
         {activeTab === 'requests' && renderRequestsTab()}

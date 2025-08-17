@@ -3,10 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import { useUser } from './UserContext';
 import PropTypes from 'prop-types';
 import './FFMI.css';
+import { useTranslation } from 'react-i18next';
 
 function FFMI({ onComplete }) {
   const { userData, setUserData } = useUser();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [bodyFat, setBodyFat] = useState(
     userData.testInputs?.ffmi?.bodyFat || ''
   );
@@ -34,11 +36,11 @@ function FFMI({ onComplete }) {
       !userData.weight ||
       !userData.age
     ) {
-      alert('請先在用戶信息頁面填寫性別、身高、體重和年齡');
+      alert(t('tests.ffmiErrors.missingPrerequisites'));
       return;
     }
     if (!bodyFat) {
-      alert('請輸入體脂肪率');
+      alert(t('tests.ffmiErrors.missingBodyFat'));
       return;
     }
 
@@ -97,7 +99,7 @@ function FFMI({ onComplete }) {
 
   const handleSubmit = async () => {
     if (!ffmi || !ffmiScore) {
-      alert('請先計算 FFMI 分數！');
+      alert(t('tests.ffmiErrors.needCalculate'));
       return;
     }
 
@@ -141,7 +143,7 @@ function FFMI({ onComplete }) {
     } catch (error) {
       console.error('提交失敗:', error);
       if (!isGuest) {
-        alert('更新用戶數據失敗，請稍後再試！');
+        alert(t('tests.ffmiErrors.updateUserFail'));
       }
       navigate('/user-info', { state: { from: '/body-fat' } });
     } finally {
@@ -150,21 +152,21 @@ function FFMI({ onComplete }) {
   };
 
   const maleFfmiTable = [
-    { range: '16 - 17', description: '肌肉量低於平均' },
-    { range: '18 - 19', description: '肌肉量在平均值' },
-    { range: '20 - 21', description: '肌肉量高於平均值' },
-    { range: '22', description: '肌肉量很高' },
-    { range: '23 - 25', description: '肌肉量極高' },
-    { range: '26 - 27', description: '肌肉量已經高到可能有使用藥物' },
-    { range: '28 - 30', description: '不用藥不可能達到的數值' },
+    { range: '16 - 17', description: t('tests.ffmiInfo.maleTable.r16_17') },
+    { range: '18 - 19', description: t('tests.ffmiInfo.maleTable.r18_19') },
+    { range: '20 - 21', description: t('tests.ffmiInfo.maleTable.r20_21') },
+    { range: '22', description: t('tests.ffmiInfo.maleTable.r22') },
+    { range: '23 - 25', description: t('tests.ffmiInfo.maleTable.r23_25') },
+    { range: '26 - 27', description: t('tests.ffmiInfo.maleTable.r26_27') },
+    { range: '28 - 30', description: t('tests.ffmiInfo.maleTable.r28_30') },
   ];
 
   const femaleFfmiTable = [
-    { range: '13 - 14', description: '肌肉量低於平均' },
-    { range: '15 - 16', description: '肌肉量在平均值' },
-    { range: '17 - 18', description: '肌肉量高於平均值' },
-    { range: '19 - 21', description: '肌肉量很高' },
-    { range: '> 22', description: '不用藥不可能達到的數值' },
+    { range: '13 - 14', description: t('tests.ffmiInfo.femaleTable.r13_14') },
+    { range: '15 - 16', description: t('tests.ffmiInfo.femaleTable.r15_16') },
+    { range: '17 - 18', description: t('tests.ffmiInfo.femaleTable.r17_18') },
+    { range: '19 - 21', description: t('tests.ffmiInfo.femaleTable.r19_21') },
+    { range: '> 22', description: t('tests.ffmiInfo.femaleTable.r22plus') },
   ];
 
   const ffmiTable =
@@ -174,10 +176,10 @@ function FFMI({ onComplete }) {
 
   return (
     <div className="ffmi-container">
-      <h1 className="ffmi-title">體脂肪率與 FFMI</h1>
+      <h1 className="ffmi-title">{t('tests.ffmiTitle')}</h1>
       <div className="input-section">
         <label htmlFor="bodyFat" className="input-label">
-          體脂肪率 (%)
+          {t('tests.ffmiLabels.bodyFatPercent')}
         </label>
         <input
           id="bodyFat"
@@ -185,20 +187,26 @@ function FFMI({ onComplete }) {
           type="number"
           value={bodyFat}
           onChange={e => setBodyFat(e.target.value)}
-          placeholder="輸入體脂肪率 (%)"
+          placeholder={t('tests.ffmiLabels.bodyFatPercent')}
           className="input-field"
           required
         />
         <button onClick={calculateScores} className="calculate-btn">
-          計算分數
+          {t('common.calculate')}
         </button>
       </div>
       {ffmi && (
         <div className="result-section">
-          <h2 className="result-title">您的評估結果</h2>
-          <p className="result-text">FFMI：{ffmi}</p>
-          <p className="score-text">FFMI 評分：{ffmiScore} 分</p>
-          <p className="category-text">FFMI 等級：{ffmiCategory}</p>
+          <h2 className="result-title">{t('tests.ffmiLabels.resultTitle')}</h2>
+          <p className="result-text">
+            {t('tests.ffmiLabels.ffmi')}：{ffmi}
+          </p>
+          <p className="score-text">
+            {t('tests.ffmiLabels.ffmiScore')}：{ffmiScore} 分
+          </p>
+          <p className="category-text">
+            {t('tests.ffmiLabels.ffmiCategory')}：{ffmiCategory}
+          </p>
           <p className="result-text note-text"></p>
         </div>
       )}
@@ -208,22 +216,20 @@ function FFMI({ onComplete }) {
             className="description-header"
             onClick={() => setIsExpanded(!isExpanded)}
           >
-            <h2 className="description-title">FFMI 是什麼？</h2>
+            <h2 className="description-title">
+              {t('tests.ffmiLabels.whatIs')}
+            </h2>
             <span className={`arrow ${isExpanded ? 'expanded' : ''}`}>
               {isExpanded ? '▲' : '▼'}
             </span>
           </div>
           {isExpanded && (
             <div className="description-content">
-              <p>
-                FFMI（Fat Free Mass Index
-                無脂肪質量指數）用來評估肌肉量多寡，考量身高與體脂，比 BMI
-                更準確。數值越高，代表肌肉量越多，是健身評估常用指標。在以下幾個狀況下易造成結果失真：
-              </p>
+              <p>{t('tests.ffmiInfo.whatIs')}</p>
               <ol className="list-decimal pl-5 mt-2">
-                <li>受測者身高高於平均標準 (190 以上)</li>
-                <li>受測者體脂肪率顯著高於平均標準</li>
-                <li>受測者體重高於平均標準</li>
+                <li>{t('tests.ffmiInfo.caveats.tall')}</li>
+                <li>{t('tests.ffmiInfo.caveats.highFat')}</li>
+                <li>{t('tests.ffmiInfo.caveats.heavy')}</li>
               </ol>
             </div>
           )}
@@ -236,10 +242,10 @@ function FFMI({ onComplete }) {
             onClick={() => setIsTableExpanded(!isTableExpanded)}
           >
             <h2 className="table-title">
-              FFMI 對照表 (
+              {t('tests.ffmiLabels.tableTitle')} (
               {userData.gender === 'male' || userData.gender === '男性'
-                ? '男性'
-                : '女性'}
+                ? t('tests.ffmiLabels.male')
+                : t('tests.ffmiLabels.female')}
               )
             </h2>
             <span className={`arrow ${isTableExpanded ? 'expanded' : ''}`}>
@@ -251,8 +257,8 @@ function FFMI({ onComplete }) {
               <table className="ffmi-table">
                 <thead>
                   <tr>
-                    <th>FFMI 範圍</th>
-                    <th>評價</th>
+                    <th>{t('tests.ffmiLabels.columns.range')}</th>
+                    <th>{t('tests.ffmiLabels.columns.evaluation')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -274,7 +280,7 @@ function FFMI({ onComplete }) {
         className="ffmi-submit-btn"
         disabled={submitting}
       >
-        {submitting ? '提交中…' : '提交並返回總覽'}
+        {submitting ? t('common.submitting') : t('common.submitAndReturn')}
       </button>
     </div>
   );

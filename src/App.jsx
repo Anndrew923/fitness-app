@@ -4,7 +4,6 @@ import {
   Routes,
   Route,
   Navigate,
-  Link,
   useLocation,
 } from 'react-router-dom';
 import { UserProvider, useUser } from './UserContext';
@@ -12,20 +11,20 @@ import { auth } from './firebase';
 import { signInWithEmailAndPassword, signOut } from 'firebase/auth';
 import PropTypes from 'prop-types';
 import ScrollToTop from './ScrollToTop';
-import Welcome from './Welcome';
-import UserInfo from './UserInfo';
-import Strength from './Strength';
-import Cardio from './Cardio';
-import Power from './Power';
-import Muscle from './Muscle';
-import FFMI from './FFMI';
+const Welcome = React.lazy(() => import('./Welcome'));
+const UserInfo = React.lazy(() => import('./UserInfo'));
+const Strength = React.lazy(() => import('./Strength'));
+const Cardio = React.lazy(() => import('./Cardio'));
+const Power = React.lazy(() => import('./Power'));
+const Muscle = React.lazy(() => import('./Muscle'));
+const FFMI = React.lazy(() => import('./FFMI'));
 
-import Login from './Login';
-import History from './History';
-import PrivacyPolicy from './PrivacyPolicy';
+const Login = React.lazy(() => import('./Login'));
+const History = React.lazy(() => import('./History'));
+const PrivacyPolicy = React.lazy(() => import('./PrivacyPolicy'));
 import BottomNavBar from './components/BottomNavBar';
-import Ladder from './components/Ladder';
-import Settings from './components/Settings';
+const Ladder = React.lazy(() => import('./components/Ladder'));
+const Settings = React.lazy(() => import('./components/Settings'));
 const Community = React.lazy(() => import('./components/Community'));
 const FriendFeed = React.lazy(() => import('./components/FriendFeed'));
 import GlobalAdBanner from './components/GlobalAdBanner';
@@ -33,9 +32,10 @@ import PWAInstallPrompt from './components/PWAInstallPrompt';
 import IOSInstallPrompt from './components/IOSInstallPrompt';
 import performanceMonitor from './utils/performanceMonitor';
 import './App.css';
+import { useTranslation, withTranslation } from 'react-i18next';
 import PrivacyPolicyModal from './components/PrivacyPolicyModal';
 
-class ErrorBoundary extends Component {
+class RawErrorBoundary extends Component {
   state = { hasError: false, error: null, errorInfo: null };
 
   static getDerivedStateFromError(error) {
@@ -57,6 +57,7 @@ class ErrorBoundary extends Component {
   }
 
   render() {
+    const { t } = this.props;
     if (this.state.hasError) {
       return (
         <div
@@ -72,10 +73,10 @@ class ErrorBoundary extends Component {
           }}
         >
           <h2 style={{ color: '#dc3545', marginBottom: '20px' }}>
-            🚨 發生錯誤
+            🚨 {t('errorBoundary.title')}
           </h2>
           <p style={{ marginBottom: '20px', color: '#6c757d' }}>
-            應用程序遇到了一個問題，請稍後再試或聯繫支持團隊。
+            {t('errorBoundary.description')}
           </p>
           <button
             onClick={() => window.location.reload()}
@@ -88,11 +89,11 @@ class ErrorBoundary extends Component {
               cursor: 'pointer',
             }}
           >
-            重新載入頁面
+            {t('errorBoundary.reload')}
           </button>
           {process.env.NODE_ENV === 'development' && this.state.error && (
             <details style={{ marginTop: '20px', textAlign: 'left' }}>
-              <summary>錯誤詳情 (開發模式)</summary>
+              <summary>{t('errorBoundary.detailsDev')}</summary>
               <pre
                 style={{
                   backgroundColor: '#f8f9fa',
@@ -114,12 +115,15 @@ class ErrorBoundary extends Component {
   }
 }
 
-ErrorBoundary.propTypes = {
+RawErrorBoundary.propTypes = {
   children: PropTypes.node.isRequired,
 };
 
+const ErrorBoundary = withTranslation()(RawErrorBoundary);
+
 // 創建一個內部組件來使用 useNavigate
 function AppContent() {
+  const { t } = useTranslation();
   const [testData, setTestData] = useState(null);
   const location = useLocation();
   const [isPrivacyModalOpen, setIsPrivacyModalOpen] = useState(false);
@@ -284,7 +288,7 @@ function AppContent() {
     <div className={`app-container ${showFixedAd ? 'page-with-fixed-ad' : ''}`}>
       <ScrollToTop />
       <ErrorBoundary>
-        <Suspense fallback={<div>載入中...</div>}>
+        <Suspense fallback={<div>{t('common.loading')}</div>}>
           <div className="main-content">
             <Routes>
               <Route
@@ -403,17 +407,12 @@ function AppContent() {
               />
 
               <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-              <Route path="*" element={<div>404 - 頁面未找到</div>} />
+              <Route path="*" element={<div>{t('common.notFound')}</div>} />
             </Routes>
           </div>
         </Suspense>
       </ErrorBoundary>
-      {/* 依規範：保留主要入口頁政策連結，其餘頁面移除以減少干擾 */}
-      {['/', '/login'].some(path => location.pathname.startsWith(path)) && (
-        <footer className="app-footer">
-          <Link to="/privacy-policy">隱私權政策</Link>
-        </footer>
-      )}
+
       {/* 在天梯頁面隱藏廣告，保持頁面乾淨 */}
       {location.pathname !== '/ladder' && <GlobalAdBanner />}
       {showNavBar && <BottomNavBar />}

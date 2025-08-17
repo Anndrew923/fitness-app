@@ -8,6 +8,7 @@ import { useUser } from '../UserContext';
 import PrivacyPolicyModal from './PrivacyPolicyModal';
 import LanguageSwitcher from './LanguageSwitcher';
 import BottomNavBar from './BottomNavBar';
+import { useTranslation } from 'react-i18next';
 
 function Settings() {
   const navigate = useNavigate();
@@ -15,6 +16,7 @@ function Settings() {
   const [showPrivacy, setShowPrivacy] = useState(false);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
+  const { t } = useTranslation();
 
   const isLoggedIn = useMemo(() => !!auth.currentUser, []);
 
@@ -25,7 +27,7 @@ function Settings() {
   const handleResetPrivacyConsent = useCallback(() => {
     localStorage.removeItem('privacyAcceptedV1');
     setShowPrivacy(true);
-    setMessage('已重置同意狀態');
+    setMessage(t('settings.msgResetConsent'));
   }, []);
 
   const handleCheckPWAUpdate = useCallback(async () => {
@@ -34,13 +36,13 @@ function Settings() {
         const registration = await navigator.serviceWorker.getRegistration();
         if (registration) {
           await registration.update();
-          setMessage('已檢查更新');
+          setMessage(t('settings.msgCheckedUpdate'));
           return;
         }
       }
-      setMessage('此環境未註冊 Service Worker');
+      setMessage(t('settings.msgNoSW'));
     } catch (e) {
-      setMessage('檢查更新失敗');
+      setMessage(t('settings.msgCheckUpdateFail'));
     }
   }, []);
 
@@ -55,7 +57,7 @@ function Settings() {
       a.click();
       URL.revokeObjectURL(url);
     } catch (_) {
-      setMessage('匯出失敗');
+      setMessage(t('settings.msgExportFail'));
     }
   }, []);
 
@@ -64,46 +66,42 @@ function Settings() {
       localStorage.removeItem('userData');
       localStorage.removeItem('lastSavedUserData');
       localStorage.removeItem('ladderSubmissionState');
-      setMessage('已清除本機資料');
+      setMessage(t('settings.msgClearedLocal'));
     } catch (_) {
-      setMessage('清除失敗');
+      setMessage(t('settings.msgClearFail'));
     }
   }, []);
 
   const handleDeleteAccount = useCallback(async () => {
     if (!isLoggedIn) {
-      setMessage('請先登入');
+      setMessage(t('settings.msgPleaseLogin'));
       navigate('/login');
       return;
     }
 
-    const confirm1 = window.confirm(
-      '此操作將永久刪除帳號與雲端資料，是否繼續？'
-    );
+    const confirm1 = window.confirm(t('settings.deleteConfirm'));
     if (!confirm1) return;
 
     // 二段式密碼確認
-    const password = window.prompt(
-      '為了您的資料安全，請輸入密碼以確認刪除（此操作不可恢復）：'
-    );
+    const password = window.prompt(t('settings.passwordPrompt'));
     if (!password || password.trim() === '') {
-      setMessage('已取消刪除');
+      setMessage('');
       return;
     }
 
     try {
       const email = auth.currentUser?.email;
-      if (!email) throw new Error('需要重新登入');
+      if (!email) throw new Error(t('settings.msgNeedRelogin'));
       const { signInWithEmailAndPassword } = await import('firebase/auth');
       await signInWithEmailAndPassword(auth, email, password);
     } catch (e) {
-      setMessage('密碼驗證失敗，請重新登入後再試');
+      setMessage(t('settings.msgPasswordVerifyFail'));
       navigate('/login');
       return;
     }
 
     setBusy(true);
-    setMessage('正在刪除帳號…');
+    setMessage(t('settings.msgDeleting'));
 
     try {
       const uid = auth.currentUser.uid;
@@ -123,7 +121,7 @@ function Settings() {
         await deleteUser(auth.currentUser);
       } catch (err) {
         if (err?.code === 'auth/requires-recent-login') {
-          setMessage('需要重新登入後才能刪除帳號');
+          setMessage(t('settings.msgNeedReloginToDelete'));
           navigate('/login');
           return;
         }
@@ -132,10 +130,10 @@ function Settings() {
 
       // 清理本地狀態
       clearUserData();
-      setMessage('帳號已刪除');
+      setMessage(t('settings.msgDeleted'));
       navigate('/');
     } catch (e) {
-      setMessage('刪除失敗，請稍後再試');
+      setMessage(t('settings.msgDeleteFail'));
     } finally {
       setBusy(false);
     }
@@ -144,7 +142,7 @@ function Settings() {
   return (
     <div style={{ padding: '16px', paddingBottom: '96px' }}>
       <h1 style={{ fontSize: '20px', fontWeight: 700, marginBottom: '12px' }}>
-        設定
+        {t('settings.title')}
       </h1>
 
       {message && (
@@ -152,41 +150,58 @@ function Settings() {
       )}
 
       <section style={{ marginBottom: '16px' }}>
-        <h2 style={{ fontSize: '16px', marginBottom: '8px' }}>隱私與同意</h2>
+        <h2 style={{ fontSize: '16px', marginBottom: '8px' }}>
+          {t('settings.privacySection')}
+        </h2>
         <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-          <button onClick={handleOpenPrivacy}>查看隱私權政策</button>
-          <button onClick={handleResetPrivacyConsent}>
-            重置同意並再次顯示
+          <button onClick={handleOpenPrivacy}>
+            {t('settings.viewPrivacy')}
           </button>
-          <button onClick={handleExportLocalData}>匯出本機資料</button>
-          <button onClick={handleClearLocalData}>清除本機資料</button>
+          <button onClick={handleResetPrivacyConsent}>
+            {t('settings.resetConsent')}
+          </button>
+          <button onClick={handleExportLocalData}>
+            {t('settings.exportLocal')}
+          </button>
+          <button onClick={handleClearLocalData}>
+            {t('settings.clearLocal')}
+          </button>
         </div>
       </section>
 
       <section style={{ marginBottom: '16px' }}>
-        <h2 style={{ fontSize: '16px', marginBottom: '8px' }}>語言</h2>
+        <h2 style={{ fontSize: '16px', marginBottom: '8px' }}>
+          {t('settings.languageSection')}
+        </h2>
         <LanguageSwitcher />
       </section>
 
       <section style={{ marginBottom: '16px' }}>
-        <h2 style={{ fontSize: '16px', marginBottom: '8px' }}>PWA</h2>
+        <h2 style={{ fontSize: '16px', marginBottom: '8px' }}>
+          {t('settings.pwaSection')}
+        </h2>
         <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-          <button onClick={handleCheckPWAUpdate}>檢查更新</button>
+          <button onClick={handleCheckPWAUpdate}>
+            {t('settings.checkUpdate')}
+          </button>
         </div>
       </section>
 
       <section style={{ marginBottom: '16px' }}>
-        <h2 style={{ fontSize: '16px', marginBottom: '8px' }}>資料/同意管理</h2>
+        <h2 style={{ fontSize: '16px', marginBottom: '8px' }}>
+          {t('settings.dataSection')}
+        </h2>
         <div style={{ color: '#555', marginBottom: '8px' }}>
-          登入狀態：{isLoggedIn ? '已登入' : '未登入'}
+          {t('settings.loginStatus')}：
+          {isLoggedIn ? t('common.loggedIn') : t('common.loggedOut')}
         </div>
         <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
           <button onClick={() => navigate('/privacy-policy')}>
-            前往隱私權政策頁
+            {t('settings.toPrivacyPage')}
           </button>
           {isLoggedIn && (
             <button onClick={handleDeleteAccount} disabled={busy}>
-              {busy ? '刪除中…' : '刪除帳號（不可恢復）'}
+              {busy ? t('common.deleting') : t('settings.deleteAccountDanger')}
             </button>
           )}
         </div>
@@ -198,7 +213,7 @@ function Settings() {
         onAccept={() => {
           localStorage.setItem('privacyAcceptedV1', 'true');
           setShowPrivacy(false);
-          setMessage('已同意隱私權政策');
+          setMessage('');
         }}
       />
       <BottomNavBar />
