@@ -1265,7 +1265,7 @@ const Community = () => {
   return (
     <div className="community-page">
       <div className="community-header">
-        <h1>🏠 肉體樂園</h1>
+        <h1>🏠 {t('community.brandTitle')}</h1>
 
         {/* 狀態訊息 */}
         {error && <div className="alert alert-error">{error}</div>}

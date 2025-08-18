@@ -392,6 +392,8 @@ export function UserProvider({ children }) {
           'profession',
           'weeklyTrainingHours',
           'trainingYears',
+          // 新增：評測輸入需持久化，避免回頁面遺失
+          'testInputs',
         ];
 
         const hasImportantChanges = importantFields.some(field => {
@@ -424,7 +426,16 @@ export function UserProvider({ children }) {
           }
 
           // 簡化防抖邏輯：使用固定的防抖時間
-          const debounceTime = isOnlyNicknameChange ? 5000 : 20000; // 暱稱5秒，其他20秒
+          // 國內外測試輸入需要較即時保存，若 testInputs 有變則縮短為 2 秒
+          const testInputsChanged =
+            JSON.stringify(newData.testInputs) !==
+            JSON.stringify(userData.testInputs);
+
+          const debounceTime = isOnlyNicknameChange
+            ? 5000
+            : testInputsChanged
+            ? 2000
+            : 20000; // 暱稱5秒，測試輸入2秒，其餘20秒
 
           // 檢查寫入頻率限制（至少間隔60秒）
           if (timeSinceLastWrite < 60000) {

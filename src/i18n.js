@@ -654,6 +654,7 @@ const zhTW = {
 
     // 社群（動態）
     community: {
+      brandTitle: '肉體樂園',
       loadingFriends: '正在載入好友數據...',
       tabs: {
         feed: '動態牆',
@@ -1000,7 +1001,7 @@ const enUS = {
 
     // Navbar
     navbar: {
-      community: 'Community',
+      community: 'Muscle Park',
       home: 'Home',
       assessment: 'Start',
       ladder: 'Ladder',
@@ -1493,6 +1494,7 @@ const enUS = {
 
     // Community (feed)
     community: {
+      brandTitle: 'Muscle Park',
       loadingFriends: 'Loading friends data...',
       tabs: {
         feed: 'Feed',

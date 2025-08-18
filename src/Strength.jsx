@@ -60,37 +60,9 @@ function Strength({ onComplete }) {
   // 將 useRef 移到組件頂層
   const timeoutRef = useRef(null);
 
-  const debouncedSetUserData = useCallback(
-    newUserData => {
-      const updateData = () => {
-        // 只在測試輸入有實質變化時才更新
-        const currentTestInputs = userData.testInputs?.strength || {};
-        const newTestInputs = newUserData.testInputs?.strength || {};
-
-        const hasChanges =
-          JSON.stringify(currentTestInputs) !== JSON.stringify(newTestInputs);
-
-        if (hasChanges) {
-          console.log('💾 測試輸入變化，更新用戶數據');
-          setUserData(newUserData);
-        } else {
-          console.log('⏭️ 測試輸入無變化，跳過更新');
-        }
-      };
-
-      // 清除之前的定時器
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
-
-      // 設置新的定時器，增加到5秒防抖
-      timeoutRef.current = setTimeout(updateData, 5000);
-    },
-    [setUserData, userData.testInputs]
-  );
-
-  useEffect(() => {
-    const updatedTestInputs = {
+  // 構建目前的 strength 測試輸入
+  const buildUpdatedTestInputs = useCallback(() => {
+    return {
       ...userData.testInputs,
       strength: {
         benchPress: {
@@ -125,14 +97,35 @@ function Strength({ onComplete }) {
         },
       },
     };
-    const newUserData = { ...userData, testInputs: updatedTestInputs };
-    debouncedSetUserData(newUserData);
+  }, [
+    userData.testInputs,
+    benchPress,
+    squat,
+    deadlift,
+    latPulldown,
+    shoulderPress,
+  ]);
 
-    // 清理函數
+  // 立即刷新當前的 strength 測試輸入至全域狀態（避免卸載時遺失）
+  const flushTestInputs = useCallback(() => {
+    const updatedTestInputs = buildUpdatedTestInputs();
+    const currentTestInputs = userData.testInputs?.strength || {};
+    const newTestInputs = updatedTestInputs.strength || {};
+    const hasChanges =
+      JSON.stringify(currentTestInputs) !== JSON.stringify(newTestInputs);
+    if (hasChanges) {
+      setUserData({ ...userData, testInputs: updatedTestInputs });
+    }
+  }, [buildUpdatedTestInputs, setUserData, userData]);
+
+  useEffect(() => {
+    // 即時同步到全域狀態（不再等候防抖）
+    flushTestInputs();
+
+    // 卸載或依賴變化時做最後一次刷新，避免遺失
     return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      flushTestInputs();
     };
   }, [
     benchPress,
@@ -140,8 +133,7 @@ function Strength({ onComplete }) {
     deadlift,
     latPulldown,
     shoulderPress,
-    userData,
-    debouncedSetUserData,
+    flushTestInputs,
   ]);
 
   const calculateScore = (value, standard) => {
@@ -346,6 +338,8 @@ function Strength({ onComplete }) {
       : null;
 
   const handleSubmit = async () => {
+    // 提交前強制刷新一次，確保輸入已保存
+    flushTestInputs();
     if (!averageScore) return alert(t('tests.strengthErrors.needAtLeastOne'));
     if (submitting) return;
     setSubmitting(true);
@@ -679,7 +673,7 @@ function Strength({ onComplete }) {
                       }}
                     />
                     <Radar
-                      name="分數"
+                      name={t('tests.score')}
                       dataKey="value"
                       stroke="#81D8D0"
                       fill="url(#strengthTiffanyGradient)"
@@ -724,7 +718,7 @@ function Strength({ onComplete }) {
                     <div key={exercise.key} className="score-item">
                       <span className="score-label">{exercise.name}</span>
                       <span className="score-value">
-                        {exercise.state.score || '未測試'}
+                        {exercise.state.score || t('community.ui.noScore')}
                       </span>
                     </div>
                   ))}

@@ -1,4 +1,4 @@
-# Fitness App 跨平台升級與功能擴充
+# Ultimate Physique 跨平台升級與功能擴充
 
 ## 專案概述
 

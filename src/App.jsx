@@ -22,6 +22,7 @@ const FFMI = React.lazy(() => import('./FFMI'));
 const Login = React.lazy(() => import('./Login'));
 const History = React.lazy(() => import('./History'));
 const PrivacyPolicy = React.lazy(() => import('./PrivacyPolicy'));
+const Terms = React.lazy(() => import('./Terms'));
 import BottomNavBar from './components/BottomNavBar';
 const Ladder = React.lazy(() => import('./components/Ladder'));
 const Settings = React.lazy(() => import('./components/Settings'));
@@ -407,6 +408,7 @@ function AppContent() {
               />
 
               <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+              <Route path="/terms" element={<Terms />} />
               <Route path="*" element={<div>{t('common.notFound')}</div>} />
             </Routes>
           </div>

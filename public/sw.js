@@ -1,5 +1,5 @@
 // Service Worker for PWA
-const CACHE_NAME = 'fitness-app-v1.0.3';
+const CACHE_NAME = 'ultimate-physique-v1.0.3';
 const urlsToCache = [
   '/',
   '/index.html',

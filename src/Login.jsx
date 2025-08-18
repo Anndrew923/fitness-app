@@ -9,7 +9,6 @@ import { doc, setDoc } from 'firebase/firestore';
 import PropTypes from 'prop-types';
 import SocialLogin from './components/SocialLogin';
 import PrivacyPolicyModal from './components/PrivacyPolicyModal';
-import DataSecurityNotice from './components/DataSecurityNotice';
 import './Login.css';
 import { useTranslation } from 'react-i18next';
 
@@ -23,7 +22,7 @@ function Login({ onLogin }) {
   const [showPrivacyPolicy, setShowPrivacyPolicy] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   const { height, weight, age } = location.state || {};
 
@@ -261,9 +260,33 @@ function Login({ onLogin }) {
         {isRegistering ? t('login.switchToLogin') : t('login.switchToRegister')}
       </button>
 
-      <DataSecurityNotice
-        onViewPrivacyPolicy={() => setShowPrivacyPolicy(true)}
-      />
+      <div className="privacy-notice">
+        {i18n.language && i18n.language.toLowerCase().startsWith('zh') ? (
+          <p>
+            若繼續操作，即表示你同意最強肉體
+            <a className="privacy-link" href="/terms">
+              使用條款
+            </a>
+            。請參閱我們的
+            <a className="privacy-link" href="/privacy-policy">
+              隱私權政策
+            </a>
+            。
+          </p>
+        ) : (
+          <p>
+            By continuing, you agree to the Ultimate Physique
+            <a className="privacy-link" href="/terms">
+              Terms of Service
+            </a>
+            . Please review our
+            <a className="privacy-link" href="/privacy-policy">
+              Privacy Policy
+            </a>
+            .
+          </p>
+        )}
+      </div>
 
       <SocialLogin onLogin={handleSocialLogin} onError={handleSocialError} />
 
