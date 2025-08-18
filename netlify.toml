@@ -2,6 +2,14 @@
   command = "npm run build"
   publish = "dist"
 
+  # Avoid install failing due to peerDependency conflicts from test-only packages
+  # Netlify passes these flags to `npm install`
+  [build.environment]
+    NPM_FLAGS = "--legacy-peer-deps"
+[build]
+  command = "npm run build"
+  publish = "dist"
+
 [[redirects]]
   from = "/*"
   to = "/index.html"
