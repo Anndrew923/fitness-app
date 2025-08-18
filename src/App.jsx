@@ -37,7 +37,6 @@ import IOSInstallPrompt from './components/IOSInstallPrompt';
 import performanceMonitor from './utils/performanceMonitor';
 import './App.css';
 import { useTranslation, withTranslation } from 'react-i18next';
-import PrivacyPolicyModal from './components/PrivacyPolicyModal';
 
 class RawErrorBoundary extends Component {
   state = { hasError: false, error: null, errorInfo: null };
@@ -130,7 +129,6 @@ function AppContent() {
   const { t } = useTranslation();
   const [testData, setTestData] = useState(null);
   const location = useLocation();
-  const [isPrivacyModalOpen, setIsPrivacyModalOpen] = useState(false);
   const showNavBar = [
     '/user-info',
     '/history',
@@ -175,14 +173,7 @@ function AppContent() {
     return () => clearTimeout(timer);
   }, [location.pathname]);
 
-  // 首次使用顯示隱私權政策（不佔導覽空間）
-  useEffect(() => {
-    const accepted = localStorage.getItem('privacyAcceptedV1') === 'true';
-    const allowedPages = ['/', '/login', '/user-info'];
-    if (!accepted && allowedPages.some(p => location.pathname.startsWith(p))) {
-      setIsPrivacyModalOpen(true);
-    }
-  }, [location.pathname]);
+  // 2025-08: V1 不再自動彈出隱私權政策彈窗（保留設定頁/專頁入口）
 
   const handleLogin = async (email, password) => {
     try {
@@ -426,14 +417,6 @@ function AppContent() {
       {showNavBar && <BottomNavBar />}
       <PWAInstallPrompt />
       <IOSInstallPrompt />
-      <PrivacyPolicyModal
-        isOpen={isPrivacyModalOpen}
-        onClose={() => setIsPrivacyModalOpen(false)}
-        onAccept={() => {
-          localStorage.setItem('privacyAcceptedV1', 'true');
-          setIsPrivacyModalOpen(false);
-        }}
-      />
     </div>
   );
 }

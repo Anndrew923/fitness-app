@@ -1078,9 +1078,10 @@ const Community = () => {
       setLoading(true);
 
       // 1. 更新原邀請狀態為已接受
+      // 注意：依 Firestore 規則僅允許更新 'status' 與 'updatedAt'
       await updateDoc(doc(db, 'friendInvitations', requestId), {
         status: 'accepted',
-        acceptedAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
       });
 
       // 記錄寫入操作
@@ -1128,9 +1129,10 @@ const Community = () => {
     try {
       setLoading(true);
 
+      // 注意：依 Firestore 規則僅允許更新 'status' 與 'updatedAt'
       await updateDoc(doc(db, 'friendInvitations', requestId), {
         status: 'declined',
-        declinedAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
       });
 
       // 記錄寫入操作
