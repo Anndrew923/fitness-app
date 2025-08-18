@@ -1064,7 +1064,7 @@ const enUS = {
 
     // 歡迎頁面
     welcome: {
-      title: 'Welcome to Fitness Assessment',
+      title: 'Welcome to Ultimate Physique',
       subtitle: 'Track your progress with detailed fitness metrics',
       login: 'Login',
       guestMode: 'Try Now (Guest Mode)',
