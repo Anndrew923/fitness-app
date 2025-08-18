@@ -55,39 +55,14 @@ function Cardio({ onComplete }) {
 
   const getComment = (score, gender) => {
     const genderValue =
-      gender === '男性' || gender.toLowerCase() === 'male' ? 'male' : 'female';
-    const scoreRange = Math.floor(score / 10) * 10;
-
-    const comments = {
-      male: {
-        0: '兄弟，該動起來了！全力衝刺吧！',
-        10: '還不夠熱血！再加把勁，衝上去！',
-        20: '起步了！再加速，展現你的實力！',
-        30: '進步中！再拼一點，突破極限吧！',
-        40: '不錯！再猛一點，超越自己！',
-        50: '很棒了！再衝刺，成為王者吧！',
-        60: '強者氣勢！再加速，稱霸全場！',
-        70: '超強！熱血沸騰，繼續衝刺！',
-        80: '頂尖表現！再拼，成為傳說！',
-        90: '無敵了！你是真正的王者，保持！',
-        100: '無敵了！你是真正的王者，保持！',
-      },
-      female: {
-        0: '親愛的，別氣餒，慢慢進步哦！',
-        10: '再努力一點，你會更好的，加油！',
-        20: '小進步了！繼續加油，你很棒！',
-        30: '進步了呢！再努力一點，會更好哦！',
-        40: '很棒了！再加把勁，你會更棒的！',
-        50: '表現很好！再努力一點，超棒的！',
-        60: '好厲害！繼續保持，你很棒哦！',
-        70: '真的很棒！保持下去，你最棒了！',
-        80: '太厲害了！繼續努力，你超棒的！',
-        90: '完美表現！超棒的你，繼續保持！',
-        100: '完美表現！超棒的你，繼續保持！',
-      },
-    };
-
-    return comments[genderValue][scoreRange] || '加油！';
+      gender === '男性' || `${gender}`.toLowerCase() === 'male'
+        ? 'male'
+        : 'female';
+    const bucket = Math.min(100, Math.max(0, Math.floor(score / 10) * 10));
+    const key = `tests.cardioComments.${genderValue}.r${bucket}`;
+    const fallback = t('tests.cardioComments.default');
+    const msg = t(key);
+    return msg === key ? fallback : msg;
   };
 
   const calculateCardioScore = () => {

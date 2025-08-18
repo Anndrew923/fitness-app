@@ -24,14 +24,21 @@
     "full-check": "npm run check && npm run build-check",
     "quick-check": "bash quick-check.sh",
     "weekly-check": "bash weekly-check.sh",
-    "phase-check": "bash phase-check.sh"
+    "phase-check": "bash phase-check.sh",
+    "test": "vitest",
+    "test:rules": "vitest -t rules",
+    "test:e2e": "playwright test",
+    "e2e:install": "playwright install"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.5.0",
     "eslint": "^9.26.0",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^5.2.0",
-    "vite": "^6.3.5"
+    "vite": "^6.3.5",
+    "vitest": "^2.0.5",
+    "@firebase/rules-unit-testing": "^3.0.1",
+    "@playwright/test": "^1.45.0"
   },
   "browserslist": {
     "production": [

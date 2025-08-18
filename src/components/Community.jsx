@@ -702,23 +702,36 @@ const Community = () => {
         console.log('開始載入好友列表，使用邀請記錄方式');
       }
 
-      // 從邀請記錄中獲取好友關係
-      const friendshipsQuery = query(
+      if (!auth.currentUser) {
+        throw new Error('未登入');
+      }
+
+      // 從邀請記錄中獲取好友關係（拆分兩個查詢以符合安全規則：僅讀取與自己相關的邀請）
+      const qFromMe = query(
         collection(db, 'friendInvitations'),
+        where('fromUserId', '==', auth.currentUser.uid),
+        where('status', '==', 'accepted')
+      );
+      const qToMe = query(
+        collection(db, 'friendInvitations'),
+        where('toUserId', '==', auth.currentUser.uid),
         where('status', '==', 'accepted')
       );
 
-      const friendshipsSnapshot = await getDocs(friendshipsQuery);
+      const [fromSnap, toSnap] = await Promise.all([
+        getDocs(qFromMe),
+        getDocs(qToMe),
+      ]);
       const friendIds = new Set();
 
       // 收集所有好友的 ID
-      friendshipsSnapshot.forEach(doc => {
+      fromSnap.forEach(doc => {
         const data = doc.data();
-        if (data.fromUserId === auth.currentUser.uid) {
-          friendIds.add(data.toUserId);
-        } else if (data.toUserId === auth.currentUser.uid) {
-          friendIds.add(data.fromUserId);
-        }
+        friendIds.add(data.toUserId);
+      });
+      toSnap.forEach(doc => {
+        const data = doc.data();
+        friendIds.add(data.fromUserId);
       });
 
       if (process.env.NODE_ENV === 'development') {

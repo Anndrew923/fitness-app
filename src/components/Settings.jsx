@@ -16,7 +16,12 @@ function Settings() {
   const [showPrivacy, setShowPrivacy] = useState(false);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const isZh = i18n.language && i18n.language.toLowerCase().startsWith('zh');
+  const tr = (key, zh, en) => {
+    const s = t(key);
+    return s === key ? (isZh ? zh : en) : s;
+  };
 
   const isLoggedIn = useMemo(() => !!auth.currentUser, []);
 
@@ -198,6 +203,18 @@ function Settings() {
         <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
           <button onClick={() => navigate('/privacy-policy')}>
             {t('settings.toPrivacyPage')}
+          </button>
+          <button onClick={() => navigate('/terms')}>
+            {tr('navigation.terms', '使用條款', 'Terms')}
+          </button>
+          <button onClick={() => navigate('/about')}>
+            {tr('navigation.about', '關於', 'About')}
+          </button>
+          <button onClick={() => navigate('/disclaimer')}>
+            {tr('navigation.disclaimer', '免責聲明', 'Disclaimer')}
+          </button>
+          <button onClick={() => navigate('/contact')}>
+            {tr('navigation.contact', '聯絡我們', 'Contact')}
           </button>
           {isLoggedIn && (
             <button onClick={handleDeleteAccount} disabled={busy}>

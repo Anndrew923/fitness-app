@@ -23,6 +23,9 @@ const Login = React.lazy(() => import('./Login'));
 const History = React.lazy(() => import('./History'));
 const PrivacyPolicy = React.lazy(() => import('./PrivacyPolicy'));
 const Terms = React.lazy(() => import('./Terms'));
+const About = React.lazy(() => import('./About'));
+const Disclaimer = React.lazy(() => import('./Disclaimer'));
+const Contact = React.lazy(() => import('./Contact'));
 import BottomNavBar from './components/BottomNavBar';
 const Ladder = React.lazy(() => import('./components/Ladder'));
 const Settings = React.lazy(() => import('./components/Settings'));
@@ -409,6 +412,9 @@ function AppContent() {
 
               <Route path="/privacy-policy" element={<PrivacyPolicy />} />
               <Route path="/terms" element={<Terms />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/disclaimer" element={<Disclaimer />} />
+              <Route path="/contact" element={<Contact />} />
               <Route path="*" element={<div>{t('common.notFound')}</div>} />
             </Routes>
           </div>

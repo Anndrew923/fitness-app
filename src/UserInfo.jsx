@@ -456,11 +456,13 @@ function UserInfo({ testData, onLogout, clearTestData }) {
         lastSubmissionDate: now.toDateString(),
       }));
 
-      // 顯示成功訊息
+      // 顯示成功訊息（國際化）
       setModalState({
         isOpen: true,
-        title: '提交成功',
-        message: `您的分數 ${ladderScore} 已成功提交到天梯！`,
+        title: t('userInfo.modal.submitSuccessTitle'),
+        message: t('userInfo.modal.submitSuccessMessage', {
+          score: ladderScore,
+        }),
         type: 'success',
         onAction: () => {
           // 關閉對話框
@@ -475,7 +477,7 @@ function UserInfo({ testData, onLogout, clearTestData }) {
             },
           });
         },
-        actionText: '立即查看天梯',
+        actionText: t('userInfo.modal.viewLadder'),
       });
 
       // 5秒後自動關閉成功對話框（給用戶時間選擇）
@@ -486,8 +488,8 @@ function UserInfo({ testData, onLogout, clearTestData }) {
       console.error('提交到天梯失敗:', error);
       setModalState({
         isOpen: true,
-        title: '提交失敗',
-        message: '提交到天梯時發生錯誤，請稍後再試',
+        title: t('userInfo.modal.submitFailTitle'),
+        message: t('userInfo.modal.submitFailMessage'),
         type: 'error',
       });
     } finally {

@@ -1,3 +1,63 @@
+// Vitest emulator unit tests will import this file for rules source
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() { return request.auth != null; }
+    function isOwner(uid) { return signedIn() && request.auth.uid == uid; }
+    function onlyMutate(keys) {
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly(keys);
+    }
+
+    match /users/{userId} {
+      allow read: if signedIn();
+      allow create, update, delete: if isOwner(userId)
+        && request.resource.data.userId == userId && !('isAdmin' in request.resource.data);
+    }
+
+    match /friendInvitations/{inviteId} {
+      allow read: if signedIn() && (
+        resource.data.fromUserId == request.auth.uid || resource.data.toUserId == request.auth.uid
+      );
+      allow create: if signedIn() && request.resource.data.fromUserId == request.auth.uid
+        && request.resource.data.toUserId is string && request.resource.data.toUserId != request.auth.uid;
+      allow update: if signedIn() && (resource.data.fromUserId == request.auth.uid || resource.data.toUserId == request.auth.uid)
+        && onlyMutate(['status','updatedAt']);
+      allow delete: if false;
+    }
+
+    match /communityPosts/{postId} {
+      allow read: if signedIn();
+      allow create: if signedIn() && request.resource.data.userId == request.auth.uid;
+      allow update: if signedIn() && ((resource.data.userId == request.auth.uid) || onlyMutate(['likes','comments']));
+      allow delete: if signedIn() && resource.data.userId == request.auth.uid;
+    }
+
+    match /assessments/{assessmentId} {
+      allow read, update, delete: if signedIn() && resource.data.userId == request.auth.uid;
+      allow create: if signedIn() && request.resource.data.userId == request.auth.uid;
+    }
+
+    match /ladderRankings/{rankingId} {
+      allow read: if signedIn();
+      allow create: if signedIn() && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if signedIn() && resource.data.userId == request.auth.uid;
+    }
+
+    match /history/{historyId} {
+      allow read, update, delete: if signedIn() && resource.data.userId == request.auth.uid;
+      allow create: if signedIn() && request.resource.data.userId == request.auth.uid;
+    }
+
+    match /userSettings/{settingId} {
+      allow read, create, update, delete: if isOwner(settingId);
+    }
+
+    match /systemConfig/{configId} {
+      allow read: if signedIn();
+      allow write: if false;
+    }
+  }
+}
 // Firebase Firestore Security Rules for 健身應用 - 完整版
 // 包含：用戶管理、好友系統、社群動態、挑戰系統、評估記錄等
 // 請將以下規則複製到您的 Firebase Console 中的 Firestore 安全規則

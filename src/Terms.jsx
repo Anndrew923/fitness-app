@@ -28,12 +28,15 @@ function Terms() {
     window.switchTermsLanguage = function (lang) {
       const root = containerRef.current;
       if (!root) return;
-      root.querySelectorAll('.content').forEach(el => el.classList.remove('active'));
-      if (lang === 'zh') {
-        root.querySelector('#zh-content')?.classList.add('active');
-      } else {
-        root.querySelector('#en-content')?.classList.add('active');
-      }
+      // 隱藏全部
+      root
+        .querySelectorAll('.content')
+        .forEach(el => el.classList.remove('active'));
+      // 顯示目標語系的所有段落（id 以 zh-content / en-content 開頭）
+      const prefix = lang === 'zh' ? '#zh-content' : '#en-content';
+      root.querySelectorAll(`[id^="${prefix.substring(1)}"]`).forEach(el => {
+        if (el.classList.contains('content')) el.classList.add('active');
+      });
       const buttons = Array.from(root.querySelectorAll('.language-btn'));
       buttons.forEach(btn => btn.classList.remove('active'));
       const zhBtn = buttons.find(btn => btn.getAttribute('data-lang') === 'zh');
@@ -42,7 +45,10 @@ function Terms() {
     };
 
     // 初始化語言
-    const initial = i18n.language && i18n.language.toLowerCase().startsWith('zh') ? 'zh' : 'en';
+    const initial =
+      i18n.language && i18n.language.toLowerCase().startsWith('zh')
+        ? 'zh'
+        : 'en';
     try {
       window.switchTermsLanguage(initial);
     } catch {}
@@ -55,7 +61,10 @@ function Terms() {
   }, [htmlContent, i18n.language]);
 
   return (
-    <div style={{ padding: '20px', maxWidth: '800px', margin: '0 auto' }} ref={containerRef}>
+    <div
+      style={{ padding: '20px', maxWidth: '800px', margin: '0 auto' }}
+      ref={containerRef}
+    >
       <div dangerouslySetInnerHTML={{ __html: htmlContent }} />
     </div>
   );
