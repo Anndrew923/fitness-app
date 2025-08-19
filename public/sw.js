@@ -1,8 +1,9 @@
 // Service Worker for PWA
-const CACHE_NAME = 'ultimate-physique-v1.0.4';
+const CACHE_NAME = 'ultimate-physique-v1.0.5';
 const urlsToCache = [
   '/',
   '/index.html',
+  '/offline.html',
   // 不預先快取 manifest 與 icons，避免長期卡舊圖
 ];
 
@@ -70,8 +71,15 @@ self.addEventListener('fetch', event => {
             console.log('Google 頭像請求失敗，將使用預設頭像');
           }
 
-          // 返回緩存版本（如果有的話）
-          return response;
+          // 返回緩存版本（如果有的話）；否則回離線頁
+          if (response) return response;
+          if (event.request.mode === 'navigate') {
+            return caches.match('/offline.html');
+          }
+          return new Response('Offline', {
+            status: 200,
+            headers: { 'Content-Type': 'text/plain' },
+          });
         })
         .then(response => {
           // 檢查是否為有效回應
