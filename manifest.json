@@ -11,13 +11,37 @@
   "lang": "zh-TW",
   "icons": [
     {
-      "src": "/logo192.png",
+      "src": "/logo192.png?v=20250819",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/logo256.png?v=20250819",
+      "sizes": "256x256",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/logo384.png?v=20250819",
+      "sizes": "384x384",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/logo512.png?v=20250819",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/logo192-maskable.png?v=20250819",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "/logo512.png",
+      "src": "/logo512-maskable.png?v=20250819",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"

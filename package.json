@@ -19,6 +19,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "serve": "NODE_ENV=production node server.js",
+    "icons": "node scripts/generate-icons.js",
     "postinstall": "echo 'skip playwright browsers on prod'",
     "check": "eslint src --ext .js,.jsx --fix",
     "build-check": "npm run build && echo '構建成功'",

@@ -24,6 +24,29 @@ function Login({ onLogin }) {
   const location = useLocation();
   const { t, i18n } = useTranslation();
 
+  // 國際化原生驗證訊息
+  const handleEmailInvalid = e => {
+    const v = e.target.validity;
+    if (v.valueMissing) {
+      e.target.setCustomValidity(t('errors.emailRequired'));
+    } else if (v.typeMismatch) {
+      e.target.setCustomValidity(t('errors.emailInvalid'));
+    } else {
+      e.target.setCustomValidity(t('errors.invalidFormat'));
+    }
+  };
+
+  const handlePasswordInvalid = e => {
+    const v = e.target.validity;
+    if (v.valueMissing) {
+      e.target.setCustomValidity(t('errors.passwordRequired'));
+    } else if (v.tooShort) {
+      e.target.setCustomValidity(t('errors.passwordTooShort'));
+    } else {
+      e.target.setCustomValidity(t('errors.invalidFormat'));
+    }
+  };
+
   const { height, weight, age } = location.state || {};
 
   useEffect(() => {
@@ -198,6 +221,8 @@ function Login({ onLogin }) {
             placeholder={t('login.emailPlaceholder')}
             className="input-field"
             required
+            onInvalid={handleEmailInvalid}
+            onInput={e => e.currentTarget.setCustomValidity('')}
             disabled={loading}
           />
         </div>
@@ -212,6 +237,9 @@ function Login({ onLogin }) {
             placeholder={t('login.passwordPlaceholder')}
             className="input-field"
             required
+            minLength={6}
+            onInvalid={handlePasswordInvalid}
+            onInput={e => e.currentTarget.setCustomValidity('')}
             disabled={loading}
           />
         </div>

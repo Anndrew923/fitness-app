@@ -616,6 +616,10 @@ const zhTW = {
       authError: '認證失敗',
       saveError: '儲存失敗',
       loadError: '載入失敗',
+      emailRequired: '請輸入電子郵件',
+      emailInvalid: '請輸入有效的電子郵件地址',
+      passwordRequired: '請輸入密碼',
+      passwordTooShort: '密碼長度至少 6 碼',
     },
 
     // 登入頁
@@ -1493,6 +1497,10 @@ const enUS = {
       authError: 'Authentication failed',
       saveError: 'Save failed',
       loadError: 'Load failed',
+      emailRequired: 'Please enter your email',
+      emailInvalid: 'Please enter a valid email address',
+      passwordRequired: 'Please enter your password',
+      passwordTooShort: 'Password must be at least 6 characters long',
     },
 
     // Login page
