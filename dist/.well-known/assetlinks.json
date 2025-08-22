@@ -3,9 +3,9 @@
     "relation": ["delegate_permission/common.handle_all_urls"],
     "target": {
       "namespace": "android_app",
-      "package_name": "com.example.app",
+      "package_name": "com.ultimatephysique.app",
       "sha256_cert_fingerprints": [
-        "填入你的簽章 SHA-256 指紋（用 keytool 取得）"
+        "C8:07:86:18:BA:7A:FA:9A:8B:62:65:F0:E8:C8:DB:E8:60:72:C8:5E:F9:69:6D:21:8D:D2:B8:25:A2:E3:A0:A2"
       ]
     }
   }

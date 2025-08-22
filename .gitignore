@@ -33,3 +33,35 @@ yarn-error.log*
 _redirects
 # Local Netlify folder
 .netlify
+
+# Android build files
+*.apk
+*.aab
+*.ap_
+*.dex
+*.class
+*.jar
+*.war
+*.ear
+*.aar
+*.so
+*.dll
+*.dylib
+
+# Android specific
+app/build/
+app/release/
+app/debug/
+.gradle/
+local.properties
+*.iml
+captures/
+.externalNativeBuild
+.cxx/
+
+# Generated files
+app-release-bundle.aab
+app-release-signed.apk
+app-release-unsigned-aligned.apk
+android.keystore
+*.idsig
