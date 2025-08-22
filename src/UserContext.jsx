@@ -6,6 +6,7 @@ import {
   useCallback,
   useRef,
   useState,
+  useMemo,
 } from 'react';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { db, auth } from './firebase';
@@ -50,6 +51,11 @@ export function UserProvider({ children }) {
   const isMountedRef = useRef(true);
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  // 檢測是否為模擬模式
+  const isMockMode = useMemo(() => {
+    return auth.app?.options?.apiKey === 'demo-api-key' || !auth.app;
+  }, []);
 
   const userReducer = (state, action) => {
     switch (action.type) {
@@ -171,6 +177,13 @@ export function UserProvider({ children }) {
       return false;
     }
 
+    // 檢查是否為模擬模式
+    if (isMockMode) {
+      console.log('⏭️ 模擬模式：跳過 Firebase 寫入，僅保存到本地');
+      localStorage.setItem('userData', JSON.stringify(data));
+      return true;
+    }
+
     try {
       const userRef = doc(db, 'users', auth.currentUser.uid);
       const dataToSave = {
@@ -213,7 +226,7 @@ export function UserProvider({ children }) {
       localStorage.setItem('userData', JSON.stringify(data));
       return false;
     }
-  }, []);
+  }, [isMockMode]);
 
   // 新增：防抖引用
   const setUserDataDebounceRef = useRef(null);
@@ -247,6 +260,22 @@ export function UserProvider({ children }) {
   // 新增：智能寫入隊列處理
   const processWriteQueue = useCallback(async () => {
     if (isProcessingQueueRef.current || writeQueueRef.current.length === 0) {
+      return;
+    }
+
+    // 檢查是否為模擬模式
+    if (isMockMode) {
+      console.log('⏭️ 模擬模式：跳過 Firebase 寫入處理');
+      // 清空寫入隊列
+      writeQueueRef.current.length = 0;
+      return;
+    }
+
+    // 檢查認證狀態
+    if (!auth.currentUser) {
+      console.log('⏭️ 跳過寫入：用戶未認證');
+      // 清空寫入隊列，避免積累
+      writeQueueRef.current.length = 0;
       return;
     }
 
@@ -316,11 +345,23 @@ export function UserProvider({ children }) {
         setTimeout(() => processWriteQueue(), 1000);
       }
     }
-  }, [validateUserData]);
+  }, [validateUserData, isMockMode]);
 
   // 新增：添加到寫入隊列
   const addToWriteQueue = useCallback(
     (data, type = 'update') => {
+      // 檢查是否為模擬模式
+      if (isMockMode) {
+        console.log('⏭️ 模擬模式：跳過 Firebase 寫入操作');
+        return;
+      }
+
+      // 檢查認證狀態
+      if (!auth.currentUser) {
+        console.log('⏭️ 跳過添加到寫入隊列：用戶未認證');
+        return;
+      }
+
       const writeOp = {
         id: Date.now().toString(),
         type,
@@ -340,7 +381,7 @@ export function UserProvider({ children }) {
         setTimeout(() => processWriteQueue(), 1000);
       }
     },
-    [processWriteQueue]
+    [processWriteQueue, isMockMode]
   );
 
   // 更新用戶數據
@@ -532,6 +573,12 @@ export function UserProvider({ children }) {
         payload: { history: newHistory },
       });
 
+      // 檢查是否為模擬模式
+      if (isMockMode) {
+        console.log('⏭️ 模擬模式：歷史記錄僅保存到本地');
+        return;
+      }
+
       // 使用防抖機制保存到 Firebase
       if (saveHistoryDebounceRef.current) {
         clearTimeout(saveHistoryDebounceRef.current);
@@ -557,7 +604,7 @@ export function UserProvider({ children }) {
         }
       }, 15000); // 增加到15秒防抖，進一步減少寫入頻率
     },
-    [userData, addToWriteQueue]
+    [userData, addToWriteQueue, isMockMode]
   );
 
   // 清除用戶數據

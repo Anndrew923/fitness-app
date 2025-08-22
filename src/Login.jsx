@@ -92,9 +92,22 @@ function Login({ onLogin }) {
       'email:',
       email
     );
+
+    // 檢查 Firebase 配置
     if (!auth || !db) {
-      setError('Firebase 未正確初始化，請檢查配置');
-      console.error('auth 或 db 未初始化:', { auth, db });
+      const errorMsg = 'Firebase 未正確初始化，請檢查配置';
+      console.error(errorMsg, { auth, db });
+      setError(errorMsg);
+      setLoading(false);
+      return;
+    }
+
+    // 檢查 Firebase 配置是否為 demo 配置
+    if (auth.app?.options?.apiKey === 'demo-api-key') {
+      const errorMsg =
+        'Firebase 使用 demo 配置，無法進行真實認證。請檢查環境變數配置。';
+      console.error(errorMsg);
+      setError(errorMsg);
       setLoading(false);
       return;
     }
@@ -162,6 +175,7 @@ function Login({ onLogin }) {
       }
 
       const user = userCredential.user;
+      console.log('調用 onLogin 回調函數');
       onLogin(user.email, password);
 
       if (rememberMe) {
@@ -181,7 +195,22 @@ function Login({ onLogin }) {
       }, 500);
     } catch (error) {
       console.error('登入/註冊失敗:', error.code, error.message);
-      setError(`發生錯誤：${error.message} (代碼: ${error.code})`);
+
+      // 提供更友好的錯誤訊息
+      let userFriendlyError = error.message;
+      if (error.code === 'auth/user-not-found') {
+        userFriendlyError = '找不到此電子郵件帳號，請檢查是否輸入正確或先註冊';
+      } else if (error.code === 'auth/wrong-password') {
+        userFriendlyError = '密碼錯誤，請重新輸入';
+      } else if (error.code === 'auth/invalid-email') {
+        userFriendlyError = '電子郵件格式不正確';
+      } else if (error.code === 'auth/weak-password') {
+        userFriendlyError = '密碼強度不足，請使用至少6個字符';
+      } else if (error.code === 'auth/email-already-in-use') {
+        userFriendlyError = '此電子郵件已被使用，請直接登入或使用其他郵箱註冊';
+      }
+
+      setError(userFriendlyError);
     } finally {
       setLoading(false);
     }

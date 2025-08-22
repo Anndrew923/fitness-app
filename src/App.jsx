@@ -177,20 +177,32 @@ function AppContent() {
 
   const handleLogin = async (email, password) => {
     try {
+      console.log('App.jsx: handleLogin 被調用', {
+        email,
+        password: password ? '***' : 'undefined',
+      });
+
       // 檢查密碼是否提供
       if (!password || password.trim() === '') {
         throw new Error('密碼不能為空');
       }
 
+      console.log('App.jsx: 開始 Firebase 認證');
       await signInWithEmailAndPassword(auth, email, password);
+
+      console.log('App.jsx: Firebase 認證成功');
+
       // 登入成功後清除 guestMode 標記
       sessionStorage.removeItem('guestMode');
       setTestData(null);
+
       if (process.env.NODE_ENV === 'development') {
         console.log('登入成功, auth.currentUser:', auth.currentUser);
       }
+
+      console.log('App.jsx: handleLogin 完成');
     } catch (error) {
-      console.error('登入失敗:', error);
+      console.error('App.jsx: 登入失敗:', error);
       // 不要拋出新的錯誤，讓調用者處理原始錯誤
       throw error;
     }

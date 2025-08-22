@@ -30,7 +30,11 @@
     "test": "vitest",
     "test:rules": "vitest -t rules",
     "test:e2e": "playwright test",
-    "e2e:install": "playwright install"
+    "e2e:install": "playwright install",
+    "env:check": "node scripts/check-env.js",
+    "env:setup": "cp env.example .env && echo '✅ .env 檔案已創建，請編輯填入您的 Firebase 配置'",
+    "env:status": "node -e \"console.log('🔍 環境變數狀態:'); console.log('VITE_FIREBASE_API_KEY:', process.env.VITE_FIREBASE_API_KEY ? '已設置' : '未設置'); console.log('VITE_FIREBASE_PROJECT_ID:', process.env.VITE_FIREBASE_PROJECT_ID ? '已設置' : '未設置');\"",
+    "simple": "node scripts/simple-setup.js"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.5.0",

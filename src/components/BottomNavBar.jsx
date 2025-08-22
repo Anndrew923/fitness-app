@@ -25,7 +25,6 @@ const navItems = [
       </svg>
     ),
     path: '/community',
-
     guestBlock: true,
   },
 
@@ -47,7 +46,6 @@ const navItems = [
       </svg>
     ),
     path: '/user-info',
-
     guestBlock: false,
   },
   {
@@ -72,7 +70,6 @@ const navItems = [
       </svg>
     ),
     path: '/user-info',
-
     guestBlock: false,
   },
   {
@@ -93,7 +90,6 @@ const navItems = [
       </svg>
     ),
     path: '/ladder',
-
     guestBlock: true,
   },
   {
@@ -114,7 +110,6 @@ const navItems = [
       </svg>
     ),
     path: '/history',
-
     guestBlock: false,
   },
   {

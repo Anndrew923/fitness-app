@@ -333,6 +333,12 @@ function UserInfo({ testData, onLogout, clearTestData }) {
     remainingCount: 3, // 暫時固定為3次，之後會動態計算
   });
 
+  // 新增：體重提醒狀態
+  const [weightReminder, setWeightReminder] = useState({
+    show: false,
+    message: '',
+  });
+
   // 新增：檢查天梯提交限制
   /*
   const checkLadderSubmissionLimit = useCallback(() => {
@@ -1201,6 +1207,25 @@ function UserInfo({ testData, onLogout, clearTestData }) {
         processedValue = value === '' ? 0 : Number(value);
       }
 
+      // 檢查體重變化
+      if (name === 'weight') {
+        const oldWeight = userData.weight || 0;
+        const newWeight = processedValue;
+
+        // 如果體重有變化且不是從 0 開始
+        if (oldWeight > 0 && newWeight > 0 && oldWeight !== newWeight) {
+          setWeightReminder({
+            show: true,
+            message: t('userInfo.weightChangeReminder'),
+          });
+
+          // 3秒後自動隱藏提醒
+          setTimeout(() => {
+            setWeightReminder(prev => ({ ...prev, show: false }));
+          }, 3000);
+        }
+      }
+
       setUserData(prev => ({
         ...prev,
         [name]: processedValue,
@@ -1208,7 +1233,7 @@ function UserInfo({ testData, onLogout, clearTestData }) {
         ladderScore: prev.ladderScore || 0,
       }));
     },
-    [setUserData]
+    [setUserData, userData.weight, t]
   );
 
   // 新增：頭像上傳處理
@@ -1529,22 +1554,34 @@ function UserInfo({ testData, onLogout, clearTestData }) {
                     <label htmlFor="weight" className="form-label">
                       {t('userInfo.weight')}
                     </label>
-                    <input
-                      id="weight"
-                      name="weight"
-                      type="number"
-                      value={userData?.weight || ''}
-                      onChange={handleInputChange}
-                      placeholder={t('userInfo.weight')}
-                      className="form-input"
-                      required
-                      onInvalid={e =>
-                        e.currentTarget.setCustomValidity(t('errors.required'))
-                      }
-                      onInput={e => e.currentTarget.setCustomValidity('')}
-                      min="0"
-                      step="0.1"
-                    />
+                    <div className="input-with-reminder">
+                      <input
+                        id="weight"
+                        name="weight"
+                        type="number"
+                        value={userData?.weight || ''}
+                        onChange={handleInputChange}
+                        placeholder={t('userInfo.weight')}
+                        className="form-input"
+                        required
+                        onInvalid={e =>
+                          e.currentTarget.setCustomValidity(
+                            t('errors.required')
+                          )
+                        }
+                        onInput={e => e.currentTarget.setCustomValidity('')}
+                        min="0"
+                        step="0.1"
+                      />
+                      {weightReminder.show && (
+                        <div className="weight-reminder-bubble">
+                          <span className="reminder-icon">💡</span>
+                          <span className="reminder-text">
+                            {weightReminder.message}
+                          </span>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
