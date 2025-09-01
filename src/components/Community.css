@@ -21,6 +21,94 @@
   --metal-glow: rgba(74, 85, 104, 0.1);
 }
 
+/* 好友數量限制資訊 */
+.friends-limit-info {
+  background: linear-gradient(
+    135deg,
+    rgba(129, 216, 208, 0.1) 0%,
+    rgba(95, 158, 160, 0.1) 100%
+  );
+  border: 1px solid rgba(129, 216, 208, 0.2);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 20px;
+}
+
+.friends-limit-info .limit-info-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 8px;
+  padding: 4px 0;
+}
+
+.friends-limit-info .limit-info-item:last-child {
+  margin-bottom: 0;
+}
+
+.friends-limit-info .limit-icon {
+  font-size: 16px;
+  width: 24px;
+  text-align: center;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.friends-limit-info .limit-text {
+  color: #2d3748;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.5;
+  flex: 1;
+  text-align: left;
+  word-break: break-word;
+}
+
+.friends-limit-info .limit-warning {
+  color: #e53e3e;
+  font-weight: 600;
+}
+
+/* 手機版響應式樣式 */
+@media (max-width: 768px) {
+  .friends-limit-info {
+    padding: 12px;
+    margin-bottom: 16px;
+  }
+
+  .friends-limit-info .limit-info-item {
+    gap: 10px;
+    margin-bottom: 6px;
+  }
+
+  .friends-limit-info .limit-icon {
+    width: 20px;
+    font-size: 14px;
+  }
+
+  .friends-limit-info .limit-text {
+    font-size: 12px;
+    line-height: 1.4;
+  }
+}
+
+/* 禁用按鈕樣式 */
+.btn-add:disabled,
+.btn-accept:disabled {
+  background: #ccc !important;
+  color: #666 !important;
+  cursor: not-allowed !important;
+  opacity: 0.6;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+.btn-add:disabled:hover,
+.btn-accept:disabled:hover {
+  transform: none !important;
+  box-shadow: none !important;
+}
+
 /* 社群頁面樣式 - Tiffany 藍主題 */
 .community-page {
   max-width: 800px;

@@ -812,6 +812,10 @@ const zhTW = {
         deletePostSuccess: '動態已刪除',
         deletePostFail: '刪除動態失敗，請稍後再試',
         loadFriendsFail: '載入好友數據失敗，請稍後再試',
+        friendLimitReached: '好友數量已達上限',
+        friendLimitMessage:
+          '您的好友數量已達到上限（100個），無法添加更多好友。建議刪除一些不活躍的好友來騰出空間。',
+        friendLimitInfo: '為了保持社群品質，每位用戶最多可添加100個好友',
         searchFail: '搜尋失敗',
         inviteSent: '好友邀請已發送',
         inviteSendFail: '發送邀請失敗',
@@ -1720,6 +1724,11 @@ const enUS = {
         deletePostSuccess: 'Post deleted',
         deletePostFail: 'Failed to delete post',
         loadFriendsFail: 'Failed to load friends. Please try again later.',
+        friendLimitReached: 'Friend limit reached',
+        friendLimitMessage:
+          'You have reached the friend limit (100 friends) and cannot add more. Consider removing some inactive friends to free up space.',
+        friendLimitInfo:
+          'To maintain community quality, each user can add up to 100 friends',
         searchFail: 'Search failed',
         inviteSent: 'Friend invitation sent',
         inviteSendFail: 'Failed to send invitation',

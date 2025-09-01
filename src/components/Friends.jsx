@@ -552,6 +552,15 @@ const Friends = () => {
       console.log('接收者ID:', toUserId);
       setLoading(true);
 
+      // 檢查好友數量限制 - 使用 userData.friends 作為更可靠的來源
+      const currentFriendsCount = userData?.friends?.length || friendsList.length;
+      const FRIEND_LIMIT = 100;
+
+      if (currentFriendsCount >= FRIEND_LIMIT) {
+        setError(t('community.messages.friendLimitMessage'));
+        return;
+      }
+
       // 檢查是否已經發送過邀請
       const existingQuery = query(
         collection(db, 'friendInvitations'),
@@ -649,6 +658,15 @@ const Friends = () => {
   const acceptFriendRequest = async (requestId, fromUserId) => {
     try {
       setLoading(true);
+
+      // 檢查好友數量限制 - 使用 userData.friends 作為更可靠的來源
+      const currentFriendsCount = userData?.friends?.length || friendsList.length;
+      const FRIEND_LIMIT = 100;
+      
+      if (currentFriendsCount >= FRIEND_LIMIT) {
+        setError(t('community.messages.friendLimitMessage'));
+        return;
+      }
 
       // 1. 更新原邀請狀態為已接受
       await updateDoc(doc(db, 'friendInvitations', requestId), {
@@ -983,9 +1001,35 @@ const Friends = () => {
   }, [error, success]);
 
   // 渲染好友列表標籤頁
-  const renderFriendsTab = () => {
+     const renderFriendsTab = () => {
+     const FRIEND_LIMIT = 100;
+     const currentFriendsCount = userData?.friends?.length || friendsList.length;
+     const remainingSlots = FRIEND_LIMIT - currentFriendsCount;
+
     return (
       <div className="friends-list">
+        {/* 好友數量限制資訊 */}
+        <div className="friends-limit-info">
+          <div className="limit-info-item">
+            <span className="limit-icon">👥</span>
+            <span className="limit-text">
+              {t('community.messages.friendLimitInfo')}
+            </span>
+          </div>
+          <div className="limit-info-item">
+            <span className="limit-icon">📊</span>
+            <span className="limit-text">
+              當前好友：{currentFriendsCount} / {FRIEND_LIMIT}
+              {remainingSlots <= 10 && (
+                <span className="limit-warning">
+                  {' '}
+                  (僅剩 {remainingSlots} 個名額)
+                </span>
+              )}
+            </span>
+          </div>
+        </div>
+
         {friendsList.length === 0 ? (
           <div className="empty-state">
             <p>{t('friends.emptyFriends')}</p>
@@ -1078,8 +1122,40 @@ const Friends = () => {
   };
 
   // 渲染好友邀請標籤頁
-  const renderRequestsTab = () => (
+     const renderRequestsTab = () => {
+     const FRIEND_LIMIT = 100;
+     const currentFriendsCount = userData?.friends?.length || friendsList.length;
+     const remainingSlots = FRIEND_LIMIT - currentFriendsCount;
+    
+    return (
     <div className="friend-requests">
+        {/* 邀請頁面的好友數量限制資訊 */}
+        <div className="friends-limit-info">
+          <div className="limit-info-item">
+            <span className="limit-icon">👥</span>
+            <span className="limit-text">
+              {t('community.messages.friendLimitInfo')}
+            </span>
+          </div>
+          <div className="limit-info-item">
+            <span className="limit-icon">📊</span>
+            <span className="limit-text">
+              當前好友：{currentFriendsCount} / {FRIEND_LIMIT}
+              {remainingSlots <= 10 && (
+                <span className="limit-warning"> (僅剩 {remainingSlots} 個名額)</span>
+              )}
+            </span>
+          </div>
+          {currentFriendsCount >= FRIEND_LIMIT && (
+            <div className="limit-info-item">
+              <span className="limit-icon">⚠️</span>
+              <span className="limit-text limit-warning">
+                已達好友數量上限，無法接受更多邀請
+              </span>
+            </div>
+          )}
+        </div>
+
       <div style={{ marginBottom: '10px', textAlign: 'right' }}>
         <button
           onClick={() => {
@@ -1150,8 +1226,10 @@ const Friends = () => {
                 onClick={() =>
                   acceptFriendRequest(request.id, request.fromUserId)
                 }
-              >
-                {t('friends.requestAction.accept')}
+                                  disabled={(userData?.friends?.length || friendsList.length) >= 100}
+                 title={(userData?.friends?.length || friendsList.length) >= 100 ? t('community.messages.friendLimitReached') : t('friends.requestAction.accept')}
+               >
+                 {(userData?.friends?.length || friendsList.length) >= 100 ? '已達上限' : t('friends.requestAction.accept')}
               </button>
               <button
                 className="friends-list__btn-reject"
@@ -1167,8 +1245,40 @@ const Friends = () => {
   );
 
   // 渲染搜尋標籤頁
-  const renderSearchTab = () => (
+     const renderSearchTab = () => {
+     const FRIEND_LIMIT = 100;
+     const currentFriendsCount = userData?.friends?.length || friendsList.length;
+     const remainingSlots = FRIEND_LIMIT - currentFriendsCount;
+    
+    return (
     <div className="search-section">
+        {/* 搜尋頁面的好友數量限制資訊 */}
+        <div className="friends-limit-info">
+          <div className="limit-info-item">
+            <span className="limit-icon">👥</span>
+            <span className="limit-text">
+              {t('community.messages.friendLimitInfo')}
+            </span>
+          </div>
+          <div className="limit-info-item">
+            <span className="limit-icon">📊</span>
+            <span className="limit-text">
+              當前好友：{currentFriendsCount} / {FRIEND_LIMIT}
+              {remainingSlots <= 10 && (
+                <span className="limit-warning"> (僅剩 {remainingSlots} 個名額)</span>
+              )}
+            </span>
+          </div>
+          {currentFriendsCount >= FRIEND_LIMIT && (
+            <div className="limit-info-item">
+              <span className="limit-icon">⚠️</span>
+              <span className="limit-text limit-warning">
+                已達好友數量上限，無法添加更多好友
+              </span>
+            </div>
+          )}
+        </div>
+
       <div className="search-box">
         <input
           type="text"
@@ -1242,9 +1352,10 @@ const Friends = () => {
                   <button
                     className="friends-list__btn-add"
                     onClick={() => sendFriendRequest(user.id)}
-                    disabled={loading}
-                  >
-                    {t('community.friend.add')}
+                                          disabled={loading || (userData?.friends?.length || friendsList.length) >= 100}
+                     title={(userData?.friends?.length || friendsList.length) >= 100 ? t('community.messages.friendLimitReached') : ''}
+                   >
+                     {(userData?.friends?.length || friendsList.length) >= 100 ? '已達上限' : t('community.friend.add')}
                   </button>
                 )}
               </div>
