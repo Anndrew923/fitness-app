@@ -607,6 +607,13 @@ const zhTW = {
       banner: '訪客模式 - 您的資料僅儲存在本地',
       syncData: '註冊同步',
       exit: '退出',
+      modal: {
+        title: '註冊帳號才能使用此功能',
+        message:
+          '好友與天梯功能僅限註冊用戶使用，立即註冊帳號即可解鎖完整社交體驗！',
+        registerButton: '前往註冊/登入',
+        cancelButton: '取消',
+      },
     },
 
     // 錯誤訊息
@@ -1489,6 +1496,13 @@ const enUS = {
       banner: 'Guest Mode - Your data is stored locally only',
       syncData: 'Register to Sync',
       exit: 'Exit',
+      modal: {
+        title: 'Register an account to use this feature',
+        message:
+          'Friend and Ladder features are only available to registered users. Register an account now to unlock the complete social experience!',
+        registerButton: 'Go to Register/Login',
+        cancelButton: 'Cancel',
+      },
     },
 
     // 錯誤訊息

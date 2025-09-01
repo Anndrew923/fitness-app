@@ -257,6 +257,7 @@ function AppContent() {
       '/explosive-power',
       '/muscle-mass',
       '/body-fat',
+      '/settings', // 允許訪客進入設定頁面
     ];
     if (
       isGuest &&

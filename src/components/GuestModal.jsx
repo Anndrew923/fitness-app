@@ -1,7 +1,10 @@
 // import React from 'react';
 import PropTypes from 'prop-types';
+import { useTranslation } from 'react-i18next';
 
 function GuestModal({ open, onClose, onRegister }) {
+  const { t } = useTranslation();
+
   if (!open) return null;
   return (
     <div
@@ -31,10 +34,10 @@ function GuestModal({ open, onClose, onRegister }) {
         }}
       >
         <h2 style={{ marginBottom: '16px', color: '#667eea' }}>
-          註冊帳號才能使用此功能
+          {t('guestMode.modal.title')}
         </h2>
         <p style={{ marginBottom: '24px', color: '#444' }}>
-          好友與天梯功能僅限註冊用戶使用，立即註冊帳號即可解鎖完整社交體驗！
+          {t('guestMode.modal.message')}
         </p>
         <div style={{ display: 'flex', justifyContent: 'center', gap: '16px' }}>
           <button
@@ -51,7 +54,7 @@ function GuestModal({ open, onClose, onRegister }) {
               boxShadow: '0 2px 8px rgba(102,126,234,0.08)',
             }}
           >
-            前往註冊/登入
+            {t('guestMode.modal.registerButton')}
           </button>
           <button
             onClick={onClose}
@@ -66,7 +69,7 @@ function GuestModal({ open, onClose, onRegister }) {
               fontWeight: 'bold',
             }}
           >
-            取消
+            {t('guestMode.modal.cancelButton')}
           </button>
         </div>
       </div>

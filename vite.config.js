@@ -10,6 +10,19 @@ export default defineConfig(({ mode }) => {
     server: {
       port: 5173,
       open: true,
+      // 防止 Windows 檔案鎖定問題
+      fs: {
+        strict: false
+      },
+      // 優化 HMR 配置，防止檔案鎖定
+      hmr: {
+        overlay: false
+      },
+      // 防止 Windows 檔案鎖定
+      watch: {
+        usePolling: false,
+        interval: 1000
+      },
       // 開發環境：只在需要時允許 eval
       headers:
         mode === 'development'
@@ -41,8 +54,10 @@ export default defineConfig(({ mode }) => {
       chunkSizeWarningLimit: 1000,
     },
 
-    // 優化依賴預建置
+    // 優化依賴預建置，防止檔案鎖定
     optimizeDeps: {
+      force: false,
+      entries: [],
       include: [
         'react',
         'react-dom',

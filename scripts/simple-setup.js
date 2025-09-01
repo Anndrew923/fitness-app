@@ -45,3 +45,4 @@ console.log('1. 在這台電腦上配置好 Firebase');
 console.log('2. 將 .env 檔案同步到雲端（Dropbox/Google Drive）');
 console.log('3. 在另一台電腦上從雲端複製 .env 檔案');
 console.log('4. 運行: npm install && npm run dev');
+
