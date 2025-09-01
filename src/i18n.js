@@ -750,6 +750,7 @@ const zhTW = {
         badgeFriend: '已是好友',
         badgeInvited: '邀請已發送',
         add: '加好友',
+        remove: '移除好友',
       },
       invites: {
         empty: '沒有待處理的邀請',
@@ -759,15 +760,6 @@ const zhTW = {
       search: {
         empty: '沒有找到相關用戶',
         placeholder: '搜尋暱稱或電子郵件...',
-      },
-      friend: {
-        badgeFriend: '已是好友',
-        badgeInvited: '邀請已發送',
-        add: '加好友',
-        remove: '移除好友',
-      },
-      search: {
-        empty: '沒有找到相關用戶',
       },
       ui: {
         avatarAlt: '頭像',
@@ -816,6 +808,7 @@ const zhTW = {
         friendLimitMessage:
           '您的好友數量已達到上限（100個），無法添加更多好友。建議刪除一些不活躍的好友來騰出空間。',
         friendLimitInfo: '為了保持社群品質，每位用戶最多可添加100個好友',
+        currentFriends: '當前好友',
         searchFail: '搜尋失敗',
         inviteSent: '好友邀請已發送',
         inviteSendFail: '發送邀請失敗',
@@ -827,9 +820,6 @@ const zhTW = {
         friendRemoveFail: '移除好友失敗',
         loadDataFail: '載入數據失敗，請稍後再試',
       },
-      back: '返回社群',
-      goLogin: '前往登入',
-      friendLabel: '好友',
     },
     friendFeed: {
       ui: {
@@ -1678,9 +1668,6 @@ const enUS = {
         add: 'Add friend',
         remove: 'Remove friend',
       },
-      search: {
-        empty: 'No matching users found',
-      },
       ui: {
         avatarAlt: 'Avatar',
         noScore: 'Not assessed yet',
@@ -1729,6 +1716,7 @@ const enUS = {
           'You have reached the friend limit (100 friends) and cannot add more. Consider removing some inactive friends to free up space.',
         friendLimitInfo:
           'To maintain community quality, each user can add up to 100 friends',
+        currentFriends: 'Current friends',
         searchFail: 'Search failed',
         inviteSent: 'Friend invitation sent',
         inviteSendFail: 'Failed to send invitation',
@@ -1740,9 +1728,6 @@ const enUS = {
         friendRemoveFail: 'Failed to remove friend',
         loadDataFail: 'Failed to load data. Please try again later.',
       },
-      back: 'Back to Community',
-      goLogin: 'Go to Login',
-      friendLabel: 'Friend',
     },
     friendFeed: {
       ui: {

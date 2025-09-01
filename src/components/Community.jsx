@@ -981,7 +981,8 @@ const Community = () => {
       setLoading(true);
 
       // 檢查好友數量限制
-      const currentFriendsCount = userData?.friends?.length || friendsList?.length || 0;
+      const currentFriendsCount =
+        userData?.friends?.length || friendsList?.length || 0;
       const FRIEND_LIMIT = 100;
 
       if (currentFriendsCount >= FRIEND_LIMIT) {
@@ -1087,7 +1088,8 @@ const Community = () => {
       setLoading(true);
 
       // 檢查好友數量限制
-      const currentFriendsCount = userData?.friends?.length || friendsList?.length || 0;
+      const currentFriendsCount =
+        userData?.friends?.length || friendsList?.length || 0;
       const FRIEND_LIMIT = 100;
 
       if (currentFriendsCount >= FRIEND_LIMIT) {
@@ -1497,16 +1499,25 @@ const Community = () => {
               <div className="limit-info-item">
                 <span className="limit-icon">📊</span>
                 <span className="limit-text">
-                  當前好友：{userData?.friends?.length || friendsList?.length || 0} / 100
-                  {100 - (userData?.friends?.length || friendsList?.length || 0) <= 10 && (
+                  {t('community.messages.currentFriends')}：
+                  {userData?.friends?.length || friendsList?.length || 0} / 100
+                  {100 -
+                    (userData?.friends?.length || friendsList?.length || 0) <=
+                    10 && (
                     <span className="limit-warning">
                       {' '}
-                      (僅剩 {100 - (userData?.friends?.length || friendsList?.length || 0)} 個名額)
+                      (僅剩{' '}
+                      {100 -
+                        (userData?.friends?.length ||
+                          friendsList?.length ||
+                          0)}{' '}
+                      個名額)
                     </span>
                   )}
                 </span>
               </div>
-              {(userData?.friends?.length || friendsList?.length || 0) >= 100 && (
+              {(userData?.friends?.length || friendsList?.length || 0) >=
+                100 && (
                 <div className="limit-info-item">
                   <span className="limit-icon">⚠️</span>
                   <span className="limit-text limit-warning">
@@ -1599,16 +1610,25 @@ const Community = () => {
               <div className="limit-info-item">
                 <span className="limit-icon">📊</span>
                 <span className="limit-text">
-                  當前好友：{userData?.friends?.length || friendsList?.length || 0} / 100
-                  {100 - (userData?.friends?.length || friendsList?.length || 0) <= 10 && (
+                  {t('community.messages.currentFriends')}：
+                  {userData?.friends?.length || friendsList?.length || 0} / 100
+                  {100 -
+                    (userData?.friends?.length || friendsList?.length || 0) <=
+                    10 && (
                     <span className="limit-warning">
                       {' '}
-                      (僅剩 {100 - (userData?.friends?.length || friendsList?.length || 0)} 個名額)
+                      (僅剩{' '}
+                      {100 -
+                        (userData?.friends?.length ||
+                          friendsList?.length ||
+                          0)}{' '}
+                      個名額)
                     </span>
                   )}
                 </span>
               </div>
-              {(userData?.friends?.length || friendsList?.length || 0) >= 100 && (
+              {(userData?.friends?.length || friendsList?.length || 0) >=
+                100 && (
                 <div className="limit-info-item">
                   <span className="limit-icon">⚠️</span>
                   <span className="limit-text limit-warning">
@@ -1647,14 +1667,24 @@ const Community = () => {
                         onClick={() =>
                           acceptFriendRequest(request.id, request.fromUserId)
                         }
-                        disabled={(userData?.friends?.length || friendsList?.length || 0) >= 100}
+                        disabled={
+                          (userData?.friends?.length ||
+                            friendsList?.length ||
+                            0) >= 100
+                        }
                         title={
-                          (userData?.friends?.length || friendsList?.length || 0) >= 100
+                          (userData?.friends?.length ||
+                            friendsList?.length ||
+                            0) >= 100
                             ? t('community.messages.friendLimitReached')
                             : t('community.invites.accept')
                         }
                       >
-                        {(userData?.friends?.length || friendsList?.length || 0) >= 100 ? '❌' : '✅'}
+                        {(userData?.friends?.length ||
+                          friendsList?.length ||
+                          0) >= 100
+                          ? '❌'
+                          : '✅'}
                       </button>
                       <button
                         className="btn-decline"
@@ -1684,16 +1714,25 @@ const Community = () => {
               <div className="limit-info-item">
                 <span className="limit-icon">📊</span>
                 <span className="limit-text">
-                  當前好友：{userData?.friends?.length || friendsList?.length || 0} / 100
-                  {100 - (userData?.friends?.length || friendsList?.length || 0) <= 10 && (
+                  {t('community.messages.currentFriends')}：
+                  {userData?.friends?.length || friendsList?.length || 0} / 100
+                  {100 -
+                    (userData?.friends?.length || friendsList?.length || 0) <=
+                    10 && (
                     <span className="limit-warning">
                       {' '}
-                      (僅剩 {userData?.friends?.length || friendsList?.length || 0)} 個名額)
+                      (僅剩{' '}
+                      {100 -
+                        (userData?.friends?.length ||
+                          friendsList?.length ||
+                          0)}{' '}
+                      個名額)
                     </span>
                   )}
                 </span>
               </div>
-              {(userData?.friends?.length || friendsList?.length || 0) >= 100 && (
+              {(userData?.friends?.length || friendsList?.length || 0) >=
+                100 && (
                 <div className="limit-info-item">
                   <span className="limit-icon">⚠️</span>
                   <span className="limit-text limit-warning">
@@ -1758,15 +1797,22 @@ const Community = () => {
                           className="btn-add"
                           onClick={() => sendFriendRequest(user.id)}
                           disabled={
-                            loading || (userData?.friends?.length || friendsList?.length || 0) >= 100
+                            loading ||
+                            (userData?.friends?.length ||
+                              friendsList?.length ||
+                              0) >= 100
                           }
                           title={
-                            (userData?.friends?.length || friendsList?.length || 0) >= 100
+                            (userData?.friends?.length ||
+                              friendsList?.length ||
+                              0) >= 100
                               ? t('community.messages.friendLimitReached')
                               : t('community.friend.add')
                           }
                         >
-                          {(userData?.friends?.length || friendsList?.length || 0) >= 100
+                          {(userData?.friends?.length ||
+                            friendsList?.length ||
+                            0) >= 100
                             ? '已達上限'
                             : t('community.friend.add')}
                         </button>
