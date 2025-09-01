@@ -240,6 +240,20 @@ const zhTW = {
         cancel: '還沒填好',
         confirm: '確定提交',
       },
+      limits: {
+        dailyLimit: '每日更新限制',
+        remainingUpdates: '今日還可更新 {{count}} 次',
+        limitReached: '今日已達更新上限（3次）',
+        limitReachedMessage: '今日天梯更新次數已達上限，請明天再試！',
+        cooldownMessage: '請等待 {{minutes}} 分鐘後再更新',
+        nextResetTime: '下次重置時間：明天 00:00',
+        limitInfo:
+          '為了保持天梯排名的公平性，每位用戶每日最多可更新天梯分數 3 次',
+        needLoginToSubmit: '請先登入以提交到天梯',
+        assessmentIncomplete: '評測未完成',
+        assessmentIncompleteMessage:
+          '請先完成全部5項評測（目前完成 {{count}}/5 項）',
+      },
     },
 
     // 評測
@@ -1165,6 +1179,22 @@ const enUS = {
         improveValue: 'Improve ladder reference value',
         cancel: 'Not ready yet',
         confirm: 'Submit now',
+      },
+      limits: {
+        dailyLimit: 'Daily Update Limit',
+        remainingUpdates: '{{count}} updates remaining today',
+        limitReached: 'Daily limit reached (3 updates)',
+        limitReachedMessage:
+          'You have reached the daily limit for ladder updates. Please try again tomorrow!',
+        cooldownMessage:
+          'Please wait {{minutes}} minutes before updating again',
+        nextResetTime: 'Next reset time: Tomorrow 00:00',
+        limitInfo:
+          'To maintain ladder ranking fairness, each user can update their ladder score up to 3 times per day',
+        needLoginToSubmit: 'Please log in to submit to the ladder',
+        assessmentIncomplete: 'Assessment Incomplete',
+        assessmentIncompleteMessage:
+          'Please complete all 5 assessments first (currently {{count}}/5 completed)',
       },
       modal: {
         invalidPositive: 'Height, weight, and age must be greater than 0',

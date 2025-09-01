@@ -190,6 +190,25 @@ const SubmitConfirmModal = ({
               <span className="remaining-count">{remainingCount}</span>{' '}
               {t('userInfo.submitConfirm.descSuffix')}
             </p>
+
+            {/* 新增：限制資訊顯示 */}
+            <div className="limit-info">
+              <div className="limit-item">
+                <span className="limit-icon">🔄</span>
+                <span className="limit-text">
+                  {t('userInfo.limits.remainingUpdates', {
+                    count: remainingCount,
+                  })}
+                </span>
+              </div>
+              <div className="limit-item">
+                <span className="limit-icon">⏰</span>
+                <span className="limit-text">
+                  {t('userInfo.limits.nextResetTime')}
+                </span>
+              </div>
+            </div>
+
             <div className="confirm-details">
               <div className="detail-item">
                 <span className="detail-icon">📊</span>
@@ -340,7 +359,6 @@ function UserInfo({ testData, onLogout, clearTestData }) {
   });
 
   // 新增：檢查天梯提交限制
-  /*
   const checkLadderSubmissionLimit = useCallback(() => {
     const now = new Date();
     const today = now.toDateString();
@@ -359,11 +377,11 @@ function UserInfo({ testData, onLogout, clearTestData }) {
     if (ladderSubmissionState.dailySubmissionCount >= 3) {
       return {
         canSubmit: false,
-        reason: '今日已達提交上限（3次），請明天再試',
+        reason: t('userInfo.limits.limitReachedMessage'),
       };
     }
 
-    // 檢查冷卻時間
+    // 檢查冷卻時間（2小時）
     if (ladderSubmissionState.lastSubmissionTime) {
       const timeDiff = now - ladderSubmissionState.lastSubmissionTime;
       const cooldownHours = 2;
@@ -375,25 +393,46 @@ function UserInfo({ testData, onLogout, clearTestData }) {
         );
         return {
           canSubmit: false,
-          reason: `請等待 ${remainingMinutes} 分鐘後再提交`,
+          reason: t('userInfo.limits.cooldownMessage', {
+            minutes: remainingMinutes,
+          }),
         };
       }
     }
 
     return { canSubmit: true, reason: null };
-  }, [ladderSubmissionState]);
-  */
+  }, [ladderSubmissionState, t]);
 
   // 新增：顯示提交確認對話框
   const showSubmitConfirmModal = useCallback(() => {
-    // 暫時不啟用實際限制，直接顯示確認對話框
+    // 檢查天梯提交限制
+    const limitCheck = checkLadderSubmissionLimit();
+
+    if (!limitCheck.canSubmit) {
+      // 顯示限制訊息
+      setModalState({
+        isOpen: true,
+        title: t('userInfo.limits.limitReached'),
+        message: limitCheck.reason,
+        type: 'warning',
+        onAction: () => {
+          setModalState(prev => ({ ...prev, isOpen: false }));
+          // 導航到天梯頁面查看當前排名
+          navigate('/ladder');
+        },
+        actionText: t('userInfo.modal.viewLadder'),
+      });
+      return;
+    }
+
+    // 可以提交，顯示確認對話框
     const remainingCount =
       3 - (ladderSubmissionState.dailySubmissionCount || 0);
     setSubmitConfirmModal({
       isOpen: true,
       remainingCount: Math.max(0, remainingCount),
     });
-  }, [ladderSubmissionState]);
+  }, [ladderSubmissionState, checkLadderSubmissionLimit, t, navigate]);
 
   // 新增：確認提交到天梯
   const confirmSubmitToLadder = useCallback(async () => {
@@ -513,8 +552,8 @@ function UserInfo({ testData, onLogout, clearTestData }) {
     if (!auth.currentUser) {
       setModalState({
         isOpen: true,
-        title: '需要登入',
-        message: '請先登入以提交到天梯',
+        title: t('community.messages.needLogin'),
+        message: t('userInfo.limits.needLoginToSubmit'),
         type: 'warning',
       });
       return;
@@ -529,28 +568,44 @@ function UserInfo({ testData, onLogout, clearTestData }) {
     if (completedCount < 5) {
       setModalState({
         isOpen: true,
-        title: '評測未完成',
-        message: `請先完成全部5項評測（目前完成 ${completedCount}/5 項）`,
+        title: t('userInfo.limits.assessmentIncomplete'),
+        message: t('userInfo.limits.assessmentIncompleteMessage', {
+          count: completedCount,
+        }),
         type: 'warning',
       });
       return;
     }
 
-    // 暫時不啟用實際限制檢查，直接顯示確認對話框
-    // const { canSubmit, reason } = checkLadderSubmissionLimit();
-    // if (!canSubmit) {
-    //   setModalState({
-    //     isOpen: true,
-    //     title: '提交限制',
-    //     message: reason,
-    //     type: 'warning',
-    //   });
-    //   return;
-    // }
+    // 檢查天梯提交限制
+    const { canSubmit, reason } = checkLadderSubmissionLimit();
+    if (!canSubmit) {
+      setModalState({
+        isOpen: true,
+        title: t('userInfo.limits.limitReached'),
+        message: reason,
+        type: 'warning',
+        onAction: () => {
+          setModalState(prev => ({ ...prev, isOpen: false }));
+          // 導航到天梯頁面查看當前排名
+          navigate('/ladder');
+        },
+        actionText: t('userInfo.modal.viewLadder'),
+      });
+      return;
+    }
 
     // 顯示提交確認對話框
     showSubmitConfirmModal();
-  }, [userData, showSubmitConfirmModal, setModalState]);
+  }, [
+    userData,
+    showSubmitConfirmModal,
+    setModalState,
+    checkLadderSubmissionLimit,
+    t,
+    navigate,
+    auth.currentUser,
+  ]);
 
   const radarChartData = useMemo(() => {
     const scores = userData.scores || DEFAULT_SCORES;
@@ -1844,6 +1899,33 @@ function UserInfo({ testData, onLogout, clearTestData }) {
                   </button>
                 )}
               </div>
+
+              {/* 天梯限制資訊 */}
+              {completionStatus.isFullyCompleted && (
+                <div className="ladder-limits-info">
+                  <div className="limit-info-item">
+                    <span className="limit-icon">🔄</span>
+                    <span className="limit-text">
+                      {t('userInfo.limits.remainingUpdates', {
+                        count:
+                          3 - (ladderSubmissionState.dailySubmissionCount || 0),
+                      })}
+                    </span>
+                  </div>
+                  <div className="limit-info-item">
+                    <span className="limit-icon">⏰</span>
+                    <span className="limit-text">
+                      {t('userInfo.limits.nextResetTime')}
+                    </span>
+                  </div>
+                  <div className="limit-info-item">
+                    <span className="limit-icon">ℹ️</span>
+                    <span className="limit-text">
+                      {t('userInfo.limits.limitInfo')}
+                    </span>
+                  </div>
+                </div>
+              )}
 
               {/* 天梯排名說明 */}
               <div className="ladder-info-card">

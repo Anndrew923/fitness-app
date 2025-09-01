@@ -1292,6 +1292,73 @@
 
 /* 移除所有動畫相關的CSS */
 
+/* 天梯限制資訊 */
+.ladder-limits-info {
+  background: linear-gradient(
+    135deg,
+    rgba(129, 216, 208, 0.1) 0%,
+    rgba(95, 158, 160, 0.1) 100%
+  );
+  border: 1px solid rgba(129, 216, 208, 0.2);
+  border-radius: 12px;
+  padding: 16px;
+  margin-top: 16px;
+  margin-bottom: 16px;
+}
+
+.limit-info-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 12px;
+  padding: 8px 0;
+}
+
+.limit-info-item:last-child {
+  margin-bottom: 0;
+}
+
+.limit-icon {
+  font-size: 16px;
+  width: 24px;
+  text-align: center;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.limit-text {
+  color: #2d3748;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.5;
+  flex: 1;
+  text-align: left;
+  word-break: break-word;
+}
+
+@media (max-width: 768px) {
+  .ladder-limits-info {
+    padding: 12px;
+    margin-top: 12px;
+    margin-bottom: 12px;
+  }
+  
+  .limit-info-item {
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  
+  .limit-icon {
+    width: 20px;
+    font-size: 14px;
+  }
+  
+  .limit-text {
+    font-size: 12px;
+    line-height: 1.4;
+  }
+}
+
 /* 天梯排名說明卡 */
 .ladder-info-card {
   background: linear-gradient(
@@ -1720,6 +1787,43 @@
   border: 1px solid rgba(129, 216, 208, 0.2);
 }
 
+/* 限制資訊樣式 */
+.limit-info {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 16px 0;
+  padding: 14px;
+  background: rgba(255, 107, 53, 0.1);
+  border-radius: 10px;
+  border: 1px solid rgba(255, 107, 53, 0.2);
+}
+
+.limit-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 8px 0;
+}
+
+.limit-icon {
+  font-size: 18px;
+  width: 24px;
+  text-align: center;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.limit-text {
+  font-size: 13px;
+  color: #4a5568;
+  font-weight: 500;
+  line-height: 1.5;
+  flex: 1;
+  text-align: left;
+  word-break: break-word;
+}
+
 .detail-item {
   display: flex;
   align-items: center;
@@ -1804,6 +1908,26 @@
 
   .detail-text {
     font-size: 12px;
+  }
+
+  .limit-info {
+    padding: 10px;
+    gap: 8px;
+  }
+
+  .limit-item {
+    gap: 8px;
+    padding: 6px 0;
+  }
+
+  .limit-icon {
+    width: 20px;
+    font-size: 16px;
+  }
+
+  .limit-text {
+    font-size: 12px;
+    line-height: 1.4;
   }
 
   .submit-confirm-footer {
