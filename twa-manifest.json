@@ -21,8 +21,8 @@
     "path": "C:\\Users\\User\\Dropbox\\fitness-app\\android.keystore",
     "alias": "upload"
   },
-  "appVersionName": "2",
-  "appVersionCode": 2,
+  "appVersionName": "3",
+  "appVersionCode": 3,
   "shortcuts": [],
   "generatorApp": "bubblewrap-cli",
   "webManifestUrl": "https://fitness-app2025.netlify.app/manifest.json",
@@ -43,5 +43,5 @@
   "protocolHandlers": [],
   "fileHandlers": [],
   "launchHandlerClientMode": "",
-  "appVersion": "2"
+  "appVersion": "3"
 }
