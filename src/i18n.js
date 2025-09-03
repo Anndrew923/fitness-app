@@ -32,6 +32,7 @@ const zhTW = {
       notEntered: '未輸入',
       notSelected: '未選擇',
       or: '或',
+      points: '分',
     },
 
     // 歷史紀錄
@@ -329,8 +330,8 @@ const zhTW = {
           below40: '親愛的，還有進步空間，繼續加油哦！',
         },
       },
-      explosivePower: '爆發力測試',
-      powerTitle: '爆發力測試',
+      explosivePower: '爆發力評測',
+      powerTitle: '爆發力評測',
       powerLabels: {
         movementsTitle: '爆發力動作',
         verticalJump: '垂直彈跳 (公分)',
@@ -369,8 +370,8 @@ const zhTW = {
             '本測驗包含推測值：12-80歲全齡數據不全，依ACSM每10年下降10-15%、性別差異70-90%推估。',
         },
       },
-      cardio: '心肺耐力測試',
-      cardioTitle: '心肺耐力測試',
+      cardio: '心肺耐力評測',
+      cardioTitle: '心肺耐力評測',
       cardioLabels: {
         distanceMeters: '跑步距離 (公尺)',
         score: '心肺耐力分數',
@@ -418,39 +419,6 @@ const zhTW = {
           r100: '完美表現！超棒的你，繼續保持！',
         },
         default: '加油！',
-      },
-      strengthErrors: {
-        missingInputs: 'Please enter weight and reps',
-        missingUserData: 'Please make sure weight and age are provided',
-        repsTooHigh: 'Reps must not exceed 12. Please re-enter',
-        needAtLeastOne: 'Please complete at least one exercise',
-        updateFail:
-          'Failed to update user data or navigate. Please try again later',
-      },
-      cardioErrors: {
-        missingPrerequisites:
-          'Please enter age and gender in the profile and input running distance here',
-        invalidInputs: 'Please enter a valid running distance and age',
-        standardsNotFound: 'Standards not found. Please check age and gender',
-        needCalculate: 'Please calculate your cardio score first',
-        updateUserFail: 'Failed to update user data. Please try again later',
-      },
-      powerErrors: {
-        missingPrerequisites:
-          'Please ensure age and gender are provided in your profile',
-        noAnyInput: 'Please enter at least one movement data',
-        invalidAge: 'Please enter a valid age',
-        standardsNotFound: 'Standards not found. Please check age and gender',
-        needMeasure: 'Please complete at least one measurement',
-        needCalculate: 'Please calculate the power score first',
-        updateUserFail: 'Failed to update user data. Please try again later',
-      },
-      ffmiErrors: {
-        missingPrerequisites:
-          'Please fill gender, height, weight, and age on the profile page first',
-        missingBodyFat: 'Please enter body fat percentage',
-        needCalculate: 'Please calculate the FFMI score first',
-        updateUserFail: 'Failed to update user data. Please try again later',
       },
       strengthErrors: {
         missingInputs: '請輸入重量和次數！',
@@ -1031,6 +999,7 @@ const enUS = {
       notEntered: 'Not entered',
       notSelected: 'Not selected',
       or: 'or',
+      points: 'pts',
     },
 
     // Privacy & errors
@@ -1286,8 +1255,8 @@ const enUS = {
           below40: "There's plenty of room to grow. Keep it up!",
         },
       },
-      explosivePower: 'Explosive Power Test',
-      powerTitle: 'Explosive Power Test',
+      explosivePower: 'Explosive Power Assessment',
+      powerTitle: 'Explosive Power Assessment',
       powerLabels: {
         movementsTitle: 'Explosive movements',
         verticalJump: 'Vertical jump (cm)',
@@ -1327,8 +1296,8 @@ const enUS = {
             'Includes estimated values: due to incomplete data for ages 12–80. Decline estimated per ACSM (10–15% per decade), sex difference 70–90%.',
         },
       },
-      cardio: 'Cardio Endurance Test',
-      cardioTitle: 'Cardio Endurance Test',
+      cardio: 'Cardio Endurance Assessment',
+      cardioTitle: 'Cardio Endurance Assessment',
       cardioInfo: {
         cooperTitle: 'Cooper 12-minute run test',
         sectionTitle: 'How to perform',
@@ -1391,6 +1360,39 @@ const enUS = {
         smmShort: 'SMM',
         smPercentShort: 'SM%',
         smPercentScore: 'SM% score',
+      },
+      strengthErrors: {
+        missingInputs: 'Please enter weight and reps',
+        missingUserData: 'Please make sure weight and age are provided',
+        repsTooHigh: 'Reps must not exceed 12. Please re-enter',
+        needAtLeastOne: 'Please complete at least one exercise',
+        updateFail:
+          'Failed to update user data or navigate. Please try again later',
+      },
+      cardioErrors: {
+        missingPrerequisites:
+          'Please enter age and gender in the profile and input running distance here',
+        invalidInputs: 'Please enter a valid running distance and age',
+        standardsNotFound: 'Standards not found. Please check age and gender',
+        needCalculate: 'Please calculate your cardio score first',
+        updateUserFail: 'Failed to update user data. Please try again later',
+      },
+      powerErrors: {
+        missingPrerequisites:
+          'Please ensure age and gender are provided in your profile',
+        noAnyInput: 'Please enter at least one movement data',
+        invalidAge: 'Please enter a valid age',
+        standardsNotFound: 'Standards not found. Please check age and gender',
+        needMeasure: 'Please complete at least one measurement',
+        needCalculate: 'Please calculate the power score first',
+        updateUserFail: 'Failed to update user data. Please try again later',
+      },
+      ffmiErrors: {
+        missingPrerequisites:
+          'Please fill gender, height, weight, and age on the profile page first',
+        missingBodyFat: 'Please enter body fat percentage',
+        needCalculate: 'Please calculate the FFMI score first',
+        updateUserFail: 'Failed to update user data. Please try again later',
       },
       muscleErrors: {
         missingPrerequisites:

@@ -80,20 +80,29 @@ function FFMI({ onComplete }) {
     setFfmiScore(newFfmiScore.toFixed(2));
 
     if (isMale) {
-      if (adjustedFfmi < 18) setFfmiCategory('肌肉量低於平均');
-      else if (adjustedFfmi < 20) setFfmiCategory('肌肉量在平均值');
-      else if (adjustedFfmi < 22) setFfmiCategory('肌肉量高於平均值');
-      else if (adjustedFfmi < 23) setFfmiCategory('肌肉量很高');
-      else if (adjustedFfmi < 26) setFfmiCategory('肌肉量極高');
+      if (adjustedFfmi < 18)
+        setFfmiCategory(t('tests.ffmiInfo.maleTable.r16_17'));
+      else if (adjustedFfmi < 20)
+        setFfmiCategory(t('tests.ffmiInfo.maleTable.r18_19'));
+      else if (adjustedFfmi < 22)
+        setFfmiCategory(t('tests.ffmiInfo.maleTable.r20_21'));
+      else if (adjustedFfmi < 23)
+        setFfmiCategory(t('tests.ffmiInfo.maleTable.r22'));
+      else if (adjustedFfmi < 26)
+        setFfmiCategory(t('tests.ffmiInfo.maleTable.r23_25'));
       else if (adjustedFfmi < 28)
-        setFfmiCategory('肌肉量已經高到可能有使用藥物');
-      else setFfmiCategory('不用藥不可能達到的數值');
+        setFfmiCategory(t('tests.ffmiInfo.maleTable.r26_27'));
+      else setFfmiCategory(t('tests.ffmiInfo.maleTable.r28_30'));
     } else {
-      if (adjustedFfmi < 15) setFfmiCategory('肌肉量低於平均');
-      else if (adjustedFfmi < 17) setFfmiCategory('肌肉量在平均值');
-      else if (adjustedFfmi < 19) setFfmiCategory('肌肉量高於平均值');
-      else if (adjustedFfmi < 22) setFfmiCategory('肌肉量很高');
-      else setFfmiCategory('不用藥不可能達到的數值');
+      if (adjustedFfmi < 15)
+        setFfmiCategory(t('tests.ffmiInfo.femaleTable.r13_14'));
+      else if (adjustedFfmi < 17)
+        setFfmiCategory(t('tests.ffmiInfo.femaleTable.r15_16'));
+      else if (adjustedFfmi < 19)
+        setFfmiCategory(t('tests.ffmiInfo.femaleTable.r17_18'));
+      else if (adjustedFfmi < 22)
+        setFfmiCategory(t('tests.ffmiInfo.femaleTable.r19_21'));
+      else setFfmiCategory(t('tests.ffmiInfo.femaleTable.r22plus'));
     }
   };
 
@@ -202,7 +211,7 @@ function FFMI({ onComplete }) {
             {t('tests.ffmiLabels.ffmi')}：{ffmi}
           </p>
           <p className="score-text">
-            {t('tests.ffmiLabels.ffmiScore')}：{ffmiScore} 分
+            {t('tests.ffmiLabels.ffmiScore')}：{ffmiScore} {t('common.points')}
           </p>
           <p className="category-text">
             {t('tests.ffmiLabels.ffmiCategory')}：{ffmiCategory}
