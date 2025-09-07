@@ -203,40 +203,40 @@ function Cardio({ onComplete }) {
             </>
           )}
         </div>
+      </div>
 
-        <div className="description-section">
-          <div className="description-card">
-            <div
-              className="description-header"
-              onClick={() => setIsExpanded(!isExpanded)}
-            >
-              <h2 className="text-lg font-semibold">
-                {t('tests.cardioInfo.sectionTitle')}
-              </h2>
-              <span className={`arrow ${isExpanded ? 'expanded' : ''}`}>
-                {isExpanded ? '▲' : '▼'}
-              </span>
-            </div>
-            {isExpanded && (
-              <div className="description-content">
-                <p className="font-semibold">
-                  {t('tests.cardioInfo.introTitle')}
-                </p>
-                <p>{t('tests.cardioInfo.introText')}</p>
-                <p className="font-semibold mt-2">
-                  {t('tests.cardioInfo.measureLabel')}
-                </p>
-                <ul className="list-disc pl-5">
-                  <li>{t('tests.cardioInfo.items.place')}</li>
-                  <li>{t('tests.cardioInfo.items.record')}</li>
-                  <li>{t('tests.cardioInfo.items.warmup')}</li>
-                </ul>
-                <p className="mt-2 text-sm text-gray-600">
-                  {t('tests.cardioInfo.sourceNote')}
-                </p>
-              </div>
-            )}
+      <div className="description-section">
+        <div className="description-card">
+          <div
+            className="description-header"
+            onClick={() => setIsExpanded(!isExpanded)}
+          >
+            <h2 className="text-lg font-semibold">
+              {t('tests.cardioInfo.sectionTitle')}
+            </h2>
+            <span className={`arrow ${isExpanded ? 'expanded' : ''}`}>
+              {isExpanded ? '▲' : '▼'}
+            </span>
           </div>
+          {isExpanded && (
+            <div className="description-content">
+              <p className="font-semibold">
+                {t('tests.cardioInfo.introTitle')}
+              </p>
+              <p>{t('tests.cardioInfo.introText')}</p>
+              <p className="font-semibold mt-2">
+                {t('tests.cardioInfo.measureLabel')}
+              </p>
+              <ul className="list-disc pl-5">
+                <li>{t('tests.cardioInfo.items.place')}</li>
+                <li>{t('tests.cardioInfo.items.record')}</li>
+                <li>{t('tests.cardioInfo.items.warmup')}</li>
+              </ul>
+              <p className="mt-2 text-sm text-gray-600">
+                {t('tests.cardioInfo.sourceNote')}
+              </p>
+            </div>
+          )}
         </div>
       </div>
 
