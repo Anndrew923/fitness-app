@@ -16,6 +16,10 @@ import {
   deleteDoc,
 } from 'firebase/firestore';
 import firebaseWriteMonitor from '../utils/firebaseMonitor';
+import {
+  processCommentAddition,
+  getCommentStats,
+} from '../utils/commentLimiter';
 import './FriendFeed.css';
 import PropTypes from 'prop-types';
 
@@ -386,7 +390,7 @@ const FriendFeed = () => {
     }
   };
 
-  // 添加留言
+  // 添加留言 - 整合留言限制功能
   const addComment = async (postId, commentContent) => {
     if (!commentContent.trim()) return;
     if (!auth.currentUser) {
@@ -397,6 +401,24 @@ const FriendFeed = () => {
     // 防抖：避免重複提交
     if (commentProcessing.has(postId)) {
       console.log('🔄 留言提交中，請稍候...');
+      return;
+    }
+
+    // 找到對應的動態，檢查留言限制
+    const currentPost = posts.find(post => post.id === postId);
+    if (!currentPost) {
+      setError(t('friendFeed.messages.postNotFound'));
+      return;
+    }
+
+    // 檢查留言限制
+    const limitResult = processCommentAddition(
+      currentPost.comments || [],
+      null,
+      'post'
+    );
+    if (!limitResult.success) {
+      setError(limitResult.message);
       return;
     }
 
@@ -413,12 +435,23 @@ const FriendFeed = () => {
       timestamp: new Date().toISOString(),
     };
 
+    // 處理留言添加（包含限制檢查和自動清理）
+    const finalResult = processCommentAddition(
+      currentPost.comments || [],
+      comment,
+      'post'
+    );
+
+    if (!finalResult.success) {
+      setError(finalResult.message);
+      return;
+    }
+
     // 立即更新本地狀態（樂觀更新）
     setPosts(prevPosts => {
       const updatedPosts = prevPosts.map(post => {
         if (post.id === postId) {
-          const newComments = [...post.comments, comment];
-          return { ...post, comments: newComments };
+          return { ...post, comments: finalResult.comments };
         }
         return post;
       });
@@ -436,26 +469,28 @@ const FriendFeed = () => {
     // 設置新的防抖計時器（1秒）
     const timer = setTimeout(async () => {
       try {
-        // 找到對應的動態
-        const currentPost = posts.find(post => post.id === postId);
-        if (!currentPost) {
-          setError(t('friendFeed.messages.postNotFound'));
-          return;
-        }
-
-        // 計算新的留言列表
-        const newComments = [...currentPost.comments, comment];
-
-        // 使用 updateDoc
+        // 使用處理後的留言列表
         const postRef = doc(db, 'communityPosts', postId);
-        await updateDoc(postRef, { comments: newComments });
+        await updateDoc(postRef, { comments: finalResult.comments });
 
         // 記錄寫入操作
         firebaseWriteMonitor.logWrite('updateDoc', 'communityPosts', postId, {
-          comments: `新增留言，總計 ${newComments.length} 條`,
+          comments: `新增留言，總計 ${finalResult.comments.length} 條`,
+          wasAutoCleaned: finalResult.wasAutoCleaned,
+          removedCount: finalResult.removedCount,
         });
 
-        console.log('💬 留言添加成功');
+        // 顯示通知
+        if (finalResult.notification) {
+          setSuccess(finalResult.notification);
+          setTimeout(() => setSuccess(''), 5000);
+        }
+
+        console.log('💬 留言添加成功', {
+          totalComments: finalResult.comments.length,
+          wasAutoCleaned: finalResult.wasAutoCleaned,
+          removedCount: finalResult.removedCount,
+        });
       } catch (error) {
         console.error('❌ 添加留言失敗:', error);
         setError(t('friendFeed.messages.commentFail'));
@@ -464,10 +499,7 @@ const FriendFeed = () => {
         setPosts(prevPosts => {
           const updatedPosts = prevPosts.map(post => {
             if (post.id === postId) {
-              const revertedComments = post.comments.filter(
-                c => c.id !== comment.id
-              );
-              return { ...post, comments: revertedComments };
+              return { ...post, comments: currentPost.comments || [] };
             }
             return post;
           });
