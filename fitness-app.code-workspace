@@ -1,0 +1,31 @@
+{
+  "folders": [
+    {
+      "path": "."
+    }
+  ],
+  "settings": {
+    "typescript.preferences.importModuleSpecifier": "relative",
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.fixAll.eslint": "explicit"
+    },
+    "eslint.workingDirectories": [
+      "."
+    ],
+    "files.associations": {
+      "*.jsx": "javascriptreact",
+      "*.js": "javascript"
+    }
+  },
+  "extensions": {
+    "recommendations": [
+      "ms-vscode.vscode-eslint",
+      "esbenp.prettier-vscode",
+      "ms-vscode.vscode-json",
+      "formulahendry.auto-rename-tag",
+      "christian-kohler.path-intellisense",
+      "ms-vscode.vscode-typescript-next"
+    ]
+  }
+}

@@ -24,4 +24,53 @@ error_tracking: true
 
 # 開發環境設置
 development_mode: true
-debug_logs: true 
+debug_logs: true
+
+# 自動代碼修改設定
+auto_apply_changes: true
+auto_edit_mode: true
+auto_accept_suggestions: true
+auto_fix_errors: true
+
+# 代碼修改行為
+code_modification:
+  auto_apply: true
+  require_confirmation: false
+  backup_before_edit: true
+  max_file_changes: 10
+
+# 自動化設定
+automation:
+  auto_import: true
+  auto_format: true
+  auto_lint_fix: true
+  auto_save: true
+
+# 模型行為設定
+model_behavior:
+  # 積極型模型（會自動修改）
+  aggressive_models:
+    - "claude-4.1-opus"
+    - "gpt-5"
+    - "o3-pro"
+    - "claude-4-sonnet"
+  
+  # 保守型模型（需要明確指令）
+  conservative_models:
+    - "claude-3.5-sonnet"
+    - "gpt-4o"
+    - "gpt-4"
+  
+  # 強制自動修改設定
+  force_auto_edit: true
+  bypass_confirmation: true
+  direct_code_modification: true
+
+# 指令增強設定
+instruction_enhancement:
+  auto_add_directives: true
+  default_directives:
+    - "請直接修改代碼，不要只提供建議"
+    - "請自動應用變更，不需要我手動複製"
+    - "請直接編輯檔案，我會確認變更"
+    - "請使用工具直接修改，不要提供代碼塊" 

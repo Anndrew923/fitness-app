@@ -3,19 +3,12 @@ import { useLocation } from 'react-router-dom';
 import AdBanner from './AdBanner';
 
 const GlobalAdBanner = () => {
-  // 🚫 暫時隱藏廣告用於截圖 - 截圖完成後請恢復
-  return null;
-
-  /* 
-  📝 截圖完成後，請將上面的 return null; 註解掉，並取消註解下面的代碼：
-  
   const location = useLocation();
 
   // 定義需要顯示廣告的頁面
   const adEnabledPaths = [
     '/user-info',
     '/friends',
-    '/ladder',
     '/history',
     '/strength',
     '/cardio',
@@ -30,6 +23,7 @@ const GlobalAdBanner = () => {
     '/privacy-policy',
     '/test',
     '/strength-instructions',
+    '/ladder', // 天梯頁面不顯示廣告，保持頁面乾淨
   ];
 
   // 檢查當前路徑是否應該顯示廣告
@@ -63,7 +57,6 @@ const GlobalAdBanner = () => {
       className="global-ad-banner"
     />
   );
-  */
 };
 
 export default React.memo(GlobalAdBanner);

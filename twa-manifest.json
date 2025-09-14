@@ -1,7 +1,7 @@
 {
-  "packageId": "com.ultimatephysique.app",
+  "packageId": "com.ultimatephysique.fitness2025",
   "host": "fitness-app2025.netlify.app",
-  "name": "com.ultimatephysique.app",
+  "name": "最強肉體",
   "launcherName": "最強肉體",
   "display": "standalone",
   "themeColor": "#4BC0C0",
@@ -21,7 +21,7 @@
     "path": "C:\\Users\\User\\Dropbox\\fitness-app\\android.keystore",
     "alias": "upload"
   },
-  "appVersionName": "3",
+  "appVersionName": "1.2",
   "appVersionCode": 3,
   "shortcuts": [],
   "generatorApp": "bubblewrap-cli",
@@ -43,5 +43,5 @@
   "protocolHandlers": [],
   "fileHandlers": [],
   "launchHandlerClientMode": "",
-  "appVersion": "3"
+  "appVersion": "1.2"
 }

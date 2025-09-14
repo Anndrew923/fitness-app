@@ -15,7 +15,19 @@
      limitations under the License.
 -->
 <resources>
+  <!-- 應用程式名稱 -->
+  <string name="app_name">最強肉體</string>
+  <string name="app_name_short">最強肉體</string>
+  <string name="appName">最強肉體</string>
+  <string name="launcherName">最強肉體</string>
   
+  <!-- 其他必要的字符串 -->
+  <string name="launchUrl">https://fitness-app2025.netlify.app/</string>
+  <string name="webManifestUrl">https://fitness-app2025.netlify.app/manifest.json</string>
+  <string name="generatorApp">bubblewrap-cli</string>
+  <string name="providerAuthority">com.ultimatephysique.fitness2025.fileprovider</string>
+  <string name="fallbackType">customtabs</string>
+  <string name="orientation">portrait</string>
 
   <!--
     This variable below expresses the relationship between the app and the site,

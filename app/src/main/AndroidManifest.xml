@@ -19,27 +19,27 @@
      to an Activity by ".MyActivity" instead of the full name. If more Activities are added to the
      application, the package attribute will need to reflect the correct path in order to use
      the abbreviated format. -->
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.ultimatephysique.app">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-    
-        <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
-    
+    <!-- 網路權限 -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
-    
+    <!-- 通知權限 -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
 
-    
-
-    
+    <!-- 檔案存取權限 -->
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <application
         android:name="Application"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/appName"
-        
+
         android:manageSpaceActivity="com.google.androidbrowserhelper.trusted.ManageDataLauncherActivity"
-        
+
         android:supportsRtl="true"
         android:theme="@android:style/Theme.Translucent.NoTitleBar">
 
@@ -47,27 +47,27 @@
             android:name="asset_statements"
             android:resource="@string/assetStatements" />
 
-        
+
             <meta-data
                 android:name="web_manifest_url"
                 android:value="@string/webManifestUrl" />
-        
+
 
         <meta-data
             android:name="twa_generator"
             android:value="@string/generatorApp" />
 
-        
 
-        
 
-        
+
+
+
             <activity android:name="com.google.androidbrowserhelper.trusted.ManageDataLauncherActivity">
             <meta-data
                 android:name="android.support.customtabs.trusted.MANAGE_SPACE_URL"
                 android:value="@string/launchUrl" />
             </activity>
-        
+
 
         <activity android:name="LauncherActivity"
             android:alwaysRetainTaskState="true"
@@ -80,7 +80,7 @@
                 android:name="android.support.customtabs.trusted.STATUS_BAR_COLOR"
                 android:resource="@color/colorPrimary" />
 
-            
+
 
             <meta-data
                 android:name="android.support.customtabs.trusted.STATUS_BAR_COLOR_DARK"
@@ -119,16 +119,16 @@
             <meta-data android:name="android.support.customtabs.trusted.FALLBACK_STRATEGY"
                 android:value="@string/fallbackType" />
 
-            
 
-            
+
+
 
             <meta-data android:name="android.support.customtabs.trusted.SCREEN_ORIENTATION"
                 android:value="@string/orientation"/>
 
-            
 
-            
+
+
 
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -140,14 +140,21 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE"/>
                 <data android:scheme="https"
-                    android:host="@string/hostName"
-                
-                />
+                    android:host="fitness-app2025.netlify.app"
+                    android:pathPrefix="/" />
             </intent-filter>
 
-            
+            <!-- 添加自定義 scheme 深層連結 -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="ultimatephysique" />
+            </intent-filter>
 
-            
+
+
+
         </activity>
 
         <activity android:name="com.google.androidbrowserhelper.trusted.FocusActivity" />
@@ -170,11 +177,11 @@
             android:enabled="@bool/enableNotification"
             android:exported="@bool/enableNotification">
 
-            
+
                 <meta-data
                     android:name="android.support.customtabs.trusted.SMALL_ICON"
                     android:resource="@drawable/ic_notification_icon" />
-            
+
 
             <intent-filter>
                 <action android:name="android.support.customtabs.trusted.TRUSTED_WEB_ACTIVITY_SERVICE"/>
@@ -182,10 +189,10 @@
             </intent-filter>
         </service>
 
-        
-            <activity android:name="com.google.androidbrowserhelper.trusted.NotificationPermissionRequestActivity" />
-        
 
-        
+            <activity android:name="com.google.androidbrowserhelper.trusted.NotificationPermissionRequestActivity" />
+
+
+
     </application>
 </manifest>

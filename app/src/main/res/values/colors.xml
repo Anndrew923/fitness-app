@@ -15,4 +15,13 @@
 -->
 <resources>
     <color name="shortcut_background">#F5F5F5</color>
+
+    <!-- TWA 主題顏色 -->
+    <color name="colorPrimary">#4BC0C0</color>
+    <color name="colorPrimaryDark">#000000</color>
+    <color name="navigationColor">#000000</color>
+    <color name="navigationColorDark">#000000</color>
+    <color name="navigationDividerColor">#000000</color>
+    <color name="navigationDividerColorDark">#000000</color>
+    <color name="backgroundColor">#4BC0C0</color>
 </resources>

@@ -1,0 +1,11 @@
+{
+  "timestamp": "2025-09-13T12:44:07.855Z",
+  "node": "20.19.1",
+  "npm": "10.8.2",
+  "java": null,
+  "gradle": "8.11.1",
+  "environmentVariables": false,
+  "dependencies": true,
+  "android": true,
+  "cursor": true
+}

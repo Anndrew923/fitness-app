@@ -34,7 +34,12 @@
     "env:check": "node scripts/check-env.js",
     "env:setup": "cp env.example .env && echo '✅ .env 檔案已創建，請編輯填入您的 Firebase 配置'",
     "env:status": "node -e \"console.log('🔍 環境變數狀態:'); console.log('VITE_FIREBASE_API_KEY:', process.env.VITE_FIREBASE_API_KEY ? '已設置' : '未設置'); console.log('VITE_FIREBASE_PROJECT_ID:', process.env.VITE_FIREBASE_PROJECT_ID ? '已設置' : '未設置');\"",
-    "simple": "node scripts/simple-setup.js"
+    "simple": "node scripts/simple-setup.js",
+    "office:setup": "node scripts/office-setup.js",
+    "office:sync": "node scripts/sync-environment.js",
+    "office:fix": "node scripts/sync-environment.js --fix",
+    "cursor:sync": "node scripts/cursor-config-sync.js",
+    "office:complete": "node scripts/complete-sync.js"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.5.0",
