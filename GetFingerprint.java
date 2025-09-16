@@ -8,7 +8,7 @@ public class GetFingerprint {
         try {
             String keystorePath = "android.keystore";
             String alias = "upload";
-            String password = "YOUR_PASSWORD_HERE"; // 請替換為你的密碼
+            String password = "fitness2025"; // 請替換為你的密碼
             
             KeyStore keystore = KeyStore.getInstance("JKS");
             FileInputStream fis = new FileInputStream(keystorePath);

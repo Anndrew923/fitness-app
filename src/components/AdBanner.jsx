@@ -1,4 +1,4 @@
-// import React from 'react'; // 不需要，因為使用 JSX Transform
+import { useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import './AdBanner.css';
 
@@ -7,27 +7,101 @@ const AdBanner = ({
   className = '',
   showAd = true,
   isFixed = true,
+  adUnitId = null, // 從 AdMob 獲取的廣告單元 ID
 }) => {
-  // 開發環境顯示測試廣告
-  // const isDevelopment = process.env.NODE_ENV === 'development';
+  const adRef = useRef(null);
+  const isDevelopment = process.env.NODE_ENV === 'development';
+
+  useEffect(() => {
+    // 如果不需要顯示廣告，返回
+    if (!showAd) {
+      return;
+    }
+
+    // 如果是開發環境或沒有廣告單元 ID，顯示測試廣告
+    if (isDevelopment || !adUnitId) {
+      return;
+    }
+
+    // 載入 Google AdSense 腳本
+    const loadAdSense = () => {
+      if (window.adsbygoogle) {
+        // 如果腳本已載入，直接初始化廣告
+        try {
+          (window.adsbygoogle = window.adsbygoogle || []).push({});
+        } catch (error) {
+          console.error('AdSense 初始化錯誤:', error);
+        }
+      } else {
+        // 載入 AdSense 腳本
+        const script = document.createElement('script');
+        script.async = true;
+        script.src =
+          'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js';
+        script.crossOrigin = 'anonymous';
+        script.onload = () => {
+          try {
+            (window.adsbygoogle = window.adsbygoogle || []).push({});
+          } catch (error) {
+            console.error('AdSense 載入後初始化錯誤:', error);
+          }
+        };
+        script.onerror = () => {
+          console.error('AdSense 腳本載入失敗');
+        };
+        document.head.appendChild(script);
+      }
+    };
+
+    // 延遲載入廣告，確保 DOM 已準備好
+    const timer = setTimeout(loadAdSense, 100);
+
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [showAd, adUnitId, isDevelopment]);
 
   // 如果不需要顯示廣告，返回 null
   if (!showAd) {
     return null;
   }
 
+  // 開發環境或沒有廣告單元 ID 時顯示測試廣告
+  if (isDevelopment || !adUnitId) {
+    return (
+      <div
+        className={`ad-banner ad-banner--${position} ${
+          isFixed ? 'ad-banner--fixed' : ''
+        } ${className}`}
+      >
+        <div className="ad-banner__test">
+          <div className="ad-banner__test-content">
+            <span className="ad-banner__test-label">🎯 廣告空間預留 🎯</span>
+            <span className="ad-banner__test-size">
+              {isDevelopment ? '開發模式 - 測試廣告' : '請設置廣告單元 ID'}
+            </span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // 正式廣告
   return (
     <div
       className={`ad-banner ad-banner--${position} ${
         isFixed ? 'ad-banner--fixed' : ''
       } ${className}`}
     >
-      <div className="ad-banner__test">
-        <div className="ad-banner__test-content">
-          <span className="ad-banner__test-label">🎯 廣告空間預留 🎯</span>
-          <span className="ad-banner__test-size">點擊體驗優化版設計</span>
-        </div>
-      </div>
+      <ins
+        ref={adRef}
+        className="adsbygoogle"
+        style={{ display: 'block' }}
+        data-ad-client="ca-pub-XXXXXXXXXXXXXXXX" // 替換為您的 AdSense 客戶 ID
+        data-ad-slot={adUnitId} // 您的廣告單元 ID
+        data-ad-format="auto"
+        data-full-width-responsive="true"
+      />
     </div>
   );
 };
@@ -37,6 +111,7 @@ AdBanner.propTypes = {
   className: PropTypes.string,
   showAd: PropTypes.bool,
   isFixed: PropTypes.bool, // 控制是否固定在底部
+  adUnitId: PropTypes.string, // AdMob 廣告單元 ID
 };
 
 export default AdBanner;

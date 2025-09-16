@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+﻿import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useUser } from '../UserContext';
 import { auth, db } from '../firebase';
@@ -1698,7 +1698,6 @@ const Friends = () => {
     batchUpdateExpiredChallenges,
     respondToChallenge,
     sendChallenge,
-    t,
   ]);
 
   return (

@@ -1,5 +1,20 @@
 // 廣告配置
 export const adConfig = {
+  // AdSense 客戶 ID（從 Google AdSense 獲取）
+  clientId: process.env.VITE_ADSENSE_CLIENT_ID || 'ca-pub-XXXXXXXXXXXXXXXX',
+
+  // 廣告單元 ID 配置
+  adUnits: {
+    // 底部橫幅廣告
+    bottomBanner: process.env.VITE_ADSENSE_BOTTOM_BANNER_ID || null,
+
+    // 頂部橫幅廣告
+    topBanner: process.env.VITE_ADSENSE_TOP_BANNER_ID || null,
+
+    // 內嵌廣告
+    inline: process.env.VITE_ADSENSE_INLINE_ID || null,
+  },
+
   // 評測頁面 - 只在結果頁面顯示底部廣告
   testPages: {
     strength: { showTop: false, showBottom: true },
@@ -29,35 +44,64 @@ export const adConfig = {
     bottomAdOnly: true, // 只使用底部廣告
     respectUserFlow: true, // 尊重用戶操作流程
   },
+
+  // 開發模式設置
+  development: {
+    showTestAds: true, // 開發環境顯示測試廣告
+    enableLogging: true, // 啟用廣告日誌
+  },
 };
 
 // 獲取頁面廣告配置
 export const getPageAdConfig = pageName => {
-  const testPages = adConfig.testPages[pageName];
-  if (testPages) {
-    return testPages;
+  // 檢查是否為評測頁面
+  if (adConfig.testPages[pageName]) {
+    return adConfig.testPages[pageName];
   }
 
-  const otherPages = adConfig.otherPages[pageName];
-  if (otherPages) {
-    return otherPages;
+  // 檢查是否為其他頁面
+  if (adConfig.otherPages[pageName]) {
+    return adConfig.otherPages[pageName];
   }
 
-  // 預設配置
+  // 預設不顯示廣告
   return { showTop: false, showBottom: false };
 };
 
+// 獲取廣告單元 ID
+export const getAdUnitId = (position = 'bottom') => {
+  const key =
+    position === 'top'
+      ? 'topBanner'
+      : position === 'inline'
+      ? 'inline'
+      : 'bottomBanner';
+  return adConfig.adUnits[key];
+};
+
 // 檢查是否應該顯示廣告
-export const shouldShowAd = (pageName, position) => {
-  const config = getPageAdConfig(pageName);
+export const shouldShowAd = (pageName, position = 'bottom') => {
+  const pageConfig = getPageAdConfig(pageName);
+  return position === 'top' ? pageConfig.showTop : pageConfig.showBottom;
+};
 
-  if (position === 'top') {
-    return config.showTop && !adConfig.ux.avoidTopAds;
-  }
+// 廣告載入狀態管理
+export const adState = {
+  loaded: false,
+  loading: false,
+  error: null,
+  lastLoadTime: null,
+};
 
-  if (position === 'bottom') {
-    return config.showBottom;
-  }
+// 重置廣告狀態
+export const resetAdState = () => {
+  adState.loaded = false;
+  adState.loading = false;
+  adState.error = null;
+  adState.lastLoadTime = null;
+};
 
-  return false;
+// 設置廣告狀態
+export const setAdState = newState => {
+  Object.assign(adState, newState);
 };

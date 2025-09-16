@@ -5,6 +5,7 @@
   "license": "MIT",
   "dependencies": {
     "firebase": "^11.8.1",
+    "google-adsense": "^1.1.7",
     "i18next": "^25.3.2",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
@@ -42,14 +43,14 @@
     "office:complete": "node scripts/complete-sync.js"
   },
   "devDependencies": {
+    "@firebase/rules-unit-testing": "^4.0.0",
+    "@playwright/test": "^1.45.0",
     "@vitejs/plugin-react": "^4.5.0",
     "eslint": "^9.26.0",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^5.2.0",
     "vite": "^6.3.5",
-    "vitest": "^2.0.5",
-    "@firebase/rules-unit-testing": "^4.0.0",
-    "@playwright/test": "^1.45.0"
+    "vitest": "^2.0.5"
   },
   "browserslist": {
     "production": [

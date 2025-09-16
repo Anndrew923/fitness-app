@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>帳戶刪除政策 / Account Deletion Policy - Ultimate Physique</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+          'Helvetica Neue', Arial, sans-serif;
+        line-height: 1.6;
+        color: #333;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #f8f9fa;
+      }
+
+      .container {
+        background: white;
+        padding: 40px;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+
+      .header {
+        text-align: center;
+        margin-bottom: 40px;
+        padding-bottom: 20px;
+        border-bottom: 2px solid #e9ecef;
+      }
+
+      .header h1 {
+        font-size: 2.5rem;
+        color: #2c3e50;
+        margin-bottom: 10px;
+      }
+
+      .header .subtitle {
+        font-size: 1.1rem;
+        color: #6c757d;
+        margin-bottom: 10px;
+      }
+
+      .header .date {
+        font-size: 0.9rem;
+        color: #868e96;
+      }
+
+      .language-switch {
+        text-align: center;
+        margin-bottom: 30px;
+      }
+
+      .language-btn {
+        background: #007bff;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        margin: 0 10px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 1rem;
+        transition: background-color 0.3s;
+      }
+
+      .language-btn:hover {
+        background: #0056b3;
+      }
+
+      .language-btn.active {
+        background: #28a745;
+      }
+
+      .content {
+        display: none;
+      }
+
+      .content.active {
+        display: block;
+      }
+
+      .content h2 {
+        font-size: 1.8rem;
+        color: #2c3e50;
+        margin: 30px 0 15px 0;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #e9ecef;
+      }
+
+      .content h3 {
+        font-size: 1.4rem;
+        color: #495057;
+        margin: 25px 0 10px 0;
+      }
+
+      .content p {
+        margin-bottom: 15px;
+        text-align: justify;
+      }
+
+      .content ul,
+      .content ol {
+        margin: 15px 0 15px 30px;
+      }
+
+      .content li {
+        margin-bottom: 8px;
+      }
+
+      .highlight-box {
+        background: #e3f2fd;
+        border-left: 4px solid #2196f3;
+        padding: 20px;
+        margin: 20px 0;
+        border-radius: 4px;
+      }
+
+      .warning-box {
+        background: #fff3cd;
+        border-left: 4px solid #ffc107;
+        padding: 20px;
+        margin: 20px 0;
+        border-radius: 4px;
+      }
+
+      .contact-info {
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 8px;
+        margin: 30px 0;
+      }
+
+      .contact-info h3 {
+        color: #495057;
+        margin-bottom: 15px;
+      }
+
+      .contact-info p {
+        margin-bottom: 10px;
+      }
+
+      .contact-info a {
+        color: #007bff;
+        text-decoration: none;
+      }
+
+      .contact-info a:hover {
+        text-decoration: underline;
+      }
+
+      .step-list {
+        counter-reset: step-counter;
+      }
+
+      .step-list li {
+        counter-increment: step-counter;
+        margin-bottom: 15px;
+        padding-left: 40px;
+        position: relative;
+      }
+
+      .step-list li::before {
+        content: counter(step-counter);
+        position: absolute;
+        left: 0;
+        top: 0;
+        background: #4bc0c0;
+        color: white;
+        width: 25px;
+        height: 25px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 0.9rem;
+      }
+
+      @media (max-width: 768px) {
+        .container {
+          padding: 20px;
+        }
+
+        .header h1 {
+          font-size: 2rem;
+        }
+
+        .content h2 {
+          font-size: 1.5rem;
+        }
+
+        .content h3 {
+          font-size: 1.2rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>帳戶刪除政策</h1>
+        <div class="subtitle">Account Deletion Policy</div>
+        <div class="date">最後更新：2025年1月</div>
+      </div>
+
+      <div class="language-switch">
+        <button class="language-btn active" onclick="switchLanguage('zh')">
+          中文
+        </button>
+        <button class="language-btn" onclick="switchLanguage('en')">
+          English
+        </button>
+      </div>
+
+      <!-- 中文版本 -->
+      <div id="content-zh" class="content active">
+        <h2>如何刪除您的帳戶</h2>
+        <p>在 Ultimate Physique 應用程式中，您可以透過以下步驟刪除您的帳戶：</p>
+
+        <ol class="step-list">
+          <li>開啟 Ultimate Physique 應用程式</li>
+          <li>點擊底部導航欄的「設定」</li>
+          <li>在設定頁面中找到「資料」區塊</li>
+          <li>點擊「刪除帳戶」按鈕</li>
+          <li>閱讀刪除確認訊息</li>
+          <li>點擊「確認刪除」完成帳戶刪除</li>
+        </ol>
+
+        <div class="warning-box">
+          <strong>⚠️ 重要提醒：</strong>
+          帳戶刪除是不可逆的操作。一旦刪除，您將無法恢復任何資料或重新使用相同的帳戶。
+        </div>
+
+        <h2>會刪除的資料類型</h2>
+        <p>當您刪除帳戶時，我們將刪除以下所有相關資料：</p>
+
+        <h3>個人基本資料</h3>
+        <ul>
+          <li>身高、體重、年齡、性別</li>
+          <li>用戶暱稱和電子郵件地址</li>
+          <li>頭像圖片</li>
+          <li>登入憑證和認證資訊</li>
+        </ul>
+
+        <h3>運動評測資料</h3>
+        <ul>
+          <li>力量測試結果和評分</li>
+          <li>爆發力測試結果和評分</li>
+          <li>心肺測試結果和評分</li>
+          <li>肌肉量評估結果</li>
+          <li>體脂肪分析結果</li>
+          <li>所有歷史評測記錄</li>
+        </ul>
+
+        <h3>社群互動資料</h3>
+        <ul>
+          <li>發布的所有動態內容</li>
+          <li>所有留言和回覆</li>
+          <li>好友關係和邀請記錄</li>
+          <li>點讚記錄</li>
+          <li>社群互動歷史</li>
+        </ul>
+
+        <h3>使用行為資料</h3>
+        <ul>
+          <li>應用程式使用記錄</li>
+          <li>功能使用統計</li>
+          <li>偏好設定</li>
+          <li>本地儲存的快取資料</li>
+        </ul>
+
+        <h2>資料保留政策</h2>
+        <p>根據法律要求和技術限制，某些資料可能會在以下情況下保留：</p>
+
+        <h3>法律要求保留</h3>
+        <ul>
+          <li>根據相關法律法規要求保留的資料</li>
+          <li>用於法律程序或調查的資料</li>
+          <li>用於防止欺詐或安全威脅的資料</li>
+        </ul>
+
+        <h3>技術限制</h3>
+        <ul>
+          <li>備份系統中的資料（最多保留 30 天）</li>
+          <li>系統日誌（最多保留 90 天）</li>
+          <li>用於系統維護和優化的匿名化資料</li>
+        </ul>
+
+        <h3>資料保留期限</h3>
+        <p>
+          所有可識別個人身份的資料將在帳戶刪除後立即開始刪除程序，並在 30
+          天內完全清除。匿名化的統計資料可能會保留更長時間，但不會包含任何可識別個人身份的資訊。
+        </p>
+
+        <h2>部分資料刪除</h2>
+        <p>除了完整帳戶刪除外，您也可以選擇刪除部分資料：</p>
+
+        <h3>社群內容刪除</h3>
+        <ul>
+          <li>刪除特定的動態內容</li>
+          <li>刪除特定的留言或回覆</li>
+          <li>移除好友關係</li>
+        </ul>
+
+        <h3>評測記錄刪除</h3>
+        <ul>
+          <li>刪除特定的評測結果</li>
+          <li>清除評測歷史記錄</li>
+        </ul>
+
+        <h2>資料刪除確認</h2>
+        <p>當您提交帳戶刪除請求後，我們將：</p>
+        <ol>
+          <li>立即停止收集新的個人資料</li>
+          <li>在 24 小時內開始刪除程序</li>
+          <li>在 30 天內完成所有資料刪除</li>
+          <li>向您發送刪除完成確認（如果提供聯絡方式）</li>
+        </ol>
+
+        <h2>聯絡我們</h2>
+        <div class="contact-info">
+          <h3>如果您對帳戶刪除有任何疑問</h3>
+          <p>
+            <strong>電子郵件：</strong>
+            <a href="mailto:topaj01@gmail.com">topaj01@gmail.com</a>
+          </p>
+          <p><strong>回應時間：</strong> 我們將在 48 小時內回覆您的詢問</p>
+          <p><strong>支援語言：</strong> 中文、英文</p>
+        </div>
+
+        <h2>政策更新</h2>
+        <p>
+          我們可能會不時更新此帳戶刪除政策。任何重大變更都會透過應用程式內通知或電子郵件告知用戶。建議您定期查看此政策以了解最新資訊。
+        </p>
+      </div>
+
+      <!-- 英文版本 -->
+      <div id="content-en" class="content">
+        <h2>How to Delete Your Account</h2>
+        <p>
+          In the Ultimate Physique application, you can delete your account by
+          following these steps:
+        </p>
+
+        <ol class="step-list">
+          <li>Open the Ultimate Physique application</li>
+          <li>Click on "Settings" in the bottom navigation bar</li>
+          <li>Find the "Data" section in the settings page</li>
+          <li>Click the "Delete Account" button</li>
+          <li>Read the deletion confirmation message</li>
+          <li>Click "Confirm Delete" to complete account deletion</li>
+        </ol>
+
+        <div class="warning-box">
+          <strong>⚠️ Important Notice:</strong>
+          Account deletion is an irreversible operation. Once deleted, you will
+          not be able to recover any data or reuse the same account.
+        </div>
+
+        <h2>Data Types That Will Be Deleted</h2>
+        <p>
+          When you delete your account, we will delete all related data
+          including:
+        </p>
+
+        <h3>Personal Basic Data</h3>
+        <ul>
+          <li>Height, weight, age, gender</li>
+          <li>User nickname and email address</li>
+          <li>Profile picture</li>
+          <li>Login credentials and authentication information</li>
+        </ul>
+
+        <h3>Fitness Assessment Data</h3>
+        <ul>
+          <li>Strength test results and scores</li>
+          <li>Explosive power test results and scores</li>
+          <li>Cardio test results and scores</li>
+          <li>Muscle mass assessment results</li>
+          <li>Body fat analysis results</li>
+          <li>All historical assessment records</li>
+        </ul>
+
+        <h3>Social Interaction Data</h3>
+        <ul>
+          <li>All published posts and content</li>
+          <li>All comments and replies</li>
+          <li>Friend relationships and invitation records</li>
+          <li>Like records</li>
+          <li>Social interaction history</li>
+        </ul>
+
+        <h3>Usage Behavior Data</h3>
+        <ul>
+          <li>Application usage records</li>
+          <li>Feature usage statistics</li>
+          <li>Preference settings</li>
+          <li>Locally stored cache data</li>
+        </ul>
+
+        <h2>Data Retention Policy</h2>
+        <p>
+          According to legal requirements and technical limitations, certain
+          data may be retained in the following situations:
+        </p>
+
+        <h3>Legal Requirements</h3>
+        <ul>
+          <li>Data required to be retained by relevant laws and regulations</li>
+          <li>Data used for legal proceedings or investigations</li>
+          <li>Data used to prevent fraud or security threats</li>
+        </ul>
+
+        <h3>Technical Limitations</h3>
+        <ul>
+          <li>Data in backup systems (retained for up to 30 days)</li>
+          <li>System logs (retained for up to 90 days)</li>
+          <li>Anonymized data used for system maintenance and optimization</li>
+        </ul>
+
+        <h3>Data Retention Period</h3>
+        <p>
+          All personally identifiable data will begin the deletion process
+          immediately after account deletion and will be completely removed
+          within 30 days. Anonymized statistical data may be retained longer but
+          will not contain any personally identifiable information.
+        </p>
+
+        <h2>Partial Data Deletion</h2>
+        <p>
+          In addition to complete account deletion, you can also choose to
+          delete partial data:
+        </p>
+
+        <h3>Social Content Deletion</h3>
+        <ul>
+          <li>Delete specific posts</li>
+          <li>Delete specific comments or replies</li>
+          <li>Remove friend relationships</li>
+        </ul>
+
+        <h3>Assessment Record Deletion</h3>
+        <ul>
+          <li>Delete specific assessment results</li>
+          <li>Clear assessment history</li>
+        </ul>
+
+        <h2>Data Deletion Confirmation</h2>
+        <p>When you submit an account deletion request, we will:</p>
+        <ol>
+          <li>Immediately stop collecting new personal data</li>
+          <li>Begin the deletion process within 24 hours</li>
+          <li>Complete all data deletion within 30 days</li>
+          <li>
+            Send you a deletion completion confirmation (if contact information
+            is provided)
+          </li>
+        </ol>
+
+        <h2>Contact Us</h2>
+        <div class="contact-info">
+          <h3>If you have any questions about account deletion</h3>
+          <p>
+            <strong>Email:</strong>
+            <a href="mailto:topaj01@gmail.com">topaj01@gmail.com</a>
+          </p>
+          <p>
+            <strong>Response Time:</strong> We will respond to your inquiry
+            within 48 hours
+          </p>
+          <p><strong>Supported Languages:</strong> Chinese, English</p>
+        </div>
+
+        <h2>Policy Updates</h2>
+        <p>
+          We may update this account deletion policy from time to time. Any
+          significant changes will be communicated to users through in-app
+          notifications or email. We recommend that you review this policy
+          regularly to stay informed of the latest information.
+        </p>
+      </div>
+    </div>
+
+    <script>
+      function switchLanguage(lang) {
+        // 隱藏所有內容
+        document.querySelectorAll('.content').forEach(content => {
+          content.classList.remove('active');
+        });
+
+        // 顯示選中的語言內容
+        document.getElementById('content-' + lang).classList.add('active');
+
+        // 更新按鈕狀態
+        document.querySelectorAll('.language-btn').forEach(btn => {
+          btn.classList.remove('active');
+        });
+        event.target.classList.add('active');
+      }
+
+      // 頁面載入完成後的初始化
+      document.addEventListener('DOMContentLoaded', function () {
+        console.log('Account Deletion Policy page loaded successfully');
+
+        // 檢查所有連結是否正常
+        const links = document.querySelectorAll('a');
+        links.forEach(link => {
+          link.addEventListener('click', function (e) {
+            if (this.href.startsWith('mailto:')) {
+              console.log('Email link clicked:', this.href);
+            }
+          });
+        });
+      });
+    </script>
+  </body>
+</html>

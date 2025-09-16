@@ -8,6 +8,7 @@
   "background_color": "#4bc0c0",
   "theme_color": "#4bc0c0",
   "scope": "/",
+  "display_override": ["window-controls-overlay"],
   "lang": "zh-TW",
   "icons": [
     {
