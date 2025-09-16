@@ -12,17 +12,23 @@ export default defineConfig(({ mode }) => {
       {
         name: 'copy-well-known',
         closeBundle() {
-          // 確保 .well-known 目錄存在
           try {
+            // 方法1：複製到 .well-known 目錄
             mkdirSync(resolve('dist/.well-known'), { recursive: true });
-            // 複製 assetlinks.json
             copyFileSync(
               resolve('public/.well-known/assetlinks.json'),
               resolve('dist/.well-known/assetlinks.json')
             );
-            console.log('✅ Successfully copied .well-known/assetlinks.json');
+            
+            // 方法2：複製到根目錄（備用方案）
+            copyFileSync(
+              resolve('public/assetlinks.json'),
+              resolve('dist/assetlinks.json')
+            );
+            
+            console.log('✅ Successfully copied assetlinks.json to both locations');
           } catch (error) {
-            console.error('❌ Failed to copy .well-known files:', error);
+            console.error('❌ Failed to copy assetlinks files:', error);
           }
         }
       }
