@@ -8,11 +8,11 @@ $plainPassword = [Runtime.InteropServices.Marshal]::PtrToStringAuto([Runtime.Int
 try {
     # 使用 keytool 獲取指紋
     $result = & keytool -list -v -keystore android.keystore -alias upload -storepass $plainPassword 2>&1
-    
+
     if ($LASTEXITCODE -eq 0) {
         Write-Host "成功獲取指紋信息：" -ForegroundColor Green
         $result | ForEach-Object { Write-Host $_ }
-        
+
         # 提取 SHA256 指紋
         $sha256Line = $result | Where-Object { $_ -match "SHA256.*:" }
         if ($sha256Line) {

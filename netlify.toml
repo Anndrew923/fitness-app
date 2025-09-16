@@ -7,6 +7,13 @@
 [build.environment]
   NPM_FLAGS = "--legacy-peer-deps"
 
+# 確保 .well-known 目錄可以正常訪問
+[[headers]]
+  for = "/.well-known/*"
+  [headers.values]
+    Content-Type = "application/json"
+    Access-Control-Allow-Origin = "*"
+
 [[redirects]]
   from = "/assets/*"
   to = "/assets/:splat"

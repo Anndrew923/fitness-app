@@ -662,7 +662,7 @@ const Friends = () => {
       // 檢查好友數量限制 - 使用 userData.friends 作為更可靠的來源
       const currentFriendsCount = userData?.friends?.length || friendsList.length;
       const FRIEND_LIMIT = 100;
-      
+
       if (currentFriendsCount >= FRIEND_LIMIT) {
         setError(t('community.messages.friendLimitMessage'));
         return;
@@ -1126,7 +1126,7 @@ const Friends = () => {
      const FRIEND_LIMIT = 100;
      const currentFriendsCount = userData?.friends?.length || friendsList.length;
      const remainingSlots = FRIEND_LIMIT - currentFriendsCount;
-    
+
     return (
     <div className="friend-requests">
         {/* 邀請頁面的好友數量限制資訊 */}
@@ -1249,7 +1249,7 @@ const Friends = () => {
      const FRIEND_LIMIT = 100;
      const currentFriendsCount = userData?.friends?.length || friendsList.length;
      const remainingSlots = FRIEND_LIMIT - currentFriendsCount;
-    
+
     return (
     <div className="search-section">
         {/* 搜尋頁面的好友數量限制資訊 */}
