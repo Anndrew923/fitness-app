@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { useUser } from '../UserContext';
 import { getGuestData, saveGuestData, clearGuestData } from '../utils';

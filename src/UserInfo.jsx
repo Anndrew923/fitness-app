@@ -54,9 +54,9 @@ const Modal = ({
   onAction = null,
   actionText = null,
 }) => {
-  if (!isOpen) return null;
-
   const { t } = useTranslation();
+
+  if (!isOpen) return null;
 
   const getIcon = () => {
     switch (type) {
@@ -160,9 +160,9 @@ const SubmitConfirmModal = ({
   onCancel,
   remainingCount,
 }) => {
-  if (!isOpen) return null;
-
   const { t } = useTranslation();
+
+  if (!isOpen) return null;
 
   const handleOverlayClick = e => {
     if (e.target === e.currentTarget) {
@@ -2008,6 +2008,9 @@ UserInfo.propTypes = {
     smm: PropTypes.number,
     bodyFat: PropTypes.number,
     ffmiScore: PropTypes.number,
+    verticalJump: PropTypes.number,
+    standingLongJump: PropTypes.number,
+    sprint: PropTypes.number,
   }),
   onLogout: PropTypes.func.isRequired,
   clearTestData: PropTypes.func.isRequired,

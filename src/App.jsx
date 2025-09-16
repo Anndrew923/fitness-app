@@ -41,7 +41,7 @@ import { useTranslation, withTranslation } from 'react-i18next';
 class RawErrorBoundary extends Component {
   state = { hasError: false, error: null, errorInfo: null };
 
-  static getDerivedStateFromError(error) {
+  static getDerivedStateFromError() {
     return { hasError: true };
   }
 
@@ -120,6 +120,7 @@ class RawErrorBoundary extends Component {
 
 RawErrorBoundary.propTypes = {
   children: PropTypes.node.isRequired,
+  t: PropTypes.func.isRequired,
 };
 
 const ErrorBoundary = withTranslation()(RawErrorBoundary);

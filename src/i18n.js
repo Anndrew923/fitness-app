@@ -1654,6 +1654,7 @@ const enUS = {
         badgeFriend: 'Friends',
         badgeInvited: 'Invite sent',
         add: 'Add friend',
+        remove: 'Remove friend',
       },
       invites: {
         empty: 'No pending invitations',
@@ -1663,12 +1664,6 @@ const enUS = {
       search: {
         empty: 'No matching users found',
         placeholder: 'Search nickname or email...',
-      },
-      friend: {
-        badgeFriend: 'Friends',
-        badgeInvited: 'Invite sent',
-        add: 'Add friend',
-        remove: 'Remove friend',
       },
       ui: {
         avatarAlt: 'Avatar',
@@ -1863,7 +1858,9 @@ function getInitialLanguage() {
   try {
     const saved = localStorage.getItem('language');
     if (saved) return saved;
-  } catch {}
+  } catch (error) {
+    console.warn('無法讀取語言設定:', error);
+  }
   const nav = (
     navigator.language ||
     navigator.userLanguage ||

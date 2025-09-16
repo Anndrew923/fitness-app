@@ -16,10 +16,7 @@ import {
   deleteDoc,
 } from 'firebase/firestore';
 import firebaseWriteMonitor from '../utils/firebaseMonitor';
-import {
-  processCommentAddition,
-  getCommentStats,
-} from '../utils/commentLimiter';
+import { processCommentAddition } from '../utils/commentLimiter';
 import './FriendFeed.css';
 import PropTypes from 'prop-types';
 
@@ -851,6 +848,8 @@ const FriendFeed = () => {
     }
   );
 
+  PostCard.displayName = 'PostCard';
+
   PostCard.propTypes = {
     post: PropTypes.shape({
       id: PropTypes.string.isRequired,
@@ -861,6 +860,7 @@ const FriendFeed = () => {
       timestamp: PropTypes.any.isRequired,
       likes: PropTypes.array.isRequired,
       comments: PropTypes.array.isRequired,
+      targetUserId: PropTypes.string,
     }).isRequired,
     currentUserId: PropTypes.string.isRequired,
     onToggleLike: PropTypes.func.isRequired,

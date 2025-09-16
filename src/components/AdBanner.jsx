@@ -1,4 +1,4 @@
-import React from 'react';
+// import React from 'react'; // 不需要，因為使用 JSX Transform
 import PropTypes from 'prop-types';
 import './AdBanner.css';
 

@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>資料刪除請求 / Data Deletion Request - Ultimate Physique</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+          'Helvetica Neue', Arial, sans-serif;
+        line-height: 1.6;
+        color: #333;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #f8f9fa;
+      }
+
+      .container {
+        background: white;
+        padding: 40px;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+
+      .header {
+        text-align: center;
+        margin-bottom: 40px;
+        padding-bottom: 20px;
+        border-bottom: 2px solid #e9ecef;
+      }
+
+      .header h1 {
+        font-size: 2.5rem;
+        color: #2c3e50;
+        margin-bottom: 10px;
+      }
+
+      .header .subtitle {
+        font-size: 1.1rem;
+        color: #6c757d;
+        margin-bottom: 10px;
+      }
+
+      .header .date {
+        font-size: 0.9rem;
+        color: #868e96;
+      }
+
+      .language-switch {
+        text-align: center;
+        margin-bottom: 30px;
+      }
+
+      .language-btn {
+        background: #007bff;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        margin: 0 10px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 1rem;
+        transition: background-color 0.3s;
+      }
+
+      .language-btn:hover {
+        background: #0056b3;
+      }
+
+      .language-btn.active {
+        background: #28a745;
+      }
+
+      .content {
+        display: none;
+      }
+
+      .content.active {
+        display: block;
+      }
+
+      .content h2 {
+        font-size: 1.8rem;
+        color: #2c3e50;
+        margin: 30px 0 15px 0;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #e9ecef;
+      }
+
+      .content h3 {
+        font-size: 1.4rem;
+        color: #495057;
+        margin: 25px 0 10px 0;
+      }
+
+      .content p {
+        margin-bottom: 15px;
+        text-align: justify;
+      }
+
+      .content ul,
+      .content ol {
+        margin: 15px 0 15px 30px;
+      }
+
+      .content li {
+        margin-bottom: 8px;
+      }
+
+      .highlight-box {
+        background: #e3f2fd;
+        border-left: 4px solid #2196f3;
+        padding: 20px;
+        margin: 20px 0;
+        border-radius: 4px;
+      }
+
+      .warning-box {
+        background: #fff3cd;
+        border-left: 4px solid #ffc107;
+        padding: 20px;
+        margin: 20px 0;
+        border-radius: 4px;
+      }
+
+      .contact-info {
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 8px;
+        margin: 30px 0;
+      }
+
+      .contact-info h3 {
+        color: #495057;
+        margin-bottom: 15px;
+      }
+
+      .contact-info p {
+        margin-bottom: 10px;
+      }
+
+      .contact-info a {
+        color: #007bff;
+        text-decoration: none;
+      }
+
+      .contact-info a:hover {
+        text-decoration: underline;
+      }
+
+      .step-list {
+        counter-reset: step-counter;
+      }
+
+      .step-list li {
+        counter-increment: step-counter;
+        margin-bottom: 15px;
+        padding-left: 40px;
+        position: relative;
+      }
+
+      .step-list li::before {
+        content: counter(step-counter);
+        position: absolute;
+        left: 0;
+        top: 0;
+        background: #4bc0c0;
+        color: white;
+        width: 25px;
+        height: 25px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 0.9rem;
+      }
+
+      .app-link {
+        background: #28a745;
+        color: white;
+        padding: 15px 30px;
+        border-radius: 8px;
+        text-decoration: none;
+        display: inline-block;
+        margin: 20px 0;
+        font-weight: bold;
+        text-align: center;
+        transition: background-color 0.3s;
+      }
+
+      .app-link:hover {
+        background: #218838;
+        color: white;
+        text-decoration: none;
+      }
+
+      @media (max-width: 768px) {
+        .container {
+          padding: 20px;
+        }
+
+        .header h1 {
+          font-size: 2rem;
+        }
+
+        .content h2 {
+          font-size: 1.5rem;
+        }
+
+        .content h3 {
+          font-size: 1.2rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>資料刪除請求</h1>
+        <div class="subtitle">Data Deletion Request</div>
+        <div class="date">最後更新：2025年1月</div>
+      </div>
+
+      <div class="language-switch">
+        <button class="language-btn active" onclick="switchLanguage('zh')">
+          中文
+        </button>
+        <button class="language-btn" onclick="switchLanguage('en')">
+          English
+        </button>
+      </div>
+
+      <!-- 中文版本 -->
+      <div id="content-zh" class="content active">
+        <h2>如何刪除您的資料</h2>
+        <p>在 Ultimate Physique 應用程式中，您可以透過以下方式刪除您的資料：</p>
+
+        <div class="highlight-box">
+          <h3>推薦方式：使用應用程式內功能</h3>
+          <p>最簡單的方式是直接在應用程式內刪除您的資料：</p>
+          <a href="https://fitness-app2025.netlify.app/" class="app-link">
+            開啟 Ultimate Physique 應用程式
+          </a>
+        </div>
+
+        <h3>應用程式內刪除步驟</h3>
+        <ol class="step-list">
+          <li>開啟 Ultimate Physique 應用程式</li>
+          <li>登入您的帳戶</li>
+          <li>前往「社群」頁面刪除動態內容</li>
+          <li>前往「歷史」頁面刪除評測記錄</li>
+          <li>前往「設定」頁面刪除帳戶</li>
+        </ol>
+
+        <h3>可刪除的資料類型</h3>
+        <ul>
+          <li><strong>社群內容：</strong>動態、留言、回覆</li>
+          <li>
+            <strong>評測記錄：</strong
+            >力量、爆發力、心肺、肌肉量、體脂肪測試結果
+          </li>
+          <li><strong>好友關係：</strong>好友列表、邀請記錄</li>
+          <li><strong>個人資料：</strong>暱稱、頭像、基本資訊</li>
+          <li><strong>完整帳戶：</strong>所有相關資料</li>
+        </ul>
+
+        <h2>透過網頁提交刪除請求</h2>
+        <p>如果您無法使用應用程式，也可以透過以下方式提交刪除請求：</p>
+
+        <div class="contact-info">
+          <h3>聯絡我們</h3>
+          <p>
+            <strong>電子郵件：</strong>
+            <a href="mailto:topaj01@gmail.com">topaj01@gmail.com</a>
+          </p>
+          <p><strong>請在郵件中提供：</strong></p>
+          <ul>
+            <li>您的用戶暱稱或電子郵件地址</li>
+            <li>要刪除的資料類型（社群內容、評測記錄、完整帳戶等）</li>
+            <li>刪除原因（可選）</li>
+          </ul>
+          <p><strong>回應時間：</strong> 我們將在 48 小時內回覆您的請求</p>
+        </div>
+
+        <h2>資料刪除政策</h2>
+        <p>根據我們的資料刪除政策：</p>
+        <ul>
+          <li>部分資料刪除：立即生效</li>
+          <li>完整帳戶刪除：30天內完成</li>
+          <li>備份資料：最多保留30天</li>
+          <li>系統日誌：最多保留90天</li>
+        </ul>
+
+        <div class="warning-box">
+          <strong>⚠️ 重要提醒：</strong>
+          資料刪除是不可逆的操作。請確認您真的想要刪除這些資料。
+        </div>
+      </div>
+
+      <!-- 英文版本 -->
+      <div id="content-en" class="content">
+        <h2>How to Delete Your Data</h2>
+        <p>
+          In the Ultimate Physique application, you can delete your data in the
+          following ways:
+        </p>
+
+        <div class="highlight-box">
+          <h3>Recommended Method: Use In-App Features</h3>
+          <p>
+            The easiest way is to delete your data directly within the
+            application:
+          </p>
+          <a href="https://fitness-app2025.netlify.app/" class="app-link">
+            Open Ultimate Physique Application
+          </a>
+        </div>
+
+        <h3>In-App Deletion Steps</h3>
+        <ol class="step-list">
+          <li>Open the Ultimate Physique application</li>
+          <li>Log in to your account</li>
+          <li>Go to "Community" page to delete posts</li>
+          <li>Go to "History" page to delete assessment records</li>
+          <li>Go to "Settings" page to delete account</li>
+        </ol>
+
+        <h3>Data Types That Can Be Deleted</h3>
+        <ul>
+          <li><strong>Social Content:</strong> Posts, comments, replies</li>
+          <li>
+            <strong>Assessment Records:</strong> Strength, explosive power,
+            cardio, muscle mass, body fat test results
+          </li>
+          <li>
+            <strong>Friend Relationships:</strong> Friend lists, invitation
+            records
+          </li>
+          <li>
+            <strong>Personal Data:</strong> Nickname, avatar, basic information
+          </li>
+          <li><strong>Complete Account:</strong> All related data</li>
+        </ul>
+
+        <h2>Submit Deletion Request via Web</h2>
+        <p>
+          If you cannot use the application, you can also submit a deletion
+          request through the following methods:
+        </p>
+
+        <div class="contact-info">
+          <h3>Contact Us</h3>
+          <p>
+            <strong>Email:</strong>
+            <a href="mailto:topaj01@gmail.com">topaj01@gmail.com</a>
+          </p>
+          <p><strong>Please provide in your email:</strong></p>
+          <ul>
+            <li>Your username or email address</li>
+            <li>
+              Type of data to delete (social content, assessment records,
+              complete account, etc.)
+            </li>
+            <li>Reason for deletion (optional)</li>
+          </ul>
+          <p>
+            <strong>Response Time:</strong> We will respond to your request
+            within 48 hours
+          </p>
+        </div>
+
+        <h2>Data Deletion Policy</h2>
+        <p>According to our data deletion policy:</p>
+        <ul>
+          <li>Partial data deletion: Immediate effect</li>
+          <li>Complete account deletion: Completed within 30 days</li>
+          <li>Backup data: Retained for up to 30 days</li>
+          <li>System logs: Retained for up to 90 days</li>
+        </ul>
+
+        <div class="warning-box">
+          <strong>⚠️ Important Notice:</strong>
+          Data deletion is an irreversible operation. Please confirm that you
+          really want to delete this data.
+        </div>
+      </div>
+    </div>
+
+    <script>
+      function switchLanguage(lang) {
+        // 隱藏所有內容
+        document.querySelectorAll('.content').forEach(content => {
+          content.classList.remove('active');
+        });
+
+        // 顯示選中的語言內容
+        document.getElementById('content-' + lang).classList.add('active');
+
+        // 更新按鈕狀態
+        document.querySelectorAll('.language-btn').forEach(btn => {
+          btn.classList.remove('active');
+        });
+        event.target.classList.add('active');
+      }
+
+      // 頁面載入完成後的初始化
+      document.addEventListener('DOMContentLoaded', function () {
+        console.log('Data Deletion Request page loaded successfully');
+
+        // 檢查所有連結是否正常
+        const links = document.querySelectorAll('a');
+        links.forEach(link => {
+          link.addEventListener('click', function (e) {
+            if (this.href.startsWith('mailto:')) {
+              console.log('Email link clicked:', this.href);
+            } else if (this.href.includes('fitness-app2025.netlify.app')) {
+              console.log('App link clicked:', this.href);
+            }
+          });
+        });
+      });
+    </script>
+  </body>
+</html>

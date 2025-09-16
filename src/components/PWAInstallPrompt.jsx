@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import './PWAInstallPrompt.css';
 
 const PWAInstallPrompt = () => {
@@ -104,7 +104,8 @@ const PWAInstallPrompt = () => {
       if (process.env.NODE_ENV === 'development') {
         window.checkPWAUpdate = async () => {
           if ('serviceWorker' in navigator) {
-            const registration = await navigator.serviceWorker.getRegistration();
+            const registration =
+              await navigator.serviceWorker.getRegistration();
             if (registration) {
               try {
                 await registration.update();

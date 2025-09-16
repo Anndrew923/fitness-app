@@ -20,7 +20,10 @@
   <string name="app_name_short">最強肉體</string>
   <string name="appName">最強肉體</string>
   <string name="launcherName">最強肉體</string>
-  
+
+  <!-- 應用程式描述 -->
+  <string name="app_description">專業的健身追蹤應用程式，幫助您記錄和分析健身數據，達到最佳訓練效果。</string>
+
   <!-- 其他必要的字符串 -->
   <string name="launchUrl">https://fitness-app2025.netlify.app/</string>
   <string name="webManifestUrl">https://fitness-app2025.netlify.app/manifest.json</string>
@@ -43,6 +46,6 @@
             \"site\": \"https://fitness-app2025.netlify.app\"
         }
     }]
-    
-  </string>  
+
+  </string>
 </resources>

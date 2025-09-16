@@ -3,8 +3,8 @@
     "relation": ["delegate_permission/common.handle_all_urls"],
     "target": {
       "namespace": "android_app",
-      "package_name": "com.ultimatephysique.app",
-      "sha256_cert_fingerprints": ["待更新"]
+      "package_name": "com.ultimatephysique.fitness2025",
+      "sha256_cert_fingerprints": ["請替換為您的應用程式簽名指紋"]
     }
   }
 ]

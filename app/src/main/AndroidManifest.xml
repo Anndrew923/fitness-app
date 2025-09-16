@@ -21,27 +21,25 @@
      the abbreviated format. -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!-- 網路權限 -->
+    <!-- 網路權限 - TWA 必需 -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
-    <!-- 通知權限 -->
+    <!-- 通知權限 - 可選，但已啟用 -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
 
-    <!-- 檔案存取權限 -->
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <!-- 移除檔案存取權限 - 對 TWA 不必要且可能被拒絕 -->
 
     <application
         android:name="Application"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/appName"
-
+        android:description="@string/app_description"
         android:manageSpaceActivity="com.google.androidbrowserhelper.trusted.ManageDataLauncherActivity"
-
         android:supportsRtl="true"
-        android:theme="@android:style/Theme.Translucent.NoTitleBar">
+        android:theme="@android:style/Theme.Translucent.NoTitleBar"
+        android:usesCleartextTraffic="false">
 
         <meta-data
             android:name="asset_statements"
@@ -95,11 +93,11 @@
                 android:resource="@color/navigationColorDark" />
 
             <meta-data
-                android:name="androix.browser.trusted.NAVIGATION_BAR_DIVIDER_COLOR"
+                android:name="androidx.browser.trusted.NAVIGATION_BAR_DIVIDER_COLOR"
                 android:resource="@color/navigationDividerColor" />
 
             <meta-data
-                android:name="androix.browser.trusted.NAVIGATION_BAR_DIVIDER_COLOR_DARK"
+                android:name="androidx.browser.trusted.NAVIGATION_BAR_DIVIDER_COLOR_DARK"
                 android:resource="@color/navigationDividerColorDark" />
 
             <meta-data android:name="android.support.customtabs.trusted.SPLASH_IMAGE_DRAWABLE"
@@ -144,13 +142,7 @@
                     android:pathPrefix="/" />
             </intent-filter>
 
-            <!-- 添加自定義 scheme 深層連結 -->
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW"/>
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE"/>
-                <data android:scheme="ultimatephysique" />
-            </intent-filter>
+            <!-- 移除自定義 scheme - 可能被審查員視為可疑 -->
 
 
 

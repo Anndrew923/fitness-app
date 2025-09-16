@@ -51,12 +51,16 @@ function Terms() {
         : 'en';
     try {
       window.switchTermsLanguage(initial);
-    } catch {}
+    } catch (error) {
+      console.warn('無法切換條款語言:', error);
+    }
 
     return () => {
       try {
         delete window.switchTermsLanguage;
-      } catch {}
+      } catch (error) {
+        console.warn('無法清理條款語言函數:', error);
+      }
     };
   }, [htmlContent, i18n.language]);
 

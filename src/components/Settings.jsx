@@ -12,7 +12,7 @@ import { useTranslation } from 'react-i18next';
 
 function Settings() {
   const navigate = useNavigate();
-  const { userData, clearUserData } = useUser();
+  const { clearUserData } = useUser();
   const [showPrivacy, setShowPrivacy] = useState(false);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
@@ -46,7 +46,8 @@ function Settings() {
         }
       }
       setMessage(t('settings.msgNoSW'));
-    } catch (e) {
+    } catch (error) {
+      console.error('檢查更新失敗:', error);
       setMessage(t('settings.msgCheckUpdateFail'));
     }
   }, []);
@@ -61,7 +62,8 @@ function Settings() {
       a.download = 'userData.json';
       a.click();
       URL.revokeObjectURL(url);
-    } catch (_) {
+    } catch (error) {
+      console.error('導出數據失敗:', error);
       setMessage(t('settings.msgExportFail'));
     }
   }, []);
@@ -72,7 +74,8 @@ function Settings() {
       localStorage.removeItem('lastSavedUserData');
       localStorage.removeItem('ladderSubmissionState');
       setMessage(t('settings.msgClearedLocal'));
-    } catch (_) {
+    } catch (error) {
+      console.error('清除數據失敗:', error);
       setMessage(t('settings.msgClearFail'));
     }
   }, []);
@@ -99,7 +102,8 @@ function Settings() {
       if (!email) throw new Error(t('settings.msgNeedRelogin'));
       const { signInWithEmailAndPassword } = await import('firebase/auth');
       await signInWithEmailAndPassword(auth, email, password);
-    } catch (e) {
+    } catch (error) {
+      console.error('密碼驗證失敗:', error);
       setMessage(t('settings.msgPasswordVerifyFail'));
       navigate('/login');
       return;
@@ -114,30 +118,35 @@ function Settings() {
       try {
         const avatarRef = ref(storage, `avatars/${uid}/avatar.jpg`);
         await deleteObject(avatarRef);
-      } catch (_) {}
+      } catch (error) {
+        console.warn('刪除頭像失敗:', error);
+      }
 
       // 刪除 Firestore 用戶文檔
       try {
         await deleteDoc(doc(db, 'users', uid));
-      } catch (_) {}
+      } catch (error) {
+        console.warn('刪除用戶文檔失敗:', error);
+      }
 
       // 刪除 Auth 帳號（需要近期登入）
       try {
         await deleteUser(auth.currentUser);
-      } catch (err) {
-        if (err?.code === 'auth/requires-recent-login') {
+      } catch (error) {
+        if (error?.code === 'auth/requires-recent-login') {
           setMessage(t('settings.msgNeedReloginToDelete'));
           navigate('/login');
           return;
         }
-        throw err;
+        throw error;
       }
 
       // 清理本地狀態
       clearUserData();
       setMessage(t('settings.msgDeleted'));
       navigate('/');
-    } catch (e) {
+    } catch (error) {
+      console.error('刪除帳號失敗:', error);
       setMessage(t('settings.msgDeleteFail'));
     } finally {
       setBusy(false);

@@ -171,62 +171,65 @@ export function UserProvider({ children }) {
   }, []);
 
   // 保存用戶數據到 Firebase
-  const saveUserData = useCallback(async data => {
-    if (!auth.currentUser || !data) {
-      console.warn('無法保存數據：用戶未登入或數據無效');
-      return false;
-    }
+  const saveUserData = useCallback(
+    async data => {
+      if (!auth.currentUser || !data) {
+        console.warn('無法保存數據：用戶未登入或數據無效');
+        return false;
+      }
 
-    // 檢查是否為模擬模式
-    if (isMockMode) {
-      console.log('⏭️ 模擬模式：跳過 Firebase 寫入，僅保存到本地');
-      localStorage.setItem('userData', JSON.stringify(data));
-      return true;
-    }
+      // 檢查是否為模擬模式
+      if (isMockMode) {
+        console.log('⏭️ 模擬模式：跳過 Firebase 寫入，僅保存到本地');
+        localStorage.setItem('userData', JSON.stringify(data));
+        return true;
+      }
 
-    try {
-      const userRef = doc(db, 'users', auth.currentUser.uid);
-      const dataToSave = {
-        ...data,
-        userId: auth.currentUser.uid,
-        updatedAt: new Date().toISOString(),
-        // 確保數值類型正確
-        height: Number(data.height) || 0,
-        weight: Number(data.weight) || 0,
-        age: Number(data.age) || 0,
-        // 確保年齡段被計算和保存
-        ageGroup: data.age
-          ? getAgeGroup(Number(data.age))
-          : data.ageGroup || '',
-        // 保持原有的天梯分數，不自動重新計算
-        ladderScore: data.ladderScore || 0,
-        // 確保天梯排名被保存
-        ladderRank: Number(data.ladderRank) || 0,
-        // 確保天梯提交時間被保存
-        lastLadderSubmission: data.lastLadderSubmission || null,
-        // 確保最後活動時間被保存
-        lastActive: data.lastActive || null,
-      };
+      try {
+        const userRef = doc(db, 'users', auth.currentUser.uid);
+        const dataToSave = {
+          ...data,
+          userId: auth.currentUser.uid,
+          updatedAt: new Date().toISOString(),
+          // 確保數值類型正確
+          height: Number(data.height) || 0,
+          weight: Number(data.weight) || 0,
+          age: Number(data.age) || 0,
+          // 確保年齡段被計算和保存
+          ageGroup: data.age
+            ? getAgeGroup(Number(data.age))
+            : data.ageGroup || '',
+          // 保持原有的天梯分數，不自動重新計算
+          ladderScore: data.ladderScore || 0,
+          // 確保天梯排名被保存
+          ladderRank: Number(data.ladderRank) || 0,
+          // 確保天梯提交時間被保存
+          lastLadderSubmission: data.lastLadderSubmission || null,
+          // 確保最後活動時間被保存
+          lastActive: data.lastActive || null,
+        };
 
-      await setDoc(userRef, dataToSave);
-      localStorage.setItem('userData', JSON.stringify(dataToSave));
+        await setDoc(userRef, dataToSave);
+        localStorage.setItem('userData', JSON.stringify(dataToSave));
 
-      // 記錄寫入操作
-      firebaseWriteMonitor.logWrite(
-        'setDoc',
-        'users',
-        auth.currentUser.uid,
-        dataToSave
-      );
+        // 記錄寫入操作
+        firebaseWriteMonitor.logWrite(
+          'setDoc',
+          'users',
+          auth.currentUser.uid,
+          dataToSave
+        );
 
-      return true;
-    } catch (error) {
-      console.error('保存用戶數據失敗:', error);
-      // 至少保存到本地
-      localStorage.setItem('userData', JSON.stringify(data));
-      return false;
-    }
-  }, [isMockMode]);
+        return true;
+      } catch (error) {
+        console.error('保存用戶數據失敗:', error);
+        // 至少保存到本地
+        localStorage.setItem('userData', JSON.stringify(data));
+        return false;
+      }
+    },
+    [isMockMode]
+  );
 
   // 新增：防抖引用
   const setUserDataDebounceRef = useRef(null);
@@ -410,8 +413,8 @@ export function UserProvider({ children }) {
         if (prevString === nextString) {
           return;
         }
-      } catch (e) {
-        // 若序列化失敗則繼續更新
+      } catch (error) {
+        console.warn('序列化比較失敗，繼續更新:', error);
       }
 
       // 立即更新本地狀態
@@ -442,7 +445,8 @@ export function UserProvider({ children }) {
             return (
               JSON.stringify(newData[field]) !== JSON.stringify(userData[field])
             );
-          } catch (e) {
+          } catch (error) {
+            console.warn('比較欄位失敗，視為有變化:', error);
             return true;
           }
         });

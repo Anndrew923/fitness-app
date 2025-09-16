@@ -1,10 +1,4 @@
-import React, {
-  useState,
-  useEffect,
-  useMemo,
-  useRef,
-  useCallback,
-} from 'react';
+import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { useUser } from '../UserContext';
 import { useLocation } from 'react-router-dom';
 import { auth, db } from '../firebase';
@@ -16,7 +10,7 @@ import { useTranslation } from 'react-i18next';
 const Ladder = () => {
   const { userData } = useUser();
   const location = useLocation();
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const [ladderData, setLadderData] = useState([]);
   const [userRank, setUserRank] = useState(0);
   const [selectedAgeGroup, setSelectedAgeGroup] = useState('all');

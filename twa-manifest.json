@@ -21,7 +21,7 @@
     "path": "C:\\Users\\User\\Dropbox\\fitness-app\\android.keystore",
     "alias": "upload"
   },
-  "appVersionName": "1.2",
+  "appVersionName": "1.1",
   "appVersionCode": 3,
   "shortcuts": [],
   "generatorApp": "bubblewrap-cli",
@@ -43,5 +43,5 @@
   "protocolHandlers": [],
   "fileHandlers": [],
   "launchHandlerClientMode": "",
-  "appVersion": "1.2"
+  "appVersion": "1.1"
 }

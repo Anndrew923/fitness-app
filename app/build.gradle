@@ -67,7 +67,12 @@ android {
         minSdkVersion 21
         targetSdkVersion 35
         versionCode 3
-        versionName "1.2"
+        versionName "1.1"
+
+        // 添加安全配置
+        manifestPlaceholders = [
+            'appAuthRedirectScheme': 'com.ultimatephysique.fitness2025'
+        ]
 
         // The name for the application
         resValue "string", "appName", twaManifest.name

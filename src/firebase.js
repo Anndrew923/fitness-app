@@ -9,12 +9,12 @@ import { getStorage } from 'firebase/storage';
 
 // 開發環境的預設配置
 const defaultConfig = {
-  apiKey: 'demo-api-key',
-  authDomain: 'demo-project.firebaseapp.com',
-  projectId: 'demo-project',
-  storageBucket: 'demo-project.appspot.com',
-  messagingSenderId: '123456789',
-  appId: 'demo-app-id',
+  apiKey: 'AIzaSyCxl9ki92NaxmXmxB8kc-SCuN_Cmle-MwA',
+  authDomain: 'fitness-app-69f08.firebaseapp.com',
+  projectId: 'fitness-app-69f08',
+  storageBucket: 'fitness-app-69f08.firebasestorage.app',
+  messagingSenderId: '51448990869',
+  appId: '1:51448990869:web:1fd63a1fa84e89bce1af4',
 };
 
 // 檢查是否為開發環境
@@ -44,8 +44,8 @@ try {
 
     console.log('開發環境 Firebase 配置:', firebaseConfig);
 
-    // 檢查是否使用 demo 配置
-    if (firebaseConfig.apiKey === defaultConfig.apiKey) {
+    // 檢查是否使用有效的 Firebase 配置
+    if (firebaseConfig.apiKey === 'demo-api-key') {
       console.warn(
         '⚠️ 警告：使用 demo Firebase 配置，認證功能將無法正常工作！'
       );
@@ -53,6 +53,8 @@ try {
       console.warn(
         '或者設置環境變數：VITE_FIREBASE_API_KEY, VITE_FIREBASE_AUTH_DOMAIN 等'
       );
+    } else {
+      console.log('✅ 使用有效的 Firebase 配置');
     }
   } else {
     // 生產環境：嚴格檢查環境變數
@@ -119,13 +121,13 @@ try {
         callback(null);
         return () => {}; // 返回清理函數
       },
-      signInWithEmailAndPassword: async (auth, email, password) => {
+      signInWithEmailAndPassword: async (auth, email) => {
         console.log('模擬登入被調用:', email);
         throw new Error(
           'Firebase 未正確配置，無法進行真實認證。請檢查環境變數配置。'
         );
       },
-      createUserWithEmailAndPassword: async (auth, email, password) => {
+      createUserWithEmailAndPassword: async (auth, email) => {
         console.log('模擬註冊被調用:', email);
         throw new Error(
           'Firebase 未正確配置，無法進行真實認證。請檢查環境變數配置。'

@@ -25,10 +25,7 @@ import {
   deleteDoc,
 } from 'firebase/firestore';
 import firebaseWriteMonitor from '../utils/firebaseMonitor';
-import {
-  processCommentAddition,
-  getCommentStats,
-} from '../utils/commentLimiter';
+import { processCommentAddition } from '../utils/commentLimiter';
 
 import './Community.css';
 import PropTypes from 'prop-types';
@@ -80,21 +77,7 @@ const Community = () => {
     return auth.currentUser?.uid;
   }, [auth.currentUser?.uid]);
 
-  const allowedUserIds = useMemo(() => {
-    const friendIds = userData?.friends || [];
-    return [currentUserId, ...friendIds].filter(Boolean);
-  }, [currentUserId, userData?.friends]);
-
-  const filteredPosts = useMemo(() => {
-    if (!searchQuery.trim()) {
-      return posts;
-    }
-    return posts.filter(
-      post =>
-        post.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        post.userNickname.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-  }, [posts, searchQuery]);
+  // 移除未使用的變數以優化性能
 
   // 載入動態 - 優化版本（避免複合索引問題）
   const loadPosts = useCallback(async () => {
@@ -2079,6 +2062,9 @@ PostCard.propTypes = {
     timestamp: PropTypes.any.isRequired,
     likes: PropTypes.array.isRequired,
     comments: PropTypes.array.isRequired,
+    commentCount: PropTypes.number,
+    targetUserId: PropTypes.string,
+    targetUserNickname: PropTypes.string,
   }).isRequired,
   currentUserId: PropTypes.string.isRequired,
   onToggleLike: PropTypes.func.isRequired,
@@ -2090,5 +2076,7 @@ PostCard.propTypes = {
   likeProcessing: PropTypes.instanceOf(Set).isRequired,
   commentProcessing: PropTypes.instanceOf(Set).isRequired,
 };
+
+PostCard.displayName = 'PostCard';
 
 export default Community;
