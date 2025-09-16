@@ -1,11 +1,32 @@
 import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
+import { copyFileSync, mkdirSync } from 'fs';
+import { resolve } from 'path';
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
 
   return {
-    plugins: [react()],
+    plugins: [
+      react(),
+      {
+        name: 'copy-well-known',
+        closeBundle() {
+          // 確保 .well-known 目錄存在
+          try {
+            mkdirSync(resolve('dist/.well-known'), { recursive: true });
+            // 複製 assetlinks.json
+            copyFileSync(
+              resolve('public/.well-known/assetlinks.json'),
+              resolve('dist/.well-known/assetlinks.json')
+            );
+            console.log('✅ Successfully copied .well-known/assetlinks.json');
+          } catch (error) {
+            console.error('❌ Failed to copy .well-known files:', error);
+          }
+        }
+      }
+    ],
 
     server: {
       port: 5173,
