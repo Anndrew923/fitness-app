@@ -14,6 +14,12 @@
     Content-Type = "application/json"
     Access-Control-Allow-Origin = "*"
 
+# 優先處理 .well-known 目錄，避免被重定向
+[[redirects]]
+  from = "/.well-known/*"
+  to = "/.well-known/:splat"
+  status = 200
+
 [[redirects]]
   from = "/assets/*"
   to = "/assets/:splat"
