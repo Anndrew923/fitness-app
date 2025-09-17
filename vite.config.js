@@ -19,19 +19,21 @@ export default defineConfig(({ mode }) => {
               resolve('public/.well-known/assetlinks.json'),
               resolve('dist/.well-known/assetlinks.json')
             );
-            
+
             // 方法2：複製到根目錄（備用方案）
             copyFileSync(
               resolve('public/assetlinks.json'),
               resolve('dist/assetlinks.json')
             );
-            
-            console.log('✅ Successfully copied assetlinks.json to both locations');
+
+            console.log(
+              '✅ Successfully copied assetlinks.json to both locations'
+            );
           } catch (error) {
             console.error('❌ Failed to copy assetlinks files:', error);
           }
-        }
-      }
+        },
+      },
     ],
 
     server: {
@@ -39,16 +41,16 @@ export default defineConfig(({ mode }) => {
       open: true,
       // 防止 Windows 檔案鎖定問題
       fs: {
-        strict: false
+        strict: false,
       },
       // 優化 HMR 配置，防止檔案鎖定
       hmr: {
-        overlay: false
+        overlay: false,
       },
       // 防止 Windows 檔案鎖定
       watch: {
         usePolling: false,
-        interval: 1000
+        interval: 1000,
       },
       // 開發環境：只在需要時允許 eval
       headers:

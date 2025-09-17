@@ -1,18 +1,18 @@
 // 廣告配置
 export const adConfig = {
   // AdSense 客戶 ID（從 Google AdSense 獲取）
-  clientId: process.env.VITE_ADSENSE_CLIENT_ID || 'ca-pub-XXXXXXXXXXXXXXXX',
+  clientId: import.meta.env.VITE_ADSENSE_CLIENT_ID || 'ca-pub-XXXXXXXXXXXXXXXX',
 
   // 廣告單元 ID 配置
   adUnits: {
     // 底部橫幅廣告
-    bottomBanner: process.env.VITE_ADSENSE_BOTTOM_BANNER_ID || null,
+    bottomBanner: import.meta.env.VITE_ADSENSE_BOTTOM_BANNER_ID || null,
 
     // 頂部橫幅廣告
-    topBanner: process.env.VITE_ADSENSE_TOP_BANNER_ID || null,
+    topBanner: import.meta.env.VITE_ADSENSE_TOP_BANNER_ID || null,
 
     // 內嵌廣告
-    inline: process.env.VITE_ADSENSE_INLINE_ID || null,
+    inline: import.meta.env.VITE_ADSENSE_INLINE_ID || null,
   },
 
   // 評測頁面 - 只在結果頁面顯示底部廣告

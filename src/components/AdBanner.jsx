@@ -10,7 +10,7 @@ const AdBanner = ({
   adUnitId = null, // 從 AdMob 獲取的廣告單元 ID
 }) => {
   const adRef = useRef(null);
-  const isDevelopment = process.env.NODE_ENV === 'development';
+  const isDevelopment = import.meta.env.MODE === 'development';
 
   useEffect(() => {
     // 如果不需要顯示廣告，返回
