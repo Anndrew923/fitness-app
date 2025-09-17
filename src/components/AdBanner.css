@@ -146,6 +146,31 @@
   padding-bottom: 120px; /* 為固定廣告和底部導航預留空間 */
 }
 
+/* 隱藏頂部廣告 - 避免影響用戶體驗 */
+.ad-banner--top {
+  display: none !important;
+}
+
+/* 隱藏 AdSense 自動生成的頂部廣告 */
+ins[data-ad-status='unfilled'],
+ins[data-ad-status='filled'] {
+  position: relative;
+}
+
+/* 隱藏頂部錨定廣告 */
+.adsbygoogle[data-ad-format='anchor'] {
+  display: none !important;
+}
+
+/* 只顯示底部廣告 */
+.adsbygoogle[data-ad-format='auto'] {
+  position: fixed !important;
+  bottom: 70px !important;
+  left: 0 !important;
+  right: 0 !important;
+  z-index: 950 !important;
+}
+
 /* 響應式設計 */
 @media (max-width: 768px) {
   .ad-banner {
@@ -166,5 +191,10 @@
 
   .page-with-fixed-ad {
     padding-bottom: 114px; /* 手機版調整間距 */
+  }
+
+  /* 手機版隱藏頂部廣告 */
+  .adsbygoogle[data-ad-format='auto'] {
+    bottom: 64px !important;
   }
 }

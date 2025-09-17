@@ -26,10 +26,19 @@ export const adConfig = {
 
   // 其他頁面
   otherPages: {
-    userInfo: { showTop: false, showBottom: false },
-    history: { showTop: false, showBottom: true },
-    ladder: { showTop: false, showBottom: true },
-    guest: { showTop: false, showBottom: false },
+    userInfo: { showTop: false, showBottom: false }, // 用戶資訊頁面不顯示廣告
+    history: { showTop: false, showBottom: true }, // 歷史記錄頁面顯示底部廣告
+    ladder: { showTop: false, showBottom: false }, // 天梯頁面不顯示廣告（保持乾淨）
+    guest: { showTop: false, showBottom: false }, // 訪客模式不顯示廣告
+    home: { showTop: false, showBottom: false }, // 首頁不顯示廣告
+    login: { showTop: false, showBottom: false }, // 登入頁面不顯示廣告
+    'privacy-policy': { showTop: false, showBottom: false }, // 隱私政策不顯示廣告
+    terms: { showTop: false, showBottom: false }, // 條款頁面不顯示廣告
+    about: { showTop: false, showBottom: false }, // 關於頁面不顯示廣告
+    disclaimer: { showTop: false, showBottom: false }, // 免責聲明不顯示廣告
+    contact: { showTop: false, showBottom: false }, // 聯絡頁面不顯示廣告
+    settings: { showTop: false, showBottom: false }, // 設定頁面不顯示廣告
+    community: { showTop: false, showBottom: false }, // 社群頁面不顯示廣告
   },
 
   // 廣告顯示頻率控制
