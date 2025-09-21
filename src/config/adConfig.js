@@ -15,19 +15,19 @@ export const adConfig = {
     inline: import.meta.env.VITE_ADSENSE_INLINE_ID || null,
   },
 
-  // 評測頁面 - 只在結果頁面顯示底部廣告
+  // 評測頁面 - 暫時不顯示廣告，等有足夠內容後再啟用
   testPages: {
-    strength: { showTop: false, showBottom: true },
-    cardio: { showTop: false, showBottom: true },
-    explosivePower: { showTop: false, showBottom: true },
-    muscleMass: { showTop: false, showBottom: true },
-    bodyFat: { showTop: false, showBottom: true },
+    strength: { showTop: false, showBottom: false }, // 暫時關閉，等內容豐富後再啟用
+    cardio: { showTop: false, showBottom: false },
+    explosivePower: { showTop: false, showBottom: false },
+    muscleMass: { showTop: false, showBottom: false },
+    bodyFat: { showTop: false, showBottom: false },
   },
 
   // 其他頁面
   otherPages: {
     userInfo: { showTop: false, showBottom: false }, // 用戶資訊頁面不顯示廣告
-    history: { showTop: false, showBottom: true }, // 歷史記錄頁面顯示底部廣告
+    history: { showTop: false, showBottom: false }, // 暫時關閉，等內容豐富後再啟用
     ladder: { showTop: false, showBottom: false }, // 天梯頁面不顯示廣告（保持乾淨）
     guest: { showTop: false, showBottom: false }, // 訪客模式不顯示廣告
     home: { showTop: false, showBottom: false }, // 首頁不顯示廣告
@@ -38,7 +38,7 @@ export const adConfig = {
     disclaimer: { showTop: false, showBottom: false }, // 免責聲明不顯示廣告
     contact: { showTop: false, showBottom: false }, // 聯絡頁面不顯示廣告
     settings: { showTop: false, showBottom: false }, // 設定頁面不顯示廣告
-    community: { showTop: false, showBottom: false }, // 社群頁面不顯示廣告
+    community: { showTop: false, showBottom: true }, // 社群頁面內容豐富，可以顯示廣告
   },
 
   // 廣告顯示頻率控制
@@ -91,7 +91,27 @@ export const getAdUnitId = (position = 'bottom') => {
 // 檢查是否應該顯示廣告
 export const shouldShowAd = (pageName, position = 'bottom') => {
   const pageConfig = getPageAdConfig(pageName);
-  return position === 'top' ? pageConfig.showTop : pageConfig.showBottom;
+  const shouldShow = position === 'top' ? pageConfig.showTop : pageConfig.showBottom;
+  
+  // 額外檢查：確保頁面有足夠內容
+  if (shouldShow) {
+    // 檢查頁面是否有足夠的內容來支撐廣告
+    const hasEnoughContent = checkPageContent(pageName);
+    return hasEnoughContent;
+  }
+  
+  return shouldShow;
+};
+
+// 檢查頁面內容是否足夠
+const checkPageContent = (pageName) => {
+  // 社群頁面通常有豐富內容
+  if (pageName === 'community') {
+    return true;
+  }
+  
+  // 其他頁面暫時不顯示廣告，等內容豐富後再啟用
+  return false;
 };
 
 // 廣告載入狀態管理
