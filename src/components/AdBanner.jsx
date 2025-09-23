@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
+import { preAdDisplayCheck } from '../utils/adsenseCompliance';
 import './AdBanner.css';
 
 const AdBanner = ({
@@ -20,6 +21,15 @@ const AdBanner = ({
 
     // 如果是開發環境或沒有廣告單元 ID，顯示測試廣告
     if (isDevelopment || !adUnitId) {
+      return;
+    }
+
+    // AdSense 合規檢查
+    const pageContent = document.body.innerText || '';
+    const currentPage = window.location.pathname.replace('/', '') || 'home';
+    
+    if (!preAdDisplayCheck(currentPage, pageContent)) {
+      console.log('AdSense 合規檢查失敗，不顯示廣告');
       return;
     }
 

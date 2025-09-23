@@ -1,0 +1,3 @@
+# ads.txt file for Google AdSense
+# This file helps protect your ad revenue
+google.com, pub-5869708488609837, DIRECT, f08c47fec0942fa0

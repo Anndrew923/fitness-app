@@ -15,19 +15,19 @@ export const adConfig = {
     inline: import.meta.env.VITE_ADSENSE_INLINE_ID || null,
   },
 
-  // 評測頁面 - 暫時不顯示廣告，等有足夠內容後再啟用
+  // 評測頁面 - 只在有評測結果時顯示廣告
   testPages: {
-    strength: { showTop: false, showBottom: false }, // 暫時關閉，等內容豐富後再啟用
-    cardio: { showTop: false, showBottom: false },
-    explosivePower: { showTop: false, showBottom: false },
-    muscleMass: { showTop: false, showBottom: false },
-    bodyFat: { showTop: false, showBottom: false },
+    strength: { showTop: false, showBottom: true }, // 有評測結果時顯示
+    cardio: { showTop: false, showBottom: true },
+    explosivePower: { showTop: false, showBottom: true },
+    muscleMass: { showTop: false, showBottom: true },
+    bodyFat: { showTop: false, showBottom: true },
   },
 
   // 其他頁面
   otherPages: {
     userInfo: { showTop: false, showBottom: false }, // 用戶資訊頁面不顯示廣告
-    history: { showTop: false, showBottom: false }, // 暫時關閉，等內容豐富後再啟用
+    history: { showTop: false, showBottom: true }, // 有歷史數據時顯示
     ladder: { showTop: false, showBottom: false }, // 天梯頁面不顯示廣告（保持乾淨）
     guest: { showTop: false, showBottom: false }, // 訪客模式不顯示廣告
     home: { showTop: false, showBottom: false }, // 首頁不顯示廣告
@@ -91,27 +91,72 @@ export const getAdUnitId = (position = 'bottom') => {
 // 檢查是否應該顯示廣告
 export const shouldShowAd = (pageName, position = 'bottom') => {
   const pageConfig = getPageAdConfig(pageName);
-  const shouldShow = position === 'top' ? pageConfig.showTop : pageConfig.showBottom;
-  
+  const shouldShow =
+    position === 'top' ? pageConfig.showTop : pageConfig.showBottom;
+
   // 額外檢查：確保頁面有足夠內容
   if (shouldShow) {
     // 檢查頁面是否有足夠的內容來支撐廣告
     const hasEnoughContent = checkPageContent(pageName);
     return hasEnoughContent;
   }
-  
+
   return shouldShow;
 };
 
-// 檢查頁面內容是否足夠
+// 智能內容驗證系統
 const checkPageContent = (pageName) => {
-  // 社群頁面通常有豐富內容
+  // 根據 Google AdSense 政策，只有內容豐富的頁面才能顯示廣告
+  
+  // 1. 社群頁面 - 有豐富的用戶生成內容
   if (pageName === 'community') {
     return true;
   }
   
-  // 其他頁面暫時不顯示廣告，等內容豐富後再啟用
+  // 2. 歷史頁面 - 有數據和圖表內容
+  if (pageName === 'history') {
+    // 檢查是否有歷史數據
+    const hasHistoryData = checkHistoryData();
+    return hasHistoryData;
+  }
+  
+  // 3. 評測結果頁面 - 有詳細的評測結果和建議
+  if (['strength', 'cardio', 'explosivePower', 'muscleMass', 'bodyFat'].includes(pageName)) {
+    // 檢查是否有評測結果
+    const hasTestResults = checkTestResults(pageName);
+    return hasTestResults;
+  }
+  
+  // 其他頁面暫時不顯示廣告，確保符合政策
   return false;
+};
+
+// 檢查歷史數據是否存在
+const checkHistoryData = () => {
+  try {
+    const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+    const history = userData.history || [];
+    return history.length > 0;
+  } catch {
+    return false;
+  }
+};
+
+// 檢查評測結果是否存在
+const checkTestResults = (testType) => {
+  try {
+    const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+    const testInputs = userData.testInputs || {};
+    const testData = testInputs[testType] || {};
+    
+    // 檢查是否有任何評測數據
+    return Object.keys(testData).length > 0 && 
+           Object.values(testData).some(value => 
+             value !== null && value !== '' && value !== undefined
+           );
+  } catch {
+    return false;
+  }
 };
 
 // 廣告載入狀態管理
