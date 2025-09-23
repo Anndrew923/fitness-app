@@ -105,28 +105,32 @@ export const shouldShowAd = (pageName, position = 'bottom') => {
 };
 
 // 智能內容驗證系統
-const checkPageContent = (pageName) => {
+const checkPageContent = pageName => {
   // 根據 Google AdSense 政策，只有內容豐富的頁面才能顯示廣告
-  
+
   // 1. 社群頁面 - 有豐富的用戶生成內容
   if (pageName === 'community') {
     return true;
   }
-  
+
   // 2. 歷史頁面 - 有數據和圖表內容
   if (pageName === 'history') {
     // 檢查是否有歷史數據
     const hasHistoryData = checkHistoryData();
     return hasHistoryData;
   }
-  
+
   // 3. 評測結果頁面 - 有詳細的評測結果和建議
-  if (['strength', 'cardio', 'explosivePower', 'muscleMass', 'bodyFat'].includes(pageName)) {
+  if (
+    ['strength', 'cardio', 'explosivePower', 'muscleMass', 'bodyFat'].includes(
+      pageName
+    )
+  ) {
     // 檢查是否有評測結果
     const hasTestResults = checkTestResults(pageName);
     return hasTestResults;
   }
-  
+
   // 其他頁面暫時不顯示廣告，確保符合政策
   return false;
 };
@@ -143,17 +147,19 @@ const checkHistoryData = () => {
 };
 
 // 檢查評測結果是否存在
-const checkTestResults = (testType) => {
+const checkTestResults = testType => {
   try {
     const userData = JSON.parse(localStorage.getItem('userData') || '{}');
     const testInputs = userData.testInputs || {};
     const testData = testInputs[testType] || {};
-    
+
     // 檢查是否有任何評測數據
-    return Object.keys(testData).length > 0 && 
-           Object.values(testData).some(value => 
-             value !== null && value !== '' && value !== undefined
-           );
+    return (
+      Object.keys(testData).length > 0 &&
+      Object.values(testData).some(
+        value => value !== null && value !== '' && value !== undefined
+      )
+    );
   } catch {
     return false;
   }

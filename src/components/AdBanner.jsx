@@ -27,7 +27,7 @@ const AdBanner = ({
     // AdSense 合規檢查
     const pageContent = document.body.innerText || '';
     const currentPage = window.location.pathname.replace('/', '') || 'home';
-    
+
     if (!preAdDisplayCheck(currentPage, pageContent)) {
       console.log('AdSense 合規檢查失敗，不顯示廣告');
       return;
@@ -76,7 +76,7 @@ const AdBanner = ({
     return null;
   }
 
-  // 開發環境或沒有廣告單元 ID 時顯示測試廣告
+  // 開發環境或沒有廣告單元 ID 時顯示優化的預留空間
   if (isDevelopment || !adUnitId) {
     return (
       <div
@@ -84,11 +84,13 @@ const AdBanner = ({
           isFixed ? 'ad-banner--fixed' : ''
         } ${className}`}
       >
-        <div className="ad-banner__test">
-          <div className="ad-banner__test-content">
-            <span className="ad-banner__test-label">🎯 廣告空間預留 🎯</span>
-            <span className="ad-banner__test-size">
-              {isDevelopment ? '開發模式 - 測試廣告' : '請設置廣告單元 ID'}
+        <div className="ad-banner__placeholder">
+          <div className="ad-banner__placeholder-content">
+            <span className="ad-banner__placeholder-label">
+              {isDevelopment ? '🔧 開發模式' : '📱 廣告空間'}
+            </span>
+            <span className="ad-banner__placeholder-subtitle">
+              {isDevelopment ? '測試廣告位置' : '等待 AdSense 審查通過'}
             </span>
           </div>
         </div>
