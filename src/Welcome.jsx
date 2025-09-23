@@ -89,6 +89,27 @@ function Welcome({ onGuestMode }) {
       <div className="welcome-content">
         <h1 className="welcome-title">{t('welcome.title')}</h1>
         <p className="welcome-subtitle">{t('welcome.subtitle')}</p>
+
+        {/* 添加更多有價值的內容 */}
+        <div className="welcome-features">
+          <div className="feature-card">
+            <h3>🏋️ 專業評測</h3>
+            <p>提供力量、心肺、爆發力、肌肉量、體脂等多項專業評測</p>
+          </div>
+          <div className="feature-card">
+            <h3>📊 詳細分析</h3>
+            <p>基於科學標準，提供個人化的健身建議和進步追蹤</p>
+          </div>
+          <div className="feature-card">
+            <h3>👥 社群互動</h3>
+            <p>與其他健身愛好者分享成果，互相激勵成長</p>
+          </div>
+          <div className="feature-card">
+            <h3>📈 歷史記錄</h3>
+            <p>完整記錄您的健身歷程，見證每一次進步</p>
+          </div>
+        </div>
+
         <div className="button-group-mode">
           <div className="button-with-tooltip">
             <button
