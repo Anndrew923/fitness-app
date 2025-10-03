@@ -74,7 +74,7 @@
 
 /* Hero Section */
 .hero-section {
-  padding: 2rem 2rem 2.5rem;
+  padding: 2rem 2rem 3rem;
   max-width: 1000px;
   margin: 6rem auto 2rem;
   background: rgba(255, 255, 255, 0.95);
@@ -442,17 +442,21 @@
 /* 標語 */
 .radar-slogan {
   text-align: center;
-  font-size: 1.2rem;
+  font-size: 1.1rem;
   font-weight: 700;
   background: linear-gradient(45deg, #ff6b35, #f7931e, #ffd700);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
   margin-top: 1.5rem;
-  margin-bottom: 2rem;
+  margin-bottom: 1rem;
   text-shadow: 0 0 10px rgba(255, 107, 53, 0.3);
   text-transform: uppercase;
   letter-spacing: 1px;
+  line-height: 1.3;
+  padding: 0 1rem;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 @keyframes float {
@@ -738,7 +742,7 @@
 /* Responsive Design */
 @media (max-width: 768px) {
   .hero-section {
-    padding: 1.5rem 1.5rem 2rem;
+    padding: 1.5rem 1.5rem 2.5rem;
     margin: 5rem 1rem 1rem;
     text-align: center;
   }
@@ -770,6 +774,12 @@
 
   .hero-visual {
     padding: 1.5rem 0;
+  }
+
+  .radar-slogan {
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+    padding: 0 0.5rem;
   }
 
   .features-grid,
