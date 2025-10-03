@@ -1,4 +1,10 @@
-import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import React, {
+  useState,
+  useEffect,
+  useMemo,
+  useCallback,
+  useRef,
+} from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useUser } from './UserContext';
 import {
@@ -2016,4 +2022,4 @@ UserInfo.propTypes = {
   clearTestData: PropTypes.func.isRequired,
 };
 
-export default UserInfo;
+export default React.memo(UserInfo);

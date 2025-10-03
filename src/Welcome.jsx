@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from './UserContext';
 import { auth } from './firebase';
@@ -117,4 +117,4 @@ Welcome.propTypes = {
   onGuestMode: PropTypes.func,
 };
 
-export default Welcome;
+export default React.memo(Welcome);

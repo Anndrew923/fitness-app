@@ -1,4 +1,10 @@
-import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
+import React, {
+  useState,
+  useEffect,
+  useMemo,
+  useRef,
+  useCallback,
+} from 'react';
 import { useUser } from '../UserContext';
 import { useLocation } from 'react-router-dom';
 import { auth, db } from '../firebase';
@@ -930,4 +936,4 @@ const Ladder = () => {
   );
 };
 
-export default Ladder;
+export default React.memo(Ladder);

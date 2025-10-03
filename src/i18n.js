@@ -139,6 +139,83 @@ const zhTW = {
       contact: '聯絡我們',
     },
 
+    // 首頁
+    landing: {
+      hero: {
+        title: '【健身RPG】\n運動升級邁向最強肉體',
+        subtitle:
+          '5大能力值科學評測，升級你的肉體，與全球健身玩家競逐天梯排行榜',
+        startButton: '立即開始評測',
+        guestButton: '訪客模式體驗',
+        slogan: '打造五邊形全能戰士',
+      },
+      features: {
+        title: '核心功能特色',
+        strength: {
+          title: '力量評測',
+          desc: '胸、肩、背、腿、核心全面評測',
+        },
+        power: {
+          title: '爆發力評測',
+          desc: '垂直跳躍、立定跳遠、衝刺測試',
+        },
+        cardio: {
+          title: '心肺耐力',
+          desc: '跑步測試，評估心血管健康狀況',
+        },
+        muscle: {
+          title: '肌肉量評估',
+          desc: '骨骼肌肉量計算與分析',
+        },
+        bodyfat: {
+          title: '體脂分析',
+          desc: 'FFMI 指數計算，科學評估體脂率',
+        },
+        ladder: {
+          title: '天梯排行榜',
+          desc: '與全球用戶競爭，激勵持續進步',
+        },
+      },
+      stats: {
+        title: '應用數據',
+        assessments: '大評測項目',
+        scoring: '分評分系統',
+        availability: '全天候服務',
+        languages: '種語言支援',
+      },
+      users: {
+        title: '適用人群',
+        fitness: {
+          title: '健身愛好者',
+          desc: '追蹤訓練效果，設定健身目標',
+        },
+        athletes: {
+          title: '運動員',
+          desc: '評估體能狀態，優化訓練計畫',
+        },
+        coaches: {
+          title: '健身教練',
+          desc: '教學輔助工具，學員評估',
+        },
+        general: {
+          title: '一般用戶',
+          desc: '了解身體狀況，開始健身之旅',
+        },
+      },
+      cta: {
+        title: '準備好開始你的健身評測之旅了嗎？',
+        subtitle: '立即註冊或使用訪客模式開始體驗',
+        startButton: '立即開始評測',
+        guestButton: '訪客模式體驗',
+      },
+      footer: {
+        about: '關於我們',
+        privacy: '隱私政策',
+        terms: '使用條款',
+        contact: '聯絡我們',
+      },
+    },
+
     // 歡迎頁面
     welcome: {
       title: '歡迎來到最強肉體',
@@ -1049,6 +1126,83 @@ const enUS = {
       about: 'About',
       disclaimer: 'Disclaimer',
       contact: 'Contact',
+    },
+
+    // 首頁
+    landing: {
+      hero: {
+        title: '[Fitness RPG]\nExercise to Upgrade Your Ultimate Physique',
+        subtitle:
+          '5 ability assessments, upgrade your physique, compete with global fitness players on the leaderboard',
+        startButton: 'Start Assessment Now',
+        guestButton: 'Try Guest Mode',
+        slogan: 'Build Your Pentagon Warrior',
+      },
+      features: {
+        title: 'Core Features',
+        strength: {
+          title: 'Strength Assessment',
+          desc: 'Comprehensive assessment of chest, shoulders, back, legs, and core',
+        },
+        power: {
+          title: 'Explosive Power Assessment',
+          desc: 'Vertical jump, standing long jump, sprint test',
+        },
+        cardio: {
+          title: 'Cardiovascular Endurance',
+          desc: 'Running test to evaluate cardiovascular health',
+        },
+        muscle: {
+          title: 'Muscle Mass Assessment',
+          desc: 'Skeletal muscle mass calculation and analysis',
+        },
+        bodyfat: {
+          title: 'Body Fat Analysis',
+          desc: 'FFMI index calculation for scientific body fat assessment',
+        },
+        ladder: {
+          title: 'Leaderboard',
+          desc: 'Compete with global users to motivate continuous improvement',
+        },
+      },
+      stats: {
+        title: 'App Statistics',
+        assessments: 'Assessment Categories',
+        scoring: 'Point Scoring System',
+        availability: '24/7 Service',
+        languages: 'Language Support',
+      },
+      users: {
+        title: 'Target Users',
+        fitness: {
+          title: 'Fitness Enthusiasts',
+          desc: 'Track training effects and set fitness goals',
+        },
+        athletes: {
+          title: 'Athletes',
+          desc: 'Assess physical condition and optimize training plans',
+        },
+        coaches: {
+          title: 'Fitness Coaches',
+          desc: 'Teaching assistant tools and student assessment',
+        },
+        general: {
+          title: 'General Users',
+          desc: 'Understand physical condition and start fitness journey',
+        },
+      },
+      cta: {
+        title: 'Ready to start your fitness assessment journey?',
+        subtitle: 'Register now or try guest mode to get started',
+        startButton: 'Start Assessment Now',
+        guestButton: 'Try Guest Mode',
+      },
+      footer: {
+        about: 'About Us',
+        privacy: 'Privacy Policy',
+        terms: 'Terms of Service',
+        contact: 'Contact Us',
+      },
     },
 
     // 歡迎頁面

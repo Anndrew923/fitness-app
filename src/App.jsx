@@ -11,6 +11,7 @@ import { auth } from './firebase';
 import { signInWithEmailAndPassword, signOut } from 'firebase/auth';
 import PropTypes from 'prop-types';
 import ScrollToTop from './ScrollToTop';
+const LandingPage = React.lazy(() => import('./LandingPage'));
 const Welcome = React.lazy(() => import('./Welcome'));
 const UserInfo = React.lazy(() => import('./UserInfo'));
 const Strength = React.lazy(() => import('./Strength'));
@@ -300,8 +301,9 @@ function AppContent() {
         <Suspense fallback={<div>{t('common.loading')}</div>}>
           <div className="main-content">
             <Routes>
+              <Route path="/" element={<LandingPage />} />
               <Route
-                path="/"
+                path="/welcome"
                 element={
                   auth.currentUser ? (
                     <Navigate to="/user-info" />

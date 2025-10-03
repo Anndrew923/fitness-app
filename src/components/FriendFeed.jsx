@@ -1129,4 +1129,4 @@ const FriendFeed = () => {
   );
 };
 
-export default FriendFeed;
+export default React.memo(FriendFeed);

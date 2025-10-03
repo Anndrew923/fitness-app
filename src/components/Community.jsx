@@ -2079,4 +2079,4 @@ PostCard.propTypes = {
 
 PostCard.displayName = 'PostCard';
 
-export default Community;
+export default React.memo(Community);

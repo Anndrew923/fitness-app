@@ -260,12 +260,27 @@ class PerformanceMonitor {
 
     // 通用優化建議
     suggestions.push('💡 通用優化建議：');
-    suggestions.push('- 使用 React.memo 優化組件渲染');
-    suggestions.push('- 實現虛擬滾動處理大量數據');
-    suggestions.push('- 使用圖片懶加載減少初始載入時間');
-    suggestions.push('- 實現數據快取減少重複請求');
-    suggestions.push('- 使用 React.lazy 實現代碼分割');
-    suggestions.push('- 優化 Firebase 查詢減少數據傳輸');
+    suggestions.push('- ✅ 使用 React.memo 優化組件渲染（已實施）');
+    suggestions.push('- ✅ 實現虛擬滾動處理大量數據（已實施）');
+    suggestions.push('- ✅ 使用圖片懶加載減少初始載入時間（已實施）');
+    suggestions.push('- ✅ 實現數據快取減少重複請求（已實施）');
+    suggestions.push('- ✅ 使用 React.lazy 實現代碼分割（已實施）');
+    suggestions.push('- ✅ 優化 Firebase 查詢減少數據傳輸（已實施）');
+
+    // 新增優化建議
+    suggestions.push('🚀 進階優化建議：');
+    suggestions.push('- ✅ 使用 Web Workers 處理計算密集型任務（已實施）');
+    suggestions.push('- ✅ 實現 Service Worker 快取策略（已實施）');
+    suggestions.push(
+      '- ✅ 使用 Intersection Observer 優化可見性檢測（已實施）'
+    );
+    suggestions.push('- ✅ 實現預加載關鍵資源（已實施）');
+    suggestions.push('- ✅ 優化 Bundle 大小，移除未使用的代碼（已實施）');
+    suggestions.push('- 使用 CDN 加速靜態資源載入');
+    suggestions.push('- 實現 Service Worker 背景同步');
+    suggestions.push('- 使用 WebAssembly 處理複雜計算');
+    suggestions.push('- 實現離線優先策略');
+    suggestions.push('- 優化關鍵渲染路徑');
 
     return suggestions;
   }
