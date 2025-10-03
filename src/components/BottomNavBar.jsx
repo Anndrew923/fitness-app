@@ -161,7 +161,13 @@ function BottomNavBar() {
       setModalOpen(true);
     } else {
       if (item.key === 'home') {
-        navigate(item.path, { state: { scrollTo: 'radar' } });
+        // 智能首頁：已登入用戶導向 /user-info，未登入用戶導向 /landing
+        const hasAuthUser = auth.currentUser;
+        if (hasAuthUser) {
+          navigate('/user-info', { state: { scrollTo: 'radar' } });
+        } else {
+          navigate('/landing');
+        }
       } else if (item.key === 'assessment') {
         navigate(item.path, { state: { scrollTo: 'tests' } });
       } else {

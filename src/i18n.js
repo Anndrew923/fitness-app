@@ -208,6 +208,18 @@ const zhTW = {
         startButton: '立即開始評測',
         guestButton: '訪客模式體驗',
       },
+      info: {
+        title: '了解更多',
+        subtitle: '深入了解我們的評測系統和團隊背景',
+        features: {
+          title: '功能介紹',
+          desc: '了解5大評測的科學原理',
+        },
+        about: {
+          title: '關於我們',
+          desc: '認識我們的團隊和理念',
+        },
+      },
       footer: {
         about: '關於我們',
         privacy: '隱私政策',
@@ -217,6 +229,12 @@ const zhTW = {
     },
 
     // 歡迎頁面
+    welcomeSplash: {
+      loading: '正在載入遊戲...',
+      ready: '準備就緒！',
+      tip: '準備好開始你的健身冒險了嗎？',
+      version: '終極肉體評測系統',
+    },
     welcome: {
       title: '歡迎來到最強肉體',
       subtitle: '留下運動數據,進步多少馬上知道',
@@ -1197,6 +1215,18 @@ const enUS = {
         startButton: 'Start Assessment Now',
         guestButton: 'Try Guest Mode',
       },
+      info: {
+        title: 'Learn More',
+        subtitle: 'Discover our assessment system and team background',
+        features: {
+          title: 'Features',
+          desc: 'Learn about the science behind 5 assessments',
+        },
+        about: {
+          title: 'About Us',
+          desc: 'Meet our team and philosophy',
+        },
+      },
       footer: {
         about: 'About Us',
         privacy: 'Privacy Policy',
@@ -1206,6 +1236,12 @@ const enUS = {
     },
 
     // 歡迎頁面
+    welcomeSplash: {
+      loading: 'Loading game...',
+      ready: 'Ready!',
+      tip: 'Ready to start your fitness adventure?',
+      version: 'Ultimate Physique Assessment System',
+    },
     welcome: {
       title: 'Welcome to Ultimate Physique',
       subtitle: 'Track your progress with detailed fitness metrics',

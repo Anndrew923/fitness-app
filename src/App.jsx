@@ -11,6 +11,7 @@ import { auth } from './firebase';
 import { signInWithEmailAndPassword, signOut } from 'firebase/auth';
 import PropTypes from 'prop-types';
 import ScrollToTop from './ScrollToTop';
+const WelcomeSplash = React.lazy(() => import('./WelcomeSplash'));
 const LandingPage = React.lazy(() => import('./LandingPage'));
 const Welcome = React.lazy(() => import('./Welcome'));
 const UserInfo = React.lazy(() => import('./UserInfo'));
@@ -132,6 +133,7 @@ function AppContent() {
   const [testData, setTestData] = useState(null);
   const location = useLocation();
   const showNavBar = [
+    '/landing', // 修改：新首頁
     '/user-info',
     '/history',
     '/ladder',
@@ -301,7 +303,8 @@ function AppContent() {
         <Suspense fallback={<div>{t('common.loading')}</div>}>
           <div className="main-content">
             <Routes>
-              <Route path="/" element={<LandingPage />} />
+              <Route path="/" element={<WelcomeSplash />} />
+              <Route path="/landing" element={<LandingPage />} />
               <Route
                 path="/welcome"
                 element={

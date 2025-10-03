@@ -294,6 +294,50 @@ function LandingPage() {
         </div>
       </section>
 
+      {/* Additional Info Section */}
+      <section className="info-section">
+        <div className="container">
+          <div className="info-content">
+            <h3 className="info-title">
+              {t('landing.info.title', '了解更多')}
+            </h3>
+            <p className="info-subtitle">
+              {t('landing.info.subtitle', '深入了解我們的評測系統和團隊背景')}
+            </p>
+            <div className="info-buttons">
+              <button
+                className="info-button primary"
+                onClick={() => navigate('/features')}
+              >
+                <div className="button-icon">🔬</div>
+                <div className="button-content">
+                  <div className="button-title">
+                    {t('landing.info.features.title', '功能介紹')}
+                  </div>
+                  <div className="button-desc">
+                    {t('landing.info.features.desc', '了解5大評測的科學原理')}
+                  </div>
+                </div>
+              </button>
+              <button
+                className="info-button secondary"
+                onClick={() => navigate('/about')}
+              >
+                <div className="button-icon">👥</div>
+                <div className="button-content">
+                  <div className="button-title">
+                    {t('landing.info.about.title', '關於我們')}
+                  </div>
+                  <div className="button-desc">
+                    {t('landing.info.about.desc', '認識我們的團隊和理念')}
+                  </div>
+                </div>
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Footer */}
       <footer className="landing-footer">
         <div className="container">
