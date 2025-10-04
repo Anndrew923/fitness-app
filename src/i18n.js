@@ -259,6 +259,16 @@ const zhTW = {
       radarOverview: '表現總覽',
       basicInfo: '基本資料',
       nickname: '暱稱',
+      modals: {
+        basicInfoRequired: {
+          title: '需要基本資料',
+          message: '請先填寫並儲存您的身高、體重、年齡和性別，才能開始評測！',
+        },
+        dataNotSaved: {
+          title: '資料未保存',
+          message: '請確保資料已正確保存後再進行評測！',
+        },
+      },
       nicknamePlaceholder: '請輸入暱稱',
       generateNickname: '生成暱稱',
       gender: '性別',
@@ -720,6 +730,7 @@ const zhTW = {
       switchToRegister: '沒有帳號？點此註冊',
       google: '使用 Google 登入',
       processing: '處理中...',
+      guestMode: '訪客模式體驗',
       instructions: {
         title: '使用說明',
         items: {
@@ -736,6 +747,136 @@ const zhTW = {
             desc: '記錄進步軌跡，優化課表效率。',
           },
         },
+      },
+    },
+
+    // 功能介紹頁面
+    features: {
+      hero: {
+        title: '科學化健身評測系統',
+        subtitle: '透過 5 大評測項目，全面了解你的身體素質，打造五邊形全能戰士',
+        startButton: '立即開始評測',
+        backButton: '返回首頁',
+      },
+      overview: {
+        title: '5大評測項目',
+        subtitle: '基於科學研究與大數據分析，提供準確的身體素質評估',
+      },
+      strength: {
+        title: '力量評測',
+        description: '評估全身力量水平，包括上肢、下肢和核心力量',
+        exercises: '評測動作',
+        benchPress: '平板臥推',
+        squat: '深蹲',
+        deadlift: '硬舉',
+        latPulldown: '滑輪下拉',
+        shoulderPress: '站姿肩推',
+        standards: '評分標準',
+        standardsDesc: '基於 Strength Level 數據庫，男女分組評分',
+      },
+      power: {
+        title: '爆發力測試',
+        description: '測試瞬間爆發力，評估快速力量輸出能力',
+        tests: '測試項目',
+        verticalJump: '垂直跳躍',
+        standingLongJump: '立定跳遠',
+        sprint: '衝刺測試',
+        standards: '評分標準',
+        standardsDesc: '基於年齡性別分組標準，多項目綜合評分',
+      },
+      cardio: {
+        title: '心肺耐力',
+        description: '評估心血管健康狀況，測試有氧運動能力',
+        test: '測試方法',
+        cooperTest: '12分鐘跑步測試 - 測量最大跑步距離',
+        standards: '評分標準',
+        standardsDesc: '基於 Cooper 測試標準，年齡性別對照評分',
+      },
+      muscle: {
+        title: '肌肉量評估',
+        description: '分析身體組成，評估骨骼肌肉量水平',
+        method: '評估方法',
+        smmCalculation: '骨骼肌肉量 (SMM) 計算與分析',
+        standards: '評分標準',
+        standardsDesc: '基於年齡性別標準，肌肉量百分比評分',
+      },
+      bodyfat: {
+        title: '體脂分析',
+        description: '科學評估體脂率，計算去脂體重指數 (FFMI)',
+        method: '評估方法',
+        ffmiCalculation: 'FFMI 指數計算，身高體重調整公式',
+        standards: '評分標準',
+        standardsDesc: '基於科學研究標準，男女分組評分',
+      },
+      science: {
+        title: '科學依據',
+        dataSource: '數據來源',
+        dataSourceDesc:
+          '參考 Strength Level (https://strengthlevel.com/)，超過 1.34 億人次的各項運動表現統計資料庫。Cooper 測試 (專為美軍設計的測驗標準)，以及各項運動生理學研究數據',
+        algorithm: '評分算法',
+        algorithmDesc:
+          '採用線性插值算法，結合年齡性別分組，確保評分準確性和公平性',
+        standards: '評分標準',
+        standardsDesc:
+          '100分制評分系統，分為5個等級：初階、入門、中等、高階、精英',
+      },
+      usage: {
+        title: '使用流程',
+        step1: {
+          title: '註冊登入',
+          desc: '創建帳號或使用訪客模式開始體驗',
+        },
+        step2: {
+          title: '填寫資料',
+          desc: '輸入基本身體資料：身高、體重、年齡、性別',
+        },
+        step3: {
+          title: '進行評測',
+          desc: '依序完成5大評測項目，獲得個人化評分',
+        },
+        step4: {
+          title: '查看結果',
+          desc: '查看雷達圖分析，參與天梯排名，追蹤進步',
+        },
+      },
+      faq: {
+        title: '常見問題',
+        q1: {
+          question: '評測結果準確嗎？',
+          answer:
+            '我們的評測系統基於科學研究和大數據分析，提供相對準確的身體素質評估。建議定期重測以追蹤進步。',
+        },
+        q2: {
+          question: '需要專業設備嗎？',
+          answer:
+            '大部分評測項目可以在健身房或家中完成，建議在安全環境下進行，必要時尋求專業指導。',
+        },
+        q3: {
+          question: '多久重測一次？',
+          answer: '建議每4-6週重測一次，以追蹤訓練效果和身體變化。',
+        },
+        q4: {
+          question: '評測安全嗎？',
+          answer:
+            '請根據自身能力選擇合適重量，建議有保護者協助，如有身體不適請立即停止。',
+        },
+        q5: {
+          question: '如何提升評測分數？',
+          answer:
+            '建議制定全面的訓練計畫，包括力量訓練、有氧運動、營養管理，並保持規律的運動習慣。',
+        },
+      },
+      cta: {
+        title: '準備好開始你的健身評測之旅了嗎？',
+        subtitle: '立即註冊或使用訪客模式開始體驗',
+        startButton: '立即開始評測',
+        backButton: '返回首頁',
+      },
+      footer: {
+        about: '關於我們',
+        privacy: '隱私政策',
+        terms: '使用條款',
+        contact: '聯絡我們',
       },
     },
 
@@ -1266,6 +1407,18 @@ const enUS = {
       radarOverview: 'Performance Overview',
       basicInfo: 'Basic Info',
       nickname: 'Nickname',
+      modals: {
+        basicInfoRequired: {
+          title: 'Basic Information Required',
+          message:
+            'Please fill in and save your height, weight, age, and gender before starting the assessment!',
+        },
+        dataNotSaved: {
+          title: 'Data Not Saved',
+          message:
+            'Please ensure your data is properly saved before starting the assessment!',
+        },
+      },
       nicknamePlaceholder: 'Enter nickname',
       generateNickname: 'Generate',
       gender: 'Gender',
@@ -1748,6 +1901,7 @@ const enUS = {
       switchToRegister: "Don't have an account? Sign up",
       google: 'Sign in with Google',
       processing: 'Processing...',
+      guestMode: 'Try Guest Mode',
       instructions: {
         title: 'How it works',
         items: {
@@ -1764,6 +1918,150 @@ const enUS = {
             desc: 'Track your progress and optimize training efficiency.',
           },
         },
+      },
+    },
+
+    // Features page
+    features: {
+      hero: {
+        title: 'Scientific Fitness Assessment System',
+        subtitle:
+          'Comprehensive body fitness evaluation through 5 assessment categories, build your pentagon warrior',
+        startButton: 'Start Assessment Now',
+        backButton: 'Back to Home',
+      },
+      overview: {
+        title: '5 Assessment Categories',
+        subtitle:
+          'Based on scientific research and big data analysis, providing accurate body fitness evaluation',
+      },
+      strength: {
+        title: 'Strength Assessment',
+        description:
+          'Evaluate overall strength level, including upper body, lower body, and core strength',
+        exercises: 'Assessment Exercises',
+        benchPress: 'Bench Press',
+        squat: 'Squat',
+        deadlift: 'Deadlift',
+        latPulldown: 'Lat Pulldown',
+        shoulderPress: 'Shoulder Press',
+        standards: 'Scoring Standards',
+        standardsDesc:
+          'Based on Strength Level database, gender-grouped scoring',
+      },
+      power: {
+        title: 'Explosive Power Test',
+        description:
+          'Test instantaneous explosive power, evaluate rapid force output capability',
+        tests: 'Test Items',
+        verticalJump: 'Vertical Jump',
+        standingLongJump: 'Standing Long Jump',
+        sprint: 'Sprint Test',
+        standards: 'Scoring Standards',
+        standardsDesc:
+          'Based on age-gender grouped standards, multi-item comprehensive scoring',
+      },
+      cardio: {
+        title: 'Cardiovascular Endurance',
+        description:
+          'Evaluate cardiovascular health status, test aerobic exercise capacity',
+        test: 'Test Method',
+        cooperTest: '12-minute running test - measure maximum running distance',
+        standards: 'Scoring Standards',
+        standardsDesc:
+          'Based on Cooper test standards, age-gender comparative scoring',
+      },
+      muscle: {
+        title: 'Muscle Mass Assessment',
+        description:
+          'Analyze body composition, evaluate skeletal muscle mass level',
+        method: 'Assessment Method',
+        smmCalculation: 'Skeletal Muscle Mass (SMM) calculation and analysis',
+        standards: 'Scoring Standards',
+        standardsDesc:
+          'Based on age-gender standards, muscle mass percentage scoring',
+      },
+      bodyfat: {
+        title: 'Body Fat Analysis',
+        description:
+          'Scientific evaluation of body fat percentage, calculate Fat-Free Mass Index (FFMI)',
+        method: 'Assessment Method',
+        ffmiCalculation:
+          'FFMI index calculation, height-weight adjustment formula',
+        standards: 'Scoring Standards',
+        standardsDesc:
+          'Based on scientific research standards, gender-grouped scoring',
+      },
+      science: {
+        title: 'Scientific Basis',
+        dataSource: 'Data Source',
+        dataSourceDesc:
+          'Reference Strength Level (https://strengthlevel.com/), a database with over 134 million exercise performance records. Cooper test (military-designed assessment standard), and various exercise physiology research data',
+        algorithm: 'Scoring Algorithm',
+        algorithmDesc:
+          'Using linear interpolation algorithm, combined with age-gender grouping, ensuring scoring accuracy and fairness',
+        standards: 'Scoring Standards',
+        standardsDesc:
+          '100-point scoring system, divided into 5 levels: Beginner, Novice, Intermediate, Advanced, Elite',
+      },
+      usage: {
+        title: 'How to Use',
+        step1: {
+          title: 'Register/Login',
+          desc: 'Create an account or use guest mode to start experiencing',
+        },
+        step2: {
+          title: 'Fill in Data',
+          desc: 'Enter basic body data: height, weight, age, gender',
+        },
+        step3: {
+          title: 'Take Assessment',
+          desc: 'Complete 5 assessment categories in sequence, get personalized scores',
+        },
+        step4: {
+          title: 'View Results',
+          desc: 'View radar chart analysis, participate in ladder rankings, track progress',
+        },
+      },
+      faq: {
+        title: 'Frequently Asked Questions',
+        q1: {
+          question: 'Are the assessment results accurate?',
+          answer:
+            'Our assessment system is based on scientific research and big data analysis, providing relatively accurate body fitness evaluation. We recommend regular retesting to track progress.',
+        },
+        q2: {
+          question: 'Do I need professional equipment?',
+          answer:
+            'Most assessment items can be completed in a gym or at home. We recommend conducting in a safe environment and seeking professional guidance when necessary.',
+        },
+        q3: {
+          question: 'How often should I retest?',
+          answer:
+            'We recommend retesting every 4-6 weeks to track training effects and body changes.',
+        },
+        q4: {
+          question: 'Is the assessment safe?',
+          answer:
+            'Please choose appropriate weights based on your ability, we recommend having a spotter assist, and stop immediately if you feel unwell.',
+        },
+        q5: {
+          question: 'How can I improve my assessment scores?',
+          answer:
+            'We recommend developing a comprehensive training plan including strength training, aerobic exercise, nutrition management, and maintaining regular exercise habits.',
+        },
+      },
+      cta: {
+        title: 'Ready to start your fitness assessment journey?',
+        subtitle: 'Register now or use guest mode to start experiencing',
+        startButton: 'Start Assessment Now',
+        backButton: 'Back to Home',
+      },
+      footer: {
+        about: 'About Us',
+        privacy: 'Privacy Policy',
+        terms: 'Terms of Service',
+        contact: 'Contact Us',
       },
     },
 

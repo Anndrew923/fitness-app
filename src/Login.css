@@ -63,6 +63,34 @@
   background-color: #d1d5db;
 }
 
+.guest-btn {
+  width: 100%;
+  padding: 0.6rem;
+  margin-top: 0.5rem;
+  background-color: #f8f9fa;
+  color: #495057;
+  border: 2px solid #dee2e6;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.guest-btn:hover {
+  background-color: #e9ecef;
+  border-color: #adb5bd;
+  color: #343a40;
+}
+
+.guest-btn:disabled {
+  background-color: #f8f9fa;
+  color: #6c757d;
+  border-color: #dee2e6;
+  cursor: not-allowed;
+}
+
 .error-message {
   color: #dc2626;
   font-size: 0.875rem;

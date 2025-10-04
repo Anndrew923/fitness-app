@@ -227,6 +227,12 @@ function Login({ onLogin }) {
     setError(errorMessage);
   };
 
+  const handleGuestMode = () => {
+    // 設置 guestMode 標記並導向 user-info
+    sessionStorage.setItem('guestMode', 'true');
+    navigate('/user-info');
+  };
+
   const handlePrivacyAccept = () => {
     // 用戶已查看隱私權政策，可以記錄這個行為
     localStorage.setItem('privacyPolicyViewed', 'true');
@@ -315,6 +321,14 @@ function Login({ onLogin }) {
         className="toggle-btn"
       >
         {isRegistering ? t('login.switchToLogin') : t('login.switchToRegister')}
+      </button>
+
+      <button
+        onClick={handleGuestMode}
+        className="guest-btn"
+        disabled={loading}
+      >
+        {t('login.guestMode')}
       </button>
 
       <div className="privacy-notice">

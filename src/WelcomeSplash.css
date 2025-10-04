@@ -6,14 +6,11 @@
   width: 100%;
   height: 100vh;
   /* 背景圖片設置 - 響應式設計 */
-  /* 測試用：先使用純色背景確認組件正常 */
-  background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #1e3c72 100%);
-  /* 圖片背景 - 取消註解下面這行來測試圖片 */
   background: linear-gradient(
       135deg,
-      rgba(30, 60, 114, 0.7) 0%,
-      rgba(42, 82, 152, 0.7) 50%,
-      rgba(30, 60, 114, 0.7) 100%
+      rgba(30, 60, 114, 0.85) 0%,
+      rgba(42, 82, 152, 0.85) 50%,
+      rgba(30, 60, 114, 0.85) 100%
     ),
     url('/images/splash-background.jpg');
   background-size: cover;

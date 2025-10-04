@@ -1213,8 +1213,8 @@ function UserInfo({ testData, onLogout, clearTestData }) {
       ) {
         setModalState({
           isOpen: true,
-          title: '需要基本資料',
-          message: '請先填寫並儲存您的身高、體重、年齡和性別，才能開始評測！',
+          title: t('userInfo.modals.basicInfoRequired.title'),
+          message: t('userInfo.modals.basicInfoRequired.message'),
           type: 'warning',
         });
         return;
@@ -1226,8 +1226,8 @@ function UserInfo({ testData, onLogout, clearTestData }) {
       } else {
         setModalState({
           isOpen: true,
-          title: '資料未保存',
-          message: '請確保資料已正確保存後再進行評測！',
+          title: t('userInfo.modals.dataNotSaved.title'),
+          message: t('userInfo.modals.dataNotSaved.message'),
           type: 'warning',
         });
       }

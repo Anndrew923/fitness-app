@@ -13,9 +13,12 @@
   background: transparent;
   color: #666;
   font-size: 12px;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
 .lang-btn:hover {
@@ -26,6 +29,7 @@
 .lang-btn.active {
   background: #667eea;
   color: white;
+  font-weight: 700;
 }
 
 .lang-btn.active:hover {
