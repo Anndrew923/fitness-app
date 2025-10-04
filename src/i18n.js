@@ -750,6 +750,175 @@ const zhTW = {
       },
     },
 
+    // 關於我們頁面
+    about: {
+      header: {
+        title: '關於我們',
+        subtitle: '最強肉體評測系統',
+      },
+      hero: {
+        title: '科學化健身評測的領導者',
+        subtitle:
+          '我們致力於提供最準確、最科學的身體素質評估，幫助每個人了解自己的身體潛能',
+        backButton: '返回首頁',
+        contactButton: '聯絡我們',
+      },
+      mission: {
+        title: '我們的使命',
+        description:
+          '我們相信每個人都應該了解自己的身體素質，並有機會透過科學化的評測來改善自己的健康狀況。我們的使命是讓健身評測變得簡單、準確且有趣。',
+        point1: {
+          title: '科學化評測',
+          desc: '基於大量科學研究數據，提供準確的身體素質評估',
+        },
+        point2: {
+          title: '個人化分析',
+          desc: '根據年齡、性別、身高、體重等個人因素進行客製化評分',
+        },
+        point3: {
+          title: '持續改進',
+          desc: '不斷優化評測算法，確保評分標準的準確性和公平性',
+        },
+      },
+      team: {
+        title: '我們的團隊',
+        subtitle: '由運動科學專家、數據分析師和軟體工程師組成的專業團隊',
+        placeholder: {
+          title: '團隊介紹即將上線',
+          desc: '我們正在準備詳細的團隊介紹，敬請期待！',
+        },
+      },
+      features: {
+        title: '平台特色',
+        subtitle: '我們提供獨特的健身評測體驗，讓您深入了解自己的身體素質',
+        scientific: {
+          title: '科學化評測',
+          desc: '基於 Strength Level 數據庫和 Cooper 測試等科學標準，確保評測結果的準確性',
+        },
+        data: {
+          title: '大數據分析',
+          desc: '整合超過 1.34 億人次運動表現數據，提供最全面的評分基準',
+        },
+        personalized: {
+          title: '個人化評分',
+          desc: '根據個人身體條件進行客製化評分，確保評測結果的公平性',
+        },
+        userFriendly: {
+          title: '簡潔易用',
+          desc: '直觀的用戶界面設計，讓每個人都能輕鬆完成評測',
+        },
+      },
+      technical: {
+        title: '技術說明',
+        subtitle: '深入了解我們的評測系統背後的科學原理和技術實現',
+        dataSources: {
+          title: '數據來源',
+          strengthLevel: {
+            title: 'Strength Level 數據庫',
+            desc: '全球最大的健身數據庫，包含超過 1.34 億人次的運動表現記錄',
+            point1: '涵蓋臥推、深蹲、硬舉、肩推等多項健身動作',
+            point2: '男女分組統計，確保評分標準的準確性',
+            point3: '持續更新，反映最新的健身趨勢和標準',
+          },
+          cooperTest: {
+            title: 'Cooper 測試標準',
+            desc: '由美國空軍上校 Kenneth Cooper 博士設計的 12 分鐘跑步測試',
+            point1: '專為美軍設計的體能測驗標準，具有高度權威性',
+            point2: '透過跑步距離推估最大攝氧量 (VO₂ Max)',
+            point3: '適用於各年齡層，提供標準化的心肺耐力評估',
+          },
+          research: {
+            title: '運動生理學研究',
+            desc: '整合多項國際運動生理學研究數據，確保評測標準的科學性',
+            point1: '參考美國運動醫學會 (ACSM) 的運動標準',
+            point2: '整合世界田徑協會的田徑標準數據',
+            point3: '結合各國體育署的體適能常模資料',
+          },
+        },
+        algorithms: {
+          title: '評分算法',
+          scoring: {
+            title: '線性插值算法',
+            desc: '採用線性插值方法，根據個人數據在標準範圍內的位置計算分數，確保評分的連續性和準確性',
+          },
+          normalization: {
+            title: '數據標準化',
+            desc: '將不同來源的數據進行標準化處理，消除年齡、性別等因素的影響，確保評分的公平性',
+          },
+          ranking: {
+            title: '排名算法',
+            desc: '基於多維度評分系統，綜合考慮力量、爆發力、心肺、肌肉量、體脂等指標，計算最終排名',
+          },
+        },
+        assessments: {
+          title: '評測項目詳解',
+          strength: {
+            title: '力量評測',
+            desc: '評估全身力量水平，包括上肢、下肢和核心力量，基於 1RM 計算公式進行評分',
+          },
+          explosive: {
+            title: '爆發力評測',
+            desc: '測試瞬間爆發力，包括垂直跳躍、立定跳遠和衝刺測試，評估快速力量輸出能力',
+          },
+          cardio: {
+            title: '心肺耐力評測',
+            desc: '透過 12 分鐘跑步測試評估心血管健康狀況，推估最大攝氧量水平',
+          },
+          muscle: {
+            title: '肌肉量評估',
+            desc: '分析身體組成，計算骨骼肌肉量 (SMM) 和肌肉量百分比，評估肌肉發達程度',
+          },
+          bodyfat: {
+            title: '體脂分析',
+            desc: '計算去脂體重指數 (FFMI)，科學評估體脂率和肌肉質量，提供身體組成分析',
+          },
+        },
+      },
+      values: {
+        title: '我們的價值觀',
+        subtitle: '我們的核心價值觀指導著我們的每一個決策和行動',
+        science: {
+          title: '科學至上',
+          desc: '我們堅持基於科學研究和數據分析來開發評測系統，確保每一個評分都有科學依據',
+        },
+        fairness: {
+          title: '公平公正',
+          desc: '我們致力於提供公平的評測環境，讓每個人都能在相同的標準下進行評估',
+        },
+        transparency: {
+          title: '透明公開',
+          desc: '我們公開評測標準和算法，讓用戶了解評分原理，建立信任關係',
+        },
+        community: {
+          title: '社群共創',
+          desc: '我們鼓勵用戶參與平台建設，透過反饋和建議不斷改善服務品質',
+        },
+      },
+      contact: {
+        title: '聯絡我們',
+        subtitle: '我們重視每一位用戶的意見和建議，歡迎與我們聯繫',
+        email: {
+          title: '電子郵件',
+          desc: 'support@fitness-assessment.com',
+        },
+        feedback: {
+          title: '意見反饋',
+          desc: '透過應用程式內的意見反饋功能，直接與我們分享您的想法',
+        },
+        social: {
+          title: '社群媒體',
+          desc: '關注我們的 Facebook 和 Instagram，獲取最新資訊和健身 tips',
+        },
+        contactButton: '立即聯絡',
+      },
+      footer: {
+        home: '首頁',
+        features: '功能介紹',
+        contact: '聯絡我們',
+        copyright: '© 2024 最強肉體評測系統. 版權所有.',
+      },
+    },
+
     // 功能介紹頁面
     features: {
       hero: {
@@ -1918,6 +2087,187 @@ const enUS = {
             desc: 'Track your progress and optimize training efficiency.',
           },
         },
+      },
+    },
+
+    // About page
+    about: {
+      header: {
+        title: 'About Us',
+        subtitle: 'Ultimate Physique Assessment System',
+      },
+      hero: {
+        title: 'Leading Scientific Fitness Assessment',
+        subtitle:
+          'We are committed to providing the most accurate and scientific body fitness evaluation, helping everyone understand their physical potential',
+        backButton: 'Back to Home',
+        contactButton: 'Contact Us',
+      },
+      mission: {
+        title: 'Our Mission',
+        description:
+          'We believe everyone should understand their physical fitness and have the opportunity to improve their health through scientific assessment. Our mission is to make fitness assessment simple, accurate, and fun.',
+        point1: {
+          title: 'Scientific Assessment',
+          desc: 'Based on extensive scientific research data, providing accurate body fitness evaluation',
+        },
+        point2: {
+          title: 'Personalized Analysis',
+          desc: 'Customized scoring based on personal factors such as age, gender, height, and weight',
+        },
+        point3: {
+          title: 'Continuous Improvement',
+          desc: 'Continuously optimizing assessment algorithms to ensure accuracy and fairness of scoring standards',
+        },
+      },
+      team: {
+        title: 'Our Team',
+        subtitle:
+          'Professional team composed of exercise science experts, data analysts, and software engineers',
+        placeholder: {
+          title: 'Team Introduction Coming Soon',
+          desc: 'We are preparing detailed team introductions, stay tuned!',
+        },
+      },
+      features: {
+        title: 'Platform Features',
+        subtitle:
+          'We provide unique fitness assessment experience, helping you deeply understand your physical fitness',
+        scientific: {
+          title: 'Scientific Assessment',
+          desc: 'Based on Strength Level database and Cooper test standards, ensuring accuracy of assessment results',
+        },
+        data: {
+          title: 'Big Data Analysis',
+          desc: 'Integrating over 134 million exercise performance records, providing the most comprehensive scoring benchmarks',
+        },
+        personalized: {
+          title: 'Personalized Scoring',
+          desc: 'Customized scoring based on individual physical conditions, ensuring fairness of assessment results',
+        },
+        userFriendly: {
+          title: 'User-Friendly',
+          desc: 'Intuitive user interface design, allowing everyone to easily complete assessments',
+        },
+      },
+      technical: {
+        title: 'Technical Details',
+        subtitle:
+          'Deep dive into the scientific principles and technical implementation behind our assessment system',
+        dataSources: {
+          title: 'Data Sources',
+          strengthLevel: {
+            title: 'Strength Level Database',
+            desc: "The world's largest fitness database, containing over 134 million exercise performance records",
+            point1:
+              'Covers multiple fitness exercises including bench press, squat, deadlift, shoulder press',
+            point2:
+              'Gender-grouped statistics ensuring accuracy of scoring standards',
+            point3:
+              'Continuously updated, reflecting latest fitness trends and standards',
+          },
+          cooperTest: {
+            title: 'Cooper Test Standards',
+            desc: '12-minute running test designed by Dr. Kenneth Cooper, US Air Force Colonel',
+            point1:
+              'Military-designed fitness test standard with high authority',
+            point2:
+              'Estimates maximum oxygen uptake (VO₂ Max) through running distance',
+            point3:
+              'Applicable to all age groups, providing standardized cardiovascular endurance assessment',
+          },
+          research: {
+            title: 'Exercise Physiology Research',
+            desc: 'Integrating multiple international exercise physiology research data, ensuring scientific nature of assessment standards',
+            point1:
+              'References American College of Sports Medicine (ACSM) exercise standards',
+            point2: 'Integrates World Athletics track and field standard data',
+            point3: 'Combines national sports administration fitness norm data',
+          },
+        },
+        algorithms: {
+          title: 'Scoring Algorithms',
+          scoring: {
+            title: 'Linear Interpolation Algorithm',
+            desc: 'Using linear interpolation method, calculating scores based on individual data position within standard ranges, ensuring continuity and accuracy of scoring',
+          },
+          normalization: {
+            title: 'Data Normalization',
+            desc: 'Standardizing data from different sources, eliminating effects of age, gender and other factors, ensuring fairness of scoring',
+          },
+          ranking: {
+            title: 'Ranking Algorithm',
+            desc: 'Based on multi-dimensional scoring system, comprehensively considering strength, explosive power, cardio, muscle mass, body fat and other indicators to calculate final ranking',
+          },
+        },
+        assessments: {
+          title: 'Assessment Items Details',
+          strength: {
+            title: 'Strength Assessment',
+            desc: 'Evaluates overall strength level including upper body, lower body and core strength, scoring based on 1RM calculation formula',
+          },
+          explosive: {
+            title: 'Explosive Power Assessment',
+            desc: 'Tests instantaneous explosive power including vertical jump, standing long jump and sprint test, evaluating rapid force output capability',
+          },
+          cardio: {
+            title: 'Cardiovascular Endurance Assessment',
+            desc: 'Evaluates cardiovascular health through 12-minute running test, estimating maximum oxygen uptake level',
+          },
+          muscle: {
+            title: 'Muscle Mass Assessment',
+            desc: 'Analyzes body composition, calculates skeletal muscle mass (SMM) and muscle mass percentage, evaluating muscle development level',
+          },
+          bodyfat: {
+            title: 'Body Fat Analysis',
+            desc: 'Calculates Fat-Free Mass Index (FFMI), scientifically evaluates body fat percentage and muscle mass, providing body composition analysis',
+          },
+        },
+      },
+      values: {
+        title: 'Our Values',
+        subtitle: 'Our core values guide every decision and action we take',
+        science: {
+          title: 'Science First',
+          desc: 'We insist on developing assessment systems based on scientific research and data analysis, ensuring every score has scientific basis',
+        },
+        fairness: {
+          title: 'Fair and Just',
+          desc: 'We are committed to providing fair assessment environment, allowing everyone to be evaluated under the same standards',
+        },
+        transparency: {
+          title: 'Transparent and Open',
+          desc: 'We publicly disclose assessment standards and algorithms, letting users understand scoring principles and build trust relationships',
+        },
+        community: {
+          title: 'Community Co-creation',
+          desc: 'We encourage users to participate in platform building, continuously improving service quality through feedback and suggestions',
+        },
+      },
+      contact: {
+        title: 'Contact Us',
+        subtitle:
+          "We value every user's opinions and suggestions, welcome to contact us",
+        email: {
+          title: 'Email',
+          desc: 'support@fitness-assessment.com',
+        },
+        feedback: {
+          title: 'Feedback',
+          desc: 'Share your thoughts directly with us through the feedback function in the app',
+        },
+        social: {
+          title: 'Social Media',
+          desc: 'Follow our Facebook and Instagram for latest updates and fitness tips',
+        },
+        contactButton: 'Contact Now',
+      },
+      footer: {
+        home: 'Home',
+        features: 'Features',
+        contact: 'Contact',
+        copyright:
+          '© 2024 Ultimate Physique Assessment System. All rights reserved.',
       },
     },
 
