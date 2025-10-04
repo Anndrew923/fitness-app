@@ -16,9 +16,9 @@ function LandingPage() {
   };
 
   const handleGuestMode = () => {
-    // 設置 guestMode 標記並導向 user-info
+    // 設置 guestMode 標記並導向 user-info 的表單區塊
     sessionStorage.setItem('guestMode', 'true');
-    navigate('/user-info');
+    navigate('/user-info', { state: { scrollTo: 'form' } });
   };
 
   const handleStartAssessment = () => {

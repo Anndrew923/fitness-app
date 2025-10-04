@@ -326,6 +326,7 @@ function UserInfo({ testData, onLogout, clearTestData }) {
   const location = useLocation();
   const radarSectionRef = useRef(null);
   const testsSectionRef = useRef(null);
+  const formSectionRef = useRef(null);
   const nicknameTimeoutRef = useRef(null); // 新增：暱稱輸入防抖定時器
   const [avatarUploading, setAvatarUploading] = useState(false);
   const [avatarError, setAvatarError] = useState(null);
@@ -839,6 +840,11 @@ function UserInfo({ testData, onLogout, clearTestData }) {
           });
         } else if (scrollTo === 'tests' && testsSectionRef.current) {
           testsSectionRef.current.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start',
+          });
+        } else if (scrollTo === 'form' && formSectionRef.current) {
+          formSectionRef.current.scrollIntoView({
             behavior: 'smooth',
             block: 'start',
           });
@@ -1475,7 +1481,11 @@ function UserInfo({ testData, onLogout, clearTestData }) {
             <div className="page-subtitle">{t('userInfo.subtitle')}</div>
           </div>
 
-          <div className="form-card">
+          <div
+            id="user-form-section"
+            className="form-card"
+            ref={formSectionRef}
+          >
             <form className="user-form" onSubmit={saveData}>
               <div className="form-section">
                 <div className="section-header">
