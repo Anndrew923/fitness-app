@@ -783,9 +783,72 @@ const zhTW = {
       team: {
         title: '我們的團隊',
         subtitle: '由運動科學專家、數據分析師和軟體工程師組成的專業團隊',
-        placeholder: {
-          title: '團隊介紹即將上線',
-          desc: '我們正在準備詳細的團隊介紹，敬請期待！',
+        founder: {
+          name: 'Anndrew Lin',
+          title: '創辦人 & 首席訓練顧問',
+          bio1: '自幼崇拜阿諾史瓦辛格與李小龍，10歲起便開始自主訓練。然而在缺乏科學指導的情況下，對於如何有效變強，始終不得其門而入。',
+          bio2: '直到大學時期，身高180公分卻僅有55公斤，BMI嚴重偏低。這段經歷讓我深刻理解缺乏科學訓練方法的困境。',
+          bio3: '隨後拜師美國西北賽區綜合格鬥冠軍，接受專業的肌力與體能訓練。在兩年半內增重28公斤（體重達83公斤），體脂率維持在12%以下。這段經歷不僅改變了我的身體，也讓我踏上運動科學與教練之路。',
+          experienceTitle: '專業教練經歷',
+          experience: [
+            '合格運動教練',
+            '泰拳國手體能訓練師',
+            '籃球國家代表隊肌力與體能教練',
+            '空手道選手大專盃肌力與體能教練',
+            '多位藝人專屬健身教練',
+            '2011~2025年，14年教練經歷，累計指導500位以上學員，教學時數超過兩萬五千小時',
+          ],
+          missionTitle: '開發理念',
+          mission:
+            '結合企業管理背景與運動科學專業，我開發了「最強肉體」評測系統。透過數據化、科學化的評估方式，讓每個人都能：',
+          goals: [
+            '清楚了解自己的體能水平',
+            '設定明確且可達成的訓練目標',
+            '透過數據追蹤進步軌跡',
+            '與全球健身愛好者良性競爭',
+            '讓健身跟訓練變成像打怪升級，充滿樂趣',
+          ],
+          scoreTitle: '個人最佳成績',
+          score: '92.72 分',
+          closing: '讓我們用數據說話，一起變得更強！💪',
+        },
+      },
+      techStack: {
+        title: '技術架構',
+        subtitle: '採用業界領先的技術棧，打造高效能、安全且可靠的健身評測平台',
+        frontend: {
+          title: '前端技術',
+          desc: '採用現代化的 React 生態系統，提供流暢的用戶體驗。使用 Vite 作為建構工具，實現極速開發和優化的生產環境。支援 PWA 漸進式網頁應用，讓用戶可以像使用原生 App 一樣使用我們的平台。',
+        },
+        backend: {
+          title: '後端服務',
+          desc: '基於 Google Firebase 雲端平台，提供企業級的安全性和可靠性。使用 Firestore 作為即時資料庫，實現數據的即時同步。Firebase Authentication 提供多種登入方式，確保用戶資料的安全性。',
+        },
+        data: {
+          title: '數據分析',
+          desc: '自主研發的算法引擎，整合運動科學數據與統計模型，提供精準的評分系統。使用數據視覺化技術，將複雜的體能數據轉化為直觀的雷達圖和圖表，讓用戶輕鬆理解自己的身體素質。',
+        },
+        devops: {
+          title: '開發運維',
+          desc: '採用 Git 版本控制，確保代碼質量和協作效率。實施 CI/CD 自動化部署流程，快速迭代和發布新功能。整合 Google Analytics 進行性能監控和用戶行為分析，持續優化用戶體驗。',
+        },
+        highlights: {
+          performance: {
+            title: '高效能',
+            desc: '採用 React 虛擬 DOM 和 Vite 優化，實現毫秒級響應速度。Firebase CDN 全球分發，確保各地用戶都能獲得最佳訪問速度。',
+          },
+          security: {
+            title: '安全性',
+            desc: 'Firebase 企業級安全防護，數據傳輸採用 HTTPS 加密。嚴格的權限管理和訪問控制，保護用戶隱私和資料安全。',
+          },
+          responsive: {
+            title: '響應式設計',
+            desc: '完美支援桌面、平板、手機等各種設備。自適應佈局和觸控優化，在任何螢幕尺寸下都能提供最佳體驗。',
+          },
+          international: {
+            title: '國際化',
+            desc: '內建多語言支援系統，目前支援繁體中文和英文。模組化的語言架構，可輕鬆擴展到更多語言市場。',
+          },
         },
       },
       features: {
@@ -2124,9 +2187,73 @@ const enUS = {
         title: 'Our Team',
         subtitle:
           'Professional team composed of exercise science experts, data analysts, and software engineers',
-        placeholder: {
-          title: 'Team Introduction Coming Soon',
-          desc: 'We are preparing detailed team introductions, stay tuned!',
+        founder: {
+          name: 'Anndrew Lin',
+          title: 'Founder & Chief Training Advisor',
+          bio1: 'Inspired by Arnold Schwarzenegger and Bruce Lee since childhood, I began self-training at age 10. However, without scientific guidance, I struggled to find effective ways to get stronger.',
+          bio2: 'During college, despite being 180cm tall, I weighed only 55kg with severely low BMI. This experience gave me profound insight into the challenges of training without scientific methods.',
+          bio3: 'I then trained under the US Northwest Regional MMA Champion, receiving professional strength and conditioning training. Over 2.5 years, I gained 28kg (reaching 83kg) while maintaining body fat below 12%. This experience not only transformed my body but also set me on the path of exercise science and coaching.',
+          experienceTitle: 'Professional Experience',
+          experience: [
+            'Certified Fitness Coach',
+            'Muay Thai National Team Conditioning Coach',
+            'Basketball National Team Strength & Conditioning Coach',
+            'College Karate Championship S&C Coach',
+            'Personal Trainer for Multiple Celebrities',
+            '2011-2025: 14 years of coaching experience, trained over 500 students with 25,000+ training hours',
+          ],
+          missionTitle: 'Development Vision',
+          mission:
+            'Combining my business management background with exercise science expertise, I developed the "Ultimate Physique" assessment system. Through data-driven, scientific evaluation, everyone can:',
+          goals: [
+            'Clearly understand their fitness level',
+            'Set specific and achievable training goals',
+            'Track progress through data',
+            'Compete positively with fitness enthusiasts worldwide',
+            'Make fitness training fun like leveling up in a game',
+          ],
+          scoreTitle: 'Personal Best Score',
+          score: '92.72 Points',
+          closing: "Let the data speak, let's get stronger together! 💪",
+        },
+      },
+      techStack: {
+        title: 'Technology Stack',
+        subtitle:
+          'Built with industry-leading technologies to create a high-performance, secure, and reliable fitness assessment platform',
+        frontend: {
+          title: 'Frontend Technologies',
+          desc: 'Utilizing modern React ecosystem for smooth user experience. Powered by Vite build tool for lightning-fast development and optimized production builds. PWA support enables app-like experience across all devices.',
+        },
+        backend: {
+          title: 'Backend Services',
+          desc: 'Built on Google Firebase cloud platform for enterprise-grade security and reliability. Firestore provides real-time database capabilities with instant data synchronization. Firebase Authentication offers multiple sign-in methods while ensuring data security.',
+        },
+        data: {
+          title: 'Data Analytics',
+          desc: 'Proprietary algorithm engine integrating exercise science data with statistical models for precise scoring. Advanced data visualization transforms complex fitness metrics into intuitive radar charts and graphs for easy understanding.',
+        },
+        devops: {
+          title: 'DevOps',
+          desc: 'Git version control ensures code quality and collaboration efficiency. CI/CD automation enables rapid iteration and feature deployment. Google Analytics integration provides performance monitoring and user behavior insights for continuous optimization.',
+        },
+        highlights: {
+          performance: {
+            title: 'High Performance',
+            desc: 'React Virtual DOM and Vite optimization deliver millisecond-level response times. Firebase CDN ensures optimal access speed worldwide.',
+          },
+          security: {
+            title: 'Security',
+            desc: 'Enterprise-grade Firebase security with HTTPS encrypted data transmission. Strict permission management and access control protect user privacy.',
+          },
+          responsive: {
+            title: 'Responsive Design',
+            desc: 'Perfect support for desktop, tablet, and mobile devices. Adaptive layouts and touch optimization provide optimal experience on any screen size.',
+          },
+          international: {
+            title: 'Internationalization',
+            desc: 'Built-in multilingual support system, currently supporting Traditional Chinese and English. Modular language architecture allows easy expansion to more language markets.',
+          },
         },
       },
       features: {

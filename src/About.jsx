@@ -87,11 +87,248 @@ function About() {
         <div className="container">
           <h2 className="section-title">{t('about.team.title')}</h2>
           <p className="section-subtitle">{t('about.team.subtitle')}</p>
-          <div className="team-placeholder">
-            <div className="placeholder-content">
-              <div className="placeholder-icon">👥</div>
-              <h3>{t('about.team.placeholder.title')}</h3>
-              <p>{t('about.team.placeholder.desc')}</p>
+
+          <div className="founder-profile">
+            <div className="founder-card">
+              {/* Founder Image - will show placeholder if image doesn't exist */}
+              <img
+                src="/images/founder.jpg"
+                alt={t('about.team.founder.name')}
+                className="founder-image"
+                onError={e => {
+                  e.target.style.display = 'none';
+                  e.target.nextElementSibling.style.display = 'flex';
+                }}
+              />
+              <div
+                className="founder-image-placeholder"
+                style={{ display: 'none' }}
+              >
+                <div className="image-icon">👤</div>
+                <p className="image-hint">
+                  將您的照片放在 public/images/founder.jpg
+                </p>
+              </div>
+
+              <div className="founder-info">
+                <h3 className="founder-name">{t('about.team.founder.name')}</h3>
+                <p className="founder-title">{t('about.team.founder.title')}</p>
+
+                <div className="founder-bio">
+                  <p>{t('about.team.founder.bio1')}</p>
+                  <p>{t('about.team.founder.bio2')}</p>
+                  <p>{t('about.team.founder.bio3')}</p>
+                </div>
+
+                <div className="founder-experience">
+                  <h4>{t('about.team.founder.experienceTitle')}</h4>
+                  <ul>
+                    {t('about.team.founder.experience', {
+                      returnObjects: true,
+                    }).map((item, index) => (
+                      <li key={index}>{item}</li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div className="founder-mission">
+                  <h4>{t('about.team.founder.missionTitle')}</h4>
+                  <p>{t('about.team.founder.mission')}</p>
+                  <ul>
+                    {t('about.team.founder.goals', { returnObjects: true }).map(
+                      (goal, index) => (
+                        <li key={index}>{goal}</li>
+                      )
+                    )}
+                  </ul>
+                </div>
+
+                <div className="founder-score">
+                  <div className="score-badge">
+                    <span className="score-label">
+                      {t('about.team.founder.scoreTitle')}
+                    </span>
+                    <span className="score-value">
+                      {t('about.team.founder.score')}
+                    </span>
+                  </div>
+                </div>
+
+                <p className="founder-closing">
+                  {t('about.team.founder.closing')}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Tech Stack Section */}
+      <div className="tech-stack-section">
+        <div className="container">
+          <h2 className="section-title">{t('about.techStack.title')}</h2>
+          <p className="section-subtitle">{t('about.techStack.subtitle')}</p>
+
+          <div className="tech-stack-grid">
+            <div className="stack-category">
+              <div className="category-header">
+                <div className="category-icon">🎨</div>
+                <h3 className="category-title">
+                  {t('about.techStack.frontend.title')}
+                </h3>
+              </div>
+              <div className="tech-list">
+                <div className="tech-badge">
+                  <span className="badge-icon">⚛️</span>
+                  <span className="badge-text">React 18</span>
+                </div>
+                <div className="tech-badge">
+                  <span className="badge-icon">🚀</span>
+                  <span className="badge-text">Vite</span>
+                </div>
+                <div className="tech-badge">
+                  <span className="badge-icon">🎨</span>
+                  <span className="badge-text">CSS3</span>
+                </div>
+                <div className="tech-badge">
+                  <span className="badge-icon">🌐</span>
+                  <span className="badge-text">React Router</span>
+                </div>
+                <div className="tech-badge">
+                  <span className="badge-icon">🗣️</span>
+                  <span className="badge-text">i18next</span>
+                </div>
+                <div className="tech-badge">
+                  <span className="badge-icon">📱</span>
+                  <span className="badge-text">PWA</span>
+                </div>
+              </div>
+              <p className="category-desc">
+                {t('about.techStack.frontend.desc')}
+              </p>
+            </div>
+
+            <div className="stack-category">
+              <div className="category-header">
+                <div className="category-icon">🔥</div>
+                <h3 className="category-title">
+                  {t('about.techStack.backend.title')}
+                </h3>
+              </div>
+              <div className="tech-list">
+                <div className="tech-badge">
+                  <span className="badge-icon">🔥</span>
+                  <span className="badge-text">Firebase</span>
+                </div>
+                <div className="tech-badge">
+                  <span className="badge-icon">🔐</span>
+                  <span className="badge-text">Authentication</span>
+                </div>
+                <div className="tech-badge">
+                  <span className="badge-icon">💾</span>
+                  <span className="badge-text">Firestore</span>
+                </div>
+                <div className="tech-badge">
+                  <span className="badge-icon">☁️</span>
+                  <span className="badge-text">Cloud Hosting</span>
+                </div>
+                <div className="tech-badge">
+                  <span className="badge-icon">⚡</span>
+                  <span className="badge-text">Real-time Sync</span>
+                </div>
+              </div>
+              <p className="category-desc">
+                {t('about.techStack.backend.desc')}
+              </p>
+            </div>
+
+            <div className="stack-category">
+              <div className="category-header">
+                <div className="category-icon">📊</div>
+                <h3 className="category-title">
+                  {t('about.techStack.data.title')}
+                </h3>
+              </div>
+              <div className="tech-list">
+                <div className="tech-badge">
+                  <span className="badge-icon">🧮</span>
+                  <span className="badge-text">算法引擎</span>
+                </div>
+                <div className="tech-badge">
+                  <span className="badge-icon">📈</span>
+                  <span className="badge-text">數據視覺化</span>
+                </div>
+                <div className="tech-badge">
+                  <span className="badge-icon">🎯</span>
+                  <span className="badge-text">統計分析</span>
+                </div>
+                <div className="tech-badge">
+                  <span className="badge-icon">🔬</span>
+                  <span className="badge-text">科學計算</span>
+                </div>
+                <div className="tech-badge">
+                  <span className="badge-icon">💡</span>
+                  <span className="badge-text">智能推薦</span>
+                </div>
+              </div>
+              <p className="category-desc">{t('about.techStack.data.desc')}</p>
+            </div>
+
+            <div className="stack-category">
+              <div className="category-header">
+                <div className="category-icon">🛠️</div>
+                <h3 className="category-title">
+                  {t('about.techStack.devops.title')}
+                </h3>
+              </div>
+              <div className="tech-list">
+                <div className="tech-badge">
+                  <span className="badge-icon">📦</span>
+                  <span className="badge-text">Git</span>
+                </div>
+                <div className="tech-badge">
+                  <span className="badge-icon">🚀</span>
+                  <span className="badge-text">CI/CD</span>
+                </div>
+                <div className="tech-badge">
+                  <span className="badge-icon">📊</span>
+                  <span className="badge-text">Analytics</span>
+                </div>
+                <div className="tech-badge">
+                  <span className="badge-icon">🔍</span>
+                  <span className="badge-text">Performance Monitor</span>
+                </div>
+                <div className="tech-badge">
+                  <span className="badge-icon">🛡️</span>
+                  <span className="badge-text">Security</span>
+                </div>
+              </div>
+              <p className="category-desc">
+                {t('about.techStack.devops.desc')}
+              </p>
+            </div>
+          </div>
+
+          <div className="tech-highlights">
+            <div className="highlight-card">
+              <div className="highlight-icon">⚡</div>
+              <h4>{t('about.techStack.highlights.performance.title')}</h4>
+              <p>{t('about.techStack.highlights.performance.desc')}</p>
+            </div>
+            <div className="highlight-card">
+              <div className="highlight-icon">🔒</div>
+              <h4>{t('about.techStack.highlights.security.title')}</h4>
+              <p>{t('about.techStack.highlights.security.desc')}</p>
+            </div>
+            <div className="highlight-card">
+              <div className="highlight-icon">📱</div>
+              <h4>{t('about.techStack.highlights.responsive.title')}</h4>
+              <p>{t('about.techStack.highlights.responsive.desc')}</p>
+            </div>
+            <div className="highlight-card">
+              <div className="highlight-icon">🌍</div>
+              <h4>{t('about.techStack.highlights.international.title')}</h4>
+              <p>{t('about.techStack.highlights.international.desc')}</p>
             </div>
           </div>
         </div>
