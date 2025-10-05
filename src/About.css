@@ -82,7 +82,7 @@
 }
 
 /* Hero Section */
-.hero-section {
+.about-page .hero-section {
   padding: 2rem 2rem 3rem;
   max-width: 1000px;
   margin: 6rem auto 2rem;
@@ -95,7 +95,7 @@
   z-index: 1;
 }
 
-.hero-content {
+.about-page .hero-content {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
@@ -103,28 +103,28 @@
   margin-bottom: 2rem;
 }
 
-.hero-title {
+.about-page .hero-title {
   font-size: 2.5rem;
   font-weight: 700;
   line-height: 1.2;
   margin: 0;
-  background: linear-gradient(45deg, #81d8d0, #5f9ea0);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  background: linear-gradient(45deg, #81d8d0, #5f9ea0) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  background-clip: text !important;
   white-space: pre-line;
-  text-shadow: 0 0 20px rgba(129, 216, 208, 0.3);
+  text-shadow: 0 0 20px rgba(129, 216, 208, 0.3) !important;
   position: relative;
 }
 
-.hero-subtitle {
+.about-page .hero-subtitle {
   font-size: 1.2rem;
   line-height: 1.6;
-  color: #5f9ea0;
+  color: #5f9ea0 !important;
   margin: 0;
 }
 
-.hero-actions {
+.about-page .hero-actions {
   display: flex;
   gap: 1rem;
   margin-top: 1rem;
@@ -133,7 +133,7 @@
 }
 
 /* CTA Buttons */
-.cta-button {
+.about-page .cta-button {
   padding: 0.8rem 2rem;
   border: none;
   border-radius: 8px;
@@ -146,12 +146,12 @@
   text-align: center;
 }
 
-.cta-button.primary {
-  background: linear-gradient(135deg, #81d8d0 0%, #5f9ea0 100%);
-  color: white;
+.about-page .cta-button.primary {
+  background: linear-gradient(135deg, #81d8d0 0%, #5f9ea0 100%) !important;
+  color: white !important;
   box-shadow: 0 8px 25px rgba(129, 216, 208, 0.4),
-    0 4px 15px rgba(95, 158, 160, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.3);
-  border: 2px solid rgba(255, 255, 255, 0.2);
+    0 4px 15px rgba(95, 158, 160, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
+  border: 2px solid rgba(255, 255, 255, 0.2) !important;
   border-radius: 15px;
   font-weight: 700;
   text-transform: uppercase;
@@ -161,20 +161,20 @@
   transition: all 0.3s ease;
 }
 
-.cta-button.primary:hover {
+.about-page .cta-button.primary:hover {
   transform: translateY(-2px);
   box-shadow: 0 12px 35px rgba(129, 216, 208, 0.5),
-    0 6px 20px rgba(95, 158, 160, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+    0 6px 20px rgba(95, 158, 160, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.4) !important;
 }
 
-.cta-button.secondary {
+.about-page .cta-button.secondary {
   background: linear-gradient(
     135deg,
     rgba(255, 255, 255, 0.95) 0%,
     rgba(255, 255, 255, 0.8) 100%
-  );
-  color: #5f9ea0;
-  border: 2px solid #5f9ea0;
+  ) !important;
+  color: #5f9ea0 !important;
+  border: 2px solid #5f9ea0 !important;
   border-radius: 15px;
   font-weight: 700;
   text-transform: uppercase;
@@ -183,15 +183,15 @@
   overflow: hidden;
   transition: all 0.3s ease;
   box-shadow: 0 4px 15px rgba(95, 158, 160, 0.2),
-    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    inset 0 1px 0 rgba(255, 255, 255, 0.8) !important;
 }
 
-.cta-button.secondary:hover {
+.about-page .cta-button.secondary:hover {
   transform: translateY(-2px);
-  background: linear-gradient(135deg, #5f9ea0 0%, #81d8d0 100%);
-  color: white;
+  background: linear-gradient(135deg, #5f9ea0 0%, #81d8d0 100%) !important;
+  color: white !important;
   box-shadow: 0 8px 25px rgba(95, 158, 160, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
 }
 
 /* Container */
@@ -202,29 +202,29 @@
 }
 
 /* Section Styles */
-.mission-section,
-.team-section,
-.features-section,
-.technical-section,
-.values-section,
-.contact-section {
+.about-page .mission-section,
+.about-page .team-section,
+.about-page .features-section,
+.about-page .technical-section,
+.about-page .values-section,
+.about-page .contact-section {
   padding: 2.5rem 0;
   position: relative;
   z-index: 1;
 }
 
-.section-title {
+.about-page .section-title {
   font-size: 2rem;
   font-weight: 700;
   text-align: center;
   margin-bottom: 1rem;
-  color: white;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  color: white !important;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) !important;
 }
 
-.section-subtitle {
+.about-page .section-subtitle {
   font-size: 1.1rem;
-  color: rgba(255, 255, 255, 0.9);
+  color: rgba(255, 255, 255, 0.9) !important;
   text-align: center;
   margin-bottom: 2rem;
   line-height: 1.6;
@@ -595,32 +595,32 @@
 
 /* Responsive Design */
 @media (max-width: 768px) {
-  .hero-section {
+  .about-page .hero-section {
     padding: 1.5rem 1.5rem 2.5rem;
     margin: 5rem 1rem 1rem;
   }
 
-  .hero-title {
+  .about-page .hero-title {
     font-size: 1.8rem;
     line-height: 1.3;
   }
 
-  .hero-subtitle {
+  .about-page .hero-subtitle {
     font-size: 1rem;
   }
 
-  .hero-actions {
+  .about-page .hero-actions {
     flex-direction: column;
     align-items: center;
     gap: 0.8rem;
   }
 
-  .cta-button {
+  .about-page .cta-button {
     width: 100%;
     max-width: 280px;
   }
 
-  .section-title {
+  .about-page .section-title {
     font-size: 1.8rem;
   }
 
@@ -672,7 +672,7 @@
 }
 
 @media (max-width: 480px) {
-  .hero-title {
+  .about-page .hero-title {
     font-size: 1.6rem;
   }
 

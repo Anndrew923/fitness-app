@@ -35,8 +35,6 @@ const Settings = React.lazy(() => import('./components/Settings'));
 const Community = React.lazy(() => import('./components/Community'));
 const FriendFeed = React.lazy(() => import('./components/FriendFeed'));
 import GlobalAdBanner from './components/GlobalAdBanner';
-import PWAInstallPrompt from './components/PWAInstallPrompt';
-import IOSInstallPrompt from './components/IOSInstallPrompt';
 import performanceMonitor from './utils/performanceMonitor';
 import './App.css';
 import { useTranslation, withTranslation } from 'react-i18next';
@@ -435,8 +433,6 @@ function AppContent() {
       {/* 在天梯頁面隱藏廣告，保持頁面乾淨 */}
       {location.pathname !== '/ladder' && <GlobalAdBanner />}
       {showNavBar && <BottomNavBar />}
-      <PWAInstallPrompt />
-      <IOSInstallPrompt />
     </div>
   );
 }
