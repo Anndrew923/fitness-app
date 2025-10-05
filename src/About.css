@@ -330,6 +330,9 @@
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
   backdrop-filter: blur(10px);
   border: 2px solid rgba(129, 216, 208, 0.2);
+  max-width: 800px;
+  width: 100%;
+  margin: 0 auto;
 }
 
 .founder-image-placeholder {
@@ -966,6 +969,8 @@
 
   .founder-card {
     padding: 2rem 1.5rem;
+    margin: 0 auto;
+    max-width: calc(100% - 2rem);
   }
 
   .founder-image-placeholder,
@@ -1072,5 +1077,271 @@
   .feature-card,
   .value-card {
     padding: 1.5rem;
+  }
+}
+
+/* Advisor Profile Styles */
+.advisor-profile {
+  margin-top: 4rem;
+  display: flex;
+  justify-content: center;
+}
+
+.advisor-card {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 20px;
+  padding: 2rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(129, 216, 208, 0.2);
+  max-width: 800px;
+  width: 100%;
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+}
+
+.advisor-image {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 4px solid #81d8d0;
+  margin: 0 auto 1.5rem;
+  display: block;
+  box-shadow: 0 4px 12px rgba(129, 216, 208, 0.3);
+}
+
+.advisor-image-placeholder {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #81d8d0, #5f9ea0);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.5rem;
+  border: 4px solid #81d8d0;
+  box-shadow: 0 4px 12px rgba(129, 216, 208, 0.3);
+}
+
+.advisor-info {
+  text-align: center;
+}
+
+.advisor-name {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #2d3748;
+  margin-bottom: 0.5rem;
+}
+
+.advisor-title {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #5f9ea0;
+  margin-bottom: 0.3rem;
+}
+
+.advisor-subtitle {
+  font-size: 1rem;
+  color: #81d8d0;
+  margin-bottom: 1.5rem;
+  font-style: italic;
+}
+
+.advisor-bio {
+  margin-bottom: 2rem;
+  text-align: left;
+}
+
+.advisor-bio p {
+  font-size: 1rem;
+  line-height: 1.7;
+  color: #4a5568;
+  margin-bottom: 1rem;
+}
+
+.advisor-education,
+.advisor-experience,
+.advisor-achievements,
+.advisor-specializations,
+.advisor-therapy,
+.advisor-publications {
+  margin-bottom: 2rem;
+  text-align: left;
+}
+
+.advisor-education h4,
+.advisor-experience h4,
+.advisor-achievements h4,
+.advisor-specializations h4,
+.advisor-therapy h4,
+.advisor-publications h4 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #2d3748;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #81d8d0;
+}
+
+.advisor-education ul,
+.advisor-experience ul,
+.advisor-achievements ul,
+.advisor-specializations ul,
+.advisor-therapy ul {
+  list-style: none;
+  padding: 0;
+}
+
+.advisor-education li,
+.advisor-experience li,
+.advisor-achievements li,
+.advisor-specializations li,
+.advisor-therapy li {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: #4a5568;
+  margin-bottom: 0.8rem;
+  padding-left: 1.5rem;
+  position: relative;
+}
+
+.advisor-education li::before,
+.advisor-experience li::before,
+.advisor-achievements li::before,
+.advisor-specializations li::before,
+.advisor-therapy li::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  color: #81d8d0;
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+.therapy-description {
+  font-size: 1rem;
+  line-height: 1.7;
+  color: #4a5568;
+  margin-bottom: 1rem;
+  font-style: italic;
+  background: rgba(129, 216, 208, 0.1);
+  padding: 1rem;
+  border-radius: 8px;
+  border-left: 4px solid #81d8d0;
+}
+
+.advisor-publications p {
+  font-size: 1rem;
+  color: #4a5568;
+  font-style: italic;
+  background: rgba(129, 216, 208, 0.1);
+  padding: 1rem;
+  border-radius: 8px;
+  border-left: 4px solid #81d8d0;
+}
+
+.advisor-closing {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #2d3748;
+  text-align: center;
+  margin-top: 2rem;
+  padding: 1rem;
+  background: linear-gradient(
+    135deg,
+    rgba(129, 216, 208, 0.1),
+    rgba(95, 158, 160, 0.1)
+  );
+  border-radius: 12px;
+  border: 1px solid rgba(129, 216, 208, 0.3);
+}
+
+/* Second Advisor Specific Styles */
+.advisor-team-experience,
+.advisor-competition-results {
+  margin-bottom: 2rem;
+  text-align: left;
+}
+
+.advisor-team-experience h4,
+.advisor-competition-results h4 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #2d3748;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #81d8d0;
+}
+
+.advisor-team-experience ul,
+.advisor-competition-results ul {
+  list-style: none;
+  padding: 0;
+}
+
+.advisor-team-experience li,
+.advisor-competition-results li {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: #4a5568;
+  margin-bottom: 0.8rem;
+  padding-left: 1.5rem;
+  position: relative;
+}
+
+.advisor-team-experience li::before {
+  content: '🏆';
+  position: absolute;
+  left: 0;
+  font-size: 1rem;
+}
+
+.advisor-competition-results li::before {
+  content: '🏅';
+  position: absolute;
+  left: 0;
+  font-size: 1rem;
+}
+
+/* Responsive Design for Advisor */
+@media (max-width: 768px) {
+  .advisor-card {
+    padding: 1.5rem;
+    margin: 0 auto;
+    max-width: calc(100% - 2rem);
+  }
+
+  .advisor-name {
+    font-size: 1.5rem;
+  }
+
+  .advisor-title {
+    font-size: 1.1rem;
+  }
+
+  .advisor-subtitle {
+    font-size: 0.9rem;
+  }
+
+  .advisor-bio p,
+  .advisor-education li,
+  .advisor-experience li,
+  .advisor-achievements li,
+  .advisor-specializations li,
+  .advisor-therapy li {
+    font-size: 0.9rem;
+  }
+
+  .advisor-education h4,
+  .advisor-experience h4,
+  .advisor-achievements h4,
+  .advisor-specializations h4,
+  .advisor-therapy h4,
+  .advisor-publications h4 {
+    font-size: 1.1rem;
   }
 }

@@ -160,6 +160,203 @@ function About() {
               </div>
             </div>
           </div>
+
+          {/* Advisor Profile */}
+          <div className="advisor-profile">
+            <div className="advisor-card">
+              {/* Advisor Image - will show placeholder if image doesn't exist */}
+              <img
+                src="/images/advisor.jpg"
+                alt={t('about.team.advisor.name')}
+                className="advisor-image"
+                onError={e => {
+                  e.target.style.display = 'none';
+                  e.target.nextElementSibling.style.display = 'flex';
+                }}
+              />
+              <div
+                className="advisor-image-placeholder"
+                style={{ display: 'none' }}
+              >
+                <div className="image-icon">👨‍⚕️</div>
+                <p className="image-hint">
+                  將顧問照片放在 public/images/advisor.jpg
+                </p>
+              </div>
+
+              <div className="advisor-info">
+                <h3 className="advisor-name">{t('about.team.advisor.name')}</h3>
+                <p className="advisor-title">{t('about.team.advisor.title')}</p>
+                <p className="advisor-subtitle">
+                  {t('about.team.advisor.subtitle')}
+                </p>
+
+                <div className="advisor-bio">
+                  <p>{t('about.team.advisor.bio1')}</p>
+                  <p>{t('about.team.advisor.bio2')}</p>
+                  <p>{t('about.team.advisor.bio3')}</p>
+                </div>
+
+                <div className="advisor-education">
+                  <h4>{t('about.team.advisor.educationTitle')}</h4>
+                  <ul>
+                    {t('about.team.advisor.education', {
+                      returnObjects: true,
+                    }).map((item, index) => (
+                      <li key={index}>{item}</li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div className="advisor-experience">
+                  <h4>{t('about.team.advisor.experienceTitle')}</h4>
+                  <ul>
+                    {t('about.team.advisor.experience', {
+                      returnObjects: true,
+                    }).map((item, index) => (
+                      <li key={index}>{item}</li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div className="advisor-achievements">
+                  <h4>{t('about.team.advisor.achievementsTitle')}</h4>
+                  <ul>
+                    {t('about.team.advisor.achievements', {
+                      returnObjects: true,
+                    }).map((item, index) => (
+                      <li key={index}>{item}</li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div className="advisor-specializations">
+                  <h4>{t('about.team.advisor.specializationsTitle')}</h4>
+                  <ul>
+                    {t('about.team.advisor.specializations', {
+                      returnObjects: true,
+                    }).map((item, index) => (
+                      <li key={index}>{item}</li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div className="advisor-therapy">
+                  <h4>{t('about.team.advisor.therapy.title')}</h4>
+                  <p className="therapy-description">
+                    {t('about.team.advisor.therapy.description')}
+                  </p>
+                  <ul>
+                    {t('about.team.advisor.therapy.principles', {
+                      returnObjects: true,
+                    }).map((item, index) => (
+                      <li key={index}>{item}</li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div className="advisor-publications">
+                  <h4>{t('about.team.advisor.publicationsTitle')}</h4>
+                  <p>{t('about.team.advisor.publications')}</p>
+                </div>
+
+                <p className="advisor-closing">
+                  {t('about.team.advisor.closing')}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Second Advisor Profile */}
+          <div className="advisor-profile">
+            <div className="advisor-card">
+              {/* Advisor Image - will show placeholder if image doesn't exist */}
+              <img
+                src="/images/advisor2.jpg"
+                alt={t('about.team.advisor2.name')}
+                className="advisor-image"
+                onError={e => {
+                  e.target.style.display = 'none';
+                  e.target.nextElementSibling.style.display = 'flex';
+                }}
+              />
+              <div
+                className="advisor-image-placeholder"
+                style={{ display: 'none' }}
+              >
+                <div className="image-icon">🏆</div>
+                <p className="image-hint">
+                  將顧問照片放在 public/images/advisor2.jpg
+                </p>
+              </div>
+
+              <div className="advisor-info">
+                <h3 className="advisor-name">
+                  {t('about.team.advisor2.name')}
+                </h3>
+                <p className="advisor-title">
+                  {t('about.team.advisor2.title')}
+                </p>
+                <p className="advisor-subtitle">
+                  {t('about.team.advisor2.subtitle')}
+                </p>
+
+                <div className="advisor-bio">
+                  <p>{t('about.team.advisor2.bio1')}</p>
+                  <p>{t('about.team.advisor2.bio2')}</p>
+                  <p>{t('about.team.advisor2.bio3')}</p>
+                </div>
+
+                <div className="advisor-team-experience">
+                  <h4>{t('about.team.advisor2.teamExperienceTitle')}</h4>
+                  <ul>
+                    {t('about.team.advisor2.teamExperience', {
+                      returnObjects: true,
+                    }).map((item, index) => (
+                      <li key={index}>{item}</li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div className="advisor-competition-results">
+                  <h4>{t('about.team.advisor2.competitionResultsTitle')}</h4>
+                  <ul>
+                    {t('about.team.advisor2.competitionResults', {
+                      returnObjects: true,
+                    }).map((item, index) => (
+                      <li key={index}>{item}</li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div className="advisor-achievements">
+                  <h4>{t('about.team.advisor2.achievementsTitle')}</h4>
+                  <ul>
+                    {t('about.team.advisor2.achievements', {
+                      returnObjects: true,
+                    }).map((item, index) => (
+                      <li key={index}>{item}</li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div className="advisor-specializations">
+                  <h4>{t('about.team.advisor2.specializationsTitle')}</h4>
+                  <ul>
+                    {t('about.team.advisor2.specializations', {
+                      returnObjects: true,
+                    }).map((item, index) => (
+                      <li key={index}>{item}</li>
+                    ))}
+                  </ul>
+                </div>
+
+                <p className="advisor-closing">
+                  {t('about.team.advisor2.closing')}
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -250,26 +447,17 @@ function About() {
                 </h3>
               </div>
               <div className="tech-list">
-                <div className="tech-badge">
-                  <span className="badge-icon">🧮</span>
-                  <span className="badge-text">算法引擎</span>
-                </div>
-                <div className="tech-badge">
-                  <span className="badge-icon">📈</span>
-                  <span className="badge-text">數據視覺化</span>
-                </div>
-                <div className="tech-badge">
-                  <span className="badge-icon">🎯</span>
-                  <span className="badge-text">統計分析</span>
-                </div>
-                <div className="tech-badge">
-                  <span className="badge-icon">🔬</span>
-                  <span className="badge-text">科學計算</span>
-                </div>
-                <div className="tech-badge">
-                  <span className="badge-icon">💡</span>
-                  <span className="badge-text">智能推薦</span>
-                </div>
+                {t('about.techStack.data.features', {
+                  returnObjects: true,
+                }).map((feature, index) => {
+                  const icons = ['🧮', '📈', '🎯', '🔬', '💡'];
+                  return (
+                    <div key={index} className="tech-badge">
+                      <span className="badge-icon">{icons[index]}</span>
+                      <span className="badge-text">{feature}</span>
+                    </div>
+                  );
+                })}
               </div>
               <p className="category-desc">{t('about.techStack.data.desc')}</p>
             </div>

@@ -216,6 +216,9 @@ function Settings() {
           <button onClick={() => navigate('/terms')}>
             {tr('navigation.terms', '使用條款', 'Terms')}
           </button>
+          <button onClick={() => navigate('/features')}>
+            {tr('navigation.features', '功能介紹', 'Features')}
+          </button>
           <button onClick={() => navigate('/about')}>
             {tr('navigation.about', '關於', 'About')}
           </button>
