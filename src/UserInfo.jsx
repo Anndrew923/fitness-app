@@ -288,24 +288,30 @@ async function compressImage(
       canvas.width = width;
       canvas.height = height;
       const ctx = canvas.getContext('2d');
+
+      // 啟用高品質圖像渲染
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = 'high';
+
+      // 繪製圖像
       ctx.drawImage(img, 0, 0, width, height);
       canvas.toBlob(
         blob => {
           if (blob.size > maxSize) {
-            // 再壓縮一次，但保持較高品質
+            // 再壓縮一次，保持高品質
             canvas.toBlob(
               blob2 => {
                 resolve(blob2);
               },
               'image/jpeg',
-              0.85
+              0.9
             );
           } else {
             resolve(blob);
           }
         },
         'image/jpeg',
-        0.92
+        0.95
       );
     };
     img.onerror = reject;
@@ -1318,10 +1324,10 @@ function UserInfo({ testData, onLogout, clearTestData }) {
     }
     setAvatarUploading(true);
     try {
-      // 壓縮圖片 - 提升品質設定
-      const compressed = await compressImage(file, 800 * 1024, 256, 256);
-      if (compressed.size > 1000 * 1024) {
-        setAvatarError('壓縮後圖片仍超過 1MB，請選擇更小的圖片');
+      // 壓縮圖片 - 高品質設定
+      const compressed = await compressImage(file, 1200 * 1024, 384, 384);
+      if (compressed.size > 1500 * 1024) {
+        setAvatarError('壓縮後圖片仍超過 1.5MB，請選擇更小的圖片');
         setAvatarUploading(false);
         return;
       }
