@@ -51,12 +51,17 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  min-height: 80px;
+  box-sizing: border-box;
 }
 
 .logo-section {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
+  flex: 1;
+  min-width: 0;
+  margin-right: 1rem;
 }
 
 .about-page .app-title {
@@ -68,6 +73,10 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
+  max-width: 100%;
 }
 
 .about-page .app-subtitle {
@@ -79,6 +88,9 @@
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
   font-weight: 500;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  max-width: 100%;
 }
 
 /* Hero Section */
@@ -933,6 +945,26 @@
 
 /* Responsive Design */
 @media (max-width: 768px) {
+  .header-content {
+    padding: 0.8rem 1rem;
+    flex-wrap: nowrap;
+  }
+
+  .logo-section {
+    margin-right: 0.5rem;
+    min-width: 0;
+    flex: 1;
+  }
+
+  .about-page .app-title {
+    font-size: 1.4rem;
+    line-height: 1.2;
+  }
+
+  .about-page .app-subtitle {
+    font-size: 0.8rem;
+  }
+
   .about-page .hero-section {
     padding: 1.5rem 1.5rem 2.5rem;
     margin: 5rem 1rem 1rem;
@@ -1056,16 +1088,28 @@
 }
 
 @media (max-width: 480px) {
-  .about-page .hero-title {
-    font-size: 1.6rem;
+  .header-content {
+    padding: 0.6rem 0.8rem;
+    flex-wrap: nowrap;
   }
 
-  .header-content {
-    padding: 1rem;
+  .logo-section {
+    margin-right: 0.3rem;
+    min-width: 0;
+    flex: 1;
   }
 
   .about-page .app-title {
-    font-size: 1.5rem;
+    font-size: 1.2rem;
+    line-height: 1.1;
+  }
+
+  .about-page .app-subtitle {
+    font-size: 0.7rem;
+  }
+
+  .about-page .hero-title {
+    font-size: 1.6rem;
   }
 
   .mission-content,
