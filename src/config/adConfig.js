@@ -1,7 +1,7 @@
 // 廣告配置
 export const adConfig = {
   // AdSense 客戶 ID（從 Google AdSense 獲取）
-  clientId: import.meta.env.VITE_ADSENSE_CLIENT_ID || 'ca-pub-XXXXXXXXXXXXXXXX',
+  clientId: import.meta.env.VITE_ADSENSE_CLIENT_ID || 'ca-pub-5869708488609837',
 
   // 廣告單元 ID 配置
   adUnits: {

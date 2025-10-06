@@ -1067,7 +1067,7 @@ const zhTW = {
         subtitle: '我們重視每一位用戶的意見和建議，歡迎與我們聯繫',
         email: {
           title: '電子郵件',
-          desc: 'support@fitness-assessment.com',
+          desc: 'topaj01@gmail.com',
         },
         feedback: {
           title: '意見反饋',
@@ -2593,7 +2593,7 @@ const enUS = {
           "We value every user's opinions and suggestions, welcome to contact us",
         email: {
           title: 'Email',
-          desc: 'support@fitness-assessment.com',
+          desc: 'topaj01@gmail.com',
         },
         feedback: {
           title: 'Feedback',
