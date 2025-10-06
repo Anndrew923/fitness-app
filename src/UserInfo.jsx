@@ -292,20 +292,20 @@ async function compressImage(
       canvas.toBlob(
         blob => {
           if (blob.size > maxSize) {
-            // 再壓縮一次
+            // 再壓縮一次，但保持較高品質
             canvas.toBlob(
               blob2 => {
                 resolve(blob2);
               },
               'image/jpeg',
-              0.7
+              0.85
             );
           } else {
             resolve(blob);
           }
         },
         'image/jpeg',
-        0.85
+        0.92
       );
     };
     img.onerror = reject;
@@ -1318,10 +1318,10 @@ function UserInfo({ testData, onLogout, clearTestData }) {
     }
     setAvatarUploading(true);
     try {
-      // 壓縮圖片
-      const compressed = await compressImage(file, 500 * 1024, 192, 192);
-      if (compressed.size > 600 * 1024) {
-        setAvatarError('壓縮後圖片仍超過 600KB，請選擇更小的圖片');
+      // 壓縮圖片 - 提升品質設定
+      const compressed = await compressImage(file, 800 * 1024, 256, 256);
+      if (compressed.size > 1000 * 1024) {
+        setAvatarError('壓縮後圖片仍超過 1MB，請選擇更小的圖片');
         setAvatarUploading(false);
         return;
       }
