@@ -1587,6 +1587,7 @@
   margin: 20px 0;
   padding: 0 20px;
   align-items: center;
+  width: 100%;
 }
 
 .action-btn {
@@ -1603,11 +1604,12 @@
   transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
-  width: 100%;
-  max-width: 320px;
+  width: 280px;
   min-width: 280px;
+  max-width: 280px;
   min-height: 48px;
   flex-shrink: 0;
+  box-sizing: border-box;
 }
 
 .action-btn:disabled {
@@ -1709,8 +1711,9 @@
   .action-btn {
     padding: 12px 20px;
     font-size: 14px;
+    width: 260px;
     min-width: 260px;
-    max-width: 100%;
+    max-width: 260px;
   }
 
   .btn-icon {

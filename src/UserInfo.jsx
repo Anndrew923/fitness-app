@@ -1312,16 +1312,16 @@ function UserInfo({ testData, onLogout, clearTestData }) {
       setAvatarError('請選擇圖片檔案');
       return;
     }
-    if (file.size > 2 * 1024 * 1024) {
-      setAvatarError('圖片大小請勿超過 2MB');
+    if (file.size > 7 * 1024 * 1024) {
+      setAvatarError('圖片大小請勿超過 7MB');
       return;
     }
     setAvatarUploading(true);
     try {
       // 壓縮圖片
-      const compressed = await compressImage(file, 300 * 1024, 192, 192);
-      if (compressed.size > 350 * 1024) {
-        setAvatarError('壓縮後圖片仍超過 350KB，請選擇更小的圖片');
+      const compressed = await compressImage(file, 500 * 1024, 192, 192);
+      if (compressed.size > 600 * 1024) {
+        setAvatarError('壓縮後圖片仍超過 600KB，請選擇更小的圖片');
         setAvatarUploading(false);
         return;
       }

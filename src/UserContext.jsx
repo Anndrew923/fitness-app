@@ -583,30 +583,58 @@ export function UserProvider({ children }) {
         return;
       }
 
-      // 使用防抖機制保存到 Firebase
-      if (saveHistoryDebounceRef.current) {
-        clearTimeout(saveHistoryDebounceRef.current);
-      }
+      // 優化的歷史記錄保存策略：立即本地保存 + 短延遲 Firebase 保存
+      try {
+        const updatedData = {
+          ...userData,
+          history: newHistory,
+          updatedAt: new Date().toISOString(),
+        };
 
-      saveHistoryDebounceRef.current = setTimeout(async () => {
-        try {
-          // 使用寫入隊列而不是直接寫入
-          const updatedData = {
-            ...userData,
-            history: newHistory,
-            updatedAt: new Date().toISOString(),
-          };
+        // 立即保存到本地存儲（確保數據不丟失）
+        localStorage.setItem('userData', JSON.stringify(updatedData));
+        localStorage.setItem('lastSavedUserData', JSON.stringify(updatedData));
+        console.log(
+          `歷史記錄已保存到本地存儲 (${newHistory.length}/${maxRecords})`
+        );
 
-          addToWriteQueue(updatedData, 'history');
-          console.log(
-            `歷史記錄已加入寫入隊列 (${newHistory.length}/${maxRecords})`
-          );
-        } catch (error) {
-          console.error('保存歷史記錄失敗:', error);
-        } finally {
-          saveHistoryDebounceRef.current = null;
+        // 使用短延遲（2秒）保存到 Firebase，避免過度寫入
+        if (auth.currentUser) {
+          setTimeout(async () => {
+            try {
+              const userRef = doc(db, 'users', auth.currentUser.uid);
+              await setDoc(
+                userRef,
+                {
+                  history: newHistory,
+                  updatedAt: new Date().toISOString(),
+                },
+                { merge: true }
+              );
+              console.log(
+                `歷史記錄已保存到 Firebase (${newHistory.length}/${maxRecords})`
+              );
+            } catch (firebaseError) {
+              console.error('Firebase 保存失敗，但本地已備份:', firebaseError);
+            }
+          }, 2000); // 2秒延遲，平衡即時性和寫入頻率
         }
-      }, 15000); // 增加到15秒防抖，進一步減少寫入頻率
+      } catch (error) {
+        console.error('保存歷史記錄失敗:', error);
+        // 如果本地保存也失敗，至少嘗試保存到 localStorage
+        try {
+          localStorage.setItem(
+            'userData',
+            JSON.stringify({
+              ...userData,
+              history: newHistory,
+              updatedAt: new Date().toISOString(),
+            })
+          );
+        } catch (localError) {
+          console.error('本地存儲也失敗:', localError);
+        }
+      }
     },
     [userData, addToWriteQueue, isMockMode]
   );
