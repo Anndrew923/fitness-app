@@ -259,7 +259,7 @@ SubmitConfirmModal.propTypes = {
 
 // 移除儀式感動畫系統
 
-// 新增：圖片壓縮工具
+// 新增：極致品質圖片壓縮工具
 async function compressImage(
   file,
   maxSize = 300 * 1024,
@@ -276,42 +276,45 @@ async function compressImage(
       const canvas = document.createElement('canvas');
       let width = img.width;
       let height = img.height;
+
+      // 計算最佳尺寸，保持長寬比
       if (width > maxWidth || height > maxHeight) {
-        if (width > height) {
-          height = Math.round((height * maxWidth) / width);
-          width = maxWidth;
-        } else {
-          width = Math.round((width * maxHeight) / height);
-          height = maxHeight;
-        }
+        const ratio = Math.min(maxWidth / width, maxHeight / height);
+        width = Math.round(width * ratio);
+        height = Math.round(height * ratio);
       }
+
       canvas.width = width;
       canvas.height = height;
-      const ctx = canvas.getContext('2d');
+      const ctx = canvas.getContext('2d', { alpha: false });
 
-      // 啟用高品質圖像渲染
+      // 啟用最高品質圖像渲染
       ctx.imageSmoothingEnabled = true;
       ctx.imageSmoothingQuality = 'high';
+
+      // 使用白色背景（針對透明圖片）
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(0, 0, width, height);
 
       // 繪製圖像
       ctx.drawImage(img, 0, 0, width, height);
       canvas.toBlob(
         blob => {
           if (blob.size > maxSize) {
-            // 再壓縮一次，保持高品質
+            // 再壓縮一次，仍保持極高品質
             canvas.toBlob(
               blob2 => {
                 resolve(blob2);
               },
               'image/jpeg',
-              0.9
+              0.93
             );
           } else {
             resolve(blob);
           }
         },
         'image/jpeg',
-        0.95
+        0.98
       );
     };
     img.onerror = reject;
@@ -1324,10 +1327,10 @@ function UserInfo({ testData, onLogout, clearTestData }) {
     }
     setAvatarUploading(true);
     try {
-      // 壓縮圖片 - 高品質設定
-      const compressed = await compressImage(file, 1200 * 1024, 384, 384);
-      if (compressed.size > 1500 * 1024) {
-        setAvatarError('壓縮後圖片仍超過 1.5MB，請選擇更小的圖片');
+      // 壓縮圖片 - 極致品質設定
+      const compressed = await compressImage(file, 2000 * 1024, 512, 512);
+      if (compressed.size > 2500 * 1024) {
+        setAvatarError('壓縮後圖片仍超過 2.5MB，請選擇更小的圖片');
         setAvatarUploading(false);
         return;
       }

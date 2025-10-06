@@ -1584,10 +1584,12 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
-  margin: 20px 0;
+  margin: 20px auto;
   padding: 0 20px;
   align-items: center;
+  justify-content: center;
   width: 100%;
+  max-width: 600px;
 }
 
 .action-btn {
@@ -1604,12 +1606,16 @@
   transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
-  width: 280px;
-  min-width: 280px;
-  max-width: 280px;
-  min-height: 48px;
+  width: 280px !important;
+  min-width: 280px !important;
+  max-width: 280px !important;
+  height: 48px !important;
+  min-height: 48px !important;
+  max-height: 48px !important;
   flex-shrink: 0;
+  flex-grow: 0;
   box-sizing: border-box;
+  margin: 0 auto;
 }
 
 .action-btn:disabled {
@@ -1706,14 +1712,19 @@
   .action-buttons-section {
     padding: 0 15px;
     gap: 12px;
+    margin: 20px auto;
   }
 
   .action-btn {
     padding: 12px 20px;
     font-size: 14px;
-    width: 260px;
-    min-width: 260px;
-    max-width: 260px;
+    width: 260px !important;
+    min-width: 260px !important;
+    max-width: 260px !important;
+    height: 48px !important;
+    min-height: 48px !important;
+    max-height: 48px !important;
+    margin: 0 auto;
   }
 
   .btn-icon {
