@@ -386,6 +386,9 @@
 
 .step-content {
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
 }
 
 .step-title {
@@ -393,6 +396,10 @@
   font-weight: 600;
   color: #2c3e50;
   margin-bottom: 0.4rem;
+  text-align: left;
+  min-height: 1.5rem;
+  display: flex;
+  align-items: center;
 }
 
 .step-desc {

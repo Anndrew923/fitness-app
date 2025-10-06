@@ -51,9 +51,9 @@
   "screenshots": [
     {
       "src": "/logo512.png",
-      "sizes": "1280x720",
+      "sizes": "512x512",
       "type": "image/png",
-      "form_factor": "wide"
+      "form_factor": "narrow"
     }
   ]
 }

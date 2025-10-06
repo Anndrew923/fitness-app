@@ -269,7 +269,7 @@
     padding: 8px 12px;
     top: -45px;
   }
-  
+
   .weight-reminder-bubble::after {
     right: auto;
     left: 20px;
@@ -822,24 +822,9 @@
   z-index: 1;
 }
 
-.save-results-btn {
-  background: linear-gradient(135deg, #81d8d0 0%, #5f9ea0 100%);
-  color: white;
-  padding: 16px 32px;
-  border: none;
-  border-radius: 12px;
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(129, 216, 208, 0.3);
-  min-width: 200px;
-}
+/* 舊的 save-results-btn 樣式已移除，統一使用 .action-btn */
 
-.save-results-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(129, 216, 208, 0.4);
-}
+/* 舊的 hover 樣式已移除，統一使用 .action-btn:hover */
 
 /* 評測按鈕區域 */
 .test-buttons-section {
@@ -1342,17 +1327,17 @@
     margin-top: 12px;
     margin-bottom: 12px;
   }
-  
+
   .limit-info-item {
     gap: 10px;
     margin-bottom: 10px;
   }
-  
+
   .limit-icon {
     width: 20px;
     font-size: 14px;
   }
-  
+
   .limit-text {
     font-size: 12px;
     line-height: 1.4;
@@ -1609,17 +1594,20 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  padding: 12px 20px;
+  padding: 14px 24px;
   border: none;
   border-radius: 12px;
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
-  width: 200px;
-  min-width: 200px;
+  width: 100%;
+  max-width: 320px;
+  min-width: 280px;
+  min-height: 48px;
+  flex-shrink: 0;
 }
 
 .action-btn:disabled {
@@ -1715,16 +1703,18 @@
 @media (max-width: 768px) {
   .action-buttons-section {
     padding: 0 15px;
-    gap: 10px;
+    gap: 12px;
   }
 
   .action-btn {
-    padding: 10px 16px;
-    font-size: 13px;
+    padding: 12px 20px;
+    font-size: 14px;
+    min-width: 260px;
+    max-width: 100%;
   }
 
   .btn-icon {
-    font-size: 14px;
+    font-size: 15px;
   }
 }
 

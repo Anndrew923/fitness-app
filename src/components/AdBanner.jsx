@@ -47,8 +47,9 @@ const AdBanner = ({
         const script = document.createElement('script');
         script.async = true;
         script.src =
-          'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js';
+          'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5869708488609837';
         script.crossOrigin = 'anonymous';
+        script.setAttribute('data-ad-client', 'ca-pub-5869708488609837');
         script.onload = () => {
           try {
             (window.adsbygoogle = window.adsbygoogle || []).push({});
