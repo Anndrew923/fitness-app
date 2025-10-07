@@ -872,29 +872,32 @@ const zhTW = {
           name: 'Fin Chou',
           title: '國家代表隊選手 / 健身顧問 / 自然健身',
           subtitle: '中華台北健美國家代表隊',
-          bio1: '48歲的自然健身專家，擁有豐富的健美競賽經驗。作為中華台北健美國家代表隊成員，在各大比賽中屢獲佳績，展現了自然健身的強大潛力。',
+          bio1: '生於1977年的自然健身專家，擁有豐富的健美競賽經驗。作為中華台北健美國家代表隊成員，在各大比賽中屢獲佳績，展現了自然健身的強大潛力。',
           bio2: '代表台北市健美代表隊和頗行戰隊，在國內外各項健美賽事中表現優異，累計獲得12面獎牌，包括8面金牌、2面銀牌和2面銅牌。',
           bio3: '專精自然健身訓練，不依賴藥物輔助，純粹透過科學訓練和營養管理達到競賽水準，為健身愛好者樹立了健康訓練的典範。',
           teamExperienceTitle: '代表隊經歷',
           teamExperience: [
             '中華台北健美國家代表隊',
             '台北市健美代表隊',
-            '頗行戰隊',
+            '頗行戰隊（私人訓練團體）',
           ],
           competitionResultsTitle: '比賽成績',
           competitionResults: [
-            '2024年 (113年) - 全民運6th 全國健身錦標賽 🥇🥇🥇',
-            '2023年 (112年) - 中正盃 🥇',
-            '2022年 (111年) - 全民運 🥈、總統盃 🥇、亞同運 🥇',
-            '2021年 (110年) - FitModel 🥇🥇🥉',
-            '2020年 (109年) - WNBF 🥈',
-            '2019年 (108年) - 全國盃 🥇🥉',
+            '2025年 - IFBB環球先生國際賽Fit model第六名',
+            '2024年 - 全國健身錦標賽量級兩面金牌🥇🥇全場總冠軍🥇',
+            '2024年 - 全民運第六名',
+            '2023年 - 中正盃量級金牌🥇',
+            '2022年 - 全民運第二量級銀牌🥈總統盃資深形體金牌🥇',
+            '2022年 - 亞洲同志運動會男子形體雙人組金牌🥇',
+            '2021年 - FitModel形體兩面金牌🥇🥇全場總季軍🥉',
+            '2020年 - WNBF男子形體量級銀牌🥈',
+            '2019年 - 全國盃公開形體金牌🥇新秀形體季軍🥉',
           ],
           achievementsTitle: '重要成就',
           achievements: [
             '累計獲得12面獎牌',
             '8面金牌、2面銀牌、2面銅牌',
-            '2024年全民運三金佳績',
+            '2024年全國健身錦標賽雙金一總冠軍',
             '2022年總統盃金牌',
             '2021年FitModel雙金一銅',
             '2020年WNBF銀牌',
@@ -1529,7 +1532,7 @@ const enUS = {
       empty: {
         title: '📋 No history yet',
         p1: 'Your records will appear here after completing assessments',
-        p2: 'Start your fitness journey now!',
+        p2: 'Start your fitness journey!',
       },
       chart: {
         title: '📈 Trend chart',
@@ -1604,7 +1607,7 @@ const enUS = {
       community: 'Muscle Park',
       home: 'Home',
       assessment: 'Start',
-      ladder: 'Ladder',
+      ladder: 'Leaderboard',
       history: 'History',
       settings: 'Settings',
     },
@@ -1614,7 +1617,7 @@ const enUS = {
       home: 'Home',
       profile: 'Profile',
       history: 'History',
-      ladder: 'Ladder',
+      ladder: 'Leaderboard',
       friends: 'Friends',
       settings: 'Settings',
       logout: 'Logout',
@@ -1628,38 +1631,38 @@ const enUS = {
     // 首頁
     landing: {
       hero: {
-        title: '[Fitness RPG]\nExercise to Upgrade Your Ultimate Physique',
+        title: 'Fitness RPG\nLevel Up Your Ultimate Physique',
         subtitle:
-          '5 ability assessments, upgrade your physique, compete with global fitness players on the leaderboard',
-        startButton: 'Start Assessment Now',
-        guestButton: 'Try Guest Mode',
-        slogan: 'Build Your Pentagon Warrior',
+          'Take 5 comprehensive assessments, level up your physique, and compete on the global leaderboard',
+        startButton: 'Start Your Assessment',
+        guestButton: 'Try as Guest',
+        slogan: 'Become a Five-Point All-Round Athlete',
       },
       features: {
         title: 'Core Features',
         strength: {
-          title: 'Strength Assessment',
-          desc: 'Comprehensive assessment of chest, shoulders, back, legs, and core',
+          title: 'Strength Testing',
+          desc: 'Comprehensive evaluation of chest, shoulders, back, legs, and core strength',
         },
         power: {
-          title: 'Explosive Power Assessment',
-          desc: 'Vertical jump, standing long jump, sprint test',
+          title: 'Explosive Power Testing',
+          desc: 'Vertical jump, standing long jump, and sprint performance',
         },
         cardio: {
-          title: 'Cardiovascular Endurance',
-          desc: 'Running test to evaluate cardiovascular health',
+          title: 'Cardiovascular Fitness',
+          desc: 'Running test to evaluate your cardiovascular endurance',
         },
         muscle: {
-          title: 'Muscle Mass Assessment',
-          desc: 'Skeletal muscle mass calculation and analysis',
+          title: 'Muscle Mass Analysis',
+          desc: 'Skeletal muscle mass calculation and body composition analysis',
         },
         bodyfat: {
-          title: 'Body Fat Analysis',
-          desc: 'FFMI index calculation for scientific body fat assessment',
+          title: 'Body Composition',
+          desc: 'FFMI-based body fat analysis and composition evaluation',
         },
         ladder: {
-          title: 'Leaderboard',
-          desc: 'Compete with global users to motivate continuous improvement',
+          title: 'Global Leaderboard',
+          desc: 'Compete globally and stay motivated to improve',
         },
       },
       stats: {
@@ -1673,19 +1676,19 @@ const enUS = {
         title: 'Target Users',
         fitness: {
           title: 'Fitness Enthusiasts',
-          desc: 'Track training effects and set fitness goals',
+          desc: 'Track progress and set fitness goals',
         },
         athletes: {
           title: 'Athletes',
-          desc: 'Assess physical condition and optimize training plans',
+          desc: 'Assess physical condition and optimize training',
         },
         coaches: {
           title: 'Fitness Coaches',
-          desc: 'Teaching assistant tools and student assessment',
+          desc: 'Coaching tools and client assessment',
         },
         general: {
           title: 'General Users',
-          desc: 'Understand physical condition and start fitness journey',
+          desc: 'Understand your body and start your fitness journey',
         },
       },
       cta: {
@@ -1740,9 +1743,9 @@ const enUS = {
 
     // 用戶資料
     userInfo: {
-      title: 'Body Status & Performance Overview',
-      subtitle: 'Complete your profile to begin your fitness journey',
-      radarOverview: 'Performance Overview',
+      title: 'Fitness Profile & Performance',
+      subtitle: 'Complete your profile to start your fitness journey',
+      radarOverview: 'Performance Radar',
       basicInfo: 'Basic Info',
       nickname: 'Nickname',
       modals: {
@@ -1785,17 +1788,17 @@ const enUS = {
         ffmi: 'FFMI',
       },
       ladder: {
-        title: 'Ladder Settings',
-        anonymousTitle: 'Participate anonymously on ladder',
+        title: 'Leaderboard Settings',
+        anonymousTitle: 'Participate anonymously on the leaderboard',
         anonymousDesc:
           'When enabled, your nickname and avatar are hidden and shown anonymously on the rankings',
-        rankLabel: 'Ladder rank',
+        rankLabel: 'Leaderboard rank',
         submittedScore: 'Submitted score',
         currentScore: 'Current score',
         needsSubmit: '(submit to update)',
         ctaCompleted:
-          'Complete all five assessments to participate in the ladder rankings',
-        ctaNotCompleted: 'Participate after completing {{count}}/5 assessments',
+          'Complete all five assessments to appear on the leaderboard',
+        ctaNotCompleted: 'Appear after completing {{count}}/5 assessments',
       },
       training: {
         title: 'Training background (optional)',
@@ -2135,8 +2138,8 @@ const enUS = {
 
     // 天梯排行榜
     ladder: {
-      title: 'Ladder Rankings',
-      myScore: 'My Ladder Score',
+      title: 'Global Leaderboard',
+      myScore: 'My Leaderboard Score',
       myRank: 'My Rank',
       notParticipated: 'Not Participated',
       notRanked: 'Not Ranked',
@@ -2195,19 +2198,19 @@ const enUS = {
 
     // 訪客模式
     guestMode: {
-      title: 'Welcome to Fitness Assessment',
-      subtitle: 'You can choose to register or try directly',
-      startGuest: 'Try Now (Guest Mode)',
+      title: 'Welcome to Ultimate Physique',
+      subtitle: 'Register for full features or try as guest',
+      startGuest: 'Try as Guest',
       register: 'Register',
       or: 'or',
-      banner: 'Guest Mode - Your data is stored locally only',
+      banner: 'Guest Mode - Data stored locally only',
       syncData: 'Register to Sync',
       exit: 'Exit',
       modal: {
         title: 'Register an account to use this feature',
         message:
-          'Friend and Ladder features are only available to registered users. Register an account now to unlock the complete social experience!',
-        registerButton: 'Go to Register/Login',
+          'Friends and Leaderboard features require registration. Sign up now to unlock the full social experience!',
+        registerButton: 'Sign Up / Login',
         cancelButton: 'Cancel',
       },
     },
@@ -2386,31 +2389,34 @@ const enUS = {
           title:
             'National Team Athlete / Fitness Consultant / Natural Bodybuilding',
           subtitle: 'Chinese Taipei National Bodybuilding Team',
-          bio1: '48-year-old natural bodybuilding expert with extensive competitive experience. As a member of the Chinese Taipei National Bodybuilding Team, has achieved outstanding results in major competitions, demonstrating the power of natural bodybuilding.',
+          bio1: 'Born in 1977, natural bodybuilding expert with extensive competitive experience. As a member of the Chinese Taipei National Bodybuilding Team, has achieved outstanding results in major competitions, demonstrating the power of natural bodybuilding.',
           bio2: 'Representing Taipei City Bodybuilding Team and Poxing Team, has excelled in domestic and international bodybuilding competitions, accumulating 12 medals including 8 gold, 2 silver, and 2 bronze medals.',
           bio3: 'Specializes in natural bodybuilding training without pharmaceutical assistance, achieving competitive standards through scientific training and nutrition management, setting a healthy training example for fitness enthusiasts.',
           teamExperienceTitle: 'Team Experience',
           teamExperience: [
             'Chinese Taipei National Bodybuilding Team',
             'Taipei City Bodybuilding Team',
-            'Poxing Team',
+            'Posing Team (Private Training Group)',
           ],
           competitionResultsTitle: 'Competition Results',
           competitionResults: [
-            '2024 - National Fitness Championships 6th 🥇🥇🥇',
-            '2023 - Chung Cheng Cup 🥇',
-            '2022 - National Games 🥈, Presidential Cup 🥇, Asian Games 🥇',
-            '2021 - FitModel 🥇🥇🥉',
-            '2020 - WNBF 🥈',
-            '2019 - National Cup 🥇🥉',
+            '2025 - IFBB Mr. Universe, International Fitness Model, 6th Place',
+            '2024 - National Bodybuilding Championships, Gold (2 Categories) 🥇🥇, Overall Champion 🥇',
+            '2024 - National Sports Games, 6th Place',
+            '2023 - Chung Cheng Cup Bodybuilding Championships, Gold Medal 🥇',
+            '2022 - National Sports Games, Silver Medal (Second Category) 🥈; Presidential Cup, Gold Medal (Masters Physique) 🥇',
+            "2022 - Asia Pride Games, Men's Physique Pairs, Gold Medal 🥇",
+            '2021 - Fitness Model Championships, Gold (2 Categories) 🥇🥇, Overall Bronze Medal 🥉',
+            "2020 - WNBF Men's Physique, Silver Medal (Category) 🥈",
+            '2019 - National Cup, Open Physique Gold Medal 🥇; Rookie Physique Bronze Medal 🥉',
           ],
           achievementsTitle: 'Key Achievements',
           achievements: [
             'Accumulated 12 medals',
             '8 gold, 2 silver, 2 bronze medals',
-            '2024 National Games triple gold',
+            '2024 National Bodybuilding Championships double gold and overall champion',
             '2022 Presidential Cup gold',
-            '2021 FitModel double gold and bronze',
+            '2021 Fitness Model Championships double gold and bronze',
             '2020 WNBF silver',
           ],
           specializationsTitle: 'Specializations',

@@ -145,12 +145,18 @@
   margin-bottom: 20px;
   box-shadow: 0 4px 16px var(--tiffany-shadow);
   border: 1px solid var(--border-color);
+  width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 .composer-header {
   display: flex;
   gap: 15px;
   align-items: flex-start;
+  width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 .user-avatar {
@@ -173,8 +179,9 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
-  width: 100%;
-  min-width: 0; /* 確保 flex 項目可以縮小 */
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
 }
 
 .composer-input textarea {
@@ -188,6 +195,7 @@
   resize: vertical;
   transition: border-color 0.3s ease;
   background: var(--background-white);
+  box-sizing: border-box;
 }
 
 .composer-input textarea:focus {
@@ -204,11 +212,18 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 10px;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
 }
 
 .char-count {
   font-size: 14px;
   color: var(--text-light);
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .publish-btn {
@@ -226,6 +241,9 @@
   transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
+  flex-shrink: 0;
+  white-space: nowrap;
+  box-sizing: border-box;
 }
 
 .publish-btn::before {
@@ -746,15 +764,31 @@
   .composer-header {
     flex-direction: column;
     gap: 10px;
+    width: 100%;
+    box-sizing: border-box;
   }
 
   .user-avatar {
     align-self: center;
   }
 
+  .composer-input {
+    width: 100%;
+    max-width: 100%;
+  }
+
   .composer-input textarea {
     min-height: 80px;
     padding: 12px;
+  }
+
+  .composer-footer {
+    gap: 8px;
+  }
+
+  .publish-btn {
+    padding: 8px 16px;
+    font-size: 14px;
   }
 
   .post-card {
@@ -817,11 +851,31 @@
 
   .post-composer {
     padding: 12px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .composer-input {
+    width: 100%;
+    max-width: 100%;
   }
 
   .composer-input textarea {
     min-height: 60px;
     padding: 10px;
+  }
+
+  .composer-footer {
+    gap: 6px;
+  }
+
+  .publish-btn {
+    padding: 8px 14px;
+    font-size: 13px;
+  }
+
+  .char-count {
+    font-size: 12px;
   }
 
   .post-card {

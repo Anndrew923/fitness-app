@@ -319,12 +319,18 @@
   padding: 16px;
   margin-bottom: 20px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 .composer-header {
   display: flex;
   gap: 12px;
   align-items: flex-start;
+  width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 .user-avatar {
@@ -346,8 +352,9 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
-  width: 100%;
-  min-width: 0; /* 確保 flex 項目可以縮小 */
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
 }
 
 .composer-input textarea {
@@ -376,6 +383,9 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 10px;
+  width: 100%;
+  box-sizing: border-box;
   padding-top: 8px;
   border-top: 1px solid #e4e6eb;
 }
@@ -383,6 +393,8 @@
 .char-count {
   font-size: 12px;
   color: #65676b;
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .publish-btn {
@@ -404,6 +416,9 @@
   border: 1px solid var(--metal-highlight);
   position: relative;
   overflow: hidden;
+  flex-shrink: 0;
+  white-space: nowrap;
+  box-sizing: border-box;
 }
 
 .publish-btn::before {
@@ -892,14 +907,30 @@
 
   .post-composer {
     padding: 12px;
+    width: 100%;
+    box-sizing: border-box;
   }
 
-  .post-card {
-    padding: 12px;
+  .composer-input {
+    width: 100%;
+    max-width: 100%;
   }
 
   .composer-input textarea {
     min-height: 60px;
+  }
+
+  .composer-footer {
+    gap: 8px;
+  }
+
+  .publish-btn {
+    padding: 8px 16px;
+    font-size: 13px;
+  }
+
+  .post-card {
+    padding: 12px;
   }
 
   .action-btn {
@@ -1292,6 +1323,26 @@
 
   .post-composer {
     padding: 10px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .composer-input {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .composer-footer {
+    gap: 6px;
+  }
+
+  .publish-btn {
+    padding: 8px 14px;
+    font-size: 12px;
+  }
+
+  .char-count {
+    font-size: 11px;
   }
 
   .post-card {
