@@ -279,10 +279,12 @@
             <li><strong>技術資訊：</strong>設備資訊、瀏覽器類型、IP地址</li>
             <li><strong>位置資訊：</strong>僅在您授權時收集（用於特定功能）</li>
             <li>
-              <strong>廣告相關數據：</strong>廣告ID、廣告互動數據、個性化偏好
+              <strong>廣告相關數據：</strong
+              >設備廣告標識符（IDFA/GAID）、廣告展示和點擊數據、廣告定向偏好
             </li>
             <li>
-              <strong>Cookie 數據：</strong>用於廣告投放和分析的 Cookie 資訊
+              <strong>應用使用模式：</strong
+              >用於廣告定向的應用使用情況和功能使用頻率
             </li>
           </ul>
 
@@ -443,31 +445,86 @@
         <section id="zh-8">
           <h2>8. 第三方服務</h2>
 
-          <h3>8.1 社交登入</h3>
+          <h3>8.1 第三方服務列表</h3>
+          <p>本應用使用以下第三方服務：</p>
+          <ul>
+            <li>
+              <strong>Google AdMob</strong> - 移動廣告服務，用於在應用中顯示廣告
+            </li>
+            <li>
+              <strong>Firebase</strong> - 數據存儲、用戶認證和應用分析服務
+            </li>
+            <li>
+              <strong>Google Analytics</strong> - 應用使用情況分析（如果啟用）
+            </li>
+            <li><strong>Google/Facebook 登入</strong> - 社交登入服務</li>
+          </ul>
+
+          <h3>8.2 社交登入</h3>
           <p>
             當您使用 Google 或 Facebook
             登入時，這些服務將根據其隱私政策處理您的資料。
           </p>
 
-          <h3>8.2 廣告服務</h3>
-          <p>我們使用 Google AdSense 來顯示廣告。Google AdSense 會：</p>
+          <h3>8.3 廣告服務</h3>
+          <p>
+            本應用使用 Google AdMob 提供廣告服務。AdMob 是 Google
+            的移動廣告平台，用於在應用中顯示相關廣告。
+          </p>
+
+          <h4>AdMob 收集的信息</h4>
+          <p>AdMob 可能會收集以下信息：</p>
           <ul>
-            <li>使用 Cookie 和類似技術來提供個性化廣告</li>
-            <li>收集廣告相關數據以改善廣告效果</li>
-            <li>根據您的興趣和行為顯示相關廣告</li>
-            <li>與廣告商共享匿名化的數據</li>
+            <li>
+              <strong>設備信息：</strong>設備型號、操作系統版本、設備標識符
+            </li>
+            <li>
+              <strong>應用使用情況：</strong>應用版本、使用頻率、功能使用情況
+            </li>
+            <li><strong>廣告互動數據：</strong>廣告點擊、展示次數、轉換數據</li>
+            <li>
+              <strong>位置信息：</strong>如果用戶授權，可能收集大致位置信息
+            </li>
+            <li><strong>網路信息：</strong>IP 地址、網路類型</li>
           </ul>
+
+          <h4>AdMob 使用信息的目的</h4>
+          <p>AdMob 使用收集的信息來：</p>
+          <ul>
+            <li>提供個性化和相關的廣告內容</li>
+            <li>改善廣告效果和用戶體驗</li>
+            <li>防止欺詐行為和濫用</li>
+            <li>生成廣告效果報告</li>
+            <li>遵守法律法規要求</li>
+          </ul>
+
+          <h4>廣告個性化控制</h4>
           <p>您可以通過以下方式管理廣告偏好：</p>
           <ul>
-            <li>在 Google 帳戶設置中調整廣告個性化</li>
-            <li>使用瀏覽器設置禁用 Cookie</li>
+            <li>在設備設置中關閉個性化廣告</li>
             <li>
               訪問
-              <a href="https://www.google.com/settings/ads" target="_blank"
+              <a
+                href="https://adssettings.google.com"
+                target="_blank"
+                rel="noopener"
                 >Google 廣告設置</a
               >
+              管理廣告偏好
             </li>
+            <li>選擇退出個性化廣告，但您仍會看到廣告，只是內容可能不太相關</li>
           </ul>
+
+          <h4>AdMob 隱私政策</h4>
+          <p>
+            有關 AdMob 如何處理您的數據的更多信息，請查看
+            <a
+              href="https://policies.google.com/privacy"
+              target="_blank"
+              rel="noopener"
+              >Google 隱私政策</a
+            >。
+          </p>
 
           <h3>8.3 分析服務</h3>
           <p>
@@ -493,12 +550,13 @@
             <li><strong>廣告 Cookie：</strong>提供個性化廣告</li>
           </ul>
 
-          <h3>9.3 Google AdSense Cookie</h3>
-          <p>Google AdSense 使用以下類型的 Cookie：</p>
+          <h3>9.3 廣告 Cookie</h3>
+          <p>我們使用 AdMob 提供的廣告 Cookie 來：</p>
           <ul>
-            <li><strong>廣告 Cookie：</strong>用於投放相關廣告</li>
-            <li><strong>分析 Cookie：</strong>測量廣告效果</li>
-            <li><strong>個性化 Cookie：</strong>根據您的興趣顯示廣告</li>
+            <li>記住您的廣告偏好設置</li>
+            <li>提供個性化廣告內容</li>
+            <li>防止重複顯示相同廣告</li>
+            <li>測量廣告效果</li>
           </ul>
 
           <h3>9.4 如何管理 Cookie</h3>
@@ -818,42 +876,106 @@
         <section id="en-8">
           <h2>8. Third-Party Services</h2>
 
-          <h3>8.1 Social Login</h3>
+          <h3>8.1 Third-Party Services List</h3>
+          <p>This app uses the following third-party services:</p>
+          <ul>
+            <li>
+              <strong>Google AdMob</strong> - Mobile advertising service for
+              displaying ads in the app
+            </li>
+            <li>
+              <strong>Firebase</strong> - Data storage, user authentication, and
+              app analytics services
+            </li>
+            <li>
+              <strong>Google Analytics</strong> - App usage analytics (if
+              enabled)
+            </li>
+            <li>
+              <strong>Google/Facebook Login</strong> - Social login services
+            </li>
+          </ul>
+
+          <h3>8.2 Social Login</h3>
           <p>
             When you log in using Google or Facebook, these services will
             process your data according to their privacy policies.
           </p>
 
-          <h3>8.2 Advertising Services</h3>
+          <h3>8.3 Advertising Services</h3>
           <p>
-            We use Google AdSense to display advertisements. Google AdSense
-            will:
+            This app uses Google AdMob to provide advertising services. AdMob is
+            Google's mobile advertising platform used to display relevant ads in
+            the app.
           </p>
+
+          <h4>Information Collected by AdMob</h4>
+          <p>AdMob may collect the following information:</p>
           <ul>
             <li>
-              Use cookies and similar technologies to provide personalized ads
+              <strong>Device Information:</strong> Device model, operating
+              system version, device identifiers
             </li>
             <li>
-              Collect advertising-related data to improve ad effectiveness
+              <strong>App Usage:</strong> App version, usage frequency, feature
+              usage
             </li>
-            <li>Display relevant ads based on your interests and behavior</li>
-            <li>Share anonymized data with advertisers</li>
-          </ul>
-          <p>You can manage your advertising preferences by:</p>
-          <ul>
             <li>
-              Adjusting ad personalization in your Google Account settings
+              <strong>Ad Interaction Data:</strong> Ad clicks, impressions,
+              conversion data
             </li>
-            <li>Using browser settings to disable cookies</li>
             <li>
-              Visiting
-              <a href="https://www.google.com/settings/ads" target="_blank"
-                >Google Ad Settings</a
-              >
+              <strong>Location Information:</strong> If authorized by user, may
+              collect approximate location
+            </li>
+            <li>
+              <strong>Network Information:</strong> IP address, network type
             </li>
           </ul>
 
-          <h3>8.3 Analytics Services</h3>
+          <h4>Purpose of AdMob Data Usage</h4>
+          <p>AdMob uses collected information to:</p>
+          <ul>
+            <li>Provide personalized and relevant ad content</li>
+            <li>Improve ad effectiveness and user experience</li>
+            <li>Prevent fraud and abuse</li>
+            <li>Generate ad performance reports</li>
+            <li>Comply with legal requirements</li>
+          </ul>
+
+          <h4>Ad Personalization Controls</h4>
+          <p>You can manage your ad preferences by:</p>
+          <ul>
+            <li>Turning off personalized ads in device settings</li>
+            <li>
+              Visiting
+              <a
+                href="https://adssettings.google.com"
+                target="_blank"
+                rel="noopener"
+                >Google Ad Settings</a
+              >
+              to manage ad preferences
+            </li>
+            <li>
+              Opting out of personalized ads, though you'll still see ads, just
+              less relevant ones
+            </li>
+          </ul>
+
+          <h4>AdMob Privacy Policy</h4>
+          <p>
+            For more information about how AdMob handles your data, please see
+            the
+            <a
+              href="https://policies.google.com/privacy"
+              target="_blank"
+              rel="noopener"
+              >Google Privacy Policy</a
+            >.
+          </p>
+
+          <h3>8.4 Analytics Services</h3>
           <p>
             We use Google Analytics to analyze website usage. You can opt out of
             Google Analytics tracking.
@@ -885,19 +1007,13 @@
             </li>
           </ul>
 
-          <h3>9.3 Google AdSense Cookies</h3>
-          <p>Google AdSense uses the following types of cookies:</p>
+          <h3>9.3 Advertising Cookies</h3>
+          <p>We use AdMob-provided advertising cookies to:</p>
           <ul>
-            <li>
-              <strong>Advertising Cookies:</strong> For serving relevant ads
-            </li>
-            <li>
-              <strong>Analytics Cookies:</strong> Measuring ad effectiveness
-            </li>
-            <li>
-              <strong>Personalization Cookies:</strong> Showing ads based on
-              your interests
-            </li>
+            <li>Remember your advertising preferences</li>
+            <li>Provide personalized ad content</li>
+            <li>Prevent showing duplicate ads</li>
+            <li>Measure ad effectiveness</li>
           </ul>
 
           <h3>9.4 How to Manage Cookies</h3>
