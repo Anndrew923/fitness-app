@@ -1,42 +1,21 @@
+# Netlify 配置文件
 [build]
   command = "npm run build"
   publish = "dist"
-
-# Avoid install failing due to peerDependency conflicts from test-only packages
-# Netlify passes these flags to `npm install`
-[build.environment]
-  NPM_FLAGS = "--legacy-peer-deps"
-
-# 確保 .well-known 目錄可以正常訪問
-[[headers]]
-  for = "/.well-known/*"
-  [headers.values]
-    Content-Type = "application/json"
-    Access-Control-Allow-Origin = "*"
-
-# 優先處理 assetlinks.json 檔案
-[[redirects]]
-  from = "/.well-known/assetlinks.json"
-  to = "/.well-known/assetlinks.json"
-  status = 200
-
-[[redirects]]
-  from = "/assetlinks.json"
-  to = "/assetlinks.json"
-  status = 200
-
-# 優先處理 .well-known 目錄，避免被重定向
-[[redirects]]
-  from = "/.well-known/*"
-  to = "/.well-known/:splat"
-  status = 200
-
-[[redirects]]
-  from = "/assets/*"
-  to = "/assets/:splat"
-  status = 200
 
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"

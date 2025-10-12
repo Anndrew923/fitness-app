@@ -1,18 +1,26 @@
 // 廣告配置
 export const adConfig = {
-  // AdSense 客戶 ID（從 Google AdSense 獲取）
-  clientId: import.meta.env.VITE_ADSENSE_CLIENT_ID || 'ca-pub-5869708488609837',
+  // AdMob 應用程式 ID（從 Google AdMob 獲取）
+  appId:
+    import.meta.env.VITE_ADMOB_APP_ID ||
+    'ca-app-pub-5869708488609837~6490454632',
 
   // 廣告單元 ID 配置
   adUnits: {
     // 底部橫幅廣告
-    bottomBanner: import.meta.env.VITE_ADSENSE_BOTTOM_BANNER_ID || null,
+    bottomBanner:
+      import.meta.env.VITE_ADMOB_BANNER_ID ||
+      'ca-app-pub-5869708488609837/1189068634',
 
-    // 頂部橫幅廣告
-    topBanner: import.meta.env.VITE_ADSENSE_TOP_BANNER_ID || null,
+    // 頂部橫幅廣告（暫時使用同一個 ID，後續可添加）
+    topBanner:
+      import.meta.env.VITE_ADMOB_BANNER_ID ||
+      'ca-app-pub-5869708488609837/1189068634',
 
-    // 內嵌廣告
-    inline: import.meta.env.VITE_ADSENSE_INLINE_ID || null,
+    // 內嵌廣告（暫時使用同一個 ID，後續可添加）
+    inline:
+      import.meta.env.VITE_ADMOB_BANNER_ID ||
+      'ca-app-pub-5869708488609837/1189068634',
   },
 
   // 評測頁面 - 只在有評測結果時顯示廣告
@@ -85,7 +93,15 @@ export const getAdUnitId = (position = 'bottom') => {
       : position === 'inline'
       ? 'inline'
       : 'bottomBanner';
-  return adConfig.adUnits[key];
+
+  const adUnitId = adConfig.adUnits[key];
+
+  // 檢查 AdMob 廣告單元 ID 格式
+  if (adUnitId && !adUnitId.includes('ca-app-pub-')) {
+    console.warn(`廣告單元 ID 格式可能不正確: ${adUnitId}`);
+  }
+
+  return adUnitId;
 };
 
 // 檢查是否應該顯示廣告
@@ -106,7 +122,7 @@ export const shouldShowAd = (pageName, position = 'bottom') => {
 
 // 智能內容驗證系統
 const checkPageContent = pageName => {
-  // 根據 Google AdSense 政策，只有內容豐富的頁面才能顯示廣告
+  // 根據 Google AdMob 政策，只有內容豐富的頁面才能顯示廣告
 
   // 1. 社群頁面 - 有豐富的用戶生成內容
   if (pageName === 'community') {
@@ -184,4 +200,34 @@ export const resetAdState = () => {
 // 設置廣告狀態
 export const setAdState = newState => {
   Object.assign(adState, newState);
+};
+
+// 檢查 AdMob 配置狀態
+export const checkAdMobConfig = () => {
+  const config = {
+    appId: adConfig.appId,
+    bannerId: adConfig.adUnits.bottomBanner,
+    enabled: import.meta.env.VITE_ADMOB_ENABLED === 'true',
+    testMode: import.meta.env.VITE_ADMOB_TEST_MODE === 'true',
+    environment: import.meta.env.MODE,
+  };
+
+  console.log('🎯 AdMob 配置狀態:', config);
+
+  // 檢查必要配置
+  const issues = [];
+  if (!config.appId || config.appId.includes('your_')) {
+    issues.push('AdMob 應用程式 ID 未正確設置');
+  }
+  if (!config.bannerId || config.bannerId.includes('your_')) {
+    issues.push('AdMob 廣告單元 ID 未正確設置');
+  }
+
+  if (issues.length > 0) {
+    console.warn('⚠️ AdMob 配置問題:', issues);
+  } else {
+    console.log('✅ AdMob 配置正常');
+  }
+
+  return { config, issues };
 };

@@ -1,0 +1,145 @@
+.admob-debug {
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  padding: 20px;
+  margin: 20px 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.admob-debug h3 {
+  margin: 0 0 20px 0;
+  color: #2c3e50;
+  font-size: 1.2rem;
+}
+
+.config-section {
+  background: white;
+  border-radius: 6px;
+  padding: 15px;
+  margin-bottom: 15px;
+}
+
+.config-section h4 {
+  margin: 0 0 15px 0;
+  color: #495057;
+  font-size: 1rem;
+}
+
+.config-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid #f1f3f4;
+}
+
+.config-item:last-child {
+  border-bottom: none;
+}
+
+.label {
+  font-weight: 500;
+  color: #6c757d;
+  min-width: 120px;
+}
+
+.value {
+  font-family: 'Courier New', monospace;
+  font-size: 0.9rem;
+  padding: 4px 8px;
+  border-radius: 4px;
+  word-break: break-all;
+}
+
+.value.success {
+  background: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.value.warning {
+  background: #fff3cd;
+  color: #856404;
+  border: 1px solid #ffeaa7;
+}
+
+.value.error {
+  background: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+.issues-section {
+  background: #f8d7da;
+  border: 1px solid #f5c6cb;
+  border-radius: 6px;
+  padding: 15px;
+  margin-bottom: 15px;
+}
+
+.issues-section h4 {
+  margin: 0 0 10px 0;
+  color: #721c24;
+  font-size: 1rem;
+}
+
+.issue-item {
+  color: #721c24;
+  margin: 5px 0;
+  padding-left: 10px;
+}
+
+.success-section {
+  background: #d4edda;
+  border: 1px solid #c3e6cb;
+  border-radius: 6px;
+  padding: 15px;
+  margin-bottom: 15px;
+}
+
+.success-section h4 {
+  margin: 0 0 10px 0;
+  color: #155724;
+  font-size: 1rem;
+}
+
+.success-section p {
+  margin: 0;
+  color: #155724;
+}
+
+.actions-section {
+  text-align: center;
+}
+
+.refresh-btn {
+  background: #007bff;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background-color 0.3s;
+}
+
+.refresh-btn:hover {
+  background: #0056b3;
+}
+
+@media (max-width: 768px) {
+  .config-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .label {
+    margin-bottom: 5px;
+  }
+
+  .value {
+    width: 100%;
+    word-break: break-all;
+  }
+}

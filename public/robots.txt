@@ -1,0 +1,22 @@
+User-agent: *
+Allow: /
+
+# AdSense 爬蟲
+User-agent: Mediapartners-Google
+Allow: /
+
+# 允許所有搜索引擎
+User-agent: *
+Allow: /
+
+# 禁止訪問敏感目錄
+Disallow: /admin/
+Disallow: /private/
+Disallow: /temp/
+
+# 允許廣告相關文件
+Allow: /ads.txt
+Allow: /assetlinks.json
+
+# 網站地圖（如果有的話）
+# Sitemap: https://fitness-app2025.netlify.app/sitemap.xml
