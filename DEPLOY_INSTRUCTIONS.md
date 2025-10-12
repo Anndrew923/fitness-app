@@ -22,22 +22,10 @@
 
 🔧 環境變數設置
 在 Netlify 控制台的 Site settings > Environment variables 中添加：
-# Netlify 環境變數設置
-# 在 Netlify 控制台的 Site settings > Environment variables 中設置
-
 VITE_ADMOB_APP_ID=ca-app-pub-5869708488609837~6490454632
 VITE_ADMOB_BANNER_ID=ca-app-pub-5869708488609837/1189068634
 VITE_ADMOB_ENABLED=true
 VITE_ADMOB_TEST_MODE=false
-
-# Firebase 配置 (如果使用)
-VITE_FIREBASE_API_KEY=your_firebase_api_key
-VITE_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
-VITE_FIREBASE_PROJECT_ID=your_project_id
-VITE_FIREBASE_STORAGE_BUCKET=your_project.appspot.com
-VITE_FIREBASE_MESSAGING_SENDER_ID=123456789
-VITE_FIREBASE_APP_ID=your_firebase_app_id
-
 
 📊 部署後檢查
 1. 訪問部署的網站

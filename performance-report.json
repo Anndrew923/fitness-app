@@ -1,0 +1,72 @@
+{
+  "timestamp": "2025-10-12T08:39:03.311Z",
+  "metrics": {
+    "fileSizes": {
+      "index.html": {
+        "size": 3049,
+        "sizeKB": "2.98 KB",
+        "status": "good"
+      },
+      "manifest.json": {
+        "size": 1317,
+        "sizeKB": "1.29 KB",
+        "status": "good"
+      },
+      "assets": {
+        "totalSize": 1761085,
+        "totalSizeMB": "1.68 MB",
+        "fileCount": 50,
+        "largeFiles": [],
+        "status": "good"
+      }
+    },
+    "adMob": {
+      "admobConfigSize": 393073,
+      "admobConfigSizeKB": "383.86 KB",
+      "admobScriptsFound": 1,
+      "status": "warning"
+    },
+    "optimization": {
+      "optimizationScore": {
+        "total": 3,
+        "passed": 2
+      },
+      "optimizationPercentage": "66.7%",
+      "issues": [
+        "src/config/adConfig.js: 缺少性能優化",
+        "src/components/AdBanner.jsx: 缺少性能優化",
+        "src/components/AdMobConfigDebug.jsx: 缺少錯誤處理",
+        "src/components/AdMobConfigDebug.jsx: 缺少性能優化"
+      ],
+      "status": "warning"
+    },
+    "network": {
+      "totalScripts": 1,
+      "admobScripts": 0,
+      "asyncScripts": 0,
+      "deferScripts": 0,
+      "preloadScripts": 0
+    }
+  },
+  "warnings": [],
+  "recommendations": [
+    {
+      "type": "admob-performance",
+      "priority": "medium",
+      "message": "AdMob 配置文件過大",
+      "action": "考慮使用更小的 AdMob 配置或延遲載入"
+    },
+    {
+      "type": "code-optimization",
+      "priority": "high",
+      "message": "代碼需要優化",
+      "action": "添加錯誤處理和性能優化"
+    }
+  ],
+  "summary": {
+    "totalChecks": 4,
+    "warnings": 0,
+    "recommendations": 2,
+    "highPriorityRecommendations": 1
+  }
+}

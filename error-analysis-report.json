@@ -1,0 +1,211 @@
+{
+  "timestamp": "2025-10-12T08:52:36.209Z",
+  "summary": {
+    "totalTime": "32ms",
+    "totalErrors": 82,
+    "autoFixable": 77,
+    "manualFix": 5,
+    "criticalIssues": 0,
+    "mostCommonError": null
+  },
+  "statistics": {
+    "totalErrors": 82,
+    "logErrors": 0,
+    "codeErrors": 82,
+    "errorTypes": {},
+    "severity": {
+      "high": 0,
+      "medium": 2,
+      "low": 80
+    },
+    "autoFixable": 77,
+    "manualFix": 5,
+    "mostCommonError": null,
+    "criticalIssues": 0
+  },
+  "patterns": [
+    {
+      "name": "環境變數錯誤",
+      "pattern": {},
+      "severity": "high",
+      "category": "configuration",
+      "description": "AdMob 環境變數未正確設置",
+      "autoFixable": true,
+      "fix": "檢查 .env.local 文件並確保所有 VITE_ADMOB_ 變數已設置"
+    },
+    {
+      "name": "AdMob 腳本載入錯誤",
+      "pattern": {},
+      "severity": "high",
+      "category": "network",
+      "description": "AdMob 腳本載入失敗",
+      "autoFixable": false,
+      "fix": "檢查網絡連接和 AdMob 應用程式 ID 是否正確"
+    },
+    {
+      "name": "廣告單元 ID 格式錯誤",
+      "pattern": {},
+      "severity": "high",
+      "category": "configuration",
+      "description": "AdMob 廣告單元 ID 格式不正確",
+      "autoFixable": true,
+      "fix": "檢查廣告單元 ID 格式是否為 ca-app-pub-XXXXXXXXXXXXXXXX~YYYYYYYYYY"
+    },
+    {
+      "name": "CORS 錯誤",
+      "pattern": {},
+      "severity": "medium",
+      "category": "network",
+      "description": "跨域資源共享錯誤",
+      "autoFixable": false,
+      "fix": "檢查服務器 CORS 設置和 AdMob 腳本載入方式"
+    },
+    {
+      "name": "React 組件錯誤",
+      "pattern": {},
+      "severity": "medium",
+      "category": "component",
+      "description": "React 組件相關錯誤",
+      "autoFixable": true,
+      "fix": "檢查組件 props 和狀態管理"
+    },
+    {
+      "name": "性能錯誤",
+      "pattern": {},
+      "severity": "low",
+      "category": "performance",
+      "description": "性能相關警告",
+      "autoFixable": true,
+      "fix": "優化組件渲染和記憶體使用"
+    }
+  ],
+  "autoFixes": [
+    {
+      "type": "remove-console-logs",
+      "priority": "medium",
+      "description": "移除生產環境中的 console.log",
+      "action": "remove-console-logs",
+      "details": {
+        "files": [
+          "src/config/adConfig.js",
+          "src/components/AdBanner.jsx",
+          "scripts/browser-test.js"
+        ],
+        "count": 77
+      }
+    }
+  ],
+  "troubleshootingGuide": [
+    {
+      "category": "環境變數問題",
+      "symptoms": [
+        "VITE_ADMOB_ 變數未定義",
+        "環境變數載入失敗"
+      ],
+      "causes": [
+        ".env.local 文件不存在",
+        "環境變數名稱錯誤",
+        "開發服務器未重啟"
+      ],
+      "solutions": [
+        "檢查 .env.local 文件是否存在",
+        "確認環境變數名稱以 VITE_ 開頭",
+        "重新啟動開發服務器",
+        "檢查變數值是否正確"
+      ],
+      "prevention": [
+        "使用環境變數模板",
+        "在 README 中記錄必要的環境變數",
+        "使用 TypeScript 類型檢查"
+      ]
+    },
+    {
+      "category": "AdMob 腳本載入問題",
+      "symptoms": [
+        "adsbygoogle 腳本載入失敗",
+        "廣告不顯示",
+        "網絡錯誤"
+      ],
+      "causes": [
+        "網絡連接問題",
+        "AdMob 應用程式 ID 錯誤",
+        "CORS 限制"
+      ],
+      "solutions": [
+        "檢查網絡連接",
+        "驗證 AdMob 應用程式 ID 格式",
+        "檢查瀏覽器控制台錯誤",
+        "確認 AdMob 帳戶狀態"
+      ],
+      "prevention": [
+        "使用錯誤處理機制",
+        "添加重試邏輯",
+        "監控腳本載入狀態"
+      ]
+    },
+    {
+      "category": "React 組件錯誤",
+      "symptoms": [
+        "組件渲染失敗",
+        "Props 錯誤",
+        "狀態更新問題"
+      ],
+      "causes": [
+        "Props 類型錯誤",
+        "狀態管理問題",
+        "生命週期錯誤"
+      ],
+      "solutions": [
+        "檢查 Props 類型定義",
+        "使用 PropTypes 或 TypeScript",
+        "檢查組件狀態更新邏輯",
+        "添加錯誤邊界"
+      ],
+      "prevention": [
+        "使用 TypeScript",
+        "添加 PropTypes 驗證",
+        "實現錯誤邊界",
+        "編寫單元測試"
+      ]
+    },
+    {
+      "category": "性能問題",
+      "symptoms": [
+        "頁面載入慢",
+        "廣告載入延遲",
+        "記憶體洩漏"
+      ],
+      "causes": [
+        "文件過大",
+        "未優化的代碼",
+        "過多的重新渲染"
+      ],
+      "solutions": [
+        "使用代碼分割",
+        "優化組件渲染",
+        "添加性能監控",
+        "使用懶加載"
+      ],
+      "prevention": [
+        "定期性能監控",
+        "使用性能分析工具",
+        "優化圖片和資源",
+        "實現緩存策略"
+      ]
+    }
+  ],
+  "recommendations": [
+    {
+      "priority": "medium",
+      "category": "automation",
+      "description": "77 個錯誤可以自動修復",
+      "action": "運行自動修復腳本"
+    },
+    {
+      "priority": "medium",
+      "category": "manual",
+      "description": "5 個錯誤需要手動修復",
+      "action": "參考故障排除指南進行修復"
+    }
+  ]
+}

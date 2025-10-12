@@ -1,0 +1,314 @@
+{
+  "summary": {
+    "totalSuites": 5,
+    "totalTests": 15,
+    "passed": 15,
+    "failed": 0,
+    "skipped": 0,
+    "successRate": "100.0%",
+    "totalTime": "46157ms",
+    "timestamp": "2025-10-12T09:17:19.908Z"
+  },
+  "suites": [
+    {
+      "name": "environment",
+      "tests": [
+        {
+          "name": "環境變數文件檢查"
+        },
+        {
+          "name": "AdMob 環境變數驗證"
+        },
+        {
+          "name": "Node.js 環境檢查"
+        }
+      ],
+      "status": "pass",
+      "startTime": 1760260593752,
+      "endTime": 1760260593763,
+      "results": [
+        {
+          "name": "環境變數文件檢查",
+          "status": "pass",
+          "duration": 5,
+          "result": {
+            "fileExists": true,
+            "path": ".env.local"
+          },
+          "timestamp": "2025-10-12T09:16:33.757Z"
+        },
+        {
+          "name": "AdMob 環境變數驗證",
+          "status": "pass",
+          "duration": 8,
+          "result": {
+            "requiredVars": 4,
+            "missingVars": 4,
+            "missingVarsList": [
+              "VITE_ADMOB_APP_ID",
+              "VITE_ADMOB_BANNER_ID",
+              "VITE_ADMOB_ENABLED",
+              "VITE_ADMOB_TEST_MODE"
+            ]
+          },
+          "timestamp": "2025-10-12T09:16:33.762Z"
+        },
+        {
+          "name": "Node.js 環境檢查",
+          "status": "pass",
+          "duration": 6,
+          "result": {
+            "nodeVersion": "v20.19.1",
+            "platform": "win32",
+            "arch": "x64",
+            "isSupported": true
+          },
+          "timestamp": "2025-10-12T09:16:33.762Z"
+        }
+      ]
+    },
+    {
+      "name": "configuration",
+      "tests": [
+        {
+          "name": "AdMob 配置文件檢查"
+        },
+        {
+          "name": "package.json 依賴檢查"
+        },
+        {
+          "name": "Vite 配置檢查"
+        }
+      ],
+      "status": "pass",
+      "startTime": 1760260593764,
+      "endTime": 1760260593769,
+      "results": [
+        {
+          "name": "AdMob 配置文件檢查",
+          "status": "pass",
+          "duration": 4,
+          "result": {
+            "src/config/adConfig.js": {
+              "exists": true,
+              "size": 5754,
+              "hasAdMobConfig": true,
+              "hasErrorHandling": true,
+              "hasPerformanceOptimization": false
+            },
+            "src/components/AdBanner.jsx": {
+              "exists": true,
+              "size": 4122,
+              "hasAdMobConfig": true,
+              "hasErrorHandling": true,
+              "hasPerformanceOptimization": false
+            },
+            "src/components/AdMobConfigDebug.jsx": {
+              "exists": true,
+              "size": 2739,
+              "hasAdMobConfig": true,
+              "hasErrorHandling": false,
+              "hasPerformanceOptimization": false
+            }
+          },
+          "timestamp": "2025-10-12T09:16:33.768Z"
+        },
+        {
+          "name": "package.json 依賴檢查",
+          "status": "pass",
+          "duration": 2,
+          "result": {
+            "totalDependencies": 10,
+            "totalDevDependencies": 8,
+            "requiredDependencies": 1,
+            "missingDependencies": 0
+          },
+          "timestamp": "2025-10-12T09:16:33.768Z"
+        },
+        {
+          "name": "Vite 配置檢查",
+          "status": "pass",
+          "duration": 2,
+          "result": {
+            "exists": true,
+            "hasBuildConfig": true,
+            "hasDevConfig": true,
+            "hasPluginConfig": true
+          },
+          "timestamp": "2025-10-12T09:16:33.769Z"
+        }
+      ]
+    },
+    {
+      "name": "build",
+      "tests": [
+        {
+          "name": "生產構建檢查"
+        },
+        {
+          "name": "AdMob 配置打包檢查"
+        },
+        {
+          "name": "文件大小優化檢查"
+        }
+      ],
+      "status": "pass",
+      "startTime": 1760260593769,
+      "endTime": 1760260593833,
+      "results": [
+        {
+          "name": "生產構建檢查",
+          "status": "pass",
+          "duration": 64,
+          "result": {
+            "distExists": true,
+            "requiredFiles": 2,
+            "missingFiles": 0
+          },
+          "timestamp": "2025-10-12T09:16:33.833Z"
+        },
+        {
+          "name": "AdMob 配置打包檢查",
+          "status": "pass",
+          "duration": 59,
+          "result": {
+            "admobConfigPacked": true,
+            "admobConfigSize": "383.86 KB",
+            "jsFiles": 29
+          },
+          "timestamp": "2025-10-12T09:16:33.833Z"
+        },
+        {
+          "name": "文件大小優化檢查",
+          "status": "pass",
+          "duration": 13,
+          "result": {
+            "totalSize": "1.68 MB",
+            "largeFiles": 0,
+            "largeFilesList": [],
+            "isOptimized": true
+          },
+          "timestamp": "2025-10-12T09:16:33.833Z"
+        }
+      ]
+    },
+    {
+      "name": "code-quality",
+      "tests": [
+        {
+          "name": "ESLint 檢查"
+        },
+        {
+          "name": "代碼覆蓋率檢查"
+        },
+        {
+          "name": "性能優化檢查"
+        }
+      ],
+      "status": "pass",
+      "startTime": 1760260593833,
+      "endTime": 1760260607687,
+      "results": [
+        {
+          "name": "ESLint 檢查",
+          "status": "pass",
+          "duration": 13853,
+          "result": {
+            "eslintPassed": false,
+            "output": "\n> ultimate-physique@0.1.0 check\n> eslint src --ext .js,.jsx --fix\n\n\nC:\\Users\\User\\Dropbox\\fitness-app\\src\\About.jsx\n  1:8  error  'React' is defined but never used  no-unused-vars\n\nC:\\Users\\User\\Dropbox\\fitness-app\\src\\LandingPage.jsx\n   5:10  error  'auth' is defined but never used                          no-unused-vars\n  14:9   error  'handleLoginRedirect' is assigned a value but never used  no-unused-vars\n\nC:\\Users\\User\\Dropbox\\fitness-app\\src\\Strength.jsx\n  127:55  warning  The ref value 'timeoutRef.current' will likely have changed by the time this effect cleanup function runs. If this ref points to a node rendered by React, copy 'timeoutRef.current' to a variable inside the effect, and use that variable in the cleanup function  react-hooks/exhaustive-deps\n  241:5   warning  React Hook useCallback has a missing dependency: 't'. Either include it or remove the dependency array                                                                                                                                                               react-hooks/exhaustive-deps\n\nC:\\Users\\User\\Dropbox\\fitness-app\\src\\UserContext.jsx\n  236:9  error    'saveHistoryDebounceRef' is assigned a value but never used                                                                no-unused-vars\n  639:5  warning  React Hook useCallback has an unnecessary dependency: 'addToWriteQueue'. Either exclude it or remove the dependency array  react-hooks/exhaustive-deps\n\nC:\\Users\\User\\Dropbox\\fitness-app\\src\\UserInfo.jsx\n   559:6  warning  React Hook useCallback has missing dependencies: 't' and 'userData'. Either include them or remove the dependency array                                                                                                                                 react-hooks/exhaustive-deps\n   616:6  warning  React Hook useCallback has an unnecessary dependency: 'auth.currentUser'. Either exclude it or remove the dependency array. Outer scope values like 'auth.currentUser' aren't valid dependencies because mutating them doesn't re-render the component  react-hooks/exhaustive-deps\n   657:6  warning  React Hook useMemo has a missing dependency: 't'. Either include it or remove the dependency array                                                                                                                                                      react-hooks/exhaustive-deps\n   788:6  warning  React Hook useEffect has missing dependencies: 'isGuest' and 'navigate'. Either include them or remove the dependency array                                                                                                                             react-hooks/exhaustive-deps\n   958:6  warning  React Hook useEffect has a missing dependency: 'setUserData'. Either include it or remove the dependency array                                                                                                                                          react-hooks/exhaustive-deps\n   975:6  warning  React Hook useCallback has a missing dependency: 't'. Either include it or remove the dependency array                                                                                                                                                  react-hooks/exhaustive-deps\n  1030:5  warning  React Hook useCallback has a missing dependency: 't'. Either include it or remove the dependency array                                                                                                                                                  react-hooks/exhaustive-deps\n  1219:6  warning  React Hook useCallback has a missing dependency: 't'. Either include it or remove the dependency array                                                                                                                                                  react-hooks/exhaustive-deps\n  1250:5  warning  React Hook useCallback has a missing dependency: 't'. Either include it or remove the dependency array                                                                                                                                                  react-hooks/exhaustive-deps\n\nC:\\Users\\User\\Dropbox\\fitness-app\\src\\WelcomeSplash.jsx\n   9:11  error  't' is assigned a value but never used          no-unused-vars\n  10:10  error  'isLoading' is assigned a value but never used  no-unused-vars\n\nC:\\Users\\User\\Dropbox\\fitness-app\\src\\components\\Community.jsx\n    78:6   warning  React Hook useMemo has an unnecessary dependency: 'auth.currentUser.uid'. Either exclude it or remove the dependency array. Outer scope values like 'auth.currentUser.uid' aren't valid dependencies because mutating them doesn't re-render the component                                 react-hooks/exhaustive-deps\n   230:6   warning  React Hook useCallback has missing dependencies: 'currentUserId', 't', and 'userData'. Either include them or remove the dependency array                                                                                                                                                  react-hooks/exhaustive-deps\n   372:5   warning  React Hook useCallback has missing dependencies: 'currentUserId' and 't'. Either include them or remove the dependency array. Outer scope values like 'auth.currentUser' aren't valid dependencies because mutating them doesn't re-render the component                                   react-hooks/exhaustive-deps\n   541:5   warning  React Hook useCallback has a missing dependency: 't'. Either include it or remove the dependency array. Outer scope values like 'auth.currentUser' aren't valid dependencies because mutating them doesn't re-render the component                                                         react-hooks/exhaustive-deps\n   627:5   warning  React Hook useCallback has a missing dependency: 't'. Either include it or remove the dependency array                                                                                                                                                                                     react-hooks/exhaustive-deps\n   682:5   warning  React Hook useCallback has a missing dependency: 't'. Either include it or remove the dependency array                                                                                                                                                                                     react-hooks/exhaustive-deps\n   874:6   warning  React Hook useCallback has missing dependencies: 'setUserData' and 't'. Either include them or remove the dependency array                                                                                                                                                                 react-hooks/exhaustive-deps\n  1290:44  warning  The ref value 'commentDebounceTimers.current' will likely have changed by the time this effect cleanup function runs. If this ref points to a node rendered by React, copy 'commentDebounceTimers.current' to a variable inside the effect, and use that variable in the cleanup function  react-hooks/exhaustive-deps\n\nC:\\Users\\User\\Dropbox\\fitness-app\\src\\components\\FriendFeed.jsx\n   87:6   warning  React Hook useCallback has a missing dependency: 't'. Either include it or remove the dependency array                                                                                                                                                                                     react-hooks/exhaustive-deps\n  666:6   warning  React Hook useCallback has missing dependencies: 'i18n.language' and 't'. Either include them or remove the dependency array                                                                                                                                                               react-hooks/exhaustive-deps\n  895:44  warning  The ref value 'commentDebounceTimers.current' will likely have changed by the time this effect cleanup function runs. If this ref points to a node rendered by React, copy 'commentDebounceTimers.current' to a variable inside the effect, and use that variable in the cleanup function  react-hooks/exhaustive-deps\n\nC:\\Users\\User\\Dropbox\\fitness-app\\src\\components\\Friends.jsx\n  1761:1  error  Parsing error: 'import' and 'export' may only appear at the top level\n\nC:\\Users\\User\\Dropbox\\fitness-app\\src\\components\\Ladder.jsx\n  267:6  warning  React Hook useCallback has a missing dependency: 't'. Either include it or remove the dependency array  react-hooks/exhaustive-deps\n  485:6  warning  React Hook useMemo has a missing dependency: 't'. Either include it or remove the dependency array      react-hooks/exhaustive-deps\n\nC:\\Users\\User\\Dropbox\\fitness-app\\src\\components\\MonitorDashboard.jsx\n  1:8  error  'React' is defined but never used  no-unused-vars\n\nC:\\Users\\User\\Dropbox\\fitness-app\\src\\components\\Settings.jsx\n   36:6  warning  React Hook useCallback has a missing dependency: 't'. Either include it or remove the dependency array  react-hooks/exhaustive-deps\n   53:6  warning  React Hook useCallback has a missing dependency: 't'. Either include it or remove the dependency array  react-hooks/exhaustive-deps\n   69:6  warning  React Hook useCallback has a missing dependency: 't'. Either include it or remove the dependency array  react-hooks/exhaustive-deps\n   81:6  warning  React Hook useCallback has a missing dependency: 't'. Either include it or remove the dependency array  react-hooks/exhaustive-deps\n  154:6  warning  React Hook useCallback has a missing dependency: 't'. Either include it or remove the dependency array  react-hooks/exhaustive-deps\n\nC:\\Users\\User\\Dropbox\\fitness-app\\src\\components\\VirtualScroll.jsx\n   3:3  error  'useEffect' is defined but never used                no-unused-vars\n  74:9  error  'scrollToTop' is assigned a value but never used     no-unused-vars\n  79:9  error  'scrollToBottom' is assigned a value but never used  no-unused-vars\n\nC:\\Users\\User\\Dropbox\\fitness-app\\src\\hooks\\useDataCache.js\n  140:6  warning  React Hook useEffect was passed a dependency list that is not an array literal. This means we can't statically verify whether you've passed the correct dependencies  react-hooks/exhaustive-deps\n  140:6  warning  React Hook useEffect has missing dependencies: 'enabled' and 'fetchData'. Either include them or remove the dependency array                                          react-hooks/exhaustive-deps\n\nC:\\Users\\User\\Dropbox\\fitness-app\\src\\hooks\\useIntersectionObserver.js\n  14:9  warning  The 'defaultOptions' object makes the dependencies of useCallback Hook (at line 37) change on every render. Move it inside the useCallback callback. Alternatively, wrap the initialization of 'defaultOptions' in its own useMemo() Hook  react-hooks/exhaustive-deps\n  73:6  warning  React Hook useEffect was passed a dependency list that is not an array literal. This means we can't statically verify whether you've passed the correct dependencies                                                                       react-hooks/exhaustive-deps\n  73:6  warning  React Hook useEffect has missing dependencies: 'createObserver' and 'startObserving'. Either include them or remove the dependency array                                                                                                   react-hooks/exhaustive-deps\n\nC:\\Users\\User\\Dropbox\\fitness-app\\src\\hooks\\useResourcePreloader.js\n   90:15  error  Unexpected lexical declaration in case block  no-case-declarations\n   97:15  error  Unexpected lexical declaration in case block  no-case-declarations\n  106:15  error  Unexpected lexical declaration in case block  no-case-declarations\n  115:15  error  Unexpected lexical declaration in case block  no-case-declarations\n\nC:\\Users\\User\\Dropbox\\fitness-app\\src\\hooks\\useWebWorker.js\n   8:35  error    'options' is assigned a value but never used                                                                                                                                                                                                                             no-unused-vars\n  51:20  warning  The ref value 'callbacksRef.current' will likely have changed by the time this effect cleanup function runs. If this ref points to a node rendered by React, copy 'callbacksRef.current' to a variable inside the effect, and use that variable in the cleanup function  react-hooks/exhaustive-deps\n\nC:\\Users\\User\\Dropbox\\fitness-app\\src\\pages\\MonitorPage.jsx\n  1:8  error  'React' is defined but never used  no-unused-vars\n\n✖ 53 problems (17 errors, 36 warnings)\n\n"
+          },
+          "timestamp": "2025-10-12T09:16:47.686Z"
+        },
+        {
+          "name": "代碼覆蓋率檢查",
+          "status": "pass",
+          "duration": 9,
+          "result": {
+            "totalLines": 481,
+            "coveredLines": 37,
+            "coverage": "7.7%",
+            "isGoodCoverage": false
+          },
+          "timestamp": "2025-10-12T09:16:47.686Z"
+        },
+        {
+          "name": "性能優化檢查",
+          "status": "pass",
+          "duration": 7,
+          "result": {
+            "totalFiles": 3,
+            "optimizedFiles": 0,
+            "optimizationPercentage": "0.0%",
+            "issues": 4,
+            "issuesList": [
+              "src/config/adConfig.js: 缺少性能優化",
+              "src/components/AdBanner.jsx: 缺少性能優化",
+              "src/components/AdMobConfigDebug.jsx: 缺少錯誤處理",
+              "src/components/AdMobConfigDebug.jsx: 缺少性能優化"
+            ],
+            "isWellOptimized": false
+          },
+          "timestamp": "2025-10-12T09:16:47.687Z"
+        }
+      ]
+    },
+    {
+      "name": "performance",
+      "tests": [
+        {
+          "name": "構建性能檢查"
+        },
+        {
+          "name": "文件壓縮檢查"
+        },
+        {
+          "name": "依賴大小分析"
+        }
+      ],
+      "status": "pass",
+      "startTime": 1760260607690,
+      "endTime": 1760260639908,
+      "results": [
+        {
+          "name": "構建性能檢查",
+          "status": "pass",
+          "duration": 32216,
+          "result": {
+            "buildTime": "32197ms",
+            "buildSuccessful": true,
+            "isFastBuild": true
+          },
+          "timestamp": "2025-10-12T09:17:19.907Z"
+        },
+        {
+          "name": "文件壓縮檢查",
+          "status": "pass",
+          "duration": 19,
+          "result": {
+            "totalSize": "1.68 MB",
+            "fileCount": 50,
+            "compressedFiles": 49,
+            "compressionRatio": "98.0%"
+          },
+          "timestamp": "2025-10-12T09:17:19.907Z"
+        },
+        {
+          "name": "依賴大小分析",
+          "status": "pass",
+          "duration": 3,
+          "result": {
+            "productionDependencies": 10,
+            "developmentDependencies": 8,
+            "totalDependencies": 18,
+            "isReasonableSize": true
+          },
+          "timestamp": "2025-10-12T09:17:19.908Z"
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "warnings": [],
+  "performance": {},
+  "coverage": {}
+}

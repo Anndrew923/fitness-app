@@ -1,0 +1,715 @@
+{
+  "timestamp": "2025-10-12T09:28:53.966Z",
+  "runtime": "11.3 分鐘",
+  "summary": {
+    "admobEarnings": 102.46099701298331,
+    "adLoadSuccessRate": "73.9%",
+    "totalErrors": 23,
+    "totalAlerts": 45,
+    "avgPageLoadTime": "1649ms",
+    "avgAdRenderTime": "660ms",
+    "memoryUsage": "4.40 MB"
+  },
+  "metrics": {
+    "startTime": 1760260658027,
+    "admobEarnings": 102.46099701298331,
+    "adLoadSuccess": 17,
+    "adLoadFailure": 6,
+    "userExperience": {
+      "pageLoadTime": 1648.6825638848627,
+      "adRenderTime": 660.1379431969746,
+      "userInteraction": true,
+      "bounceRate": 0.1665297983619288
+    },
+    "performance": {
+      "memoryUsage": {
+        "rss": 39055360,
+        "heapTotal": 5738496,
+        "heapUsed": 4615384,
+        "external": 1864913,
+        "arrayBuffers": 10491
+      },
+      "cpuUsage": {
+        "user": 437000,
+        "system": 187000
+      },
+      "uptime": 660.2997259,
+      "responseTime": 357.3492069310037
+    },
+    "errors": [
+      {
+        "timestamp": "2025-10-12T09:17:38.039Z",
+        "type": "error_count",
+        "count": 0
+      },
+      {
+        "timestamp": "2025-10-12T09:18:08.047Z",
+        "type": "error_count",
+        "count": 0
+      },
+      {
+        "timestamp": "2025-10-12T09:18:38.062Z",
+        "type": "error_count",
+        "count": 0
+      },
+      {
+        "timestamp": "2025-10-12T09:19:08.087Z",
+        "type": "error_count",
+        "count": 0
+      },
+      {
+        "timestamp": "2025-10-12T09:19:38.080Z",
+        "type": "error_count",
+        "count": 0
+      },
+      {
+        "timestamp": "2025-10-12T09:20:08.080Z",
+        "type": "error_count",
+        "count": 0
+      },
+      {
+        "timestamp": "2025-10-12T09:20:38.091Z",
+        "type": "error_count",
+        "count": 0
+      },
+      {
+        "timestamp": "2025-10-12T09:21:08.112Z",
+        "type": "error_count",
+        "count": 0
+      },
+      {
+        "timestamp": "2025-10-12T09:21:38.121Z",
+        "type": "error_count",
+        "count": 0
+      },
+      {
+        "timestamp": "2025-10-12T09:22:08.131Z",
+        "type": "error_count",
+        "count": 0
+      },
+      {
+        "timestamp": "2025-10-12T09:22:38.139Z",
+        "type": "error_count",
+        "count": 0
+      },
+      {
+        "timestamp": "2025-10-12T09:23:08.145Z",
+        "type": "error_count",
+        "count": 0
+      },
+      {
+        "timestamp": "2025-10-12T09:23:38.180Z",
+        "type": "error_count",
+        "count": 0
+      },
+      {
+        "timestamp": "2025-10-12T09:24:08.227Z",
+        "type": "error_count",
+        "count": 0
+      },
+      {
+        "timestamp": "2025-10-12T09:24:38.169Z",
+        "type": "error_count",
+        "count": 0
+      },
+      {
+        "timestamp": "2025-10-12T09:25:08.176Z",
+        "type": "error_count",
+        "count": 0
+      },
+      {
+        "timestamp": "2025-10-12T09:25:38.179Z",
+        "type": "error_count",
+        "count": 0
+      },
+      {
+        "timestamp": "2025-10-12T09:26:08.180Z",
+        "type": "error_count",
+        "count": 0
+      },
+      {
+        "timestamp": "2025-10-12T09:26:38.202Z",
+        "type": "error_count",
+        "count": 0
+      },
+      {
+        "timestamp": "2025-10-12T09:27:08.195Z",
+        "type": "error_count",
+        "count": 0
+      },
+      {
+        "timestamp": "2025-10-12T09:27:38.203Z",
+        "type": "error_count",
+        "count": 0
+      },
+      {
+        "timestamp": "2025-10-12T09:28:08.239Z",
+        "type": "error_count",
+        "count": 0
+      },
+      {
+        "timestamp": "2025-10-12T09:28:38.239Z",
+        "type": "error_count",
+        "count": 0
+      }
+    ],
+    "alerts": [
+      {
+        "type": "earnings",
+        "level": "info",
+        "message": "AdMob 收益達到 $3.84",
+        "timestamp": "2025-10-12T09:17:38.042Z"
+      },
+      {
+        "type": "earnings",
+        "level": "info",
+        "message": "AdMob 收益達到 $7.67",
+        "timestamp": "2025-10-12T09:18:08.047Z"
+      },
+      {
+        "type": "earnings",
+        "level": "info",
+        "message": "AdMob 收益達到 $10.03",
+        "timestamp": "2025-10-12T09:18:38.063Z"
+      },
+      {
+        "type": "earnings",
+        "level": "info",
+        "message": "AdMob 收益達到 $10.56",
+        "timestamp": "2025-10-12T09:19:08.088Z"
+      },
+      {
+        "type": "earnings",
+        "level": "info",
+        "message": "AdMob 收益達到 $10.93",
+        "timestamp": "2025-10-12T09:19:38.081Z"
+      },
+      {
+        "type": "earnings",
+        "level": "info",
+        "message": "AdMob 收益達到 $12.79",
+        "timestamp": "2025-10-12T09:20:08.080Z"
+      },
+      {
+        "type": "error_count",
+        "level": "error",
+        "message": "錯誤數量過多: 6",
+        "timestamp": "2025-10-12T09:20:08.080Z"
+      },
+      {
+        "type": "earnings",
+        "level": "info",
+        "message": "AdMob 收益達到 $13.68",
+        "timestamp": "2025-10-12T09:20:38.092Z"
+      },
+      {
+        "type": "error_count",
+        "level": "error",
+        "message": "錯誤數量過多: 7",
+        "timestamp": "2025-10-12T09:20:38.092Z"
+      },
+      {
+        "type": "earnings",
+        "level": "info",
+        "message": "AdMob 收益達到 $18.67",
+        "timestamp": "2025-10-12T09:21:08.112Z"
+      },
+      {
+        "type": "error_count",
+        "level": "error",
+        "message": "錯誤數量過多: 8",
+        "timestamp": "2025-10-12T09:21:08.112Z"
+      },
+      {
+        "type": "earnings",
+        "level": "info",
+        "message": "AdMob 收益達到 $22.20",
+        "timestamp": "2025-10-12T09:21:38.125Z"
+      },
+      {
+        "type": "error_count",
+        "level": "error",
+        "message": "錯誤數量過多: 9",
+        "timestamp": "2025-10-12T09:21:38.125Z"
+      },
+      {
+        "type": "earnings",
+        "level": "info",
+        "message": "AdMob 收益達到 $30.67",
+        "timestamp": "2025-10-12T09:22:08.133Z"
+      },
+      {
+        "type": "error_count",
+        "level": "error",
+        "message": "錯誤數量過多: 10",
+        "timestamp": "2025-10-12T09:22:08.133Z"
+      },
+      {
+        "type": "earnings",
+        "level": "info",
+        "message": "AdMob 收益達到 $37.16",
+        "timestamp": "2025-10-12T09:22:38.139Z"
+      },
+      {
+        "type": "error_count",
+        "level": "error",
+        "message": "錯誤數量過多: 11",
+        "timestamp": "2025-10-12T09:22:38.139Z"
+      },
+      {
+        "type": "earnings",
+        "level": "info",
+        "message": "AdMob 收益達到 $39.87",
+        "timestamp": "2025-10-12T09:23:08.145Z"
+      },
+      {
+        "type": "error_count",
+        "level": "error",
+        "message": "錯誤數量過多: 12",
+        "timestamp": "2025-10-12T09:23:08.146Z"
+      },
+      {
+        "type": "earnings",
+        "level": "info",
+        "message": "AdMob 收益達到 $44.13",
+        "timestamp": "2025-10-12T09:23:38.181Z"
+      },
+      {
+        "type": "error_count",
+        "level": "error",
+        "message": "錯誤數量過多: 13",
+        "timestamp": "2025-10-12T09:23:38.181Z"
+      },
+      {
+        "type": "earnings",
+        "level": "info",
+        "message": "AdMob 收益達到 $44.60",
+        "timestamp": "2025-10-12T09:24:08.230Z"
+      },
+      {
+        "type": "error_count",
+        "level": "error",
+        "message": "錯誤數量過多: 14",
+        "timestamp": "2025-10-12T09:24:08.230Z"
+      },
+      {
+        "type": "earnings",
+        "level": "info",
+        "message": "AdMob 收益達到 $54.35",
+        "timestamp": "2025-10-12T09:24:38.169Z"
+      },
+      {
+        "type": "error_count",
+        "level": "error",
+        "message": "錯誤數量過多: 15",
+        "timestamp": "2025-10-12T09:24:38.169Z"
+      },
+      {
+        "type": "earnings",
+        "level": "info",
+        "message": "AdMob 收益達到 $60.01",
+        "timestamp": "2025-10-12T09:25:08.177Z"
+      },
+      {
+        "type": "error_count",
+        "level": "error",
+        "message": "錯誤數量過多: 16",
+        "timestamp": "2025-10-12T09:25:08.177Z"
+      },
+      {
+        "type": "earnings",
+        "level": "info",
+        "message": "AdMob 收益達到 $63.02",
+        "timestamp": "2025-10-12T09:25:38.180Z"
+      },
+      {
+        "type": "error_count",
+        "level": "error",
+        "message": "錯誤數量過多: 17",
+        "timestamp": "2025-10-12T09:25:38.180Z"
+      },
+      {
+        "type": "earnings",
+        "level": "info",
+        "message": "AdMob 收益達到 $71.68",
+        "timestamp": "2025-10-12T09:26:08.180Z"
+      },
+      {
+        "type": "error_count",
+        "level": "error",
+        "message": "錯誤數量過多: 18",
+        "timestamp": "2025-10-12T09:26:08.180Z"
+      },
+      {
+        "type": "earnings",
+        "level": "info",
+        "message": "AdMob 收益達到 $74.80",
+        "timestamp": "2025-10-12T09:26:38.202Z"
+      },
+      {
+        "type": "ad_load_rate",
+        "level": "warning",
+        "message": "廣告載入成功率過低: 78.9%",
+        "timestamp": "2025-10-12T09:26:38.202Z"
+      },
+      {
+        "type": "error_count",
+        "level": "error",
+        "message": "錯誤數量過多: 19",
+        "timestamp": "2025-10-12T09:26:38.202Z"
+      },
+      {
+        "type": "earnings",
+        "level": "info",
+        "message": "AdMob 收益達到 $82.32",
+        "timestamp": "2025-10-12T09:27:08.196Z"
+      },
+      {
+        "type": "error_count",
+        "level": "error",
+        "message": "錯誤數量過多: 20",
+        "timestamp": "2025-10-12T09:27:08.196Z"
+      },
+      {
+        "type": "earnings",
+        "level": "info",
+        "message": "AdMob 收益達到 $90.90",
+        "timestamp": "2025-10-12T09:27:38.204Z"
+      },
+      {
+        "type": "ad_load_rate",
+        "level": "warning",
+        "message": "廣告載入成功率過低: 76.2%",
+        "timestamp": "2025-10-12T09:27:38.204Z"
+      },
+      {
+        "type": "error_count",
+        "level": "error",
+        "message": "錯誤數量過多: 21",
+        "timestamp": "2025-10-12T09:27:38.204Z"
+      },
+      {
+        "type": "earnings",
+        "level": "info",
+        "message": "AdMob 收益達到 $97.53",
+        "timestamp": "2025-10-12T09:28:08.242Z"
+      },
+      {
+        "type": "ad_load_rate",
+        "level": "warning",
+        "message": "廣告載入成功率過低: 77.3%",
+        "timestamp": "2025-10-12T09:28:08.242Z"
+      },
+      {
+        "type": "error_count",
+        "level": "error",
+        "message": "錯誤數量過多: 22",
+        "timestamp": "2025-10-12T09:28:08.242Z"
+      },
+      {
+        "type": "earnings",
+        "level": "info",
+        "message": "AdMob 收益達到 $102.46",
+        "timestamp": "2025-10-12T09:28:38.244Z"
+      },
+      {
+        "type": "ad_load_rate",
+        "level": "warning",
+        "message": "廣告載入成功率過低: 73.9%",
+        "timestamp": "2025-10-12T09:28:38.244Z"
+      },
+      {
+        "type": "error_count",
+        "level": "error",
+        "message": "錯誤數量過多: 23",
+        "timestamp": "2025-10-12T09:28:38.244Z"
+      }
+    ]
+  },
+  "alerts": [
+    {
+      "type": "earnings",
+      "level": "info",
+      "message": "AdMob 收益達到 $3.84",
+      "timestamp": "2025-10-12T09:17:38.042Z"
+    },
+    {
+      "type": "earnings",
+      "level": "info",
+      "message": "AdMob 收益達到 $7.67",
+      "timestamp": "2025-10-12T09:18:08.047Z"
+    },
+    {
+      "type": "earnings",
+      "level": "info",
+      "message": "AdMob 收益達到 $10.03",
+      "timestamp": "2025-10-12T09:18:38.063Z"
+    },
+    {
+      "type": "earnings",
+      "level": "info",
+      "message": "AdMob 收益達到 $10.56",
+      "timestamp": "2025-10-12T09:19:08.088Z"
+    },
+    {
+      "type": "earnings",
+      "level": "info",
+      "message": "AdMob 收益達到 $10.93",
+      "timestamp": "2025-10-12T09:19:38.081Z"
+    },
+    {
+      "type": "earnings",
+      "level": "info",
+      "message": "AdMob 收益達到 $12.79",
+      "timestamp": "2025-10-12T09:20:08.080Z"
+    },
+    {
+      "type": "error_count",
+      "level": "error",
+      "message": "錯誤數量過多: 6",
+      "timestamp": "2025-10-12T09:20:08.080Z"
+    },
+    {
+      "type": "earnings",
+      "level": "info",
+      "message": "AdMob 收益達到 $13.68",
+      "timestamp": "2025-10-12T09:20:38.092Z"
+    },
+    {
+      "type": "error_count",
+      "level": "error",
+      "message": "錯誤數量過多: 7",
+      "timestamp": "2025-10-12T09:20:38.092Z"
+    },
+    {
+      "type": "earnings",
+      "level": "info",
+      "message": "AdMob 收益達到 $18.67",
+      "timestamp": "2025-10-12T09:21:08.112Z"
+    },
+    {
+      "type": "error_count",
+      "level": "error",
+      "message": "錯誤數量過多: 8",
+      "timestamp": "2025-10-12T09:21:08.112Z"
+    },
+    {
+      "type": "earnings",
+      "level": "info",
+      "message": "AdMob 收益達到 $22.20",
+      "timestamp": "2025-10-12T09:21:38.125Z"
+    },
+    {
+      "type": "error_count",
+      "level": "error",
+      "message": "錯誤數量過多: 9",
+      "timestamp": "2025-10-12T09:21:38.125Z"
+    },
+    {
+      "type": "earnings",
+      "level": "info",
+      "message": "AdMob 收益達到 $30.67",
+      "timestamp": "2025-10-12T09:22:08.133Z"
+    },
+    {
+      "type": "error_count",
+      "level": "error",
+      "message": "錯誤數量過多: 10",
+      "timestamp": "2025-10-12T09:22:08.133Z"
+    },
+    {
+      "type": "earnings",
+      "level": "info",
+      "message": "AdMob 收益達到 $37.16",
+      "timestamp": "2025-10-12T09:22:38.139Z"
+    },
+    {
+      "type": "error_count",
+      "level": "error",
+      "message": "錯誤數量過多: 11",
+      "timestamp": "2025-10-12T09:22:38.139Z"
+    },
+    {
+      "type": "earnings",
+      "level": "info",
+      "message": "AdMob 收益達到 $39.87",
+      "timestamp": "2025-10-12T09:23:08.145Z"
+    },
+    {
+      "type": "error_count",
+      "level": "error",
+      "message": "錯誤數量過多: 12",
+      "timestamp": "2025-10-12T09:23:08.146Z"
+    },
+    {
+      "type": "earnings",
+      "level": "info",
+      "message": "AdMob 收益達到 $44.13",
+      "timestamp": "2025-10-12T09:23:38.181Z"
+    },
+    {
+      "type": "error_count",
+      "level": "error",
+      "message": "錯誤數量過多: 13",
+      "timestamp": "2025-10-12T09:23:38.181Z"
+    },
+    {
+      "type": "earnings",
+      "level": "info",
+      "message": "AdMob 收益達到 $44.60",
+      "timestamp": "2025-10-12T09:24:08.230Z"
+    },
+    {
+      "type": "error_count",
+      "level": "error",
+      "message": "錯誤數量過多: 14",
+      "timestamp": "2025-10-12T09:24:08.230Z"
+    },
+    {
+      "type": "earnings",
+      "level": "info",
+      "message": "AdMob 收益達到 $54.35",
+      "timestamp": "2025-10-12T09:24:38.169Z"
+    },
+    {
+      "type": "error_count",
+      "level": "error",
+      "message": "錯誤數量過多: 15",
+      "timestamp": "2025-10-12T09:24:38.169Z"
+    },
+    {
+      "type": "earnings",
+      "level": "info",
+      "message": "AdMob 收益達到 $60.01",
+      "timestamp": "2025-10-12T09:25:08.177Z"
+    },
+    {
+      "type": "error_count",
+      "level": "error",
+      "message": "錯誤數量過多: 16",
+      "timestamp": "2025-10-12T09:25:08.177Z"
+    },
+    {
+      "type": "earnings",
+      "level": "info",
+      "message": "AdMob 收益達到 $63.02",
+      "timestamp": "2025-10-12T09:25:38.180Z"
+    },
+    {
+      "type": "error_count",
+      "level": "error",
+      "message": "錯誤數量過多: 17",
+      "timestamp": "2025-10-12T09:25:38.180Z"
+    },
+    {
+      "type": "earnings",
+      "level": "info",
+      "message": "AdMob 收益達到 $71.68",
+      "timestamp": "2025-10-12T09:26:08.180Z"
+    },
+    {
+      "type": "error_count",
+      "level": "error",
+      "message": "錯誤數量過多: 18",
+      "timestamp": "2025-10-12T09:26:08.180Z"
+    },
+    {
+      "type": "earnings",
+      "level": "info",
+      "message": "AdMob 收益達到 $74.80",
+      "timestamp": "2025-10-12T09:26:38.202Z"
+    },
+    {
+      "type": "ad_load_rate",
+      "level": "warning",
+      "message": "廣告載入成功率過低: 78.9%",
+      "timestamp": "2025-10-12T09:26:38.202Z"
+    },
+    {
+      "type": "error_count",
+      "level": "error",
+      "message": "錯誤數量過多: 19",
+      "timestamp": "2025-10-12T09:26:38.202Z"
+    },
+    {
+      "type": "earnings",
+      "level": "info",
+      "message": "AdMob 收益達到 $82.32",
+      "timestamp": "2025-10-12T09:27:08.196Z"
+    },
+    {
+      "type": "error_count",
+      "level": "error",
+      "message": "錯誤數量過多: 20",
+      "timestamp": "2025-10-12T09:27:08.196Z"
+    },
+    {
+      "type": "earnings",
+      "level": "info",
+      "message": "AdMob 收益達到 $90.90",
+      "timestamp": "2025-10-12T09:27:38.204Z"
+    },
+    {
+      "type": "ad_load_rate",
+      "level": "warning",
+      "message": "廣告載入成功率過低: 76.2%",
+      "timestamp": "2025-10-12T09:27:38.204Z"
+    },
+    {
+      "type": "error_count",
+      "level": "error",
+      "message": "錯誤數量過多: 21",
+      "timestamp": "2025-10-12T09:27:38.204Z"
+    },
+    {
+      "type": "earnings",
+      "level": "info",
+      "message": "AdMob 收益達到 $97.53",
+      "timestamp": "2025-10-12T09:28:08.242Z"
+    },
+    {
+      "type": "ad_load_rate",
+      "level": "warning",
+      "message": "廣告載入成功率過低: 77.3%",
+      "timestamp": "2025-10-12T09:28:08.242Z"
+    },
+    {
+      "type": "error_count",
+      "level": "error",
+      "message": "錯誤數量過多: 22",
+      "timestamp": "2025-10-12T09:28:08.242Z"
+    },
+    {
+      "type": "earnings",
+      "level": "info",
+      "message": "AdMob 收益達到 $102.46",
+      "timestamp": "2025-10-12T09:28:38.244Z"
+    },
+    {
+      "type": "ad_load_rate",
+      "level": "warning",
+      "message": "廣告載入成功率過低: 73.9%",
+      "timestamp": "2025-10-12T09:28:38.244Z"
+    },
+    {
+      "type": "error_count",
+      "level": "error",
+      "message": "錯誤數量過多: 23",
+      "timestamp": "2025-10-12T09:28:38.244Z"
+    }
+  ],
+  "recommendations": [
+    {
+      "priority": "high",
+      "category": "ad_loading",
+      "description": "廣告載入成功率過低",
+      "action": "檢查 AdMob 配置和網絡連接"
+    },
+    {
+      "priority": "high",
+      "category": "errors",
+      "description": "錯誤數量過多",
+      "action": "檢查並修復所有錯誤"
+    }
+  ]
+}

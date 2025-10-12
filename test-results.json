@@ -1,0 +1,109 @@
+{
+  "timestamp": "2025-10-12T08:38:59.351Z",
+  "summary": {
+    "total": 6,
+    "passed": 6,
+    "failed": 0,
+    "totalTime": 263,
+    "errors": 0
+  },
+  "tests": [
+    {
+      "name": "環境變數檢查",
+      "status": "pass",
+      "details": {
+        "fileExists": true,
+        "requiredVars": 4,
+        "missingVars": 4,
+        "envVars": {
+          "\u0000V\u0000I\u0000T\u0000E\u0000_\u0000A\u0000D\u0000M\u0000O\u0000B\u0000_\u0000A\u0000P\u0000P\u0000_\u0000I\u0000D\u0000": "\u0000c\u0000a\u0000-\u0000a\u0000p\u0000p\u0000-\u0000p\u0000u\u0000b\u0000-\u00005\u00008\u00006\u00009\u00007\u00000\u00008\u00004\u00008\u00008\u00006\u00000\u00009\u00008\u00003\u00007\u0000~\u00006\u00004\u00009\u00000\u00004\u00005\u00004\u00006\u00003\u00002\u0000",
+          "\u0000V\u0000I\u0000T\u0000E\u0000_\u0000A\u0000D\u0000M\u0000O\u0000B\u0000_\u0000B\u0000A\u0000N\u0000N\u0000E\u0000R\u0000_\u0000I\u0000D\u0000": "\u0000c\u0000a\u0000-\u0000a\u0000p\u0000p\u0000-\u0000p\u0000u\u0000b\u0000-\u00005\u00008\u00006\u00009\u00007\u00000\u00008\u00004\u00008\u00008\u00006\u00000\u00009\u00008\u00003\u00007\u0000/\u00001\u00001\u00008\u00009\u00000\u00006\u00008\u00006\u00003\u00004\u0000",
+          "\u0000V\u0000I\u0000T\u0000E\u0000_\u0000A\u0000D\u0000M\u0000O\u0000B\u0000_\u0000E\u0000N\u0000A\u0000B\u0000L\u0000E\u0000D\u0000": "\u0000t\u0000r\u0000u\u0000e\u0000",
+          "\u0000V\u0000I\u0000T\u0000E\u0000_\u0000A\u0000D\u0000M\u0000O\u0000B\u0000_\u0000T\u0000E\u0000S\u0000T\u0000_\u0000M\u0000O\u0000D\u0000E\u0000": "\u0000f\u0000a\u0000l\u0000s\u0000e\u0000",
+          "\u0000V\u0000I\u0000T\u0000E\u0000_\u0000F\u0000I\u0000R\u0000E\u0000B\u0000A\u0000S\u0000E\u0000_\u0000A\u0000P\u0000I\u0000_\u0000K\u0000E\u0000Y\u0000": "\u0000y\u0000o\u0000u\u0000r\u0000_\u0000a\u0000p\u0000i\u0000_\u0000k\u0000e\u0000y\u0000_\u0000h\u0000e\u0000r\u0000e\u0000",
+          "\u0000V\u0000I\u0000T\u0000E\u0000_\u0000F\u0000I\u0000R\u0000E\u0000B\u0000A\u0000S\u0000E\u0000_\u0000A\u0000U\u0000T\u0000H\u0000_\u0000D\u0000O\u0000M\u0000A\u0000I\u0000N\u0000": "\u0000y\u0000o\u0000u\u0000r\u0000_\u0000p\u0000r\u0000o\u0000j\u0000e\u0000c\u0000t\u0000.\u0000f\u0000i\u0000r\u0000e\u0000b\u0000a\u0000s\u0000e\u0000a\u0000p\u0000p\u0000.\u0000c\u0000o\u0000m\u0000",
+          "\u0000V\u0000I\u0000T\u0000E\u0000_\u0000F\u0000I\u0000R\u0000E\u0000B\u0000A\u0000S\u0000E\u0000_\u0000P\u0000R\u0000O\u0000J\u0000E\u0000C\u0000T\u0000_\u0000I\u0000D\u0000": "\u0000y\u0000o\u0000u\u0000r\u0000_\u0000p\u0000r\u0000o\u0000j\u0000e\u0000c\u0000t\u0000_\u0000i\u0000d\u0000",
+          "\u0000V\u0000I\u0000T\u0000E\u0000_\u0000F\u0000I\u0000R\u0000E\u0000B\u0000A\u0000S\u0000E\u0000_\u0000S\u0000T\u0000O\u0000R\u0000A\u0000G\u0000E\u0000_\u0000B\u0000U\u0000C\u0000K\u0000E\u0000T\u0000": "\u0000y\u0000o\u0000u\u0000r\u0000_\u0000p\u0000r\u0000o\u0000j\u0000e\u0000c\u0000t\u0000.\u0000a\u0000p\u0000p\u0000s\u0000p\u0000o\u0000t\u0000.\u0000c\u0000o\u0000m\u0000",
+          "\u0000V\u0000I\u0000T\u0000E\u0000_\u0000F\u0000I\u0000R\u0000E\u0000B\u0000A\u0000S\u0000E\u0000_\u0000M\u0000E\u0000S\u0000S\u0000A\u0000G\u0000I\u0000N\u0000G\u0000_\u0000S\u0000E\u0000N\u0000D\u0000E\u0000R\u0000_\u0000I\u0000D\u0000": "\u00001\u00002\u00003\u00004\u00005\u00006\u00007\u00008\u00009\u0000",
+          "\u0000V\u0000I\u0000T\u0000E\u0000_\u0000F\u0000I\u0000R\u0000E\u0000B\u0000A\u0000S\u0000E\u0000_\u0000A\u0000P\u0000P\u0000_\u0000I\u0000D\u0000": "\u0000y\u0000o\u0000u\u0000r\u0000_\u0000a\u0000p\u0000p\u0000_\u0000i\u0000d\u0000\r\u0000"
+        }
+      },
+      "timestamp": "2025-10-12T08:38:59.077Z"
+    },
+    {
+      "name": "配置文件檢查",
+      "status": "pass",
+      "details": {
+        "src/config/adConfig.js": {
+          "exists": true,
+          "size": 5754,
+          "hasAdMobConfig": true,
+          "hasErrorHandling": true
+        },
+        "src/components/AdBanner.jsx": {
+          "exists": true,
+          "size": 4122,
+          "hasAdMobConfig": true,
+          "hasErrorHandling": true
+        },
+        "src/components/AdMobConfigDebug.jsx": {
+          "exists": true,
+          "size": 2739,
+          "hasAdMobConfig": true,
+          "hasErrorHandling": false
+        }
+      },
+      "timestamp": "2025-10-12T08:38:59.095Z"
+    },
+    {
+      "name": "構建過程檢查",
+      "status": "pass",
+      "details": {
+        "distExists": true,
+        "requiredFiles": 2,
+        "missingFiles": 0,
+        "admobConfigPacked": true,
+        "indexHtmlSize": "2.98 KB",
+        "jsFiles": 29
+      },
+      "timestamp": "2025-10-12T08:38:59.232Z"
+    },
+    {
+      "name": "代碼質量檢查",
+      "status": "pass",
+      "details": {
+        "filesChecked": 3,
+        "qualityIssues": 2,
+        "issues": [
+          "src/config/adConfig.js: 包含生產環境 console.log",
+          "src/components/AdBanner.jsx: 包含生產環境 console.log"
+        ]
+      },
+      "timestamp": "2025-10-12T08:38:59.266Z"
+    },
+    {
+      "name": "依賴檢查",
+      "status": "pass",
+      "details": {
+        "totalDependencies": 10,
+        "totalDevDependencies": 8,
+        "requiredDependencies": 1,
+        "missingDependencies": 0,
+        "missingDevDependencies": 0
+      },
+      "timestamp": "2025-10-12T08:38:59.294Z"
+    },
+    {
+      "name": "性能檢查",
+      "status": "pass",
+      "details": {
+        "indexHtmlSize": "2.98 KB",
+        "totalAssetsSize": "1.68 MB",
+        "warnings": 0,
+        "warningDetails": []
+      },
+      "timestamp": "2025-10-12T08:38:59.327Z"
+    }
+  ],
+  "errors": []
+}

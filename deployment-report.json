@@ -1,0 +1,24 @@
+{
+  "timestamp": "2025-10-12T09:17:22.191Z",
+  "summary": {
+    "totalChecks": 6,
+    "passedChecks": 5,
+    "successRate": "83.3%",
+    "issues": 0,
+    "warnings": 1,
+    "recommendations": 0
+  },
+  "checks": {
+    "build": true,
+    "fileSize": true,
+    "dependencies": false,
+    "environment": true,
+    "admob": true,
+    "health": true
+  },
+  "issues": [],
+  "warnings": [
+    "依賴檢查失敗"
+  ],
+  "recommendations": []
+}

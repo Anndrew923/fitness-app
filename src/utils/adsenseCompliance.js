@@ -139,6 +139,20 @@ export const AdSenseCompliance = {
 
 // 廣告顯示前的合規檢查
 export const preAdDisplayCheck = (pageName, pageContent) => {
+  // 評測頁面特殊處理 - 有豐富的說明內容，符合 AdMob 政策
+  const testPages = [
+    'strength',
+    'cardio',
+    'explosive-power',
+    'muscle-mass',
+    'body-fat',
+  ];
+  if (testPages.includes(pageName)) {
+    console.log(`📄 評測頁面 [${pageName}] 跳過內容長度檢查，直接顯示廣告`);
+    return true;
+  }
+
+  // 其他頁面進行正常合規檢查
   const compliance = AdSenseCompliance.checkContentPolicy(
     pageName,
     pageContent

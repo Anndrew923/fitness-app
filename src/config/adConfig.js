@@ -27,9 +27,9 @@ export const adConfig = {
   testPages: {
     strength: { showTop: false, showBottom: true }, // 有評測結果時顯示
     cardio: { showTop: false, showBottom: true },
-    explosivePower: { showTop: false, showBottom: true },
-    muscleMass: { showTop: false, showBottom: true },
-    bodyFat: { showTop: false, showBottom: true },
+    'explosive-power': { showTop: false, showBottom: true },
+    'muscle-mass': { showTop: false, showBottom: true },
+    'body-fat': { showTop: false, showBottom: true },
   },
 
   // 其他頁面
@@ -136,15 +136,19 @@ const checkPageContent = pageName => {
     return hasHistoryData;
   }
 
-  // 3. 評測結果頁面 - 有詳細的評測結果和建議
+  // 3. 評測頁面 - 有豐富的說明內容和評測功能，直接顯示廣告
   if (
-    ['strength', 'cardio', 'explosivePower', 'muscleMass', 'bodyFat'].includes(
-      pageName
-    )
+    [
+      'strength',
+      'cardio',
+      'explosive-power',
+      'muscle-mass',
+      'body-fat',
+    ].includes(pageName)
   ) {
-    // 檢查是否有評測結果
-    const hasTestResults = checkTestResults(pageName);
-    return hasTestResults;
+    // 評測頁面有豐富的說明內容，符合 AdMob 政策，直接顯示廣告
+    console.log(`📄 評測頁面 [${pageName}] 內容豐富，顯示廣告`);
+    return true;
   }
 
   // 其他頁面暫時不顯示廣告，確保符合政策
@@ -166,17 +170,31 @@ const checkHistoryData = () => {
 const checkTestResults = testType => {
   try {
     const userData = JSON.parse(localStorage.getItem('userData') || '{}');
-    const testInputs = userData.testInputs || {};
-    const testData = testInputs[testType] || {};
+    const scores = userData.scores || {};
+    const history = userData.history || [];
 
-    // 檢查是否有任何評測數據
-    return (
-      Object.keys(testData).length > 0 &&
-      Object.values(testData).some(
-        value => value !== null && value !== '' && value !== undefined
-      )
-    );
-  } catch {
+    // 檢查 scores 中是否有分數
+    const hasScore = scores[testType] !== undefined && scores[testType] > 0;
+
+    // 檢查 history 中是否有該類型的評測記錄
+    const hasHistory = history.some(record => record.type === testType);
+
+    // 只要有任何一種記錄就顯示廣告
+    const result = hasScore || hasHistory;
+
+    // 調試日誌
+    console.log(`🔍 檢查評測結果 [${testType}]:`, {
+      hasScore,
+      hasHistory,
+      result,
+      scoreValue: scores[testType],
+      historyRecords: history.filter(record => record.type === testType),
+      allScores: scores,
+    });
+
+    return result;
+  } catch (error) {
+    console.error('檢查評測結果時發生錯誤:', error);
     return false;
   }
 };

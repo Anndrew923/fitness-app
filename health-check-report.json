@@ -1,0 +1,41 @@
+{
+  "timestamp": "2025-10-12T09:15:34.183Z",
+  "summary": {
+    "totalChecks": 6,
+    "passedChecks": 6,
+    "successRate": "100.0%",
+    "healthScore": 100,
+    "issues": 0,
+    "warnings": 0,
+    "totalTime": "101ms"
+  },
+  "checks": {
+    "config": true,
+    "environment": true,
+    "build": true,
+    "admob": true,
+    "performance": true,
+    "errors": true
+  },
+  "metrics": {
+    "startTime": 1760260534081,
+    "configStatus": {
+      "hasAppId": true,
+      "hasBannerId": true,
+      "hasEnabled": true,
+      "hasTestMode": true,
+      "hasCheckFunction": true,
+      "hasErrorHandling": true
+    },
+    "performanceMetrics": {
+      "totalSize": "1.68 MB",
+      "fileCount": 50,
+      "largeFiles": 0
+    },
+    "errorCount": 0,
+    "warningCount": 0
+  },
+  "issues": [],
+  "warnings": [],
+  "recommendations": []
+}

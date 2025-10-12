@@ -1,0 +1,324 @@
+{
+  "timestamp": "2025-10-12T09:17:22.087Z",
+  "summary": {
+    "totalTime": "89ms",
+    "fileSizes": 4,
+    "bottlenecks": 2,
+    "recommendations": 6,
+    "warnings": 0
+  },
+  "metrics": {
+    "startTime": 1760260641998,
+    "fileSizes": {
+      "index.html": {
+        "size": 3049,
+        "sizeKB": "2.98 KB",
+        "status": "good",
+        "recommendation": null
+      },
+      "manifest.json": {
+        "size": 1317,
+        "sizeKB": "1.29 KB",
+        "status": "good",
+        "recommendation": null
+      },
+      "sw.js": {
+        "size": 3721,
+        "sizeKB": "3.63 KB",
+        "status": "good",
+        "recommendation": null
+      },
+      "assets": {
+        "totalSize": 1761085,
+        "totalSizeMB": "1.68 MB",
+        "fileCount": 50,
+        "largeFiles": [],
+        "fileBreakdown": {
+          ".css": {
+            "count": 20,
+            "size": 172583
+          },
+          ".js": {
+            "count": 29,
+            "size": 1573096
+          },
+          ".ico": {
+            "count": 1,
+            "size": 15406
+          }
+        },
+        "status": "good",
+        "recommendation": null
+      }
+    },
+    "loadTimes": {},
+    "optimization": {},
+    "recommendations": [
+      {
+        "category": "admob-performance",
+        "priority": "high",
+        "recommendation": "考慮使用更小的 AdMob 配置或延遲載入廣告腳本"
+      },
+      {
+        "category": "user-experience",
+        "priority": "medium",
+        "recommendation": "缺少資源預載入",
+        "action": "添加 preload 標籤優化關鍵資源載入"
+      },
+      {
+        "category": "user-experience",
+        "priority": "medium",
+        "recommendation": "缺少 DNS 預連接",
+        "action": "添加 preconnect 標籤優化第三方資源載入"
+      },
+      {
+        "category": "user-experience",
+        "priority": "medium",
+        "recommendation": "AdMob 腳本未使用異步載入",
+        "action": "為 AdMob 腳本添加 async 屬性"
+      },
+      {
+        "category": "bottleneck",
+        "priority": "medium",
+        "recommendation": "優化 AdMob 配置或使用延遲載入",
+        "impact": "影響廣告載入速度"
+      },
+      {
+        "category": "bottleneck",
+        "priority": "high",
+        "recommendation": "添加 preload 和 preconnect 標籤",
+        "impact": "影響頁面載入性能"
+      }
+    ],
+    "warnings": [],
+    "bottlenecks": [
+      {
+        "type": "admob-performance",
+        "severity": "medium",
+        "description": "AdMob 配置過大",
+        "impact": "影響廣告載入速度",
+        "solution": "優化 AdMob 配置或使用延遲載入",
+        "size": "383.86 KB"
+      },
+      {
+        "type": "critical-path",
+        "severity": "high",
+        "description": "缺少關鍵渲染路徑優化",
+        "impact": "影響頁面載入性能",
+        "solution": "添加 preload 和 preconnect 標籤"
+      }
+    ],
+    "adMobPerformance": {
+      "admobConfigSize": 393073,
+      "admobConfigSizeKB": "383.86 KB",
+      "admobScriptsFound": 1,
+      "admobFiles": [
+        {
+          "name": "index-CwrA66WL.js",
+          "size": "383.86 KB",
+          "lines": 331,
+          "functions": 1267
+        }
+      ],
+      "status": "warning",
+      "recommendation": "考慮使用更小的 AdMob 配置或延遲載入廣告腳本"
+    },
+    "userExperience": {
+      "htmlAnalysis": {
+        "totalSize": 2969,
+        "totalSizeKB": "2.90 KB",
+        "scriptTags": 1,
+        "linkTags": 10,
+        "imgTags": 0,
+        "inlineStyles": 0,
+        "inlineScripts": 1
+      },
+      "criticalPathAnalysis": {
+        "hasPreload": false,
+        "hasPreconnect": false,
+        "hasAsyncScripts": 0,
+        "hasDeferScripts": 0,
+        "hasCriticalCSS": false
+      },
+      "admobOptimization": {
+        "hasAdMobPreload": false,
+        "hasAdMobAsync": false,
+        "hasAdMobDefer": false,
+        "adMobScriptCount": 4
+      },
+      "score": 65,
+      "recommendations": [
+        {
+          "priority": "medium",
+          "description": "缺少資源預載入",
+          "action": "添加 preload 標籤優化關鍵資源載入"
+        },
+        {
+          "priority": "medium",
+          "description": "缺少 DNS 預連接",
+          "action": "添加 preconnect 標籤優化第三方資源載入"
+        },
+        {
+          "priority": "medium",
+          "description": "AdMob 腳本未使用異步載入",
+          "action": "為 AdMob 腳本添加 async 屬性"
+        }
+      ]
+    }
+  },
+  "performance": {
+    "fileSizes": {
+      "index.html": {
+        "size": 3049,
+        "sizeKB": "2.98 KB",
+        "status": "good",
+        "recommendation": null
+      },
+      "manifest.json": {
+        "size": 1317,
+        "sizeKB": "1.29 KB",
+        "status": "good",
+        "recommendation": null
+      },
+      "sw.js": {
+        "size": 3721,
+        "sizeKB": "3.63 KB",
+        "status": "good",
+        "recommendation": null
+      },
+      "assets": {
+        "totalSize": 1761085,
+        "totalSizeMB": "1.68 MB",
+        "fileCount": 50,
+        "largeFiles": [],
+        "fileBreakdown": {
+          ".css": {
+            "count": 20,
+            "size": 172583
+          },
+          ".js": {
+            "count": 29,
+            "size": 1573096
+          },
+          ".ico": {
+            "count": 1,
+            "size": 15406
+          }
+        },
+        "status": "good",
+        "recommendation": null
+      }
+    },
+    "admobPerformance": {
+      "admobConfigSize": 393073,
+      "admobConfigSizeKB": "383.86 KB",
+      "admobScriptsFound": 1,
+      "admobFiles": [
+        {
+          "name": "index-CwrA66WL.js",
+          "size": "383.86 KB",
+          "lines": 331,
+          "functions": 1267
+        }
+      ],
+      "status": "warning",
+      "recommendation": "考慮使用更小的 AdMob 配置或延遲載入廣告腳本"
+    },
+    "userExperience": {
+      "htmlAnalysis": {
+        "totalSize": 2969,
+        "totalSizeKB": "2.90 KB",
+        "scriptTags": 1,
+        "linkTags": 10,
+        "imgTags": 0,
+        "inlineStyles": 0,
+        "inlineScripts": 1
+      },
+      "criticalPathAnalysis": {
+        "hasPreload": false,
+        "hasPreconnect": false,
+        "hasAsyncScripts": 0,
+        "hasDeferScripts": 0,
+        "hasCriticalCSS": false
+      },
+      "admobOptimization": {
+        "hasAdMobPreload": false,
+        "hasAdMobAsync": false,
+        "hasAdMobDefer": false,
+        "adMobScriptCount": 4
+      },
+      "score": 65,
+      "recommendations": [
+        {
+          "priority": "medium",
+          "description": "缺少資源預載入",
+          "action": "添加 preload 標籤優化關鍵資源載入"
+        },
+        {
+          "priority": "medium",
+          "description": "缺少 DNS 預連接",
+          "action": "添加 preconnect 標籤優化第三方資源載入"
+        },
+        {
+          "priority": "medium",
+          "description": "AdMob 腳本未使用異步載入",
+          "action": "為 AdMob 腳本添加 async 屬性"
+        }
+      ]
+    },
+    "bottlenecks": [
+      {
+        "type": "admob-performance",
+        "severity": "medium",
+        "description": "AdMob 配置過大",
+        "impact": "影響廣告載入速度",
+        "solution": "優化 AdMob 配置或使用延遲載入",
+        "size": "383.86 KB"
+      },
+      {
+        "type": "critical-path",
+        "severity": "high",
+        "description": "缺少關鍵渲染路徑優化",
+        "impact": "影響頁面載入性能",
+        "solution": "添加 preload 和 preconnect 標籤"
+      }
+    ],
+    "recommendations": [
+      {
+        "category": "admob-performance",
+        "priority": "high",
+        "recommendation": "考慮使用更小的 AdMob 配置或延遲載入廣告腳本"
+      },
+      {
+        "category": "user-experience",
+        "priority": "medium",
+        "recommendation": "缺少資源預載入",
+        "action": "添加 preload 標籤優化關鍵資源載入"
+      },
+      {
+        "category": "user-experience",
+        "priority": "medium",
+        "recommendation": "缺少 DNS 預連接",
+        "action": "添加 preconnect 標籤優化第三方資源載入"
+      },
+      {
+        "category": "user-experience",
+        "priority": "medium",
+        "recommendation": "AdMob 腳本未使用異步載入",
+        "action": "為 AdMob 腳本添加 async 屬性"
+      },
+      {
+        "category": "bottleneck",
+        "priority": "medium",
+        "recommendation": "優化 AdMob 配置或使用延遲載入",
+        "impact": "影響廣告載入速度"
+      },
+      {
+        "category": "bottleneck",
+        "priority": "high",
+        "recommendation": "添加 preload 和 preconnect 標籤",
+        "impact": "影響頁面載入性能"
+      }
+    ]
+  }
+}
