@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
-import { preAdDisplayCheck } from '../utils/adsenseCompliance';
+import { preAdDisplayCheck } from '../utils/adMobCompliance';
 import { getAdUnitId, adConfig } from '../config/adConfig';
 import './AdBanner.css';
 
@@ -37,7 +37,7 @@ const AdBanner = ({
       return;
     }
 
-    // AdMob 合規檢查（使用現有的 AdSense 合規檢查邏輯）
+    // AdMob 合規檢查
     const pageContent = document.body.innerText || '';
     const currentPage = window.location.pathname.replace('/', '') || 'home';
 

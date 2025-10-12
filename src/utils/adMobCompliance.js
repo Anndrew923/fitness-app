@@ -1,13 +1,14 @@
-// AdSense 政策合規監控系統
-// 確保完全符合 Google AdSense 政策要求
+// AdMob 政策合規監控系統
+// 確保完全符合 Google AdMob 政策要求
 
-export const AdSenseCompliance = {
-  // 檢查頁面是否符合 AdSense 內容政策
+export const AdMobCompliance = {
+  // 檢查頁面是否符合 AdMob 內容政策
   checkContentPolicy: (pageName, pageContent) => {
     const violations = [];
 
-    // 1. 檢查內容是否足夠
-    if (!pageContent || pageContent.length < 200) {
+    // 1. 檢查內容是否足夠（評測頁面跳過此檢查）
+    const testPages = ['strength', 'cardio', 'explosive-power', 'muscle-mass', 'body-fat'];
+    if (!testPages.includes(pageName) && (!pageContent || pageContent.length < 200)) {
       violations.push('內容不足：頁面內容少於 200 字元');
     }
 
@@ -153,17 +154,17 @@ export const preAdDisplayCheck = (pageName, pageContent) => {
   }
 
   // 其他頁面進行正常合規檢查
-  const compliance = AdSenseCompliance.checkContentPolicy(
+  const compliance = AdMobCompliance.checkContentPolicy(
     pageName,
     pageContent
   );
 
   if (!compliance.isCompliant) {
-    console.warn('AdSense 合規警告:', compliance.violations);
+    console.warn('AdMob 合規警告:', compliance.violations);
     return false;
   }
 
   return true;
 };
 
-export default AdSenseCompliance;
+export default AdMobCompliance;

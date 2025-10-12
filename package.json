@@ -5,7 +5,6 @@
   "license": "MIT",
   "dependencies": {
     "firebase": "^11.8.1",
-    "google-adsense": "^1.1.7",
     "i18next": "^25.3.2",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
@@ -54,7 +53,15 @@
     "office:sync": "node scripts/sync-environment.js",
     "office:fix": "node scripts/sync-environment.js --fix",
     "cursor:sync": "node scripts/cursor-config-sync.js",
-    "office:complete": "node scripts/complete-sync.js"
+    "office:complete": "node scripts/complete-sync.js",
+    "build:aab": "gradlew bundleRelease --no-daemon --console=plain --quiet",
+    "build:aab:clean": "gradlew clean --no-daemon --console=plain --quiet && gradlew bundleRelease --no-daemon --console=plain --quiet",
+    "check:aab": "dir app\\build\\outputs\\bundle\\release\\*.aab",
+    "deploy:all": "npm run build && npm run build:aab",
+    "auto:aab": "build-aab-auto.bat",
+    "auto:web": "build-web-auto.bat",
+    "auto:test": "test-auto.bat",
+    "auto:deploy": "deploy-auto.bat"
   },
   "devDependencies": {
     "@firebase/rules-unit-testing": "^4.0.0",
