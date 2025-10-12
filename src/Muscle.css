@@ -1,23 +1,47 @@
 .muscle-container {
   max-width: 100%;
-  padding: 1.2rem;
-  margin: 1.5rem auto;
-  background-color: #ffffff;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  padding: 0.8rem;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: linear-gradient(135deg, #f0f8ff 0%, #e6f3ff 100%);
+  min-height: 100vh;
 }
 
 /* 美化標題 */
 .muscle-container h1 {
   font-size: 1.8rem;
   font-weight: 700;
+  color: #2c5aa0;
+  margin-bottom: 1.2rem;
   text-align: center;
-  margin-bottom: 1.5rem;
   background: linear-gradient(135deg, #81d8d0 0%, #5f9ea0 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
   text-shadow: 0 2px 4px rgba(129, 216, 208, 0.3);
+}
+
+/* 輸入區域卡片樣式 */
+.input-section {
+  width: 90%;
+  max-width: 400px;
+  background: white;
+  padding: 1.2rem;
+  border-radius: 12px;
+  box-shadow: 0 8px 25px rgba(44, 90, 160, 0.15);
+  margin-bottom: 1.2rem;
+  border: 1px solid rgba(44, 90, 160, 0.1);
+}
+
+.input-label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #2c5aa0;
+  margin-bottom: 0.4rem;
+  text-align: left;
 }
 
 .exercise-section {
@@ -27,44 +51,80 @@
 .input-field {
   width: 100%;
   padding: 0.6rem;
-  margin: 0.4rem 0;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
   font-size: 0.9rem;
-  transition: border-color 0.2s ease;
+  border: 2px solid #e1e8ed;
+  border-radius: 8px;
+  outline: none;
+  transition: all 0.3s ease;
+  background-color: #fafbfc;
 }
 
 .input-field:focus {
-  outline: none;
-  border-color: #81d8d0;
-  box-shadow: 0 0 0 3px rgba(129, 216, 208, 0.1);
+  border-color: #81d4fa;
+  box-shadow: 0 0 0 3px rgba(129, 212, 250, 0.2);
+  background-color: white;
 }
 
 .calculate-btn {
   width: 100%;
-  padding: 0.6rem;
-  background: linear-gradient(135deg, #81d8d0 0%, #5f9ea0 100%);
-  color: white;
-  border: none;
-  border-radius: 8px;
+  margin-top: 0.8rem;
+  padding: 0.7rem;
   font-size: 0.9rem;
   font-weight: 600;
+  color: white;
+  background: linear-gradient(135deg, #81d8d0 0%, #5f9ea0 100%);
+  border: none;
+  border-radius: 8px;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(129, 216, 208, 0.3);
+  box-shadow: 0 4px 15px rgba(129, 216, 208, 0.3);
 }
 
 .calculate-btn:hover {
   background: linear-gradient(135deg, #5f9ea0 0%, #4a7c7a 100%);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(129, 216, 208, 0.4);
+  box-shadow: 0 6px 20px rgba(129, 216, 208, 0.4);
+}
+
+.calculate-btn:active {
+  transform: translateY(0);
+}
+
+/* 結果區域卡片樣式 */
+.result-section {
+  width: 90%;
+  max-width: 400px;
+  background: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 8px 25px rgba(44, 90, 160, 0.15);
+  margin-bottom: 1.5rem;
+  border: 1px solid rgba(44, 90, 160, 0.1);
+}
+
+.result-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #2c5aa0;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.result-text {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #81d4fa;
+  margin: 0.5rem 0;
+  text-align: center;
 }
 
 .score-text {
-  font-size: 1.3rem;
-  color: #d32f2f;
+  font-size: 1.25rem;
   font-weight: 600;
-  margin: 0.4rem 0;
+  color: #81d4fa;
+  margin: 0.5rem 0;
+  text-align: center;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 .final-score {
@@ -76,7 +136,14 @@
 }
 
 .chart-section {
-  margin-top: 1.5rem;
+  width: 90%;
+  max-width: 400px;
+  background: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 8px 25px rgba(44, 90, 160, 0.15);
+  margin-bottom: 1.5rem;
+  border: 1px solid rgba(44, 90, 160, 0.1);
 }
 
 .chart-container {
@@ -86,6 +153,8 @@
 }
 
 .button-group {
+  width: 90%;
+  max-width: 400px;
   display: flex;
   flex-direction: column;
   gap: 0.6rem;
@@ -94,27 +163,51 @@
 
 .submit-btn {
   width: 100%;
-  padding: 0.7rem;
-  font-size: 0.9rem;
+  padding: 0.875rem;
+  font-size: 1rem;
   font-weight: 600;
   color: white;
+  background: linear-gradient(135deg, #81d8d0 0%, #5f9ea0 100%);
   border: none;
   border-radius: 8px;
   cursor: pointer;
-  background: linear-gradient(135deg, #81d8d0 0%, #5f9ea0 100%);
   transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(129, 216, 208, 0.3);
+  box-shadow: 0 4px 15px rgba(129, 216, 208, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  text-align: center;
+  text-decoration: none;
+  line-height: 1.5;
 }
 
 .submit-btn:hover {
   background: linear-gradient(135deg, #5f9ea0 0%, #4a7c7a 100%);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(129, 216, 208, 0.4);
+  box-shadow: 0 6px 20px rgba(129, 216, 208, 0.4);
+}
+
+.submit-btn:active {
+  transform: translateY(0);
 }
 
 @media (min-width: 768px) {
   .muscle-container {
     max-width: 800px;
+  }
+
+  .muscle-container h1 {
+    font-size: 2rem;
+  }
+
+  .result-title {
+    font-size: 1.5rem;
+  }
+
+  .result-text,
+  .score-text {
+    font-size: 1.125rem;
   }
 
   .chart-container {
@@ -128,9 +221,5 @@
 
   .submit-btn {
     width: 48%;
-  }
-
-  .score-text {
-    font-size: 1.75rem;
   }
 }

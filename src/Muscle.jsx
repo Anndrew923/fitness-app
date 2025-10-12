@@ -187,28 +187,21 @@ function Muscle({ onComplete }) {
 
   return (
     <div className="muscle-container">
-      <h1 className="text-2xl font-bold text-center mb-4">
-        {t('tests.muscleTitle')}
-      </h1>
-      <p>
-        {t('common.weightLabel')}：
-        {weight ? `${weight} kg` : t('common.notEntered')}
-      </p>
-      <p>
-        {t('common.ageLabel')}：{age || t('common.notEntered')}
-      </p>
-      <p>
-        {t('common.genderLabel')}：{gender || t('common.notSelected')}
-      </p>
+      <h1>{t('tests.muscleTitle')}</h1>
 
-      <div className="exercise-section">
-        <h2 className="text-lg font-semibold">
-          {t('tests.muscleLabels.smmKg')}
-        </h2>
-        <label
-          htmlFor="smm"
-          className="block text-sm font-medium text-gray-700"
-        >
+      <div className="input-section">
+        <p className="result-text">
+          {t('common.weightLabel')}：
+          {weight ? `${weight} kg` : t('common.notEntered')}
+        </p>
+        <p className="result-text">
+          {t('common.ageLabel')}：{age || t('common.notEntered')}
+        </p>
+        <p className="result-text">
+          {t('common.genderLabel')}：{gender || t('common.notSelected')}
+        </p>
+
+        <label htmlFor="smm" className="input-label">
           {t('tests.muscleLabels.smmKg')}
         </label>
         <input
@@ -223,28 +216,31 @@ function Muscle({ onComplete }) {
         <button onClick={calculateMuscleScore} className="calculate-btn">
           {t('common.calculate')}
         </button>
-
-        {result.smmScore !== null && (
-          <>
-            <p className="score-text">
-              {t('tests.muscleLabels.smmShort')}: {result.smmScore}
-            </p>
-            <p className="score-text">
-              {t('tests.muscleLabels.smPercentShort')}: {result.smPercent}%
-            </p>
-            <p className="score-text">
-              {t('tests.muscleLabels.smPercentScore')}: {result.smPercentScore}
-            </p>
-            <p className="score-text final-score">
-              {t('tests.muscleLabels.finalScore')}: {result.finalScore}
-            </p>
-          </>
-        )}
       </div>
+
+      {result.smmScore !== null && (
+        <div className="result-section">
+          <h2 className="result-title">
+            {t('tests.muscleLabels.sectionTitle')}
+          </h2>
+          <p className="result-text">
+            {t('tests.muscleLabels.smmShort')}: {result.smmScore}
+          </p>
+          <p className="result-text">
+            {t('tests.muscleLabels.smPercentShort')}: {result.smPercent}%
+          </p>
+          <p className="result-text">
+            {t('tests.muscleLabels.smPercentScore')}: {result.smPercentScore}
+          </p>
+          <p className="score-text final-score">
+            {t('tests.muscleLabels.finalScore')}: {result.finalScore}
+          </p>
+        </div>
+      )}
 
       {result.finalScore && (
         <div className="chart-section">
-          <h2 className="text-lg font-semibold mb-4">
+          <h2 className="result-title">
             {t('tests.muscleLabels.numbersComparison')}
           </h2>
           <div className="chart-container">
