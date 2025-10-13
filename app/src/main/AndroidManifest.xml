@@ -25,8 +25,7 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
-    <!-- 通知權限 - 可選，但已啟用 -->
-    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+    <!-- 通知權限已移除 - 避免與 enableNotifications: false 衝突 -->
 
     <!-- 廣告權限 - AdMob 必需 -->
     <uses-permission android:name="com.google.android.gms.permission.AD_ID" />
@@ -43,7 +42,8 @@
         android:manageSpaceActivity="com.google.androidbrowserhelper.trusted.ManageDataLauncherActivity"
         android:supportsRtl="true"
         android:theme="@android:style/Theme.Translucent.NoTitleBar"
-        android:usesCleartextTraffic="false">
+        android:usesCleartextTraffic="false"
+        android:exported="true">
 
         <meta-data
             android:name="asset_statements"
@@ -170,8 +170,8 @@
 
         <service
             android:name=".DelegationService"
-            android:enabled="@bool/enableNotification"
-            android:exported="@bool/enableNotification">
+            android:enabled="false"
+            android:exported="false">
 
 
                 <meta-data
@@ -186,7 +186,7 @@
         </service>
 
 
-            <activity android:name="com.google.androidbrowserhelper.trusted.NotificationPermissionRequestActivity" />
+            <!-- NotificationPermissionRequestActivity 已移除 - 避免與 enableNotifications: false 衝突 -->
 
 
 
