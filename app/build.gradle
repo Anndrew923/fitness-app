@@ -66,8 +66,8 @@ android {
         applicationId "com.ultimatephysique.fitness2025"
         minSdkVersion 21
         targetSdkVersion 35
-        versionCode 7
-        versionName "1.7"
+        versionCode 8
+        versionName "1.8"
 
         // 添加安全配置
         manifestPlaceholders = [

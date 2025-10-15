@@ -1,6 +1,6 @@
 {
   "packageId": "com.ultimatephysique.fitness2025",
-  "host": "app2025.netlify.app",
+  "host": "fitness-app2025.netlify.app",
   "name": "最強肉體",
   "launcherName": "最強肉體",
   "display": "standalone",
@@ -11,22 +11,22 @@
   "navigationDividerColor": "#000000",
   "navigationDividerColorDark": "#000000",
   "backgroundColor": "#4BC0C0",
-  "enableNotifications": true,
+  "enableNotifications": false,
   "startUrl": "/",
-  "iconUrl": "https://app2025.netlify.app/logo512.png?v=20250819",
-  "maskableIconUrl": "https://app2025.netlify.app/logo512-maskable.png?v=20250819",
-  "monochromeIconUrl": "https://app2025.netlify.app/android/ic_launcher_monochrome.png",
+  "iconUrl": "https://fitness-app2025.netlify.app/logo512.png?v=20250819",
+  "maskableIconUrl": "https://fitness-app2025.netlify.app/logo512-maskable.png?v=20250819",
+  "monochromeIconUrl": "https://fitness-app2025.netlify.app/android/ic_launcher_monochrome.png",
   "splashScreenFadeOutDuration": 300,
   "signingKey": {
     "path": "C:\\Users\\User\\Dropbox\\fitness-app\\android.keystore",
-    "alias": "upload"
+    "alias": "android"
   },
-  "appVersionName": "1.1",
-  "appVersionCode": 3,
+  "appVersionName": "1.8",
+  "appVersionCode": 8,
   "shortcuts": [],
   "generatorApp": "bubblewrap-cli",
-  "webManifestUrl": "https://app2025.netlify.app/manifest.json",
-  "fallbackType": "customtabs",
+  "webManifestUrl": "https://fitness-app2025.netlify.app/manifest.json",
+  "fallbackType": "webview",
   "displayMode": "standalone",
   "features": {
     "locationDelegation": {
@@ -39,7 +39,7 @@
   "enableSiteSettingsShortcut": true,
   "isChromeOSOnly": false,
   "isMetaQuest": false,
-  "fullScopeUrl": "https://app2025.netlify.app/",
+  "fullScopeUrl": "https://fitness-app2025.netlify.app/",
   "minSdkVersion": 21,
   "orientation": "portrait",
   "fingerprints": [],
@@ -48,5 +48,5 @@
   "protocolHandlers": [],
   "fileHandlers": [],
   "launchHandlerClientMode": "",
-  "appVersion": "1.1"
+  "appVersion": "1.8"
 }

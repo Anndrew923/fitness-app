@@ -223,6 +223,50 @@ function Muscle({ onComplete }) {
           <h2 className="result-title">
             {t('tests.muscleLabels.sectionTitle')}
           </h2>
+
+          {/* 新增：簡潔的雙重指標說明 */}
+          <div className="concise-explanation">
+            <h3>{t('tests.muscleLabels.muscleExplanation.title')}</h3>
+
+            <div className="dual-metrics">
+              <div className="metric">
+                <h4>
+                  📏 {t('tests.muscleLabels.muscleExplanation.weightTitle')}
+                </h4>
+                <p>{t('tests.muscleLabels.muscleExplanation.weightDesc')}</p>
+              </div>
+              <div className="metric">
+                <h4>
+                  📊 {t('tests.muscleLabels.muscleExplanation.percentTitle')}
+                </h4>
+                <p>{t('tests.muscleLabels.muscleExplanation.percentDesc')}</p>
+              </div>
+            </div>
+
+            <div className="why-both">
+              <h4>{t('tests.muscleLabels.muscleExplanation.whyBoth')}</h4>
+              <div className="examples">
+                <p>
+                  <strong>
+                    {t('tests.muscleLabels.muscleExplanation.example1')}
+                  </strong>
+                </p>
+                <p>
+                  <strong>
+                    {t('tests.muscleLabels.muscleExplanation.example2')}
+                  </strong>
+                </p>
+              </div>
+              <div className="solution">
+                <p>
+                  <strong>
+                    {t('tests.muscleLabels.muscleExplanation.solution')}
+                  </strong>
+                </p>
+              </div>
+            </div>
+          </div>
+
           <p className="result-text">
             {t('tests.muscleLabels.smmShort')}: {result.smmScore}
           </p>

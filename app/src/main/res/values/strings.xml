@@ -29,7 +29,7 @@
   <string name="webManifestUrl">https://fitness-app2025.netlify.app/manifest.json</string>
   <string name="generatorApp">bubblewrap-cli</string>
   <string name="providerAuthority">com.ultimatephysique.fitness2025.fileprovider</string>
-  <string name="fallbackType">customtabs</string>
+  <string name="fallbackType">webview</string>
   <string name="orientation">portrait</string>
 
   <!--

@@ -568,6 +568,17 @@ const zhTW = {
         smmShort: 'SMM',
         smPercentShort: 'SM%',
         smPercentScore: 'SM% 分數',
+        muscleExplanation: {
+          title: '評測指標說明',
+          weightTitle: '骨骼肌肉量重量',
+          weightDesc: '測量體內骨骼肌的總重量',
+          percentTitle: '骨骼肌肉量比例',
+          percentDesc: '肌肉重量佔總體重的百分比',
+          whyBoth: '為什麼需要兩個指標？',
+          example1: '情況1：肌肉重量35kg，但比例25% → 可能體重過重',
+          example2: '情況2：肌肉重量20kg，但比例40% → 可能體重過輕',
+          solution: '解決方案：將兩個分數平均，提供更全面的評估',
+        },
       },
       muscleErrors: {
         missingPrerequisites:
@@ -2044,6 +2055,22 @@ const enUS = {
         smmShort: 'SMM',
         smPercentShort: 'SM%',
         smPercentScore: 'SM% score',
+        muscleExplanation: {
+          title: 'Assessment Metrics Explanation',
+          weightTitle: 'Skeletal Muscle Mass Weight',
+          weightDesc:
+            'Measures the total weight of skeletal muscle in your body',
+          percentTitle: 'Skeletal Muscle Mass Percentage',
+          percentDesc:
+            'Percentage of muscle weight relative to total body weight',
+          whyBoth: 'Why do we need both metrics?',
+          example1:
+            'Scenario 1: 35kg muscle weight, but 25% ratio → may be overweight',
+          example2:
+            'Scenario 2: 20kg muscle weight, but 40% ratio → may be underweight',
+          solution:
+            'Solution: Average both scores for a more comprehensive assessment',
+        },
       },
       strengthErrors: {
         missingInputs: 'Please enter weight and reps',
