@@ -579,6 +579,35 @@ const zhTW = {
           example2: '情況2：肌肉重量20kg，但比例40% → 可能體重過輕',
           solution: '解決方案：將兩個分數平均，提供更全面的評估',
         },
+        scoringReference: {
+          title: '評分標準參考',
+          average: {
+            title: '成年人平均',
+            range: '60分',
+            desc: '符合一般健康成年人的肌肉量標準',
+          },
+          aboveAverage: {
+            title: '優於一般人',
+            range: '60-70分',
+            desc: '肌肉量明顯優於一般成年人水平',
+          },
+          intermediate: {
+            title: '中階運動員',
+            range: '70-80分',
+            desc: '規律訓練的中階運動員水平',
+          },
+          excellent: {
+            title: '相當優越',
+            range: '80-90分',
+            desc: '肌肉量達到相當優越的水平',
+          },
+          elite: {
+            title: '頂尖水平',
+            range: '90-100分',
+            desc: '達到頂尖運動員的肌肉量水平',
+          },
+          yourScore: '您的分數',
+        },
       },
       muscleErrors: {
         missingPrerequisites:
@@ -2070,6 +2099,35 @@ const enUS = {
             'Scenario 2: 20kg muscle weight, but 40% ratio → may be underweight',
           solution:
             'Solution: Average both scores for a more comprehensive assessment',
+        },
+        scoringReference: {
+          title: 'Scoring Reference',
+          average: {
+            title: 'Adult Average',
+            range: '60 points',
+            desc: 'Standard muscle mass for healthy adults',
+          },
+          aboveAverage: {
+            title: 'Above Average',
+            range: '60-70 points',
+            desc: 'Muscle mass significantly above general population',
+          },
+          intermediate: {
+            title: 'Intermediate Athlete',
+            range: '70-80 points',
+            desc: 'Level of regularly trained intermediate athletes',
+          },
+          excellent: {
+            title: 'Excellent',
+            range: '80-90 points',
+            desc: 'Muscle mass at an excellent level',
+          },
+          elite: {
+            title: 'Elite Level',
+            range: '90-100 points',
+            desc: 'Elite athlete-level muscle mass',
+          },
+          yourScore: 'Your Score',
         },
       },
       strengthErrors: {

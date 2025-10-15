@@ -267,6 +267,105 @@ function Muscle({ onComplete }) {
             </div>
           </div>
 
+          {/* 新增：評分標準參考 */}
+          <div className="scoring-reference">
+            <h3>{t('tests.muscleLabels.scoringReference.title')}</h3>
+
+            <div className="reference-levels">
+              <div className="level average">
+                <div className="level-icon">👤</div>
+                <div className="level-content">
+                  <h4>
+                    {t('tests.muscleLabels.scoringReference.average.title')}
+                  </h4>
+                  <p className="score-range">
+                    {t('tests.muscleLabels.scoringReference.average.range')}
+                  </p>
+                  <p className="description">
+                    {t('tests.muscleLabels.scoringReference.average.desc')}
+                  </p>
+                </div>
+              </div>
+
+              <div className="level above-average">
+                <div className="level-icon">💪</div>
+                <div className="level-content">
+                  <h4>
+                    {t(
+                      'tests.muscleLabels.scoringReference.aboveAverage.title'
+                    )}
+                  </h4>
+                  <p className="score-range">
+                    {t(
+                      'tests.muscleLabels.scoringReference.aboveAverage.range'
+                    )}
+                  </p>
+                  <p className="description">
+                    {t('tests.muscleLabels.scoringReference.aboveAverage.desc')}
+                  </p>
+                </div>
+              </div>
+
+              <div className="level intermediate">
+                <div className="level-icon">🏃</div>
+                <div className="level-content">
+                  <h4>
+                    {t(
+                      'tests.muscleLabels.scoringReference.intermediate.title'
+                    )}
+                  </h4>
+                  <p className="score-range">
+                    {t(
+                      'tests.muscleLabels.scoringReference.intermediate.range'
+                    )}
+                  </p>
+                  <p className="description">
+                    {t('tests.muscleLabels.scoringReference.intermediate.desc')}
+                  </p>
+                </div>
+              </div>
+
+              <div className="level excellent">
+                <div className="level-icon">⭐</div>
+                <div className="level-content">
+                  <h4>
+                    {t('tests.muscleLabels.scoringReference.excellent.title')}
+                  </h4>
+                  <p className="score-range">
+                    {t('tests.muscleLabels.scoringReference.excellent.range')}
+                  </p>
+                  <p className="description">
+                    {t('tests.muscleLabels.scoringReference.excellent.desc')}
+                  </p>
+                </div>
+              </div>
+
+              <div className="level elite">
+                <div className="level-icon">🏆</div>
+                <div className="level-content">
+                  <h4>
+                    {t('tests.muscleLabels.scoringReference.elite.title')}
+                  </h4>
+                  <p className="score-range">
+                    {t('tests.muscleLabels.scoringReference.elite.range')}
+                  </p>
+                  <p className="description">
+                    {t('tests.muscleLabels.scoringReference.elite.desc')}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="your-score">
+              <p>
+                <strong>
+                  {t('tests.muscleLabels.scoringReference.yourScore')}:{' '}
+                  {result.finalScore}分
+                </strong>
+              </p>
+            </div>
+          </div>
+
           <p className="result-text">
             {t('tests.muscleLabels.smmShort')}: {result.smmScore}
           </p>
