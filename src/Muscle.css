@@ -351,7 +351,105 @@
 }
 
 @media (max-width: 767px) {
+  .concise-explanation {
+    padding: 1rem;
+    margin: 0.8rem;
+    border-radius: 8px;
+  }
+
+  .concise-explanation h3 {
+    font-size: 1.1rem;
+    margin-bottom: 0.8rem;
+    padding-bottom: 0.5rem;
+  }
+
+  .dual-metrics {
+    grid-template-columns: 1fr;
+    gap: 0.8rem;
+    margin-bottom: 1rem;
+  }
+
+  .metric {
+    padding: 0.8rem;
+    text-align: left;
+    border-radius: 6px;
+  }
+
+  .metric h4 {
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+    text-align: left;
+  }
+
+  .metric p {
+    font-size: 0.85rem;
+    text-align: left;
+    line-height: 1.3;
+  }
+
+  .why-both {
+    padding: 0.8rem;
+    margin-top: 0.8rem;
+  }
+
+  .why-both h4 {
+    font-size: 1rem;
+    margin-bottom: 0.6rem;
+    text-align: left;
+  }
+
   .examples {
+    padding: 0.6rem;
+    margin-bottom: 0.6rem;
+    font-size: 0.8rem;
+    line-height: 1.3;
     max-width: 90%;
+  }
+
+  .solution {
+    padding: 0.6rem;
+    font-size: 0.8rem;
+    line-height: 1.3;
+  }
+
+  .muscle-container {
+    padding: 0.6rem;
+  }
+
+  .result-section {
+    margin-bottom: 1rem;
+  }
+
+  .chart-section {
+    margin-bottom: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .concise-explanation {
+    padding: 0.8rem;
+    margin: 0.6rem;
+  }
+
+  .metric {
+    padding: 0.6rem;
+  }
+
+  .metric h4 {
+    font-size: 0.9rem;
+  }
+
+  .metric p {
+    font-size: 0.8rem;
+  }
+
+  .why-both h4 {
+    font-size: 0.9rem;
+  }
+
+  .examples,
+  .solution {
+    font-size: 0.75rem;
+    padding: 0.5rem;
   }
 }
