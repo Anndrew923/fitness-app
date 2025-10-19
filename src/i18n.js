@@ -146,7 +146,7 @@ const zhTW = {
         title: '【健身RPG】\n運動升級邁向最強肉體',
         subtitle:
           '5大能力值科學評測，升級你的肉體，與全球健身玩家競逐天梯排行榜',
-        startButton: '立即開始評測',
+        startButton: '登入開始評測',
         guestButton: '訪客模式體驗',
         slogan: '打造五邊形全能戰士',
       },
@@ -206,7 +206,7 @@ const zhTW = {
       cta: {
         title: '準備好開始你的健身評測之旅了嗎？',
         subtitle: '立即註冊或使用訪客模式開始體驗',
-        startButton: '立即開始評測',
+        startButton: '登入開始評測',
         guestButton: '訪客模式體驗',
       },
       info: {
@@ -222,6 +222,7 @@ const zhTW = {
         },
       },
       footer: {
+        features: '功能介紹',
         about: '關於我們',
         privacy: '隱私政策',
         terms: '使用條款',
@@ -1674,7 +1675,7 @@ const enUS = {
         title: 'Fitness RPG\nLevel Up Your Ultimate Physique',
         subtitle:
           'Take 5 comprehensive assessments, level up your physique, and compete on the global leaderboard',
-        startButton: 'Start Your Assessment',
+        startButton: 'Login to Start Assessment',
         guestButton: 'Try as Guest',
         slogan: 'Become a Five-Point All-Round Athlete',
       },
@@ -1734,7 +1735,7 @@ const enUS = {
       cta: {
         title: 'Ready to start your fitness assessment journey?',
         subtitle: 'Register now or try guest mode to get started',
-        startButton: 'Start Assessment Now',
+        startButton: 'Login to Start Assessment',
         guestButton: 'Try Guest Mode',
       },
       info: {
@@ -1750,6 +1751,7 @@ const enUS = {
         },
       },
       footer: {
+        features: 'Features',
         about: 'About Us',
         privacy: 'Privacy Policy',
         terms: 'Terms of Service',

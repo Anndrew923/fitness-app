@@ -95,7 +95,7 @@
 .hero-section {
   padding: 2rem 2rem 3rem;
   max-width: 1000px;
-  margin: 6rem auto 2rem;
+  margin: 6rem auto 4rem;
   background: rgba(255, 255, 255, 0.95);
   border-radius: 20px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
@@ -172,13 +172,13 @@
 .landing-page .cta-button.primary {
   background: linear-gradient(
     135deg,
-    #ff6b35 0%,
-    #f7931e 50%,
-    #ffd700 100%
+    #4bc0c0 0%,
+    #5f9ea0 50%,
+    #81d8d0 100%
   ) !important;
   color: white !important;
-  box-shadow: 0 8px 25px rgba(255, 107, 53, 0.4),
-    0 4px 15px rgba(247, 147, 30, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
+  box-shadow: 0 8px 25px rgba(75, 192, 192, 0.4),
+    0 4px 15px rgba(95, 158, 160, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
   border: 2px solid rgba(255, 255, 255, 0.2) !important;
   border-radius: 15px;
   font-weight: 700;
@@ -187,6 +187,24 @@
   position: relative;
   overflow: hidden;
   transition: all 0.3s ease;
+  font-size: 1.1rem;
+  padding: 1rem 2.5rem;
+}
+
+.landing-page .cta-button.secondary {
+  background: transparent !important;
+  color: #4bc0c0 !important;
+  border: 2px solid #4bc0c0 !important;
+  border-radius: 15px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(75, 192, 192, 0.2) !important;
+  font-size: 1rem;
+  padding: 0.9rem 2.2rem;
 }
 
 .landing-page .cta-button.primary::before {
@@ -207,8 +225,8 @@
 
 .landing-page .cta-button.primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 12px 35px rgba(255, 107, 53, 0.5),
-    0 6px 20px rgba(247, 147, 30, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.4) !important;
+  box-shadow: 0 12px 35px rgba(75, 192, 192, 0.5),
+    0 6px 20px rgba(95, 158, 160, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.4) !important;
 }
 
 .landing-page .cta-button.primary:hover::before {
@@ -217,27 +235,8 @@
 
 .landing-page .cta-button.primary:active {
   transform: translateY(0);
-  box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3),
+  box-shadow: 0 4px 15px rgba(75, 192, 192, 0.3),
     inset 0 2px 4px rgba(0, 0, 0, 0.2) !important;
-}
-
-.landing-page .cta-button.secondary {
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.95) 0%,
-    rgba(255, 255, 255, 0.8) 100%
-  ) !important;
-  color: #ff6b35 !important;
-  border: 2px solid #ff6b35 !important;
-  border-radius: 15px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  position: relative;
-  overflow: hidden;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(255, 107, 53, 0.2),
-    inset 0 1px 0 rgba(255, 255, 255, 0.8) !important;
 }
 
 .landing-page .cta-button.secondary::before {
@@ -250,7 +249,7 @@
   background: linear-gradient(
     90deg,
     transparent,
-    rgba(255, 107, 53, 0.1),
+    rgba(75, 192, 192, 0.1),
     transparent
   );
   transition: left 0.5s ease;
@@ -258,9 +257,9 @@
 
 .landing-page .cta-button.secondary:hover {
   transform: translateY(-2px);
-  background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%) !important;
+  background: linear-gradient(135deg, #4bc0c0 0%, #5f9ea0 100%) !important;
   color: white !important;
-  box-shadow: 0 8px 25px rgba(255, 107, 53, 0.3),
+  box-shadow: 0 8px 25px rgba(75, 192, 192, 0.3),
     inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
 }
 
@@ -270,7 +269,7 @@
 
 .landing-page .cta-button.secondary:active {
   transform: translateY(0);
-  box-shadow: 0 2px 8px rgba(255, 107, 53, 0.2),
+  box-shadow: 0 2px 8px rgba(75, 192, 192, 0.2),
     inset 0 2px 4px rgba(0, 0, 0, 0.1) !important;
 }
 
@@ -557,7 +556,6 @@
 }
 
 /* Section Styles */
-.features-section,
 .stats-section,
 .users-section,
 .cta-section {
@@ -572,50 +570,6 @@
   text-align: center;
   margin-bottom: 2rem;
   color: white !important;
-}
-
-/* Features Grid */
-.features-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 2rem;
-}
-
-.feature-card {
-  background: rgba(255, 255, 255, 0.9);
-  padding: 1.5rem;
-  border-radius: 12px;
-  text-align: center;
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  transition: transform 0.3s ease;
-  color: #5f9ea0;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-}
-
-.feature-card:hover {
-  transform: translateY(-5px);
-  background: rgba(255, 255, 255, 1);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-}
-
-.feature-icon {
-  font-size: 3rem;
-  margin-bottom: 1rem;
-}
-
-.feature-title {
-  font-size: 1.3rem;
-  font-weight: 600;
-  margin-bottom: 1rem;
-  color: #5f9ea0;
-}
-
-.feature-desc {
-  color: #5f9ea0;
-  line-height: 1.6;
-  margin: 0;
-  opacity: 0.8;
 }
 
 /* Stats Grid */
@@ -901,7 +855,7 @@
 
   .hero-section {
     padding: 1.5rem 1.5rem 2.5rem;
-    margin: 5rem 1rem 1rem;
+    margin: 5rem 1rem 3rem;
     text-align: center;
   }
 
@@ -922,7 +876,17 @@
 
   .landing-page .cta-button {
     width: 100%;
-    max-width: 280px;
+    max-width: 300px;
+  }
+
+  .landing-page .cta-button.primary {
+    font-size: 1.2rem;
+    padding: 1.2rem 2.5rem;
+  }
+
+  .landing-page .cta-button.secondary {
+    font-size: 1.1rem;
+    padding: 1.1rem 2.2rem;
   }
 
   .radar-preview {
@@ -940,7 +904,6 @@
     padding: 0 0.5rem;
   }
 
-  .features-grid,
   .users-grid {
     grid-template-columns: 1fr;
     gap: 1.5rem;
@@ -1007,7 +970,6 @@
     font-size: 0.9rem;
   }
 
-  .features-section,
   .stats-section,
   .users-section,
   .cta-section {
