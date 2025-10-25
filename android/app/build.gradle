@@ -55,6 +55,9 @@ dependencies {
     androidTestImplementation "androidx.test.espresso:espresso-core:$androidxEspressoCoreVersion"
     implementation project(':capacitor-cordova-android-plugins')
 
+    // Google Sign-In Plugin
+    implementation project(':@capacitor-community_google-signin')
+
     // AdMob 依賴
     implementation 'com.google.android.gms:play-services-ads:22.6.0'
     implementation 'com.google.android.gms:play-services-ads-identifier:18.0.1'
