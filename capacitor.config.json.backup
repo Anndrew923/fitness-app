@@ -1,0 +1,10 @@
+{
+  "appId": "com.ultimatephysique.fitness2025",
+  "appName": "最強肉體",
+  "webDir": "dist",
+  "plugins": {
+    "AdMob": {
+      "appId": "ca-app-pub-3940256099942544~3347511713"
+    }
+  }
+}

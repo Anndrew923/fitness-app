@@ -57,32 +57,32 @@ try {
       console.log('✅ 使用有效的 Firebase 配置');
     }
   } else {
-    // 生產環境：嚴格檢查環境變數
-    const requiredEnvVars = [
-      'VITE_FIREBASE_API_KEY',
-      'VITE_FIREBASE_AUTH_DOMAIN',
-      'VITE_FIREBASE_PROJECT_ID',
-      'VITE_FIREBASE_STORAGE_BUCKET',
-      'VITE_FIREBASE_MESSAGING_SENDER_ID',
-      'VITE_FIREBASE_APP_ID',
-    ];
-
-    const missingVars = requiredEnvVars.filter(
-      envVar => !import.meta.env[envVar]
-    );
-    if (missingVars.length > 0) {
-      console.error('缺少環境變量:', missingVars);
-      throw new Error(`缺少環境變量：${missingVars.join(', ')}`);
-    }
-
+    // 生產環境：優先使用環境變數，如果沒有則使用預設配置
     firebaseConfig = {
-      apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-      authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-      projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-      storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-      messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-      appId: import.meta.env.VITE_FIREBASE_APP_ID,
+      apiKey: import.meta.env.VITE_FIREBASE_API_KEY || defaultConfig.apiKey,
+      authDomain:
+        import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || defaultConfig.authDomain,
+      projectId:
+        import.meta.env.VITE_FIREBASE_PROJECT_ID || defaultConfig.projectId,
+      storageBucket:
+        import.meta.env.VITE_FIREBASE_STORAGE_BUCKET ||
+        defaultConfig.storageBucket,
+      messagingSenderId:
+        import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID ||
+        defaultConfig.messagingSenderId,
+      appId: import.meta.env.VITE_FIREBASE_APP_ID || defaultConfig.appId,
     };
+
+    console.log('生產環境 Firebase 配置:', firebaseConfig);
+
+    // 檢查是否使用有效的 Firebase 配置
+    if (firebaseConfig.apiKey === 'demo-api-key') {
+      console.warn(
+        '⚠️ 警告：使用 demo Firebase 配置，認證功能將無法正常工作！'
+      );
+    } else {
+      console.log('✅ 使用有效的 Firebase 配置');
+    }
   }
 
   console.log('開始初始化 Firebase');

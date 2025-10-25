@@ -12,6 +12,8 @@ root.render(
 );
 
 // 註冊 Service Worker（TWA 需求：提供離線備援與快取能力）
+// 已停用 Service Worker 以解決快取問題
+/*
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker
@@ -19,3 +21,4 @@ if ('serviceWorker' in navigator) {
       .catch(err => console.error('SW register failed:', err));
   });
 }
+*/
