@@ -88,8 +88,6 @@
   fill: #4285f4;
 }
 
-
-
 /* 響應式設計 */
 @media (max-width: 480px) {
   .social-btn {
@@ -111,4 +109,41 @@
 
 .social-btn:disabled svg {
   opacity: 0.5;
+}
+
+/* 初始化狀態樣式 */
+.initialization-status {
+  text-align: center;
+  margin-top: 8px;
+  color: #718096;
+  font-size: 12px;
+}
+
+.social-btn:disabled:hover {
+  transform: none;
+}
+
+/* 重試狀態樣式 */
+.retry-status {
+  text-align: center;
+  margin-top: 8px;
+  color: #f7931e;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.retry-status small {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.6;
+  }
 }

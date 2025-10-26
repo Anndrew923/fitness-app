@@ -39,12 +39,25 @@
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
             android:value="ca-app-pub-3940256099942544~3347511713"/>
+
+        <!-- Google Auth 配置 -->
+        <meta-data
+            android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version" />
+
+        <!-- Google Sign-In Client ID -->
+        <meta-data
+            android:name="com.google.android.gms.auth.GOOGLE_SIGN_IN_CLIENT_ID"
+            android:value="5144099869-n8eqotfij5eg6gv97e9s83l22kgqgm6i.apps.googleusercontent.com" />
     </application>
 
     <!-- Permissions -->
-
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="com.google.android.gms.permission.AD_ID" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+
+    <!-- Google Auth 權限 -->
+    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
+    <uses-permission android:name="android.permission.USE_CREDENTIALS" />
 </manifest>

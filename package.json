@@ -4,6 +4,7 @@
   "private": true,
   "license": "MIT",
   "dependencies": {
+    "@belongnet/capacitor-google-auth": "^6.0.0-rc.0",
     "@capacitor-community/admob": "^6.0.0",
     "@capacitor/android": "^6.0.0",
     "@capacitor/app": "^6.0.0",
@@ -51,8 +52,9 @@
     "test:e2e": "playwright test",
     "e2e:install": "playwright install",
     "env:check": "node scripts/check-env.js",
-    "env:setup": "cp env.example .env && echo '✅ .env 檔案已創建，請編輯填入您的 Firebase 配置'",
+    "env:setup": "copy .env.template .env && echo '✅ .env 檔案已創建，請編輯填入您的 Firebase 配置'",
     "env:status": "node -e \"console.log('🔍 環境變數狀態:'); console.log('VITE_FIREBASE_API_KEY:', process.env.VITE_FIREBASE_API_KEY ? '已設置' : '未設置'); console.log('VITE_FIREBASE_PROJECT_ID:', process.env.VITE_FIREBASE_PROJECT_ID ? '已設置' : '未設置');\"",
+    "prebuild:check": "npm run env:check",
     "simple": "node scripts/simple-setup.js",
     "office:setup": "node scripts/office-setup.js",
     "office:sync": "node scripts/sync-environment.js",

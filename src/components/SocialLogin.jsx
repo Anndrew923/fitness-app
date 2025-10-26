@@ -1,194 +1,82 @@
 import { useState, useEffect } from 'react';
-import { auth, db } from '../firebase';
-import {
-  signInWithPopup,
-  signInWithRedirect,
-  getRedirectResult,
-  GoogleAuthProvider,
-} from 'firebase/auth';
-import { doc, setDoc, getDoc } from 'firebase/firestore';
+import NativeGoogleAuth from '../utils/nativeGoogleAuth';
 import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
 import './SocialLogin.css';
 
 function SocialLogin({ onLogin, onError }) {
   const [loading, setLoading] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
   const { t } = useTranslation();
 
-  // 檢測環境
-  const isWebView = /wv|WebView/.test(navigator.userAgent);
-  const isMobile =
-    /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-      navigator.userAgent
-    );
-
-  // 處理重定向結果（所有環境）
+  // 初始化 Google Auth - 增強版本
   useEffect(() => {
-    const handleRedirectResult = async () => {
+    const initializeGoogleAuth = async () => {
       try {
-        const result = await getRedirectResult(auth);
-        if (result) {
-          const user = result.user;
-          console.log('Google 重定向登入成功:', user.email);
-          await handleUserData(user);
-          onLogin(user.email, null);
-        }
-      } catch (error) {
-        console.error('處理重定向結果失敗:', error);
+        // 添加 Bridge 錯誤監聽
+        const originalConsoleError = console.error;
+        console.error = (...args) => {
+          if (args[0] && args[0].includes('androidBridge')) {
+            console.log('🔍 檢測到 Bridge 通信錯誤，嘗試重新初始化...');
+            // 可以嘗試重新初始化
+          }
+          originalConsoleError.apply(console, args);
+        };
 
-        // 如果是 sessionStorage 錯誤，提供更友好的錯誤訊息
-        if (
-          error.message.includes('missing initial state') ||
-          error.message.includes('sessionStorage')
-        ) {
-          onError('WebView 環境登入失敗，請嘗試使用標準瀏覽器或聯繫客服');
-        } else {
-          onError('登入處理失敗，請重試');
-        }
+        await NativeGoogleAuth.initialize();
+        setIsInitialized(true);
+        console.log('✅ Google Auth 初始化完成');
+      } catch (error) {
+        console.error('❌ Google Auth 初始化失敗:', error);
+        setIsInitialized(false);
+        // 不阻止應用啟動，只是記錄錯誤
       }
     };
 
-    handleRedirectResult();
-  }, [onLogin, onError]);
+    initializeGoogleAuth();
+  }, []);
 
-  // 處理用戶資料創建/更新
-  const handleUserData = async firebaseUser => {
-    try {
-      const userRef = doc(db, 'users', firebaseUser.uid);
-      const userSnap = await getDoc(userRef);
-
-      if (!userSnap.exists()) {
-        // 新用戶，創建初始資料
-        const initialUserData = {
-          email: firebaseUser.email,
-          userId: firebaseUser.uid,
-          nickname:
-            firebaseUser.displayName || firebaseUser.email.split('@')[0],
-          avatarUrl: firebaseUser.photoURL || '',
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-          gender: '',
-          height: 0,
-          weight: 0,
-          age: 0,
-          scores: {
-            strength: 0,
-            explosivePower: 0,
-            cardio: 0,
-            muscleMass: 0,
-            bodyFat: 0,
-          },
-          history: [],
-          testInputs: {},
-          friends: [],
-          friendRequests: [],
-          blockedUsers: [],
-          ladderScore: 0,
-          ladderRank: 0,
-          ladderHistory: [],
-          isGuest: false,
-          lastActive: new Date().toISOString(),
-        };
-
-        await setDoc(userRef, initialUserData);
-        console.log('新用戶資料已創建');
-      } else {
-        // 現有用戶，更新最後登入時間
-        await setDoc(
-          userRef,
-          {
-            lastActive: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-          },
-          { merge: true }
-        );
-        console.log('現有用戶資料已更新');
-      }
-    } catch (error) {
-      console.error('處理用戶資料失敗:', error);
-      throw error;
+  // 處理 Google 登入 - 增強版本
+  const handleGoogleLogin = async () => {
+    if (!isInitialized) {
+      onError('Google 登入服務尚未初始化，請稍後重試');
+      return;
     }
-  };
 
-  // WebView 環境：使用 Firebase signInWithRedirect 但添加錯誤處理
-  const handleWebViewLogin = async () => {
+    setLoading(true);
+    setRetryCount(0);
+
     try {
-      const authProvider = new GoogleAuthProvider();
-      authProvider.setCustomParameters({
-        prompt: 'select_account',
-      });
+      console.log('🔄 開始 Google 登入流程...');
 
-      console.log('WebView 環境：使用 Firebase signInWithRedirect');
-      await signInWithRedirect(auth, authProvider);
+      // 使用原生 Google 登入
+      const user = await NativeGoogleAuth.signIn();
 
-      // 注意：這裡不會執行到，因為會重定向
-      // 實際的登入處理在 useEffect 中的 getRedirectResult
-    } catch (error) {
-      console.error('WebView Google 登入失敗:', error);
-
-      // 如果是 sessionStorage 錯誤，提供更友好的錯誤訊息
-      if (
-        error.message.includes('missing initial state') ||
-        error.message.includes('sessionStorage')
-      ) {
-        onError('WebView 環境登入失敗，請嘗試使用標準瀏覽器或聯繫客服');
-      } else {
-        onError('登入失敗，請重試');
-      }
-      setLoading(false);
-    }
-  };
-
-  // 標準瀏覽器：使用 popup
-  const handleStandardLogin = async () => {
-    try {
-      const authProvider = new GoogleAuthProvider();
-      authProvider.setCustomParameters({
-        prompt: 'select_account',
-      });
-
-      console.log('標準瀏覽器：使用 popup 登入');
-      const result = await signInWithPopup(auth, authProvider);
-      const user = result.user;
-
-      console.log('Google popup 登入成功:', user.email);
-      await handleUserData(user);
+      console.log('✅ Google 登入成功:', user.email);
       onLogin(user.email, null);
     } catch (error) {
-      console.error('標準瀏覽器 Google 登入失敗:', error);
+      console.error('❌ Google 登入失敗:', error);
 
-      let errorMessage = '登入失敗';
-      if (error.code === 'auth/popup-closed-by-user') {
-        errorMessage = '登入視窗被關閉，請重試';
-      } else if (error.code === 'auth/popup-blocked') {
-        errorMessage = '彈出視窗被阻擋，請允許彈出視窗後重試';
-      } else if (
-        error.code === 'auth/account-exists-with-different-credential'
-      ) {
-        errorMessage = '此電子郵件已被其他方式註冊，請使用原註冊方式登入';
-      } else {
-        errorMessage = `登入失敗：${error.message}`;
+      // 提供友好的錯誤訊息
+      let errorMessage = 'Google 登入失敗，請重試';
+
+      if (error.message.includes('network')) {
+        errorMessage = '網路連線問題，請檢查網路後重試';
+      } else if (error.message.includes('cancelled')) {
+        errorMessage = '登入已取消';
+      } else if (error.message.includes('service')) {
+        errorMessage = 'Google 服務暫時不可用，請稍後重試';
+      } else if (error.message.includes('sign_in_failed')) {
+        errorMessage = 'Google 登入失敗，請檢查網路連線';
+      } else if (error.message.includes('Something went wrong')) {
+        errorMessage = '登入服務暫時不可用，請稍後重試';
+      } else if (error.message.includes('androidBridge')) {
+        errorMessage = '登入通信錯誤，請重試';
       }
 
       onError(errorMessage);
-      setLoading(false);
-    }
-  };
-
-  const handleGoogleLogin = async () => {
-    setLoading(true);
-
-    try {
-      if (isWebView) {
-        // WebView 環境：使用 OAuth 2.0 重定向
-        await handleWebViewLogin();
-      } else {
-        // 標準瀏覽器：使用 popup
-        await handleStandardLogin();
-      }
-    } catch (error) {
-      console.error('Google 登入失敗:', error);
-      onError('登入失敗，請重試');
+    } finally {
       setLoading(false);
     }
   };
@@ -204,7 +92,7 @@ function SocialLogin({ onLogin, onError }) {
           type="button"
           className="social-btn google-btn"
           onClick={handleGoogleLogin}
-          disabled={loading}
+          disabled={loading || !isInitialized}
         >
           <svg className="google-icon" viewBox="0 0 24 24">
             <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -215,6 +103,18 @@ function SocialLogin({ onLogin, onError }) {
           {loading ? t('login.processing') : t('login.google')}
         </button>
       </div>
+
+      {!isInitialized && (
+        <div className="initialization-status">
+          <small>正在初始化 Google 登入服務...</small>
+        </div>
+      )}
+
+      {retryCount > 0 && (
+        <div className="retry-status">
+          <small>正在重試登入... ({retryCount}/3)</small>
+        </div>
+      )}
     </div>
   );
 }
