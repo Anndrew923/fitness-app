@@ -514,16 +514,28 @@ const Ladder = () => {
 
     const rect = event.currentTarget.getBoundingClientRect();
     const tooltipHeight = 200; // 預估工具提示的高度
-    // const viewportHeight = window.innerHeight;
+    const tooltipWidth = 350; // 預估工具提示的寬度
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
     const safeMargin = 20; // 安全邊距
 
     // 檢查是否為第一名
     const isFirstPlace = ladderData.findIndex(u => u.id === user.id) === 0;
 
     // 計算最佳位置
+    let x = rect.left + rect.width / 2;
     let y = rect.top - 10;
     let transformY = -100; // 預設向上顯示
     let tooltipStyle = {}; // 額外的樣式
+
+    // 檢查水平邊界
+    if (x - tooltipWidth / 2 < safeMargin) {
+      // 左邊超出，調整到右邊
+      x = tooltipWidth / 2 + safeMargin;
+    } else if (x + tooltipWidth / 2 > viewportWidth - safeMargin) {
+      // 右邊超出，調整到左邊
+      x = viewportWidth - tooltipWidth / 2 - safeMargin;
+    }
 
     if (isFirstPlace) {
       // 第一名特殊處理：向下展開，遮住第二名和第三名
@@ -544,10 +556,16 @@ const Ladder = () => {
         y = rect.bottom + 10;
         transformY = 0; // 向下顯示
       }
+
+      // 檢查垂直邊界
+      if (y + tooltipHeight > viewportHeight - safeMargin) {
+        y = rect.top - tooltipHeight - 10;
+        transformY = -100; // 改為向上顯示
+      }
     }
 
     setTooltipPosition({
-      x: rect.left + rect.width / 2,
+      x: x,
       y: y,
       transformY: transformY,
       tooltipStyle: tooltipStyle,

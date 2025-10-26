@@ -680,8 +680,8 @@
   background: white;
   border-radius: 12px;
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-  max-width: 400px;
-  min-width: 350px;
+  max-width: min(400px, calc(100vw - 40px)); /* 確保不超出螢幕 */
+  min-width: 280px; /* 從 350px 改為 280px */
   overflow: hidden;
   animation: tooltipFadeIn 0.3s ease-out;
 }
@@ -818,7 +818,8 @@
 
 @media (max-width: 768px) {
   .tooltip-content {
-    max-width: 280px;
+    max-width: min(280px, calc(100vw - 32px)); /* 確保不超出螢幕 */
+    min-width: 240px; /* 進一步縮小最小寬度 */
     margin: 0 16px;
   }
 
@@ -842,6 +843,14 @@
   .tooltip-label,
   .tooltip-value {
     font-size: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .tooltip-content {
+    max-width: min(260px, calc(100vw - 24px)); /* 小螢幕進一步縮小 */
+    min-width: 200px; /* 最小寬度 */
+    margin: 0 12px;
   }
 }
 
