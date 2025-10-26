@@ -130,7 +130,7 @@
   height: 100%;
   background: linear-gradient(90deg, #ff6b35, #f7931e, #ffd700);
   border-radius: 3px;
-  transition: width 0.3s ease;
+  /* 移除 transition，使用更簡單的方式 */
   box-shadow: 0 0 10px rgba(255, 107, 53, 0.5);
   position: relative;
   overflow: hidden;
@@ -146,10 +146,11 @@
   background: linear-gradient(
     90deg,
     transparent,
-    rgba(255, 255, 255, 0.4),
+    rgba(255, 255, 255, 0.8),
     transparent
   );
-  animation: shimmer 1.5s infinite;
+  /* 使用更簡單的動畫 */
+  animation: shimmer 1.8s linear infinite;
 }
 
 @keyframes shimmer {

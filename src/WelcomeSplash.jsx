@@ -11,18 +11,29 @@ function WelcomeSplash() {
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {
-    // 模擬載入進度
-    const progressInterval = setInterval(() => {
-      setProgress(prev => {
-        if (prev >= 100) {
-          clearInterval(progressInterval);
-          return 100;
-        }
-        return prev + Math.random() * 15;
-      });
-    }, 100);
+    // 使用更穩定的進度更新方式
+    let progressValue = 0;
+    const updateProgress = () => {
+      progressValue += Math.random() * 8 + 7; // 更穩定的增量
+      if (progressValue >= 100) {
+        progressValue = 100;
+        setProgress(100);
+        return;
+      }
+      setProgress(progressValue);
 
-    // 2秒後跳轉到首頁
+      // 使用 requestAnimationFrame 替代 setInterval
+      if (progressValue < 100) {
+        requestAnimationFrame(updateProgress);
+      }
+    };
+
+    // 延遲開始進度更新
+    const startProgress = setTimeout(() => {
+      updateProgress();
+    }, 200);
+
+    // 2.5秒後跳轉（給更多時間）
     const timer = setTimeout(() => {
       setIsLoading(false);
       // 檢查用戶登入狀態，決定跳轉目標
@@ -31,11 +42,11 @@ function WelcomeSplash() {
       } else {
         navigate('/landing');
       }
-    }, 2000);
+    }, 2500);
 
     return () => {
       clearTimeout(timer);
-      clearInterval(progressInterval);
+      clearTimeout(startProgress);
     };
   }, [navigate]);
 
