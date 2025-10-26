@@ -5,7 +5,6 @@ import { doc, setDoc, getDoc } from 'firebase/firestore';
 import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
 import './SocialLogin.css';
-// import { GoogleAuth } from '@codetrix-studio/capacitor-google-auth'; // 暫時停用
 
 function SocialLogin({ onLogin, onError }) {
   const [loading, setLoading] = useState(false);
@@ -15,7 +14,6 @@ function SocialLogin({ onLogin, onError }) {
     setLoading(true);
 
     try {
-      // 暫時使用 signInWithPopup 避免崩潰
       const authProvider = new GoogleAuthProvider();
       authProvider.setCustomParameters({
         prompt: 'select_account',

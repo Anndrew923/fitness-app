@@ -1,3 +1,4 @@
+/* 效能優化：精確的硬體加速 */
 .history-container {
   max-width: 100%;
   padding: 0.5rem; /* 從 0.8rem 減少到 0.5rem */
@@ -7,6 +8,17 @@
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   min-height: calc(100vh - 140px); /* 確保頁面有足夠高度 */
+  -webkit-overflow-scrolling: touch;
+  will-change: scroll-position;
+}
+
+/* 只對動畫元素應用硬體加速 */
+.history-container .record-item,
+.history-container .chart-container {
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
 }
 
 /* 響應式調整 */

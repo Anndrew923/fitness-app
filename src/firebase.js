@@ -13,8 +13,8 @@ const defaultConfig = {
   authDomain: 'fitness-app-69f08.firebaseapp.com',
   projectId: 'fitness-app-69f08',
   storageBucket: 'fitness-app-69f08.firebasestorage.app',
-  messagingSenderId: '51448990869',
-  appId: '1:51448990869:web:1fd63a1fa84e89bce1af4',
+  messagingSenderId: '5144099869',
+  appId: '1:5144099869:web:1df863a1fa04e89bce1af4',
 };
 
 // 檢查是否為開發環境

@@ -7,18 +7,27 @@ export const AdMobCompliance = {
     const violations = [];
 
     // 1. 檢查內容是否足夠（評測頁面跳過此檢查）
-    const testPages = ['strength', 'cardio', 'explosive-power', 'muscle-mass', 'body-fat'];
-    if (!testPages.includes(pageName) && (!pageContent || pageContent.length < 200)) {
+    const testPages = [
+      'strength',
+      'cardio',
+      'explosive-power',
+      'muscle-mass',
+      'body-fat',
+    ];
+    if (
+      !testPages.includes(pageName) &&
+      (!pageContent || pageContent.length < 200)
+    ) {
       violations.push('內容不足：頁面內容少於 200 字元');
     }
 
     // 2. 檢查是否有重複內容
-    if (this.hasDuplicateContent(pageContent)) {
+    if (AdMobCompliance.hasDuplicateContent(pageContent)) {
       violations.push('重複內容：檢測到重複或低價值內容');
     }
 
     // 3. 檢查是否為導航頁面
-    if (this.isNavigationPage(pageName)) {
+    if (AdMobCompliance.isNavigationPage(pageName)) {
       violations.push('導航頁面：不應在導航頁面顯示廣告');
     }
 
@@ -65,12 +74,12 @@ export const AdMobCompliance = {
     const issues = [];
 
     // 1. 檢查是否在內容不足的頁面放置廣告
-    if (this.isLowContentPage(pageName)) {
+    if (AdMobCompliance.isLowContentPage(pageName)) {
       issues.push('內容不足頁面不應顯示廣告');
     }
 
     // 2. 檢查廣告位置是否合適
-    if (adPosition === 'top' && this.isMobilePage()) {
+    if (adPosition === 'top' && AdMobCompliance.isMobilePage()) {
       issues.push('手機版不建議在頂部放置廣告');
     }
 
@@ -103,8 +112,14 @@ export const AdMobCompliance = {
 
   // 生成合規報告
   generateComplianceReport: (pageName, pageContent, adConfig) => {
-    const contentCheck = this.checkContentPolicy(pageName, pageContent);
-    const placementCheck = this.checkAdPlacement(pageName, adConfig.position);
+    const contentCheck = AdMobCompliance.checkContentPolicy(
+      pageName,
+      pageContent
+    );
+    const placementCheck = AdMobCompliance.checkAdPlacement(
+      pageName,
+      adConfig.position
+    );
 
     return {
       pageName,
@@ -154,10 +169,7 @@ export const preAdDisplayCheck = (pageName, pageContent) => {
   }
 
   // 其他頁面進行正常合規檢查
-  const compliance = AdMobCompliance.checkContentPolicy(
-    pageName,
-    pageContent
-  );
+  const compliance = AdMobCompliance.checkContentPolicy(pageName, pageContent);
 
   if (!compliance.isCompliant) {
     console.warn('AdMob 合規警告:', compliance.violations);

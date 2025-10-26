@@ -1,3 +1,20 @@
+/* 效能優化：精確的硬體加速 */
+/* 只對特定需要優化的元素應用硬體加速 */
+.community-container {
+  -webkit-overflow-scrolling: touch;
+  will-change: scroll-position;
+}
+
+/* 只對動畫元素應用硬體加速 */
+.community-container .post-card,
+.community-container .comment-item,
+.community-container .friend-item {
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+
 /* Tiffany 藍主色調變數 */
 :root {
   --tiffany-primary: #81d8d0;

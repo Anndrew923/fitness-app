@@ -197,6 +197,9 @@ function BottomNavBar() {
           alignItems: 'center',
           zIndex: 1200,
           boxShadow: '0 -2px 8px rgba(0,0,0,0.04)',
+          // 確保不受硬體加速影響
+          transform: 'none',
+          willChange: 'auto',
         }}
       >
         {navItems.map(item => (
