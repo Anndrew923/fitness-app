@@ -1,12 +1,28 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import LanguageSwitcher from './components/LanguageSwitcher';
+import { App as CapacitorApp } from '@capacitor/app';
 import './About.css';
 
 function About() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+
+  // 處理 Android 返回按鈕
+  useEffect(() => {
+    const handleBackButton = () => {
+      console.log('🔙 About 頁面：返回按鈕被點擊，回到首頁');
+      navigate('/landing');
+      return true; // 阻止默認行為
+    };
+
+    CapacitorApp.addListener('backButton', handleBackButton);
+
+    return () => {
+      CapacitorApp.removeAllListeners();
+    };
+  }, [navigate]);
 
   const handleBackToHome = () => {
     navigate('/landing');

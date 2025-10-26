@@ -5,12 +5,14 @@ import {
   Route,
   Navigate,
   useLocation,
+  useNavigate,
 } from 'react-router-dom';
 import { UserProvider, useUser } from './UserContext';
 import { auth } from './firebase';
 import { signInWithEmailAndPassword, signOut } from 'firebase/auth';
 import PropTypes from 'prop-types';
 import ScrollToTop from './ScrollToTop';
+import { App as CapacitorApp } from '@capacitor/app';
 const WelcomeSplash = React.lazy(() => import('./WelcomeSplash'));
 const LandingPage = React.lazy(() => import('./LandingPage'));
 const Welcome = React.lazy(() => import('./Welcome'));
@@ -131,6 +133,7 @@ function AppContent() {
   const { t } = useTranslation();
   const [testData, setTestData] = useState(null);
   const location = useLocation();
+  const navigate = useNavigate();
   const showNavBar = [
     '/user-info',
     '/history',
@@ -174,6 +177,40 @@ function AppContent() {
 
     return () => clearTimeout(timer);
   }, [location.pathname]);
+
+  // 處理 Android 返回按鈕
+  useEffect(() => {
+    const handleBackButton = () => {
+      const currentPath = location.pathname;
+
+      // 定義需要特殊處理的頁面（沒有底部導覽列的頁面）
+      const pagesWithoutNavBar = [
+        '/features',
+        '/about',
+        '/privacy-policy',
+        '/terms',
+        '/contact',
+        '/disclaimer',
+      ];
+
+      if (pagesWithoutNavBar.includes(currentPath)) {
+        // 這些頁面沒有導覽列，返回按鈕應該回到首頁
+        console.log('🔙 返回按鈕：從', currentPath, '回到首頁');
+        navigate('/landing');
+        return true; // 阻止默認行為
+      }
+
+      // 其他頁面使用默認行為
+      return false;
+    };
+
+    // 監聽返回按鈕事件
+    CapacitorApp.addListener('backButton', handleBackButton);
+
+    return () => {
+      CapacitorApp.removeAllListeners();
+    };
+  }, [location.pathname, navigate]);
 
   // 2025-08: V1 不再自動彈出隱私權政策彈窗（保留設定頁/專頁入口）
 
