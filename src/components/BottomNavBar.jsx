@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { auth } from '../firebase';
 import GuestModal from './GuestModal';
@@ -151,9 +151,65 @@ function BottomNavBar() {
   const navigate = useNavigate();
   const location = useLocation();
   const { t } = useTranslation();
-
   const [modalOpen, setModalOpen] = useState(false);
-  // const [pendingPath, setPendingPath] = useState('');
+  const [screenSize, setScreenSize] = useState('medium');
+
+  // 檢測螢幕大小並分類
+  useEffect(() => {
+    const checkScreenSize = () => {
+      const width = window.innerWidth;
+      if (width < 360) {
+        setScreenSize('small'); // 小螢幕
+      } else if (width < 400) {
+        setScreenSize('medium'); // 中等螢幕
+      } else {
+        setScreenSize('large'); // 大螢幕
+      }
+    };
+
+    checkScreenSize();
+    window.addEventListener('resize', checkScreenSize);
+
+    return () => window.removeEventListener('resize', checkScreenSize);
+  }, []);
+
+  // 檢測是否為英文
+  const isEnglish = () => {
+    const currentLang = t('common.language');
+    return (
+      currentLang === 'en' ||
+      window.navigator.language.startsWith('en') ||
+      document.documentElement.lang === 'en'
+    );
+  };
+
+  // 根據螢幕大小和語言調整樣式
+  const getTextStyles = () => {
+    const isEng = isEnglish();
+
+    if (screenSize === 'small') {
+      return {
+        fontSize: isEng ? '8px' : '9px',
+        padding: '2px 1px',
+        lineHeight: '1.1',
+        fontWeight: isEng ? '500' : 'normal',
+      };
+    } else if (screenSize === 'medium') {
+      return {
+        fontSize: isEng ? '9px' : '10px',
+        padding: '3px 2px',
+        lineHeight: '1.2',
+        fontWeight: isEng ? '500' : 'normal',
+      };
+    } else {
+      return {
+        fontSize: isEng ? '10px' : '11px',
+        padding: '4px 2px',
+        lineHeight: '1.2',
+        fontWeight: isEng ? '500' : 'normal',
+      };
+    }
+  };
 
   const handleNav = item => {
     if (item.guestBlock && isGuestMode()) {
@@ -220,17 +276,31 @@ function BottomNavBar() {
                 justifyContent: 'center',
                 color: location.pathname === item.path ? '#667eea' : '#888',
                 fontWeight: location.pathname === item.path ? 'bold' : 'normal',
-                fontSize: '12px',
+                fontSize: getTextStyles().fontSize,
                 width: '100%',
                 height: '64px',
                 cursor: 'pointer',
                 position: 'relative',
                 transition: 'color 0.2s',
+                padding: getTextStyles().padding,
+                boxSizing: 'border-box',
               }}
               aria-label={item.label}
             >
               {item.icon}
-              <span style={{ marginTop: '4px' }}>
+              <span
+                style={{
+                  marginTop: '4px',
+                  maxWidth: '100%',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                  fontSize: getTextStyles().fontSize,
+                  lineHeight: getTextStyles().lineHeight,
+                  fontWeight: getTextStyles().fontWeight,
+                  letterSpacing: '0.02em', // 增加字母間距，提升可讀性
+                }}
+              >
                 {t(
                   `navbar.${
                     item.key === 'assessment' ? 'assessment' : item.key

@@ -1,42 +1,70 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { auth, db } from '../firebase';
-import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
+import {
+  signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
+  GoogleAuthProvider,
+} from 'firebase/auth';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
 import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
 import './SocialLogin.css';
-// import { GoogleAuth } from '@codetrix-studio/capacitor-google-auth'; // 暫時停用
 
 function SocialLogin({ onLogin, onError }) {
   const [loading, setLoading] = useState(false);
   const { t } = useTranslation();
 
-  const handleGoogleLogin = async () => {
-    setLoading(true);
+  // 檢測環境
+  const isWebView = /wv|WebView/.test(navigator.userAgent);
+  const isMobile =
+    /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+      navigator.userAgent
+    );
 
+  // 處理重定向結果（所有環境）
+  useEffect(() => {
+    const handleRedirectResult = async () => {
+      try {
+        const result = await getRedirectResult(auth);
+        if (result) {
+          const user = result.user;
+          console.log('Google 重定向登入成功:', user.email);
+          await handleUserData(user);
+          onLogin(user.email, null);
+        }
+      } catch (error) {
+        console.error('處理重定向結果失敗:', error);
+
+        // 如果是 sessionStorage 錯誤，提供更友好的錯誤訊息
+        if (
+          error.message.includes('missing initial state') ||
+          error.message.includes('sessionStorage')
+        ) {
+          onError('WebView 環境登入失敗，請嘗試使用標準瀏覽器或聯繫客服');
+        } else {
+          onError('登入處理失敗，請重試');
+        }
+      }
+    };
+
+    handleRedirectResult();
+  }, [onLogin, onError]);
+
+  // 處理用戶資料創建/更新
+  const handleUserData = async firebaseUser => {
     try {
-      // 暫時使用 signInWithPopup 避免崩潰
-      const authProvider = new GoogleAuthProvider();
-      authProvider.setCustomParameters({
-        prompt: 'select_account',
-      });
-
-      const result = await signInWithPopup(auth, authProvider);
-      const user = result.user;
-
-      console.log('Google 登入成功:', user.email);
-
-      // 檢查用戶是否已存在
-      const userRef = doc(db, 'users', user.uid);
+      const userRef = doc(db, 'users', firebaseUser.uid);
       const userSnap = await getDoc(userRef);
 
       if (!userSnap.exists()) {
         // 新用戶，創建初始資料
         const initialUserData = {
-          email: user.email,
-          userId: user.uid,
-          nickname: user.displayName || user.email.split('@')[0],
-          avatarUrl: user.photoURL || '',
+          email: firebaseUser.email,
+          userId: firebaseUser.uid,
+          nickname:
+            firebaseUser.displayName || firebaseUser.email.split('@')[0],
+          avatarUrl: firebaseUser.photoURL || '',
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
           gender: '',
@@ -64,11 +92,70 @@ function SocialLogin({ onLogin, onError }) {
 
         await setDoc(userRef, initialUserData);
         console.log('新用戶資料已創建');
+      } else {
+        // 現有用戶，更新最後登入時間
+        await setDoc(
+          userRef,
+          {
+            lastActive: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          },
+          { merge: true }
+        );
+        console.log('現有用戶資料已更新');
       }
-
-      onLogin(user.email, null); // 社交登入不需要密碼
     } catch (error) {
-      console.error('Google 登入失敗:', error);
+      console.error('處理用戶資料失敗:', error);
+      throw error;
+    }
+  };
+
+  // WebView 環境：使用 Firebase signInWithRedirect 但添加錯誤處理
+  const handleWebViewLogin = async () => {
+    try {
+      const authProvider = new GoogleAuthProvider();
+      authProvider.setCustomParameters({
+        prompt: 'select_account',
+      });
+
+      console.log('WebView 環境：使用 Firebase signInWithRedirect');
+      await signInWithRedirect(auth, authProvider);
+
+      // 注意：這裡不會執行到，因為會重定向
+      // 實際的登入處理在 useEffect 中的 getRedirectResult
+    } catch (error) {
+      console.error('WebView Google 登入失敗:', error);
+
+      // 如果是 sessionStorage 錯誤，提供更友好的錯誤訊息
+      if (
+        error.message.includes('missing initial state') ||
+        error.message.includes('sessionStorage')
+      ) {
+        onError('WebView 環境登入失敗，請嘗試使用標準瀏覽器或聯繫客服');
+      } else {
+        onError('登入失敗，請重試');
+      }
+      setLoading(false);
+    }
+  };
+
+  // 標準瀏覽器：使用 popup
+  const handleStandardLogin = async () => {
+    try {
+      const authProvider = new GoogleAuthProvider();
+      authProvider.setCustomParameters({
+        prompt: 'select_account',
+      });
+
+      console.log('標準瀏覽器：使用 popup 登入');
+      const result = await signInWithPopup(auth, authProvider);
+      const user = result.user;
+
+      console.log('Google popup 登入成功:', user.email);
+      await handleUserData(user);
+      onLogin(user.email, null);
+    } catch (error) {
+      console.error('標準瀏覽器 Google 登入失敗:', error);
 
       let errorMessage = '登入失敗';
       if (error.code === 'auth/popup-closed-by-user') {
@@ -84,7 +171,24 @@ function SocialLogin({ onLogin, onError }) {
       }
 
       onError(errorMessage);
-    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    setLoading(true);
+
+    try {
+      if (isWebView) {
+        // WebView 環境：使用 OAuth 2.0 重定向
+        await handleWebViewLogin();
+      } else {
+        // 標準瀏覽器：使用 popup
+        await handleStandardLogin();
+      }
+    } catch (error) {
+      console.error('Google 登入失敗:', error);
+      onError('登入失敗，請重試');
       setLoading(false);
     }
   };

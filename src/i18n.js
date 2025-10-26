@@ -116,11 +116,11 @@ const zhTW = {
 
     // 導覽列（底部）
     navbar: {
-      community: '社群',
+      community: '公會',
       home: '首頁',
-      assessment: '開始評測',
-      ladder: '天梯',
-      history: '歷史',
+      assessment: '練功',
+      ladder: '排行榜',
+      history: '成就',
       settings: '設定',
     },
 
@@ -143,38 +143,37 @@ const zhTW = {
     // 首頁
     landing: {
       hero: {
-        title: '【健身RPG】\n運動升級邁向最強肉體',
-        subtitle:
-          '5大能力值科學評測，升級你的肉體，與全球健身玩家競逐天梯排行榜',
-        startButton: '登入開始評測',
-        guestButton: '訪客模式體驗',
-        slogan: '打造五邊形全能戰士',
+        title: '【健身RPG】\n角色升級邁向最強戰士',
+        subtitle: '5大屬性科學評測，升級你的角色，與全球玩家競逐排行榜',
+        startButton: '開始冒險',
+        guestButton: '試玩模式',
+        slogan: '練成五邊形全能戰士',
       },
       features: {
-        title: '核心功能特色',
+        title: '修煉技能',
         strength: {
-          title: '力量評測',
-          desc: '胸、肩、背、腿、核心全面評測',
+          title: '力量修煉',
+          desc: '提升胸、肩、背、腿、核心力量屬性',
         },
         power: {
-          title: '爆發力評測',
-          desc: '垂直跳躍、立定跳遠、衝刺測試',
+          title: '爆發力修煉',
+          desc: '提升垂直跳躍、立定跳遠、衝刺速度屬性',
         },
         cardio: {
-          title: '心肺耐力',
-          desc: '跑步測試，評估心血管健康狀況',
+          title: '耐力修煉',
+          desc: '提升心肺功能及體能耐力屬性',
         },
         muscle: {
-          title: '肌肉量評估',
-          desc: '骨骼肌肉量計算與分析',
+          title: '肌肉修煉',
+          desc: '提升肌肉量及身體組成屬性',
         },
         bodyfat: {
-          title: '體脂分析',
-          desc: 'FFMI 指數計算，科學評估體脂率',
+          title: '體脂修煉',
+          desc: '優化體脂率及肌肉脂肪比例',
         },
         ladder: {
-          title: '天梯排行榜',
-          desc: '與全球用戶競爭，激勵持續進步',
+          title: '全球排行榜',
+          desc: '與全球玩家競逐，保持練功動力',
         },
       },
       stats: {
@@ -204,10 +203,10 @@ const zhTW = {
         },
       },
       cta: {
-        title: '準備好開始你的健身評測之旅了嗎？',
-        subtitle: '立即註冊或使用訪客模式開始體驗',
-        startButton: '登入開始評測',
-        guestButton: '訪客模式體驗',
+        title: '準備開始你的健身冒險了嗎？',
+        subtitle: '創建角色或試玩模式開始',
+        startButton: '開始冒險',
+        guestButton: '試玩模式',
       },
       info: {
         title: '了解更多',
@@ -256,11 +255,11 @@ const zhTW = {
 
     // 用戶資料
     userInfo: {
-      title: '身體狀態與表現總覽',
-      subtitle: '完善您的個人資料，開始健身之旅',
-      radarOverview: '表現總覽',
+      title: '角色檔案與屬性',
+      subtitle: '完成你的角色設定以開始冒險',
+      radarOverview: '屬性總覽',
       basicInfo: '基本資料',
-      nickname: '暱稱',
+      nickname: '角色名稱',
       modals: {
         basicInfoRequired: {
           title: '需要基本資料',
@@ -271,26 +270,26 @@ const zhTW = {
           message: '請確保資料已正確保存後再進行評測！',
         },
       },
-      nicknamePlaceholder: '請輸入暱稱',
-      generateNickname: '生成暱稱',
+      nicknamePlaceholder: '請輸入角色名稱',
+      generateNickname: '生成名稱',
       gender: '性別',
       selectGender: '請選擇性別',
       male: '男性',
       female: '女性',
       height: '身高 (cm)',
       weight: '體重 (kg)',
-      weightChangeReminder: '更改體重後，要重新計算所有分數唷',
+      weightChangeReminder: '更改體重後，要重新計算所有屬性唷',
       age: '年齡',
-      saveData: '儲存資料',
+      saveData: '儲存角色',
       saving: '儲存中...',
-      saveResults: '儲存評測結果',
-      submitToLadder: '提交到天梯',
-      updateLadderScore: '更新天梯分數',
-      startTests: '開始評測',
-      dataSaved: '資料已儲存成功！',
+      saveResults: '儲存修煉結果',
+      submitToLadder: '提交到排行榜',
+      updateLadderScore: '更新排行榜分數',
+      startTests: '角色技能樹',
+      dataSaved: '角色已儲存成功！',
       saveFailed: '儲存失敗，請稍後再試',
-      yourPerformance: '您的表現',
-      powerTitle: '戰鬥力',
+      yourPerformance: '你的角色屬性',
+      powerTitle: '爆發力等級',
       radarLabels: {
         strength: '力量',
         explosivePower: '爆發力',
@@ -366,8 +365,8 @@ const zhTW = {
 
     // 評測
     tests: {
-      strength: '力量評測',
-      strengthTitle: '力量評測',
+      strength: '力量',
+      strengthTitle: '力量',
       strengthSafetyNote: '挑戰重量時記得綁上腰帶和手套，注意安全喔',
       strengthLabels: {
         weightKg: '重量 (kg)',
@@ -437,8 +436,8 @@ const zhTW = {
           below40: '親愛的，還有進步空間，繼續加油哦！',
         },
       },
-      explosivePower: '爆發力評測',
-      powerTitle: '爆發力評測',
+      explosivePower: '爆發力',
+      powerTitle: '爆發力',
       powerLabels: {
         movementsTitle: '爆發力動作',
         verticalJump: '垂直彈跳 (公分)',
@@ -477,8 +476,8 @@ const zhTW = {
             '本測驗包含推測值：12-80歲全齡數據不全，依ACSM每10年下降10-15%、性別差異70-90%推估。',
         },
       },
-      cardio: '心肺耐力評測',
-      cardioTitle: '心肺耐力評測',
+      cardio: '心肺能力',
+      cardioTitle: '心肺能力',
       cardioLabels: {
         distanceMeters: '跑步距離 (公尺)',
         score: '心肺耐力分數',
@@ -531,34 +530,34 @@ const zhTW = {
         missingInputs: '請輸入重量和次數！',
         missingUserData: '請確保已輸入有效的體重和年齡！',
         repsTooHigh: '可完成次數不得超過12次，請重新輸入！',
-        needAtLeastOne: '請至少完成一項評測！',
-        updateFail: '更新用戶數據或導航失敗，請稍後再試！',
+        needAtLeastOne: '請至少完成一項修煉挑戰！',
+        updateFail: '更新角色數據或導航失敗，請稍後再試！',
       },
       cardioErrors: {
         missingPrerequisites:
-          '請確保已在用戶信息中輸入年齡和性別，並在此輸入跑步距離！',
+          '請完成你的角色檔案（年齡和性別），並在此輸入跑步距離！',
         invalidInputs: '請輸入有效的跑步距離和年齡！',
-        standardsNotFound: '無法找到對應的評測標準，請檢查年齡和性別！',
-        needCalculate: '請先計算心肺耐力分數！',
-        updateUserFail: '更新用戶數據失敗，請稍後再試！',
+        standardsNotFound: '無法找到對應的修煉標準，請檢查你的角色檔案！',
+        needCalculate: '請先計算耐力分數！',
+        updateUserFail: '更新角色數據失敗，請稍後再試！',
       },
       powerErrors: {
-        missingPrerequisites: '請確保已在用戶信息中輸入年齡和性別！',
-        noAnyInput: '請至少輸入一項動作數據！',
-        invalidAge: '請輸入有效的年齡！',
-        standardsNotFound: '無法找到對應的評測標準，請檢查年齡和性別！',
-        needMeasure: '請至少完成一項動作的測量！',
-        needCalculate: '請先計算爆發力分數！',
-        updateUserFail: '更新用戶數據失敗，請稍後再試！',
+        missingPrerequisites: '請完成你的角色檔案（年齡和性別）！',
+        noAnyInput: '請至少完成一項修煉挑戰！',
+        invalidAge: '請輸入有效的角色年齡！',
+        standardsNotFound: '無法找到對應的修煉標準，請檢查你的角色檔案！',
+        needMeasure: '請至少完成一項修煉挑戰！',
+        needCalculate: '請先計算爆發力等級！',
+        updateUserFail: '更新角色數據失敗，請稍後再試！',
       },
       ffmiErrors: {
-        missingPrerequisites: '請先在用戶信息頁面填寫性別、身高、體重和年齡',
+        missingPrerequisites: '請完成你的角色檔案（性別、身高、體重和年齡）',
         missingBodyFat: '請輸入體脂肪率',
-        needCalculate: '請先計算 FFMI 分數！',
-        updateUserFail: '更新用戶數據失敗，請稍後再試！',
+        needCalculate: '請先計算體脂修煉分數！',
+        updateUserFail: '更新角色數據失敗，請稍後再試！',
       },
       muscleMass: '骨骼肌肉量',
-      muscleTitle: '骨骼肌肉量評測',
+      muscleTitle: '骨骼肌肉量',
       muscleLabels: {
         smmKg: '骨骼肌肉量 (kg)',
         numbersComparison: '數值比較',
@@ -612,14 +611,14 @@ const zhTW = {
       },
       muscleErrors: {
         missingPrerequisites:
-          '請確保已在用戶信息中輸入體重、年齡和性別，並在此輸入骨骼肌肉量！',
-        invalidInputs: '請輸入有效的體重、骨骼肌肉量和年齡！',
-        standardsNotFound: '無法找到對應的評測標準，請檢查年齡和性別！',
-        needCalculate: '請先計算骨骼肌肉量分數！',
-        updateUserFail: '更新用戶數據失敗，請稍後再試！',
+          '請完成你的角色檔案（體重、年齡、性別），並在此輸入肌肉量數據！',
+        invalidInputs: '請輸入有效的體重、肌肉量和年齡！',
+        standardsNotFound: '無法找到對應的修煉標準，請檢查你的角色檔案！',
+        needCalculate: '請先計算肌肉修煉分數！',
+        updateUserFail: '更新角色數據失敗，請稍後再試！',
       },
-      bodyFat: '體脂肪率與FFMI',
-      ffmiTitle: '體脂肪率與 FFMI',
+      bodyFat: '體脂率FFMI',
+      ffmiTitle: '體脂率FFMI',
       ffmiLabels: {
         bodyFatPercent: '體脂肪率 (%)',
         resultTitle: '您的評估結果',
@@ -1645,11 +1644,11 @@ const enUS = {
 
     // Navbar
     navbar: {
-      community: 'Muscle Park',
+      community: 'Guild',
       home: 'Home',
-      assessment: 'Start',
-      ladder: 'Leaderboard',
-      history: 'History',
+      assessment: 'Train',
+      ladder: 'Rankings',
+      history: 'Progress',
       settings: 'Settings',
     },
 
@@ -1672,38 +1671,38 @@ const enUS = {
     // 首頁
     landing: {
       hero: {
-        title: 'Fitness RPG\nLevel Up Your Ultimate Physique',
+        title: 'Fitness RPG\nLevel Up Your Character',
         subtitle:
-          'Take 5 comprehensive assessments, level up your physique, and compete on the global leaderboard',
-        startButton: 'Login to Start Assessment',
-        guestButton: 'Try as Guest',
-        slogan: 'Master All Five Dimensions',
+          'Complete 5 fitness challenges, level up your stats, and climb the global leaderboard',
+        startButton: 'Start Your Journey',
+        guestButton: 'Try Demo Mode',
+        slogan: 'Master All Five Stats',
       },
       features: {
-        title: 'Core Features',
+        title: 'Training Skills',
         strength: {
-          title: 'Strength Testing',
-          desc: 'Comprehensive evaluation of chest, shoulders, back, legs, and core strength',
+          title: 'Strength Training',
+          desc: 'Level up your chest, shoulders, back, legs, and core strength stats',
         },
         power: {
-          title: 'Explosive Power Testing',
-          desc: 'Vertical jump, standing long jump, and sprint performance',
+          title: 'Power Training',
+          desc: 'Boost your vertical jump, long jump, and sprint speed stats',
         },
         cardio: {
-          title: 'Cardiovascular Fitness',
-          desc: 'Running test to evaluate your cardiovascular endurance',
+          title: 'Endurance Training',
+          desc: 'Improve your cardiovascular fitness and stamina stats',
         },
         muscle: {
-          title: 'Muscle Mass Analysis',
-          desc: 'Skeletal muscle mass calculation and body composition analysis',
+          title: 'Muscle Development',
+          desc: 'Build and track your muscle mass and body composition',
         },
         bodyfat: {
           title: 'Body Composition',
-          desc: 'FFMI-based body fat analysis and composition evaluation',
+          desc: 'Optimize your body fat percentage and muscle-to-fat ratio',
         },
         ladder: {
-          title: 'Global Leaderboard',
-          desc: 'Compete globally and stay motivated to improve',
+          title: 'Global Rankings',
+          desc: 'Compete with players worldwide and climb the leaderboard',
         },
       },
       stats: {
@@ -1733,10 +1732,10 @@ const enUS = {
         },
       },
       cta: {
-        title: 'Ready to start your fitness assessment journey?',
-        subtitle: 'Register now or try guest mode to get started',
-        startButton: 'Login to Start Assessment',
-        guestButton: 'Try Guest Mode',
+        title: 'Ready to start your fitness adventure?',
+        subtitle: 'Create your character or try demo mode',
+        startButton: 'Start Your Journey',
+        guestButton: 'Try Demo Mode',
       },
       info: {
         title: 'Learn More',
@@ -1785,11 +1784,11 @@ const enUS = {
 
     // 用戶資料
     userInfo: {
-      title: 'Fitness Profile & Performance',
-      subtitle: 'Complete your profile to start your fitness journey',
+      title: 'Character Profile & Stats',
+      subtitle: 'Complete your character setup to begin your adventure',
       radarOverview: 'Performance Radar',
       basicInfo: 'Basic Info',
-      nickname: 'Nickname',
+      nickname: 'Character Name',
       modals: {
         basicInfoRequired: {
           title: 'Basic Information Required',
@@ -1802,7 +1801,7 @@ const enUS = {
             'Please ensure your data is properly saved before starting the assessment!',
         },
       },
-      nicknamePlaceholder: 'Enter nickname',
+      nicknamePlaceholder: 'Enter character name',
       generateNickname: 'Generate',
       gender: 'Gender',
       selectGender: 'Select gender',
@@ -1810,18 +1809,18 @@ const enUS = {
       female: 'Female',
       height: 'Height (cm)',
       weight: 'Weight (kg)',
-      weightChangeReminder: 'Weight changed! Recalculate scores needed.',
+      weightChangeReminder: 'Weight changed! Recalculate stats needed.',
       age: 'Age',
-      saveData: 'Save Data',
+      saveData: 'Save Character',
       saving: 'Saving...',
-      saveResults: 'Save Assessment Result',
-      submitToLadder: 'Submit to Ladder',
-      updateLadderScore: 'Update Ladder Score',
-      startTests: 'Start Tests',
-      dataSaved: 'Data saved successfully!',
+      saveResults: 'Save Training Results',
+      submitToLadder: 'Submit to Rankings',
+      updateLadderScore: 'Update Ranking Score',
+      startTests: 'Skill Tree',
+      dataSaved: 'Character saved successfully!',
       saveFailed: 'Save failed, please try again',
-      yourPerformance: 'Your performance',
-      powerTitle: 'Power Score',
+      yourPerformance: 'Your Character Stats',
+      powerTitle: 'Power Level',
       radarLabels: {
         strength: 'Strength',
         explosivePower: 'Explosive Power',
@@ -1830,17 +1829,18 @@ const enUS = {
         ffmi: 'FFMI',
       },
       ladder: {
-        title: 'Leaderboard Settings',
-        anonymousTitle: 'Participate anonymously on the leaderboard',
+        title: 'Ranking Settings',
+        anonymousTitle: 'Participate anonymously on the rankings',
         anonymousDesc:
-          'When enabled, your nickname and avatar are hidden and shown anonymously on the rankings',
-        rankLabel: 'Leaderboard rank',
+          'When enabled, your character name and avatar are hidden and shown anonymously on the rankings',
+        rankLabel: 'Ranking position',
         submittedScore: 'Submitted score',
         currentScore: 'Current score',
         needsSubmit: '(submit to update)',
         ctaCompleted:
-          'Complete all five assessments to appear on the leaderboard',
-        ctaNotCompleted: 'Appear after completing {{count}}/5 assessments',
+          'Complete all five training challenges to appear on the rankings',
+        ctaNotCompleted:
+          'Appear after completing {{count}}/5 training challenges',
       },
       training: {
         title: 'Training background (optional)',
@@ -1904,8 +1904,8 @@ const enUS = {
 
     // 評測
     tests: {
-      strength: 'Strength Assessment',
-      strengthTitle: 'Strength Assessment',
+      strength: 'Strength',
+      strengthTitle: 'Strength',
       strengthSafetyNote:
         'When attempting heavy lifts, use a belt and wrist wraps. Stay safe!',
       strengthLabels: {
@@ -1981,8 +1981,8 @@ const enUS = {
           below40: "There's plenty of room to grow. Keep it up!",
         },
       },
-      explosivePower: 'Explosive Power Assessment',
-      powerTitle: 'Explosive Power Assessment',
+      explosivePower: 'Power',
+      powerTitle: 'Power',
       powerLabels: {
         movementsTitle: 'Explosive movements',
         verticalJump: 'Vertical jump (cm)',
@@ -2022,8 +2022,8 @@ const enUS = {
             'Includes estimated values: due to incomplete data for ages 12–80. Decline estimated per ACSM (10–15% per decade), sex difference 70–90%.',
         },
       },
-      cardio: 'Cardio Endurance Assessment',
-      cardioTitle: 'Cardio Endurance Assessment',
+      cardio: 'Endurance',
+      cardioTitle: 'Endurance',
       cardioInfo: {
         cooperTitle: 'Cooper 12-minute run test',
         sectionTitle: 'How to perform',
@@ -2070,8 +2070,8 @@ const enUS = {
         },
         default: 'Keep it up!',
       },
-      muscleMass: 'Muscle Mass',
-      muscleTitle: 'Muscle Mass Assessment',
+      muscleMass: 'Muscle',
+      muscleTitle: 'Muscle',
       cardioLabels: {
         distanceMeters: 'Running distance (m)',
         score: 'Cardio score',
@@ -2136,46 +2136,48 @@ const enUS = {
         missingInputs: 'Please enter weight and reps',
         missingUserData: 'Please make sure weight and age are provided',
         repsTooHigh: 'Reps must not exceed 12. Please re-enter',
-        needAtLeastOne: 'Please complete at least one exercise',
+        needAtLeastOne: 'Please complete at least one training exercise',
         updateFail:
-          'Failed to update user data or navigate. Please try again later',
+          'Failed to update character data or navigate. Please try again later',
       },
       cardioErrors: {
         missingPrerequisites:
-          'Please enter age and gender in the profile and input running distance here',
+          'Please complete your character profile (age and gender) and enter running distance',
         invalidInputs: 'Please enter a valid running distance and age',
-        standardsNotFound: 'Standards not found. Please check age and gender',
-        needCalculate: 'Please calculate your cardio score first',
-        updateUserFail: 'Failed to update user data. Please try again later',
+        standardsNotFound:
+          'Standards not found. Please check your character profile',
+        needCalculate: 'Please calculate your endurance score first',
+        updateUserFail: 'Failed to save character data. Please try again later',
       },
       powerErrors: {
         missingPrerequisites:
-          'Please ensure age and gender are provided in your profile',
-        noAnyInput: 'Please enter at least one movement data',
-        invalidAge: 'Please enter a valid age',
-        standardsNotFound: 'Standards not found. Please check age and gender',
-        needMeasure: 'Please complete at least one measurement',
-        needCalculate: 'Please calculate the power score first',
-        updateUserFail: 'Failed to update user data. Please try again later',
+          'Please complete your character profile first (age and gender)',
+        noAnyInput: 'Please complete at least one training session',
+        invalidAge: 'Please enter a valid character age',
+        standardsNotFound:
+          'Character data not found. Please check your profile',
+        needMeasure: 'Please complete at least one training challenge',
+        needCalculate: 'Please calculate your power level first',
+        updateUserFail: 'Failed to save character data. Please try again later',
       },
       ffmiErrors: {
         missingPrerequisites:
-          'Please fill gender, height, weight, and age on the profile page first',
+          'Please complete your character profile first (gender, height, weight, and age)',
         missingBodyFat: 'Please enter body fat percentage',
-        needCalculate: 'Please calculate the FFMI score first',
-        updateUserFail: 'Failed to update user data. Please try again later',
+        needCalculate: 'Please calculate your body composition score first',
+        updateUserFail: 'Failed to save character data. Please try again later',
       },
       muscleErrors: {
         missingPrerequisites:
-          'Please ensure you have entered weight, age, and gender in the profile, and enter SMM here!',
-        invalidInputs: 'Please enter valid weight, SMM, and age!',
+          'Please complete your character profile (weight, age, gender) and enter muscle mass data',
+        invalidInputs: 'Please enter valid weight, muscle mass, and age',
         standardsNotFound:
-          'Unable to find corresponding standards. Please check age and gender!',
-        needCalculate: 'Please calculate the muscle mass score first!',
-        updateUserFail: 'Failed to update user data. Please try again later!',
+          'Character data not found. Please check your profile',
+        needCalculate: 'Please calculate your muscle development score first',
+        updateUserFail: 'Failed to save character data. Please try again later',
       },
-      bodyFat: 'Body Fat & FFMI',
-      ffmiTitle: 'Body Fat & FFMI',
+      bodyFat: 'Body Fat& FFMI',
+      ffmiTitle: 'Body Fat& FFMI',
       ffmiLabels: {
         bodyFatPercent: 'Body fat (%)',
         resultTitle: 'Your assessment result',

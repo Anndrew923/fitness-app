@@ -2,8 +2,4 @@ include ':app'
 include ':capacitor-cordova-android-plugins'
 project(':capacitor-cordova-android-plugins').projectDir = new File('./capacitor-cordova-android-plugins/')
 
-// Google Sign-In Plugin
-include ':@capacitor-community_google-signin'
-project(':@capacitor-community_google-signin').projectDir = new File(rootProject.projectDir, '../node_modules/@capacitor-community/google-signin/android')
-
 apply from: 'capacitor.settings.gradle'
