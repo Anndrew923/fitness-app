@@ -1677,7 +1677,7 @@ const enUS = {
           'Take 5 comprehensive assessments, level up your physique, and compete on the global leaderboard',
         startButton: 'Login to Start Assessment',
         guestButton: 'Try as Guest',
-        slogan: 'Become a Five-Point All-Round Athlete',
+        slogan: 'Master All Five Dimensions',
       },
       features: {
         title: 'Core Features',
