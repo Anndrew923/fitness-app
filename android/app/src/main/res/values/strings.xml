@@ -4,4 +4,6 @@
     <string name="title_activity_main">最強肉體</string>
     <string name="package_name">com.ultimatephysique.fitness2025</string>
     <string name="custom_url_scheme">com.ultimatephysique.fitness2025</string>
+    <!-- Google Sign-In Web Client ID -->
+    <string name="server_client_id">5144099869-6kes2g.apps.googleusercontent.com</string>
 </resources>

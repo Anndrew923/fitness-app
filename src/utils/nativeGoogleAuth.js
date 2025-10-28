@@ -13,12 +13,16 @@ class NativeGoogleAuth {
 
       console.log('🔍 WebView 環境檢測:', isWebView);
 
+      // 使用 Web Client ID 進行初始化
+      const clientId =
+        import.meta.env.VITE_GOOGLE_CLIENT_ID ||
+        '5144099869-6kes2g.apps.googleusercontent.com';
+
       await GoogleAuth.initialize({
-        clientId: import.meta.env.VITE_GOOGLE_CLIENT_ID,
+        clientId: clientId,
         scopes: ['profile', 'email'],
         grantOfflineAccess: true,
-        // 添加 WebView 特定配置
-        webClientId: import.meta.env.VITE_GOOGLE_CLIENT_ID,
+        // 在 Android 上，外掛會自動使用 strings.xml 中的 server_client_id
       });
 
       console.log('✅ Google Auth 初始化成功');
