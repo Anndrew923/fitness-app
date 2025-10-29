@@ -19,20 +19,19 @@ class NativeGoogleAuth {
       // 添加調試資訊
       console.log('🔍 當前配置檢查:');
       console.log(
-        '- strings.xml server_client_id: 5144099869-6kes2gchrinle0io7dl8c12f83rgfso6.apps.googleusercontent.com'
+        '- strings.xml server_client_id: 5144099869-6kes2g.apps.googleusercontent.com'
       );
       console.log(
-        '- capacitor.config.json serverClientId: 5144099869-6kes2gchrinle0io7dl8c12f83rgfso6.apps.googleusercontent.com'
+        '- capacitor.config.json serverClientId: 5144099869-6kes2g.apps.googleusercontent.com'
       );
       console.log(
-        '- AndroidManifest.xml GOOGLE_SIGN_IN_CLIENT_ID: 5144099869-6kes2gchrinle0io7dl8c12f83rgfso6.apps.googleusercontent.com'
+        '- AndroidManifest.xml GOOGLE_SIGN_IN_CLIENT_ID: 5144099869-6kes2g.apps.googleusercontent.com'
       );
       console.log('- 準備初始化外掛...');
 
       // 關鍵修正：明確傳入 clientId
       await GoogleAuth.initialize({
-        clientId:
-          '5144099869-6kes2gchrinle0io7dl8c12f83rgfso6.apps.googleusercontent.com',
+        clientId: '5144099869-6kes2g.apps.googleusercontent.com',
         scopes: ['profile', 'email'],
         grantOfflineAccess: true,
       });
@@ -59,9 +58,7 @@ class NativeGoogleAuth {
       // 添加調試資訊
       console.log('🔍 登入前檢查:');
       console.log('- 外掛狀態: 已初始化');
-      console.log(
-        '- Client ID: 5144099869-6kes2gchrinle0io7dl8c12f83rgfso6.apps.googleusercontent.com'
-      );
+      console.log('- Client ID: 5144099869-6kes2g.apps.googleusercontent.com');
       console.log('- 環境: Android WebView');
 
       // 添加超時處理
@@ -135,7 +132,7 @@ class NativeGoogleAuth {
 
       console.log(`🔄 第 ${retryCount + 1} 次重試...`);
       console.log(
-        `🔍 重試前檢查: Client ID = 5144099869-6kes2gchrinle0io7dl8c12f83rgfso6.apps.googleusercontent.com`
+        `🔍 重試前檢查: Client ID = 5144099869-6kes2g.apps.googleusercontent.com`
       );
 
       const result = await GoogleAuth.signIn();

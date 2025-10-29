@@ -37,7 +37,7 @@ function SocialLogin({ onLogin, onError }) {
     initializeGoogleAuth();
   }, []);
 
-  // 處理 Google 登入 - Capacitor 版本
+  // 處理 Google 登入 - 增強版本
   const handleGoogleLogin = async () => {
     if (!isInitialized) {
       onError('Google 登入服務尚未初始化，請稍後重試');
@@ -50,26 +50,29 @@ function SocialLogin({ onLogin, onError }) {
     try {
       console.log('🔄 開始 Google 登入流程...');
 
-      // 使用 Capacitor Google Auth
+      // 使用原生 Google 登入
       const user = await NativeGoogleAuth.signIn();
 
       console.log('✅ Google 登入成功:', user.email);
       onLogin(user.email, null);
-
     } catch (error) {
       console.error('❌ Google 登入失敗:', error);
 
       // 提供友好的錯誤訊息
       let errorMessage = 'Google 登入失敗，請重試';
 
-      if (error.message.includes('Something went wrong')) {
+      if (error.message.includes('network')) {
+        errorMessage = '網路連線問題，請檢查網路後重試';
+      } else if (error.message.includes('cancelled')) {
+        errorMessage = '登入已取消';
+      } else if (error.message.includes('service')) {
+        errorMessage = 'Google 服務暫時不可用，請稍後重試';
+      } else if (error.message.includes('sign_in_failed')) {
+        errorMessage = 'Google 登入失敗，請檢查網路連線';
+      } else if (error.message.includes('Something went wrong')) {
         errorMessage = '登入服務暫時不可用，請稍後重試';
       } else if (error.message.includes('androidBridge')) {
         errorMessage = '登入通信錯誤，請重試';
-      } else if (error.message.includes('cancelled')) {
-        errorMessage = '登入已取消';
-      } else if (error.message.includes('network')) {
-        errorMessage = '網路連線問題，請檢查網路後重試';
       }
 
       onError(errorMessage);

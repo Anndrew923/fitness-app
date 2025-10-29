@@ -543,6 +543,8 @@
   transition: all 0.3s ease;
   font-size: 14px;
   min-width: 100px;
+  white-space: pre-line;
+  line-height: 1.4;
 }
 
 .pagination-btn:hover:not(:disabled) {

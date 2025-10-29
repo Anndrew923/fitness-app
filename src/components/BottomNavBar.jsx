@@ -189,23 +189,23 @@ function BottomNavBar() {
 
     if (screenSize === 'small') {
       return {
-        fontSize: isEng ? '8px' : '9px',
+        fontSize: isEng ? '7px' : '9px', // 英文稍小，容納較長文字
         padding: '2px 1px',
-        lineHeight: '1.1',
+        lineHeight: isEng ? '1.15' : '1.1', // 英文稍緊湊
         fontWeight: isEng ? '500' : 'normal',
       };
     } else if (screenSize === 'medium') {
       return {
-        fontSize: isEng ? '9px' : '10px',
+        fontSize: isEng ? '8px' : '10px', // 英文稍小
         padding: '3px 2px',
-        lineHeight: '1.2',
+        lineHeight: isEng ? '1.15' : '1.2',
         fontWeight: isEng ? '500' : 'normal',
       };
     } else {
       return {
-        fontSize: isEng ? '10px' : '11px',
+        fontSize: isEng ? '9px' : '11px', // 英文稍小
         padding: '4px 2px',
-        lineHeight: '1.2',
+        lineHeight: isEng ? '1.15' : '1.2',
         fontWeight: isEng ? '500' : 'normal',
       };
     }
@@ -294,11 +294,14 @@ function BottomNavBar() {
                   maxWidth: '100%',
                   overflow: 'hidden',
                   textOverflow: 'ellipsis',
-                  whiteSpace: 'nowrap',
+                  whiteSpace: isEnglish() ? 'normal' : 'nowrap', // 英文允許換行
                   fontSize: getTextStyles().fontSize,
                   lineHeight: getTextStyles().lineHeight,
                   fontWeight: getTextStyles().fontWeight,
                   letterSpacing: '0.02em', // 增加字母間距，提升可讀性
+                  wordBreak: isEnglish() ? 'break-word' : 'normal', // 英文允許斷字
+                  display: 'block',
+                  maxHeight: isEnglish() ? '24px' : 'auto', // 限制英文最多兩行
                 }}
               >
                 {t(

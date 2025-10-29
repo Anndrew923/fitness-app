@@ -54,8 +54,8 @@ const zhTW = {
         select: '選擇',
       },
       pagination: {
-        prev: '← 上一頁',
-        next: '下一頁 →',
+        prev: '上一頁\n←',
+        next: '下一頁\n→',
       },
       mobileToggle: {
         showDate: '顯示日期 📅',
@@ -116,9 +116,9 @@ const zhTW = {
 
     // 導覽列（底部）
     navbar: {
-      community: '公會',
+      community: '營地',
       home: '首頁',
-      assessment: '練功',
+      assessment: '技能樹',
       ladder: '排行榜',
       history: '成就',
       settings: '設定',
@@ -1302,7 +1302,7 @@ const zhTW = {
 
     // 社群（動態）
     community: {
-      brandTitle: '肉體樂園',
+      brandTitle: '訓練營地',
       loadingFriends: '正在載入好友數據...',
       tabs: {
         feed: '動態牆',
@@ -1551,8 +1551,8 @@ const enUS = {
         select: 'Select',
       },
       pagination: {
-        prev: '← Prev',
-        next: 'Next →',
+        prev: 'Prev\n←',
+        next: 'Next\n→',
       },
       mobileToggle: {
         showDate: 'Show date 📅',
@@ -1644,9 +1644,9 @@ const enUS = {
 
     // Navbar
     navbar: {
-      community: 'Guild',
+      community: 'Camp',
       home: 'Home',
-      assessment: 'Train',
+      assessment: 'Skill Tree',
       ladder: 'Rankings',
       history: 'Progress',
       settings: 'Settings',
@@ -2898,7 +2898,7 @@ const enUS = {
 
     // Community (feed)
     community: {
-      brandTitle: 'Muscle Park',
+      brandTitle: 'Training Camp',
       loadingFriends: 'Loading friends data...',
       tabs: {
         feed: 'Feed',

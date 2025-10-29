@@ -3,118 +3,75 @@ import { auth, db } from '../firebase';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
 
 class NativeGoogleAuth {
-  // 初始化 - 完整修正版本
+  // 初始化 - 完美版本
   static async initialize() {
     try {
       console.log('🔍 初始化 Capacitor Google Auth...');
-
+      
       // 檢測環境
-      const isWebView =
-        window.navigator.userAgent.includes('wv') ||
-        window.navigator.userAgent.includes('WebView');
+      const isWebView = window.navigator.userAgent.includes('wv') || 
+                       window.navigator.userAgent.includes('WebView');
       const isCapacitor = window.Capacitor !== undefined;
-
+      
       console.log('🔍 環境檢測:', { isWebView, isCapacitor });
-
-      // 添加調試資訊
-      console.log('🔍 當前配置檢查:');
-      console.log(
-        '- strings.xml server_client_id: 5144099869-6kes2gchrinle0io7dl8c12f83rgfso6.apps.googleusercontent.com'
-      );
-      console.log(
-        '- capacitor.config.json serverClientId: 5144099869-6kes2gchrinle0io7dl8c12f83rgfso6.apps.googleusercontent.com'
-      );
-      console.log(
-        '- AndroidManifest.xml GOOGLE_SIGN_IN_CLIENT_ID: 5144099869-6kes2gchrinle0io7dl8c12f83rgfso6.apps.googleusercontent.com'
-      );
-      console.log('- 準備初始化外掛...');
-
-      // 關鍵修正：明確傳入 clientId
+      
+      // 關鍵修正：不傳 clientId，讓外掛自動讀取 strings.xml
       await GoogleAuth.initialize({
-        clientId:
-          '5144099869-6kes2gchrinle0io7dl8c12f83rgfso6.apps.googleusercontent.com',
         scopes: ['profile', 'email'],
         grantOfflineAccess: true,
+        // 移除 clientId 參數，讓外掛從 strings.xml 讀取 server_client_id
       });
-
+      
       console.log('✅ Google Auth 初始化成功');
       return true;
     } catch (error) {
       console.error('❌ Google Auth 初始化失敗:', error);
-      console.error('🔍 初始化錯誤詳情:', {
-        message: error.message,
-        code: error.code,
-        stack: error.stack,
-      });
       // 不拋出錯誤，允許應用繼續運行
       return false;
     }
   }
 
-  // 執行 Google 登入 - 完整修正版本
+  // 執行 Google 登入 - 完美版本
   static async signIn() {
     try {
       console.log('🔄 開始 Google 登入...');
-
-      // 添加調試資訊
-      console.log('🔍 登入前檢查:');
-      console.log('- 外掛狀態: 已初始化');
-      console.log(
-        '- Client ID: 5144099869-6kes2gchrinle0io7dl8c12f83rgfso6.apps.googleusercontent.com'
-      );
-      console.log('- 環境: Android WebView');
-
+      
       // 添加超時處理
       const timeoutPromise = new Promise((_, reject) => {
         setTimeout(() => reject(new Error('登入超時')), 30000);
       });
-
+      
       const signInPromise = GoogleAuth.signIn();
       const result = await Promise.race([signInPromise, timeoutPromise]);
-
+      
       console.log('✅ Google 登入成功:', result);
-
+      
       // 驗證結果完整性
       if (!result || !result.id || !result.email) {
         throw new Error('登入結果不完整');
       }
-
+      
       const firebaseUser = await this.convertToFirebaseUser(result);
       return firebaseUser;
+      
     } catch (error) {
       console.error('❌ Google 登入失敗:', error);
-
+      
       // 詳細錯誤分析
-      console.error('🔍 錯誤詳情:', {
-        message: error.message,
-        code: error.code,
-        stack: error.stack,
-      });
-
       if (error.message.includes('Something went wrong')) {
-        console.error('🔍 可能原因分析:');
-        console.error('1. Client ID 配置不正確');
-        console.error('2. Google Console 設定問題');
-        console.error('3. 外掛版本相容性問題');
-        console.error('4. Android WebView 權限問題');
-        console.error('🔍 建議檢查:');
-        console.error(
-          '- Firebase Console > Authentication > Sign-in method > Google'
-        );
-        console.error('- Google Cloud Console > OAuth 2.0 客戶端 ID');
-        console.error('- Android 應用程式簽名 (SHA-1)');
+        console.error('🔍 可能原因: Client ID 配置不正確');
+        console.error('🔍 檢查 strings.xml 中的 server_client_id');
+        console.error('🔍 檢查 capacitor.config.json 中的 serverClientId');
       }
-
+      
       // 重試機制
-      if (
-        error.message.includes('Something went wrong') ||
-        error.message.includes('androidBridge') ||
-        error.message.includes('iu:')
-      ) {
+      if (error.message.includes('Something went wrong') || 
+          error.message.includes('androidBridge') ||
+          error.message.includes('iu:')) {
         console.log('🔄 檢測到通信錯誤，嘗試重試...');
         return await this.retrySignIn();
       }
-
+      
       throw error;
     }
   }
@@ -122,42 +79,34 @@ class NativeGoogleAuth {
   // 重試機制 - 增強版本
   static async retrySignIn(retryCount = 0) {
     const maxRetries = 3;
-
+    
     if (retryCount >= maxRetries) {
       throw new Error('重試次數已達上限');
     }
-
+    
     try {
       // 等待後重試
-      await new Promise(resolve =>
+      await new Promise(resolve => 
         setTimeout(resolve, 1000 * (retryCount + 1))
       );
-
+      
       console.log(`🔄 第 ${retryCount + 1} 次重試...`);
-      console.log(
-        `🔍 重試前檢查: Client ID = 5144099869-6kes2gchrinle0io7dl8c12f83rgfso6.apps.googleusercontent.com`
-      );
-
       const result = await GoogleAuth.signIn();
-
+      
       if (!result || !result.id || !result.email) {
         throw new Error('登入結果不完整');
       }
-
+      
       const firebaseUser = await this.convertToFirebaseUser(result);
       return firebaseUser;
+      
     } catch (error) {
       console.error(`❌ 第 ${retryCount + 1} 次重試失敗:`, error);
-      console.error(`🔍 重試錯誤詳情:`, {
-        message: error.message,
-        code: error.code,
-        retryCount: retryCount + 1,
-      });
-
+      
       if (retryCount < maxRetries - 1) {
         return await this.retrySignIn(retryCount + 1);
       }
-
+      
       throw error;
     }
   }
@@ -166,30 +115,27 @@ class NativeGoogleAuth {
   static async convertToFirebaseUser(googleResult) {
     try {
       console.log('🔄 轉換 Google 結果為 Firebase 用戶...');
-      console.log('🔍 Google 結果:', googleResult);
-
+      
       const userData = {
         uid: googleResult.id,
         email: googleResult.email,
         displayName: googleResult.name,
         photoURL: googleResult.imageUrl,
         emailVerified: true,
-        providerData: [
-          {
-            providerId: 'google.com',
-            uid: googleResult.id,
-            email: googleResult.email,
-            displayName: googleResult.name,
-            photoURL: googleResult.imageUrl,
-          },
-        ],
+        providerData: [{
+          providerId: 'google.com',
+          uid: googleResult.id,
+          email: googleResult.email,
+          displayName: googleResult.name,
+          photoURL: googleResult.imageUrl,
+        }],
       };
-
+      
       console.log('✅ Firebase 用戶資料:', userData);
-
+      
       // 保存到 Firestore
       await this.saveUserToFirestore(userData);
-
+      
       return userData;
     } catch (error) {
       console.error('❌ 轉換 Firebase 用戶失敗:', error);
@@ -201,10 +147,10 @@ class NativeGoogleAuth {
   static async saveUserToFirestore(userData) {
     try {
       console.log('🔄 保存用戶資料到 Firestore...');
-
+      
       const userRef = doc(db, 'users', userData.uid);
       const userSnap = await getDoc(userRef);
-
+      
       if (!userSnap.exists()) {
         // 新用戶
         const initialUserData = {
@@ -236,19 +182,15 @@ class NativeGoogleAuth {
           isGuest: false,
           lastActive: new Date().toISOString(),
         };
-
+        
         await setDoc(userRef, initialUserData);
         console.log('✅ 新用戶資料已創建');
       } else {
         // 現有用戶
-        await setDoc(
-          userRef,
-          {
-            lastActive: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-          },
-          { merge: true }
-        );
+        await setDoc(userRef, {
+          lastActive: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        }, { merge: true });
         console.log('✅ 現有用戶資料已更新');
       }
     } catch (error) {
