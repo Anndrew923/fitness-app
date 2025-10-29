@@ -278,233 +278,7 @@
   font-size: 1.1rem;
 }
 
-/* Hero Visual */
-.hero-visual {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  gap: 1.5rem;
-  padding: 1rem 0;
-}
-
-.radar-preview {
-  width: 300px;
-  height: 300px;
-  position: relative;
-  margin: 0 auto;
-}
-
-.radar-chart-mockup {
-  width: 100%;
-  height: 100%;
-  position: relative;
-  background: radial-gradient(
-    circle,
-    rgba(255, 107, 53, 0.1) 0%,
-    rgba(247, 147, 30, 0.05) 50%,
-    transparent 70%
-  );
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 2px solid rgba(255, 107, 53, 0.3);
-  animation: float 3s ease-in-out infinite;
-  box-shadow: 0 0 30px rgba(255, 107, 53, 0.2),
-    inset 0 0 20px rgba(255, 107, 53, 0.1);
-}
-
-/* 雷達圖網格 - 模仿 UserInfo 頁面的同心圓 */
-.radar-grid {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  top: 0;
-  left: 0;
-}
-
-.grid-circle {
-  position: absolute;
-  border: 2px solid rgba(255, 107, 53, 0.4);
-  border-radius: 50%;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  box-shadow: 0 0 10px rgba(255, 107, 53, 0.2);
-}
-
-.grid-circle.circle-1 {
-  width: 60px;
-  height: 60px;
-}
-.grid-circle.circle-2 {
-  width: 100px;
-  height: 100px;
-}
-.grid-circle.circle-3 {
-  width: 140px;
-  height: 140px;
-}
-.grid-circle.circle-4 {
-  width: 180px;
-  height: 180px;
-}
-.grid-circle.circle-5 {
-  width: 220px;
-  height: 220px;
-}
-
-/* 軸線 - 5條放射線 */
-.radar-axis {
-  position: absolute;
-  width: 2px;
-  height: 110px;
-  background: linear-gradient(
-    to top,
-    rgba(255, 107, 53, 0.8),
-    rgba(255, 215, 0, 0.6)
-  );
-  transform-origin: bottom center;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -100%);
-  box-shadow: 0 0 8px rgba(255, 107, 53, 0.3);
-}
-
-.radar-axis.axis-1 {
-  transform: translate(-50%, -100%) rotate(0deg);
-}
-.radar-axis.axis-2 {
-  transform: translate(-50%, -100%) rotate(72deg);
-}
-.radar-axis.axis-3 {
-  transform: translate(-50%, -100%) rotate(144deg);
-}
-.radar-axis.axis-4 {
-  transform: translate(-50%, -100%) rotate(216deg);
-}
-.radar-axis.axis-5 {
-  transform: translate(-50%, -100%) rotate(288deg);
-}
-
-/* 數據區域 - 五邊形形狀 */
-.radar-data-area {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  top: 0;
-  left: 0;
-}
-
-.data-point {
-  position: absolute;
-  width: 8px;
-  height: 8px;
-  background: linear-gradient(45deg, #ff6b35, #ffd700);
-  border-radius: 50%;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  box-shadow: 0 0 15px rgba(255, 107, 53, 0.8);
-  animation: pulse 2s ease-in-out infinite;
-  border: 2px solid rgba(255, 255, 255, 0.8);
-}
-
-/* 數據點位置 - 形成五邊形 */
-.data-point.point-1 {
-  transform: translate(-50%, -50%) translateY(-80px);
-  animation-delay: 0s;
-}
-.data-point.point-2 {
-  transform: translate(-50%, -50%) translateY(-25px) translateX(76px);
-  animation-delay: 0.2s;
-}
-.data-point.point-3 {
-  transform: translate(-50%, -50%) translateY(65px) translateX(47px);
-  animation-delay: 0.4s;
-}
-.data-point.point-4 {
-  transform: translate(-50%, -50%) translateY(65px) translateX(-47px);
-  animation-delay: 0.6s;
-}
-.data-point.point-5 {
-  transform: translate(-50%, -50%) translateY(-25px) translateX(-76px);
-  animation-delay: 0.8s;
-}
-
-/* 中心點 */
-.radar-center {
-  width: 12px;
-  height: 12px;
-  background: radial-gradient(circle, #ffd700 0%, #ff6b35 100%);
-  border-radius: 50%;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 3;
-  box-shadow: 0 0 20px rgba(255, 107, 53, 0.8), 0 0 40px rgba(255, 215, 0, 0.6);
-  border: 3px solid rgba(255, 255, 255, 0.9);
-  animation: centerPulse 2s ease-in-out infinite;
-}
-
-@keyframes centerPulse {
-  0%,
-  100% {
-    transform: translate(-50%, -50%) scale(1);
-    box-shadow: 0 0 20px rgba(255, 107, 53, 0.8),
-      0 0 40px rgba(255, 215, 0, 0.6);
-  }
-  50% {
-    transform: translate(-50%, -50%) scale(1.2);
-    box-shadow: 0 0 30px rgba(255, 107, 53, 1), 0 0 60px rgba(255, 215, 0, 0.8);
-  }
-}
-
-/* 標語 */
-.radar-slogan {
-  text-align: center;
-  font-size: 1.8rem; /* 保持與主標題一致 */
-  font-weight: 700;
-  background: linear-gradient(45deg, #ff6b35, #f7931e, #ffd700);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  margin-top: 1.5rem; /* 保持原來的間距 */
-  margin-bottom: 1rem; /* 保持原來的間距 */
-  text-shadow: 0 0 10px rgba(255, 107, 53, 0.3);
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  line-height: 1.1; /* 只稍微縮小行高，讓英文多行更緊湊 */
-  padding: 0 1rem;
-  word-wrap: break-word;
-  overflow-wrap: break-word;
-  white-space: normal; /* 確保文字可以正常換行 */
-  word-break: break-word; /* 確保長單詞可以斷開 */
-}
-
-@keyframes float {
-  0%,
-  100% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-10px);
-  }
-}
-
-@keyframes glow {
-  0%,
-  100% {
-    box-shadow: 0 0 30px rgba(255, 107, 53, 0.2),
-      inset 0 0 20px rgba(255, 107, 53, 0.1);
-  }
-  50% {
-    box-shadow: 0 0 50px rgba(255, 107, 53, 0.4),
-      inset 0 0 30px rgba(255, 107, 53, 0.2);
-  }
-}
+/* 已移除未使用的雷達圖相關樣式，保持版面乾淨 */
 
 @keyframes shimmer {
   0% {
@@ -513,10 +287,6 @@
   100% {
     background-position: 200% center;
   }
-}
-
-.radar-chart-mockup {
-  animation: float 3s ease-in-out infinite, glow 4s ease-in-out infinite;
 }
 
 .cta-button.primary::after {
@@ -536,18 +306,6 @@
   animation: shimmer 3s ease-in-out infinite;
   border-radius: 15px;
   pointer-events: none;
-}
-
-@keyframes pulse {
-  0%,
-  100% {
-    transform: translate(-50%, -50%) scale(1);
-    opacity: 0.8;
-  }
-  50% {
-    transform: translate(-50%, -50%) scale(1.2);
-    opacity: 1;
-  }
 }
 
 /* Container */
@@ -889,22 +647,6 @@
   .landing-page .cta-button.secondary {
     font-size: 1.1rem;
     padding: 1.1rem 2.2rem;
-  }
-
-  .radar-preview {
-    width: 250px;
-    height: 250px;
-  }
-
-  .hero-visual {
-    padding: 1.5rem 0;
-  }
-
-  .radar-slogan {
-    font-size: 1.5rem; /* 保持與主標題一致 */
-    line-height: 1.1; /* 只稍微縮小行高 */
-    margin-bottom: 0.5rem;
-    padding: 0 0.5rem;
   }
 
   .users-grid {

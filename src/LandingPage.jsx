@@ -66,42 +66,7 @@ function LandingPage() {
             </button>
           </div>
         </div>
-        <div className="hero-visual">
-          <div className="radar-preview">
-            <div className="radar-chart-mockup">
-              {/* 雷達圖網格 */}
-              <div className="radar-grid">
-                <div className="grid-circle circle-1"></div>
-                <div className="grid-circle circle-2"></div>
-                <div className="grid-circle circle-3"></div>
-                <div className="grid-circle circle-4"></div>
-                <div className="grid-circle circle-5"></div>
-              </div>
-
-              {/* 軸線 */}
-              <div className="radar-axis axis-1"></div>
-              <div className="radar-axis axis-2"></div>
-              <div className="radar-axis axis-3"></div>
-              <div className="radar-axis axis-4"></div>
-              <div className="radar-axis axis-5"></div>
-
-              {/* 數據區域 */}
-              <div className="radar-data-area">
-                <div className="data-point point-1"></div>
-                <div className="data-point point-2"></div>
-                <div className="data-point point-3"></div>
-                <div className="data-point point-4"></div>
-                <div className="data-point point-5"></div>
-              </div>
-
-              {/* 中心點 */}
-              <div className="radar-center"></div>
-            </div>
-            <div className="radar-slogan">
-              {t('landing.hero.slogan', '打造五邊形全能戰士')}
-            </div>
-          </div>
-        </div>
+        {/* 已移除首頁示意圖與標語，保持版面乾淨 */}
       </section>
 
       {/* Footer - 整合詳細資訊 */}
