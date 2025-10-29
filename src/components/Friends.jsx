@@ -1054,16 +1054,17 @@ const Friends = () => {
                 )}
               </div>
               <div className="friends-list__friend-info">
+                {/* 第一行：名稱 */}
                 <div className="friends-list__friend-name">
                   {friend.nickname}
                 </div>
-                <div className="friends-list__friend-score">
-                  {friend.ladderScore}
-                  {t('community.ui.pointsUnit')}
-                </div>
-                <div className="friends-list__friend-email">{friend.email}</div>
-              </div>
-              <div className="friends-list__friend-actions">
+                {/* 第二行：分數 + 按鈕 */}
+                <div className="friends-list__friend-info-row">
+                  <div className="friends-list__friend-score">
+                    {friend.ladderScore}
+                    {t('community.ui.pointsUnit')}
+                  </div>
+                  <div className="friends-list__friend-actions">
                 <button
                   className="friends-list__btn-challenge"
                   onClick={() => {
@@ -1080,6 +1081,10 @@ const Friends = () => {
                 >
                   ×
                 </button>
+                  </div>
+                </div>
+                {/* 第三行：信箱 */}
+                <div className="friends-list__friend-email">{friend.email}</div>
               </div>
             </div>
           ))
@@ -1213,14 +1218,16 @@ const Friends = () => {
               )}
             </div>
             <div className="friends-list__friend-info">
+              {/* 第一行：名稱 */}
               <div className="friends-list__friend-name">
                 {request.senderName}
               </div>
-              <div className="friends-list__friend-email">
-                {t('friends.requestAction.wantsToAdd')}
-              </div>
-            </div>
-            <div className="friends-list__friend-actions">
+              {/* 第二行：訊息文字 + 按鈕 */}
+              <div className="friends-list__friend-info-row">
+                <div className="friends-list__friend-email">
+                  {t('friends.requestAction.wantsToAdd')}
+                </div>
+                <div className="friends-list__friend-actions">
               <button
                 className="friends-list__btn-accept"
                 onClick={() =>
@@ -1237,6 +1244,9 @@ const Friends = () => {
               >
                 {t('friends.requestAction.reject')}
               </button>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         ))
@@ -1332,14 +1342,15 @@ const Friends = () => {
                 )}
               </div>
               <div className="friends-list__friend-info">
+                {/* 第一行：名稱 */}
                 <div className="friends-list__friend-name">{user.nickname}</div>
-                <div className="friends-list__friend-score">
-                  {user.ladderScore}
-                  {t('community.ui.pointsUnit')}
-                </div>
-                <div className="friends-list__friend-email">{user.email}</div>
-              </div>
-              <div className="friends-list__friend-actions">
+                {/* 第二行：分數 + 按鈕 */}
+                <div className="friends-list__friend-info-row">
+                  <div className="friends-list__friend-score">
+                    {user.ladderScore}
+                    {t('community.ui.pointsUnit')}
+                  </div>
+                  <div className="friends-list__friend-actions">
                 {user.isFriend ? (
                   <span className="status-badge">
                     {t('community.friend.badgeFriend')}
@@ -1358,6 +1369,10 @@ const Friends = () => {
                      {(userData?.friends?.length || friendsList.length) >= 100 ? '已達上限' : t('community.friend.add')}
                   </button>
                 )}
+                  </div>
+                </div>
+                {/* 第三行：信箱 */}
+                <div className="friends-list__friend-email">{user.email}</div>
               </div>
             </div>
           ))

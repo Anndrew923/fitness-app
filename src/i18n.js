@@ -289,7 +289,7 @@ const zhTW = {
       dataSaved: '角色已儲存成功！',
       saveFailed: '儲存失敗，請稍後再試',
       yourPerformance: '你的角色屬性',
-      powerTitle: '爆發力等級',
+      powerTitle: '角色戰鬥力',
       radarLabels: {
         strength: '力量',
         explosivePower: '爆發力',
@@ -1820,7 +1820,7 @@ const enUS = {
       dataSaved: 'Character saved successfully!',
       saveFailed: 'Save failed, please try again',
       yourPerformance: 'Your Character Stats',
-      powerTitle: 'Power Level',
+      powerTitle: 'Battle Power',
       radarLabels: {
         strength: 'Strength',
         explosivePower: 'Explosive Power',

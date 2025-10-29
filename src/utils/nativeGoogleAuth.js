@@ -1,5 +1,6 @@
 import { GoogleAuth } from '@belongnet/capacitor-google-auth';
 import { auth, db } from '../firebase';
+import { signInWithCredential, GoogleAuthProvider } from 'firebase/auth';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
 
 class NativeGoogleAuth {
@@ -73,6 +74,7 @@ class NativeGoogleAuth {
       const result = await Promise.race([signInPromise, timeoutPromise]);
 
       console.log('✅ Google 登入成功:', result);
+      console.log('🔍 Google 結果完整結構:', JSON.stringify(result, null, 2));
 
       // 驗證結果完整性
       if (!result || !result.id || !result.email) {
@@ -168,50 +170,87 @@ class NativeGoogleAuth {
       console.log('🔄 轉換 Google 結果為 Firebase 用戶...');
       console.log('🔍 Google 結果:', googleResult);
 
-      const userData = {
-        uid: googleResult.id,
-        email: googleResult.email,
-        displayName: googleResult.name,
-        photoURL: googleResult.imageUrl,
-        emailVerified: true,
-        providerData: [
-          {
-            providerId: 'google.com',
-            uid: googleResult.id,
-            email: googleResult.email,
-            displayName: googleResult.name,
-            photoURL: googleResult.imageUrl,
-          },
-        ],
+      // 嘗試從不同可能的欄位獲取 idToken
+      // Capacitor Google Auth 可能返回 idToken、authentication.idToken 或 serverAuthCode
+      const idToken =
+        googleResult.idToken ||
+        googleResult.authentication?.idToken ||
+        googleResult.authenticationToken ||
+        (googleResult.authentication && googleResult.authentication.idToken);
+
+      if (!idToken) {
+        console.error('❌ Google 結果中未找到 idToken');
+        console.error('🔍 可用欄位:', Object.keys(googleResult));
+        // 如果沒有 idToken，嘗試檢查是否有 serverAuthCode（需要後端處理）
+        if (googleResult.serverAuthCode) {
+          console.warn(
+            '⚠️ 找到 serverAuthCode，但無法直接使用，需要後端交換 idToken'
+          );
+          throw new Error(
+            'Google 登入結果缺少 idToken。如果只有 serverAuthCode，需要後端處理。'
+          );
+        }
+        throw new Error('Google 登入結果缺少 idToken，無法進行 Firebase 認證');
+      }
+
+      console.log('✅ 找到 idToken，開始 Firebase 認證...');
+
+      // 創建 Firebase 認證憑證
+      const credential = GoogleAuthProvider.credential(idToken);
+
+      // 通過 Firebase Authentication 認證用戶
+      const firebaseAuthResult = await signInWithCredential(auth, credential);
+      const firebaseUser = firebaseAuthResult.user;
+
+      console.log('✅ Firebase 認證成功');
+      console.log('✅ Firebase 用戶 UID:', firebaseUser.uid);
+      console.log('✅ Firebase 用戶 Email:', firebaseUser.email);
+      console.log('✅ Firebase 用戶 Display Name:', firebaseUser.displayName);
+
+      // 現在用戶已經通過 Firebase Auth，可以保存到 Firestore
+      await this.saveUserToFirestore(firebaseUser);
+
+      // 返回包含 email 屬性的對象，以兼容現有的 SocialLogin 調用
+      return {
+        uid: firebaseUser.uid,
+        email: firebaseUser.email,
+        displayName: firebaseUser.displayName,
+        photoURL: firebaseUser.photoURL,
+        ...firebaseUser, // 保留所有 Firebase User 屬性
       };
-
-      console.log('✅ Firebase 用戶資料:', userData);
-
-      // 保存到 Firestore
-      await this.saveUserToFirestore(userData);
-
-      return userData;
     } catch (error) {
       console.error('❌ 轉換 Firebase 用戶失敗:', error);
+      console.error('🔍 錯誤詳情:', {
+        message: error.message,
+        code: error.code,
+        stack: error.stack,
+      });
       throw error;
     }
   }
 
-  // 保存用戶資料到 Firestore
-  static async saveUserToFirestore(userData) {
+  // 保存用戶資料到 Firestore - 使用 Firebase User 對象
+  static async saveUserToFirestore(firebaseUser) {
     try {
       console.log('🔄 保存用戶資料到 Firestore...');
+      console.log('🔍 使用 Firebase UID:', firebaseUser.uid);
+      console.log('🔍 當前認證狀態:', auth.currentUser ? '已認證' : '未認證');
+      console.log('🔍 當前認證 UID:', auth.currentUser?.uid);
 
-      const userRef = doc(db, 'users', userData.uid);
+      // 使用 Firebase Auth 的 uid（這是 Firebase 認證後的 uid）
+      const userRef = doc(db, 'users', firebaseUser.uid);
       const userSnap = await getDoc(userRef);
 
       if (!userSnap.exists()) {
         // 新用戶
         const initialUserData = {
-          email: userData.email,
-          userId: userData.uid,
-          nickname: userData.displayName || userData.email.split('@')[0],
-          avatarUrl: userData.photoURL || '',
+          email: firebaseUser.email,
+          userId: firebaseUser.uid, // 使用 Firebase Auth 的 uid
+          nickname:
+            firebaseUser.displayName ||
+            firebaseUser.email?.split('@')[0] ||
+            'User',
+          avatarUrl: firebaseUser.photoURL || '',
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
           gender: '',
@@ -238,14 +277,18 @@ class NativeGoogleAuth {
         };
 
         await setDoc(userRef, initialUserData);
-        console.log('✅ 新用戶資料已創建');
+        console.log('✅ 新用戶資料已創建到 Firestore');
       } else {
-        // 現有用戶
+        // 現有用戶 - 更新最後活躍時間和可能更新過的用戶資訊
         await setDoc(
           userRef,
           {
             lastActive: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
+            // 更新用戶資訊（如果 Google 資訊更新了）
+            email: firebaseUser.email,
+            nickname: firebaseUser.displayName || userSnap.data().nickname,
+            avatarUrl: firebaseUser.photoURL || userSnap.data().avatarUrl,
           },
           { merge: true }
         );
@@ -253,6 +296,10 @@ class NativeGoogleAuth {
       }
     } catch (error) {
       console.error('❌ 保存用戶資料失敗:', error);
+      console.error('🔍 錯誤詳情:', {
+        message: error.message,
+        code: error.code,
+      });
       throw error;
     }
   }

@@ -404,7 +404,8 @@
   display: flex;
   flex-direction: column;
   flex: 1;
-  min-width: 0; /* 確保可以縮小 */
+  min-width: 0;
+  align-items: flex-start; /* 確保靠左對齊 */
 }
 
 .user-name {
@@ -414,6 +415,10 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  width: 100%; /* 確保與時間戳記同寬 */
+  margin-bottom: 4px; /* 增加間距 */
+  text-align: left; /* 明確靠左對齊 */
+  align-self: flex-start; /* 確保在 flex 容器中靠左 */
 }
 
 .to-label {
@@ -426,7 +431,10 @@
 .post-time {
   font-size: 12px;
   color: var(--text-light);
-  margin-top: 2px;
+  text-align: left; /* 明確靠左對齊 */
+  width: 100%; /* 確保與名字同寬 */
+  align-self: flex-start; /* 確保靠左 */
+  margin-top: 0; /* 移除預設 margin-top */
 }
 
 .post-content {
@@ -562,61 +570,74 @@
 .comment-text-info {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 4px; /* 調整間距，更符合 Facebook 風格 */
   flex: 1;
   min-width: 0;
+  padding-right: 4px; /* 為刪除按鈕預留空間 */
+  box-sizing: border-box;
+  align-items: flex-start; /* 確保所有子元素靠左對齊 */
 }
 
 .comment-name {
   font-weight: 600;
   color: var(--text-primary);
   font-size: 14px;
+  line-height: 1.2;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  max-width: 100%; /* 確保不超過容器 */
+  width: 100%; /* 確保與時間戳記同寬 */
+  text-align: left; /* 明確靠左對齊 */
+  align-self: flex-start; /* 確保在 flex 容器中靠左 */
 }
 
 .comment-time {
   font-size: 12px;
   color: var(--text-light);
   white-space: nowrap;
+  line-height: 1.2;
+  text-align: left; /* 明確靠左對齊 */
+  width: 100%; /* 確保與名字同寬，靠左對齊 */
+  align-self: flex-start; /* 確保靠左 */
 }
 
-/* 刪除按鈕 - 全新簡潔樣式 */
+/* 刪除按鈕 - Facebook 風格：懸停顯示 */
 .comment-delete-btn {
   position: absolute !important;
   top: 0 !important;
   right: 0 !important;
-  width: 16px !important;
-  height: 16px !important;
+  width: 32px !important; /* 增大點擊區域 */
+  height: 32px !important;
   background: transparent !important;
   border: none !important;
-  color: #ff6b6b !important;
+  color: var(--text-light) !important; /* 使用變數，更符合主題 */
   cursor: pointer !important;
-  font-size: 12px !important;
+  font-size: 16px !important; /* 稍微增大圖標 */
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  opacity: 0.6 !important;
-  transition: opacity 0.2s ease !important;
+  opacity: 0 !important; /* 預設隱藏 */
+  visibility: hidden !important; /* 預設不可見 */
+  transition: opacity 0.2s ease, visibility 0.2s ease !important;
   z-index: 10 !important;
   padding: 0 !important;
   margin: 0 !important;
   box-shadow: none !important;
-  border-radius: 0 !important;
-  transform: none !important;
-  min-width: 16px !important;
-  max-width: 16px !important;
+  border-radius: 50% !important; /* 圓形背景 */
+}
+
+/* 關鍵：懸停時顯示刪除按鈕 */
+.comment-header:hover .comment-delete-btn,
+.comment-item:hover .comment-delete-btn {
+  opacity: 1 !important;
+  visibility: visible !important;
+  background: rgba(0, 0, 0, 0.05) !important; /* 懸停時顯示背景 */
 }
 
 .comment-delete-btn:hover {
-  opacity: 1 !important;
-  background: transparent !important;
-  transform: none !important;
-  width: 16px !important;
-  height: 16px !important;
-  min-width: 16px !important;
-  max-width: 16px !important;
+  background: rgba(0, 0, 0, 0.1) !important;
+  color: #ff6b6b !important;
 }
 
 /* 移除舊的刪除按鈕樣式 */

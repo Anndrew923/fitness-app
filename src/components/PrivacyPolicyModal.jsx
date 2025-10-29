@@ -111,7 +111,7 @@ function PrivacyPolicyModal({ isOpen, onClose, onAccept }) {
               <div className="privacy-contact">
                 <h4>聯絡我們</h4>
                 <p>電子郵件：topaj01@gmail.com</p>
-                <p>我們將在48小時內回應您的詢問</p>
+                <p>我們將盡快回應您的詢問</p>
               </div>
             </div>
           ) : (
@@ -194,7 +194,7 @@ function PrivacyPolicyModal({ isOpen, onClose, onAccept }) {
               <div className="privacy-contact">
                 <h4>Contact Us</h4>
                 <p>Email: topaj01@gmail.com</p>
-                <p>We will respond to your inquiry within 48 hours</p>
+                <p>We will respond to your inquiry as soon as possible</p>
               </div>
             </div>
           )}

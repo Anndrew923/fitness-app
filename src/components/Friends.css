@@ -298,14 +298,35 @@
   border-radius: 50% !important;
 }
 
+/* 中間資訊區 - 垂直佈局 */
 .friends-list__friend-info {
   flex: 1 !important;
   display: flex !important;
-  align-items: center !important;
-  gap: 16px !important;
+  flex-direction: column !important; /* ⚠️ 垂直排列 */
+  gap: 6px !important;
   min-width: 0 !important;
+  overflow: hidden !important;
 }
 
+/* 第二行容器：分數/內容 + 按鈕 */
+.friends-list__friend-info-row {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important; /* 分數靠左，按鈕靠右 */
+  gap: 8px !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  overflow: hidden !important; /* 防止內容溢出 */
+}
+
+/* 在第二行中的信箱（邀請列表使用） */
+.friends-list__friend-info-row .friends-list__friend-email {
+  flex: 1 !important; /* 佔用剩餘空間 */
+  min-width: 0 !important; /* 允許縮小 */
+  width: auto !important; /* 覆蓋單獨使用時的 width: 100% */
+}
+
+/* 第一行：名稱 - 完整寬度 */
 .friends-list__friend-name {
   font-weight: 600 !important;
   font-size: 16px !important;
@@ -313,45 +334,45 @@
   white-space: nowrap !important;
   overflow: hidden !important;
   text-overflow: ellipsis !important;
-  max-width: 100px !important;
   margin: 0 !important;
   padding: 0 !important;
-  display: inline !important;
   line-height: 1.2 !important;
+  width: 100% !important; /* ⚠️ 完整寬度，不會被其他元素擠壓 */
+  min-width: 0 !important;
 }
 
+/* 分數 - 第二行靠左 */
 .friends-list__friend-score {
   font-size: 14px !important;
   color: #4b5d67 !important;
   font-weight: 600 !important;
   white-space: nowrap !important;
-  max-width: 60px !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
   margin: 0 !important;
   padding: 0 !important;
-  display: inline !important;
   line-height: 1.2 !important;
+  flex-shrink: 0 !important; /* 分數不縮小 */
 }
 
+/* 第三行：信箱 - 完整寬度 */
 .friends-list__friend-email {
   font-size: 12px !important;
   color: #888 !important;
   white-space: nowrap !important;
   overflow: hidden !important;
   text-overflow: ellipsis !important;
-  max-width: 160px !important;
   margin: 0 !important;
   padding: 0 !important;
-  display: inline !important;
   line-height: 1.2 !important;
+  width: 100% !important; /* ⚠️ 完整寬度 */
+  min-width: 0 !important;
 }
 
+/* 按鈕區域 - 第二行靠右 */
 .friends-list__friend-actions {
   display: flex !important;
-  gap: 8px !important;
-  margin-left: 12px !important;
-  flex-shrink: 0 !important;
+  gap: 6px !important;
+  flex-shrink: 0 !important; /* ⚠️ 按鈕不縮小 */
+  margin-left: auto !important; /* ⚠️ 自動推到右側 */
 }
 
 /* 按鈕樣式 */
@@ -895,13 +916,42 @@
   .friends-list__friend-card,
   .friends-list__request-card,
   .friends-list__user-card {
-    padding: 12px;
+    padding: 10px 12px !important; /* 減少垂直 padding */
+    gap: 10px !important;
   }
 
   .friends-list__friend-avatar {
-    width: 40px;
-    height: 40px;
-    margin-right: 12px;
+    width: 36px !important; /* 稍微縮小 */
+    height: 36px !important;
+  }
+
+  /* 響應式：稍微縮小字體以適應小螢幕 */
+  .friends-list__friend-name {
+    font-size: 15px !important;
+  }
+
+  .friends-list__friend-score {
+    font-size: 13px !important;
+  }
+
+  .friends-list__friend-email {
+    font-size: 11px !important;
+  }
+
+  /* 按鈕稍微縮小 */
+  .friends-list__btn-challenge,
+  .friends-list__btn-remove,
+  .friends-list__btn-accept,
+  .friends-list__btn-reject,
+  .friends-list__btn-add {
+    min-width: 32px !important;
+    height: 32px !important;
+    font-size: 12px !important;
+    padding: 0 10px !important;
+  }
+
+  .friends-list__friend-actions {
+    gap: 4px !important;
   }
 
   .search-box {
