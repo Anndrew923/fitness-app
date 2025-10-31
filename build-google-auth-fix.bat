@@ -19,9 +19,10 @@ echo VITE_GOOGLE_CLIENT_ID=5144099869-6kes2g.apps.googleusercontent.com
 echo VITE_GOOGLE_ANDROID_CLIENT_ID=5144099869-n8eqotfij5eg6gv97e9s83l22kgqgm6i.apps.googleusercontent.com
 echo.
 echo # AdMob Configuration
-echo VITE_ADMOB_APP_ID=ca-app-pub-3940256099942544~3347511713
-echo VITE_ADMOB_BANNER_AD_ID=ca-app-pub-3940256099942544/6300978111
-echo VITE_ADMOB_INTERSTITIAL_AD_ID=ca-app-pub-3940256099942544/1033173712
+echo VITE_ADMOB_APP_ID=ca-app-pub-5869708488609837~6490454632
+echo VITE_ADMOB_BANNER_ID=ca-app-pub-5869708488609837/1189068634
+echo VITE_ADMOB_ENABLED=true
+echo VITE_ADMOB_TEST_MODE=false
 ) > .env
 echo ✅ .env 檔案已建立
 
@@ -65,4 +66,3 @@ echo ============================================
 echo APK 位置: android\app\build\outputs\apk\release\app-release.apk
 echo.
 pause
-

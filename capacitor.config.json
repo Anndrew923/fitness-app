@@ -4,7 +4,7 @@
   "webDir": "dist",
   "plugins": {
     "AdMob": {
-      "appId": "ca-app-pub-3940256099942544~3347511713"
+      "appId": "ca-app-pub-5869708488609837~6490454632"
     },
     "GoogleAuth": {
       "scopes": ["profile", "email"],

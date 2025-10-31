@@ -13,6 +13,7 @@ import { signInWithEmailAndPassword, signOut } from 'firebase/auth';
 import PropTypes from 'prop-types';
 import ScrollToTop from './ScrollToTop';
 import { App as CapacitorApp } from '@capacitor/app';
+import { Capacitor } from '@capacitor/core';
 const WelcomeSplash = React.lazy(() => import('./WelcomeSplash'));
 const LandingPage = React.lazy(() => import('./LandingPage'));
 const Welcome = React.lazy(() => import('./Welcome'));
@@ -162,6 +163,32 @@ function AppContent() {
     '/body-fat',
     '/settings',
   ].some(path => location.pathname.startsWith(path));
+
+  // AdMob 初始化（僅在 Android/iOS 平台）
+  useEffect(() => {
+    const initializeAdMob = async () => {
+      if (Capacitor.isNativePlatform()) {
+        try {
+          const { AdMob } = await import('@capacitor-community/admob');
+          const isDevelopment = import.meta.env.MODE === 'development';
+          const isTestMode = import.meta.env.VITE_ADMOB_TEST_MODE === 'true';
+
+          await AdMob.initialize({
+            requestTrackingAuthorization: true,
+            // 注意：testingDevices 應為測試設備 ID 陣列，空陣列表示所有設備為測試設備
+            // initializeForTesting 參數在 6.0.0 版本中可能不存在，已移除
+          });
+
+          console.log('✅ AdMob 初始化成功');
+        } catch (error) {
+          console.error('❌ AdMob 初始化失敗:', error);
+          // 不影響 App 啟動，只記錄錯誤
+        }
+      }
+    };
+
+    initializeAdMob();
+  }, []);
 
   // 性能監控：監控頁面載入時間
   useEffect(() => {
