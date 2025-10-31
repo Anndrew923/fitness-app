@@ -5,6 +5,16 @@ echo ========================================
 echo 🚀 自動打包 AAB（無需手動確認）
 echo ========================================
 
+echo 📋 檢查環境變數...
+if "%VITE_ADMOB_TEST_MODE%"=="" (
+    echo ⚠️ 警告: VITE_ADMOB_TEST_MODE 未設置，使用預設值 false
+    set VITE_ADMOB_TEST_MODE=false
+)
+if "%VITE_ADMOB_ENABLED%"=="" (
+    echo ⚠️ 警告: VITE_ADMOB_ENABLED 未設置，使用預設值 true
+    set VITE_ADMOB_ENABLED=true
+)
+
 echo 📋 清理構建...
 call gradlew clean --no-daemon --console=plain --quiet
 
