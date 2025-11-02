@@ -87,7 +87,7 @@ const AdBanner = ({
             adId: adId,
             adSize: 'BANNER',
             position: position === 'top' ? 'TOP_CENTER' : 'BOTTOM_CENTER',
-            margin: 0,
+            margin: 64, // 底部導覽列高度（64px），讓廣告顯示在導覽列上方，避免重疊
           };
 
           // 載入橫幅廣告

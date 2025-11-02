@@ -14,13 +14,15 @@
 /* 固定在底部的廣告樣式 */
 .ad-banner--fixed {
   position: fixed;
-  bottom: 70px; /* 在底部導航欄之上 */
+  bottom: 64px; /* 與底部導覽列高度一致，完全緊貼 */
   left: 0;
   right: 0;
   margin: 0;
+  padding: 0; /* 移除內邊距，確保完全緊貼 */
   border-radius: 0;
   border-left: none;
   border-right: none;
+  border-bottom: none; /* 移除底部邊框，避免視覺間隙 */
   z-index: 950; /* 調整z-index，在底部導航之下，但在其他內容之上 */
   animation: slideUpAd 0.5s ease-out;
   backdrop-filter: blur(10px);
@@ -184,9 +186,11 @@ ins[data-ad-status='filled'] {
 /* 只顯示底部廣告 */
 .adsbygoogle[data-ad-format='auto'] {
   position: fixed !important;
-  bottom: 70px !important;
+  bottom: 64px !important; /* 與底部導覽列高度一致，完全緊貼 */
   left: 0 !important;
   right: 0 !important;
+  margin: 0 !important; /* 移除邊距 */
+  padding: 0 !important; /* 移除內邊距 */
   z-index: 950 !important;
 }
 
@@ -205,7 +209,7 @@ ins[data-ad-status='filled'] {
   }
 
   .ad-banner--fixed {
-    bottom: 64px; /* 手機版底部導航較小 */
+    bottom: 64px; /* 手機版底部導航高度，完全緊貼 */
   }
 
   .page-with-fixed-ad {
@@ -214,6 +218,8 @@ ins[data-ad-status='filled'] {
 
   /* 手機版隱藏頂部廣告 */
   .adsbygoogle[data-ad-format='auto'] {
-    bottom: 64px !important;
+    bottom: 64px !important; /* 與底部導覽列完全緊貼 */
+    margin: 0 !important; /* 移除邊距 */
+    padding: 0 !important; /* 移除內邊距 */
   }
 }
