@@ -30,10 +30,9 @@ class NativeGoogleAuth {
       );
       console.log('- 準備初始化外掛...');
 
-      // 關鍵修正：明確傳入 clientId
+      // ✅ 恢復：使用完整版本 Client ID（之前能正常登入的配置）
       await GoogleAuth.initialize({
-        clientId:
-          '5144099869-6kes2gchrinle0io7dl8c12f83rgfso6.apps.googleusercontent.com',
+        clientId: '5144099869-6kes2gchrinle0io7dl8c12f83rgfso6.apps.googleusercontent.com',
         scopes: ['profile', 'email'],
         grantOfflineAccess: true,
       });
@@ -65,20 +64,52 @@ class NativeGoogleAuth {
       );
       console.log('- 環境: Android WebView');
 
-      // 添加超時處理
-      const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('登入超時')), 30000);
-      });
+      // ✅ 改進：直接調用，不使用 Promise.race（避免錯誤被吞掉）
+      let result;
+      try {
+        result = await GoogleAuth.signIn();
+        console.log('✅ Google 登入調用成功，結果:', result);
+      } catch (signInError) {
+        // ✅ 新增：捕獲登入調用的錯誤
+        console.error('❌ GoogleAuth.signIn() 調用失敗:', signInError);
+        console.error('🔍 錯誤詳情:', {
+          message: signInError.message,
+          code: signInError.code,
+          name: signInError.name,
+        });
 
-      const signInPromise = GoogleAuth.signIn();
-      const result = await Promise.race([signInPromise, timeoutPromise]);
+        // ✅ 檢查是否是用戶取消
+        if (
+          signInError.message?.includes('cancelled') ||
+          signInError.code === 'CANCELLED'
+        ) {
+          throw new Error('登入已取消');
+        }
+
+        throw signInError; // 重新拋出錯誤
+      }
+
+      // ✅ 檢查結果
+      if (!result) {
+        throw new Error('登入結果為空');
+      }
+
+      // ✅ 檢查結果是否包含錯誤
+      if (result.error) {
+        console.error('❌ Google 登入結果包含錯誤:', result.error);
+        throw new Error(result.error.message || '登入失敗');
+      }
 
       console.log('✅ Google 登入成功:', result);
-      console.log('🔍 Google 結果完整結構:', JSON.stringify(result, null, 2));
+      console.log(
+        '🔍 Google 結果完整結構:',
+        JSON.stringify(result, null, 2)
+      );
 
       // 驗證結果完整性
-      if (!result || !result.id || !result.email) {
-        throw new Error('登入結果不完整');
+      if (!result.id || !result.email) {
+        console.error('❌ 登入結果不完整:', result);
+        throw new Error('登入結果不完整：缺少 id 或 email');
       }
 
       const firebaseUser = await this.convertToFirebaseUser(result);
@@ -117,7 +148,7 @@ class NativeGoogleAuth {
         return await this.retrySignIn();
       }
 
-      throw error;
+      throw error; // ✅ 確保錯誤被拋出
     }
   }
 

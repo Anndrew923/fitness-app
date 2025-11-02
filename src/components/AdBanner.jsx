@@ -1,17 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import { preAdDisplayCheck } from '../utils/adMobCompliance';
-import { getAdUnitId, adConfig } from '../config/adConfig';
+import { getAdUnitId, adConfig, shouldShowAd } from '../config/adConfig';
 import { Capacitor } from '@capacitor/core';
 import './AdBanner.css';
 
-// 動態導入 Capacitor AdMob 插件（僅在 Android/iOS 平台使用）
-let AdMob = null;
-if (Capacitor.isNativePlatform()) {
-  import('@capacitor-community/admob').then(module => {
-    AdMob = module.AdMob;
-  });
-}
+// ✅ 動態導入 AdMob 插件（在組件內部使用動態導入，移除頂部未使用的變數定義）
 
 const AdBanner = ({
   position = 'bottom',
@@ -27,6 +21,9 @@ const AdBanner = ({
   const isTestMode = import.meta.env.VITE_ADMOB_TEST_MODE === 'true';
   const isNativePlatform = Capacitor.isNativePlatform();
 
+  // ✅ 修正 1：應用程式審核狀態（在 AdMob 應用程式審核通過前設為 true）
+  const APP_PENDING_ADMOB_REVIEW = true; // TODO: AdMob 應用程式審核通過後改為 false
+
   // 獲取廣告單元 ID（優先使用傳入的 ID，否則使用配置中的 ID）
   const finalAdUnitId = adUnitId || getAdUnitId(position);
   const appId = adConfig.appId;
@@ -37,22 +34,38 @@ const AdBanner = ({
       return;
     }
 
+    // ✅ 修正 1：應用程式待審核時，不載入任何廣告（包括測試廣告）
+    // 只顯示 placeholder，不調用 AdMob.showBanner()，避免真實廣告與 placeholder 重疊
+    if (APP_PENDING_ADMOB_REVIEW) {
+      console.log('📋 應用程式待審核，不載入真實廣告，只顯示 placeholder');
+      return; // 不執行廣告載入邏輯，只顯示 placeholder
+    }
+
     // 檢查必要的配置
     if (!finalAdUnitId || !appId) {
       console.warn('AdMob 配置不完整:', { finalAdUnitId, appId });
       return;
     }
 
-    // 如果是開發環境或測試模式，顯示測試廣告
+    // ✅ 修正 2：測試模式或開發環境時，使用測試廣告 ID（不 return）
     if (isDevelopment || isTestMode) {
-      console.log('AdMob 測試模式，顯示測試廣告');
-      return;
+      console.log('AdMob 測試模式或開發環境，將使用測試廣告 ID');
+      // 不 return，繼續執行，使用測試廣告 ID
     }
 
-    // AdMob 合規檢查
+    // ✅ 修正 3：先檢查頁面配置（優先於合規檢查）
     const pageContent = document.body?.innerText || '';
     const currentPage = window.location?.pathname?.replace('/', '') || 'home';
 
+    // ✅ 修正 3：檢查頁面配置，確保遵守 shouldShowAd() 的結果
+    if (!shouldShowAd(currentPage, position)) {
+      console.log(
+        `📄 頁面 [${currentPage}] 配置為不顯示廣告（${position}位置）`
+      );
+      return;
+    }
+
+    // ✅ 然後進行 AdMob 合規檢查
     if (!preAdDisplayCheck(currentPage, pageContent)) {
       console.log('AdMob 合規檢查失敗，不顯示廣告');
       return;
@@ -66,35 +79,45 @@ const AdBanner = ({
           // 動態導入 AdMob 插件
           const { AdMob } = await import('@capacitor-community/admob');
 
-          // 確保 AdMob 已初始化（應在 App 啟動時執行）
-          try {
-            await AdMob.initialize({
-              requestTrackingAuthorization: true,
-              testingDevices: isDevelopment || isTestMode ? [] : undefined,
-            });
-          } catch (initError) {
-            // 如果已初始化，會拋出錯誤，可以忽略
-            console.log('AdMob 初始化檢查:', initError.message);
-          }
+          // ✅ 移除重複初始化（已在 App.jsx 中初始化，避免資源競爭）
 
           // 準備橫幅廣告
+          // ✅ 修正：測試模式或開發環境時，使用測試廣告 ID
+          // 注意：APP_PENDING_ADMOB_REVIEW 的情況已在 useEffect 開始處 return，不會執行到這裡
           const adId =
             isDevelopment || isTestMode
               ? 'ca-app-pub-3940256099942544/6300978111' // 測試 ID
-              : finalAdUnitId;
+              : finalAdUnitId; // 真實廣告 ID（應用程式審核通過後使用）
+
+          // ✅ 新增：詳細日誌，確認使用的廣告 ID
+          console.log('🔍 廣告 ID 選擇:', {
+            isDevelopment,
+            isTestMode,
+            APP_PENDING_ADMOB_REVIEW,
+            selectedAdId: adId,
+            finalAdUnitId,
+            isTestAd: adId === 'ca-app-pub-3940256099942544/6300978111',
+          });
+
+          if (adId === 'ca-app-pub-3940256099942544/6300978111') {
+            console.log('✅ 使用測試廣告 ID（正確）');
+          } else {
+            console.warn('⚠️ 使用真實廣告 ID（應用程式審核通過後才應使用）');
+          }
 
           const bannerOptions = {
             adId: adId,
             adSize: 'BANNER',
             position: position === 'top' ? 'TOP_CENTER' : 'BOTTOM_CENTER',
-            margin: 64, // 底部導覽列高度（64px），讓廣告顯示在導覽列上方，避免重疊
+            margin: 84, // ✅ 導覽列高度(64px) + 安全間距(20px) = 84px，讓廣告顯示在導覽列上方，避免重疊
           };
 
-          // 載入橫幅廣告
-          await AdMob.prepareBanner(bannerOptions);
+          // ✅ 移除 prepareBanner（在 Android 上未實現），直接使用 showBanner
           await AdMob.showBanner({
-            adId: adId,
+            adId: bannerOptions.adId,
+            adSize: bannerOptions.adSize,
             adPosition: bannerOptions.position,
+            margin: bannerOptions.margin, // ✅ 傳遞 margin 參數，確保廣告位置正確
           });
           setAdLoaded(true);
           console.log('✅ 原生 AdMob 橫幅廣告已載入');
@@ -107,6 +130,7 @@ const AdBanner = ({
       loadNativeAd();
     } else {
       // Web 版 AdMob（使用 adsbygoogle.js）
+      // ✅ 修正 1：Web 版本的廣告 ID 邏輯在 JSX 中的 data-ad-slot 屬性中處理
       const loadWebAd = () => {
         if (window.adsbygoogle) {
           // 如果腳本已載入，直接初始化廣告
@@ -155,6 +179,7 @@ const AdBanner = ({
     isTestMode,
     isNativePlatform,
     position,
+    APP_PENDING_ADMOB_REVIEW, // ✅ 添加到依賴項
   ]);
 
   // 如果不需要顯示廣告，返回 null
@@ -162,8 +187,19 @@ const AdBanner = ({
     return null;
   }
 
-  // 開發環境、測試模式或沒有廣告單元 ID 時顯示優化的預留空間
-  if (isDevelopment || isTestMode || !finalAdUnitId) {
+  // ✅ 修正 4：先檢查頁面配置，如果不應顯示廣告，直接返回 null（包括 placeholder）
+  const currentPage = window.location?.pathname?.replace('/', '') || 'home';
+  if (!shouldShowAd(currentPage, position)) {
+    return null; // 不顯示廣告（包括 placeholder）
+  }
+
+  // ✅ 修正 5：開發環境、測試模式、應用程式待審核或沒有廣告單元 ID 時顯示優化的預留空間
+  if (
+    isDevelopment ||
+    isTestMode ||
+    APP_PENDING_ADMOB_REVIEW ||
+    !finalAdUnitId
+  ) {
     return (
       <div
         className={`ad-banner ad-banner--${position} ${
@@ -177,6 +213,8 @@ const AdBanner = ({
                 ? '🔧 開發模式'
                 : isTestMode
                 ? '🧪 測試模式'
+                : APP_PENDING_ADMOB_REVIEW
+                ? '📋 測試廣告'
                 : '📱 廣告空間'}
             </span>
             <span className="ad-banner__placeholder-subtitle">
@@ -184,6 +222,8 @@ const AdBanner = ({
                 ? 'AdMob 測試廣告位置'
                 : isTestMode
                 ? 'AdMob 測試廣告'
+                : APP_PENDING_ADMOB_REVIEW
+                ? '等待 AdMob 審查通過'
                 : '等待 AdMob 審查通過'}
             </span>
           </div>
@@ -234,7 +274,13 @@ const AdBanner = ({
           className="adsbygoogle"
           style={{ display: 'block' }}
           data-ad-client={appId} // AdMob 應用程式 ID
-          data-ad-slot={finalAdUnitId} // AdMob 廣告單元 ID
+          data-ad-slot={
+            // ✅ 修正：Web 版本也需要使用測試廣告 ID（測試模式或開發環境時）
+            // 注意：APP_PENDING_ADMOB_REVIEW 的情況已在 useEffect 開始處 return，不會執行到這裡
+            isDevelopment || isTestMode
+              ? 'ca-app-pub-3940256099942544/6300978111' // 測試 ID
+              : finalAdUnitId
+          } // AdMob 廣告單元 ID
           data-ad-format="auto"
           data-full-width-responsive="true"
         />

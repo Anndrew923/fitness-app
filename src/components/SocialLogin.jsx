@@ -14,12 +14,22 @@ function SocialLogin({ onLogin, onError }) {
   useEffect(() => {
     const initializeGoogleAuth = async () => {
       try {
-        // 添加 Bridge 錯誤監聽
+        // ✅ 修正：安全地檢查 Bridge 錯誤
         const originalConsoleError = console.error;
         console.error = (...args) => {
-          if (args[0] && args[0].includes('androidBridge')) {
-            console.log('🔍 檢測到 Bridge 通信錯誤，嘗試重新初始化...');
-            // 可以嘗試重新初始化
+          // ✅ 改進：安全地檢查字符串（如果 args[0] 是 Error 對象，轉換為字符串）
+          const firstArg = args[0];
+          if (firstArg) {
+            const firstArgStr =
+              typeof firstArg === 'string'
+                ? firstArg
+                : firstArg.toString
+                  ? firstArg.toString()
+                  : String(firstArg);
+
+            if (firstArgStr.includes('androidBridge')) {
+              console.log('🔍 檢測到 Bridge 通信錯誤，嘗試重新初始化...');
+            }
           }
           originalConsoleError.apply(console, args);
         };

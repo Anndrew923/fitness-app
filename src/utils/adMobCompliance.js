@@ -155,6 +155,23 @@ export const AdMobCompliance = {
 
 // 廣告顯示前的合規檢查
 export const preAdDisplayCheck = (pageName, pageContent) => {
+  // ✅ 改進：優先檢查導航頁面（不應顯示廣告）
+  const navigationPages = [
+    'home',
+    'login',
+    'user-info',
+    'settings',
+    'privacy-policy',
+    'terms',
+    'about',
+    'disclaimer',
+    'contact',
+  ];
+  if (navigationPages.includes(pageName)) {
+    console.log(`📄 導航頁面 [${pageName}] 不應顯示廣告`);
+    return false;
+  }
+
   // 評測頁面特殊處理 - 有豐富的說明內容，符合 AdMob 政策
   const testPages = [
     'strength',

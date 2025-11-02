@@ -7,7 +7,7 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:5144099869:android:1df863a1fa04e89bce1af4",
+        "mobilesdk_app_id": "1:5144099869:android:49fb1163c8b18ff0ce1af4",
         "android_client_info": {
           "package_name": "com.ultimatephysique.fitness2025"
         }
@@ -20,6 +20,10 @@
             "package_name": "com.ultimatephysique.fitness2025",
             "certificate_hash": "3185828c3d0cfb0df7d976651b91ffcde8180e59"
           }
+        },
+        {
+          "client_id": "5144099869-6kes2gchrinle0io7dl8c12f83rgfso6.apps.googleusercontent.com",
+          "client_type": 3
         }
       ],
       "api_key": [
@@ -31,7 +35,7 @@
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "5144099869-6kes2g.apps.googleusercontent.com",
+              "client_id": "5144099869-6kes2gchrinle0io7dl8c12f83rgfso6.apps.googleusercontent.com",
               "client_type": 3
             }
           ]
