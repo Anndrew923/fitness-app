@@ -1,9 +1,5 @@
 import { initializeApp } from 'firebase/app';
-import {
-  getAuth,
-  GoogleAuthProvider,
-  FacebookAuthProvider,
-} from 'firebase/auth';
+import { getAuth, GoogleAuthProvider } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 
@@ -93,16 +89,11 @@ try {
 
   // 初始化社交登入提供者
   const googleProvider = new GoogleAuthProvider();
-  const facebookProvider = new FacebookAuthProvider();
 
   // 配置 Google 登入
   googleProvider.setCustomParameters({
     prompt: 'select_account',
   });
-
-  // 配置 Facebook 登入
-  facebookProvider.addScope('email');
-  facebookProvider.addScope('public_profile');
 
   console.log('Firebase 初始化成功');
 } catch (error) {

@@ -129,8 +129,8 @@ export default defineConfig(({ mode }) => {
           ? {
               'Content-Security-Policy': [
                 "default-src 'self'",
-                "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://apis.google.com https://accounts.google.com https://connect.facebook.net",
-                "frame-src 'self' https://*.firebaseapp.com https://accounts.google.com https://*.facebook.com",
+                "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://apis.google.com https://accounts.google.com",
+                "frame-src 'self' https://*.firebaseapp.com https://accounts.google.com",
                 "connect-src 'self' ws://localhost:* https://*.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com https://*.googleusercontent.com",
                 "style-src 'self' 'unsafe-inline'",
                 "img-src 'self' data: https:",
