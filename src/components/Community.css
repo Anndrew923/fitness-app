@@ -790,49 +790,6 @@
   align-self: flex-start; /* 確保靠左 */
 }
 
-/* 刪除按鈕 - Facebook 風格：懸停顯示 */
-.comment-delete-btn {
-  position: absolute !important;
-  top: 0 !important;
-  right: 0 !important;
-  width: 32px !important; /* 增大點擊區域 */
-  height: 32px !important;
-  background: transparent !important;
-  border: none !important;
-  color: #65676b !important; /* 淡灰色，更符合 Facebook 風格 */
-  cursor: pointer !important;
-  font-size: 16px !important; /* 稍微增大圖標 */
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  opacity: 0 !important; /* 預設隱藏 */
-  visibility: hidden !important; /* 預設不可見 */
-  transition: opacity 0.2s ease, visibility 0.2s ease !important;
-  z-index: 10 !important;
-  padding: 0 !important;
-  margin: 0 !important;
-  box-shadow: none !important;
-  border-radius: 50% !important; /* 圓形背景 */
-}
-
-/* 關鍵：懸停時顯示刪除按鈕（像 Facebook 一樣） */
-.comment-header:hover .comment-delete-btn,
-.comment-item:hover .comment-delete-btn {
-  opacity: 1 !important;
-  visibility: visible !important;
-  background: rgba(0, 0, 0, 0.05) !important; /* 懸停時顯示背景 */
-}
-
-.comment-delete-btn:hover {
-  background: rgba(0, 0, 0, 0.1) !important;
-  color: #ff6b6b !important;
-}
-
-/* 移除舊的刪除按鈕樣式 */
-.delete-comment-btn {
-  display: none !important;
-}
-
 .comment-content {
   font-size: 14px;
   color: #1c1e21;
@@ -1461,7 +1418,6 @@
   background: rgba(255, 107, 107, 0.1);
   transform: scale(1.1);
 }
-
 /* 刪除按鈕尺寸調整 - 留言板 */
 .delete-post-btn,
 .comment-delete-btn {

@@ -168,6 +168,45 @@ const SubmitConfirmModal = ({
 }) => {
   const { t } = useTranslation();
 
+  // ✅ 新增：阻止背景滾動
+  useEffect(() => {
+    if (isOpen) {
+      // 保存當前滾動位置
+      const scrollY = window.scrollY;
+
+      // 阻止背景滾動
+      document.body.style.overflow = 'hidden';
+      document.body.style.position = 'fixed';
+      document.body.style.width = '100%';
+      document.body.style.top = `-${scrollY}px`;
+    } else {
+      // 恢復背景滾動
+      const scrollY = document.body.style.top;
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
+      document.body.style.top = '';
+
+      // 恢復滾動位置
+      if (scrollY) {
+        window.scrollTo(0, parseInt(scrollY || '0') * -1);
+      }
+    }
+
+    return () => {
+      // 清理：確保在組件卸載時恢復
+      const scrollY = document.body.style.top;
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
+      document.body.style.top = '';
+
+      if (scrollY) {
+        window.scrollTo(0, parseInt(scrollY || '0') * -1);
+      }
+    };
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   const handleOverlayClick = e => {
