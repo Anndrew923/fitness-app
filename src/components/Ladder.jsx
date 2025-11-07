@@ -12,6 +12,7 @@ import { collection, query, orderBy, limit, getDocs } from 'firebase/firestore';
 import { formatScore, getAgeGroup } from '../utils';
 import './Ladder.css';
 import { useTranslation } from 'react-i18next';
+import LadderUserCard from './LadderUserCard';
 
 const Ladder = () => {
   const { userData } = useUser();
@@ -23,8 +24,8 @@ const Ladder = () => {
   const [selectedTab, setSelectedTab] = useState('total'); // 'total' 或 'weekly'
   const [loading, setLoading] = useState(true);
   const [showUserContext, setShowUserContext] = useState(false);
-  const [selectedUser, setSelectedUser] = useState(null);
-  const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
+  const [showUserCard, setShowUserCard] = useState(false);
+  const [selectedUserForCard, setSelectedUserForCard] = useState(null);
   // const lastLadderScoreRef = useRef(null);
   const lastConditionCheckRef = useRef(null);
   const lastLoadParamsRef = useRef(null);
@@ -120,6 +121,18 @@ const Ladder = () => {
                 t('community.fallback.unnamedUser'),
             avatarUrl: isAnonymous ? '' : docData.avatarUrl,
             isAnonymous: isAnonymous,
+            // ✅ 新增：載入 scores 數據用於雷達圖
+            scores: docData.scores || {
+              strength: 0,
+              explosivePower: 0,
+              cardio: 0,
+              muscleMass: 0,
+              bodyFat: 0,
+            },
+            // ✅ 新增：保留訓練背景資訊
+            profession: docData.profession || '',
+            weeklyTrainingHours: docData.weeklyTrainingHours || 0,
+            trainingYears: docData.trainingYears || 0,
           });
         }
       });
@@ -508,74 +521,13 @@ const Ladder = () => {
   //   return rankToShow > 0 ? `第 ${rankToShow} 名` : '未上榜';
   // };
 
-  // 處理用戶點擊，顯示訓練背景信息
+  // 處理用戶點擊，顯示用戶名片
   const handleUserClick = (user, event) => {
     if (user.isAnonymous) return; // 匿名用戶不顯示信息
 
-    const rect = event.currentTarget.getBoundingClientRect();
-    const tooltipHeight = 200; // 預估工具提示的高度
-    const tooltipWidth = 350; // 預估工具提示的寬度
-    const viewportWidth = window.innerWidth;
-    const viewportHeight = window.innerHeight;
-    const safeMargin = 20; // 安全邊距
-
-    // 檢查是否為第一名
-    const isFirstPlace = ladderData.findIndex(u => u.id === user.id) === 0;
-
-    // 計算最佳位置
-    let x = rect.left + rect.width / 2;
-    let y = rect.top - 10;
-    let transformY = -100; // 預設向上顯示
-    let tooltipStyle = {}; // 額外的樣式
-
-    // 檢查水平邊界
-    if (x - tooltipWidth / 2 < safeMargin) {
-      // 左邊超出，調整到右邊
-      x = tooltipWidth / 2 + safeMargin;
-    } else if (x + tooltipWidth / 2 > viewportWidth - safeMargin) {
-      // 右邊超出，調整到左邊
-      x = viewportWidth - tooltipWidth / 2 - safeMargin;
-    }
-
-    if (isFirstPlace) {
-      // 第一名特殊處理：向下展開，遮住第二名和第三名
-      y = rect.bottom; // 從第一名底部開始
-      transformY = 0; // 向下顯示
-      tooltipStyle = {
-        width: '100%',
-        maxWidth: 'none',
-        left: '0',
-        transform: 'translateX(0) translateY(0)',
-        borderRadius: '0 0 16px 16px',
-        boxShadow: '0 8px 25px rgba(0, 0, 0, 0.3)',
-        zIndex: 1001, // 確保在最上層
-      };
-    } else {
-      // 其他名次：如果向上顯示會被切掉，改為向下顯示
-      if (rect.top - tooltipHeight - safeMargin < 0) {
-        y = rect.bottom + 10;
-        transformY = 0; // 向下顯示
-      }
-
-      // 檢查垂直邊界
-      if (y + tooltipHeight > viewportHeight - safeMargin) {
-        y = rect.top - tooltipHeight - 10;
-        transformY = -100; // 改為向上顯示
-      }
-    }
-
-    setTooltipPosition({
-      x: x,
-      y: y,
-      transformY: transformY,
-      tooltipStyle: tooltipStyle,
-    });
-    setSelectedUser(user);
-  };
-
-  // 關閉浮動框
-  const closeTooltip = () => {
-    setSelectedUser(null);
+    // 顯示用戶卡片而不是工具提示
+    setSelectedUserForCard(user);
+    setShowUserCard(true);
   };
 
   // 格式化時間戳
@@ -839,114 +791,14 @@ const Ladder = () => {
         )}
       </div>
 
-      {/* 訓練背景浮動框 */}
-      {selectedUser && (
-        <div
-          className="training-tooltip"
-          style={{
-            position: 'fixed',
-            left: tooltipPosition.x,
-            top: tooltipPosition.y,
-            transform: `translateX(-50%) translateY(${
-              tooltipPosition.transformY || -100
-            }%)`,
-            zIndex: 1000,
-            ...tooltipPosition.tooltipStyle,
-          }}
-        >
-          <div
-            className={`tooltip-content ${
-              ladderData.findIndex(u => u.id === selectedUser.id) === 0
-                ? 'first-place-glow expanded'
-                : ''
-            }`}
-          >
-            <div className="tooltip-header">
-              <h4>{selectedUser.displayName} 的訓練背景</h4>
-              <button className="tooltip-close" onClick={closeTooltip}>
-                ×
-              </button>
-            </div>
-            <div className="tooltip-body">
-              {selectedUser.profession && (
-                <div className="tooltip-item">
-                  <span className="tooltip-label">💼 職業：</span>
-                  <span className="tooltip-value">
-                    {selectedUser.profession}
-                  </span>
-                </div>
-              )}
-              {selectedUser.weeklyTrainingHours && (
-                <div className="tooltip-item">
-                  <span className="tooltip-label">⏰ 每周訓練時數：</span>
-                  <span className="tooltip-value">
-                    {selectedUser.weeklyTrainingHours} 小時
-                  </span>
-                </div>
-              )}
-              {selectedUser.trainingYears && (
-                <div className="tooltip-item">
-                  <span className="tooltip-label">📅 訓練年資：</span>
-                  <span className="tooltip-value">
-                    {selectedUser.trainingYears} 年
-                  </span>
-                </div>
-              )}
-              {!selectedUser.profession &&
-                !selectedUser.weeklyTrainingHours &&
-                !selectedUser.trainingYears && (
-                  <div className="tooltip-empty">
-                    <p>該用戶尚未填寫訓練背景信息</p>
-                    <p>💡 在個人資料頁面填寫訓練背景，激勵其他健身愛好者！</p>
-                  </div>
-                )}
-            </div>
-          </div>
-          <div
-            className={`tooltip-arrow ${
-              ladderData.findIndex(u => u.id === selectedUser.id) === 0
-                ? 'first-place-arrow expanded'
-                : ''
-            }`}
-            style={{
-              ...(tooltipPosition.transformY === 0
-                ? {
-                    // 向下顯示時，箭頭在頂部
-                    bottom: 'auto',
-                    top: '-8px',
-                    borderTop: 'none',
-                    borderBottom: '8px solid white',
-                    ...(ladderData.findIndex(u => u.id === selectedUser.id) ===
-                      0 && {
-                      // 第一名的箭頭特殊處理
-                      left: '50px', // 調整箭頭位置
-                      transform: 'translateX(-50%)',
-                    }),
-                  }
-                : {
-                    // 向上顯示時，箭頭在底部（預設）
-                    bottom: '-8px',
-                    top: 'auto',
-                    borderBottom: 'none',
-                    borderTop: '8px solid white',
-                  }),
-            }}
-          ></div>
-        </div>
-      )}
-
-      {/* 點擊外部關閉浮動框 */}
-      {selectedUser && (
-        <div
-          className="tooltip-overlay"
-          onClick={closeTooltip}
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            zIndex: 999,
+      {/* 用戶名片 */}
+      {showUserCard && selectedUserForCard && (
+        <LadderUserCard
+          user={selectedUserForCard}
+          isOpen={showUserCard}
+          onClose={() => {
+            setShowUserCard(false);
+            setSelectedUserForCard(null);
           }}
         />
       )}

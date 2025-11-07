@@ -1,0 +1,365 @@
+/* ✅ 新增：防止背景滾動穿透 */
+body.ladder-card-open {
+  overflow: hidden;
+  position: fixed;
+  width: 100%;
+  height: 100%;
+}
+
+/* 天梯用戶名片樣式（完整整合版） */
+.ladder-user-card-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.3s ease-out;
+  /* ✅ 新增：防止滾動穿透 */
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.ladder-user-card {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  max-width: 500px;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  animation: slideUp 0.3s ease-out;
+  /* ✅ 新增：確保內部滾動正常 */
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  /* ✅ 新增：防止滾動穿透到背景 */
+  touch-action: pan-y;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Header */
+.ladder-user-card-header {
+  display: flex;
+  justify-content: space-between; /* 確保靠右對齊 */
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #e9ecef;
+  width: 100%; /* 確保 header 佔滿寬度 */
+}
+
+.ladder-user-card-header h3 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  color: #333;
+  background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  flex: 1; /* 讓標題佔據剩餘空間 */
+}
+
+.ladder-user-card-close {
+  background: white !important; /* 白底 - 使用 !important 覆蓋全局樣式 */
+  color: #888 !important; /* 灰色叉叉 - 使用 !important 覆蓋全局樣式 */
+  border: 1px solid #ddd !important; /* 輕微邊框 - 使用 !important 覆蓋全局樣式 */
+  border-radius: 8px !important; /* 輕微圓角 - 使用 !important 覆蓋全局樣式 */
+  font-size: 24px !important;
+  cursor: pointer;
+  padding: 0 !important; /* 覆蓋全局 padding */
+  width: 32px !important; /* 覆蓋全局 width: 100% */
+  max-width: 32px !important; /* 覆蓋全局 max-width: 300px */
+  height: 32px !important;
+  display: flex !important; /* 覆蓋全局 display: block */
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  margin-left: auto; /* 確保靠右對齊 */
+  margin-right: 0; /* 確保靠右邊緣 */
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important; /* 輕微陰影 - 覆蓋全局 box-shadow */
+  flex-shrink: 0; /* 防止被壓縮 */
+}
+
+.ladder-user-card-close:hover {
+  background: #f0f0f0 !important; /* 懸停時淺灰色背景 - 覆蓋全局 hover 樣式 */
+  color: #555 !important; /* 懸停時深灰色 - 覆蓋全局 hover 樣式 */
+  border-color: #ccc !important;
+  transform: none !important; /* 覆蓋全局 transform */
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important; /* 覆蓋全局 hover box-shadow */
+}
+
+/* Content */
+.ladder-user-card-content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* 大頭照區域 */
+.ladder-user-card-avatar-section {
+  display: flex;
+  justify-content: center;
+  padding: 16px 0;
+}
+
+.ladder-user-card-avatar {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 4px solid #ff6b35;
+  box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
+  background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+  transition: transform 0.3s ease;
+}
+
+.ladder-user-card-avatar:hover {
+  transform: scale(1.05);
+}
+
+.ladder-user-card-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.ladder-user-card-avatar-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 48px;
+  font-weight: 700;
+}
+
+/* 雷達圖區域 */
+.ladder-user-card-radar-section {
+  width: 100%;
+  margin: 16px 0;
+  padding: 16px;
+  background: #f8f9fa;
+  border-radius: 12px;
+  border: 1px solid #e9ecef;
+}
+
+.radar-section-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 12px;
+  text-align: center;
+}
+
+/* 用戶基本資訊 */
+.ladder-user-card-info {
+  text-align: center;
+  width: 100%;
+  padding: 16px 0;
+  border-top: 1px solid #e9ecef;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.ladder-user-card-name {
+  font-size: 22px;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 16px;
+}
+
+.ladder-user-card-details {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.detail-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 16px;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.detail-label {
+  font-weight: 600;
+  color: #666;
+  font-size: 14px;
+}
+
+.detail-value {
+  color: #333;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+/* 訓練背景樣式 */
+.ladder-user-card-training {
+  width: 100%;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #e9ecef;
+}
+
+.training-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+.training-details {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.training-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border-left: 4px solid #ff6b35;
+}
+
+.training-icon {
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.training-label {
+  font-weight: 600;
+  color: #666;
+  flex-shrink: 0;
+  font-size: 14px;
+}
+
+.training-value {
+  color: #333;
+  margin-left: auto;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.training-empty {
+  text-align: center;
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  color: #666;
+}
+
+.training-empty p {
+  margin: 4px 0;
+  font-size: 14px;
+}
+
+.training-hint {
+  font-size: 12px;
+  color: #999;
+  font-style: italic;
+  margin-top: 8px;
+}
+
+/* 舉報按鈕區域 */
+.ladder-user-card-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 2px solid #e9ecef;
+}
+
+.report-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 16px;
+  border: 2px solid #ff6b35;
+  border-radius: 8px;
+  background: white;
+  color: #ff6b35;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.report-btn:hover {
+  background: #ff6b35;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
+}
+
+.report-btn:active {
+  transform: translateY(0);
+}
+
+.report-icon {
+  font-size: 18px;
+}
+
+/* 響應式設計 */
+@media (max-width: 768px) {
+  .ladder-user-card {
+    max-width: 90%;
+    padding: 20px;
+  }
+
+  .ladder-user-card-avatar {
+    width: 100px;
+    height: 100px;
+  }
+
+  .ladder-user-card-avatar-placeholder {
+    font-size: 40px;
+  }
+
+  .ladder-user-card-radar-section {
+    padding: 12px;
+  }
+
+  .ladder-user-card-name {
+    font-size: 20px;
+  }
+
+  .detail-item,
+  .training-item {
+    padding: 10px;
+  }
+}

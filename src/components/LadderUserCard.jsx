@@ -1,0 +1,336 @@
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
+import PropTypes from 'prop-types';
+import { useTranslation } from 'react-i18next';
+import { useUser } from '../UserContext';
+import { auth } from '../firebase';
+import {
+  RadarChart,
+  PolarGrid,
+  PolarAngleAxis,
+  PolarRadiusAxis,
+  Radar,
+  ResponsiveContainer,
+} from 'recharts';
+import ReportModal from './ReportModal';
+import './LadderUserCard.css';
+
+function LadderUserCard({ user, isOpen, onClose }) {
+  const { t } = useTranslation();
+  const { userData } = useUser();
+  const currentUserId = auth.currentUser?.uid;
+  const [showReportModal, setShowReportModal] = useState(false);
+
+  // 獲取年齡組標籤（與 Ladder.jsx 相同）
+  const getAgeGroupLabel = useCallback(
+    ageGroup => {
+      if (!ageGroup) return t('ladder.ageGroups.unknown');
+      return t(`ladder.ageGroups.${ageGroup}`) || ageGroup;
+    },
+    [t]
+  );
+
+  // ✅ 新增：處理 body 滾動鎖定，防止背景頁面滾動
+  useEffect(() => {
+    if (isOpen) {
+      // 保存當前滾動位置
+      const scrollY = window.scrollY;
+      document.body.style.position = 'fixed';
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.width = '100%';
+      document.body.style.overflow = 'hidden';
+    } else {
+      // 恢復滾動位置
+      const scrollY = document.body.style.top;
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.width = '';
+      document.body.style.overflow = '';
+      if (scrollY) {
+        window.scrollTo(0, parseInt(scrollY || '0') * -1);
+      }
+    }
+    // 清理函數
+    return () => {
+      if (isOpen) {
+        const scrollY = document.body.style.top;
+        document.body.style.position = '';
+        document.body.style.top = '';
+        document.body.style.width = '';
+        document.body.style.overflow = '';
+        if (scrollY) {
+          window.scrollTo(0, parseInt(scrollY || '0') * -1);
+        }
+      }
+    };
+  }, [isOpen]);
+
+  if (!isOpen || !user) return null;
+
+  // 匿名用戶不顯示名片
+  if (user.isAnonymous) return null;
+
+  // 檢查是否為當前用戶
+  const isCurrentUser = user.id === currentUserId;
+
+  // 生成雷達圖數據
+  const radarChartData = useMemo(() => {
+    const scores = user.scores || {
+      strength: 0,
+      explosivePower: 0,
+      cardio: 0,
+      muscleMass: 0,
+      bodyFat: 0,
+    };
+    return [
+      {
+        name: t('userInfo.radarLabels.strength'),
+        value: scores.strength ? Number(scores.strength).toFixed(2) * 1 : 0,
+        icon: '💪',
+      },
+      {
+        name: t('userInfo.radarLabels.explosivePower'),
+        value: scores.explosivePower
+          ? Number(scores.explosivePower).toFixed(2) * 1
+          : 0,
+        icon: '⚡',
+      },
+      {
+        name: t('userInfo.radarLabels.cardio'),
+        value: scores.cardio ? Number(scores.cardio).toFixed(2) * 1 : 0,
+        icon: '❤️',
+      },
+      {
+        name: t('userInfo.radarLabels.muscle'),
+        value: scores.muscleMass ? Number(scores.muscleMass).toFixed(2) * 1 : 0,
+        icon: '🥩',
+      },
+      {
+        name: t('userInfo.radarLabels.ffmi'),
+        value: scores.bodyFat ? Number(scores.bodyFat).toFixed(2) * 1 : 0,
+        icon: '📊',
+      },
+    ];
+  }, [user.scores, t]);
+
+  // 自定義軸標籤組件
+  const CustomAxisTick = ({ payload, x, y }) => {
+    const data = radarChartData.find(item => item.name === payload.value);
+    return (
+      <g transform={`translate(${x},${y})`}>
+        <text
+          x={0}
+          y={0}
+          dy={16}
+          textAnchor="middle"
+          fill="#2d3748"
+          fontSize={12}
+          fontWeight={600}
+        >
+          {data?.icon} {payload.value}
+        </text>
+      </g>
+    );
+  };
+
+  const handleReport = () => {
+    setShowReportModal(true);
+  };
+
+  const handleOverlayClick = e => {
+    if (e.target === e.currentTarget) {
+      onClose();
+    }
+  };
+
+  return (
+    <div className="ladder-user-card-overlay" onClick={handleOverlayClick}>
+      <div
+        className="ladder-user-card"
+        onClick={e => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className="ladder-user-card-header">
+          <h3>{t('ladderCard.title')}</h3>
+          <button className="ladder-user-card-close" onClick={onClose}>
+            ×
+          </button>
+        </div>
+
+        <div className="ladder-user-card-content">
+          {/* 大頭照區域 */}
+          <div className="ladder-user-card-avatar-section">
+            <div className="ladder-user-card-avatar">
+              {user.avatarUrl && user.avatarUrl.trim() !== '' ? (
+                <img src={user.avatarUrl} alt={user.displayName} />
+              ) : (
+                <div className="ladder-user-card-avatar-placeholder">
+                  {user.displayName?.charAt(0).toUpperCase() || 'U'}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* 雷達圖區域 */}
+          <div className="ladder-user-card-radar-section">
+            <h4 className="radar-section-title">
+              📊 {t('userInfo.radarOverview')}
+            </h4>
+            <ResponsiveContainer width="100%" height={250}>
+              <RadarChart data={radarChartData}>
+                <PolarGrid
+                  gridType="polygon"
+                  stroke="rgba(129, 216, 208, 0.25)"
+                  strokeWidth={2}
+                  strokeDasharray="4 4"
+                />
+                <PolarAngleAxis
+                  dataKey="name"
+                  tick={<CustomAxisTick />}
+                  axisLine={false}
+                />
+                <PolarRadiusAxis
+                  angle={90}
+                  domain={[0, 100]}
+                  tickCount={5}
+                  tick={{
+                    fontSize: 12,
+                    fill: '#2d3748',
+                    fontWeight: 600,
+                  }}
+                  axisLine={false}
+                />
+                <Radar
+                  name={t('userInfo.yourPerformance')}
+                  dataKey="value"
+                  stroke="#81D8D0"
+                  fill="url(#tiffanyGradient)"
+                  fillOpacity={0.8}
+                  strokeWidth={4}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <defs>
+                  <linearGradient
+                    id="tiffanyGradient"
+                    x1="0%"
+                    y1="0%"
+                    x2="100%"
+                    y2="100%"
+                  >
+                    <stop offset="0%" stopColor="#81D8D0" stopOpacity={0.9} />
+                    <stop
+                      offset="50%"
+                      stopColor="#5F9EA0"
+                      stopOpacity={0.7}
+                    />
+                    <stop
+                      offset="100%"
+                      stopColor="#81D8D0"
+                      stopOpacity={0.6}
+                    />
+                  </linearGradient>
+                </defs>
+              </RadarChart>
+            </ResponsiveContainer>
+          </div>
+
+          {/* 用戶基本資訊 */}
+          <div className="ladder-user-card-info">
+            <div className="ladder-user-card-name">{user.displayName}</div>
+            <div className="ladder-user-card-details">
+              <div className="detail-item">
+                <span className="detail-label">{t('ladderCard.ageGroup')}：</span>
+                <span className="detail-value">{getAgeGroupLabel(user.ageGroup)}</span>
+              </div>
+              <div className="detail-item">
+                <span className="detail-label">{t('ladderCard.gender')}：</span>
+                <span className="detail-value">
+                  {user.gender === 'male' ? t('userInfo.male') : t('userInfo.female')}
+                </span>
+              </div>
+              <div className="detail-item">
+                <span className="detail-label">{t('ladderCard.ladderScore')}：</span>
+                <span className="detail-value">{user.ladderScore || 0}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* 訓練背景資訊 */}
+          <div className="ladder-user-card-training">
+            <h4 className="training-title">
+              💪 {t('ladderCard.trainingBackground')}
+            </h4>
+            {user.profession || user.weeklyTrainingHours || user.trainingYears ? (
+              <div className="training-details">
+                {user.profession && (
+                  <div className="training-item">
+                    <span className="training-icon">💼</span>
+                    <span className="training-label">{t('ladderCard.profession')}：</span>
+                    <span className="training-value">{user.profession}</span>
+                  </div>
+                )}
+                {user.weeklyTrainingHours && (
+                  <div className="training-item">
+                    <span className="training-icon">⏰</span>
+                    <span className="training-label">
+                      {t('ladderCard.weeklyTrainingHours')}：
+                    </span>
+                    <span className="training-value">
+                      {user.weeklyTrainingHours} {t('ladderCard.hours')}
+                    </span>
+                  </div>
+                )}
+                {user.trainingYears && (
+                  <div className="training-item">
+                    <span className="training-icon">📅</span>
+                    <span className="training-label">{t('ladderCard.trainingYears')}：</span>
+                    <span className="training-value">
+                      {user.trainingYears} {t('ladderCard.years')}
+                    </span>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="training-empty">
+                <p>{t('ladderCard.noTrainingInfo')}</p>
+                <p className="training-hint">
+                  {t('ladderCard.trainingInfoHint')}
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* 舉報按鈕（僅非當前用戶顯示） */}
+          {!isCurrentUser && (
+            <div className="ladder-user-card-actions">
+              <button
+                className="report-btn"
+                onClick={handleReport}
+              >
+                <span className="report-icon">⚠️</span>
+                {t('ladderCard.report')}
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* 舉報對話框 */}
+      <ReportModal
+        isOpen={showReportModal}
+        onClose={() => {
+          setShowReportModal(false);
+        }}
+        reportedUser={user}
+      />
+    </div>
+  );
+}
+
+LadderUserCard.propTypes = {
+  user: PropTypes.object.isRequired,
+  isOpen: PropTypes.bool.isRequired,
+  onClose: PropTypes.func.isRequired,
+};
+
+export default LadderUserCard;

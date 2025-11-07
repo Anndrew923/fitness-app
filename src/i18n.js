@@ -725,6 +725,57 @@ const zhTW = {
       },
     },
 
+    // 天梯用戶名片
+    ladderCard: {
+      title: '角色屬性',
+      ageGroup: '年齡段',
+      gender: '性別',
+      ladderScore: '天梯分數',
+      trainingBackground: '訓練背景',
+      profession: '職業',
+      weeklyTrainingHours: '每周訓練時數',
+      trainingYears: '訓練年資',
+      hours: '小時',
+      years: '年',
+      noTrainingInfo: '該用戶尚未填寫訓練背景信息',
+      trainingInfoHint: '在個人資料頁面填寫訓練背景，激勵其他健身愛好者！',
+      reportNickname: '舉報暱稱',
+      reportAvatar: '舉報頭像',
+      reportBoth: '舉報兩者',
+      report: '舉報',
+    },
+
+    // 舉報系統
+    report: {
+      title: '舉報用戶',
+      reporting: '您正在舉報',
+      reportType: {
+        label: '舉報類型',
+        nickname: '暱稱',
+        avatar: '頭像',
+        both: '暱稱和頭像',
+      },
+      reason: '舉報原因',
+      reasons: {
+        inappropriate: '不當內容',
+        offensive: '冒犯性內容',
+        spam: '垃圾訊息',
+        other: '其他',
+      },
+      description: '詳細描述（可選）',
+      descriptionPlaceholder: '請描述具體情況...',
+      submit: '提交舉報',
+      submitting: '提交中...',
+      cancel: '取消',
+      selectReason: '請選擇舉報原因',
+      success: '舉報已提交，我們會盡快審查',
+      successHidden: '舉報已提交，該用戶的內容已自動隱藏',
+      error: '舉報失敗，請稍後再試',
+      alreadyReported: '您已經舉報過此用戶，請等待審查結果',
+      cannotReportSelf: '無法舉報自己',
+      needLogin: '請先登入',
+    },
+
     // 訪客模式
     guestMode: {
       title: '歡迎使用最強肉體',
@@ -2283,6 +2334,57 @@ const enUS = {
         myRankTip:
           '💡 Tip: Your rank is {{rank}}. Click the button above to view nearby competitors',
       },
+    },
+
+    // Ladder User Card
+    ladderCard: {
+      title: 'Character Attributes',
+      ageGroup: 'Age Group',
+      gender: 'Gender',
+      ladderScore: 'Ladder Score',
+      trainingBackground: 'Training Background',
+      profession: 'Profession',
+      weeklyTrainingHours: 'Weekly Training Hours',
+      trainingYears: 'Training Years',
+      hours: 'hours',
+      years: 'years',
+      noTrainingInfo: 'This user has not filled in training background information',
+      trainingInfoHint: 'Fill in your training background on the profile page to inspire other fitness enthusiasts!',
+      reportNickname: 'Report Nickname',
+      reportAvatar: 'Report Avatar',
+      reportBoth: 'Report Both',
+      report: 'Report',
+    },
+
+    // Report System
+    report: {
+      title: 'Report User',
+      reporting: 'You are reporting',
+      reportType: {
+        label: 'Report Type',
+        nickname: 'Nickname',
+        avatar: 'Avatar',
+        both: 'Nickname and Avatar',
+      },
+      reason: 'Reason',
+      reasons: {
+        inappropriate: 'Inappropriate Content',
+        offensive: 'Offensive Content',
+        spam: 'Spam',
+        other: 'Other',
+      },
+      description: 'Description (Optional)',
+      descriptionPlaceholder: 'Please describe the situation...',
+      submit: 'Submit Report',
+      submitting: 'Submitting...',
+      cancel: 'Cancel',
+      selectReason: 'Please select a reason',
+      success: 'Report submitted, we will review it soon',
+      successHidden: 'Report submitted, the user\'s content has been automatically hidden',
+      error: 'Report failed, please try again later',
+      alreadyReported: 'You have already reported this user, please wait for review',
+      cannotReportSelf: 'Cannot report yourself',
+      needLogin: 'Please login first',
     },
 
     // 訪客模式
