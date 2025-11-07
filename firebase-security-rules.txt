@@ -2,247 +2,95 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    function signedIn() { return request.auth != null; }
-    function isOwner(uid) { return signedIn() && request.auth.uid == uid; }
+    function signedIn() {
+      return request.auth != null;
+    }
+    function isOwner(uid) {
+      return signedIn() && request.auth.uid == uid;
+    }
     function onlyMutate(keys) {
+      // 僅允許改動指定欄位（適用 update）
       return request.resource.data.diff(resource.data).affectedKeys().hasOnly(keys);
     }
 
+    // users：登入者可讀（顯示暱稱/頭像/排行榜等），僅本人可寫
+    // ✅ 新增：允許登入用戶更新其他用戶的點讚相關字段
     match /users/{userId} {
       allow read: if signedIn();
-      allow create, update, delete: if isOwner(userId)
-        && request.resource.data.userId == userId && !('isAdmin' in request.resource.data);
+
+      // 僅本人可創建/刪除自己的文檔
+      allow create, delete: if isOwner(userId)
+        && request.resource.data.userId == userId
+        && !('isAdmin' in request.resource.data);
+
+      // 本人可更新自己的文檔（原有規則）
+      allow update: if isOwner(userId)
+        && request.resource.data.userId == userId
+        && !('isAdmin' in request.resource.data);
+
+      // ✅ 新增：允許登入用戶更新其他用戶的點讚相關字段
+      allow update: if signedIn()
+        && onlyMutate(['ladderLikes', 'ladderLikeCount'])
+        && request.resource.data.userId == resource.data.userId; // 確保不能修改 userId
     }
 
+    // friendInvitations：僅參與雙方可讀；from 可建；參與雙方可改狀態
     match /friendInvitations/{inviteId} {
       allow read: if signedIn() && (
         resource.data.fromUserId == request.auth.uid || resource.data.toUserId == request.auth.uid
       );
-      allow create: if signedIn() && request.resource.data.fromUserId == request.auth.uid
-        && request.resource.data.toUserId is string && request.resource.data.toUserId != request.auth.uid;
-      allow update: if signedIn() && (resource.data.fromUserId == request.auth.uid || resource.data.toUserId == request.auth.uid)
+      allow create: if signedIn()
+        && request.resource.data.fromUserId == request.auth.uid
+        && request.resource.data.toUserId is string
+        && request.resource.data.toUserId != request.auth.uid;
+      // 僅修改狀態/時間等安全欄位
+      allow update: if signedIn()
+        && (resource.data.fromUserId == request.auth.uid || resource.data.toUserId == request.auth.uid)
         && onlyMutate(['status','updatedAt']);
       allow delete: if false;
     }
 
+    // communityPosts：登入者可讀；作者可改文章；他人僅能改 likes/comments
     match /communityPosts/{postId} {
       allow read: if signedIn();
-      allow create: if signedIn() && request.resource.data.userId == request.auth.uid;
-      allow update: if signedIn() && ((resource.data.userId == request.auth.uid) || onlyMutate(['likes','comments']));
+      allow create: if signedIn()
+        && request.resource.data.userId == request.auth.uid;
+      // 作者可改內容/隱私；其他登入者僅能改 likes/comments
+      allow update: if signedIn() && (
+        (resource.data.userId == request.auth.uid) ||
+        (onlyMutate(['likes','comments']))
+      );
       allow delete: if signedIn() && resource.data.userId == request.auth.uid;
     }
 
+    // assessments：僅本人可 CRUD
     match /assessments/{assessmentId} {
       allow read, update, delete: if signedIn() && resource.data.userId == request.auth.uid;
       allow create: if signedIn() && request.resource.data.userId == request.auth.uid;
     }
 
+    // ladderRankings：登入者可讀；本人可 CRUD 自己的排名紀錄
     match /ladderRankings/{rankingId} {
       allow read: if signedIn();
       allow create: if signedIn() && request.resource.data.userId == request.auth.uid;
       allow update, delete: if signedIn() && resource.data.userId == request.auth.uid;
     }
 
+    // history：僅本人可 CRUD
     match /history/{historyId} {
       allow read, update, delete: if signedIn() && resource.data.userId == request.auth.uid;
       allow create: if signedIn() && request.resource.data.userId == request.auth.uid;
     }
 
+    // userSettings：docId 必須是 uid，僅本人可 CRUD
     match /userSettings/{settingId} {
       allow read, create, update, delete: if isOwner(settingId);
     }
 
+    // systemConfig：僅讀（無人可寫）
     match /systemConfig/{configId} {
       allow read: if signedIn();
       allow write: if false;
     }
   }
 }
-// Firebase Firestore Security Rules for 健身應用 - 完整版
-// 包含：用戶管理、好友系統、社群動態、挑戰系統、評估記錄等
-// 請將以下規則複製到您的 Firebase Console 中的 Firestore 安全規則
-
-rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
-    
-    // 用戶文檔規則
-    match /users/{userId} {
-      // 任何登入用戶都可以讀取其他用戶的基本資訊
-      allow read: if request.auth != null;
-      
-      // 只有本人可以完全控制自己的文檔
-      allow write: if request.auth != null && request.auth.uid == userId;
-    }
-    
-    // 好友邀請規則 - 支持雙向邀請機制
-    match /friendInvitations/{inviteId} {
-      // 任何登入用戶都可以讀取邀請（用於查詢好友關係）
-      allow read: if request.auth != null;
-      
-      // 任何登入用戶都可以創建邀請（包括反向邀請）
-      allow create: if request.auth != null && 
-        request.resource.data.fromUserId == request.auth.uid;
-      
-      // 任何登入用戶都可以更新邀請狀態
-      allow update: if request.auth != null;
-      
-      // 不允許刪除邀請記錄（保留歷史）
-      allow delete: if false;
-    }
-    
-    // 好友訊息規則
-    match /friendMessages/{messageId} {
-      // 任何登入用戶都可以讀取訊息
-      allow read: if request.auth != null;
-      
-      // 任何登入用戶都可以發送訊息
-      allow create: if request.auth != null && 
-        request.resource.data.fromUserId == request.auth.uid;
-      
-      // 允許更新訊息狀態（已讀等）
-      allow update: if request.auth != null;
-      
-      // 不允許刪除訊息
-      allow delete: if false;
-    }
-    
-    // 好友挑戰規則 - 新增挑戰留言板功能
-    match /friendChallenges/{challengeId} {
-      // 任何登入用戶都可以讀取挑戰
-      allow read: if request.auth != null;
-      
-      // 任何登入用戶都可以創建挑戰
-      allow create: if request.auth != null && 
-        request.resource.data.fromUserId == request.auth.uid;
-      
-      // 允許更新挑戰狀態（接受、拒絕、完成等）
-      allow update: if request.auth != null;
-      
-      // 不允許刪除挑戰記錄（保留歷史）
-      allow delete: if false;
-    }
-    
-    // 留言板規則 - 新增留言板功能
-    match /messageBoard/{messageId} {
-      // 任何登入用戶都可以讀取留言
-      allow read: if request.auth != null;
-      
-      // 任何登入用戶都可以發布留言
-      allow create: if request.auth != null && 
-        request.resource.data.userId == request.auth.uid;
-      
-      // 只有留言作者或留言板主人可以更新留言
-      allow update: if request.auth != null && 
-        (resource.data.userId == request.auth.uid || 
-         resource.data.boardOwnerId == request.auth.uid);
-      
-      // 只有留言作者或留言板主人可以刪除留言
-      allow delete: if request.auth != null && 
-        (resource.data.userId == request.auth.uid || 
-         resource.data.boardOwnerId == request.auth.uid);
-    }
-    
-    // 社群動態規則 - 社群頁面功能
-    match /communityPosts/{postId} {
-      // 任何登入用戶都可以讀取動態
-      allow read: if request.auth != null;
-      
-      // 任何登入用戶都可以發布動態
-      allow create: if request.auth != null && 
-        request.resource.data.userId == request.auth.uid;
-      
-      // 只有動態作者可以更新自己的動態
-      allow update: if request.auth != null && 
-        resource.data.userId == request.auth.uid;
-      
-      // 只有動態作者可以刪除自己的動態
-      allow delete: if request.auth != null && 
-        resource.data.userId == request.auth.uid;
-    }
-    
-    // 評估記錄規則 - 力量、爆發力、心肺、肌肉量、體脂等
-    match /assessments/{assessmentId} {
-      // 只有本人可以讀取自己的評估記錄
-      allow read: if request.auth != null && 
-        resource.data.userId == request.auth.uid;
-      
-      // 只有本人可以創建評估記錄
-      allow create: if request.auth != null && 
-        request.resource.data.userId == request.auth.uid;
-      
-      // 只有本人可以更新自己的評估記錄
-      allow update: if request.auth != null && 
-        resource.data.userId == request.auth.uid;
-      
-      // 只有本人可以刪除自己的評估記錄
-      allow delete: if request.auth != null && 
-        resource.data.userId == request.auth.uid;
-    }
-    
-    // 天梯排名規則
-    match /ladderRankings/{rankingId} {
-      // 任何登入用戶都可以讀取排名
-      allow read: if request.auth != null;
-      
-      // 只有本人可以創建自己的排名記錄
-      allow create: if request.auth != null && 
-        request.resource.data.userId == request.auth.uid;
-      
-      // 只有本人可以更新自己的排名記錄
-      allow update: if request.auth != null && 
-        resource.data.userId == request.auth.uid;
-      
-      // 只有本人可以刪除自己的排名記錄
-      allow delete: if request.auth != null && 
-        resource.data.userId == request.auth.uid;
-    }
-    
-    // 歷史記錄規則
-    match /history/{historyId} {
-      // 只有本人可以讀取自己的歷史記錄
-      allow read: if request.auth != null && 
-        resource.data.userId == request.auth.uid;
-      
-      // 只有本人可以創建歷史記錄
-      allow create: if request.auth != null && 
-        request.resource.data.userId == request.auth.uid;
-      
-      // 只有本人可以更新自己的歷史記錄
-      allow update: if request.auth != null && 
-        resource.data.userId == request.auth.uid;
-      
-      // 只有本人可以刪除自己的歷史記錄
-      allow delete: if request.auth != null && 
-        resource.data.userId == request.auth.uid;
-    }
-    
-    // 用戶設定規則
-    match /userSettings/{settingId} {
-      // 只有本人可以讀取自己的設定
-      allow read: if request.auth != null && 
-        settingId == request.auth.uid;
-      
-      // 只有本人可以創建自己的設定
-      allow create: if request.auth != null && 
-        settingId == request.auth.uid;
-      
-      // 只有本人可以更新自己的設定
-      allow update: if request.auth != null && 
-        settingId == request.auth.uid;
-      
-      // 只有本人可以刪除自己的設定
-      allow delete: if request.auth != null && 
-        settingId == request.auth.uid;
-    }
-    
-    // 系統配置規則（如果需要）
-    match /systemConfig/{configId} {
-      // 任何登入用戶都可以讀取系統配置
-      allow read: if request.auth != null;
-      
-      // 只有管理員可以修改系統配置（這裡需要額外的管理員檢查）
-      allow write: if false; // 暫時禁用寫入，需要時可以調整
-    }
-  }
-} 

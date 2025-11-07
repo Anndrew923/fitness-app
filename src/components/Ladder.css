@@ -488,9 +488,18 @@
   color: #666;
 }
 
+/* ✅ 新增：分數區域容器（包含分數和點讚） */
+.ladder__score-section {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 100px;
+}
+
 .ladder__score {
   text-align: right;
   min-width: 70px;
+  flex-shrink: 0;
 }
 
 .ladder__score-value {
@@ -503,6 +512,131 @@
   font-size: 11px;
   color: #666;
   margin-left: 2px;
+}
+
+/* ✅ 修改：點讚按鈕 - 重置全局 button 樣式，避免裁切 */
+.ladder__like-btn {
+  /* 重置全局 button 樣式 */
+  display: flex !important; /* 覆蓋 display: block */
+  width: auto !important; /* 覆蓋 width: 100% */
+  max-width: none !important; /* 覆蓋 max-width: 300px */
+  margin: 0 !important; /* 覆蓋 margin: 0.4rem auto */
+
+  /* 我們的樣式 */
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px !important; /* 覆蓋 padding: 0.6rem */
+  background: transparent !important; /* 完全透明 */
+  border: none !important; /* 覆蓋 border: 1px solid #ccc */
+  cursor: pointer;
+  transition: all 0.3s ease;
+  opacity: 0.5; /* 預設不顯眼 */
+  border-radius: 8px !important; /* 覆蓋 border-radius: 4px */
+  flex-shrink: 0;
+  overflow: visible; /* 確保內容不被裁切 */
+  font-size: inherit !important; /* 覆蓋 font-size: 0.9rem */
+  font-weight: normal !important; /* 覆蓋 font-weight: 600 */
+  box-shadow: none !important; /* 覆蓋 box-shadow */
+}
+
+/* 佔位按鈕（匿名用戶） */
+.ladder__like-btn--placeholder {
+  cursor: default;
+  pointer-events: none; /* 不可點擊 */
+}
+
+/* 已點讚狀態 - 高亮（無背景色） */
+.ladder__like-btn.liked {
+  opacity: 1;
+  background: transparent !important; /* 完全透明 */
+  transform: scale(1.05);
+}
+
+/* 懸停效果（無背景色） */
+.ladder__like-btn:hover:not(:disabled):not(.ladder__like-btn--placeholder) {
+  opacity: 0.8;
+  background: transparent !important; /* 完全透明 */
+  transform: scale(1.1);
+}
+
+/* 已點讚懸停效果（無背景色） */
+.ladder__like-btn.liked:hover:not(:disabled) {
+  background: transparent !important; /* 完全透明 */
+  transform: scale(1.15);
+}
+
+/* 禁用狀態 */
+.ladder__like-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ✅ 修改：大拇指圖標 - 增加空間，避免被切掉 */
+.ladder__like-icon {
+  font-size: 24px;
+  line-height: 1; /* 改為 1，讓 emoji 自然顯示 */
+  height: auto; /* 改為 auto，讓 emoji 自然高度 */
+  min-height: 28px; /* 增加最小高度，給 emoji 更多空間 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease;
+  overflow: visible; /* 確保不被切掉 */
+  padding: 2px 0; /* 增加一點上下 padding 給 emoji 空間 */
+}
+
+.ladder__like-btn:hover:not(:disabled):not(.ladder__like-btn--placeholder) .ladder__like-icon {
+  transform: scale(1.2);
+}
+
+.ladder__like-btn.liked .ladder__like-icon {
+  filter: drop-shadow(0 2px 4px rgba(255, 107, 53, 0.3));
+}
+
+/* ✅ 修改：讚數文字 - 確保有足夠空間展示 */
+.ladder__like-count {
+  font-size: 12px;
+  font-weight: 600;
+  color: #666;
+  line-height: 1.2; /* 增加 line-height 確保數字完整顯示 */
+  min-height: 14px; /* 最小高度確保數字有空間 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.3s ease;
+  white-space: nowrap; /* 防止數字換行 */
+  overflow: visible; /* 確保數字不被裁切 */
+}
+
+.ladder__like-btn.liked .ladder__like-count {
+  color: #ff6b35;
+  font-weight: 700;
+}
+
+/* 手機版優化 */
+@media (max-width: 768px) {
+  .ladder__score-section {
+    gap: 8px;
+    min-width: 80px;
+  }
+
+  .ladder__like-btn {
+    padding: 3px 6px; /* 手機版也減少 padding */
+  }
+
+  .ladder__like-icon {
+    font-size: 20px;
+    min-height: 24px; /* 手機版增加最小高度，給 emoji 更多空間 */
+    padding: 1px 0; /* 手機版減少 padding */
+  }
+
+  .ladder__like-count {
+    font-size: 11px;
+    min-height: 13px; /* 手機版最小高度 */
+    line-height: 1.2; /* 確保數字完整顯示 */
+  }
 }
 
 .ladder__empty {

@@ -698,6 +698,8 @@ const zhTW = {
         title: '暫無本周新進榜數據',
         subtitle: '本周完成評測即可上榜！',
       },
+      like: '點讚',
+      unlike: '取消點讚',
       time: {
         justNow: '剛剛',
         minutesAgo: '{{count}}分鐘前',
@@ -774,6 +776,19 @@ const zhTW = {
       alreadyReported: '您已經舉報過此用戶，請等待審查結果',
       cannotReportSelf: '無法舉報自己',
       needLogin: '請先登入',
+    },
+
+    // 內容規範提醒
+    moderationNotice: {
+      title: '內容規範提醒',
+      description: '為了維護良好的社群環境，請確保您的暱稱和頭像符合以下規範：',
+      ensure: '請確保您的內容：',
+      avoid: {
+        inappropriate: '不包含不當、冒犯性或敏感內容',
+        sensitive: '不包含政治、宗教等敏感話題',
+        uncomfortable: '不會讓其他用戶感到不適',
+      },
+      warning: '若您的暱稱或頭像被舉報並經審查確認違規，將被自動刪除。',
     },
 
     // 訪客模式
@@ -2308,6 +2323,8 @@ const enUS = {
         title: 'No new rankings this week',
         subtitle: 'Complete assessments this week to rank!',
       },
+      like: 'Like',
+      unlike: 'Unlike',
       time: {
         justNow: 'Just now',
         minutesAgo: '{{count}} minutes ago',
@@ -2385,6 +2402,19 @@ const enUS = {
       alreadyReported: 'You have already reported this user, please wait for review',
       cannotReportSelf: 'Cannot report yourself',
       needLogin: 'Please login first',
+    },
+
+    // Content Moderation Notice
+    moderationNotice: {
+      title: 'Community Guidelines',
+      description: 'To keep our community safe and welcoming, please make sure your nickname and avatar follow these guidelines:',
+      ensure: 'Your content should:',
+      avoid: {
+        inappropriate: 'Be free of inappropriate, offensive, or sensitive content',
+        sensitive: 'Avoid political, religious, or other sensitive topics',
+        uncomfortable: 'Not make other users feel uncomfortable',
+      },
+      warning: 'Content that violates these guidelines will be removed automatically if reported and confirmed.',
     },
 
     // 訪客模式

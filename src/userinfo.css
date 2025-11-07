@@ -1898,6 +1898,67 @@
   word-break: break-word;
 }
 
+/* ✅ 內容規範提醒樣式 */
+.moderation-notice {
+  margin-top: 20px;
+  padding: 16px;
+  background: rgba(255, 193, 7, 0.15);
+  border-radius: 10px;
+  border: 1px solid rgba(255, 193, 7, 0.4);
+  border-left: 4px solid #ffc107;
+}
+
+.moderation-notice-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+  color: #ffc107;
+  font-size: 15px;
+}
+
+.moderation-icon {
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.moderation-notice-content {
+  color: #e2e8f0;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.moderation-notice-content p {
+  margin: 8px 0;
+  color: #cbd5e0;
+}
+
+.moderation-notice-content ul {
+  margin: 10px 0 10px 20px;
+  padding-left: 0;
+  list-style-position: outside;
+}
+
+.moderation-notice-content li {
+  margin: 6px 0;
+  color: #cbd5e0;
+  padding-left: 8px;
+}
+
+.moderation-warning {
+  margin-top: 12px !important;
+  padding: 10px;
+  background: rgba(255, 87, 34, 0.2);
+  border-radius: 6px;
+  border-left: 3px solid #ff5722;
+  color: #ffab91 !important;
+}
+
+.moderation-warning strong {
+  color: #ffab91;
+  font-weight: 600;
+}
+
 .detail-item {
   display: flex;
   align-items: center;

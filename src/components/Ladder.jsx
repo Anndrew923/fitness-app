@@ -13,6 +13,7 @@ import { formatScore, getAgeGroup } from '../utils';
 import './Ladder.css';
 import { useTranslation } from 'react-i18next';
 import LadderUserCard from './LadderUserCard';
+import LadderLikeSystem from '../utils/ladderLikeSystem';
 
 const Ladder = () => {
   const { userData } = useUser();
@@ -32,6 +33,9 @@ const Ladder = () => {
   const forceReloadRef = useRef(false);
   const loadingRef = useRef(false);
   const forceReloadProcessedRef = useRef(false);
+  // ✅ 新增：點讚相關狀態
+  const [likeProcessing, setLikeProcessing] = useState(new Set());
+  const [likedUsers, setLikedUsers] = useState(new Set());
 
   const ageGroups = useMemo(
     () => [
@@ -133,6 +137,9 @@ const Ladder = () => {
             profession: docData.profession || '',
             weeklyTrainingHours: docData.weeklyTrainingHours || 0,
             trainingYears: docData.trainingYears || 0,
+            // ✅ 新增：點讚相關數據
+            ladderLikeCount: docData.ladderLikeCount || 0,
+            ladderLikes: docData.ladderLikes || [],
           });
         }
       });
@@ -320,6 +327,145 @@ const Ladder = () => {
       }, 0);
     }
   }, [location.state, userData, loadLadderData]);
+
+  // ✅ 新增：載入點讚狀態
+  useEffect(() => {
+    if (!auth.currentUser || ladderData.length === 0) return;
+
+    const loadLikeStatus = async () => {
+      const likedSet = new Set();
+      for (const user of ladderData) {
+        if (user.id === auth.currentUser.uid) continue; // 跳過自己
+        try {
+          const isLiked = await LadderLikeSystem.checkIfLiked(user.id);
+          if (isLiked) {
+            likedSet.add(user.id);
+          }
+        } catch (error) {
+          console.error(`檢查用戶 ${user.id} 點讚狀態失敗:`, error);
+        }
+      }
+      setLikedUsers(likedSet);
+    };
+
+    loadLikeStatus();
+  }, [ladderData]);
+
+  // ✅ 新增：點讚/取消點讚處理函數
+  const handleToggleLike = useCallback(
+    async (userId, e) => {
+      if (e) {
+        e.stopPropagation(); // 防止觸發卡片點擊
+      }
+
+      if (!auth.currentUser) {
+        // 可以顯示需要登入提示
+        return;
+      }
+
+      // ✅ 修改：允許點讚自己（移除限制）
+
+      // 防抖：避免重複點擊
+      if (likeProcessing.has(userId)) {
+        return;
+      }
+
+      const isLiked = likedUsers.has(userId);
+
+      // 樂觀更新：立即更新 UI
+      setLikedUsers(prev => {
+        const newSet = new Set(prev);
+        if (isLiked) {
+          newSet.delete(userId);
+        } else {
+          newSet.add(userId);
+        }
+        return newSet;
+      });
+
+      // 更新本地數據
+      setLadderData(prevData =>
+        prevData.map(user =>
+          user.id === userId
+            ? {
+                ...user,
+                ladderLikeCount: isLiked
+                  ? Math.max((user.ladderLikeCount || 0) - 1, 0)
+                  : (user.ladderLikeCount || 0) + 1,
+              }
+            : user
+        )
+      );
+
+      // 設置處理狀態
+      setLikeProcessing(prev => new Set(prev).add(userId));
+
+      try {
+        const result = isLiked
+          ? await LadderLikeSystem.unlikeUser(userId)
+          : await LadderLikeSystem.likeUser(userId);
+
+        if (!result.success) {
+          // 回滾樂觀更新
+          setLikedUsers(prev => {
+            const newSet = new Set(prev);
+            if (isLiked) {
+              newSet.add(userId);
+            } else {
+              newSet.delete(userId);
+            }
+            return newSet;
+          });
+
+          setLadderData(prevData =>
+            prevData.map(user =>
+              user.id === userId
+                ? {
+                    ...user,
+                    ladderLikeCount: isLiked
+                      ? (user.ladderLikeCount || 0) + 1
+                      : Math.max((user.ladderLikeCount || 0) - 1, 0),
+                  }
+                : user
+            )
+          );
+        }
+      } catch (error) {
+        console.error('點讚操作失敗:', error);
+        // 回滾樂觀更新
+        setLikedUsers(prev => {
+          const newSet = new Set(prev);
+          if (isLiked) {
+            newSet.add(userId);
+          } else {
+            newSet.delete(userId);
+          }
+          return newSet;
+        });
+
+        setLadderData(prevData =>
+          prevData.map(user =>
+            user.id === userId
+              ? {
+                  ...user,
+                  ladderLikeCount: isLiked
+                    ? (user.ladderLikeCount || 0) + 1
+                    : Math.max((user.ladderLikeCount || 0) - 1, 0),
+                }
+              : user
+          )
+        );
+      } finally {
+        // 清除處理狀態
+        setLikeProcessing(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(userId);
+          return newSet;
+        });
+      }
+    },
+    [likedUsers, likeProcessing]
+  );
 
   // 簡化動畫樣式 - 動畫已移除
   const getAnimationStyle = useMemo(() => {
@@ -757,13 +903,44 @@ const Ladder = () => {
                 </div>
               </div>
 
-              <div className="ladder__score">
-                <span className="ladder__score-value">
-                  {formatScore(user.ladderScore)}
-                </span>
-                <span className="ladder__score-label">
-                  {t('community.ui.pointsUnit')}
-                </span>
+              {/* ✅ 新增：分數區域容器（包含分數和點讚） */}
+              <div className="ladder__score-section">
+                <div className="ladder__score">
+                  <span className="ladder__score-value">
+                    {formatScore(user.ladderScore)}
+                  </span>
+                  <span className="ladder__score-label">
+                    {t('community.ui.pointsUnit')}
+                  </span>
+                </div>
+
+                {/* ✅ 修改：點讚按鈕 - 所有用戶都顯示 */}
+                {user.isAnonymous ? (
+                  // 匿名用戶：顯示佔位按鈕（不可點擊）
+                  <div className="ladder__like-btn ladder__like-btn--placeholder">
+                    <span className="ladder__like-icon">👍</span>
+                    <span className="ladder__like-count">
+                      {user.ladderLikeCount || 0}
+                    </span>
+                  </div>
+                ) : (
+                  // 非匿名用戶：顯示可點擊的按鈕（包括自己）
+                  <button
+                    className={`ladder__like-btn ${likedUsers.has(user.id) ? 'liked' : ''}`}
+                    onClick={e => handleToggleLike(user.id, e)}
+                    disabled={likeProcessing.has(user.id)}
+                    title={
+                      likedUsers.has(user.id)
+                        ? t('ladder.unlike')
+                        : t('ladder.like')
+                    }
+                  >
+                    <span className="ladder__like-icon">👍</span>
+                    <span className="ladder__like-count">
+                      {user.ladderLikeCount || 0}
+                    </span>
+                  </button>
+                )}
               </div>
             </div>
           ))

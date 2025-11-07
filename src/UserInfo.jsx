@@ -274,6 +274,26 @@ const SubmitConfirmModal = ({
                 </span>
               </div>
             </div>
+
+            {/* ✅ 新增：內容規範提醒 */}
+            <div className="moderation-notice">
+              <div className="moderation-notice-header">
+                <span className="moderation-icon">⚠️</span>
+                <strong>{t('moderationNotice.title')}</strong>
+              </div>
+              <div className="moderation-notice-content">
+                <p>{t('moderationNotice.description')}</p>
+                <p>{t('moderationNotice.ensure')}</p>
+                <ul>
+                  <li>{t('moderationNotice.avoid.inappropriate')}</li>
+                  <li>{t('moderationNotice.avoid.sensitive')}</li>
+                  <li>{t('moderationNotice.avoid.uncomfortable')}</li>
+                </ul>
+                <p className="moderation-warning">
+                  <strong>{t('moderationNotice.warning')}</strong>
+                </p>
+              </div>
+            </div>
           </div>
         </div>
         <div className="modal-footer submit-confirm-footer">
