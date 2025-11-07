@@ -339,6 +339,9 @@ body.ladder-card-open {
   .ladder-user-card {
     max-width: 90%;
     padding: 20px;
+    /* ✅ 新增：為底部導覽列留出空間（64px 導覽列高度 + 16px 安全間距） */
+    padding-bottom: 80px;
+    box-sizing: border-box; /* 確保 padding 包含在高度內 */
   }
 
   .ladder-user-card-avatar {
@@ -361,5 +364,10 @@ body.ladder-card-open {
   .detail-item,
   .training-item {
     padding: 10px;
+  }
+
+  /* ✅ 新增：確保舉報按鈕區域有足夠的底部間距 */
+  .ladder-user-card-actions {
+    margin-bottom: 20px;
   }
 }
