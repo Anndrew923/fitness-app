@@ -285,6 +285,7 @@ const zhTW = {
       saveResults: '儲存修煉結果',
       submitToLadder: '提交到排行榜',
       updateLadderScore: '更新排行榜分數',
+      getVerification: '獲得榮譽認證',
       startTests: '角色技能樹',
       dataSaved: '角色已儲存成功！',
       saveFailed: '儲存失敗，請稍後再試',
@@ -789,6 +790,55 @@ const zhTW = {
         uncomfortable: '不會讓其他用戶感到不適',
       },
       warning: '若您的暱稱或頭像被舉報並經審查確認違規，將被自動刪除。',
+    },
+
+    // 榮譽認證
+    verification: {
+      title: '榮譽認證',
+      description: '榮譽認證是官方對您訓練成果的認可',
+      benefits: {
+        title: '認證的好處',
+        badge: '天梯分數旁邊顯示認證徽章',
+        card: '天梯名片顯示「榮譽認證」標記',
+        credibility: '提升您的訓練成果可信度',
+        trust: '讓其他用戶更容易信任您的分數',
+      },
+      process: {
+        title: '申請流程',
+        step1: '完成所有評測項目並提交天梯分數',
+        step2: '透過 FB、IG 等社群將訓練影片傳給管理員',
+        step3: '填寫申請表單（社群帳號、影片連結）',
+        step4: '等待管理員審核（通常 1-3 個工作天）',
+        step5: '審核通過後，您的分數將顯示認證徽章',
+      },
+      form: {
+        title: '申請榮譽認證',
+        socialPlatform: '社群平台',
+        socialAccount: '社群帳號',
+        videoLink: '訓練影片連結',
+        description: '申請說明（選填）',
+        submit: '提交申請',
+        submitting: '提交中...',
+        placeholder: {
+          socialAccount: '請輸入您的 FB 或 IG 帳號',
+          videoLink: 'https://...',
+          description: '可以補充說明您的訓練內容或特殊情況',
+        },
+      },
+      status: {
+        verified: '您已通過榮譽認證',
+        pending: '您的申請正在審核中',
+        rejected: '您的申請已被拒絕',
+        notApplied: '尚未申請認證',
+      },
+      messages: {
+        success: '申請已提交，我們會盡快審核',
+        error: '申請失敗，請稍後再試',
+        alreadyApplied: '您已有待審核的申請',
+        alreadyVerified: '您已經通過榮譽認證',
+        noLadderScore: '請先提交天梯分數',
+        cooldown: '上次申請被拒絕，請等待 {days} 天後再申請',
+      },
     },
 
     // 訪客模式
@@ -1882,6 +1932,7 @@ const enUS = {
       saveResults: 'Save Training Results',
       submitToLadder: 'Submit to Rankings',
       updateLadderScore: 'Update Ranking Score',
+      getVerification: 'Get Honor Verification',
       startTests: 'Skill Tree',
       dataSaved: 'Character saved successfully!',
       saveFailed: 'Save failed, please try again',
@@ -2415,6 +2466,55 @@ const enUS = {
         uncomfortable: 'Not make other users feel uncomfortable',
       },
       warning: 'Content that violates these guidelines will be removed automatically if reported and confirmed.',
+    },
+
+    // Honor Verification
+    verification: {
+      title: 'Verified Badge',
+      description: 'Get officially verified to show your training achievements are legit',
+      benefits: {
+        title: 'Why Get Verified?',
+        badge: 'Verified badge next to your ladder score ⭐',
+        card: 'Verified mark on your ladder profile',
+        credibility: 'Build credibility for your training results',
+        trust: 'Show others your score is legitimate',
+      },
+      process: {
+        title: 'How It Works',
+        step1: 'Complete all assessments and submit your ladder score',
+        step2: 'Share your training video with us via Facebook, Instagram, or other social platforms',
+        step3: 'Fill out the application form with your social account and video link',
+        step4: 'We\'ll review your application (typically 1-3 business days)',
+        step5: 'Once approved, you\'ll get a verification badge on your score',
+      },
+      form: {
+        title: 'Apply for Verification',
+        socialPlatform: 'Social Platform',
+        socialAccount: 'Social Account',
+        videoLink: 'Training Video Link',
+        description: 'Additional Notes (Optional)',
+        submit: 'Submit Application',
+        submitting: 'Submitting...',
+        placeholder: {
+          socialAccount: 'Your Facebook or Instagram handle',
+          videoLink: 'https://...',
+          description: 'Tell us about your training or any special circumstances',
+        },
+      },
+      status: {
+        verified: 'You\'re verified! 🎉',
+        pending: 'We\'re reviewing your application',
+        rejected: 'Your application was not approved',
+        notApplied: 'Not verified yet',
+      },
+      messages: {
+        success: 'Application submitted! We\'ll review it shortly.',
+        error: 'Something went wrong. Please try again.',
+        alreadyApplied: 'You already have an application pending review',
+        alreadyVerified: 'You\'re already verified!',
+        noLadderScore: 'Please submit your ladder score first',
+        cooldown: 'Your last application was rejected. Please wait {days} days before applying again.',
+      },
     },
 
     // 訪客模式

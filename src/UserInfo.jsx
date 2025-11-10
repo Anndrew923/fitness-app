@@ -1982,6 +1982,20 @@ function UserInfo({ testData, onLogout, clearTestData }) {
                     </span>
                   </button>
                 )}
+
+                {/* ✅ 新增：獲得榮譽認證按鈕 */}
+                {submittedLadderScore > 0 && (
+                  <button
+                    onClick={() => navigate('/verification')}
+                    className="action-btn verification-btn"
+                    disabled={loading}
+                  >
+                    <span className="btn-icon">⭐</span>
+                    <span className="btn-text">
+                      {t('userInfo.getVerification')}
+                    </span>
+                  </button>
+                )}
               </div>
 
               {/* 天梯限制資訊 */}

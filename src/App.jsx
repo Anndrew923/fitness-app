@@ -37,6 +37,7 @@ const Ladder = React.lazy(() => import('./components/Ladder'));
 const Settings = React.lazy(() => import('./components/Settings'));
 const Community = React.lazy(() => import('./components/Community'));
 const FriendFeed = React.lazy(() => import('./components/FriendFeed'));
+const Verification = React.lazy(() => import('./pages/Verification'));
 import GlobalAdBanner from './components/GlobalAdBanner';
 import performanceMonitor from './utils/performanceMonitor';
 import './App.css';
@@ -488,6 +489,10 @@ function AppContent() {
               <Route path="/features" element={<Features />} />
               <Route path="/disclaimer" element={<Disclaimer />} />
               <Route path="/contact" element={<Contact />} />
+              <Route
+                path="/verification"
+                element={<ProtectedRoute element={<Verification />} />}
+              />
               <Route path="*" element={<div>{t('common.notFound')}</div>} />
             </Routes>
           </div>
