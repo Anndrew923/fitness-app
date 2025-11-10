@@ -2,7 +2,7 @@
   min-height: 100vh;
   background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
   padding: 20px;
-  padding-bottom: 100px; /* 為底部導航欄留出空間 */
+  padding-bottom: 180px; /* 增加為 180px，確保提交按鈕與底部導覽列有足夠間距 */
 }
 
 .verification-container {
@@ -75,6 +75,23 @@
   color: #2c3e50;
   display: flex;
   align-items: center;
+}
+
+.status-description {
+  font-size: 14px;
+  color: #666;
+  margin: 10px 0 0 0;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.status-not-applied .status-description {
+  color: #667eea;
+  font-weight: 500;
+}
+
+.status-pending .status-description {
+  color: #28a745;
 }
 
 .status-details {
@@ -164,8 +181,13 @@
   background: #fff;
   border-radius: 12px;
   padding: 30px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  margin-bottom: 30px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  margin-bottom: 40px;
+  transition: box-shadow 0.3s ease;
+}
+
+.verification-form-section:hover {
+  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.12);
 }
 
 .form-title {
@@ -205,12 +227,14 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
+  margin-bottom: 20px;
 }
 
 .form-label {
   font-size: 14px;
   font-weight: 500;
   color: #2c3e50;
+  margin-bottom: 8px;
 }
 
 .required {
@@ -220,20 +244,22 @@
 .form-select,
 .form-input,
 .form-textarea {
-  padding: 12px;
-  border: 2px solid #e0e0e0;
+  padding: 12px 15px;
+  border: 1px solid #e0e0e0;
   border-radius: 8px;
   font-size: 14px;
   transition: all 0.3s ease;
   font-family: inherit;
+  background: #fff;
+  color: #333;
 }
 
 .form-select:focus,
 .form-input:focus,
 .form-textarea:focus {
   outline: none;
-  border-color: #3498db;
-  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
 .form-select:disabled,
@@ -282,7 +308,10 @@
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  margin-top: 10px;
+  margin-top: 20px;
+  margin-bottom: 20px;
+  width: 100%;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
 }
 
 .form-submit-btn:hover:not(:disabled) {
@@ -294,6 +323,7 @@
   background: #ccc;
   cursor: not-allowed;
   transform: none;
+  box-shadow: none;
 }
 
 /* 申請歷史 */
@@ -321,6 +351,7 @@
 @media (max-width: 768px) {
   .verification-page {
     padding: 15px;
+    padding-bottom: 200px;
   }
 
   .verification-title {
@@ -330,10 +361,13 @@
   .info-card,
   .verification-form-section {
     padding: 20px;
+    margin-bottom: 30px;
   }
 
   .form-submit-btn {
     width: 100%;
+    margin-top: 15px;
+    margin-bottom: 15px;
   }
 }
 

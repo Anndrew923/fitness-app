@@ -153,9 +153,10 @@ function Verification() {
         };
       case 'pending':
         return {
-          text: '您的申請正在審核中',
+          text: '您的申請正在審核中，請耐心等待',
           icon: '⏳',
           className: 'status-pending',
+          description: '管理員將在 1-3 個工作日內完成審核，感謝您的耐心等待！',
         };
       case 'approved':
         return {
@@ -171,9 +172,10 @@ function Verification() {
         };
       case 'not_applied':
         return {
-          text: '尚未申請認證',
-          icon: '📝',
+          text: '立即申請榮譽認證！',
+          icon: '✨',
           className: 'status-not-applied',
+          description: '提交您的訓練影片，獲得官方認證徽章，讓您的成就更具公信力！',
         };
       default:
         return {
@@ -203,6 +205,9 @@ function Verification() {
           <div className={`verification-status ${statusInfo.className}`}>
             <span className="status-icon">{statusInfo.icon}</span>
             <span className="status-text">{statusInfo.text}</span>
+            {statusInfo.description && (
+              <p className="status-description">{statusInfo.description}</p>
+            )}
             {verificationStatus.request && (
               <div className="status-details">
                 <p>
