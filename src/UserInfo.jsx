@@ -1990,7 +1990,7 @@ function UserInfo({ testData, onLogout, clearTestData }) {
                     className="action-btn verification-btn"
                     disabled={loading}
                   >
-                    <span className="btn-icon">⭐</span>
+                    <span className="btn-icon">🏅</span>
                     <span className="btn-text">
                       {t('userInfo.getVerification')}
                     </span>

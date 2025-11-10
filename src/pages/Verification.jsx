@@ -148,7 +148,7 @@ function Verification() {
       case 'verified':
         return {
           text: '您已通過榮譽認證',
-          icon: '⭐',
+          icon: '🏅',
           className: 'status-verified',
         };
       case 'pending':
@@ -193,7 +193,7 @@ function Verification() {
         {/* 頁面標題 */}
         <div className="verification-header">
           <h1 className="verification-title">
-            <span className="title-icon">⭐</span>
+            <span className="title-icon">🏅</span>
             {t('verification.title') || '榮譽認證'}
           </h1>
         </div>
@@ -258,7 +258,7 @@ function Verification() {
               認證的好處
             </h2>
             <ul className="info-list">
-              <li>天梯分數旁邊顯示認證徽章 ⭐</li>
+              <li>天梯分數旁邊顯示認證徽章 🏅</li>
               <li>天梯名片顯示「榮譽認證」標記</li>
               <li>提升您的訓練成果可信度</li>
               <li>讓其他用戶更容易信任您的分數</li>

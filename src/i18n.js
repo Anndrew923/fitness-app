@@ -2474,7 +2474,7 @@ const enUS = {
       description: 'Get officially verified to show your training achievements are legit',
       benefits: {
         title: 'Why Get Verified?',
-        badge: 'Verified badge next to your ladder score ⭐',
+        badge: 'Verified badge next to your ladder score 🏅',
         card: 'Verified mark on your ladder profile',
         credibility: 'Build credibility for your training results',
         trust: 'Show others your score is legitimate',
