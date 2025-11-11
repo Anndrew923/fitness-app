@@ -906,7 +906,7 @@ const zhTW = {
         step3FacebookGroup: {
           title: '📘 加入「最強肉體」Facebook 社團',
           description: '歡迎加入我們的 Facebook 社團，與其他訓練者交流、分享訓練成果！',
-          link: 'https://www.facebook.com/groups/your-group-name', // ⚠️ 待更新：社團創立後請更新此連結
+          link: 'https://www.facebook.com/groups/728224799622936', // ✅ 已更新
           linkText: '前往 Facebook 社團',
           comingSoon: '社團即將開放，敬請期待！', // 如果社團尚未創立，可使用此訊息
         },
@@ -2784,7 +2784,7 @@ const enUS = {
         step3FacebookGroup: {
           title: '📘 Join "Ultimate Physique" Facebook Group',
           description: 'Join our Facebook group to connect with other trainers and share your training results!',
-          link: 'https://www.facebook.com/groups/your-group-name', // ⚠️ To be updated: Update this link after group is created
+          link: 'https://www.facebook.com/groups/728224799622936', // ✅ Updated
           linkText: 'Go to Facebook Group',
           comingSoon: 'Group coming soon, stay tuned!', // Use this message if group is not yet created
         },
