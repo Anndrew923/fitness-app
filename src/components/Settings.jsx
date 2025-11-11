@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { auth, db, storage } from '../firebase';
 import { doc, deleteDoc } from 'firebase/firestore';
@@ -9,6 +9,7 @@ import PrivacyPolicyModal from './PrivacyPolicyModal';
 import LanguageSwitcher from './LanguageSwitcher';
 import BottomNavBar from './BottomNavBar';
 import { useTranslation } from 'react-i18next';
+import AdminSystem from '../utils/adminSystem';
 
 function Settings() {
   const navigate = useNavigate();
@@ -16,6 +17,8 @@ function Settings() {
   const [showPrivacy, setShowPrivacy] = useState(false);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [checkingAdmin, setCheckingAdmin] = useState(true);
   const { t, i18n } = useTranslation();
   const isZh = i18n.language && i18n.language.toLowerCase().startsWith('zh');
   const tr = (key, zh, en) => {
@@ -24,6 +27,21 @@ function Settings() {
   };
 
   const isLoggedIn = useMemo(() => !!auth.currentUser, []);
+
+  // 檢查管理員狀態
+  useEffect(() => {
+    const checkAdmin = async () => {
+      try {
+        const adminStatus = await AdminSystem.checkAdminStatus();
+        setIsAdmin(adminStatus);
+      } catch (error) {
+        console.error('檢查管理員狀態失敗:', error);
+      } finally {
+        setCheckingAdmin(false);
+      }
+    };
+    checkAdmin();
+  }, []);
 
   const handleOpenPrivacy = useCallback(() => {
     setShowPrivacy(true);
@@ -235,6 +253,31 @@ function Settings() {
           )}
         </div>
       </section>
+
+      {/* 管理員功能入口 */}
+      {!checkingAdmin && isAdmin && (
+        <section style={{ marginBottom: '16px' }}>
+          <h2 style={{ fontSize: '16px', marginBottom: '8px' }}>
+            管理員功能
+          </h2>
+          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+            <button
+              onClick={() => navigate('/admin')}
+              style={{
+                background: 'linear-gradient(135deg, #81d8d0 0%, #5f9ea0 100%)',
+                color: 'white',
+                border: 'none',
+                padding: '10px 20px',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                fontWeight: '600',
+              }}
+            >
+              🔧 管理員系統
+            </button>
+          </div>
+        </section>
+      )}
 
       <PrivacyPolicyModal
         isOpen={showPrivacy}

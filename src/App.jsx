@@ -38,6 +38,7 @@ const Settings = React.lazy(() => import('./components/Settings'));
 const Community = React.lazy(() => import('./components/Community'));
 const FriendFeed = React.lazy(() => import('./components/FriendFeed'));
 const Verification = React.lazy(() => import('./pages/Verification'));
+const AdminPanel = React.lazy(() => import('./pages/AdminPanel'));
 import GlobalAdBanner from './components/GlobalAdBanner';
 import performanceMonitor from './utils/performanceMonitor';
 import './App.css';
@@ -492,6 +493,10 @@ function AppContent() {
               <Route
                 path="/verification"
                 element={<ProtectedRoute element={<Verification />} />}
+              />
+              <Route
+                path="/admin"
+                element={<ProtectedRoute element={<AdminPanel />} />}
               />
               <Route path="*" element={<div>{t('common.notFound')}</div>} />
             </Routes>
