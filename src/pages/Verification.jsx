@@ -38,17 +38,29 @@ function Verification() {
 
       // 檢查是否可以申請
       const canApplyResult = await VerificationSystem.canApplyForVerification();
+      // 將 reasonCode 轉換為翻譯文字
+      if (canApplyResult.reasonCode) {
+        if (canApplyResult.reasonCode === 'COOLDOWN') {
+          canApplyResult.reason = t('verification.messages.cooldown', {
+            days: canApplyResult.reasonData?.days || 7,
+          });
+        } else {
+          // 將大寫的 reasonCode 轉換為小寫的翻譯鍵值
+          const reasonKey = `verification.errors.${canApplyResult.reasonCode.toLowerCase()}`;
+          canApplyResult.reason = t(reasonKey) || canApplyResult.reason;
+        }
+      }
       setCanApply(canApplyResult);
     } catch (error) {
       console.error('載入認證狀態失敗:', error);
       setMessage({
         type: 'error',
-        text: '載入認證狀態失敗，請稍後再試',
+        text: t('verification.errors.loadFailed'),
       });
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     loadVerificationStatus();
@@ -72,27 +84,21 @@ function Verification() {
     if (!formData.socialAccount.trim()) {
       setMessage({
         type: 'error',
-        text: '請輸入社群帳號',
+        text: t('verification.errors.socialAccountRequired'),
       });
       return;
     }
 
-    if (!formData.videoLink.trim()) {
-      setMessage({
-        type: 'error',
-        text: '請輸入訓練影片連結',
-      });
-      return;
-    }
-
-    // 驗證影片連結格式（簡單驗證）
-    const urlPattern = /^https?:\/\/.+/;
-    if (!urlPattern.test(formData.videoLink.trim())) {
-      setMessage({
-        type: 'error',
-        text: '請輸入有效的影片連結（需以 http:// 或 https:// 開頭）',
-      });
-      return;
+    // 驗證影片連結格式（如果有輸入才驗證）
+    if (formData.videoLink.trim()) {
+      const urlPattern = /^https?:\/\/.+/;
+      if (!urlPattern.test(formData.videoLink.trim())) {
+        setMessage({
+          type: 'error',
+          text: t('verification.errors.invalidVideoLink'),
+        });
+        return;
+      }
     }
 
     try {
@@ -108,7 +114,7 @@ function Verification() {
       if (result.success) {
         setMessage({
           type: 'success',
-          text: `申請已提交！申請編號：${result.applicationNumber}`,
+          text: t('verification.errors.submitSuccess', { number: result.applicationNumber }),
         });
 
         // 重置表單
@@ -124,14 +130,14 @@ function Verification() {
       } else {
         setMessage({
           type: 'error',
-          text: result.message || '申請失敗，請稍後再試',
+          text: result.message || t('verification.errors.submitFailed'),
         });
       }
     } catch (error) {
       console.error('提交申請失敗:', error);
       setMessage({
         type: 'error',
-        text: '申請失敗，請稍後再試',
+        text: t('verification.errors.submitFailed'),
       });
     } finally {
       setLoading(false);
@@ -141,45 +147,49 @@ function Verification() {
   // 獲取狀態顯示文字
   const getStatusText = () => {
     if (!verificationStatus) {
-      return '';
+      return {
+        text: t('verification.status.loading'),
+        icon: '⏳',
+        className: 'status-loading',
+      };
     }
 
     switch (verificationStatus.status) {
       case 'verified':
         return {
-          text: '您已通過榮譽認證',
+          text: t('verification.status.verified'),
           icon: '🏅',
           className: 'status-verified',
         };
       case 'pending':
         return {
-          text: '您的申請正在審核中，請耐心等待',
+          text: t('verification.status.pending'),
           icon: '⏳',
           className: 'status-pending',
-          description: '管理員將在 1-3 個工作日內完成審核，感謝您的耐心等待！',
+          description: t('verification.status.pendingDescription'),
         };
       case 'approved':
         return {
-          text: '您的申請已通過',
+          text: t('verification.status.approved'),
           icon: '✅',
           className: 'status-approved',
         };
       case 'rejected':
         return {
-          text: '您的申請已被拒絕',
+          text: t('verification.status.rejected'),
           icon: '❌',
           className: 'status-rejected',
         };
       case 'not_applied':
         return {
-          text: '立即申請榮譽認證！',
+          text: t('verification.status.notApplied'),
           icon: '✨',
           className: 'status-not-applied',
-          description: '提交您的訓練影片，獲得官方認證徽章，讓您的成就更具公信力！',
+          description: t('verification.status.notAppliedDescription'),
         };
       default:
         return {
-          text: '載入中...',
+          text: t('verification.status.loading'),
           icon: '⏳',
           className: 'status-loading',
         };
@@ -196,7 +206,7 @@ function Verification() {
         <div className="verification-header">
           <h1 className="verification-title">
             <span className="title-icon">🏅</span>
-            {t('verification.title') || '榮譽認證'}
+            {t('verification.title')}
           </h1>
         </div>
 
@@ -211,18 +221,17 @@ function Verification() {
             {verificationStatus.request && (
               <div className="status-details">
                 <p>
-                  申請編號：{verificationStatus.request.applicationNumber}
+                  {t('verification.statusDetails.applicationNumber')} {verificationStatus.request.applicationNumber}
                 </p>
                 <p>
-                  申請時間：
-                  {new Date(
+                  {t('verification.statusDetails.applicationTime')} {new Date(
                     verificationStatus.request.createdAt
-                  ).toLocaleString('zh-TW')}
+                  ).toLocaleString()}
                 </p>
                 {verificationStatus.request.status === 'rejected' &&
                   verificationStatus.request.rejectionReason && (
                     <p className="rejection-reason">
-                      拒絕原因：{verificationStatus.request.rejectionReason}
+                      {t('verification.statusDetails.rejectionReason')} {verificationStatus.request.rejectionReason}
                     </p>
                   )}
               </div>
@@ -230,14 +239,13 @@ function Verification() {
             {verificationStatus.userData?.isVerified && (
               <div className="verified-info">
                 <p>
-                  認證分數：{verificationStatus.userData.verifiedLadderScore}
+                  {t('verification.statusDetails.verifiedScore')} {verificationStatus.userData.verifiedLadderScore}
                 </p>
                 <p>
-                  認證時間：
-                  {verificationStatus.userData.verifiedAt
+                  {t('verification.statusDetails.verifiedTime')} {verificationStatus.userData.verifiedAt
                     ? new Date(
                         verificationStatus.userData.verifiedAt
-                      ).toLocaleString('zh-TW')
+                      ).toLocaleString()
                     : '-'}
                 </p>
               </div>
@@ -250,37 +258,183 @@ function Verification() {
           <div className="info-card">
             <h2 className="info-title">
               <span className="info-icon">📋</span>
-              什麼是榮譽認證？
+              {t('verification.info.whatIs.title')}
             </h2>
             <p className="info-content">
-              榮譽認證是官方對您訓練成果的認可。通過認證後，您的天梯分數旁邊會顯示認證徽章，讓其他用戶知道您的分數已獲得官方認證。
+              {t('verification.info.whatIs.content')}
             </p>
           </div>
 
           <div className="info-card">
             <h2 className="info-title">
               <span className="info-icon">✨</span>
-              認證的好處
+              {t('verification.info.benefits.title')}
             </h2>
             <ul className="info-list">
-              <li>天梯分數旁邊顯示認證徽章 🏅</li>
-              <li>天梯名片顯示「榮譽認證」標記</li>
-              <li>提升您的訓練成果可信度</li>
-              <li>讓其他用戶更容易信任您的分數</li>
+              <li>{t('verification.info.benefits.item1')}</li>
+              <li>{t('verification.info.benefits.item2')}</li>
+              <li>{t('verification.info.benefits.item3')}</li>
+              <li>{t('verification.info.benefits.item4')}</li>
             </ul>
           </div>
 
           <div className="info-card">
             <h2 className="info-title">
               <span className="info-icon">📝</span>
-              申請流程
+              {t('verification.process.title')}
             </h2>
             <ol className="info-list ordered">
-              <li>完成所有評測項目並提交天梯分數</li>
-              <li>透過 FB、IG 等社群將訓練影片傳給管理員</li>
-              <li>填寫申請表單（社群帳號、影片連結）</li>
-              <li>等待管理員審核（通常 1-3 個工作天）</li>
-              <li>審核通過後，您的分數將顯示認證徽章</li>
+              <li>
+                <strong>{t('verification.process.step1')}</strong>
+                <ul className="info-sublist">
+                  <li>{t('verification.process.step1Details.item1')}</li>
+                  <li>{t('verification.process.step1Details.item2')}</li>
+                </ul>
+              </li>
+              <li>
+                <strong>{t('verification.process.step2')}</strong>
+                <div className="video-requirements">
+                  <p className="requirements-title">
+                    {t('verification.process.step2Details.title')}
+                  </p>
+                  
+                  {/* 力量動作詳細說明 */}
+                  <div className="strength-exercises-detail">
+                    <p className="strength-title">
+                      {t('verification.process.step2Details.strength.title')}
+                    </p>
+                    
+                    {/* 平板臥推 */}
+                    <div className="exercise-detail-card">
+                      <h4 className="exercise-name">
+                        {t('verification.process.step2Details.strength.exercises.benchPress.name')}
+                      </h4>
+                      <ul className="exercise-requirements">
+                        {t('verification.process.step2Details.strength.exercises.benchPress.requirements', { returnObjects: true }).map((req, idx) => (
+                          <li key={idx}>{req}</li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    {/* 深蹲 */}
+                    <div className="exercise-detail-card">
+                      <h4 className="exercise-name">
+                        {t('verification.process.step2Details.strength.exercises.squat.name')}
+                      </h4>
+                      <ul className="exercise-requirements">
+                        {t('verification.process.step2Details.strength.exercises.squat.requirements', { returnObjects: true }).map((req, idx) => (
+                          <li key={idx}>{req}</li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    {/* 硬舉 */}
+                    <div className="exercise-detail-card">
+                      <h4 className="exercise-name">
+                        {t('verification.process.step2Details.strength.exercises.deadlift.name')}
+                      </h4>
+                      <ul className="exercise-requirements">
+                        {t('verification.process.step2Details.strength.exercises.deadlift.requirements', { returnObjects: true }).map((req, idx) => (
+                          <li key={idx}>{req}</li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    {/* 滑輪下拉 */}
+                    <div className="exercise-detail-card">
+                      <h4 className="exercise-name">
+                        {t('verification.process.step2Details.strength.exercises.latPulldown.name')}
+                      </h4>
+                      <ul className="exercise-requirements">
+                        {t('verification.process.step2Details.strength.exercises.latPulldown.requirements', { returnObjects: true }).map((req, idx) => (
+                          <li key={idx}>{req}</li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    {/* 站姿肩推 */}
+                    <div className="exercise-detail-card">
+                      <h4 className="exercise-name">
+                        {t('verification.process.step2Details.strength.exercises.shoulderPress.name')}
+                      </h4>
+                      <ul className="exercise-requirements">
+                        {t('verification.process.step2Details.strength.exercises.shoulderPress.requirements', { returnObjects: true }).map((req, idx) => (
+                          <li key={idx}>{req}</li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    <p className="requirements-note">
+                      {t('verification.process.step2Details.strength.generalNote')}
+                    </p>
+                  </div>
+
+                  {/* 爆發力測試 */}
+                  <div className="test-category">
+                    <p className="test-title">
+                      <strong>{t('verification.process.step2Details.power.title')}</strong>
+                    </p>
+                    <ul className="info-sublist">
+                      <li>{t('verification.process.step2Details.power.items')}</li>
+                      <li>{t('verification.process.step2Details.power.requirement')}</li>
+                    </ul>
+                  </div>
+
+                  {/* 心肺耐力 */}
+                  <div className="test-category">
+                    <p className="test-title">
+                      <strong>{t('verification.process.step2Details.cardio.title')}</strong>
+                    </p>
+                    <ul className="info-sublist">
+                      <li>{t('verification.process.step2Details.cardio.items')}</li>
+                      <li>{t('verification.process.step2Details.cardio.requirement')}</li>
+                    </ul>
+                  </div>
+
+                  {/* 身體組成 */}
+                  <div className="test-category">
+                    <p className="test-title">
+                      <strong>{t('verification.process.step2Details.bodyComposition.title')}</strong>
+                    </p>
+                    <ul className="info-sublist">
+                      <li>{t('verification.process.step2Details.bodyComposition.requirement')}</li>
+                      <li>{t('verification.process.step2Details.bodyComposition.note')}</li>
+                    </ul>
+                  </div>
+                </div>
+              </li>
+              <li>
+                <strong>{t('verification.process.step3')}</strong>
+                <p className="step-note">{t('verification.process.step3Note')}</p>
+                
+                {/* ✅ 新增：Facebook 社團連結區塊 */}
+                <div className="facebook-group-section">
+                  <h4 className="facebook-group-title">
+                    {t('verification.process.step3FacebookGroup.title')}
+                  </h4>
+                  <p className="facebook-group-description">
+                    {t('verification.process.step3FacebookGroup.description')}
+                  </p>
+                  {/* 如果社團已創立，顯示連結；否則顯示即將開放訊息 */}
+                  {t('verification.process.step3FacebookGroup.link') !== 'https://www.facebook.com/groups/your-group-name' ? (
+                    <a
+                      href={t('verification.process.step3FacebookGroup.link')}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="facebook-group-link"
+                    >
+                      {t('verification.process.step3FacebookGroup.linkText')} →
+                    </a>
+                  ) : (
+                    <p className="facebook-group-coming-soon">
+                      {t('verification.process.step3FacebookGroup.comingSoon')}
+                    </p>
+                  )}
+                </div>
+              </li>
+              <li>{t('verification.process.step4')}</li>
+              <li>{t('verification.process.step5')}</li>
+              <li>{t('verification.process.step6')}</li>
             </ol>
           </div>
         </div>
@@ -289,7 +443,7 @@ function Verification() {
         {verificationStatus?.status !== 'verified' &&
           verificationStatus?.status !== 'pending' && (
             <div className="verification-form-section">
-              <h2 className="form-title">申請榮譽認證</h2>
+              <h2 className="form-title">{t('verification.form.title')}</h2>
 
               {!canApply.canApply && canApply.reason && (
                 <div className="form-warning">
@@ -301,7 +455,7 @@ function Verification() {
               <form onSubmit={handleSubmit} className="verification-form">
                 <div className="form-group">
                   <label htmlFor="socialAccountType" className="form-label">
-                    社群平台 <span className="required">*</span>
+                    {t('verification.form.socialPlatformLabel')} <span className="required">*</span>
                   </label>
                   <select
                     id="socialAccountType"
@@ -318,7 +472,7 @@ function Verification() {
 
                 <div className="form-group">
                   <label htmlFor="socialAccount" className="form-label">
-                    社群帳號 <span className="required">*</span>
+                    {t('verification.form.socialAccountLabel')} <span className="required">*</span>
                   </label>
                   <input
                     type="text"
@@ -327,7 +481,7 @@ function Verification() {
                     value={formData.socialAccount}
                     onChange={handleInputChange}
                     className="form-input"
-                    placeholder="請輸入您的 FB 或 IG 帳號"
+                    placeholder={t('verification.form.placeholder.socialAccount')}
                     required
                     disabled={!canApply.canApply || loading}
                   />
@@ -335,7 +489,7 @@ function Verification() {
 
                 <div className="form-group">
                   <label htmlFor="videoLink" className="form-label">
-                    訓練影片連結 <span className="required">*</span>
+                    {t('verification.form.videoLink')}
                   </label>
                   <input
                     type="url"
@@ -344,18 +498,17 @@ function Verification() {
                     value={formData.videoLink}
                     onChange={handleInputChange}
                     className="form-input"
-                    placeholder="https://..."
-                    required
+                    placeholder={t('verification.form.placeholder.videoLink')}
                     disabled={!canApply.canApply || loading}
                   />
                   <small className="form-hint">
-                    請提供您在社群平台上傳的訓練影片連結
+                    {t('verification.form.hint.videoLink')}
                   </small>
                 </div>
 
                 <div className="form-group">
                   <label htmlFor="description" className="form-label">
-                    申請說明（選填）
+                    {t('verification.form.descriptionLabel')}
                   </label>
                   <textarea
                     id="description"
@@ -363,7 +516,7 @@ function Verification() {
                     value={formData.description}
                     onChange={handleInputChange}
                     className="form-textarea"
-                    placeholder="可以補充說明您的訓練內容或特殊情況"
+                    placeholder={t('verification.form.placeholder.description')}
                     rows="4"
                     disabled={!canApply.canApply || loading}
                   />
@@ -380,7 +533,7 @@ function Verification() {
                   className="form-submit-btn"
                   disabled={!canApply.canApply || loading}
                 >
-                  {loading ? '提交中...' : '提交申請'}
+                  {loading ? t('verification.form.submittingButton') : t('verification.form.submitButton')}
                 </button>
               </form>
             </div>
@@ -389,9 +542,9 @@ function Verification() {
         {/* 申請歷史 */}
         {verificationStatus?.status === 'rejected' && (
           <div className="verification-history-section">
-            <h2 className="history-title">申請歷史</h2>
+            <h2 className="history-title">{t('verification.history.title')}</h2>
             <p className="history-hint">
-              如果您的申請被拒絕，請等待 7 天後再重新申請。
+              {t('verification.history.hint')}
             </p>
           </div>
         )}

@@ -679,6 +679,7 @@ const zhTW = {
       filters: {
         total: '🏆 總排行榜',
         weekly: '⭐ 本周新進榜',
+        verified: '🏅 通過榮譽認證',
       },
       ageGroups: {
         all: '全部年齡',
@@ -796,6 +797,22 @@ const zhTW = {
     verification: {
       title: '榮譽認證',
       description: '榮譽認證是官方對您訓練成果的認可',
+      info: {
+        whatIs: {
+          title: '什麼是榮譽認證？',
+          content: '榮譽認證是官方對您訓練成果的認可。通過認證後，您的天梯分數旁邊會顯示認證徽章，讓其他用戶知道您的分數已獲得官方認證。',
+        },
+        benefits: {
+          title: '認證的用意',
+          item1: '天梯分數旁邊顯示認證徽章 🏅',
+          item2: '天梯名片顯示「榮譽認證」標記',
+          item3: '以榮譽心認真對待每一次訓練，展現您的訓練成果',
+          item4: '分享您的進步歷程，激勵其他運動愛好者一起努力',
+        },
+      },
+      badge: {
+        label: '榮譽認證',
+      },
       benefits: {
         title: '認證的好處',
         badge: '天梯分數旁邊顯示認證徽章',
@@ -806,30 +823,152 @@ const zhTW = {
       process: {
         title: '申請流程',
         step1: '完成所有評測項目並提交天梯分數',
-        step2: '透過 FB、IG 等社群將訓練影片傳給管理員',
-        step3: '填寫申請表單（社群帳號、影片連結）',
-        step4: '等待管理員審核（通常 1-3 個工作天）',
-        step5: '審核通過後，您的分數將顯示認證徽章',
+        step1Details: {
+          item1: '完成 5 項評測（力量、爆發力、心肺、肌肉量、體脂）',
+          item2: '已提交天梯分數（系統自動驗證）',
+        },
+        step2: '準備訓練影片',
+        step2Details: {
+          title: '📹 影片要求：',
+          strength: {
+            title: '力量動作（5 項都需準備）：',
+            exercises: {
+              benchPress: {
+                name: '平板臥推',
+                requirements: [
+                  '槓鈴下放，至手肘成90度（接近胸部）',
+                  '完整推起至手臂接近伸直(可保持一點微彎)',
+                  '雙腳踩地，背部躺在訓練椅上',
+                  '需清楚顯示槓鈴兩側重量（kg）',
+                  '至少完成 1 次完整動作',
+                ],
+              },
+              squat: {
+                name: '深蹲',
+                requirements: [
+                  '蹲至大腿與地面平行（深度達標）',
+                  '背部保持挺直，核心穩定',
+                  '需清楚顯示槓鈴兩側重量（kg）',
+                  '至少完成 1 次完整動作',
+                ],
+              },
+              deadlift: {
+                name: '硬舉',
+                requirements: [
+                  '起始位置：槓鈴貼近小腿，背部挺直',
+                  '完整拉起至髖關節完全伸展鎖定',
+                  '槓鈴需貼近身體上升，不遠離身體',
+                  '需清楚顯示槓鈴兩側重量（kg）',
+                  '至少完成 1 次完整動作',
+                ],
+              },
+              latPulldown: {
+                name: '滑輪下拉',
+                requirements: [
+                  '下拉至手肘略小於90度',
+                  '控制回放至手臂微彎',
+                  '肩胛骨穩定，保持肩膀閉鎖，身體無明顯晃動借力',
+                  '需清楚顯示重量設定（kg）',
+                  '至少完成 1 次完整動作',
+                ],
+              },
+              shoulderPress: {
+                name: '站姿肩推',
+                requirements: [
+                  '從肩部位置推起至手臂完全伸直鎖定',
+                  '核心穩定，避免過度後仰借力',
+                  '雙腳與肩同寬，保持平衡',
+                  '需清楚顯示槓鈴或啞鈴重量（kg）',
+                  '至少完成 1 次完整動作',
+                ],
+              },
+            },
+            generalNote: '💡 需清晰可見本人執行過程和重量顯示',
+          },
+          power: {
+            title: '爆發力測試：',
+            items: '垂直跳躍、立定跳遠、100 公尺衝刺',
+            requirement: '需顯示測量過程',
+          },
+          cardio: {
+            title: '心肺耐力：',
+            items: '12 分鐘跑步測試',
+            requirement: '需顯示時間/距離記錄(如adidas running等app截圖)',
+          },
+          bodyComposition: {
+            title: '身體組成（體重、體脂肪率、肌肉量）：',
+            requirement: '建議使用知名品牌設備測量（如 InBody、歐姆龍等）',
+            note: '需顯示測量設備和結果',
+          },
+        },
+        step3: '透過最強肉體FB社團、IG分享影片',
+        step3Note: '影片可以直接發出在社團，或直接傳給管理員',
+        step3FacebookGroup: {
+          title: '📘 加入「最強肉體」Facebook 社團',
+          description: '歡迎加入我們的 Facebook 社團，與其他訓練者交流、分享訓練成果！',
+          link: 'https://www.facebook.com/groups/your-group-name', // ⚠️ 待更新：社團創立後請更新此連結
+          linkText: '前往 Facebook 社團',
+          comingSoon: '社團即將開放，敬請期待！', // 如果社團尚未創立，可使用此訊息
+        },
+        step4: '填寫申請表單（社群帳號、影片連結)',
+        step5: '等待管理員審核（通常 1-3 個工作天）',
+        step6: '審核通過後，您的分數將顯示認證徽章',
       },
       form: {
         title: '申請榮譽認證',
         socialPlatform: '社群平台',
+        socialPlatformLabel: '社群平台',
         socialAccount: '社群帳號',
-        videoLink: '訓練影片連結',
+        socialAccountLabel: '社群帳號',
+        videoLink: '訓練影片連結（選填）',
         description: '申請說明（選填）',
+        descriptionLabel: '申請說明（選填）',
         submit: '提交申請',
+        submitButton: '提交申請',
         submitting: '提交中...',
+        submittingButton: '提交中...',
         placeholder: {
           socialAccount: '請輸入您的 FB 或 IG 帳號',
-          videoLink: 'https://...',
+          videoLink: 'https://...（選填）',
           description: '可以補充說明您的訓練內容或特殊情況',
         },
+        hint: {
+          videoLink: '請提供您在社群平台上傳的訓練影片連結，或直接傳給管理員（選填）',
+        },
+      },
+      history: {
+        title: '申請歷史',
+        hint: '如果您的申請被拒絕，請等待 7 天後再重新申請。',
+      },
+      errors: {
+        loadFailed: '載入認證狀態失敗，請稍後再試',
+        socialAccountRequired: '請輸入社群帳號',
+        invalidVideoLink: '請輸入有效的影片連結（需以 http:// 或 https:// 開頭）',
+        submitFailed: '申請失敗，請稍後再試',
+        submitSuccess: '申請已提交！申請編號：{number}',
+        needLogin: '請先登入',
+        userNotFound: '用戶資料不存在',
+        alreadyVerified: '您已經通過榮譽認證',
+        noLadderScore: '請先提交天梯分數',
+        alreadyApplied: '您已有待審核的申請',
+        checkFailed: '檢查失敗，請稍後再試',
       },
       status: {
         verified: '您已通過榮譽認證',
-        pending: '您的申請正在審核中',
+        pending: '您的申請正在審核中，請耐心等待',
+        pendingDescription: '管理員將在 1-3 個工作日內完成審核，感謝您的耐心等待！',
+        approved: '您的申請已通過',
         rejected: '您的申請已被拒絕',
-        notApplied: '尚未申請認證',
+        notApplied: '立即申請榮譽認證！',
+        notAppliedDescription: '提交您的訓練影片，獲得官方認證徽章，讓您的成就更具公信力！',
+        loading: '載入中...',
+      },
+      statusDetails: {
+        applicationNumber: '申請編號：',
+        applicationTime: '申請時間：',
+        rejectionReason: '拒絕原因：',
+        verifiedScore: '認證分數：',
+        verifiedTime: '認證時間：',
       },
       messages: {
         success: '申請已提交，我們會盡快審核',
@@ -2417,6 +2556,7 @@ const enUS = {
       filters: {
         total: '🏆 Overall',
         weekly: '⭐ New this week',
+        verified: '🏅 Verified',
       },
       ageGroups: {
         all: 'All Ages',
@@ -2533,8 +2673,24 @@ const enUS = {
 
     // Honor Verification
     verification: {
-      title: 'Verified Badge',
-      description: 'Get officially verified to show your training achievements are legit',
+      title: 'Honorary Verification',
+      description: 'Get officially verified to showcase your training achievements',
+      info: {
+        whatIs: {
+          title: 'What is Verification?',
+          content: 'Verification is our official recognition of your training achievements. Once verified, a badge will appear next to your ladder score, showing others that your achievements have been officially verified.',
+        },
+        benefits: {
+          title: 'Purpose of Verification',
+          item1: 'Verified badge next to your ladder score 🏅',
+          item2: 'Honorary Verified mark on your ladder profile',
+          item3: 'Take pride in every training session and showcase your achievements',
+          item4: 'Share your progress and inspire fellow fitness enthusiasts to push forward',
+        },
+      },
+      badge: {
+        label: 'Honorary Verified',
+      },
       benefits: {
         title: 'Why Get Verified?',
         badge: 'Verified badge next to your ladder score 🏅',
@@ -2543,35 +2699,157 @@ const enUS = {
         trust: 'Show others your score is legitimate',
       },
       process: {
-        title: 'How It Works',
+        title: 'Application Process',
         step1: 'Complete all assessments and submit your ladder score',
-        step2: 'Share your training video with us via Facebook, Instagram, or other social platforms',
-        step3: 'Fill out the application form with your social account and video link',
-        step4: 'We\'ll review your application (typically 1-3 business days)',
-        step5: 'Once approved, you\'ll get a verification badge on your score',
+        step1Details: {
+          item1: 'Complete 5 assessments (Strength, Power, Cardio, Muscle Mass, Body Fat)',
+          item2: 'Submit ladder score (automatically verified by system)',
+        },
+        step2: 'Prepare training videos',
+        step2Details: {
+          title: '📹 Video Requirements:',
+          strength: {
+            title: 'Strength Exercises (All 5 required):',
+            exercises: {
+              benchPress: {
+                name: 'Bench Press',
+                requirements: [
+                  'Lower bar until elbows reach 90 degrees (close to chest)',
+                  'Press up until arms are nearly extended (slight bend is acceptable)',
+                  'Feet flat on ground, back on bench',
+                  'Must clearly show weight plates on both sides (kg)',
+                  'At least 1 complete repetition',
+                ],
+              },
+              squat: {
+                name: 'Squat',
+                requirements: [
+                  'Squat until thighs are parallel to ground (depth requirement)',
+                  'Back straight, core stable',
+                  'Must clearly show weight plates on both sides (kg)',
+                  'At least 1 complete repetition',
+                ],
+              },
+              deadlift: {
+                name: 'Deadlift',
+                requirements: [
+                  'Starting position: bar close to shins, back straight',
+                  'Complete lockout with full hip extension',
+                  'Bar must stay close to body during lift',
+                  'Must clearly show weight plates on both sides (kg)',
+                  'At least 1 complete repetition',
+                ],
+              },
+              latPulldown: {
+                name: 'Lat Pulldown',
+                requirements: [
+                  'Pull down until elbows are slightly less than 90 degrees',
+                  'Controlled return with slight arm bend',
+                  'Shoulder blades stable, shoulders locked, minimal body sway or momentum',
+                  'Must clearly show weight setting (kg)',
+                  'At least 1 complete repetition',
+                ],
+              },
+              shoulderPress: {
+                name: 'Overhead Press',
+                requirements: [
+                  'Press from shoulder position to full lockout',
+                  'Core stable, avoid excessive backward lean',
+                  'Feet shoulder-width apart, balanced',
+                  'Must clearly show barbell or dumbbell weight (kg)',
+                  'At least 1 complete repetition',
+                ],
+              },
+            },
+            generalNote: '💡 Must clearly show yourself performing the exercise and display the weight',
+          },
+          power: {
+            title: 'Explosive Power Tests:',
+            items: 'Vertical Jump, Standing Long Jump, 100m Sprint',
+            requirement: 'Must show measurement process',
+          },
+          cardio: {
+            title: 'Cardiovascular Endurance:',
+            items: '12-minute running test',
+            requirement: 'Must show time/distance record (e.g., screenshot from apps like adidas running)',
+          },
+          bodyComposition: {
+            title: 'Body Composition (Weight, Body Fat %, Muscle Mass):',
+            requirement: 'Recommended to use reputable brand equipment (e.g., InBody, Omron)',
+            note: 'Must show measurement device and results',
+          },
+        },
+        step3: 'Share videos via "Ultimate Physique" Facebook Group or Instagram',
+        step3Note: 'You can post directly in the group or message administrators',
+        step3FacebookGroup: {
+          title: '📘 Join "Ultimate Physique" Facebook Group',
+          description: 'Join our Facebook group to connect with other trainers and share your training results!',
+          link: 'https://www.facebook.com/groups/your-group-name', // ⚠️ To be updated: Update this link after group is created
+          linkText: 'Go to Facebook Group',
+          comingSoon: 'Group coming soon, stay tuned!', // Use this message if group is not yet created
+        },
+        step4: 'Fill out application form (social account, video links)',
+        step5: 'Wait for administrator review (typically 1-3 business days)',
+        step6: 'Once approved, your score will display a verification badge',
       },
       form: {
         title: 'Apply for Verification',
         socialPlatform: 'Social Platform',
+        socialPlatformLabel: 'Social Platform',
         socialAccount: 'Social Account',
-        videoLink: 'Training Video Link',
+        socialAccountLabel: 'Social Account',
+        videoLink: 'Training Video Link (Optional)',
         description: 'Additional Notes (Optional)',
+        descriptionLabel: 'Additional Notes (Optional)',
         submit: 'Submit Application',
+        submitButton: 'Submit Application',
         submitting: 'Submitting...',
+        submittingButton: 'Submitting...',
         placeholder: {
           socialAccount: 'Your Facebook or Instagram handle',
-          videoLink: 'https://...',
+          videoLink: 'https://... (Optional)',
           description: 'Tell us about your training or any special circumstances',
         },
+        hint: {
+          videoLink: 'Please provide the link to your training video on social platforms, or send directly to administrators (Optional)',
+        },
+      },
+      history: {
+        title: 'Application History',
+        hint: 'If your application was rejected, please wait 7 days before applying again.',
+      },
+      errors: {
+        loadFailed: 'Failed to load verification status. Please try again later.',
+        socialAccountRequired: 'Please enter your social account',
+        invalidVideoLink: 'Please enter a valid video link (must start with http:// or https://)',
+        submitFailed: 'Application failed. Please try again later.',
+        submitSuccess: 'Application submitted! Application Number: {number}',
+        needLogin: 'Please login first',
+        userNotFound: 'User data not found',
+        alreadyVerified: 'You\'re already verified!',
+        noLadderScore: 'Please submit your ladder score first',
+        alreadyApplied: 'You already have an application pending review',
+        checkFailed: 'Unable to verify eligibility. Please try again later.',
       },
       status: {
         verified: 'You\'re verified! 🎉',
-        pending: 'We\'re reviewing your application',
+        pending: 'Your application is under review. Please be patient.',
+        pendingDescription: 'Administrators will complete the review within 1-3 business days. Thank you for your patience!',
+        approved: 'Your application has been approved',
         rejected: 'Your application was not approved',
-        notApplied: 'Not verified yet',
+        notApplied: 'Apply for verification now!',
+        notAppliedDescription: 'Submit your training videos to earn an official verification badge and inspire others with your dedication!',
+        loading: 'Loading...',
+      },
+      statusDetails: {
+        applicationNumber: 'Application Number:',
+        applicationTime: 'Application Time:',
+        rejectionReason: 'Rejection Reason:',
+        verifiedScore: 'Verified Score:',
+        verifiedTime: 'Verified Time:',
       },
       messages: {
-        success: 'Application submitted! We\'ll review it shortly.',
+        success: 'Application submitted! We\'ll review it soon.',
         error: 'Something went wrong. Please try again.',
         alreadyApplied: 'You already have an application pending review',
         alreadyVerified: 'You\'re already verified!',

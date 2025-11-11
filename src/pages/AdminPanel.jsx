@@ -280,11 +280,25 @@ function AdminPanel() {
                         </div>
                         <div className="info-row">
                           <span className="info-label">社群平台：</span>
-                          <span className="info-value">{request.socialPlatform || '-'}</span>
+                          <span className="info-value">
+                            {typeof request.socialAccount === 'object' && request.socialAccount?.type
+                              ? request.socialAccount.type === 'facebook'
+                                ? 'Facebook'
+                                : request.socialAccount.type === 'instagram'
+                                ? 'Instagram'
+                                : request.socialAccount.type
+                              : request.socialPlatform || '-'}
+                          </span>
                         </div>
                         <div className="info-row">
                           <span className="info-label">社群帳號：</span>
-                          <span className="info-value">{request.socialAccount || '-'}</span>
+                          <span className="info-value">
+                            {typeof request.socialAccount === 'object' && request.socialAccount?.account
+                              ? request.socialAccount.account
+                              : typeof request.socialAccount === 'string'
+                              ? request.socialAccount
+                              : '-'}
+                          </span>
                         </div>
                         <div className="info-row">
                           <span className="info-label">影片連結：</span>

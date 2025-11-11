@@ -171,7 +171,7 @@ function LadderUserCard({ user, isOpen, onClose }) {
             {/* ✅ 新增：榮譽認證按鈕 */}
             {user.isVerified && (
               <div className="ladder-user-card-verification-badge">
-                🏅 榮譽認證
+                🏅 {t('verification.badge.label')}
               </div>
             )}
           </div>

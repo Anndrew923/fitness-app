@@ -319,7 +319,8 @@ class VerificationSystem {
       if (!currentUserId) {
         return {
           canApply: false,
-          reason: '請先登入',
+          reasonCode: 'NEED_LOGIN',
+          reason: '', // 將由組件根據 reasonCode 翻譯
         };
       }
 
@@ -330,7 +331,8 @@ class VerificationSystem {
       if (!userSnap.exists()) {
         return {
           canApply: false,
-          reason: '用戶資料不存在',
+          reasonCode: 'USER_NOT_FOUND',
+          reason: '', // 將由組件根據 reasonCode 翻譯
         };
       }
 
@@ -340,7 +342,8 @@ class VerificationSystem {
       if (userData.isVerified === true) {
         return {
           canApply: false,
-          reason: '您已經通過榮譽認證',
+          reasonCode: 'ALREADY_VERIFIED',
+          reason: '', // 將由組件根據 reasonCode 翻譯
         };
       }
 
@@ -348,7 +351,8 @@ class VerificationSystem {
       if (!userData.ladderScore || userData.ladderScore <= 0) {
         return {
           canApply: false,
-          reason: '請先提交天梯分數',
+          reasonCode: 'NO_LADDER_SCORE',
+          reason: '', // 將由組件根據 reasonCode 翻譯
         };
       }
 
@@ -357,7 +361,8 @@ class VerificationSystem {
       if (pendingRequest) {
         return {
           canApply: false,
-          reason: '您已有待審核的申請',
+          reasonCode: 'ALREADY_APPLIED',
+          reason: '', // 將由組件根據 reasonCode 翻譯
         };
       }
 
@@ -374,20 +379,24 @@ class VerificationSystem {
           const remainingDays = 7 - daysSinceRejection;
           return {
             canApply: false,
-            reason: `上次申請被拒絕，請等待 ${remainingDays} 天後再申請`,
+            reasonCode: 'COOLDOWN',
+            reasonData: { days: remainingDays }, // 傳遞剩餘天數
+            reason: '', // 將由組件根據 reasonCode 翻譯
           };
         }
       }
 
       return {
         canApply: true,
+        reasonCode: '',
         reason: '',
       };
     } catch (error) {
       console.error('檢查申請資格失敗:', error);
       return {
         canApply: false,
-        reason: '檢查失敗，請稍後再試',
+        reasonCode: 'CHECK_FAILED',
+        reason: '', // 將由組件根據 reasonCode 翻譯
       };
     }
   }

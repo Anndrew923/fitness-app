@@ -1,4 +1,4 @@
-// Vitest emulator unit tests will import this file for rules source
+// Firestore Security Rules (V1，含好友/社群/評測/點讚/認證系統/舉報系統)
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
@@ -12,32 +12,58 @@ service cloud.firestore {
       // 僅允許改動指定欄位（適用 update）
       return request.resource.data.diff(resource.data).affectedKeys().hasOnly(keys);
     }
+    function isAdmin() {
+      // 檢查用戶是否為管理員
+      return signedIn() &&
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true;
+    }
 
     // users：登入者可讀（顯示暱稱/頭像/排行榜等），僅本人可寫
     // ✅ 新增：允許登入用戶更新其他用戶的點讚相關字段
     match /users/{userId} {
       allow read: if signedIn();
-
+      
       // 僅本人可創建/刪除自己的文檔
       allow create, delete: if isOwner(userId)
         && request.resource.data.userId == userId
         && !('isAdmin' in request.resource.data);
-
+      
       // 本人可更新自己的文檔（原有規則）
       allow update: if isOwner(userId)
         && request.resource.data.userId == userId
         && !('isAdmin' in request.resource.data);
-
+      
       // ✅ 新增：允許登入用戶更新其他用戶的點讚相關字段
       allow update: if signedIn()
         && onlyMutate(['ladderLikes', 'ladderLikeCount'])
+        && request.resource.data.userId == resource.data.userId; // 確保不能修改 userId
+
+      // ✅ 新增：允許管理員更新認證相關字段
+      allow update: if isAdmin()
+        && onlyMutate([
+          'isVerified',
+          'verifiedLadderScore',
+          'verificationStatus',
+          'verifiedAt',
+          'verificationExpiredAt',
+          'lastVerificationRejectionAt',
+          'verificationRequestId',
+          'updatedAt'
+        ])
+        && request.resource.data.userId == resource.data.userId; // 確保不能修改 userId
+
+      // ✅ 新增：允許系統更新舉報計數相關字段（自動隱藏功能）
+      allow update: if signedIn()
+        && onlyMutate(['reportCount', 'nicknameHidden', 'avatarHidden', 'moderationStatus', 'moderationTime'])
         && request.resource.data.userId == resource.data.userId; // 確保不能修改 userId
     }
 
     // friendInvitations：僅參與雙方可讀；from 可建；參與雙方可改狀態
     match /friendInvitations/{inviteId} {
       allow read: if signedIn() && (
-        resource.data.fromUserId == request.auth.uid || resource.data.toUserId == request.auth.uid
+        resource.data.fromUserId == request.auth.uid ||
+        resource.data.toUserId == request.auth.uid
       );
       allow create: if signedIn()
         && request.resource.data.fromUserId == request.auth.uid
@@ -45,7 +71,8 @@ service cloud.firestore {
         && request.resource.data.toUserId != request.auth.uid;
       // 僅修改狀態/時間等安全欄位
       allow update: if signedIn()
-        && (resource.data.fromUserId == request.auth.uid || resource.data.toUserId == request.auth.uid)
+        && (resource.data.fromUserId == request.auth.uid ||
+            resource.data.toUserId == request.auth.uid)
         && onlyMutate(['status','updatedAt']);
       allow delete: if false;
     }
@@ -91,6 +118,86 @@ service cloud.firestore {
     match /systemConfig/{configId} {
       allow read: if signedIn();
       allow write: if false;
+    }
+
+    // ✅ 新增：verificationRequests 集合
+    // 用戶可建立自己的申請；管理員可讀寫所有申請
+    match /verificationRequests/{requestId} {
+      // 用戶可讀取自己的申請，管理員可讀取所有申請
+      allow read: if signedIn() && (
+        resource.data.userId == request.auth.uid || isAdmin()
+      );
+
+      // 用戶可建立自己的申請
+      allow create: if signedIn()
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.status == 'pending'
+        && request.resource.data.applicationNumber is string
+        && request.resource.data.requestedItems is list
+        && request.resource.data.socialAccount is map;
+
+      // 管理員可更新所有申請（審核）
+      allow update: if isAdmin()
+        && (
+          onlyMutate(['status', 'reviewedAt', 'reviewedBy', 'rejectionReason', 'notes', 'updatedAt']) ||
+          (resource.data.status == 'pending' &&
+           request.resource.data.status in ['approved', 'rejected'])
+        );
+
+      // 不允許刪除申請（保留記錄）
+      allow delete: if false;
+    }
+
+    // ✅ 新增：adminActions 集合
+    // 僅管理員可讀寫
+    match /adminActions/{actionId} {
+      allow read: if isAdmin();
+
+      allow create: if isAdmin()
+        && request.resource.data.adminId == request.auth.uid
+        && request.resource.data.action is string
+        && request.resource.data.timestamp is timestamp;
+
+      allow update, delete: if false; // 不允許修改或刪除記錄
+    }
+
+    // ✅ 新增：verificationSequences 集合
+    // 用於生成唯一的申請編號，已登入用戶可讀寫
+    match /verificationSequences/{dateStr} {
+      // 已登入用戶可讀取（用於獲取當前序號）
+      allow read: if signedIn();
+      
+      // 已登入用戶可寫入（用於更新序號，通過 transaction 確保唯一性）
+      allow write: if signedIn()
+        && request.resource.data.lastSequence is int
+        && request.resource.data.updatedAt is string;
+    }
+
+    // ✅ 新增：reports 集合
+    // 用戶可建立自己的舉報；管理員可讀寫所有舉報
+    match /reports/{reportId} {
+      // 用戶可讀取自己的舉報，管理員可讀取所有舉報
+      allow read: if signedIn() && (
+        resource.data.reporterId == request.auth.uid || isAdmin()
+      );
+
+      // 用戶可建立自己的舉報
+      allow create: if signedIn()
+        && request.resource.data.reporterId == request.auth.uid
+        && request.resource.data.reportedUserId is string
+        && request.resource.data.reportedUserId != request.auth.uid
+        && request.resource.data.reportType is string
+        && request.resource.data.reason is string
+        && request.resource.data.status == 'pending'
+        && request.resource.data.createdAt is string
+        && request.resource.data.updatedAt is string;
+
+      // 管理員可更新舉報狀態（審核）
+      allow update: if isAdmin()
+        && onlyMutate(['status', 'updatedAt']);
+
+      // 不允許刪除舉報（保留記錄）
+      allow delete: if false;
     }
   }
 }

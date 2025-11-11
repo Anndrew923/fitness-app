@@ -22,7 +22,7 @@ const Ladder = () => {
   const [ladderData, setLadderData] = useState([]);
   const [userRank, setUserRank] = useState(0);
   const [selectedAgeGroup, setSelectedAgeGroup] = useState('all');
-  const [selectedTab, setSelectedTab] = useState('total'); // 'total' 或 'weekly'
+  const [selectedTab, setSelectedTab] = useState('total'); // 'total'、'weekly' 或 'verified'
   const [loading, setLoading] = useState(true);
   const [showUserContext, setShowUserContext] = useState(false);
   const [showUserCard, setShowUserCard] = useState(false);
@@ -190,6 +190,15 @@ const Ladder = () => {
         );
       }
 
+      // ✅ 新增：客戶端過濾通過榮譽認證的用戶
+      if (selectedTab === 'verified') {
+        const beforeFilterCount = data.length;
+        data = data.filter(user => user.isVerified === true);
+        console.log(
+          `🏅 榮譽認證過濾：${beforeFilterCount} → ${data.length} 名用戶`
+        );
+      }
+
       // 重新排序並顯示前50名
       data.sort((a, b) => b.ladderScore - a.ladderScore);
       data = data.slice(0, 50); // 固定顯示前50名
@@ -254,6 +263,11 @@ const Ladder = () => {
               const lastActive = new Date(user.lastActive);
               return lastActive >= oneWeekAgo;
             });
+          }
+
+          // ✅ 新增：客戶端過濾通過榮譽認證的用戶
+          if (selectedTab === 'verified') {
+            rankData = rankData.filter(user => user.isVerified === true);
           }
 
           // 重新排序
@@ -736,6 +750,7 @@ const Ladder = () => {
             >
               <option value="total">{t('ladder.filters.total')}</option>
               <option value="weekly">{t('ladder.filters.weekly')}</option>
+              <option value="verified">{t('ladder.filters.verified')}</option>
             </select>
           </div>
 
