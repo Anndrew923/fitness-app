@@ -124,7 +124,9 @@ body.ladder-card-open {
 /* 大頭照區域 */
 .ladder-user-card-avatar-section {
   display: flex;
+  align-items: center;
   justify-content: center;
+  gap: 12px;
   padding: 16px 0;
 }
 
@@ -155,9 +157,22 @@ body.ladder-card-open {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
-  font-size: 48px;
-  font-weight: 700;
+}
+
+/* ✅ 新增：榮譽認證按鈕樣式 */
+.ladder-user-card-verification-badge {
+  background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+  color: #333;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(255, 215, 0, 0.3);
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  border: 2px solid rgba(255, 215, 0, 0.5);
 }
 
 /* 雷達圖區域 */

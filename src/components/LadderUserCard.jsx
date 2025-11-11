@@ -168,6 +168,12 @@ function LadderUserCard({ user, isOpen, onClose }) {
                 </div>
               )}
             </div>
+            {/* ✅ 新增：榮譽認證按鈕 */}
+            {user.isVerified && (
+              <div className="ladder-user-card-verification-badge">
+                🏅 榮譽認證
+              </div>
+            )}
           </div>
 
           {/* 雷達圖區域 */}

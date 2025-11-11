@@ -140,6 +140,8 @@ const Ladder = () => {
             // ✅ 新增：點讚相關數據
             ladderLikeCount: docData.ladderLikeCount || 0,
             ladderLikes: docData.ladderLikes || [],
+            // ✅ 優化：明確添加認證狀態，確保類型一致性
+            isVerified: docData.isVerified === true,
           });
         }
       });
@@ -227,6 +229,8 @@ const Ladder = () => {
                   ageGroup: docData.age
                     ? getAgeGroup(Number(docData.age))
                     : docData.ageGroup || '',
+                  // ✅ 優化：明確添加認證狀態，確保類型一致性
+                  isVerified: docData.isVerified === true,
                 };
               }
               return null;
@@ -618,6 +622,11 @@ const Ladder = () => {
                 {userData.nickname ||
                   userData.email?.split('@')[0] ||
                   '未命名用戶'}
+                {userData.isVerified && (
+                  <span className="ladder__verification-badge" title="榮譽認證">
+                    🏅
+                  </span>
+                )}
               </div>
               <div className="ladder__user-details">
                 {getAgeGroupLabel(userData.ageGroup)} •{' '}
@@ -875,6 +884,11 @@ const Ladder = () => {
                     }`}
                   >
                     {user.displayName}
+                    {user.isVerified && (
+                      <span className="ladder__verification-badge" title="榮譽認證">
+                        🏅
+                      </span>
+                    )}
                     {user.isAnonymous && ' 🔒'}
                   </div>
                   <div className="ladder__user-details">
