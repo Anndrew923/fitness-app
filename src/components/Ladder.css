@@ -412,6 +412,8 @@
 
 .ladder__user-info {
   flex: 1;
+  min-width: 0; /* ✅ 新增：允許 flex 項目收縮 */
+  overflow: hidden; /* ✅ 新增：防止內容溢出 */
 }
 
 .ladder__user-name {
@@ -423,6 +425,8 @@
   color: #333;
   margin-bottom: 2px;
   position: relative;
+  font-size: 13px; /* ✅ 新增：縮小字體（從默認 16px 改為 13px） */
+  max-width: 100%; /* ✅ 新增：限制最大寬度 */
 }
 
 /* ✅ 新增：天梯列表認證標章 */
@@ -430,10 +434,11 @@
   display: inline-flex;
   align-items: center;
   margin-left: 6px;
-  font-size: 16px;
+  font-size: 13px; /* ✅ 修改：從 16px 改為 13px，與名字字體匹配 */
   line-height: 1;
   vertical-align: middle;
   white-space: nowrap;
+  flex-shrink: 0; /* ✅ 新增：標章不允許收縮 */
 }
 
 /* 當前用戶的火焰邊框效果 */
@@ -509,6 +514,7 @@
   align-items: center;
   gap: 12px;
   min-width: 100px;
+  flex-shrink: 0; /* ✅ 新增：確保不會被擠壓 */
 }
 
 .ladder__score {
@@ -602,7 +608,8 @@
   padding: 2px 0; /* 增加一點上下 padding 給 emoji 空間 */
 }
 
-.ladder__like-btn:hover:not(:disabled):not(.ladder__like-btn--placeholder) .ladder__like-icon {
+.ladder__like-btn:hover:not(:disabled):not(.ladder__like-btn--placeholder)
+  .ladder__like-icon {
   transform: scale(1.2);
 }
 
@@ -784,10 +791,22 @@
     font-size: 14px;
   }
 
+  .ladder__user-name {
+    font-size: 12px; /* ✅ 新增：手機版更小 */
+  }
+
+  .ladder__verification-badge {
+    font-size: 12px; /* ✅ 新增：手機版標章也縮小 */
+  }
+
+  .ladder__score-section {
+    min-width: 80px; /* ✅ 新增：手機版稍微縮小 */
+  }
+
   /* 手機版火焰邊框效果調整 */
   .ladder__user-name.current-user-flame {
     padding: 2px 4px;
-    font-size: 13px;
+    font-size: 11px; /* ✅ 修改：從 13px 改為 11px */
   }
 
   .ladder__user-name.current-user-flame::after {

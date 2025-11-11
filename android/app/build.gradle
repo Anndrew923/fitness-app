@@ -4,7 +4,7 @@ apply plugin: 'com.google.gms.google-services'
 android {
     signingConfigs {
         release {
-            storeFile file('C:\\Users\\User\\AndroidSigning\\fitness-app.keystore')
+            storeFile file('C:\\Users\\i\\AndroidSigning\\fitness-app.keystore')
             storePassword 'FitnessApp2025!'
             keyAlias 'fitnesskey'
             keyPassword 'FitnessApp2025!'
@@ -31,10 +31,15 @@ android {
     }
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.release
         }
+    }
+    
+    lintOptions {
+        checkReleaseBuilds false
+        abortOnError true
     }
 
     compileOptions {
