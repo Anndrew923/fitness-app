@@ -1083,8 +1083,8 @@ const Friends = () => {
                 </button>
                   </div>
                 </div>
-                {/* 第三行：信箱 */}
-                <div className="friends-list__friend-email">{friend.email}</div>
+                {/* 第三行：信箱 - 已移除，避免長信箱影響佈局 */}
+                {/* <div className="friends-list__friend-email">{friend.email}</div> */}
               </div>
             </div>
           ))
