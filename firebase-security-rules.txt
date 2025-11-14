@@ -30,9 +30,26 @@ service cloud.firestore {
         && !('isAdmin' in request.resource.data);
       
       // 本人可更新自己的文檔（原有規則）
+      // ✅ 修改：允許部分更新（merge）天梯相關欄位，並允許清除認證狀態
       allow update: if isOwner(userId)
-        && request.resource.data.userId == userId
-        && !('isAdmin' in request.resource.data);
+        && resource.data.userId == userId
+        && (
+          // 如果只更新天梯相關欄位，允許（merge 模式）
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['ladderScore', 'lastLadderSubmission', 'updatedAt']) ||
+          // 如果更新天梯分數並清除認證欄位，允許（重新提交分數後認證失效）
+          (request.resource.data.diff(resource.data).affectedKeys().hasAll(['ladderScore', 'lastLadderSubmission', 'updatedAt']) &&
+           request.resource.data.diff(resource.data).affectedKeys().hasOnly(['ladderScore', 'lastLadderSubmission', 'updatedAt', 'isVerified', 'verifiedLadderScore', 'verificationStatus', 'verifiedAt', 'verificationExpiredAt', 'verificationRequestId']) &&
+           request.resource.data.isVerified == false) ||
+          // 或者完整更新時，檢查 request.resource.data.userId 且不能修改 userId
+          (request.resource.data.userId != null && request.resource.data.userId == userId)
+        )
+        && (
+          // 如果文檔中沒有 isAdmin 欄位，不允許添加
+          (!('isAdmin' in resource.data) && !('isAdmin' in request.resource.data)) ||
+          // 如果文檔中有 isAdmin 欄位，不允許修改它的值
+          ('isAdmin' in resource.data && 
+           (!('isAdmin' in request.resource.data) || request.resource.data.isAdmin == resource.data.isAdmin))
+        );
       
       // ✅ 新增：允許登入用戶更新其他用戶的點讚相關字段
       allow update: if signedIn()
@@ -156,7 +173,7 @@ service cloud.firestore {
       allow create: if isAdmin()
         && request.resource.data.adminId == request.auth.uid
         && request.resource.data.action is string
-        && request.resource.data.timestamp is timestamp;
+        && request.resource.data.timestamp is string;
 
       allow update, delete: if false; // 不允許修改或刪除記錄
     }
@@ -194,7 +211,7 @@ service cloud.firestore {
 
       // 管理員可更新舉報狀態（審核）
       allow update: if isAdmin()
-        && onlyMutate(['status', 'updatedAt']);
+        && onlyMutate(['status', 'reviewedAt', 'reviewedBy', 'notes', 'updatedAt']);
 
       // 不允許刪除舉報（保留記錄）
       allow delete: if false;

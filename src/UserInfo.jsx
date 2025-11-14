@@ -552,15 +552,26 @@ function UserInfo({ testData, onLogout, clearTestData }) {
 
         // 立即寫入 Firebase，確保天梯分數能及時顯示
         const userRef = doc(db, 'users', auth.currentUser.uid);
-        await setDoc(
-          userRef,
-          {
-            ladderScore: ladderScore,
-            lastLadderSubmission: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-          },
-          { merge: true }
-        );
+        
+        // ✅ 檢查是否已認證，如果已認證則清除認證狀態（重新提交分數後認證失效）
+        const updateData = {
+          ladderScore: ladderScore,
+          lastLadderSubmission: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        };
+        
+        // 如果用戶已認證，清除認證相關欄位（重新提交分數後認證失效）
+        if (userData.isVerified === true) {
+          updateData.isVerified = false;
+          updateData.verifiedLadderScore = null;
+          updateData.verificationStatus = null;
+          updateData.verifiedAt = null;
+          updateData.verificationExpiredAt = null;
+          updateData.verificationRequestId = null;
+          console.log('✅ 已清除榮譽認證狀態（重新提交分數）');
+        }
+        
+        await setDoc(userRef, updateData, { merge: true });
 
         console.log('天梯分數已立即保存到 Firebase:', ladderScore);
       } catch (error) {
