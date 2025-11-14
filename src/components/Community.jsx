@@ -1586,9 +1586,10 @@ const Community = () => {
                               </span>
                             )}
                           </div>
-                          <div className="friend-email">
+                          {/* 信箱已移除，避免長信箱影響佈局 */}
+                          {/* <div className="friend-email">
                             {friend.email || ''}
-                          </div>
+                          </div> */}
                         </div>
                       </div>
                       <div className="friend-actions">
