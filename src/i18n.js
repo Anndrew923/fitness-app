@@ -930,7 +930,7 @@ const zhTW = {
         placeholder: {
           socialAccount: '請輸入您的 FB 或 IG 帳號',
           videoLink: 'https://...（選填）',
-          description: '可以補充說明您的訓練內容或特殊情況',
+          description: '可補充訓練內容或特殊情況。二次認證只需更新變動項目，請註明（例：心肺進步，僅更新心肺）',
         },
         hint: {
           videoLink: '請提供您在社群平台上傳的訓練影片連結，或直接傳給管理員（選填）',
@@ -2808,7 +2808,7 @@ const enUS = {
         placeholder: {
           socialAccount: 'Your Facebook or Instagram handle',
           videoLink: 'https://... (Optional)',
-          description: 'Tell us about your training or any special circumstances',
+          description: 'Tell us about your training or special circumstances. For re-verification, specify which items changed (e.g., "Cardio improved, updating cardio only")',
         },
         hint: {
           videoLink: 'Please provide the link to your training video on social platforms, or send directly to administrators (Optional)',
