@@ -47,6 +47,7 @@ export const adConfig = {
     contact: { showTop: false, showBottom: false }, // 聯絡頁面不顯示廣告
     settings: { showTop: false, showBottom: false }, // 設定頁面不顯示廣告
     community: { showTop: false, showBottom: true }, // 社群頁面內容豐富，可以顯示廣告
+    'training-tools': { showTop: false, showBottom: true }, // 工具頁面顯示底部廣告
   },
 
   // 廣告顯示頻率控制
@@ -149,6 +150,12 @@ const checkPageContent = pageName => {
     // 評測頁面有豐富的說明內容，符合 AdMob 政策，直接顯示廣告
     console.log(`📄 評測頁面 [${pageName}] 內容豐富，顯示廣告`);
     return true;
+  }
+
+  // 4. 工具頁面 - 有豐富的工具列表內容
+  if (pageName === 'training-tools') {
+    console.log(`📄 工具頁面 [${pageName}] 內容豐富，顯示廣告`);
+    return true; // 工具頁面有足夠內容，顯示廣告
   }
 
   // 其他頁面暫時不顯示廣告，確保符合政策

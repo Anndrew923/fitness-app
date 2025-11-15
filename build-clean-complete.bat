@@ -4,7 +4,17 @@ echo 完整清除快取並建置最新版本
 echo ============================================
 echo.
 
+:: 設置 JAVA_HOME（如果未設置）
+echo [步驟 0/8] 設置 JAVA_HOME...
+if "%JAVA_HOME%"=="" (
+    set "JAVA_HOME=C:\Program Files\Android\Android Studio\jbr"
+    echo ✅ JAVA_HOME 已設置: %JAVA_HOME%
+) else (
+    echo ℹ️  JAVA_HOME 已存在: %JAVA_HOME%
+)
+
 :: 停止運行中的進程
+echo.
 echo [步驟 1/8] 停止運行中的進程...
 powershell -Command "Get-Process -Name node,java,gradle -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue" 2>nul
 timeout /t 2 /nobreak >nul

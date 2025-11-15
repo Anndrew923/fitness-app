@@ -1612,6 +1612,48 @@ const zhTW = {
       msgDeleteFail: '刪除失敗，請稍後再試',
     },
 
+    // 訓練工具頁
+    tools: {
+      title: '訓練工具',
+      subtitle: '實用的訓練輔助工具，讓你的訓練更有效率',
+      comingSoon: '工具頁面即將推出',
+      comingSoonDesc: '我們正在開發實用的訓練工具，敬請期待！',
+      status: {
+        comingSoon: '即將推出',
+        available: '可使用',
+      },
+      category: {
+        weight: '重量訓練',
+        cardio: '有氧運動',
+      },
+      // 重量訓練工具
+      oneRM: {
+        title: '1RM 計算器',
+        desc: '根據訓練重量和次數，精準計算你的最大肌力',
+      },
+      restTimer: {
+        title: '休息計時器',
+        desc: '精準控制組間休息時間，提升訓練效率',
+      },
+      volumeCalculator: {
+        title: '訓練量計算器',
+        desc: '記錄訓練動作、重量、組數，自動計算總訓練量',
+      },
+      exerciseLibrary: {
+        title: '動作庫',
+        desc: '完整動作資料庫，包含 S~D 級動作分級系統',
+      },
+      // 有氧運動工具
+      paceCalculator: {
+        title: '配速計算器',
+        desc: '根據距離和時間，計算精準配速',
+      },
+      hrZone: {
+        title: '心率區間計算器',
+        desc: '計算個人化心率訓練區間，科學化訓練',
+      },
+    },
+
     // 歡迎頁提示
     welcomeTooltips: {
       login: '將數據保存到雲端,隨時隨地訪問',
@@ -3524,6 +3566,48 @@ const enUS = {
         'You must re-login before you can delete your account',
       msgDeleted: 'Account deleted',
       msgDeleteFail: 'Deletion failed. Please try again later',
+    },
+
+    // Training Tools page
+    tools: {
+      title: 'Training Tools',
+      subtitle: 'Practical training assistant tools to make your training more efficient',
+      comingSoon: 'Tools page coming soon',
+      comingSoonDesc: 'We are developing practical training tools, stay tuned!',
+      status: {
+        comingSoon: 'Coming Soon',
+        available: 'Available',
+      },
+      category: {
+        weight: 'Weight Training',
+        cardio: 'Cardio',
+      },
+      // Weight training tools
+      oneRM: {
+        title: '1RM Calculator',
+        desc: 'Calculate your maximum strength based on training weight and reps',
+      },
+      restTimer: {
+        title: 'Rest Timer',
+        desc: 'Precisely control rest time between sets to improve training efficiency',
+      },
+      volumeCalculator: {
+        title: 'Volume Calculator',
+        desc: 'Record exercises, weight, and sets, automatically calculate total training volume',
+      },
+      exerciseLibrary: {
+        title: 'Exercise Library',
+        desc: 'Complete exercise database with S~D grade classification system',
+      },
+      // Cardio tools
+      paceCalculator: {
+        title: 'Pace Calculator',
+        desc: 'Calculate precise pace based on distance and time',
+      },
+      hrZone: {
+        title: 'Heart Rate Zone Calculator',
+        desc: 'Calculate personalized heart rate training zones for scientific training',
+      },
     },
 
     // Welcome page tooltips

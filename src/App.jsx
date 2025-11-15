@@ -35,6 +35,7 @@ const Contact = React.lazy(() => import('./Contact'));
 import BottomNavBar from './components/BottomNavBar';
 const Ladder = React.lazy(() => import('./components/Ladder'));
 const Settings = React.lazy(() => import('./components/Settings'));
+const TrainingTools = React.lazy(() => import('./components/TrainingTools'));
 const Community = React.lazy(() => import('./components/Community'));
 const FriendFeed = React.lazy(() => import('./components/FriendFeed'));
 const Verification = React.lazy(() => import('./pages/Verification'));
@@ -493,6 +494,10 @@ function AppContent() {
               <Route
                 path="/verification"
                 element={<ProtectedRoute element={<Verification />} />}
+              />
+              <Route
+                path="/training-tools"
+                element={<ProtectedRoute element={<TrainingTools />} />}
               />
               <Route
                 path="/admin"

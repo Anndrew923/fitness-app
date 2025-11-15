@@ -185,6 +185,12 @@ export const preAdDisplayCheck = (pageName, pageContent) => {
     return true;
   }
 
+  // 工具頁面特殊處理 - 有豐富的工具列表，符合 AdMob 政策
+  if (pageName === 'training-tools') {
+    console.log(`📄 工具頁面 [${pageName}] 內容豐富，顯示廣告`);
+    return true;
+  }
+
   // 其他頁面進行正常合規檢查
   const compliance = AdMobCompliance.checkContentPolicy(pageName, pageContent);
 

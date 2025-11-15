@@ -92,6 +92,28 @@ npm run dev
 npm run build
 ```
 
+### Android APK 建置
+
+**快速建置（推薦）：**
+
+```bash
+build-release-apk.bat
+```
+
+**完整清理建置：**
+
+```bash
+build-clean-complete.bat
+```
+
+**詳細建置流程請參考：** [BUILD_PROCESS_GUIDE.md](./BUILD_PROCESS_GUIDE.md)
+
+⚠️ **重要提醒**：建置 APK 時必須執行以下步驟：
+
+1. `npm run build` - 建置 React 代碼
+2. `npx cap sync android` ⭐ **關鍵步驟！**
+3. `gradlew assembleRelease` - 建置 APK
+
 ## 資料結構
 
 ### 用戶資料 (users collection)

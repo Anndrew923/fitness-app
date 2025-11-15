@@ -2180,3 +2180,55 @@
     font-size: 16px;
   }
 }
+
+/* 設定按鈕 - 右上角 */
+.user-info__settings-btn {
+  position: fixed !important;
+  top: 15px !important;
+  right: 15px !important;
+  width: 44px !important;
+  height: 44px !important;
+  border-radius: 50% !important;
+  background: rgba(255, 255, 255, 0.95) !important;
+  color: #667eea !important;
+  border: 2px solid rgba(102, 126, 234, 0.3) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  transition: all 0.3s ease !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+  z-index: 999 !important; /* 確保在 Modal 之下，Modal 通常是 1000+ */
+  backdrop-filter: blur(10px) !important;
+}
+
+.user-info__settings-btn:hover {
+  background: rgba(255, 255, 255, 1) !important;
+  transform: scale(1.1) !important;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2) !important;
+  border-color: #667eea !important;
+}
+
+.user-info__settings-btn:active {
+  transform: scale(0.95) !important;
+}
+
+.user-info__settings-btn svg {
+  width: 20px !important;
+  height: 20px !important;
+}
+
+/* 響應式調整 */
+@media (max-width: 768px) {
+  .user-info__settings-btn {
+    top: 10px !important;
+    right: 10px !important;
+    width: 40px !important;
+    height: 40px !important;
+  }
+  
+  .user-info__settings-btn svg {
+    width: 18px !important;
+    height: 18px !important;
+  }
+}
