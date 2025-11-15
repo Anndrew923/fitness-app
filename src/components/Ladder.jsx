@@ -36,6 +36,9 @@ const Ladder = () => {
   // ✅ 新增：點讚相關狀態
   const [likeProcessing, setLikeProcessing] = useState(new Set());
   const [likedUsers, setLikedUsers] = useState(new Set());
+  // ✅ 新增：提醒框相關狀態
+  const [showNotification, setShowNotification] = useState(false);
+  const [notificationData, setNotificationData] = useState(null);
 
   const ageGroups = useMemo(
     () => [
@@ -51,6 +54,60 @@ const Ladder = () => {
     ],
     [t]
   );
+
+  // ✅ 新增：檢查並顯示提醒框（需要在 loadLadderData 之前定義）
+  const checkAndShowNotification = useCallback((newRank) => {
+    try {
+      // 讀取更新通知數據
+      const savedNotification = localStorage.getItem('ladderUpdateNotification');
+      if (!savedNotification) {
+        return; // 沒有通知數據，不顯示
+      }
+
+      const notification = JSON.parse(savedNotification);
+      
+      // 檢查是否已顯示過
+      if (notification.hasShown) {
+        return; // 已顯示過，不重複顯示
+      }
+
+      // 檢查時間戳（5分鐘內有效）
+      const timeDiff = Date.now() - notification.timestamp;
+      if (timeDiff > 5 * 60 * 1000) {
+        // 超過5分鐘，清除通知
+        localStorage.removeItem('ladderUpdateNotification');
+        return;
+      }
+
+      // 更新排名數據
+      notification.newRank = newRank;
+      notification.oldRank = notification.oldRank || 0;
+
+      // ✅ 判斷變化類型
+      const scoreImproved = notification.newScore > notification.oldScore;
+      const rankImproved = notification.oldRank > 0 && notification.newRank < notification.oldRank;
+      
+      // 判斷提醒框類型
+      if (notification.isFirstTime) {
+        notification.type = 'first-time'; // 初次進榜 - 金紅色
+      } else if (scoreImproved || rankImproved) {
+        notification.type = 'improved'; // 提升 - 金紅色
+      } else {
+        // ✅ 修改：持平、退步、排名下滑都用金屬灰
+        notification.type = 'declined'; // 持平、退步、排名下滑 - 金屬灰
+      }
+
+      // 設置提醒框數據並顯示
+      setNotificationData(notification);
+      setShowNotification(true);
+
+      // 標記為已顯示
+      notification.hasShown = true;
+      localStorage.setItem('ladderUpdateNotification', JSON.stringify(notification));
+    } catch (error) {
+      console.error('檢查提醒框失敗:', error);
+    }
+  }, []);
 
   // 使用 useCallback 優化 loadLadderData 函數
   const loadLadderData = useCallback(async () => {
@@ -223,6 +280,9 @@ const Ladder = () => {
           const newRank = userRankIndex + 1;
           console.log(`🎯 用戶排名：第 ${newRank} 名`);
           setUserRank(newRank);
+          
+          // ✅ 檢查並顯示提醒框（排名計算完成後）
+          checkAndShowNotification(newRank);
         } else {
           // 用戶不在當前顯示範圍內，需要計算實際排名
           console.log(`📋 用戶不在前50名內，計算實際排名...`);
@@ -282,6 +342,9 @@ const Ladder = () => {
 
           console.log(`🎯 用戶實際排名：第 ${newRank} 名`);
           setUserRank(newRank);
+          
+          // ✅ 檢查並顯示提醒框（排名計算完成後）
+          checkAndShowNotification(newRank);
         }
       } else {
         setUserRank(0);
@@ -517,6 +580,13 @@ const Ladder = () => {
     [ageGroups]
   );
 
+  // ✅ 新增：關閉提醒框（必須在所有條件返回之前定義，遵守 React Hooks 規則）
+  const handleCloseNotification = useCallback(() => {
+    setShowNotification(false);
+    // 清除通知數據
+    localStorage.removeItem('ladderUpdateNotification');
+  }, []);
+
   // 新增：獲取浮動排名顯示框
   const floatingRankDisplay = useMemo(() => {
     // 創建條件檢查的鍵值，用於防抖
@@ -731,6 +801,181 @@ const Ladder = () => {
 
   return (
     <div className="ladder">
+      {/* ✅ 新增：提醒框 */}
+      {showNotification && notificationData && (
+        <div className="ladder-notification-overlay" onClick={handleCloseNotification}>
+          <div 
+            className={`ladder-notification ${notificationData.type || (notificationData.isFirstTime ? 'first-time' : 'declined')}`}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button 
+              className="ladder-notification__close"
+              onClick={handleCloseNotification}
+              aria-label={t('common.close')}
+            >
+              ×
+            </button>
+            
+            {notificationData.isFirstTime ? (
+              // 第一次參加排名
+              <div className="ladder-notification__content first-time-content">
+                <div className="ladder-notification__icon">🎉</div>
+                <h2 className="ladder-notification__title">
+                  {t('ladder.notification.firstTime.title')}
+                </h2>
+                <div className="ladder-notification__stats">
+                  <div className="ladder-notification__stat">
+                    <span className="ladder-notification__stat-label">
+                      {t('ladder.notification.firstTime.combatPower')}
+                    </span>
+                    <span className="ladder-notification__stat-value">
+                      {formatScore(notificationData.newScore)}
+                    </span>
+                  </div>
+                  <div className="ladder-notification__stat">
+                    <span className="ladder-notification__stat-label">
+                      {t('ladder.notification.firstTime.rank')}
+                    </span>
+                    <span className="ladder-notification__stat-value">
+                      {t('ladder.notification.firstTime.rankValue', { rank: notificationData.newRank })}
+                    </span>
+                  </div>
+                </div>
+                <p className="ladder-notification__message">
+                  {t('ladder.notification.firstTime.message')}
+                </p>
+                <button 
+                  className="ladder-notification__button"
+                  onClick={handleCloseNotification}
+                >
+                  {t('ladder.notification.firstTime.button')}
+                </button>
+              </div>
+            ) : notificationData.type === 'improved' ? (
+              // 提升 - 金紅色
+              <div className="ladder-notification__content improved-content">
+                <div className="ladder-notification__icon">📈</div>
+                <h2 className="ladder-notification__title">
+                  {t('ladder.notification.improved.title')}
+                </h2>
+                <div className="ladder-notification__stats">
+                  <div className="ladder-notification__stat">
+                    <span className="ladder-notification__stat-label">
+                      {t('ladder.notification.improved.combatPower')}
+                    </span>
+                    <div className="ladder-notification__stat-change">
+                      <span className="ladder-notification__stat-old">
+                        {formatScore(notificationData.oldScore)}
+                      </span>
+                      <span className="ladder-notification__stat-arrow">→</span>
+                      <span className="ladder-notification__stat-new">
+                        {formatScore(notificationData.newScore)}
+                      </span>
+                      {notificationData.newScore > notificationData.oldScore && (
+                        <span className="ladder-notification__stat-improvement">
+                          (+{formatScore(notificationData.newScore - notificationData.oldScore)})
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <div className="ladder-notification__stat">
+                    <span className="ladder-notification__stat-label">
+                      {t('ladder.notification.improved.rank')}
+                    </span>
+                    <div className="ladder-notification__stat-change">
+                      <span className="ladder-notification__stat-old">
+                        {notificationData.oldRank > 0 
+                          ? t('ladder.notification.improved.rankValue', { rank: notificationData.oldRank })
+                          : t('ladder.notification.improved.notRanked')
+                        }
+                      </span>
+                      <span className="ladder-notification__stat-arrow">→</span>
+                      <span className="ladder-notification__stat-new">
+                        {t('ladder.notification.improved.rankValue', { rank: notificationData.newRank })}
+                      </span>
+                      {notificationData.oldRank > 0 && notificationData.newRank < notificationData.oldRank && (
+                        <span className="ladder-notification__stat-improvement">
+                          ({t('ladder.notification.improved.rankImproved', { 
+                            improved: notificationData.oldRank - notificationData.newRank 
+                          })})
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+                <button 
+                  className="ladder-notification__button"
+                  onClick={handleCloseNotification}
+                >
+                  {t('ladder.notification.improved.button')}
+                </button>
+              </div>
+            ) : notificationData.type === 'declined' ? (
+              // 排名下滑 - 金屬灰
+              <div className="ladder-notification__content declined-content">
+                <div className="ladder-notification__icon">💪</div>
+                <h2 className="ladder-notification__title">
+                  {t('ladder.notification.declined.title')}
+                </h2>
+                <div className="ladder-notification__stats">
+                  <div className="ladder-notification__stat">
+                    <span className="ladder-notification__stat-label">
+                      {t('ladder.notification.declined.combatPower')}
+                    </span>
+                    <div className="ladder-notification__stat-change">
+                      <span className="ladder-notification__stat-old">
+                        {formatScore(notificationData.oldScore)}
+                      </span>
+                      <span className="ladder-notification__stat-arrow">→</span>
+                      <span className="ladder-notification__stat-new">
+                        {formatScore(notificationData.newScore)}
+                      </span>
+                      {notificationData.newScore < notificationData.oldScore && (
+                        <span className="ladder-notification__stat-decline">
+                          (-{formatScore(notificationData.oldScore - notificationData.newScore)})
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <div className="ladder-notification__stat">
+                    <span className="ladder-notification__stat-label">
+                      {t('ladder.notification.declined.rank')}
+                    </span>
+                    <div className="ladder-notification__stat-change">
+                      <span className="ladder-notification__stat-old">
+                        {notificationData.oldRank > 0 
+                          ? t('ladder.notification.declined.rankValue', { rank: notificationData.oldRank })
+                          : t('ladder.notification.declined.notRanked')
+                        }
+                      </span>
+                      <span className="ladder-notification__stat-arrow">→</span>
+                      <span className="ladder-notification__stat-new">
+                        {t('ladder.notification.declined.rankValue', { rank: notificationData.newRank })}
+                      </span>
+                      {notificationData.oldRank > 0 && notificationData.newRank > notificationData.oldRank && (
+                        <span className="ladder-notification__stat-decline">
+                          ({t('ladder.notification.declined.rankDeclined', { 
+                            declined: notificationData.newRank - notificationData.oldRank 
+                          })})
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+                <p className="ladder-notification__message">
+                  {t('ladder.notification.declined.message')}
+                </p>
+                <button 
+                  className="ladder-notification__button"
+                  onClick={handleCloseNotification}
+                >
+                  {t('ladder.notification.declined.button')}
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
       {/* 晉升動畫提示 */}
       {getPromotionMessage()}
 

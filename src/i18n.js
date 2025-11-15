@@ -33,6 +33,7 @@ const zhTW = {
       notSelected: '未選擇',
       or: '或',
       points: '分',
+      close: '關閉',
     },
 
     // 歷史紀錄
@@ -726,6 +727,45 @@ const zhTW = {
         weeklyInfo: '📅 本周新進榜：顯示過去7天內有活動的用戶',
         myRankTip:
           '💡 提示：您的排名為第 {{rank}} 名，可以點擊上方按鈕查看您附近的競爭對手',
+      },
+      // ✅ 新增：提醒框國際化
+      notification: {
+        firstTime: {
+          title: '歡迎加入天梯！',
+          combatPower: '您的戰鬥力',
+          rank: '您的排名',
+          rankValue: '第 {{rank}} 名',
+          message: '開始您的天梯之旅吧！',
+          button: '開始挑戰',
+        },
+        improved: {
+          title: '戰鬥力提升！',
+          combatPower: '戰鬥力',
+          rank: '排名',
+          rankValue: '第 {{rank}} 名',
+          notRanked: '未上榜',
+          rankImproved: '提升 {{improved}} 名',
+          button: '查看排名',
+        },
+        declined: {
+          title: '排名更新',
+          combatPower: '戰鬥力',
+          rank: '排名',
+          rankValue: '第 {{rank}} 名',
+          notRanked: '未上榜',
+          rankDeclined: '下降 {{declined}} 名',
+          message: '別灰心！繼續努力訓練，下次一定能再創佳績！💪',
+          button: '繼續努力',
+        },
+        update: {
+          title: '戰鬥力更新',
+          combatPower: '戰鬥力',
+          rank: '排名',
+          rankValue: '第 {{rank}} 名',
+          notRanked: '未上榜',
+          rankImproved: '提升 {{improved}} 名',
+          button: '查看排名',
+        },
       },
     },
 
@@ -1976,6 +2016,7 @@ const enUS = {
       notSelected: 'Not selected',
       or: 'or',
       points: 'pts',
+      close: 'Close',
     },
 
     // Privacy & errors
@@ -2646,6 +2687,45 @@ const enUS = {
         weeklyInfo: '📅 New this week: users active in the past 7 days',
         myRankTip:
           '💡 Tip: Your rank is {{rank}}. Click the button above to view nearby competitors',
+      },
+      // ✅ 新增：提醒框國際化
+      notification: {
+        firstTime: {
+          title: 'Welcome to the Ladder!',
+          combatPower: 'Your Combat Power',
+          rank: 'Your Rank',
+          rankValue: 'Rank {{rank}}',
+          message: 'Begin your ladder journey!',
+          button: 'Start Challenge',
+        },
+        improved: {
+          title: 'Combat Power Improved!',
+          combatPower: 'Combat Power',
+          rank: 'Rank',
+          rankValue: 'Rank {{rank}}',
+          notRanked: 'Not Ranked',
+          rankImproved: 'Improved {{improved}} ranks',
+          button: 'View Rankings',
+        },
+        declined: {
+          title: 'Rank Updated',
+          combatPower: 'Combat Power',
+          rank: 'Rank',
+          rankValue: 'Rank {{rank}}',
+          notRanked: 'Not Ranked',
+          rankDeclined: 'Down {{declined}} ranks',
+          message: 'Don\'t give up! Keep training hard, you\'ll definitely improve next time! 💪',
+          button: 'Keep Training',
+        },
+        update: {
+          title: 'Combat Power Updated',
+          combatPower: 'Combat Power',
+          rank: 'Rank',
+          rankValue: 'Rank {{rank}}',
+          notRanked: 'Not Ranked',
+          rankImproved: 'Improved {{improved}} ranks',
+          button: 'View Rankings',
+        },
       },
     },
 

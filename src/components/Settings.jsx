@@ -90,7 +90,17 @@ function Settings() {
     try {
       localStorage.removeItem('userData');
       localStorage.removeItem('lastSavedUserData');
+      
+      // ✅ 清除舊的通用 key（向後兼容）
       localStorage.removeItem('ladderSubmissionState');
+      
+      // ✅ 如果有登入用戶，清除該用戶的提交狀態
+      if (auth.currentUser) {
+        const userId = auth.currentUser.uid;
+        const storageKey = `ladderSubmissionState_${userId}`;
+        localStorage.removeItem(storageKey);
+      }
+      
       setMessage(t('settings.msgClearedLocal'));
     } catch (error) {
       console.error('清除數據失敗:', error);

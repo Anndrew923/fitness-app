@@ -1973,8 +1973,9 @@
 
 .detail-text {
   font-size: 13px;
-  color: #cbd5e0; /* 淺色文字，適合深色背景 */
+  color: #4a5568; /* ✅ 深灰色，提高可讀性 */
   font-weight: 500;
+  text-align: left; /* ✅ 靠左對齊 */
 }
 
 /* submit-confirm-footer 樣式已移到 .submit-confirm-content .submit-confirm-footer */
@@ -2062,6 +2063,8 @@
 
   .detail-text {
     font-size: 12px;
+    color: #4a5568; /* ✅ 深灰色，提高可讀性 */
+    text-align: left; /* ✅ 靠左對齊 */
   }
 
   .limit-info {
@@ -2121,7 +2124,8 @@
   }
 
   .detail-text {
-    color: #cbd5e0;
+    color: #4a5568; /* ✅ 深灰色，提高可讀性 */
+    text-align: left; /* ✅ 靠左對齊 */
   }
 
   .limit-text {

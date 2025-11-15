@@ -522,9 +522,60 @@ function UserInfo({ testData, onLogout, clearTestData }) {
     try {
       setLoading(true);
 
+      // ✅ 在計算新分數之前，保存舊的分數（用於提醒框顯示）
+      const oldLadderScore = userData.ladderScore || 0;
+      const isFirstTime = oldLadderScore === 0;
+
+      // ✅ 新增：如果用戶有舊分數，先查詢當前排名
+      let oldRank = 0;
+      if (oldLadderScore > 0 && auth.currentUser) {
+        try {
+          // 查詢所有有分數的用戶，按分數排序
+          const q = query(
+            collection(db, 'users'),
+            orderBy('ladderScore', 'desc'),
+            limit(200)
+          );
+          const querySnapshot = await getDocs(q);
+          const allUsers = [];
+          querySnapshot.forEach(doc => {
+            const docData = doc.data();
+            if (docData.ladderScore > 0) {
+              allUsers.push({
+                id: doc.id,
+                ladderScore: docData.ladderScore,
+              });
+            }
+          });
+          
+          // 排序並查找當前用戶的排名
+          allUsers.sort((a, b) => b.ladderScore - a.ladderScore);
+          const currentUserIndex = allUsers.findIndex(
+            user => user.id === auth.currentUser.uid
+          );
+          
+          if (currentUserIndex >= 0) {
+            oldRank = currentUserIndex + 1;
+            console.log(`📊 查詢到當前排名：第 ${oldRank} 名`);
+          }
+        } catch (error) {
+          console.error('查詢當前排名失敗:', error);
+        }
+      }
+
       // 計算天梯分數
       const scores = userData.scores || {};
       const ladderScore = calculateLadderScore(scores);
+
+      // ✅ 保存更新通知數據到 localStorage，使用查詢到的 oldRank
+      localStorage.setItem('ladderUpdateNotification', JSON.stringify({
+        isFirstTime: isFirstTime,
+        oldScore: oldLadderScore,
+        newScore: ladderScore,
+        oldRank: oldRank, // ✅ 使用查詢到的排名
+        timestamp: Date.now(),
+        hasShown: false, // 標記是否已顯示
+      }));
 
       // 更新用戶數據，明確設置天梯分數和提交時間
       const updatedUserData = {
@@ -935,8 +986,23 @@ function UserInfo({ testData, onLogout, clearTestData }) {
   // 初始化天梯提交狀態
   useEffect(() => {
     const loadSubmissionState = () => {
+      // ✅ 檢查是否有登入用戶
+      if (!auth.currentUser) {
+        // 未登入，重置狀態
+        setLadderSubmissionState({
+          lastSubmissionTime: null,
+          dailySubmissionCount: 0,
+          lastSubmissionDate: null,
+        });
+        return;
+      }
+
       try {
-        const savedState = localStorage.getItem('ladderSubmissionState');
+        // ✅ 使用帶用戶 ID 的 key，確保每個用戶有獨立的提交次數
+        const userId = auth.currentUser.uid;
+        const storageKey = `ladderSubmissionState_${userId}`;
+        const savedState = localStorage.getItem(storageKey);
+        
         if (savedState) {
           const parsedState = JSON.parse(savedState);
           // 檢查是否是新的一天，如果是則重置計數
@@ -950,24 +1016,47 @@ function UserInfo({ testData, onLogout, clearTestData }) {
           } else {
             setLadderSubmissionState(parsedState);
           }
+        } else {
+          // 沒有保存的狀態，初始化為空
+          setLadderSubmissionState({
+            lastSubmissionTime: null,
+            dailySubmissionCount: 0,
+            lastSubmissionDate: null,
+          });
         }
       } catch (error) {
         console.error('載入提交狀態失敗:', error);
+        // 錯誤時重置狀態
+        setLadderSubmissionState({
+          lastSubmissionTime: null,
+          dailySubmissionCount: 0,
+          lastSubmissionDate: null,
+        });
       }
     };
 
     loadSubmissionState();
-  }, []);
+  }, [userData?.userId, auth.currentUser?.uid]); // ✅ 添加依賴，用戶切換時重新載入
 
   // 保存天梯提交狀態到localStorage
   useEffect(() => {
-    if (ladderSubmissionState.lastSubmissionDate) {
+    // ✅ 檢查是否有登入用戶
+    if (!auth.currentUser || !ladderSubmissionState.lastSubmissionDate) {
+      return;
+    }
+
+    try {
+      // ✅ 使用帶用戶 ID 的 key，確保每個用戶有獨立的提交次數
+      const userId = auth.currentUser.uid;
+      const storageKey = `ladderSubmissionState_${userId}`;
       localStorage.setItem(
-        'ladderSubmissionState',
+        storageKey,
         JSON.stringify(ladderSubmissionState)
       );
+    } catch (error) {
+      console.error('保存提交狀態失敗:', error);
     }
-  }, [ladderSubmissionState]);
+  }, [ladderSubmissionState, auth.currentUser?.uid]); // ✅ 添加依賴
 
   // 處理 testData 更新
   useEffect(() => {
