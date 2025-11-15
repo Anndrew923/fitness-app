@@ -150,6 +150,7 @@ function AppContent() {
     '/muscle-mass',
     '/body-fat',
     '/settings',
+    '/training-tools',
   ].some(path => location.pathname.startsWith(path));
 
   // 檢查是否需要為固定廣告預留空間
@@ -165,6 +166,7 @@ function AppContent() {
     '/muscle-mass',
     '/body-fat',
     '/settings',
+    '/training-tools',
   ].some(path => location.pathname.startsWith(path));
 
   // AdMob 初始化（僅在 Android/iOS 平台）
