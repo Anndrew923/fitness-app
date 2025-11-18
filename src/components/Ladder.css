@@ -1168,6 +1168,131 @@
   }
 }
 
+/* ✅ 新增：分頁控制樣式 */
+.ladder__pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  margin: 32px 0;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 107, 53, 0.2);
+}
+
+.ladder__pagination-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  border: 2px solid #ff6b35;
+  background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+  color: white;
+  border-radius: 12px;
+  font-size: 20px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
+}
+
+.ladder__pagination-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(255, 107, 53, 0.4);
+  background: linear-gradient(135deg, #ff7b45 0%, #ffa030 100%);
+}
+
+.ladder__pagination-btn:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(255, 107, 53, 0.3);
+}
+
+.ladder__pagination-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  background: linear-gradient(135deg, #ccc 0%, #999 100%);
+  border-color: #ccc;
+  box-shadow: none;
+}
+
+.ladder__pagination-arrow {
+  line-height: 1;
+  font-weight: 700;
+}
+
+.ladder__pagination-select-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ladder__pagination-select {
+  padding: 10px 16px;
+  border: 2px solid #ff6b35;
+  background: white;
+  color: #333;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23ff6b35' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 12px;
+  padding-right: 40px;
+  min-width: 80px;
+  text-align: center;
+}
+
+.ladder__pagination-select:hover {
+  border-color: #ff7b45;
+  box-shadow: 0 2px 8px rgba(255, 107, 53, 0.2);
+}
+
+.ladder__pagination-select:focus {
+  outline: none;
+  border-color: #ff6b35;
+  box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.2);
+}
+
+.ladder__pagination-total {
+  font-size: 16px;
+  font-weight: 600;
+  color: #666;
+}
+
+/* 響應式設計 */
+@media (max-width: 768px) {
+  .ladder__pagination {
+    gap: 12px;
+    padding: 16px;
+    margin: 24px 0;
+  }
+
+  .ladder__pagination-btn {
+    width: 44px;
+    height: 44px;
+    font-size: 18px;
+  }
+
+  .ladder__pagination-select {
+    padding: 8px 36px 8px 12px;
+    font-size: 14px;
+    min-width: 70px;
+  }
+
+  .ladder__pagination-total {
+    font-size: 14px;
+  }
+}
+
 /* 第一名浮動卡片金光閃爍效果 */
 .first-place-glow {
   animation: firstPlaceGlow 2s ease-in-out infinite;

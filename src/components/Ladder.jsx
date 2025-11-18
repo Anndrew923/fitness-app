@@ -45,6 +45,11 @@ const Ladder = () => {
   // ✅ 新增：提醒框相關狀態
   const [showNotification, setShowNotification] = useState(false);
   const [notificationData, setNotificationData] = useState(null);
+  // ✅ 新增：分頁相關狀態
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalUsers, setTotalUsers] = useState(0);
+  const [userPage, setUserPage] = useState(0); // 用戶所在頁面
+  const hasInitialPageSetRef = useRef(false); // 記錄是否已設置初始頁面
 
   const ageGroups = useMemo(
     () => [
@@ -274,10 +279,14 @@ const Ladder = () => {
       // 重新排序
       data.sort((a, b) => b.ladderScore - a.ladderScore);
 
-      // ✅ 新增：先計算用戶的實際排名，再決定顯示範圍
+      // ✅ 修改：先計算用戶的實際排名，再決定顯示範圍（支持分頁）
       let displayData = [];
       let actualUserRank = 0;
       let startRank = 1; // 記錄起始排名（用於顯示）
+      const usersPerPage = 50; // 每頁顯示50名
+
+      // 保存總用戶數
+      setTotalUsers(data.length);
 
       if (userData && userData.ladderScore > 0) {
         // 計算用戶在過濾後數據中的排名
@@ -287,53 +296,56 @@ const Ladder = () => {
         );
         actualUserRank = userRankIndex >= 0 ? userRankIndex + 1 : 0;
 
-        // 決定顯示範圍
-        const totalUsers = data.length;
-        const displayCount = 50; // 固定顯示50名
-
         if (actualUserRank > 0) {
-          console.log(
-            `🎯 用戶實際排名：第 ${actualUserRank} 名，總共 ${data.length} 名用戶`
-          );
+          // 計算用戶所在頁面
+          const calculatedUserPage = Math.ceil(actualUserRank / usersPerPage);
+          setUserPage(calculatedUserPage);
 
-          if (actualUserRank === totalUsers) {
-            // 用戶是最後一名，顯示最後50名（用戶在底部）
-            const startIndex = Math.max(0, totalUsers - displayCount);
-            displayData = data.slice(startIndex);
-            startRank = startIndex + 1; // 記錄起始排名
-            setDisplayStartRank(startRank);
-            console.log(
-              `📋 用戶是最後一名，顯示最後 ${displayData.length} 名，起始排名：${startRank}`
-            );
+          // ✅ 新增：首次載入時，如果用戶不在第一頁，自動跳轉到用戶所在頁
+          if (!hasInitialPageSetRef.current && calculatedUserPage > 1) {
+            setCurrentPage(calculatedUserPage);
+            hasInitialPageSetRef.current = true;
+          }
+
+          // 根據當前頁面計算顯示範圍
+          const startIndex = (currentPage - 1) * usersPerPage;
+          const endIndex = startIndex + usersPerPage;
+          
+          // 確保索引不超出範圍
+          if (startIndex < data.length) {
+            displayData = data.slice(startIndex, endIndex);
+            startRank = startIndex + 1;
           } else {
-            // ✅ 修改：改為從第1名開始顯示（而不是從用戶排名開始）
-            // 這樣用戶可以往上滾動查看前面的排名
-            displayData = data.slice(0, displayCount);
-            startRank = 1; // 從第1名開始
-            setDisplayStartRank(startRank);
-            console.log(
-              `📋 從第1名開始顯示：第 1 名到第 ${displayData.length} 名，用戶排名：第 ${actualUserRank} 名`
-            );
+            // 如果當前頁超出範圍，顯示最後一頁
+            const lastPageStart = Math.max(0, data.length - usersPerPage);
+            displayData = data.slice(lastPageStart);
+            startRank = lastPageStart + 1;
+            const lastPage = Math.ceil(data.length / usersPerPage) || 1;
+            setCurrentPage(lastPage);
           }
 
           setUserRank(actualUserRank);
           // ✅ 檢查並顯示提醒框（排名計算完成後）
           checkAndShowNotification(actualUserRank);
+          
+          console.log(
+            `🎯 用戶實際排名：第 ${actualUserRank} 名，總共 ${data.length} 名用戶，所在頁面：第 ${calculatedUserPage} 頁，當前顯示：第 ${currentPage} 頁`
+          );
         } else {
-          // 用戶不在過濾後的數據中
-          displayData = data.slice(0, displayCount);
+          // 用戶不在過濾後的數據中，顯示第一頁
+          displayData = data.slice(0, usersPerPage);
           startRank = 1;
-          setDisplayStartRank(startRank);
+          setUserPage(0);
           setUserRank(0);
           console.log(
             `📋 用戶不在過濾後的數據中，顯示前 ${displayData.length} 名`
           );
         }
       } else {
-        // 用戶沒有分數，顯示前50名
-        displayData = data.slice(0, 50);
+        // 用戶沒有分數，顯示第一頁
+        displayData = data.slice(0, usersPerPage);
         startRank = 1;
-        setDisplayStartRank(startRank);
+        setUserPage(0);
         setUserRank(0);
         console.log(`📋 用戶沒有分數，顯示前 ${displayData.length} 名`);
       }
@@ -342,6 +354,7 @@ const Ladder = () => {
         `📊 天梯數據載入完成：顯示 ${displayData.length} 名用戶，用戶排名：第 ${actualUserRank} 名，起始排名：第 ${startRank} 名`
       );
 
+      setDisplayStartRank(startRank);
       setLadderData(displayData);
 
       // 路由狀態已在 useEffect 中清除，這裡不需要重複清除
@@ -359,7 +372,35 @@ const Ladder = () => {
       // 重置強制重新載入處理標記
       forceReloadProcessedRef.current = false;
     }
-  }, [selectedAgeGroup, selectedTab, userData]);
+  }, [selectedAgeGroup, selectedTab, userData, currentPage]);
+
+  // ✅ 新增：分頁控制函數
+  const totalPages = useMemo(() => {
+    return Math.ceil(totalUsers / 50);
+  }, [totalUsers]);
+
+  const goToPage = useCallback((page) => {
+    const targetPage = Math.max(1, Math.min(page, totalPages));
+    setCurrentPage(targetPage);
+    hasAutoScrolledRef.current = false; // 重置自動滾動標記
+    // 滾動到頂部，方便查看新頁面
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [totalPages]);
+
+  // ✅ 新增：處理下拉表單頁面選擇
+  const handlePageSelect = useCallback((e) => {
+    const selectedPage = parseInt(e.target.value, 10);
+    if (selectedPage && selectedPage >= 1 && selectedPage <= totalPages) {
+      goToPage(selectedPage);
+    }
+  }, [totalPages, goToPage]);
+
+  // ✅ 新增：切換年齡段或標籤時重置分頁
+  useEffect(() => {
+    setCurrentPage(1);
+    hasInitialPageSetRef.current = false;
+    hasAutoScrolledRef.current = false;
+  }, [selectedAgeGroup, selectedTab]);
 
   // 合併所有載入觸發條件到一個 useEffect
   useEffect(() => {
@@ -439,7 +480,7 @@ const Ladder = () => {
     }
   }, [location.state, userData, loadLadderData]);
 
-  // ✅ 修改：首次載入時自動滾動到用戶排名位置（優化版本）
+  // ✅ 修改：首次載入或分頁切換時自動滾動到用戶排名位置（優化版本）
   useEffect(() => {
     if (
       !loading &&
@@ -476,7 +517,7 @@ const Ladder = () => {
                   behavior: 'smooth',
                 });
                 console.log(
-                  '✅ 首次載入自動滾動到用戶排名:',
+                  '✅ 自動滾動到用戶排名:',
                   userRank,
                   '目標位置:',
                   targetScrollY
@@ -494,7 +535,7 @@ const Ladder = () => {
         console.log('✅ 用戶不在顯示的數據中，無需滾動');
       }
     }
-  }, [loading, ladderData, userRank, userData]);
+  }, [loading, ladderData, userRank, userData, currentPage]);
 
   // ✅ 新增：載入點讚狀態
   useEffect(() => {
@@ -729,16 +770,22 @@ const Ladder = () => {
     const currentRank = userRank;
     const rankBadge = getRankBadge(currentRank);
 
-    // ✅ 新增：點擊浮動排名框跳轉到用戶排名
+    // ✅ 修改：點擊浮動排名框跳轉到用戶所在頁面
     const handleFloatingRankClick = () => {
-      const userElement = document.querySelector(
-        `[data-user-id="${userData?.userId || auth.currentUser?.uid}"]`
-      );
-      if (userElement) {
-        userElement.scrollIntoView({
-          behavior: 'smooth',
-          block: 'center',
-        });
+      if (userPage > 0 && userPage !== currentPage) {
+        // 如果用戶不在當前頁，跳轉到用戶所在頁
+        goToPage(userPage);
+      } else {
+        // 如果用戶已在當前頁，滾動到用戶位置
+        const userElement = document.querySelector(
+          `[data-user-id="${userData?.userId || auth.currentUser?.uid}"]`
+        );
+        if (userElement) {
+          userElement.scrollIntoView({
+            behavior: 'smooth',
+            block: 'center',
+          });
+        }
       }
     };
 
@@ -840,7 +887,7 @@ const Ladder = () => {
         </div>
       </div>
     );
-  }, [userData, userRank, ladderData.length, loading, getAgeGroupLabel, t]);
+  }, [userData, userRank, ladderData.length, loading, getAgeGroupLabel, t, userPage, currentPage, goToPage]);
 
   // const getUserRankDisplay = () => {
   //   if (!userData) {
@@ -1379,6 +1426,50 @@ const Ladder = () => {
           })
         )}
       </div>
+
+      {/* ✅ 修改：總是顯示分頁控制，即使只有一頁 */}
+      {totalPages >= 1 && totalUsers > 0 && (
+        <div className="ladder__pagination">
+          {/* 上一頁按鈕 */}
+          <button
+            onClick={() => goToPage(currentPage - 1)}
+            disabled={currentPage === 1}
+            className="ladder__pagination-btn ladder__pagination-btn--prev"
+            aria-label={t('history.pagination.prev')}
+          >
+            <span className="ladder__pagination-arrow">←</span>
+          </button>
+
+          {/* 頁面選擇下拉表單 */}
+          <div className="ladder__pagination-select-wrapper">
+            <select
+              value={currentPage}
+              onChange={handlePageSelect}
+              className="ladder__pagination-select"
+              aria-label={t('ladder.pagination.selectPage')}
+            >
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                <option key={page} value={page}>
+                  {t('ladder.pagination.page', { page })}
+                </option>
+              ))}
+            </select>
+            <span className="ladder__pagination-total">
+              / {t('ladder.pagination.total', { total: totalPages })}
+            </span>
+          </div>
+
+          {/* 下一頁按鈕 */}
+          <button
+            onClick={() => goToPage(currentPage + 1)}
+            disabled={currentPage === totalPages}
+            className="ladder__pagination-btn ladder__pagination-btn--next"
+            aria-label={t('history.pagination.next')}
+          >
+            <span className="ladder__pagination-arrow">→</span>
+          </button>
+        </div>
+      )}
 
       <div className="ladder__footer">
         {selectedTab === 'weekly' && (

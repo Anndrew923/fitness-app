@@ -123,6 +123,7 @@ const zhTW = {
       ladder: '排行榜',
       history: '成就',
       settings: '設定',
+      tools: '工具',
     },
 
     // 導航
@@ -732,6 +733,11 @@ const zhTW = {
       floatingRank: {
         clickToView: '點擊查看我的排名',
       },
+      pagination: {
+        selectPage: '選擇頁面',
+        page: '第 {{page}} 頁',
+        total: '共 {{total}} 頁',
+      },
       rangeInfo: '您的排名範圍（第 {{start}} - {{end}} 名）',
       tooltips: {
         viewTraining: '點擊查看訓練背景',
@@ -856,7 +862,8 @@ const zhTW = {
       info: {
         whatIs: {
           title: '什麼是榮譽認證？',
-          content: '榮譽認證是官方對您訓練成果的認可。通過認證後，您的天梯分數旁邊會顯示認證徽章，讓其他用戶知道您的分數已獲得官方認證。',
+          content:
+            '榮譽認證是官方對您訓練成果的認可。通過認證後，您的天梯分數旁邊會顯示認證徽章，讓其他用戶知道您的分數已獲得官方認證。',
         },
         benefits: {
           title: '認證的用意',
@@ -961,7 +968,8 @@ const zhTW = {
         step3Note: '影片可以直接發出在社團，或直接傳給管理員',
         step3FacebookGroup: {
           title: '📘 加入「最強肉體」Facebook 社團',
-          description: '歡迎加入我們的 Facebook 社團，與其他訓練者交流、分享訓練成果！',
+          description:
+            '歡迎加入我們的 Facebook 社團，與其他訓練者交流、分享訓練成果！',
           link: 'https://www.facebook.com/groups/728224799622936', // ✅ 已更新
           linkText: '前往 Facebook 社團',
           comingSoon: '社團即將開放，敬請期待！', // 如果社團尚未創立，可使用此訊息
@@ -986,10 +994,12 @@ const zhTW = {
         placeholder: {
           socialAccount: '請輸入您的 FB 或 IG 帳號',
           videoLink: 'https://...（選填）',
-          description: '可補充訓練內容或特殊情況。二次認證只需更新變動項目，請註明（例：心肺進步，僅更新心肺）',
+          description:
+            '可補充訓練內容或特殊情況。二次認證只需更新變動項目，請註明（例：心肺進步，僅更新心肺）',
         },
         hint: {
-          videoLink: '請提供您在社群平台上傳的訓練影片連結，或直接傳給管理員（選填）',
+          videoLink:
+            '請提供您在社群平台上傳的訓練影片連結，或直接傳給管理員（選填）',
         },
       },
       history: {
@@ -999,7 +1009,8 @@ const zhTW = {
       errors: {
         loadFailed: '載入認證狀態失敗，請稍後再試',
         socialAccountRequired: '請輸入社群帳號',
-        invalidVideoLink: '請輸入有效的影片連結（需以 http:// 或 https:// 開頭）',
+        invalidVideoLink:
+          '請輸入有效的影片連結（需以 http:// 或 https:// 開頭）',
         submitFailed: '申請失敗，請稍後再試',
         submitSuccess: '申請已提交！申請編號：{number}',
         needLogin: '請先登入',
@@ -1012,11 +1023,13 @@ const zhTW = {
       status: {
         verified: '您已通過榮譽認證',
         pending: '您的申請正在審核中，請耐心等待',
-        pendingDescription: '管理員將在 1-3 個工作日內完成審核，感謝您的耐心等待！',
+        pendingDescription:
+          '管理員將在 1-3 個工作日內完成審核，感謝您的耐心等待！',
         approved: '您的申請已通過',
         rejected: '您的申請已被拒絕',
         notApplied: '立即申請榮譽認證！',
-        notAppliedDescription: '提交您的訓練影片，獲得官方認證徽章，讓您的成就更具公信力！',
+        notAppliedDescription:
+          '提交您的訓練影片，獲得官方認證徽章，讓您的成就更具公信力！',
         loading: '載入中...',
       },
       statusDetails: {
@@ -2067,6 +2080,7 @@ const enUS = {
       ladder: 'Rankings',
       history: 'Progress',
       settings: 'Settings',
+      tools: 'Tools',
     },
 
     // 導航
@@ -2707,6 +2721,11 @@ const enUS = {
       floatingRank: {
         clickToView: 'Click to view my rank',
       },
+      pagination: {
+        selectPage: 'Select Page',
+        page: 'Page {{page}}',
+        total: 'of {{total}}',
+      },
       rangeInfo: 'Your rank range ({{start}} - {{end}})',
       tooltips: {
         viewTraining: 'Click to view training background',
@@ -2745,7 +2764,8 @@ const enUS = {
           rankValue: 'Rank {{rank}}',
           notRanked: 'Not Ranked',
           rankDeclined: 'Down {{declined}} ranks',
-          message: 'Don\'t give up! Keep training hard, you\'ll definitely improve next time! 💪',
+          message:
+            "Don't give up! Keep training hard, you'll definitely improve next time! 💪",
           button: 'Keep Training',
         },
         update: {
@@ -2773,8 +2793,10 @@ const enUS = {
       trainingYears: 'Training Years',
       hours: 'hours',
       years: 'years',
-      noTrainingInfo: 'This user has not filled in training background information',
-      trainingInfoHint: 'Fill in your training background on the profile page to inspire other fitness enthusiasts!',
+      noTrainingInfo:
+        'This user has not filled in training background information',
+      trainingInfoHint:
+        'Fill in your training background on the profile page to inspire other fitness enthusiasts!',
       reportNickname: 'Report Nickname',
       reportAvatar: 'Report Avatar',
       reportBoth: 'Report Both',
@@ -2805,9 +2827,11 @@ const enUS = {
       cancel: 'Cancel',
       selectReason: 'Please select a reason',
       success: 'Report submitted, we will review it soon',
-      successHidden: 'Report submitted, the user\'s content has been automatically hidden',
+      successHidden:
+        "Report submitted, the user's content has been automatically hidden",
       error: 'Report failed, please try again later',
-      alreadyReported: 'You have already reported this user, please wait for review',
+      alreadyReported:
+        'You have already reported this user, please wait for review',
       cannotReportSelf: 'Cannot report yourself',
       needLogin: 'Please login first',
     },
@@ -2815,31 +2839,38 @@ const enUS = {
     // Content Moderation Notice
     moderationNotice: {
       title: 'Community Guidelines',
-      description: 'To keep our community safe and welcoming, please make sure your nickname and avatar follow these guidelines:',
+      description:
+        'To keep our community safe and welcoming, please make sure your nickname and avatar follow these guidelines:',
       ensure: 'Your content should:',
       avoid: {
-        inappropriate: 'Be free of inappropriate, offensive, or sensitive content',
+        inappropriate:
+          'Be free of inappropriate, offensive, or sensitive content',
         sensitive: 'Avoid political, religious, or other sensitive topics',
         uncomfortable: 'Not make other users feel uncomfortable',
       },
-      warning: 'Content that violates these guidelines will be removed automatically if reported and confirmed.',
+      warning:
+        'Content that violates these guidelines will be removed automatically if reported and confirmed.',
     },
 
     // Honor Verification
     verification: {
       title: 'Honorary Verification',
-      description: 'Get officially verified to showcase your training achievements',
+      description:
+        'Get officially verified to showcase your training achievements',
       info: {
         whatIs: {
           title: 'What is Verification?',
-          content: 'Verification is our official recognition of your training achievements. Once verified, a badge will appear next to your ladder score, showing others that your achievements have been officially verified.',
+          content:
+            'Verification is our official recognition of your training achievements. Once verified, a badge will appear next to your ladder score, showing others that your achievements have been officially verified.',
         },
         benefits: {
           title: 'Purpose of Verification',
           item1: 'Verified badge next to your ladder score 🏅',
           item2: 'Honorary Verified mark on your ladder profile',
-          item3: 'Take pride in every training session and showcase your achievements',
-          item4: 'Share your progress and inspire fellow fitness enthusiasts to push forward',
+          item3:
+            'Take pride in every training session and showcase your achievements',
+          item4:
+            'Share your progress and inspire fellow fitness enthusiasts to push forward',
         },
       },
       badge: {
@@ -2856,7 +2887,8 @@ const enUS = {
         title: 'Application Process',
         step1: 'Complete all assessments and submit your ladder score',
         step1Details: {
-          item1: 'Complete 5 assessments (Strength, Power, Cardio, Muscle Mass, Body Fat)',
+          item1:
+            'Complete 5 assessments (Strength, Power, Cardio, Muscle Mass, Body Fat)',
           item2: 'Submit ladder score (automatically verified by system)',
         },
         step2: 'Prepare training videos',
@@ -2915,7 +2947,8 @@ const enUS = {
                 ],
               },
             },
-            generalNote: '💡 Must clearly show yourself performing the exercise and display the weight',
+            generalNote:
+              '💡 Must clearly show yourself performing the exercise and display the weight',
           },
           power: {
             title: 'Explosive Power Tests:',
@@ -2925,19 +2958,24 @@ const enUS = {
           cardio: {
             title: 'Cardiovascular Endurance:',
             items: '12-minute running test',
-            requirement: 'Must show time/distance record (e.g., screenshot from apps like adidas running)',
+            requirement:
+              'Must show time/distance record (e.g., screenshot from apps like adidas running)',
           },
           bodyComposition: {
             title: 'Body Composition (Weight, Body Fat %, Muscle Mass):',
-            requirement: 'Recommended to use reputable brand equipment (e.g., InBody, Omron)',
+            requirement:
+              'Recommended to use reputable brand equipment (e.g., InBody, Omron)',
             note: 'Must show measurement device and results',
           },
         },
-        step3: 'Share videos via "Ultimate Physique" Facebook Group or Instagram',
-        step3Note: 'You can post directly in the group or message administrators',
+        step3:
+          'Share videos via "Ultimate Physique" Facebook Group or Instagram',
+        step3Note:
+          'You can post directly in the group or message administrators',
         step3FacebookGroup: {
           title: '📘 Join "Ultimate Physique" Facebook Group',
-          description: 'Join our Facebook group to connect with other trainers and share your training results!',
+          description:
+            'Join our Facebook group to connect with other trainers and share your training results!',
           link: 'https://www.facebook.com/groups/728224799622936', // ✅ Updated
           linkText: 'Go to Facebook Group',
           comingSoon: 'Group coming soon, stay tuned!', // Use this message if group is not yet created
@@ -2962,10 +3000,12 @@ const enUS = {
         placeholder: {
           socialAccount: 'Your Facebook or Instagram handle',
           videoLink: 'https://... (Optional)',
-          description: 'Tell us about your training or special circumstances. For re-verification, specify which items changed (e.g., "Cardio improved, updating cardio only")',
+          description:
+            'Tell us about your training or special circumstances. For re-verification, specify which items changed (e.g., "Cardio improved, updating cardio only")',
         },
         hint: {
-          videoLink: 'Please provide the link to your training video on social platforms, or send directly to administrators (Optional)',
+          videoLink:
+            'Please provide the link to your training video on social platforms, or send directly to administrators (Optional)',
         },
       },
       history: {
@@ -2973,26 +3013,30 @@ const enUS = {
         hint: 'If your application was rejected, please wait 7 days before applying again.',
       },
       errors: {
-        loadFailed: 'Failed to load verification status. Please try again later.',
+        loadFailed:
+          'Failed to load verification status. Please try again later.',
         socialAccountRequired: 'Please enter your social account',
-        invalidVideoLink: 'Please enter a valid video link (must start with http:// or https://)',
+        invalidVideoLink:
+          'Please enter a valid video link (must start with http:// or https://)',
         submitFailed: 'Application failed. Please try again later.',
         submitSuccess: 'Application submitted! Application Number: {number}',
         needLogin: 'Please login first',
         userNotFound: 'User data not found',
-        alreadyVerified: 'You\'re already verified!',
+        alreadyVerified: "You're already verified!",
         noLadderScore: 'Please submit your ladder score first',
         alreadyApplied: 'You already have an application pending review',
         checkFailed: 'Unable to verify eligibility. Please try again later.',
       },
       status: {
-        verified: 'You\'re verified! 🎉',
+        verified: "You're verified! 🎉",
         pending: 'Your application is under review. Please be patient.',
-        pendingDescription: 'Administrators will complete the review within 1-3 business days. Thank you for your patience!',
+        pendingDescription:
+          'Administrators will complete the review within 1-3 business days. Thank you for your patience!',
         approved: 'Your application has been approved',
         rejected: 'Your application was not approved',
         notApplied: 'Apply for verification now!',
-        notAppliedDescription: 'Submit your training videos to earn an official verification badge and inspire others with your dedication!',
+        notAppliedDescription:
+          'Submit your training videos to earn an official verification badge and inspire others with your dedication!',
         loading: 'Loading...',
       },
       statusDetails: {
@@ -3003,12 +3047,13 @@ const enUS = {
         verifiedTime: 'Verified Time:',
       },
       messages: {
-        success: 'Application submitted! We\'ll review it soon.',
+        success: "Application submitted! We'll review it soon.",
         error: 'Something went wrong. Please try again.',
         alreadyApplied: 'You already have an application pending review',
-        alreadyVerified: 'You\'re already verified!',
+        alreadyVerified: "You're already verified!",
         noLadderScore: 'Please submit your ladder score first',
-        cooldown: 'Your last application was rejected. Please wait {days} days before applying again.',
+        cooldown:
+          'Your last application was rejected. Please wait {days} days before applying again.',
       },
     },
 
@@ -3683,7 +3728,8 @@ const enUS = {
     // Training Tools page
     tools: {
       title: 'Training Tools',
-      subtitle: 'Practical training assistant tools to make your training more efficient',
+      subtitle:
+        'Practical training assistant tools to make your training more efficient',
       comingSoon: 'Tools page coming soon',
       comingSoonDesc: 'We are developing practical training tools, stay tuned!',
       status: {
