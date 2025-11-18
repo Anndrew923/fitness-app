@@ -19,6 +19,9 @@ function ScrollToTop() {
           }
         });
       }
+    } else if (pathname === '/ladder') {
+      // ✅ 天梯頁面不執行滾動，由 Ladder 組件自己處理滾動邏輯
+      // 不做任何操作
     } else {
       window.scrollTo(0, 0);
     }

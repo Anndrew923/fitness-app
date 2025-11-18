@@ -33,6 +33,12 @@ const Ladder = () => {
   const forceReloadRef = useRef(false);
   const loadingRef = useRef(false);
   const forceReloadProcessedRef = useRef(false);
+  // ✅ 新增：記錄上次的 country 和 region，用於檢測變化
+  const lastCountryRegionRef = useRef(null);
+  // ✅ 新增：記錄是否已執行首次自動滾動
+  const hasAutoScrolledRef = useRef(false);
+  // ✅ 新增：記錄顯示的起始排名
+  const [displayStartRank, setDisplayStartRank] = useState(1);
   // ✅ 新增：點讚相關狀態
   const [likeProcessing, setLikeProcessing] = useState(new Set());
   const [likedUsers, setLikedUsers] = useState(new Set());
@@ -56,16 +62,18 @@ const Ladder = () => {
   );
 
   // ✅ 新增：檢查並顯示提醒框（需要在 loadLadderData 之前定義）
-  const checkAndShowNotification = useCallback((newRank) => {
+  const checkAndShowNotification = useCallback(newRank => {
     try {
       // 讀取更新通知數據
-      const savedNotification = localStorage.getItem('ladderUpdateNotification');
+      const savedNotification = localStorage.getItem(
+        'ladderUpdateNotification'
+      );
       if (!savedNotification) {
         return; // 沒有通知數據，不顯示
       }
 
       const notification = JSON.parse(savedNotification);
-      
+
       // 檢查是否已顯示過
       if (notification.hasShown) {
         return; // 已顯示過，不重複顯示
@@ -85,8 +93,9 @@ const Ladder = () => {
 
       // ✅ 判斷變化類型
       const scoreImproved = notification.newScore > notification.oldScore;
-      const rankImproved = notification.oldRank > 0 && notification.newRank < notification.oldRank;
-      
+      const rankImproved =
+        notification.oldRank > 0 && notification.newRank < notification.oldRank;
+
       // 判斷提醒框類型
       if (notification.isFirstTime) {
         notification.type = 'first-time'; // 初次進榜 - 金紅色
@@ -103,7 +112,10 @@ const Ladder = () => {
 
       // 標記為已顯示
       notification.hasShown = true;
-      localStorage.setItem('ladderUpdateNotification', JSON.stringify(notification));
+      localStorage.setItem(
+        'ladderUpdateNotification',
+        JSON.stringify(notification)
+      );
     } catch (error) {
       console.error('檢查提醒框失敗:', error);
     }
@@ -194,6 +206,9 @@ const Ladder = () => {
             profession: docData.profession || '',
             weeklyTrainingHours: docData.weeklyTrainingHours || 0,
             trainingYears: docData.trainingYears || 0,
+            // ✅ 新增：排行榜資訊
+            country: docData.country || '',
+            region: docData.region || '',
             // ✅ 新增：點讚相關數據
             ladderLikeCount: docData.ladderLikeCount || 0,
             ladderLikes: docData.ladderLikes || [],
@@ -256,99 +271,78 @@ const Ladder = () => {
         );
       }
 
-      // 重新排序並顯示前50名
+      // 重新排序
       data.sort((a, b) => b.ladderScore - a.ladderScore);
-      data = data.slice(0, 50); // 固定顯示前50名
 
-      console.log(
-        `📊 天梯數據載入完成：共 ${data.length} 名用戶，最高分：${
-          data[0]?.ladderScore || 0
-        }`
-      );
+      // ✅ 新增：先計算用戶的實際排名，再決定顯示範圍
+      let displayData = [];
+      let actualUserRank = 0;
+      let startRank = 1; // 記錄起始排名（用於顯示）
 
-      setLadderData(data);
-
-      // 優化：簡化用戶排名計算，使用已載入的數據
       if (userData && userData.ladderScore > 0) {
+        // 計算用戶在過濾後數據中的排名
         const userRankIndex = data.findIndex(
           user =>
             user.id === userData.userId || user.id === auth.currentUser?.uid
         );
+        actualUserRank = userRankIndex >= 0 ? userRankIndex + 1 : 0;
 
-        if (userRankIndex >= 0) {
-          // 用戶在當前顯示範圍內
-          const newRank = userRankIndex + 1;
-          console.log(`🎯 用戶排名：第 ${newRank} 名`);
-          setUserRank(newRank);
-          
-          // ✅ 檢查並顯示提醒框（排名計算完成後）
-          checkAndShowNotification(newRank);
-        } else {
-          // 用戶不在當前顯示範圍內，需要計算實際排名
-          console.log(`📋 用戶不在前50名內，計算實際排名...`);
+        // 決定顯示範圍
+        const totalUsers = data.length;
+        const displayCount = 50; // 固定顯示50名
 
-          // 使用已載入的完整數據進行排名計算，避免額外的 Firebase 查詢
-          const allUsers = querySnapshot.docs
-            .map(doc => {
-              const docData = doc.data();
-              if (docData.ladderScore > 0) {
-                return {
-                  id: doc.id,
-                  ...docData,
-                  ageGroup: docData.age
-                    ? getAgeGroup(Number(docData.age))
-                    : docData.ageGroup || '',
-                  // ✅ 優化：明確添加認證狀態，確保類型一致性
-                  isVerified: docData.isVerified === true,
-                };
-              }
-              return null;
-            })
-            .filter(Boolean);
+        if (actualUserRank > 0) {
+          console.log(
+            `🎯 用戶實際排名：第 ${actualUserRank} 名，總共 ${data.length} 名用戶`
+          );
 
-          // 客戶端過濾年齡分段
-          let rankData = allUsers;
-          if (selectedAgeGroup !== 'all') {
-            rankData = allUsers.filter(
-              user => user.ageGroup === selectedAgeGroup
+          if (actualUserRank === totalUsers) {
+            // 用戶是最後一名，顯示最後50名（用戶在底部）
+            const startIndex = Math.max(0, totalUsers - displayCount);
+            displayData = data.slice(startIndex);
+            startRank = startIndex + 1; // 記錄起始排名
+            setDisplayStartRank(startRank);
+            console.log(
+              `📋 用戶是最後一名，顯示最後 ${displayData.length} 名，起始排名：${startRank}`
+            );
+          } else {
+            // ✅ 修改：改為從第1名開始顯示（而不是從用戶排名開始）
+            // 這樣用戶可以往上滾動查看前面的排名
+            displayData = data.slice(0, displayCount);
+            startRank = 1; // 從第1名開始
+            setDisplayStartRank(startRank);
+            console.log(
+              `📋 從第1名開始顯示：第 1 名到第 ${displayData.length} 名，用戶排名：第 ${actualUserRank} 名`
             );
           }
 
-          // 客戶端過濾本周新進榜
-          if (selectedTab === 'weekly') {
-            const oneWeekAgo = new Date();
-            oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-            rankData = rankData.filter(user => {
-              if (!user.lastActive) return false;
-              const lastActive = new Date(user.lastActive);
-              return lastActive >= oneWeekAgo;
-            });
-          }
-
-          // ✅ 新增：客戶端過濾通過榮譽認證的用戶
-          if (selectedTab === 'verified') {
-            rankData = rankData.filter(user => user.isVerified === true);
-          }
-
-          // 重新排序
-          rankData.sort((a, b) => b.ladderScore - a.ladderScore);
-
-          // 計算用戶在過濾後數據中的排名
-          const userRankIndex = rankData.findIndex(
-            user =>
-              user.id === userData.userId || user.id === auth.currentUser?.uid
-          );
-          const newRank = userRankIndex >= 0 ? userRankIndex + 1 : 0;
-
-          console.log(`🎯 用戶實際排名：第 ${newRank} 名`);
-          setUserRank(newRank);
-          
+          setUserRank(actualUserRank);
           // ✅ 檢查並顯示提醒框（排名計算完成後）
-          checkAndShowNotification(newRank);
+          checkAndShowNotification(actualUserRank);
+        } else {
+          // 用戶不在過濾後的數據中
+          displayData = data.slice(0, displayCount);
+          startRank = 1;
+          setDisplayStartRank(startRank);
+          setUserRank(0);
+          console.log(
+            `📋 用戶不在過濾後的數據中，顯示前 ${displayData.length} 名`
+          );
         }
       } else {
+        // 用戶沒有分數，顯示前50名
+        displayData = data.slice(0, 50);
+        startRank = 1;
+        setDisplayStartRank(startRank);
         setUserRank(0);
+        console.log(`📋 用戶沒有分數，顯示前 ${displayData.length} 名`);
       }
+
+      console.log(
+        `📊 天梯數據載入完成：顯示 ${displayData.length} 名用戶，用戶排名：第 ${actualUserRank} 名，起始排名：第 ${startRank} 名`
+      );
+
+      setLadderData(displayData);
 
       // 路由狀態已在 useEffect 中清除，這裡不需要重複清除
     } catch (error) {
@@ -381,6 +375,42 @@ const Ladder = () => {
     location.state?.forceReload,
   ]);
 
+  // ✅ 新增：監聽 country 和 region 變化，自動重新載入天梯資料
+  useEffect(() => {
+    if (!userData) return;
+
+    const currentCountryRegion = `${userData.country || ''}-${
+      userData.region || ''
+    }`;
+    const lastCountryRegion = lastCountryRegionRef.current;
+
+    // 如果 country 或 region 有變化，且不是首次載入
+    if (
+      lastCountryRegion !== null &&
+      currentCountryRegion !== lastCountryRegion &&
+      !loading
+    ) {
+      console.log(
+        '🔄 檢測到國家/城市變化，等待 Firebase 寫入完成後重新載入天梯資料'
+      );
+      // 等待 1 秒，確保 Firebase 寫入完成並同步
+      const reloadTimer = setTimeout(() => {
+        // 設置強制重新載入標記
+        forceReloadRef.current = true;
+        // 清除載入參數緩存，確保重新載入
+        lastLoadParamsRef.current = null;
+        // 重新載入天梯資料
+        loadLadderData();
+      }, 1000); // 等待 1 秒，確保 Firebase 寫入完成
+
+      // 清理定時器
+      return () => clearTimeout(reloadTimer);
+    }
+
+    // 更新記錄
+    lastCountryRegionRef.current = currentCountryRegion;
+  }, [userData?.country, userData?.region, loading, loadLadderData]);
+
   // 監聽路由狀態變化，處理強制重新載入
   useEffect(() => {
     if (
@@ -408,6 +438,63 @@ const Ladder = () => {
       }, 0);
     }
   }, [location.state, userData, loadLadderData]);
+
+  // ✅ 修改：首次載入時自動滾動到用戶排名位置（優化版本）
+  useEffect(() => {
+    if (
+      !loading &&
+      ladderData.length > 0 &&
+      userRank > 0 &&
+      !hasAutoScrolledRef.current
+    ) {
+      // 檢查用戶是否在顯示的數據中
+      const userInDisplay = ladderData.some(
+        user =>
+          user.id === userData?.userId || user.id === auth.currentUser?.uid
+      );
+
+      if (userInDisplay) {
+        // 用戶在顯示的數據中，自動滾動到用戶排名位置
+        // 使用多層延遲確保 DOM 完全渲染
+        const scrollTimer = setTimeout(() => {
+          requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+              const userElement = document.querySelector(
+                `[data-user-id="${userData?.userId || auth.currentUser?.uid}"]`
+              );
+              if (userElement) {
+                // 計算用戶元素的實際位置
+                const elementRect = userElement.getBoundingClientRect();
+                const elementTop = elementRect.top;
+                const currentScrollY =
+                  window.scrollY || document.documentElement.scrollTop;
+                const targetScrollY = currentScrollY + elementTop;
+
+                // 使用 window.scrollTo 精確滾動到用戶位置（考慮可能的固定 header）
+                window.scrollTo({
+                  top: Math.max(0, targetScrollY),
+                  behavior: 'smooth',
+                });
+                console.log(
+                  '✅ 首次載入自動滾動到用戶排名:',
+                  userRank,
+                  '目標位置:',
+                  targetScrollY
+                );
+                hasAutoScrolledRef.current = true;
+              }
+            });
+          });
+        }, 500); // 縮短延遲，因為 ScrollToTop 已經不會干擾
+
+        return () => clearTimeout(scrollTimer);
+      } else {
+        // 用戶不在顯示的數據中（例如排名太後面），標記為已處理
+        hasAutoScrolledRef.current = true;
+        console.log('✅ 用戶不在顯示的數據中，無需滾動');
+      }
+    }
+  }, [loading, ladderData, userRank, userData]);
 
   // ✅ 新增：載入點讚狀態
   useEffect(() => {
@@ -642,8 +729,27 @@ const Ladder = () => {
     const currentRank = userRank;
     const rankBadge = getRankBadge(currentRank);
 
+    // ✅ 新增：點擊浮動排名框跳轉到用戶排名
+    const handleFloatingRankClick = () => {
+      const userElement = document.querySelector(
+        `[data-user-id="${userData?.userId || auth.currentUser?.uid}"]`
+      );
+      if (userElement) {
+        userElement.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center',
+        });
+      }
+    };
+
     return (
-      <div className="floating-rank-display" data-rank={currentRank}>
+      <div
+        className="floating-rank-display"
+        data-rank={currentRank}
+        onClick={handleFloatingRankClick}
+        style={{ cursor: 'pointer' }}
+        title={t('ladder.floatingRank.clickToView')}
+      >
         <div className="floating-rank-card">
           <div className="ladder__rank">
             <span className="ladder__rank-number">{currentRank}</span>
@@ -734,7 +840,7 @@ const Ladder = () => {
         </div>
       </div>
     );
-  }, [userData, userRank, ladderData.length, loading, getAgeGroupLabel]);
+  }, [userData, userRank, ladderData.length, loading, getAgeGroupLabel, t]);
 
   // const getUserRankDisplay = () => {
   //   if (!userData) {
@@ -803,19 +909,25 @@ const Ladder = () => {
     <div className="ladder">
       {/* ✅ 新增：提醒框 */}
       {showNotification && notificationData && (
-        <div className="ladder-notification-overlay" onClick={handleCloseNotification}>
-          <div 
-            className={`ladder-notification ${notificationData.type || (notificationData.isFirstTime ? 'first-time' : 'declined')}`}
-            onClick={(e) => e.stopPropagation()}
+        <div
+          className="ladder-notification-overlay"
+          onClick={handleCloseNotification}
+        >
+          <div
+            className={`ladder-notification ${
+              notificationData.type ||
+              (notificationData.isFirstTime ? 'first-time' : 'declined')
+            }`}
+            onClick={e => e.stopPropagation()}
           >
-            <button 
+            <button
               className="ladder-notification__close"
               onClick={handleCloseNotification}
               aria-label={t('common.close')}
             >
               ×
             </button>
-            
+
             {notificationData.isFirstTime ? (
               // 第一次參加排名
               <div className="ladder-notification__content first-time-content">
@@ -837,14 +949,16 @@ const Ladder = () => {
                       {t('ladder.notification.firstTime.rank')}
                     </span>
                     <span className="ladder-notification__stat-value">
-                      {t('ladder.notification.firstTime.rankValue', { rank: notificationData.newRank })}
+                      {t('ladder.notification.firstTime.rankValue', {
+                        rank: notificationData.newRank,
+                      })}
                     </span>
                   </div>
                 </div>
                 <p className="ladder-notification__message">
                   {t('ladder.notification.firstTime.message')}
                 </p>
-                <button 
+                <button
                   className="ladder-notification__button"
                   onClick={handleCloseNotification}
                 >
@@ -871,9 +985,15 @@ const Ladder = () => {
                       <span className="ladder-notification__stat-new">
                         {formatScore(notificationData.newScore)}
                       </span>
-                      {notificationData.newScore > notificationData.oldScore && (
+                      {notificationData.newScore >
+                        notificationData.oldScore && (
                         <span className="ladder-notification__stat-improvement">
-                          (+{formatScore(notificationData.newScore - notificationData.oldScore)})
+                          (+
+                          {formatScore(
+                            notificationData.newScore -
+                              notificationData.oldScore
+                          )}
+                          )
                         </span>
                       )}
                     </div>
@@ -884,34 +1004,42 @@ const Ladder = () => {
                     </span>
                     <div className="ladder-notification__stat-change">
                       <span className="ladder-notification__stat-old">
-                        {notificationData.oldRank > 0 
-                          ? t('ladder.notification.improved.rankValue', { rank: notificationData.oldRank })
-                          : t('ladder.notification.improved.notRanked')
-                        }
+                        {notificationData.oldRank > 0
+                          ? t('ladder.notification.improved.rankValue', {
+                              rank: notificationData.oldRank,
+                            })
+                          : t('ladder.notification.improved.notRanked')}
                       </span>
                       <span className="ladder-notification__stat-arrow">→</span>
                       <span className="ladder-notification__stat-new">
-                        {t('ladder.notification.improved.rankValue', { rank: notificationData.newRank })}
+                        {t('ladder.notification.improved.rankValue', {
+                          rank: notificationData.newRank,
+                        })}
                       </span>
-                      {notificationData.oldRank > 0 && notificationData.newRank < notificationData.oldRank && (
-                        <span className="ladder-notification__stat-improvement">
-                          ({t('ladder.notification.improved.rankImproved', { 
-                            improved: notificationData.oldRank - notificationData.newRank 
-                          })})
-                        </span>
-                      )}
+                      {notificationData.oldRank > 0 &&
+                        notificationData.newRank < notificationData.oldRank && (
+                          <span className="ladder-notification__stat-improvement">
+                            (
+                            {t('ladder.notification.improved.rankImproved', {
+                              improved:
+                                notificationData.oldRank -
+                                notificationData.newRank,
+                            })}
+                            )
+                          </span>
+                        )}
                     </div>
                   </div>
                 </div>
-                <button 
+                <button
                   className="ladder-notification__button"
                   onClick={handleCloseNotification}
                 >
                   {t('ladder.notification.improved.button')}
                 </button>
               </div>
-            ) : notificationData.type === 'declined' ? (
-              // 排名下滑 - 金屬灰
+            ) : (
+              // 排名下滑、持平、退步 - 金屬灰
               <div className="ladder-notification__content declined-content">
                 <div className="ladder-notification__icon">💪</div>
                 <h2 className="ladder-notification__title">
@@ -930,9 +1058,15 @@ const Ladder = () => {
                       <span className="ladder-notification__stat-new">
                         {formatScore(notificationData.newScore)}
                       </span>
-                      {notificationData.newScore < notificationData.oldScore && (
+                      {notificationData.newScore <
+                        notificationData.oldScore && (
                         <span className="ladder-notification__stat-decline">
-                          (-{formatScore(notificationData.oldScore - notificationData.newScore)})
+                          (-
+                          {formatScore(
+                            notificationData.oldScore -
+                              notificationData.newScore
+                          )}
+                          )
                         </span>
                       )}
                     </div>
@@ -943,29 +1077,37 @@ const Ladder = () => {
                     </span>
                     <div className="ladder-notification__stat-change">
                       <span className="ladder-notification__stat-old">
-                        {notificationData.oldRank > 0 
-                          ? t('ladder.notification.declined.rankValue', { rank: notificationData.oldRank })
-                          : t('ladder.notification.declined.notRanked')
-                        }
+                        {notificationData.oldRank > 0
+                          ? t('ladder.notification.declined.rankValue', {
+                              rank: notificationData.oldRank,
+                            })
+                          : t('ladder.notification.declined.notRanked')}
                       </span>
                       <span className="ladder-notification__stat-arrow">→</span>
                       <span className="ladder-notification__stat-new">
-                        {t('ladder.notification.declined.rankValue', { rank: notificationData.newRank })}
+                        {t('ladder.notification.declined.rankValue', {
+                          rank: notificationData.newRank,
+                        })}
                       </span>
-                      {notificationData.oldRank > 0 && notificationData.newRank > notificationData.oldRank && (
-                        <span className="ladder-notification__stat-decline">
-                          ({t('ladder.notification.declined.rankDeclined', { 
-                            declined: notificationData.newRank - notificationData.oldRank 
-                          })})
-                        </span>
-                      )}
+                      {notificationData.oldRank > 0 &&
+                        notificationData.newRank > notificationData.oldRank && (
+                          <span className="ladder-notification__stat-decline">
+                            (
+                            {t('ladder.notification.declined.rankDeclined', {
+                              declined:
+                                notificationData.newRank -
+                                notificationData.oldRank,
+                            })}
+                            )
+                          </span>
+                        )}
                     </div>
                   </div>
                 </div>
                 <p className="ladder-notification__message">
                   {t('ladder.notification.declined.message')}
                 </p>
-                <button 
+                <button
                   className="ladder-notification__button"
                   onClick={handleCloseNotification}
                 >
@@ -1059,165 +1201,182 @@ const Ladder = () => {
             </p>
           </div>
         ) : (
-          ladderData.slice(0, 200).map((user, index) => (
-            <div
-              key={user.id}
-              className={`ladder__item ${
-                user.id === userData?.userId ? 'ladder__item--current-user' : ''
-              } ${!user.isAnonymous ? 'clickable' : ''}`}
-              style={{
-                ...(user.id === userData?.userId
-                  ? {
-                      background:
-                        'linear-gradient(135deg, rgba(255, 107, 53, 0.1) 0%, rgba(247, 147, 30, 0.1) 100%)',
-                      borderLeft: '4px solid #ff6b35',
-                      fontWeight: '600',
-                    }
-                  : {}),
-                ...getAnimationStyle(user, index),
-              }}
-              onClick={
-                !user.isAnonymous ? e => handleUserClick(user, e) : undefined
-              }
-              title={!user.isAnonymous ? t('ladder.tooltips.viewTraining') : ''}
-            >
-              <div className="ladder__rank">
-                <span
-                  className={`ladder__rank-number ${
-                    user.id === userData?.userId ? 'rank-changing' : ''
-                  }`}
-                >
-                  {index + 1}
-                </span>
-                <span className="ladder__rank-badge">
-                  {getRankBadge(index + 1)}
-                </span>
-              </div>
+          ladderData.map((user, index) => {
+            // ✅ 計算實際排名（考慮顯示的起始位置）
+            const actualRank = displayStartRank + index;
 
-              <div className="ladder__user">
-                <div className="ladder__avatar">
-                  {user.avatarUrl &&
-                  user.avatarUrl.trim() !== '' &&
-                  !user.isAnonymous ? (
-                    <img
-                      src={user.avatarUrl}
-                      alt={/* i18n not wired here; use generic alt */ 'avatar'}
-                      loading="lazy"
-                      onError={e => {
-                        console.log('頭像載入失敗，使用預設頭像');
-                        e.target.style.display = 'none';
-                        const placeholder = e.target.nextSibling;
-                        if (placeholder) {
-                          placeholder.style.display = 'flex';
+            return (
+              <div
+                key={user.id}
+                data-user-id={user.id} // ✅ 新增：用於滾動定位
+                className={`ladder__item ${
+                  user.id === userData?.userId
+                    ? 'ladder__item--current-user'
+                    : ''
+                } ${!user.isAnonymous ? 'clickable' : ''}`}
+                style={{
+                  ...(user.id === userData?.userId
+                    ? {
+                        background:
+                          'linear-gradient(135deg, rgba(255, 107, 53, 0.1) 0%, rgba(247, 147, 30, 0.1) 100%)',
+                        borderLeft: '4px solid #ff6b35',
+                        fontWeight: '600',
+                      }
+                    : {}),
+                  ...getAnimationStyle(user, index),
+                }}
+                onClick={
+                  !user.isAnonymous ? e => handleUserClick(user, e) : undefined
+                }
+                title={
+                  !user.isAnonymous ? t('ladder.tooltips.viewTraining') : ''
+                }
+              >
+                <div className="ladder__rank">
+                  <span
+                    className={`ladder__rank-number ${
+                      user.id === userData?.userId ? 'rank-changing' : ''
+                    }`}
+                  >
+                    {actualRank} {/* ✅ 使用實際排名 */}
+                  </span>
+                  <span className="ladder__rank-badge">
+                    {getRankBadge(actualRank)} {/* ✅ 使用實際排名 */}
+                  </span>
+                </div>
+
+                <div className="ladder__user">
+                  <div className="ladder__avatar">
+                    {user.avatarUrl &&
+                    user.avatarUrl.trim() !== '' &&
+                    !user.isAnonymous ? (
+                      <img
+                        src={user.avatarUrl}
+                        alt={
+                          /* i18n not wired here; use generic alt */ 'avatar'
                         }
+                        loading="lazy"
+                        onError={e => {
+                          console.log('頭像載入失敗，使用預設頭像');
+                          e.target.style.display = 'none';
+                          const placeholder = e.target.nextSibling;
+                          if (placeholder) {
+                            placeholder.style.display = 'flex';
+                          }
+                        }}
+                        onLoad={() => {
+                          console.log('頭像載入成功');
+                        }}
+                      />
+                    ) : null}
+                    <div
+                      className={`ladder__avatar-placeholder ${
+                        user.isAnonymous ? 'anonymous' : ''
+                      }`}
+                      style={{
+                        display:
+                          user.avatarUrl &&
+                          user.avatarUrl.trim() !== '' &&
+                          !user.isAnonymous
+                            ? 'none'
+                            : 'flex',
                       }}
-                      onLoad={() => {
-                        console.log('頭像載入成功');
-                      }}
-                    />
-                  ) : null}
-                  <div
-                    className={`ladder__avatar-placeholder ${
-                      user.isAnonymous ? 'anonymous' : ''
-                    }`}
-                    style={{
-                      display:
-                        user.avatarUrl &&
-                        user.avatarUrl.trim() !== '' &&
-                        !user.isAnonymous
-                          ? 'none'
-                          : 'flex',
-                    }}
-                  >
-                    {user.isAnonymous
-                      ? '👤'
-                      : user.displayName.charAt(0).toUpperCase()}
+                    >
+                      {user.isAnonymous
+                        ? '👤'
+                        : user.displayName.charAt(0).toUpperCase()}
+                    </div>
+                  </div>
+
+                  <div className="ladder__user-info">
+                    <div
+                      className={`ladder__user-name ${
+                        user.isAnonymous ? 'anonymous' : ''
+                      } ${
+                        user.id === userData?.userId ? 'current-user-flame' : ''
+                      }`}
+                    >
+                      {user.displayName}
+                      {user.isVerified && (
+                        <span
+                          className="ladder__verification-badge"
+                          title="榮譽認證"
+                        >
+                          🏅
+                        </span>
+                      )}
+                      {user.isAnonymous && ' 🔒'}
+                    </div>
+                    <div className="ladder__user-details">
+                      {user.isAnonymous ? (
+                        '匿名用戶'
+                      ) : (
+                        <>
+                          {getAgeGroupLabel(user.ageGroup)} •{' '}
+                          {user.gender === 'male'
+                            ? t('userInfo.male')
+                            : t('userInfo.female')}
+                          {(user.lastLadderSubmission || user.lastActive) && (
+                            <>
+                              <br />
+                              <span className="last-update">
+                                {t('ladder.labels.updatedAt')}{' '}
+                                {formatLastUpdate(
+                                  user.lastLadderSubmission || user.lastActive
+                                )}
+                              </span>
+                            </>
+                          )}
+                        </>
+                      )}
+                    </div>
                   </div>
                 </div>
 
-                <div className="ladder__user-info">
-                  <div
-                    className={`ladder__user-name ${
-                      user.isAnonymous ? 'anonymous' : ''
-                    } ${
-                      user.id === userData?.userId ? 'current-user-flame' : ''
-                    }`}
-                  >
-                    {user.displayName}
-                    {user.isVerified && (
-                      <span className="ladder__verification-badge" title="榮譽認證">
-                        🏅
+                {/* ✅ 新增：分數區域容器（包含分數和點讚） */}
+                <div className="ladder__score-section">
+                  <div className="ladder__score">
+                    <span className="ladder__score-value">
+                      {formatScore(user.ladderScore)}
+                    </span>
+                    <span className="ladder__score-label">
+                      {t('community.ui.pointsUnit')}
+                    </span>
+                  </div>
+
+                  {/* ✅ 修改：點讚按鈕 - 所有用戶都顯示 */}
+                  {user.isAnonymous ? (
+                    // 匿名用戶：顯示佔位按鈕（不可點擊）
+                    <div className="ladder__like-btn ladder__like-btn--placeholder">
+                      <span className="ladder__like-icon">👍</span>
+                      <span className="ladder__like-count">
+                        {user.ladderLikeCount || 0}
                       </span>
-                    )}
-                    {user.isAnonymous && ' 🔒'}
-                  </div>
-                  <div className="ladder__user-details">
-                    {user.isAnonymous ? (
-                      '匿名用戶'
-                    ) : (
-                      <>
-                        {getAgeGroupLabel(user.ageGroup)} •{' '}
-                        {user.gender === 'male'
-                          ? t('userInfo.male')
-                          : t('userInfo.female')}
-                        {(user.lastLadderSubmission || user.lastActive) && (
-                          <>
-                            <br />
-                            <span className="last-update">
-                              {t('ladder.labels.updatedAt')}{' '}
-                              {formatLastUpdate(
-                                user.lastLadderSubmission || user.lastActive
-                              )}
-                            </span>
-                          </>
-                        )}
-                      </>
-                    )}
-                  </div>
+                    </div>
+                  ) : (
+                    // 非匿名用戶：顯示可點擊的按鈕（包括自己）
+                    <button
+                      className={`ladder__like-btn ${
+                        likedUsers.has(user.id) ? 'liked' : ''
+                      }`}
+                      onClick={e => handleToggleLike(user.id, e)}
+                      disabled={likeProcessing.has(user.id)}
+                      title={
+                        likedUsers.has(user.id)
+                          ? t('ladder.unlike')
+                          : t('ladder.like')
+                      }
+                    >
+                      <span className="ladder__like-icon">👍</span>
+                      <span className="ladder__like-count">
+                        {user.ladderLikeCount || 0}
+                      </span>
+                    </button>
+                  )}
                 </div>
               </div>
-
-              {/* ✅ 新增：分數區域容器（包含分數和點讚） */}
-              <div className="ladder__score-section">
-                <div className="ladder__score">
-                  <span className="ladder__score-value">
-                    {formatScore(user.ladderScore)}
-                  </span>
-                  <span className="ladder__score-label">
-                    {t('community.ui.pointsUnit')}
-                  </span>
-                </div>
-
-                {/* ✅ 修改：點讚按鈕 - 所有用戶都顯示 */}
-                {user.isAnonymous ? (
-                  // 匿名用戶：顯示佔位按鈕（不可點擊）
-                  <div className="ladder__like-btn ladder__like-btn--placeholder">
-                    <span className="ladder__like-icon">👍</span>
-                    <span className="ladder__like-count">
-                      {user.ladderLikeCount || 0}
-                    </span>
-                  </div>
-                ) : (
-                  // 非匿名用戶：顯示可點擊的按鈕（包括自己）
-                  <button
-                    className={`ladder__like-btn ${likedUsers.has(user.id) ? 'liked' : ''}`}
-                    onClick={e => handleToggleLike(user.id, e)}
-                    disabled={likeProcessing.has(user.id)}
-                    title={
-                      likedUsers.has(user.id)
-                        ? t('ladder.unlike')
-                        : t('ladder.like')
-                    }
-                  >
-                    <span className="ladder__like-icon">👍</span>
-                    <span className="ladder__like-count">
-                      {user.ladderLikeCount || 0}
-                    </span>
-                  </button>
-                )}
-              </div>
-            </div>
-          ))
+            );
+          })
         )}
       </div>
 

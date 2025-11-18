@@ -35,6 +35,9 @@ const initialState = {
   // 天梯隱私設置
   isAnonymousInLadder: false, // 是否匿名參與天梯（預設不匿名）
   lastActive: new Date().toISOString(),
+  // 排行榜資訊（選填）
+  country: '', // 國家（選填）
+  region: '', // 行政區/城市（選填）
   // 原有欄位
   scores: {
     strength: 0,
@@ -122,6 +125,9 @@ export function UserProvider({ children }) {
           lastLadderSubmission: firebaseData.lastLadderSubmission || null,
           // 確保最後活動時間被正確讀取
           lastActive: firebaseData.lastActive || null,
+          // 確保排行榜資訊被正確讀取
+          country: firebaseData.country || '',
+          region: firebaseData.region || '',
         };
 
         if (isMountedRef.current) {
@@ -207,6 +213,9 @@ export function UserProvider({ children }) {
           lastLadderSubmission: data.lastLadderSubmission || null,
           // 確保最後活動時間被保存
           lastActive: data.lastActive || null,
+          // 確保排行榜資訊被保存（後期排行榜重要資料）
+          country: data.country || '',
+          region: data.region || '',
         };
 
         await setDoc(userRef, dataToSave);
@@ -438,6 +447,9 @@ export function UserProvider({ children }) {
           'trainingYears',
           // 新增：評測輸入需持久化，避免回頁面遺失
           'testInputs',
+          // 新增：排行榜資訊需持久化（後期排行榜重要資料）
+          'country',
+          'region',
         ];
 
         const hasImportantChanges = importantFields.some(field => {

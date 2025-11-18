@@ -258,6 +258,40 @@ function LadderUserCard({ user, isOpen, onClose }) {
                 <span className="detail-label">{t('ladderCard.ladderScore')}：</span>
                 <span className="detail-value">{user.ladderScore || 0}</span>
               </div>
+              {/* 新增：國家和城市顯示 */}
+              {user.country && (
+                <div className="detail-item">
+                  <span className="detail-label">{t('ladderCard.location')}：</span>
+                  <span className="detail-value">
+                    {(() => {
+                      // 國家代碼到名稱的映射
+                      const countryNames = {
+                        TW: '台灣',
+                        CN: '中國',
+                        US: '美國',
+                        JP: '日本',
+                        KR: '韓國',
+                        SG: '新加坡',
+                        MY: '馬來西亞',
+                        HK: '香港',
+                        MO: '澳門',
+                        TH: '泰國',
+                        VN: '越南',
+                        PH: '菲律賓',
+                        ID: '印尼',
+                        AU: '澳洲',
+                        NZ: '紐西蘭',
+                        CA: '加拿大',
+                        GB: '英國',
+                        DE: '德國',
+                        FR: '法國',
+                      };
+                      const countryName = countryNames[user.country] || user.country;
+                      return countryName + (user.region ? ` • ${user.region}` : '');
+                    })()}
+                  </span>
+                </div>
+              )}
             </div>
           </div>
 

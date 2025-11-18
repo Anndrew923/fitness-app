@@ -383,8 +383,14 @@ async function compressImage(
 }
 
 function UserInfo({ testData, onLogout, clearTestData }) {
-  const { userData, setUserData, saveHistory, loadUserData, isLoading } =
-    useUser();
+  const {
+    userData,
+    setUserData,
+    saveUserData,
+    saveHistory,
+    loadUserData,
+    isLoading,
+  } = useUser();
   const { t } = useTranslation();
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -547,13 +553,13 @@ function UserInfo({ testData, onLogout, clearTestData }) {
               });
             }
           });
-          
+
           // 排序並查找當前用戶的排名
           allUsers.sort((a, b) => b.ladderScore - a.ladderScore);
           const currentUserIndex = allUsers.findIndex(
             user => user.id === auth.currentUser.uid
           );
-          
+
           if (currentUserIndex >= 0) {
             oldRank = currentUserIndex + 1;
             console.log(`📊 查詢到當前排名：第 ${oldRank} 名`);
@@ -568,14 +574,17 @@ function UserInfo({ testData, onLogout, clearTestData }) {
       const ladderScore = calculateLadderScore(scores);
 
       // ✅ 保存更新通知數據到 localStorage，使用查詢到的 oldRank
-      localStorage.setItem('ladderUpdateNotification', JSON.stringify({
-        isFirstTime: isFirstTime,
-        oldScore: oldLadderScore,
-        newScore: ladderScore,
-        oldRank: oldRank, // ✅ 使用查詢到的排名
-        timestamp: Date.now(),
-        hasShown: false, // 標記是否已顯示
-      }));
+      localStorage.setItem(
+        'ladderUpdateNotification',
+        JSON.stringify({
+          isFirstTime: isFirstTime,
+          oldScore: oldLadderScore,
+          newScore: ladderScore,
+          oldRank: oldRank, // ✅ 使用查詢到的排名
+          timestamp: Date.now(),
+          hasShown: false, // 標記是否已顯示
+        })
+      );
 
       // 更新用戶數據，明確設置天梯分數和提交時間
       const updatedUserData = {
@@ -603,14 +612,14 @@ function UserInfo({ testData, onLogout, clearTestData }) {
 
         // 立即寫入 Firebase，確保天梯分數能及時顯示
         const userRef = doc(db, 'users', auth.currentUser.uid);
-        
+
         // ✅ 檢查是否已認證，如果已認證則清除認證狀態（重新提交分數後認證失效）
         const updateData = {
           ladderScore: ladderScore,
           lastLadderSubmission: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
         };
-        
+
         // 如果用戶已認證，清除認證相關欄位（重新提交分數後認證失效）
         if (userData.isVerified === true) {
           updateData.isVerified = false;
@@ -621,7 +630,7 @@ function UserInfo({ testData, onLogout, clearTestData }) {
           updateData.verificationRequestId = null;
           console.log('✅ 已清除榮譽認證狀態（重新提交分數）');
         }
-        
+
         await setDoc(userRef, updateData, { merge: true });
 
         console.log('天梯分數已立即保存到 Firebase:', ladderScore);
@@ -1002,7 +1011,7 @@ function UserInfo({ testData, onLogout, clearTestData }) {
         const userId = auth.currentUser.uid;
         const storageKey = `ladderSubmissionState_${userId}`;
         const savedState = localStorage.getItem(storageKey);
-        
+
         if (savedState) {
           const parsedState = JSON.parse(savedState);
           // 檢查是否是新的一天，如果是則重置計數
@@ -1049,10 +1058,7 @@ function UserInfo({ testData, onLogout, clearTestData }) {
       // ✅ 使用帶用戶 ID 的 key，確保每個用戶有獨立的提交次數
       const userId = auth.currentUser.uid;
       const storageKey = `ladderSubmissionState_${userId}`;
-      localStorage.setItem(
-        storageKey,
-        JSON.stringify(ladderSubmissionState)
-      );
+      localStorage.setItem(storageKey, JSON.stringify(ladderSubmissionState));
     } catch (error) {
       console.error('保存提交狀態失敗:', error);
     }
@@ -1150,6 +1156,9 @@ function UserInfo({ testData, onLogout, clearTestData }) {
         weight: Number(userData.weight) || 0,
         age: Number(userData.age) || 0,
         gender: userData.gender,
+        // 排行榜資訊（選填）
+        country: userData.country || '',
+        region: userData.region || '',
         scores: userData.scores || DEFAULT_SCORES,
         // 保持原有的天梯分數，不自動更新
         ladderScore: userData.ladderScore || 0,
@@ -1157,8 +1166,31 @@ function UserInfo({ testData, onLogout, clearTestData }) {
       };
 
       try {
-        // 使用 setUserData 而不是直接 saveUserData，讓防抖機制生效
-        setUserData(updatedUserData);
+        // ✅ 檢查是否只改變了 country 或 region
+        const countryChanged =
+          (userData.country || '') !== (updatedUserData.country || '');
+        const regionChanged =
+          (userData.region || '') !== (updatedUserData.region || '');
+        const onlyCountryRegionChanged =
+          (countryChanged || regionChanged) &&
+          // 確保其他重要欄位沒有變化
+          userData.height === updatedUserData.height &&
+          userData.weight === updatedUserData.weight &&
+          userData.age === updatedUserData.age &&
+          userData.gender === updatedUserData.gender &&
+          JSON.stringify(userData.scores || {}) ===
+            JSON.stringify(updatedUserData.scores || {});
+
+        if (onlyCountryRegionChanged) {
+          // 如果只改變了 country/region，立即保存到 Firebase（不使用防抖）
+          console.log('🌍 國家/城市變化，立即保存到 Firebase');
+          await saveUserData(updatedUserData);
+          // 同時更新本地狀態
+          setUserData(updatedUserData);
+        } else {
+          // 其他情況使用防抖機制
+          setUserData(updatedUserData);
+        }
 
         setModalState({
           isOpen: true,
@@ -1186,7 +1218,7 @@ function UserInfo({ testData, onLogout, clearTestData }) {
         setLoading(false);
       }
     },
-    [userData, validateData, isGuest, setUserData]
+    [userData, validateData, isGuest, setUserData, saveUserData, t]
   );
 
   const averageScore = useMemo(() => {
@@ -1431,8 +1463,8 @@ function UserInfo({ testData, onLogout, clearTestData }) {
       if (name === 'gender') {
         // 性別欄位保持字符串
         processedValue = value;
-      } else if (['profession'].includes(name)) {
-        // 職業欄位保持字符串
+      } else if (['profession', 'country', 'region'].includes(name)) {
+        // 職業、國家、行政區欄位保持字符串
         processedValue = value;
       } else if (['weeklyTrainingHours', 'trainingYears'].includes(name)) {
         // 訓練相關數字欄位
@@ -1544,11 +1576,16 @@ function UserInfo({ testData, onLogout, clearTestData }) {
           setModalState(prev => ({ ...prev, isOpen: false }));
         }, 2000);
       } catch (error) {
-        console.error('⚠️ 頭像保存到 Firestore 失敗（但 Storage 上傳成功）:', error);
+        console.error(
+          '⚠️ 頭像保存到 Firestore 失敗（但 Storage 上傳成功）:',
+          error
+        );
         // 不顯示錯誤訊息，因為頭像已經成功上傳到 Storage 並可以使用
         // 只在控制台記錄錯誤，方便調試
-        console.warn('💡 提示：頭像已成功上傳，但資料庫同步失敗。頭像仍可正常使用，系統將在下次更新時自動同步。');
-        
+        console.warn(
+          '💡 提示：頭像已成功上傳，但資料庫同步失敗。頭像仍可正常使用，系統將在下次更新時自動同步。'
+        );
+
         // 仍然顯示成功提示，因為頭像實際上已經上傳成功
         setModalState({
           isOpen: true,
@@ -1954,6 +1991,140 @@ function UserInfo({ testData, onLogout, clearTestData }) {
                       max="50"
                       step="0.5"
                     />
+                  </div>
+
+                  {/* 排行榜資訊（選填） */}
+                  <div className="form-row">
+                    <div className="form-group">
+                      <label htmlFor="country" className="form-label">
+                        {t('userInfo.ranking.country')}{' '}
+                        <span className="optional-badge">選填</span>
+                      </label>
+                      <select
+                        id="country"
+                        name="country"
+                        value={userData?.country || ''}
+                        onChange={handleInputChange}
+                        className="form-input"
+                      >
+                        <option value="">
+                          {t('userInfo.ranking.selectCountry')}
+                        </option>
+                        <option value="TW">台灣</option>
+                        <option value="CN">中國</option>
+                        <option value="US">美國</option>
+                        <option value="JP">日本</option>
+                        <option value="KR">韓國</option>
+                        <option value="SG">新加坡</option>
+                        <option value="MY">馬來西亞</option>
+                        <option value="HK">香港</option>
+                        <option value="MO">澳門</option>
+                        <option value="TH">泰國</option>
+                        <option value="VN">越南</option>
+                        <option value="PH">菲律賓</option>
+                        <option value="ID">印尼</option>
+                        <option value="AU">澳洲</option>
+                        <option value="NZ">紐西蘭</option>
+                        <option value="CA">加拿大</option>
+                        <option value="GB">英國</option>
+                        <option value="DE">德國</option>
+                        <option value="FR">法國</option>
+                        <option value="OTHER">其他</option>
+                      </select>
+                      <p className="field-hint">
+                        💡 {t('userInfo.ranking.countryHint')}
+                      </p>
+                    </div>
+
+                    <div className="form-group">
+                      <label htmlFor="region" className="form-label">
+                        {t('userInfo.ranking.region')}{' '}
+                        <span className="optional-badge">選填</span>
+                      </label>
+                      {userData?.country === 'TW' ? (
+                        // 台灣行政區選單
+                        <select
+                          id="region"
+                          name="region"
+                          value={userData?.region || ''}
+                          onChange={handleInputChange}
+                          className="form-input"
+                        >
+                          <option value="">
+                            {t('userInfo.ranking.selectRegion')}
+                          </option>
+                          <optgroup label="直轄市">
+                            <option value="台北市">台北市</option>
+                            <option value="新北市">新北市</option>
+                            <option value="桃園市">桃園市</option>
+                            <option value="台中市">台中市</option>
+                            <option value="台南市">台南市</option>
+                            <option value="高雄市">高雄市</option>
+                          </optgroup>
+                          <optgroup label="省轄市">
+                            <option value="基隆市">基隆市</option>
+                            <option value="新竹市">新竹市</option>
+                            <option value="嘉義市">嘉義市</option>
+                          </optgroup>
+                          <optgroup label="縣">
+                            <option value="新竹縣">新竹縣</option>
+                            <option value="苗栗縣">苗栗縣</option>
+                            <option value="彰化縣">彰化縣</option>
+                            <option value="南投縣">南投縣</option>
+                            <option value="雲林縣">雲林縣</option>
+                            <option value="嘉義縣">嘉義縣</option>
+                            <option value="屏東縣">屏東縣</option>
+                            <option value="宜蘭縣">宜蘭縣</option>
+                            <option value="花蓮縣">花蓮縣</option>
+                            <option value="台東縣">台東縣</option>
+                            <option value="澎湖縣">澎湖縣</option>
+                            <option value="金門縣">金門縣</option>
+                            <option value="連江縣">連江縣</option>
+                          </optgroup>
+                        </select>
+                      ) : userData?.country &&
+                        userData?.country !== '' &&
+                        userData?.country !== 'OTHER' ? (
+                        // 其他國家使用下拉選單（預留未來擴充）
+                        <select
+                          id="region"
+                          name="region"
+                          value={userData?.region || ''}
+                          onChange={handleInputChange}
+                          className="form-input"
+                        >
+                          <option value="">
+                            {t('userInfo.ranking.selectRegion')}
+                          </option>
+                          {/* 未來可根據選擇的國家動態載入城市列表 */}
+                          <option value="">
+                            {t('userInfo.ranking.regionComingSoon')}
+                          </option>
+                        </select>
+                      ) : (
+                        // 未選擇國家或選擇「其他」時顯示文字輸入
+                        <input
+                          id="region"
+                          name="region"
+                          type="text"
+                          value={userData?.region || ''}
+                          onChange={handleInputChange}
+                          placeholder={
+                            userData?.country === 'OTHER'
+                              ? t('userInfo.ranking.regionPlaceholderOther')
+                              : t('userInfo.ranking.selectCountryFirst')
+                          }
+                          className="form-input"
+                          maxLength="50"
+                          disabled={
+                            !userData?.country || userData?.country === ''
+                          }
+                        />
+                      )}
+                      <p className="field-hint">
+                        💡 {t('userInfo.ranking.regionHint')}
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>

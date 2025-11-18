@@ -317,6 +317,17 @@ const zhTW = {
         weeklyHours: '每周訓練時數',
         years: '訓練年資',
       },
+      ranking: {
+        country: '國家',
+        region: '行政區/城市',
+        selectCountry: '請選擇國家',
+        selectRegion: '請選擇行政區',
+        regionPlaceholderOther: '請輸入城市名稱',
+        selectCountryFirst: '請先選擇國家',
+        countryHint: '填寫後可參與國家排行榜',
+        regionHint: '填寫後可參與城市排行榜',
+        regionComingSoon: '城市選單即將推出',
+      },
       placeholders: {
         profession: '例如：工程師、學生、教師...',
         hours: '小時',
@@ -717,6 +728,10 @@ const zhTW = {
         showTop50: '顯示前50名精華區',
         showMyRange: '顯示我的排名範圍',
       },
+      backToTop: '回到頂部',
+      floatingRank: {
+        clickToView: '點擊查看我的排名',
+      },
       rangeInfo: '您的排名範圍（第 {{start}} - {{end}} 名）',
       tooltips: {
         viewTraining: '點擊查看訓練背景',
@@ -775,6 +790,7 @@ const zhTW = {
       ageGroup: '年齡段',
       gender: '性別',
       ladderScore: '天梯分數',
+      location: '國家/城市',
       trainingBackground: '訓練背景',
       profession: '職業',
       weeklyTrainingHours: '每周訓練時數',
@@ -2251,6 +2267,17 @@ const enUS = {
         weeklyHours: 'Weekly training hours',
         years: 'Training years',
       },
+      ranking: {
+        country: 'Country',
+        region: 'Region/City',
+        selectCountry: 'Please select country',
+        selectRegion: 'Please select region',
+        regionPlaceholderOther: 'Please enter city name',
+        selectCountryFirst: 'Please select country first',
+        countryHint: 'Fill in to participate in country rankings',
+        regionHint: 'Fill in to participate in city rankings',
+        regionComingSoon: 'City list coming soon',
+      },
       placeholders: {
         profession: 'e.g., Engineer, Student, Teacher...',
         hours: 'hours',
@@ -2676,6 +2703,10 @@ const enUS = {
         showTop50: 'Show top 50 highlight',
         showMyRange: 'Show my rank range',
       },
+      backToTop: 'Back to Top',
+      floatingRank: {
+        clickToView: 'Click to view my rank',
+      },
       rangeInfo: 'Your rank range ({{start}} - {{end}})',
       tooltips: {
         viewTraining: 'Click to view training background',
@@ -2735,6 +2766,7 @@ const enUS = {
       ageGroup: 'Age Group',
       gender: 'Gender',
       ladderScore: 'Ladder Score',
+      location: 'Country/City',
       trainingBackground: 'Training Background',
       profession: 'Profession',
       weeklyTrainingHours: 'Weekly Training Hours',
