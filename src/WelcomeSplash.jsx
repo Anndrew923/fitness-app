@@ -1,13 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
 import { auth } from './firebase';
 import './WelcomeSplash.css';
 
 function WelcomeSplash() {
   const navigate = useNavigate();
-  const { t } = useTranslation();
-  const [isLoading, setIsLoading] = useState(true);
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {
@@ -35,7 +32,6 @@ function WelcomeSplash() {
 
     // 2.5秒後跳轉（給更多時間）
     const timer = setTimeout(() => {
-      setIsLoading(false);
       // 檢查用戶登入狀態，決定跳轉目標
       if (auth.currentUser) {
         navigate('/user-info');

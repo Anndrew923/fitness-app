@@ -2,7 +2,6 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from './UserContext';
-import { auth } from './firebase';
 import LanguageSwitcher from './components/LanguageSwitcher';
 import './LandingPage.css';
 
@@ -10,10 +9,6 @@ function LandingPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { isAuthenticated } = useUser();
-
-  const handleLoginRedirect = () => {
-    navigate('/login');
-  };
 
   const handleGuestMode = () => {
     // 設置 guestMode 標記並導向 user-info 的表單區塊
