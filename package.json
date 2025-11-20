@@ -68,7 +68,9 @@
     "auto:aab": "build-aab-auto.bat",
     "auto:web": "build-web-auto.bat",
     "auto:test": "test-auto.bat",
-    "auto:deploy": "deploy-auto.bat"
+    "auto:deploy": "deploy-auto.bat",
+    "build:verify": "node scripts/verify-build.js",
+    "deploy:test": "npm run build && npm run build:verify && npm run preview"
   },
   "devDependencies": {
     "@firebase/rules-unit-testing": "^4.0.0",
