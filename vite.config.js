@@ -7,6 +7,9 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
 
   return {
+    // ✅ 修復：確保生產環境路徑正確
+    base: '/',
+    
     plugins: [
       react(),
       {
@@ -146,7 +149,7 @@ export default defineConfig(({ mode }) => {
         output: {
           // ✅ 智能 chunk 分割函數
           manualChunks: (id) => {
-            // React 核心（必須在初始載入）
+            // ✅ 修復：React 核心必須優先載入，確保不會被分割到其他 chunk
             if (
               id.includes('node_modules/react/') ||
               id.includes('node_modules/react-dom/')
@@ -229,6 +232,13 @@ export default defineConfig(({ mode }) => {
       },
       // ✅ 啟用 source map（生產環境可選）
       sourcemap: mode === 'development',
+      // ✅ 修復：確保正確的構建目標和模組格式
+      target: 'esnext',
+      modulePreload: {
+        polyfill: true,
+      },
+      // ✅ 修復：確保資源正確處理
+      assetsInlineLimit: 4096,
     },
 
     // 優化依賴預建置，防止檔案鎖定
