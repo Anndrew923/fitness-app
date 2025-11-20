@@ -14,6 +14,45 @@ export default defineConfig(({ mode }) => {
     plugins: [
       react(),
       {
+        name: 'ensure-react-core-first',
+        transformIndexHtml: {
+          order: 'post',
+          handler(html) {
+            // ✅ 修復：確保 react-core 在 vendor 之前載入
+            // 提取所有 modulepreload 標籤
+            const modulepreloadRegex = /<link rel="modulepreload"[^>]*>/g;
+            const matches = html.match(modulepreloadRegex) || [];
+            
+            if (matches.length === 0) return html;
+            
+            // 分離 react-core 和其他 chunk
+            const reactCorePreloads = [];
+            const otherPreloads = [];
+            
+            matches.forEach(match => {
+              if (match.includes('react-core')) {
+                reactCorePreloads.push(match);
+              } else {
+                otherPreloads.push(match);
+              }
+            });
+            
+            // 重新排序：react-core 在最前面，然後是其他 chunk
+            const reorderedPreloads = [...reactCorePreloads, ...otherPreloads];
+            
+            // 替換 HTML 中的 modulepreload 標籤
+            let newHtml = html;
+            matches.forEach((match, index) => {
+              if (index < reorderedPreloads.length) {
+                newHtml = newHtml.replace(match, reorderedPreloads[index]);
+              }
+            });
+            
+            return newHtml;
+          },
+        },
+      },
+      {
         name: 'copy-well-known',
         closeBundle() {
           // 使用 setTimeout 確保在 Vite 建置流程完全結束後再執行檔案操作
