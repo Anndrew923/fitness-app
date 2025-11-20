@@ -10,7 +10,20 @@
 
 ## 🐛 問題診斷
 
-### 1. PureComponent 錯誤
+### 1. 重定向規則順序問題（根本原因）⚠️
+
+**錯誤訊息**:
+```
+Failed to load module script: Expected a JavaScript-or-Wasm module script but the server responded with a MIME type of "text/html"
+```
+
+**根本原因**:
+- `netlify.toml` 中的 `from = "/*"` 規則會匹配所有路徑，包括 `/assets/*.js`
+- 當瀏覽器請求 `/assets/index-xxx.js` 時，Netlify 先匹配到 `/*` 規則
+- 將請求重定向到 `/index.html`，返回 HTML 而不是 JavaScript
+- 導致瀏覽器收到 HTML，觸發 MIME 類型錯誤
+
+### 2. PureComponent 錯誤（連鎖反應）
 
 **錯誤訊息**:
 ```
@@ -18,19 +31,8 @@ Uncaught TypeError: Cannot read properties of undefined (reading 'PureComponent'
 ```
 
 **原因分析**:
-- React 19 中 PureComponent 仍然存在，但可能在代碼分割時出現載入順序問題
-- 可能是 vendor chunk 中的某些依賴庫導致的問題
-
-### 2. 模組載入失敗
-
-**錯誤訊息**:
-```
-Failed to load module script: Expected a JavaScript-or-Wasm module script but the server responded with a MIME type of "text/html"
-```
-
-**原因分析**:
-- Netlify 服務器返回 HTML（可能是 404 頁面）而不是 JavaScript
-- 缺少正確的 MIME 類型配置
+- 由於 JavaScript 模組無法載入，React 核心沒有正確初始化
+- 導致 PureComponent 無法訪問，觸發 TypeError
 
 ### 3. 路徑配置問題
 
@@ -78,7 +80,35 @@ optimizeDeps: {
 }
 ```
 
-### 2. 修復 Netlify 配置 (`netlify.toml`)
+### 2. 修復 Netlify 配置 (`netlify.toml`) - 關鍵修復 ⚠️
+
+#### 調整重定向規則順序（最重要）
+```toml
+# ✅ 修復：先處理靜態資源，避免被重定向（必須在 /* 之前）
+[[redirects]]
+  from = "/assets/*"
+  to = "/assets/:splat"
+  status = 200
+  force = true
+
+# ✅ 修復：處理 .well-known 目錄
+[[redirects]]
+  from = "/.well-known/*"
+  to = "/.well-known/:splat"
+  status = 200
+  force = true
+
+# ✅ 修復：其他路徑重定向到 index.html（但排除 assets 和 .well-known）
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+```
+
+**關鍵修復點**:
+- `/assets/*` 規則必須在 `/*` 規則之前
+- 使用 `force = true` 確保優先處理
+- 確保靜態資源不會被重定向到 `index.html`
 
 #### 添加 JavaScript 模組 MIME 類型配置
 ```toml
