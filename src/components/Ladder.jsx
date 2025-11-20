@@ -6,7 +6,7 @@ import React, {
   useCallback,
 } from 'react';
 import { useUser } from '../UserContext';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { auth, db } from '../firebase';
 import { collection, query, orderBy, limit, getDocs } from 'firebase/firestore';
 import { formatScore, getAgeGroup } from '../utils';
@@ -18,6 +18,7 @@ import LadderLikeSystem from '../utils/ladderLikeSystem';
 const Ladder = () => {
   const { userData } = useUser();
   const location = useLocation();
+  const navigate = useNavigate();
   const { t } = useTranslation();
   const [ladderData, setLadderData] = useState([]);
   const [userRank, setUserRank] = useState(0);
@@ -770,23 +771,11 @@ const Ladder = () => {
     const currentRank = userRank;
     const rankBadge = getRankBadge(currentRank);
 
-    // ✅ 修改：點擊浮動排名框跳轉到用戶所在頁面
+    // ✅ 修改：點擊浮動排名框重新載入天梯（就像點擊底部導覽列的排行榜按鈕）
     const handleFloatingRankClick = () => {
-      if (userPage > 0 && userPage !== currentPage) {
-        // 如果用戶不在當前頁，跳轉到用戶所在頁
-        goToPage(userPage);
-      } else {
-        // 如果用戶已在當前頁，滾動到用戶位置
-        const userElement = document.querySelector(
-          `[data-user-id="${userData?.userId || auth.currentUser?.uid}"]`
-        );
-        if (userElement) {
-          userElement.scrollIntoView({
-            behavior: 'smooth',
-            block: 'center',
-          });
-        }
-      }
+      // 使用 navigate 重新導航到天梯頁面，觸發組件重新掛載
+      // 這樣會重置所有狀態，並觸發「首次載入時自動跳轉到用戶所在頁面」的邏輯
+      navigate('/ladder');
     };
 
     return (
@@ -887,7 +876,7 @@ const Ladder = () => {
         </div>
       </div>
     );
-  }, [userData, userRank, ladderData.length, loading, getAgeGroupLabel, t, userPage, currentPage, goToPage]);
+  }, [userData, userRank, ladderData.length, loading, getAgeGroupLabel, t, navigate]);
 
   // const getUserRankDisplay = () => {
   //   if (!userData) {
