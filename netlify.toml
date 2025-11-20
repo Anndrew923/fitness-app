@@ -4,18 +4,17 @@
   publish = "dist"
 
 # ✅ 修復：先處理靜態資源，避免被重定向（必須在 /* 之前）
+# Netlify 會按照順序處理重定向規則，更具體的規則應該放在前面
 [[redirects]]
   from = "/assets/*"
   to = "/assets/:splat"
   status = 200
-  force = true
 
 # ✅ 修復：處理 .well-known 目錄
 [[redirects]]
   from = "/.well-known/*"
   to = "/.well-known/:splat"
   status = 200
-  force = true
 
 # ✅ 修復：其他路徑重定向到 index.html（但排除 assets 和 .well-known）
 [[redirects]]

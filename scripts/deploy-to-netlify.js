@@ -469,6 +469,19 @@ async function generateNetlifyConfig() {
   command = "npm run build"
   publish = "dist"
 
+# ✅ 修復：先處理靜態資源，避免被重定向（必須在 /* 之前）
+[[redirects]]
+  from = "/assets/*"
+  to = "/assets/:splat"
+  status = 200
+
+# ✅ 修復：處理 .well-known 目錄
+[[redirects]]
+  from = "/.well-known/*"
+  to = "/.well-known/:splat"
+  status = 200
+
+# ✅ 修復：其他路徑重定向到 index.html（但排除 assets 和 .well-known）
 [[redirects]]
   from = "/*"
   to = "/index.html"
@@ -484,6 +497,19 @@ async function generateNetlifyConfig() {
 [[headers]]
   for = "/assets/*"
   [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# ✅ 修復：確保 JavaScript 模組正確的 MIME 類型
+[[headers]]
+  for = "/assets/*.js"
+  [headers.values]
+    Content-Type = "application/javascript; charset=utf-8"
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/assets/*.mjs"
+  [headers.values]
+    Content-Type = "application/javascript; charset=utf-8"
     Cache-Control = "public, max-age=31536000, immutable"
 `
   );
