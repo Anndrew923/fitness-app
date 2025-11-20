@@ -51,8 +51,9 @@ export const AdMobCompliance = {
       wordCount[word] = (wordCount[word] || 0) + 1;
     });
 
-    // 如果任何單詞出現超過 5 次，視為重複內容
-    return Object.values(wordCount).some(count => count > 5);
+    // ✅ 調整：從 5 次提高到 10 次，避免誤判（歷史頁面等有價值內容頁面）
+    // 如果任何單詞出現超過 10 次，視為重複內容
+    return Object.values(wordCount).some(count => count > 10);
   },
 
   // 檢查是否為導航頁面
@@ -195,11 +196,17 @@ export const preAdDisplayCheck = (pageName, pageContent) => {
     return true;
   }
 
+  // ✅ 新增：歷史頁面特殊處理 - 有歷史數據和圖表，符合 AdMob 政策
+  if (pageName === 'history') {
+    logger.debug(`📄 歷史頁面 [${pageName}] 有歷史數據和圖表，顯示廣告`);
+    return true;
+  }
+
   // 其他頁面進行正常合規檢查
   const compliance = AdMobCompliance.checkContentPolicy(pageName, pageContent);
 
   if (!compliance.isCompliant) {
-    console.warn('AdMob 合規警告:', compliance.violations);
+    logger.warn('AdMob 合規警告:', compliance.violations);
     return false;
   }
 

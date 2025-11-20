@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState, useRef } from 'react';
 import { useUser } from './UserContext';
 import './History.css'; // 引入外部 CSS
 import { useTranslation } from 'react-i18next';
+import logger from './utils/logger';
 
 function History() {
   const { userData, setUserData } = useUser();
@@ -148,10 +149,11 @@ function History() {
 
   useEffect(() => {
     if (userData && !hasLoggedRef.current) {
-      console.log('History.js - userData:', userData);
-      console.log('History.js - sortedHistory:', sortedHistory);
-      console.log('History.js - 記錄數量:', recordCount, '/', maxRecords);
-      console.log('History.js - 當前頁面:', currentPage, '/', totalPages);
+      // ✅ 優化：使用 logger 替代 console.log，符合日誌優化規範
+      logger.debug('History.js - userData:', userData);
+      logger.debug('History.js - sortedHistory:', sortedHistory);
+      logger.debug('History.js - 記錄數量:', recordCount, '/', maxRecords);
+      logger.debug('History.js - 當前頁面:', currentPage, '/', totalPages);
       hasLoggedRef.current = true; // 標記已經載入過
     }
   }, [userData, sortedHistory, recordCount, currentPage, totalPages]); // 只在 userData 變化時執行，避免重複載入
@@ -183,7 +185,7 @@ function History() {
     // 重置頁面到第一頁
     setCurrentPage(1);
 
-    console.log('History.js - 已刪除所選紀錄');
+    logger.debug('History.js - 已刪除所選紀錄');
   };
 
   // 分頁導航
