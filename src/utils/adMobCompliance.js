@@ -1,6 +1,8 @@
 // AdMob 政策合規監控系統
 // 確保完全符合 Google AdMob 政策要求
 
+import logger from './logger';
+
 export const AdMobCompliance = {
   // 檢查頁面是否符合 AdMob 內容政策
   checkContentPolicy: (pageName, pageContent) => {
@@ -168,7 +170,7 @@ export const preAdDisplayCheck = (pageName, pageContent) => {
     'contact',
   ];
   if (navigationPages.includes(pageName)) {
-    console.log(`📄 導航頁面 [${pageName}] 不應顯示廣告`);
+    logger.debug(`📄 導航頁面 [${pageName}] 不應顯示廣告`);
     return false;
   }
 
@@ -181,13 +183,15 @@ export const preAdDisplayCheck = (pageName, pageContent) => {
     'body-fat',
   ];
   if (testPages.includes(pageName)) {
-    console.log(`📄 評測頁面 [${pageName}] 跳過內容長度檢查，直接顯示廣告`);
+    // ✅ 移除重複日誌：checkPageContent 已經輸出了相同的日誌
+    // logger.debug(`📄 評測頁面 [${pageName}] 跳過內容長度檢查，直接顯示廣告`);
     return true;
   }
 
   // 工具頁面特殊處理 - 有豐富的工具列表，符合 AdMob 政策
   if (pageName === 'training-tools') {
-    console.log(`📄 工具頁面 [${pageName}] 內容豐富，顯示廣告`);
+    // ✅ 移除重複日誌：checkPageContent 已經輸出了相同的日誌
+    // logger.debug(`📄 工具頁面 [${pageName}] 內容豐富，顯示廣告`);
     return true;
   }
 

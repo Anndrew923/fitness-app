@@ -1,6 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import GlobalAdBanner from './GlobalAdBanner';
+// ✅ 移除：App.jsx 已經有全局的 GlobalAdBanner，不需要重複使用
+// import GlobalAdBanner from './GlobalAdBanner';
 import BottomNavBar from './BottomNavBar';
 import './TrainingTools.css';
 
@@ -65,7 +66,8 @@ const TrainingTools = () => {
 
   return (
     <div className="training-tools-page">
-      <GlobalAdBanner />
+      {/* ✅ 移除：App.jsx 已經有全局的 GlobalAdBanner，不需要重複使用 */}
+      {/* <GlobalAdBanner /> */}
       
       <div className="tools-container">
         <div className="tools-header">
@@ -105,7 +107,8 @@ const TrainingTools = () => {
         })}
       </div>
 
-      <GlobalAdBanner />
+      {/* ✅ 移除：App.jsx 已經有全局的 GlobalAdBanner，不需要重複使用 */}
+      {/* <GlobalAdBanner /> */}
       <BottomNavBar />
     </div>
   );

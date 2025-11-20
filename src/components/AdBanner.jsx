@@ -1,8 +1,10 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useMemo } from 'react';
 import PropTypes from 'prop-types';
+import { useLocation } from 'react-router-dom';
 import { preAdDisplayCheck } from '../utils/adMobCompliance';
 import { getAdUnitId, adConfig, shouldShowAd } from '../config/adConfig';
 import { Capacitor } from '@capacitor/core';
+import logger from '../utils/logger';
 import './AdBanner.css';
 
 // ✅ 動態導入 AdMob 插件（在組件內部使用動態導入，移除頂部未使用的變數定義）
@@ -14,6 +16,7 @@ const AdBanner = ({
   isFixed = true,
   adUnitId = null, // 可選的廣告單元 ID，如果未提供則使用配置中的 ID
 }) => {
+  const location = useLocation(); // ✅ 使用 useLocation 獲取路由信息
   const adRef = useRef(null);
   const [adLoaded, setAdLoaded] = useState(false);
   const [adError, setAdError] = useState(null);
@@ -28,6 +31,38 @@ const AdBanner = ({
   const finalAdUnitId = adUnitId || getAdUnitId(position);
   const appId = adConfig.appId;
 
+  // ✅ 優化：使用 useMemo 緩存 currentPage，避免重複計算
+  const currentPage = useMemo(
+    () => location.pathname?.replace('/', '') || 'home',
+    [location.pathname]
+  );
+
+  // ✅ 優化：如果 adUnitId 是從 props 傳入的，說明 GlobalAdBanner 已經檢查過了，
+  // 不需要再次檢查 shouldShowAd，避免重複調用 checkPageContent
+  const shouldShow = useMemo(
+    () => {
+      // 如果 adUnitId 是從 props 傳入的，跳過檢查（GlobalAdBanner 已經檢查過了）
+      if (adUnitId !== null) {
+        return true;
+      }
+      // 否則，進行正常的 shouldShowAd 檢查（直接使用 AdBanner 的情況）
+      return shouldShowAd(currentPage, position);
+    },
+    [adUnitId, currentPage, position]
+  );
+
+  // ✅ 優化：使用 useMemo 緩存 pageContent，避免重複查詢 DOM
+  const pageContent = useMemo(
+    () => (typeof document !== 'undefined' ? (document.body?.innerText || '') : ''),
+    [currentPage] // 當頁面變化時重新獲取內容
+  );
+
+  // ✅ 優化：使用 useMemo 緩存 preAdDisplayCheck 結果，避免重複調用
+  const preAdCheckResult = useMemo(
+    () => preAdDisplayCheck(currentPage, pageContent),
+    [currentPage, pageContent]
+  );
+
   useEffect(() => {
     // 如果不需要顯示廣告，返回
     if (!showAd) {
@@ -37,7 +72,7 @@ const AdBanner = ({
     // ✅ 修正 1：應用程式待審核時，不載入任何廣告（包括測試廣告）
     // 只顯示 placeholder，不調用 AdMob.showBanner()，避免真實廣告與 placeholder 重疊
     if (APP_PENDING_ADMOB_REVIEW) {
-      console.log('📋 應用程式待審核，不載入真實廣告，只顯示 placeholder');
+      logger.debug('📋 應用程式待審核，不載入真實廣告，只顯示 placeholder');
       return; // 不執行廣告載入邏輯，只顯示 placeholder
     }
 
@@ -49,25 +84,21 @@ const AdBanner = ({
 
     // ✅ 修正 2：測試模式或開發環境時，使用測試廣告 ID（不 return）
     if (isDevelopment || isTestMode) {
-      console.log('AdMob 測試模式或開發環境，將使用測試廣告 ID');
+      logger.debug('AdMob 測試模式或開發環境，將使用測試廣告 ID');
       // 不 return，繼續執行，使用測試廣告 ID
     }
 
-    // ✅ 修正 3：先檢查頁面配置（優先於合規檢查）
-    const pageContent = document.body?.innerText || '';
-    const currentPage = window.location?.pathname?.replace('/', '') || 'home';
-
     // ✅ 修正 3：檢查頁面配置，確保遵守 shouldShowAd() 的結果
-    if (!shouldShowAd(currentPage, position)) {
-      console.log(
+    if (!shouldShow) {
+      logger.debug(
         `📄 頁面 [${currentPage}] 配置為不顯示廣告（${position}位置）`
       );
       return;
     }
 
-    // ✅ 然後進行 AdMob 合規檢查
-    if (!preAdDisplayCheck(currentPage, pageContent)) {
-      console.log('AdMob 合規檢查失敗，不顯示廣告');
+    // ✅ 優化：使用緩存的 preAdCheckResult，避免重複調用 preAdDisplayCheck
+    if (!preAdCheckResult) {
+      logger.debug('AdMob 合規檢查失敗，不顯示廣告');
       return;
     }
 
@@ -180,6 +211,9 @@ const AdBanner = ({
     isNativePlatform,
     position,
     APP_PENDING_ADMOB_REVIEW, // ✅ 添加到依賴項
+    shouldShow, // ✅ 添加緩存的 shouldShow 依賴項
+    currentPage, // ✅ 添加緩存的 currentPage 依賴項
+    preAdCheckResult, // ✅ 添加緩存的 preAdCheckResult 依賴項
   ]);
 
   // 如果不需要顯示廣告，返回 null
@@ -188,8 +222,8 @@ const AdBanner = ({
   }
 
   // ✅ 修正 4：先檢查頁面配置，如果不應顯示廣告，直接返回 null（包括 placeholder）
-  const currentPage = window.location?.pathname?.replace('/', '') || 'home';
-  if (!shouldShowAd(currentPage, position)) {
+  // ✅ 優化：使用緩存的 shouldShow，避免重複調用 shouldShowAd
+  if (!shouldShow) {
     return null; // 不顯示廣告（包括 placeholder）
   }
 

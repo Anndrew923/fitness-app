@@ -1,4 +1,6 @@
 // 廣告配置
+import logger from '../utils/logger';
+
 export const adConfig = {
   // AdMob 應用程式 ID（從 Google AdMob 獲取）
   appId:
@@ -148,13 +150,13 @@ const checkPageContent = pageName => {
     ].includes(pageName)
   ) {
     // 評測頁面有豐富的說明內容，符合 AdMob 政策，直接顯示廣告
-    console.log(`📄 評測頁面 [${pageName}] 內容豐富，顯示廣告`);
+    logger.debug(`📄 評測頁面 [${pageName}] 內容豐富，顯示廣告`);
     return true;
   }
 
   // 4. 工具頁面 - 有豐富的工具列表內容
   if (pageName === 'training-tools') {
-    console.log(`📄 工具頁面 [${pageName}] 內容豐富，顯示廣告`);
+    logger.debug(`📄 工具頁面 [${pageName}] 內容豐富，顯示廣告`);
     return true; // 工具頁面有足夠內容，顯示廣告
   }
 
