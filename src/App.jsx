@@ -14,6 +14,7 @@ import PropTypes from 'prop-types';
 import ScrollToTop from './ScrollToTop';
 import { App as CapacitorApp } from '@capacitor/app';
 import { Capacitor } from '@capacitor/core';
+import logger from './utils/logger';
 const WelcomeSplash = React.lazy(() => import('./WelcomeSplash'));
 const LandingPage = React.lazy(() => import('./LandingPage'));
 const Welcome = React.lazy(() => import('./Welcome'));
@@ -53,7 +54,7 @@ class RawErrorBoundary extends Component {
   }
 
   componentDidCatch(error, errorInfo) {
-    console.error('ErrorBoundary 捕獲錯誤:', error, errorInfo);
+    logger.error('ErrorBoundary 捕獲錯誤:', error, errorInfo);
 
     // 記錄錯誤到性能監控
     if (performanceMonitor) {
@@ -184,9 +185,9 @@ function AppContent() {
             // initializeForTesting 參數在 6.0.0 版本中可能不存在，已移除
           });
 
-          console.log('✅ AdMob 初始化成功');
+          logger.debug('✅ AdMob 初始化成功');
         } catch (error) {
-          console.error('❌ AdMob 初始化失敗:', error);
+          logger.error('❌ AdMob 初始化失敗:', error);
           // 不影響 App 啟動，只記錄錯誤
         }
       }
@@ -227,7 +228,7 @@ function AppContent() {
 
       if (pagesWithoutNavBar.includes(currentPath)) {
         // 這些頁面沒有導覽列，返回按鈕應該回到首頁
-        console.log('🔙 返回按鈕：從', currentPath, '回到首頁');
+        logger.debug('🔙 返回按鈕：從', currentPath, '回到首頁');
         navigate('/landing');
         return true; // 阻止默認行為
       }
@@ -248,7 +249,7 @@ function AppContent() {
 
   const handleLogin = async (email, password) => {
     try {
-      console.log('App.jsx: handleLogin 被調用', {
+      logger.debug('App.jsx: handleLogin 被調用', {
         email,
         password: password ? '***' : 'undefined',
       });
@@ -258,22 +259,22 @@ function AppContent() {
         throw new Error('密碼不能為空');
       }
 
-      console.log('App.jsx: 開始 Firebase 認證');
+      logger.debug('App.jsx: 開始 Firebase 認證');
       await signInWithEmailAndPassword(auth, email, password);
 
-      console.log('App.jsx: Firebase 認證成功');
+      logger.debug('App.jsx: Firebase 認證成功');
 
       // 登入成功後清除 guestMode 標記
       sessionStorage.removeItem('guestMode');
       setTestData(null);
 
       if (process.env.NODE_ENV === 'development') {
-        console.log('登入成功, auth.currentUser:', auth.currentUser);
+        logger.debug('登入成功, auth.currentUser:', auth.currentUser);
       }
 
-      console.log('App.jsx: handleLogin 完成');
+      logger.debug('App.jsx: handleLogin 完成');
     } catch (error) {
-      console.error('App.jsx: 登入失敗:', error);
+      logger.error('App.jsx: 登入失敗:', error);
       // 不要拋出新的錯誤，讓調用者處理原始錯誤
       throw error;
     }
@@ -285,11 +286,11 @@ function AppContent() {
         .then(() => {
           setTestData(null);
           if (process.env.NODE_ENV === 'development') {
-            console.log('登出成功');
+            logger.debug('登出成功');
           }
         })
         .catch(error => {
-          console.error('登出失敗:', error);
+          logger.error('登出失敗:', error);
         });
     }
   };
@@ -297,14 +298,14 @@ function AppContent() {
   const handleTestComplete = data => {
     setTestData(data);
     if (process.env.NODE_ENV === 'development') {
-      console.log('測驗完成, testData:', data);
+      logger.debug('測驗完成, testData:', data);
     }
   };
 
   const clearTestData = () => {
     setTestData(null);
     if (process.env.NODE_ENV === 'development') {
-      console.log('測驗數據已清除');
+      logger.debug('測驗數據已清除');
     }
   };
 

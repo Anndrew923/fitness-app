@@ -13,6 +13,7 @@ import { db, auth } from './firebase';
 import PropTypes from 'prop-types';
 import { getAgeGroup, validateAndCleanUserData } from './utils';
 import firebaseWriteMonitor from './utils/firebaseMonitor';
+import logger from './utils/logger';
 
 const UserContext = createContext();
 
@@ -83,7 +84,7 @@ export function UserProvider({ children }) {
     }
 
     if (process.env.NODE_ENV === 'development') {
-      console.log(
+      logger.debug(
         '開始載入用戶資料:',
         currentUser.uid,
         forceReload ? '(強制重新載入)' : ''
@@ -98,7 +99,7 @@ export function UserProvider({ children }) {
       if (userSnap.exists()) {
         const firebaseData = userSnap.data();
         if (process.env.NODE_ENV === 'development') {
-          console.log('從 Firebase 載入的資料:', firebaseData);
+          logger.debug('從 Firebase 載入的資料:', firebaseData);
         }
 
         // 確保數據結構完整
@@ -134,13 +135,13 @@ export function UserProvider({ children }) {
           dispatch({ type: 'SET_USER_DATA', payload: mergedData });
           localStorage.setItem('userData', JSON.stringify(mergedData));
           if (process.env.NODE_ENV === 'development') {
-            console.log('用戶資料載入成功');
+            logger.debug('用戶資料載入成功');
           }
         }
         setIsLoading(false);
         return true;
       } else {
-        console.log('用戶文檔不存在，創建新的');
+        logger.debug('用戶文檔不存在，創建新的');
         // 如果用戶文檔不存在，創建一個新的
         const newUserData = { ...initialState, userId: currentUser.uid };
         await setDoc(userRef, newUserData);
@@ -153,7 +154,7 @@ export function UserProvider({ children }) {
         return true;
       }
     } catch (error) {
-      console.error('載入用戶數據失敗:', error);
+      logger.error('載入用戶數據失敗:', error);
 
       // 嘗試從 localStorage 載入
       try {
@@ -161,14 +162,14 @@ export function UserProvider({ children }) {
         if (localData && isMountedRef.current) {
           const parsedData = JSON.parse(localData);
           if (process.env.NODE_ENV === 'development') {
-            console.log('從本地載入用戶資料:', parsedData);
+            logger.debug('從本地載入用戶資料:', parsedData);
           }
           dispatch({ type: 'SET_USER_DATA', payload: parsedData });
           setIsLoading(false);
           return true;
         }
       } catch (e) {
-        console.error('解析本地數據失敗:', e);
+        logger.error('解析本地數據失敗:', e);
       }
 
       setIsLoading(false);
@@ -180,13 +181,13 @@ export function UserProvider({ children }) {
   const saveUserData = useCallback(
     async data => {
       if (!auth.currentUser || !data) {
-        console.warn('無法保存數據：用戶未登入或數據無效');
+        logger.warn('無法保存數據：用戶未登入或數據無效');
         return false;
       }
 
       // 檢查是否為模擬模式
       if (isMockMode) {
-        console.log('⏭️ 模擬模式：跳過 Firebase 寫入，僅保存到本地');
+        logger.debug('⏭️ 模擬模式：跳過 Firebase 寫入，僅保存到本地');
         localStorage.setItem('userData', JSON.stringify(data));
         return true;
       }
@@ -231,7 +232,7 @@ export function UserProvider({ children }) {
 
         return true;
       } catch (error) {
-        console.error('保存用戶數據失敗:', error);
+        logger.error('保存用戶數據失敗:', error);
         // 至少保存到本地
         localStorage.setItem('userData', JSON.stringify(data));
         return false;
@@ -259,7 +260,7 @@ export function UserProvider({ children }) {
     const { cleaned, errors, isValid } = validateAndCleanUserData(data);
 
     if (!isValid) {
-      console.warn('數據驗證失敗:', errors);
+      logger.warn('數據驗證失敗:', errors);
     }
 
     return {
@@ -277,7 +278,7 @@ export function UserProvider({ children }) {
 
     // 檢查是否為模擬模式
     if (isMockMode) {
-      console.log('⏭️ 模擬模式：跳過 Firebase 寫入處理');
+      logger.debug('⏭️ 模擬模式：跳過 Firebase 寫入處理');
       // 清空寫入隊列
       writeQueueRef.current.length = 0;
       return;
@@ -285,7 +286,7 @@ export function UserProvider({ children }) {
 
     // 檢查認證狀態
     if (!auth.currentUser) {
-      console.log('⏭️ 跳過寫入：用戶未認證');
+      logger.debug('⏭️ 跳過寫入：用戶未認證');
       // 清空寫入隊列，避免積累
       writeQueueRef.current.length = 0;
       return;
@@ -304,7 +305,7 @@ export function UserProvider({ children }) {
         // 驗證和清理數據
         const validation = validateUserData(writeOp.data);
         if (!validation.isValid) {
-          console.warn('數據驗證失敗，跳過寫入:', validation.errors);
+          logger.warn('數據驗證失敗，跳過寫入:', validation.errors);
           continue;
         }
 
@@ -318,7 +319,7 @@ export function UserProvider({ children }) {
       }
 
       if (batch.length > 0) {
-        console.log(`🔄 批量處理 ${batch.length} 個寫入操作`);
+        logger.debug(`🔄 批量處理 ${batch.length} 個寫入操作`);
 
         // 執行批量寫入
         for (const writeOp of batch) {
@@ -334,9 +335,9 @@ export function UserProvider({ children }) {
               writeOp.data
             );
 
-            console.log(`✅ 寫入成功: ${writeOp.type}`);
+            logger.debug(`✅ 寫入成功: ${writeOp.type}`);
           } catch (error) {
-            console.error(`❌ 寫入失敗: ${writeOp.type}`, error);
+            logger.error(`❌ 寫入失敗: ${writeOp.type}`, error);
             // 將失敗的操作重新加入隊列
             writeQueueRef.current.unshift(writeOp);
           }
@@ -348,7 +349,7 @@ export function UserProvider({ children }) {
         localStorage.setItem('lastSavedUserData', JSON.stringify(latestData));
       }
     } catch (error) {
-      console.error('批量寫入處理失敗:', error);
+      logger.error('批量寫入處理失敗:', error);
     } finally {
       isProcessingQueueRef.current = false;
 
@@ -364,13 +365,13 @@ export function UserProvider({ children }) {
     (data, type = 'update') => {
       // 檢查是否為模擬模式
       if (isMockMode) {
-        console.log('⏭️ 模擬模式：跳過 Firebase 寫入操作');
+        logger.debug('⏭️ 模擬模式：跳過 Firebase 寫入操作');
         return;
       }
 
       // 檢查認證狀態
       if (!auth.currentUser) {
-        console.log('⏭️ 跳過添加到寫入隊列：用戶未認證');
+        logger.debug('⏭️ 跳過添加到寫入隊列：用戶未認證');
         return;
       }
 
@@ -423,7 +424,7 @@ export function UserProvider({ children }) {
           return;
         }
       } catch (error) {
-        console.warn('序列化比較失敗，繼續更新:', error);
+        logger.warn('序列化比較失敗，繼續更新:', error);
       }
 
       // 立即更新本地狀態
@@ -458,7 +459,7 @@ export function UserProvider({ children }) {
               JSON.stringify(newData[field]) !== JSON.stringify(userData[field])
             );
           } catch (error) {
-            console.warn('比較欄位失敗，視為有變化:', error);
+            logger.warn('比較欄位失敗，視為有變化:', error);
             return true;
           }
         });
@@ -502,7 +503,7 @@ export function UserProvider({ children }) {
             }
 
             setUserDataDebounceRef.current = setTimeout(() => {
-              console.log(`🔄 防抖後保存用戶數據（60秒頻率限制）`);
+              logger.debug(`🔄 防抖後保存用戶數據（60秒頻率限制）`);
               lastWriteTimeRef.current = Date.now();
               writeCountRef.current++;
               addToWriteQueue(newData, 'userData');
@@ -516,7 +517,7 @@ export function UserProvider({ children }) {
 
             // 使用簡化的防抖時間
             setUserDataDebounceRef.current = setTimeout(() => {
-              console.log(
+              logger.debug(
                 `🔄 防抖後保存用戶數據（${debounceTime / 1000}秒防抖，第${
                   writeCountRef.current + 1
                 }次寫入）`
@@ -537,7 +538,7 @@ export function UserProvider({ children }) {
   const saveHistory = useCallback(
     async record => {
       if (!auth.currentUser) {
-        console.warn('無法保存歷史記錄：用戶未登入');
+        logger.warn('無法保存歷史記錄：用戶未登入');
         return;
       }
 
@@ -554,7 +555,7 @@ export function UserProvider({ children }) {
 
       // 檢查記錄數量限制
       if (currentHistory.length >= maxRecords) {
-        console.warn(`歷史記錄已達上限 (${maxRecords})，執行自動清理`);
+        logger.warn(`歷史記錄已達上限 (${maxRecords})，執行自動清理`);
 
         // 自動清理：保留最新的 40 條記錄，刪除最舊的 10 條
         const sortedHistory = [...currentHistory].sort((a, b) => {
@@ -564,7 +565,7 @@ export function UserProvider({ children }) {
         });
 
         const cleanedHistory = sortedHistory.slice(0, maxRecords - 10);
-        console.log(
+        logger.debug(
           `自動清理完成：刪除 ${
             currentHistory.length - cleanedHistory.length
           } 條舊記錄`
@@ -591,7 +592,7 @@ export function UserProvider({ children }) {
 
       // 檢查是否為模擬模式
       if (isMockMode) {
-        console.log('⏭️ 模擬模式：歷史記錄僅保存到本地');
+        logger.debug('⏭️ 模擬模式：歷史記錄僅保存到本地');
         return;
       }
 
@@ -606,7 +607,7 @@ export function UserProvider({ children }) {
         // 立即保存到本地存儲（確保數據不丟失）
         localStorage.setItem('userData', JSON.stringify(updatedData));
         localStorage.setItem('lastSavedUserData', JSON.stringify(updatedData));
-        console.log(
+        logger.debug(
           `歷史記錄已保存到本地存儲 (${newHistory.length}/${maxRecords})`
         );
 
@@ -623,16 +624,16 @@ export function UserProvider({ children }) {
                 },
                 { merge: true }
               );
-              console.log(
+              logger.debug(
                 `歷史記錄已保存到 Firebase (${newHistory.length}/${maxRecords})`
               );
             } catch (firebaseError) {
-              console.error('Firebase 保存失敗，但本地已備份:', firebaseError);
+              logger.error('Firebase 保存失敗，但本地已備份:', firebaseError);
             }
           }, 2000); // 2秒延遲，平衡即時性和寫入頻率
         }
       } catch (error) {
-        console.error('保存歷史記錄失敗:', error);
+        logger.error('保存歷史記錄失敗:', error);
         // 如果本地保存也失敗，至少嘗試保存到 localStorage
         try {
           localStorage.setItem(
@@ -644,7 +645,7 @@ export function UserProvider({ children }) {
             })
           );
         } catch (localError) {
-          console.error('本地存儲也失敗:', localError);
+          logger.error('本地存儲也失敗:', localError);
         }
       }
     },
@@ -653,7 +654,7 @@ export function UserProvider({ children }) {
 
   // 清除用戶數據
   const clearUserData = useCallback(() => {
-    console.log('清除用戶資料');
+    logger.debug('清除用戶資料');
     localStorage.removeItem('userData');
     dispatch({ type: 'RESET_USER_DATA' });
     setIsLoading(false);
@@ -669,13 +670,13 @@ export function UserProvider({ children }) {
 
     const unsubscribe = auth.onAuthStateChanged(async user => {
       if (user) {
-        console.log('認證狀態變更 - 用戶已登入:', user.email);
+        logger.debug('認證狀態變更 - 用戶已登入:', user.email);
         setIsAuthenticated(true);
         // 清除訪客模式標記
         sessionStorage.removeItem('guestMode');
         await loadUserDataRef.current(user);
       } else {
-        console.log('認證狀態變更 - 用戶未登入');
+        logger.debug('認證狀態變更 - 用戶未登入');
         setIsAuthenticated(false);
         clearUserDataRef.current();
       }
@@ -700,7 +701,7 @@ export function UserProvider({ children }) {
 
         // 如果距離上次寫入不到30分鐘，跳過同步
         if (timeSinceLastWrite < 1800000) {
-          console.log('⏭️ 定期同步：距離上次寫入時間太短，跳過同步');
+          logger.debug('⏭️ 定期同步：距離上次寫入時間太短，跳過同步');
           return;
         }
 
@@ -722,11 +723,11 @@ export function UserProvider({ children }) {
         });
 
         if (lastSavedData !== currentDataString) {
-          console.log('🔄 定期同步：檢測到數據變化，執行保存');
+          logger.debug('🔄 定期同步：檢測到數據變化，執行保存');
           addToWriteQueue(userData, 'periodic_sync');
           localStorage.setItem('lastSavedUserData', currentDataString);
         } else {
-          console.log('⏭️ 定期同步：無數據變化，跳過保存');
+          logger.debug('⏭️ 定期同步：無數據變化，跳過保存');
         }
       }
     }, 3600000); // 改為60分鐘

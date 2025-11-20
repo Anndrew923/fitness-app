@@ -14,6 +14,7 @@ import './Ladder.css';
 import { useTranslation } from 'react-i18next';
 import LadderUserCard from './LadderUserCard';
 import LadderLikeSystem from '../utils/ladderLikeSystem';
+import logger from '../utils/logger';
 
 const Ladder = () => {
   const { userData } = useUser();
@@ -123,7 +124,7 @@ const Ladder = () => {
         JSON.stringify(notification)
       );
     } catch (error) {
-      console.error('檢查提醒框失敗:', error);
+      logger.error('檢查提醒框失敗:', error);
     }
   }, []);
 
@@ -131,7 +132,7 @@ const Ladder = () => {
   const loadLadderData = useCallback(async () => {
     // 防止重複載入
     if (loadingRef.current) {
-      console.log('🔄 正在載入中，跳過重複請求');
+      logger.debug('🔄 正在載入中，跳過重複請求');
       return;
     }
 
@@ -149,7 +150,7 @@ const Ladder = () => {
       lastLoadParamsRef.current &&
       JSON.stringify(lastLoadParamsRef.current) === JSON.stringify(loadParams)
     ) {
-      console.log('🔄 載入參數未變化，跳過重複載入');
+      logger.debug('🔄 載入參數未變化，跳過重複載入');
       return;
     }
 
@@ -163,7 +164,7 @@ const Ladder = () => {
     loadingRef.current = true;
     setLoading(true);
     try {
-      console.log('🚀 開始載入天梯數據...', loadParams);
+      logger.debug('🚀 開始載入天梯數據...', loadParams);
 
       // 優化：使用更大的 limit 來減少查詢次數
       const q = query(
@@ -175,7 +176,7 @@ const Ladder = () => {
       const querySnapshot = await getDocs(q);
       let data = [];
 
-      console.log(`📥 從 Firebase 獲取到 ${querySnapshot.size} 個文檔`);
+      logger.debug(`📥 從 Firebase 獲取到 ${querySnapshot.size} 個文檔`);
 
       querySnapshot.forEach(doc => {
         const docData = doc.data();
@@ -224,13 +225,13 @@ const Ladder = () => {
         }
       });
 
-      console.log(`📊 過濾後有分數的用戶：${data.length} 名`);
+      logger.debug(`📊 過濾後有分數的用戶：${data.length} 名`);
 
       // 客戶端過濾年齡分段
       if (selectedAgeGroup !== 'all') {
         const beforeFilterCount = data.length;
-        console.log(`🔍 年齡段篩選調試 - 選擇的年齡段: ${selectedAgeGroup}`);
-        console.log(
+        logger.debug(`🔍 年齡段篩選調試 - 選擇的年齡段: ${selectedAgeGroup}`);
+        logger.debug(
           `🔍 年齡段篩選調試 - 篩選前的用戶年齡段分布:`,
           data.reduce((acc, user) => {
             acc[user.ageGroup] = (acc[user.ageGroup] || 0) + 1;
@@ -241,14 +242,14 @@ const Ladder = () => {
         data = data.filter(user => {
           const matches = user.ageGroup === selectedAgeGroup;
           if (!matches) {
-            console.log(
+            logger.debug(
               `🔍 用戶 ${user.displayName} (年齡: ${user.age}, 年齡段: ${user.ageGroup}) 不符合篩選條件 ${selectedAgeGroup}`
             );
           }
           return matches;
         });
 
-        console.log(
+        logger.debug(
           `👥 年齡段過濾：${beforeFilterCount} → ${data.length} 名用戶`
         );
       }
@@ -263,7 +264,7 @@ const Ladder = () => {
           const lastActive = new Date(user.lastActive);
           return lastActive >= oneWeekAgo;
         });
-        console.log(
+        logger.debug(
           `📅 本周新進榜過濾：${beforeFilterCount} → ${data.length} 名用戶`
         );
       }
@@ -272,7 +273,7 @@ const Ladder = () => {
       if (selectedTab === 'verified') {
         const beforeFilterCount = data.length;
         data = data.filter(user => user.isVerified === true);
-        console.log(
+        logger.debug(
           `🏅 榮譽認證過濾：${beforeFilterCount} → ${data.length} 名用戶`
         );
       }
@@ -329,7 +330,7 @@ const Ladder = () => {
           // ✅ 檢查並顯示提醒框（排名計算完成後）
           checkAndShowNotification(actualUserRank);
           
-          console.log(
+          logger.debug(
             `🎯 用戶實際排名：第 ${actualUserRank} 名，總共 ${data.length} 名用戶，所在頁面：第 ${calculatedUserPage} 頁，當前顯示：第 ${currentPage} 頁`
           );
         } else {
@@ -338,7 +339,7 @@ const Ladder = () => {
           startRank = 1;
           setUserPage(0);
           setUserRank(0);
-          console.log(
+          logger.debug(
             `📋 用戶不在過濾後的數據中，顯示前 ${displayData.length} 名`
           );
         }
@@ -348,10 +349,10 @@ const Ladder = () => {
         startRank = 1;
         setUserPage(0);
         setUserRank(0);
-        console.log(`📋 用戶沒有分數，顯示前 ${displayData.length} 名`);
+        logger.debug(`📋 用戶沒有分數，顯示前 ${displayData.length} 名`);
       }
 
-      console.log(
+      logger.debug(
         `📊 天梯數據載入完成：顯示 ${displayData.length} 名用戶，用戶排名：第 ${actualUserRank} 名，起始排名：第 ${startRank} 名`
       );
 
@@ -360,8 +361,8 @@ const Ladder = () => {
 
       // 路由狀態已在 useEffect 中清除，這裡不需要重複清除
     } catch (error) {
-      console.error('載入天梯數據失敗:', error);
-      console.error('錯誤詳情:', {
+      logger.error('載入天梯數據失敗:', error);
+      logger.error('錯誤詳情:', {
         selectedAgeGroup,
         selectedTab,
         errorCode: error.code,
@@ -432,7 +433,7 @@ const Ladder = () => {
       currentCountryRegion !== lastCountryRegion &&
       !loading
     ) {
-      console.log(
+      logger.debug(
         '🔄 檢測到國家/城市變化，等待 Firebase 寫入完成後重新載入天梯資料'
       );
       // 等待 1 秒，確保 Firebase 寫入完成並同步
@@ -460,7 +461,7 @@ const Ladder = () => {
       userData &&
       !forceReloadProcessedRef.current
     ) {
-      console.log('🔄 檢測到強制重新載入標記，立即重新載入天梯數據');
+      logger.debug('🔄 檢測到強制重新載入標記，立即重新載入天梯數據');
 
       // 設置已處理標記，避免重複處理
       forceReloadProcessedRef.current = true;
@@ -517,7 +518,7 @@ const Ladder = () => {
                   top: Math.max(0, targetScrollY),
                   behavior: 'smooth',
                 });
-                console.log(
+                logger.debug(
                   '✅ 自動滾動到用戶排名:',
                   userRank,
                   '目標位置:',
@@ -533,7 +534,7 @@ const Ladder = () => {
       } else {
         // 用戶不在顯示的數據中（例如排名太後面），標記為已處理
         hasAutoScrolledRef.current = true;
-        console.log('✅ 用戶不在顯示的數據中，無需滾動');
+        logger.debug('✅ 用戶不在顯示的數據中，無需滾動');
       }
     }
   }, [loading, ladderData, userRank, userData, currentPage]);
@@ -552,7 +553,7 @@ const Ladder = () => {
             likedSet.add(user.id);
           }
         } catch (error) {
-          console.error(`檢查用戶 ${user.id} 點讚狀態失敗:`, error);
+          logger.error(`檢查用戶 ${user.id} 點讚狀態失敗:`, error);
         }
       }
       setLikedUsers(likedSet);
@@ -641,7 +642,7 @@ const Ladder = () => {
           );
         }
       } catch (error) {
-        console.error('點讚操作失敗:', error);
+        logger.error('點讚操作失敗:', error);
         // 回滾樂觀更新
         setLikedUsers(prev => {
           const newSet = new Set(prev);
@@ -730,7 +731,7 @@ const Ladder = () => {
 
     // 只在開發環境下輸出詳細日誌，並且只在數據穩定時輸出，且條件真正改變時
     if (shouldLog) {
-      console.log('🔍 檢查浮動排名框條件:', {
+      logger.debug('🔍 檢查浮動排名框條件:', {
         hasUserData: !!userData,
         hasLadderScore: userData?.ladderScore > 0,
         userRank,
@@ -743,7 +744,7 @@ const Ladder = () => {
 
     if (!userData || !userData.ladderScore || userData.ladderScore === 0) {
       if (shouldLog) {
-        console.log('❌ 浮動框條件1不滿足：用戶數據或分數問題');
+        logger.debug('❌ 浮動框條件1不滿足：用戶數據或分數問題');
       }
       return null;
     }
@@ -751,7 +752,7 @@ const Ladder = () => {
     // 如果用戶排名在前7名內，不顯示浮動框（因為應該在列表中）
     if (userRank > 0 && userRank <= 7) {
       if (shouldLog) {
-        console.log('❌ 浮動框條件2不滿足：用戶排名前7名內');
+        logger.debug('❌ 浮動框條件2不滿足：用戶排名前7名內');
       }
       return null;
     }
@@ -759,13 +760,13 @@ const Ladder = () => {
     // 如果用戶排名為0或未上榜，不顯示浮動框
     if (userRank === 0) {
       if (shouldLog) {
-        console.log('❌ 浮動框條件3不滿足：用戶未上榜');
+        logger.debug('❌ 浮動框條件3不滿足：用戶未上榜');
       }
       return null;
     }
 
     if (shouldLog) {
-      console.log('✅ 浮動框條件滿足，顯示浮動排名框，排名:', userRank);
+      logger.debug('✅ 浮動框條件滿足，顯示浮動排名框，排名:', userRank);
     }
 
     const currentRank = userRank;
@@ -807,7 +808,7 @@ const Ladder = () => {
                       alt={t('community.ui.avatarAlt')}
                       loading="lazy"
                       onError={e => {
-                        console.log('頭像載入失敗，使用預設頭像');
+                        logger.debug('頭像載入失敗，使用預設頭像');
                         e.target.style.display = 'none';
                         const placeholder = e.target.nextSibling;
                         if (placeholder) {
@@ -815,7 +816,7 @@ const Ladder = () => {
                         }
                       }}
                       onLoad={() => {
-                        console.log('頭像載入成功');
+                        logger.debug('頭像載入成功');
                       }}
                     />
                   );
@@ -1293,7 +1294,7 @@ const Ladder = () => {
                         }
                         loading="lazy"
                         onError={e => {
-                          console.log('頭像載入失敗，使用預設頭像');
+                          logger.debug('頭像載入失敗，使用預設頭像');
                           e.target.style.display = 'none';
                           const placeholder = e.target.nextSibling;
                           if (placeholder) {
@@ -1301,7 +1302,7 @@ const Ladder = () => {
                           }
                         }}
                         onLoad={() => {
-                          console.log('頭像載入成功');
+                          logger.debug('頭像載入成功');
                         }}
                       />
                     ) : null}

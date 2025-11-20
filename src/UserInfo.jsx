@@ -24,13 +24,13 @@ import {
   orderBy,
   limit,
   getDocs,
-  where,
   updateDoc,
   doc,
   setDoc,
 } from 'firebase/firestore';
 import PropTypes from 'prop-types';
 import { calculateLadderScore, generateNickname } from './utils';
+import logger from './utils/logger';
 
 import './userinfo.css';
 import { useTranslation } from 'react-i18next';
@@ -91,12 +91,12 @@ const Modal = ({
   };
 
   const handleClose = () => {
-    console.log('Modal close button clicked');
+    logger.debug('Modal close button clicked');
     onClose();
   };
 
   const handleOverlayClick = () => {
-    console.log('Modal overlay clicked');
+    logger.debug('Modal overlay clicked');
     onClose();
   };
 
@@ -562,10 +562,10 @@ function UserInfo({ testData, onLogout, clearTestData }) {
 
           if (currentUserIndex >= 0) {
             oldRank = currentUserIndex + 1;
-            console.log(`📊 查詢到當前排名：第 ${oldRank} 名`);
+            logger.debug(`📊 查詢到當前排名：第 ${oldRank} 名`);
           }
         } catch (error) {
-          console.error('查詢當前排名失敗:', error);
+          logger.error('查詢當前排名失敗:', error);
         }
       }
 
@@ -628,14 +628,14 @@ function UserInfo({ testData, onLogout, clearTestData }) {
           updateData.verifiedAt = null;
           updateData.verificationExpiredAt = null;
           updateData.verificationRequestId = null;
-          console.log('✅ 已清除榮譽認證狀態（重新提交分數）');
+          logger.debug('✅ 已清除榮譽認證狀態（重新提交分數）');
         }
 
         await setDoc(userRef, updateData, { merge: true });
 
-        console.log('天梯分數已立即保存到 Firebase:', ladderScore);
+        logger.debug('天梯分數已立即保存到 Firebase:', ladderScore);
       } catch (error) {
-        console.error('保存天梯分數失敗:', error);
+        logger.error('保存天梯分數失敗:', error);
         throw error;
       }
 
@@ -676,7 +676,7 @@ function UserInfo({ testData, onLogout, clearTestData }) {
         setModalState(prev => ({ ...prev, isOpen: false }));
       }, 5000);
     } catch (error) {
-      console.error('提交到天梯失敗:', error);
+      logger.error('提交到天梯失敗:', error);
       setModalState({
         isOpen: true,
         title: t('userInfo.modal.submitFailTitle'),
@@ -902,12 +902,12 @@ function UserInfo({ testData, onLogout, clearTestData }) {
   useEffect(() => {
     if (!auth) {
       setError('無法初始化身份驗證，請檢查 Firebase 配置並稍後再試。');
-      console.error('auth 未初始化');
+      logger.error('auth 未初始化');
       return;
     }
 
     const unsubscribe = auth.onAuthStateChanged(user => {
-      console.log('UserInfo - 認證狀態變更:', user?.email);
+      logger.debug('UserInfo - 認證狀態變更:', user?.email);
       setCurrentUser(user);
       if (!user && !isGuest) {
         navigate('/login');
@@ -921,11 +921,11 @@ function UserInfo({ testData, onLogout, clearTestData }) {
   useEffect(() => {
     const checkDataLoaded = async () => {
       if (currentUser && !dataLoaded && !isLoading) {
-        console.log('UserInfo - 檢查資料載入狀態');
+        logger.debug('UserInfo - 檢查資料載入狀態');
 
         // 如果資料為空，嘗試重新載入
         if (!userData.height && !userData.weight && !userData.age) {
-          console.log('UserInfo - 資料為空，嘗試重新載入');
+          logger.debug('UserInfo - 資料為空，嘗試重新載入');
           await loadUserData(currentUser, true);
         }
 
@@ -1034,7 +1034,7 @@ function UserInfo({ testData, onLogout, clearTestData }) {
           });
         }
       } catch (error) {
-        console.error('載入提交狀態失敗:', error);
+        logger.error('載入提交狀態失敗:', error);
         // 錯誤時重置狀態
         setLadderSubmissionState({
           lastSubmissionTime: null,
@@ -1060,14 +1060,14 @@ function UserInfo({ testData, onLogout, clearTestData }) {
       const storageKey = `ladderSubmissionState_${userId}`;
       localStorage.setItem(storageKey, JSON.stringify(ladderSubmissionState));
     } catch (error) {
-      console.error('保存提交狀態失敗:', error);
+      logger.error('保存提交狀態失敗:', error);
     }
   }, [ladderSubmissionState, auth.currentUser?.uid]); // ✅ 添加依賴
 
   // 處理 testData 更新
   useEffect(() => {
     if (testData && Object.keys(testData).length > 0) {
-      console.log('收到測試數據:', testData);
+      logger.debug('收到測試數據:', testData);
 
       // 防止重複應用相同 testData 導致的重複 setUserData
       const testDataKey = JSON.stringify(testData);
@@ -1103,7 +1103,7 @@ function UserInfo({ testData, onLogout, clearTestData }) {
             }),
           };
 
-          console.log('💾 防抖後更新測試數據分數（5秒防抖）');
+          logger.debug('💾 防抖後更新測試數據分數（5秒防抖）');
           return {
             ...prev,
             scores: updatedScores,
@@ -1183,7 +1183,7 @@ function UserInfo({ testData, onLogout, clearTestData }) {
 
         if (onlyCountryRegionChanged) {
           // 如果只改變了 country/region，立即保存到 Firebase（不使用防抖）
-          console.log('🌍 國家/城市變化，立即保存到 Firebase');
+          logger.debug('🌍 國家/城市變化，立即保存到 Firebase');
           await saveUserData(updatedUserData);
           // 同時更新本地狀態
           setUserData(updatedUserData);
@@ -1269,18 +1269,19 @@ function UserInfo({ testData, onLogout, clearTestData }) {
     }
 
     try {
-      // 獲取前100名用戶
+      // ✅ 優化：使用客戶端過濾，避免複合索引需求
+      // 獲取前200名用戶（增加限制以確保有足夠數據）
       const usersRef = collection(db, 'users');
       const q = query(
         usersRef,
-        where('ladderScore', '>', 0),
         orderBy('ladderScore', 'desc'),
-        limit(100)
+        limit(200) // 增加到200名，確保涵蓋更多用戶
       );
 
       const querySnapshot = await getDocs(q);
       const users = [];
 
+      // 客戶端過濾：只保留 ladderScore > 0 的用戶
       querySnapshot.forEach(doc => {
         const docData = doc.data();
         if (docData.ladderScore > 0) {
@@ -1296,11 +1297,11 @@ function UserInfo({ testData, onLogout, clearTestData }) {
       if (userIndex !== -1) {
         setUserRank(userIndex + 1);
       } else {
-        // 如果用戶不在前100名，設置為未上榜
+        // 如果用戶不在前200名中，設置為未上榜
         setUserRank(null);
       }
     } catch (error) {
-      console.error('獲取用戶排名失敗:', error);
+      logger.error('獲取用戶排名失敗:', error);
       setUserRank(null);
     }
   }, [userData?.userId, submittedLadderScore, setUserRank]);
@@ -1446,7 +1447,7 @@ function UserInfo({ testData, onLogout, clearTestData }) {
     localStorage.removeItem('savedPassword');
 
     if (auth.currentUser) {
-      auth.signOut().catch(err => console.error('登出失敗:', err));
+      auth.signOut().catch(err => logger.error('登出失敗:', err));
     }
 
     onLogout();
@@ -1530,7 +1531,7 @@ function UserInfo({ testData, onLogout, clearTestData }) {
       if (!userId) throw new Error('未登入，無法上傳頭像');
 
       // 添加更詳細的錯誤處理和調試信息
-      console.log('🔧 開始上傳頭像:', { userId, fileSize: compressed.size });
+      logger.debug('🔧 開始上傳頭像:', { userId, fileSize: compressed.size });
 
       const avatarRef = ref(storage, `avatars/${userId}/avatar.jpg`);
       const metadata = {
@@ -1542,10 +1543,10 @@ function UserInfo({ testData, onLogout, clearTestData }) {
       };
 
       await uploadBytes(avatarRef, compressed, metadata);
-      console.log('✅ 頭像上傳成功');
+      logger.debug('✅ 頭像上傳成功');
 
       const url = await getDownloadURL(avatarRef);
-      console.log('✅ 獲取下載 URL 成功:', url);
+      logger.debug('✅ 獲取下載 URL 成功:', url);
       // 更新 Firestore - 頭像上傳需要立即保存，不使用防抖
       setUserData(prev => ({
         ...prev,
@@ -1561,7 +1562,7 @@ function UserInfo({ testData, onLogout, clearTestData }) {
           avatarUrl: url,
           updatedAt: new Date().toISOString(),
         });
-        console.log('✅ 頭像已立即保存到 Firebase');
+        logger.debug('✅ 頭像已立即保存到 Firebase');
 
         // 顯示成功提示
         setModalState({
@@ -1576,13 +1577,13 @@ function UserInfo({ testData, onLogout, clearTestData }) {
           setModalState(prev => ({ ...prev, isOpen: false }));
         }, 2000);
       } catch (error) {
-        console.error(
+        logger.error(
           '⚠️ 頭像保存到 Firestore 失敗（但 Storage 上傳成功）:',
           error
         );
         // 不顯示錯誤訊息，因為頭像已經成功上傳到 Storage 並可以使用
         // 只在控制台記錄錯誤，方便調試
-        console.warn(
+        logger.warn(
           '💡 提示：頭像已成功上傳，但資料庫同步失敗。頭像仍可正常使用，系統將在下次更新時自動同步。'
         );
 
@@ -1645,9 +1646,9 @@ function UserInfo({ testData, onLogout, clearTestData }) {
       <Modal
         isOpen={modalState.isOpen}
         onClose={() => {
-          console.log('Modal onClose triggered, current state:', modalState);
+          logger.debug('Modal onClose triggered, current state:', modalState);
           setModalState(prev => {
-            console.log('Setting modal state to closed');
+            logger.debug('Setting modal state to closed');
             return { ...prev, isOpen: false };
           });
         }}
