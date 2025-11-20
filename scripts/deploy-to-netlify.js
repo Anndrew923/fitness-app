@@ -439,6 +439,11 @@ async function generateNetlifyConfig() {
     },
     redirects: [
       {
+        from: '/assets/*',
+        to: '/assets/:splat',
+        status: 200,
+      },
+      {
         from: '/*',
         to: '/index.html',
         status: 200,
@@ -469,6 +474,13 @@ async function generateNetlifyConfig() {
   command = "npm run build"
   publish = "dist"
 
+# ✅ 修復：保護靜態資源，避免被重定向（必須在 /* 之前）
+[[redirects]]
+  from = "/assets/*"
+  to = "/assets/:splat"
+  status = 200
+
+# ✅ 原有規則：SPA 路由重定向
 [[redirects]]
   from = "/*"
   to = "/index.html"
