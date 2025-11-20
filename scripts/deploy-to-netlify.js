@@ -444,6 +444,11 @@ async function generateNetlifyConfig() {
         status: 200,
       },
       {
+        from: '/.well-known/*',
+        to: '/.well-known/:splat',
+        status: 200,
+      },
+      {
         from: '/*',
         to: '/index.html',
         status: 200,
@@ -464,6 +469,20 @@ async function generateNetlifyConfig() {
           'Cache-Control': 'public, max-age=31536000, immutable',
         },
       },
+      {
+        for: '/assets/*.js',
+        values: {
+          'Content-Type': 'application/javascript; charset=utf-8',
+          'Cache-Control': 'public, max-age=31536000, immutable',
+        },
+      },
+      {
+        for: '/assets/*.mjs',
+        values: {
+          'Content-Type': 'application/javascript; charset=utf-8',
+          'Cache-Control': 'public, max-age=31536000, immutable',
+        },
+      },
     ],
   };
 
@@ -474,13 +493,20 @@ async function generateNetlifyConfig() {
   command = "npm run build"
   publish = "dist"
 
-# ✅ 修復：保護靜態資源，避免被重定向（必須在 /* 之前）
+# ✅ 修復：先處理靜態資源，避免被重定向（必須在 /* 之前）
+# Netlify 會按照順序處理重定向規則，更具體的規則應該放在前面
 [[redirects]]
   from = "/assets/*"
   to = "/assets/:splat"
   status = 200
 
-# ✅ 原有規則：SPA 路由重定向
+# ✅ 修復：處理 .well-known 目錄
+[[redirects]]
+  from = "/.well-known/*"
+  to = "/.well-known/:splat"
+  status = 200
+
+# ✅ 修復：其他路徑重定向到 index.html（但排除 assets 和 .well-known）
 [[redirects]]
   from = "/*"
   to = "/index.html"
@@ -496,6 +522,19 @@ async function generateNetlifyConfig() {
 [[headers]]
   for = "/assets/*"
   [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# ✅ 修復：確保 JavaScript 模組正確的 MIME 類型
+[[headers]]
+  for = "/assets/*.js"
+  [headers.values]
+    Content-Type = "application/javascript; charset=utf-8"
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/assets/*.mjs"
+  [headers.values]
+    Content-Type = "application/javascript; charset=utf-8"
     Cache-Control = "public, max-age=31536000, immutable"
 `
   );

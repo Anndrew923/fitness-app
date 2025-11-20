@@ -1,4 +1,6 @@
 // Firebase 寫入監控工具
+import logger from './logger';
+
 class FirebaseWriteMonitor {
   constructor() {
     this.writeCounts = {
@@ -16,12 +18,12 @@ class FirebaseWriteMonitor {
   start() {
     if (this.isMonitoring) return;
     this.isMonitoring = true;
-    console.log('🔥 Firebase 寫入監控已啟動');
+    logger.info('🔥 Firebase 寫入監控已啟動');
   }
 
   stop() {
     this.isMonitoring = false;
-    console.log('🛑 Firebase 寫入監控已停止');
+    logger.info('🛑 Firebase 寫入監控已停止');
   }
 
   logWrite(operation, collection, documentId, data = null) {
@@ -44,7 +46,7 @@ class FirebaseWriteMonitor {
       this.writeHistory.shift();
     }
 
-    console.log(
+    logger.debug(
       `📝 Firebase 寫入: ${operation} -> ${collection}/${documentId}`
     );
   }
@@ -85,7 +87,7 @@ class FirebaseWriteMonitor {
       arrayRemove: 0,
     };
     this.writeHistory = [];
-    console.log('🔄 Firebase 寫入統計已重置');
+    logger.info('🔄 Firebase 寫入統計已重置');
   }
 
   // 檢測異常寫入模式
@@ -227,7 +229,7 @@ if (process.env.NODE_ENV === 'development') {
         JSON.stringify(lastStats) !== currentStatsHash &&
         now - lastOutputTime > 300000
       ) {
-        console.log('📊 Firebase 寫入統計:', stats);
+        logger.debug('📊 Firebase 寫入統計:', stats);
         lastStats = JSON.parse(currentStatsHash);
         lastOutputTime = now;
 
@@ -236,8 +238,8 @@ if (process.env.NODE_ENV === 'development') {
         if (suggestions.length > 0) {
           const suggestionHash = suggestions.join('|');
           if (suggestionHash !== lastSuggestionHash) {
-            console.log('💡 優化建議:');
-            suggestions.forEach(suggestion => console.log(suggestion));
+            logger.debug('💡 優化建議:');
+            suggestions.forEach(suggestion => logger.debug(suggestion));
             lastSuggestionHash = suggestionHash;
           }
         }

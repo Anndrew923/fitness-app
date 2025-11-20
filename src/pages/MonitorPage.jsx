@@ -1,4 +1,4 @@
-import React from 'react';
+// React import removed - not needed in modern React
 import MonitorDashboard from '../components/MonitorDashboard';
 
 const MonitorPage = () => {

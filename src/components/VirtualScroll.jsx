@@ -1,6 +1,5 @@
 import React, {
   useState,
-  useEffect,
   useRef,
   useMemo,
   useCallback,
@@ -70,15 +69,7 @@ const VirtualScroll = ({
     [itemHeight]
   );
 
-  // 滾動到頂部
-  const scrollToTop = useCallback(() => {
-    scrollToIndex(0);
-  }, [scrollToIndex]);
-
-  // 滾動到底部
-  const scrollToBottom = useCallback(() => {
-    scrollToIndex(items.length - 1);
-  }, [scrollToIndex, items.length]);
+  // 滾動到頂部和底部功能已移除（未使用）
 
   return (
     <div

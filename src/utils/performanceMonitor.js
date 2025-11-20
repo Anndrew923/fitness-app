@@ -1,4 +1,6 @@
 // 性能監控工具
+import logger from './logger';
+
 class PerformanceMonitor {
   constructor() {
     this.isMonitoring = false;
@@ -15,19 +17,19 @@ class PerformanceMonitor {
   start() {
     if (this.isMonitoring) return;
     this.isMonitoring = true;
-    console.log('📊 性能監控已啟動');
+    logger.info('📊 性能監控已啟動');
   }
 
   stop() {
     this.isMonitoring = false;
-    console.log('🛑 性能監控已停止');
+    logger.info('🛑 性能監控已停止');
   }
 
   // 開始監控頁面載入
   startPageLoad(pageName) {
     if (!this.isMonitoring) return;
     this.pageStartTimes.set(pageName, Date.now());
-    console.log(`📄 開始載入頁面: ${pageName}`);
+    logger.debug(`📄 開始載入頁面: ${pageName}`);
   }
 
   // 監控頁面載入時間 - 修復版本
@@ -36,7 +38,7 @@ class PerformanceMonitor {
 
     const startTime = this.pageStartTimes.get(pageName);
     if (!startTime) {
-      console.warn(`⚠️ 頁面 ${pageName} 沒有開始時間記錄`);
+      logger.warn(`⚠️ 頁面 ${pageName} 沒有開始時間記錄`);
       return;
     }
 
@@ -44,11 +46,11 @@ class PerformanceMonitor {
     this.metrics.pageLoadTimes[pageName] = loadTime;
     this.pageStartTimes.delete(pageName); // 清理開始時間
 
-    console.log(`📄 頁面載入完成 - ${pageName}: ${loadTime}ms`);
+    logger.debug(`📄 頁面載入完成 - ${pageName}: ${loadTime}ms`);
 
     // 檢查是否超過閾值
     if (loadTime > 3000) {
-      console.warn(`⚠️ 頁面載入時間過長: ${pageName} (${loadTime}ms)`);
+      logger.warn(`⚠️ 頁面載入時間過長: ${pageName} (${loadTime}ms)`);
     }
   }
 
@@ -69,7 +71,7 @@ class PerformanceMonitor {
 
     // 檢查是否超過閾值
     if (renderTime > 100) {
-      console.warn(`⚠️ 組件渲染時間過長: ${componentName} (${renderTime}ms)`);
+      logger.warn(`⚠️ 組件渲染時間過長: ${componentName} (${renderTime}ms)`);
     }
   }
 
@@ -90,7 +92,7 @@ class PerformanceMonitor {
 
     // 檢查是否超過閾值
     if (callTime > 5000) {
-      console.warn(`⚠️ API 調用時間過長: ${apiName} (${callTime}ms)`);
+      logger.warn(`⚠️ API 調用時間過長: ${apiName} (${callTime}ms)`);
     }
   }
 
@@ -116,7 +118,7 @@ class PerformanceMonitor {
     // 檢查內存使用率
     const usagePercent = (usage.used / usage.limit) * 100;
     if (usagePercent > 80) {
-      console.warn(`⚠️ 內存使用率過高: ${usagePercent.toFixed(2)}%`);
+      logger.warn(`⚠️ 內存使用率過高: ${usagePercent.toFixed(2)}%`);
     }
   }
 
@@ -295,7 +297,7 @@ class PerformanceMonitor {
       errors: [],
     };
     this.pageStartTimes.clear();
-    console.log('🔄 性能統計已重置');
+    logger.info('🔄 性能統計已重置');
   }
 }
 
@@ -319,12 +321,12 @@ if (process.env.NODE_ENV === 'development') {
       Object.keys(stats.componentRenderTimes).length > 0 ||
       Object.keys(stats.apiCallTimes).length > 0
     ) {
-      console.log('📊 性能統計:', stats);
+      logger.debug('📊 性能統計:', stats);
 
       const suggestions = performanceMonitor.generateOptimizationSuggestions();
       if (suggestions.length > 0) {
-        console.log('💡 性能優化建議:');
-        suggestions.forEach(suggestion => console.log(suggestion));
+        logger.debug('💡 性能優化建議:');
+        suggestions.forEach(suggestion => logger.debug(suggestion));
       }
     }
   }, 300000); // 每5分鐘輸出一次
