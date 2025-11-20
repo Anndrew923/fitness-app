@@ -19,35 +19,48 @@ export default defineConfig(({ mode }) => {
           order: 'post',
           handler(html) {
             // ✅ 修復：確保 react-core 在 vendor 之前載入
-            // 提取所有 modulepreload 標籤
+            // 提取所有 modulepreload 標籤及其位置
             const modulepreloadRegex = /<link rel="modulepreload"[^>]*>/g;
-            const matches = html.match(modulepreloadRegex) || [];
-            
+            const matches = [];
+            let match;
+
+            // 使用 exec 來獲取每個匹配項的位置信息
+            while ((match = modulepreloadRegex.exec(html)) !== null) {
+              matches.push({
+                fullMatch: match[0],
+                index: match.index,
+              });
+            }
+
             if (matches.length === 0) return html;
-            
+
             // 分離 react-core 和其他 chunk
             const reactCorePreloads = [];
             const otherPreloads = [];
-            
-            matches.forEach(match => {
-              if (match.includes('react-core')) {
-                reactCorePreloads.push(match);
+
+            matches.forEach(({ fullMatch }) => {
+              if (fullMatch.includes('react-core')) {
+                reactCorePreloads.push(fullMatch);
               } else {
-                otherPreloads.push(match);
+                otherPreloads.push(fullMatch);
               }
             });
-            
+
             // 重新排序：react-core 在最前面，然後是其他 chunk
             const reorderedPreloads = [...reactCorePreloads, ...otherPreloads];
-            
-            // 替換 HTML 中的 modulepreload 標籤
+
+            // ✅ 修復：從後往前替換，避免索引偏移問題
             let newHtml = html;
-            matches.forEach((match, index) => {
-              if (index < reorderedPreloads.length) {
-                newHtml = newHtml.replace(match, reorderedPreloads[index]);
-              }
-            });
-            
+            for (let i = matches.length - 1; i >= 0; i--) {
+              const { fullMatch, index } = matches[i];
+              const replacement = reorderedPreloads[i] || fullMatch;
+              // 使用 substring 進行精確替換
+              newHtml =
+                newHtml.substring(0, index) +
+                replacement +
+                newHtml.substring(index + fullMatch.length);
+            }
+
             return newHtml;
           },
         },
