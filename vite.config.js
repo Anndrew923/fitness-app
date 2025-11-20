@@ -203,32 +203,23 @@ export default defineConfig(({ mode }) => {
           // ✅ 智能 chunk 分割函數
           // ✅ 修復：確保 React 核心優先載入，避免 PureComponent 錯誤
           manualChunks: id => {
-            // ✅ 修復：React 核心必須優先載入（最高優先級）
-            // 確保 React 和 ReactDOM 在 vendor 和其他 chunk 之前載入
+            // ✅ 修復：React 核心 + 關鍵同步依賴（必須一起載入）
+            // 確保這些在應用初始化時就可用，避免 vendor 中的庫找不到 React
+            // 這些都是同步導入，必須在首屏載入，合併不會影響優化效果
             if (
               id.includes('node_modules/react/') ||
-              id.includes('node_modules/react-dom/')
+              id.includes('node_modules/react-dom/') ||
+              id.includes('node_modules/react-router') || // ✅ 合併：同步導入，必須首屏載入
+              id.includes('node_modules/react-i18next') || // ✅ 合併：同步導入，必須首屏載入
+              id.includes('node_modules/i18next') // ✅ 合併：i18next 核心庫
             ) {
               return 'react-core';
-            }
-
-            // React Router（依賴 React，會在 react-core 之後載入）
-            if (id.includes('node_modules/react-router')) {
-              return 'react-router';
             }
 
             // Charts（依賴 React，會在 react-core 之後載入）
             // ✅ 修復：確保 recharts 在 react-core 之後載入，避免 PureComponent 錯誤
             if (id.includes('node_modules/recharts')) {
               return 'charts';
-            }
-
-            // i18n（依賴 React，會在 react-core 之後載入）
-            if (
-              id.includes('node_modules/i18next') ||
-              id.includes('node_modules/react-i18next')
-            ) {
-              return 'i18n';
             }
 
             // Firebase（按需載入，只有需要認證的頁面才載入）
