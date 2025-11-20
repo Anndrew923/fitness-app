@@ -42,6 +42,7 @@ const FriendFeed = React.lazy(() => import('./components/FriendFeed'));
 const Verification = React.lazy(() => import('./pages/Verification'));
 const AdminPanel = React.lazy(() => import('./pages/AdminPanel'));
 import GlobalAdBanner from './components/GlobalAdBanner';
+import LoadingSpinner from './components/LoadingSpinner';
 import performanceMonitor from './utils/performanceMonitor';
 import './App.css';
 import { useTranslation, withTranslation } from 'react-i18next';
@@ -211,6 +212,44 @@ function AppContent() {
     return () => clearTimeout(timer);
   }, [location.pathname]);
 
+  // ✅ 預載入常用頁面（在空閒時間）
+  useEffect(() => {
+    const preloadPages = () => {
+      // 檢查是否支援 requestIdleCallback
+      if ('requestIdleCallback' in window) {
+        requestIdleCallback(
+          () => {
+            // 預載入最常用的頁面
+            Promise.all([
+              import('./UserInfo'),
+              import('./components/Ladder'),
+              import('./components/Community'),
+            ]).catch((error) => {
+              logger.debug('預載入頁面失敗:', error);
+            });
+          },
+          { timeout: 2000 } // 最多等待 2 秒
+        );
+      } else {
+        // 降級方案：使用 setTimeout
+        setTimeout(() => {
+          Promise.all([
+            import('./UserInfo'),
+            import('./components/Ladder'),
+            import('./components/Community'),
+          ]).catch((error) => {
+            logger.debug('預載入頁面失敗:', error);
+          });
+        }, 3000); // 3 秒後預載入
+      }
+    };
+
+    // 只在用戶已登入時預載入
+    if (auth.currentUser) {
+      preloadPages();
+    }
+  }, []);
+
   // 處理 Android 返回按鈕
   useEffect(() => {
     const handleBackButton = () => {
@@ -368,7 +407,8 @@ function AppContent() {
     <div className={`app-container ${showFixedAd ? 'page-with-fixed-ad' : ''}`}>
       <ScrollToTop />
       <ErrorBoundary>
-        <Suspense fallback={<div>{t('common.loading')}</div>}>
+        {/* ✅ 優化：使用統一的載入組件 */}
+        <Suspense fallback={<LoadingSpinner message={t('common.loading')} fullScreen={true} />}>
           <div className="main-content">
             <Routes>
               <Route path="/" element={<WelcomeSplash />} />

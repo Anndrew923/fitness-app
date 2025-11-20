@@ -141,17 +141,94 @@ export default defineConfig(({ mode }) => {
     },
 
     build: {
-      // 優化生產環境建置
+      // ✅ 優化：更細粒度的代碼分割
       rollupOptions: {
         output: {
-          manualChunks: {
-            'react-vendor': ['react', 'react-dom', 'react-router-dom'],
-            firebase: ['firebase/app', 'firebase/auth', 'firebase/firestore'],
-            charts: ['recharts'],
+          // ✅ 智能 chunk 分割函數
+          manualChunks: (id) => {
+            // React 核心（必須在初始載入）
+            if (
+              id.includes('node_modules/react/') ||
+              id.includes('node_modules/react-dom/')
+            ) {
+              return 'react-core';
+            }
+
+            // React Router（路由相關，初始載入）
+            if (id.includes('node_modules/react-router')) {
+              return 'react-router';
+            }
+
+            // Firebase（按需載入，只有需要認證的頁面才載入）
+            if (id.includes('node_modules/firebase')) {
+              return 'firebase';
+            }
+
+            // Charts（只有特定頁面需要）
+            if (id.includes('node_modules/recharts')) {
+              return 'charts';
+            }
+
+            // i18n（國際化，可以延遲載入）
+            if (
+              id.includes('node_modules/i18next') ||
+              id.includes('node_modules/react-i18next')
+            ) {
+              return 'i18n';
+            }
+
+            // Capacitor（原生功能，按需載入）
+            if (id.includes('node_modules/@capacitor')) {
+              return 'capacitor';
+            }
+
+            // PropTypes（開發工具，可以單獨打包）
+            if (id.includes('node_modules/prop-types')) {
+              return 'prop-types';
+            }
+
+            // 其他 node_modules 依賴
+            if (id.includes('node_modules')) {
+              return 'vendor';
+            }
+
+            // ✅ 業務代碼按頁面分割（進一步優化）
+            // 天梯頁面（可能較大）
+            if (id.includes('/src/components/Ladder')) {
+              return 'ladder';
+            }
+
+            // 社群頁面（可能較大）
+            if (id.includes('/src/components/Community')) {
+              return 'community';
+            }
+
+            // 工具頁面
+            if (id.includes('/src/components/TrainingTools')) {
+              return 'training-tools';
+            }
+
+            // 好友動態頁面
+            if (id.includes('/src/components/FriendFeed')) {
+              return 'friend-feed';
+            }
           },
+          // ✅ 優化 chunk 命名
+          chunkFileNames: 'assets/[name]-[hash].js',
+          entryFileNames: 'assets/[name]-[hash].js',
+          assetFileNames: 'assets/[name]-[hash].[ext]',
         },
       },
-      chunkSizeWarningLimit: 1000,
+      // ✅ 降低警告閾值，更積極優化
+      chunkSizeWarningLimit: 500,
+      // ✅ 使用 esbuild 壓縮（Vite 默認，更快）
+      minify: 'esbuild',
+      // ✅ 生產環境移除 console
+      esbuild: {
+        drop: mode === 'production' ? ['console', 'debugger'] : [],
+      },
+      // ✅ 啟用 source map（生產環境可選）
+      sourcemap: mode === 'development',
     },
 
     // 優化依賴預建置，防止檔案鎖定
