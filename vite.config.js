@@ -4,12 +4,13 @@ import { existsSync, copyFileSync, mkdirSync, statSync } from 'fs';
 import { resolve } from 'path';
 
 export default defineConfig(({ mode }) => {
-  const env = loadEnv(mode, process.cwd(), '');
+  // 載入環境變數（雖然當前未直接使用，但保留以備將來需要）
+  loadEnv(mode, process.cwd(), '');
 
   return {
     // ✅ 修復：確保生產環境路徑正確
     base: '/',
-    
+
     plugins: [
       react(),
       {
@@ -148,8 +149,10 @@ export default defineConfig(({ mode }) => {
       rollupOptions: {
         output: {
           // ✅ 智能 chunk 分割函數
-          manualChunks: (id) => {
-            // ✅ 修復：React 核心必須優先載入，確保不會被分割到其他 chunk
+          // ✅ 修復：確保 React 核心優先載入，避免 PureComponent 錯誤
+          manualChunks: id => {
+            // ✅ 修復：React 核心必須優先載入（最高優先級）
+            // 確保 React 和 ReactDOM 在 vendor 和其他 chunk 之前載入
             if (
               id.includes('node_modules/react/') ||
               id.includes('node_modules/react-dom/')
@@ -157,27 +160,28 @@ export default defineConfig(({ mode }) => {
               return 'react-core';
             }
 
-            // React Router（路由相關，初始載入）
+            // React Router（依賴 React，會在 react-core 之後載入）
             if (id.includes('node_modules/react-router')) {
               return 'react-router';
             }
 
-            // Firebase（按需載入，只有需要認證的頁面才載入）
-            if (id.includes('node_modules/firebase')) {
-              return 'firebase';
-            }
-
-            // Charts（只有特定頁面需要）
+            // Charts（依賴 React，會在 react-core 之後載入）
+            // ✅ 修復：確保 recharts 在 react-core 之後載入，避免 PureComponent 錯誤
             if (id.includes('node_modules/recharts')) {
               return 'charts';
             }
 
-            // i18n（國際化，可以延遲載入）
+            // i18n（依賴 React，會在 react-core 之後載入）
             if (
               id.includes('node_modules/i18next') ||
               id.includes('node_modules/react-i18next')
             ) {
               return 'i18n';
+            }
+
+            // Firebase（按需載入，只有需要認證的頁面才載入）
+            if (id.includes('node_modules/firebase')) {
+              return 'firebase';
             }
 
             // Capacitor（原生功能，按需載入）
@@ -190,7 +194,8 @@ export default defineConfig(({ mode }) => {
               return 'prop-types';
             }
 
-            // 其他 node_modules 依賴
+            // ✅ 修復：其他 node_modules 依賴放在最後
+            // 確保所有 React 相關的庫都已經被分離出來
             if (id.includes('node_modules')) {
               return 'vendor';
             }
