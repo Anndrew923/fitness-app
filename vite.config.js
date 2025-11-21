@@ -23,7 +23,8 @@ export default defineConfig(({ mode }) => {
             const matches = [];
             let match;
 
-            // 雿輻 exec 靘???????蝵桐縑??            while ((match = modulepreloadRegex.exec(html)) !== null) {
+            // 雿輻 exec 靘????????蝵桐縑??
+            while ((match = modulepreloadRegex.exec(html)) !== null) {
               matches.push({
                 fullMatch: match[0],
                 index: match.index,
@@ -95,7 +96,6 @@ export default defineConfig(({ mode }) => {
             try {
               const distPath = resolve('dist');
 
-              // 蝣箔? dist ?桅?摮
               if (!existsSync(distPath)) {
                 console.warn('?? dist ?桅?銝??剁?頝喲?銴ˊ');
                 return;
@@ -129,7 +129,7 @@ export default defineConfig(({ mode }) => {
                     );
                   }
                 } catch (copyError) {
-                  // 瑼???憭望?銝蔣?踹遣蝵格?蝔?                  console.warn(
+                  console.warn(
                     '?? 銴ˊ .well-known 瑼?憭望?嚗?銝蔣?踹遣蝵?',
                     copyError.message
                   );
@@ -159,7 +159,7 @@ export default defineConfig(({ mode }) => {
                     );
                   }
                 } catch (copyError) {
-                  // 瑼???憭望?銝蔣?踹遣蝵格?蝔?                  console.warn(
+                  console.warn(
                     '?? 銴ˊ?寧??獢仃??雿?敶梢撱箇蔭:',
                     copyError.message
                   );
@@ -188,7 +188,8 @@ export default defineConfig(({ mode }) => {
       fs: {
         strict: false,
       },
-      // ?芸? HMR ?蔭嚗甇Ｘ?獢?摰?      hmr: {
+
+      hmr: {
         overlay: false,
       },
       // ?脫迫 Windows 瑼???
@@ -222,7 +223,8 @@ export default defineConfig(({ mode }) => {
           manualChunks: id => {
             // ??靽桀儔嚗eact ?詨? + ??郊靘陷嚗???韏瑁??伐?
             // 蝣箔????冽??典?憪??停?舐嚗??vendor 銝剔?摨急銝 React
-            // ???賣?郊撠嚗??擐?頛嚗?雿萎??蔣?踹????            if (
+
+            if (
               id.includes('node_modules/react/') ||
               id.includes('node_modules/react-dom/') ||
               id.includes('node_modules/react-router') || // ✅ 合併：路由依賴，必須與 React 一起載入
@@ -235,41 +237,36 @@ export default defineConfig(({ mode }) => {
               return 'react-core';
             }
 
-            
-
-            // Firebase嚗??頛嚗??閬?霅?????伐?
             if (id.includes('node_modules/firebase')) {
               return 'firebase';
             }
 
-            // Capacitor嚗????踝???頛嚗?            if (id.includes('node_modules/@capacitor')) {
+            if (id.includes('node_modules/@capacitor')) {
               return 'capacitor';
             }
 
             // ???寞?鈭?撠??隞?node_modules 靘陷銋?雿萄 react-core
             // ?見?臭誑蝣箔????鞈湧??React 銋?頛
             // ?????react-core ?之撠?雿隞亥圾瘙?PureComponent ?航炊
-            // ??靘陷?砌?撠勗??擐?頛嚗?甇亙??伐?嚗?雿萎??蔣?踹????            if (id.includes('node_modules')) {
+
+            if (id.includes('node_modules')) {
               return 'react-core'; // ???寧 react-core嚗???vendor
             }
 
             // ??璆剖?隞?Ⅳ???Ｗ??莎??脖?甇亙??
-            // 憭拇０?嚗?質?憭改?
+
             if (id.includes('/src/components/Ladder')) {
               return 'ladder';
             }
 
-            // 蝷曄黎?嚗?質?憭改?
             if (id.includes('/src/components/Community')) {
               return 'community';
             }
 
-            // 撌亙?
             if (id.includes('/src/components/TrainingTools')) {
               return 'training-tools';
             }
 
-            // 憟賢????
             if (id.includes('/src/components/FriendFeed')) {
               return 'friend-feed';
             }
