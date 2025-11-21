@@ -1,15 +1,14 @@
-import { defineConfig, loadEnv } from 'vite';
+﻿import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
 import { existsSync, copyFileSync, mkdirSync, statSync } from 'fs';
 import { resolve } from 'path';
 
 export default defineConfig(({ mode }) => {
-  // 載入環境變數（雖然當前未直接使用，但保留以備將來需要）
+  // 頛?啣?霈嚗??嗥??湔雿輻嚗?靽?隞亙?撠??閬?
   loadEnv(mode, process.cwd(), '');
 
   return {
-    // ✅ 修復：確保生產環境路徑正確
-    base: '/',
+    // ??靽桀儔嚗Ⅱ靽??Ｙ憓楝敺迤蝣?    base: '/',
 
     plugins: [
       react(),
@@ -18,14 +17,13 @@ export default defineConfig(({ mode }) => {
         transformIndexHtml: {
           order: 'post',
           handler(html) {
-            // ✅ 修復：確保 react-core 在 vendor 之前載入
-            // 提取所有 modulepreload 標籤及其位置
+            // ??靽桀儔嚗Ⅱ靽?react-core ??vendor 銋?頛
+            // ?????modulepreload 璅惜?雿蔭
             const modulepreloadRegex = /<link rel="modulepreload"[^>]*>/g;
             const matches = [];
             let match;
 
-            // 使用 exec 來獲取每個匹配項的位置信息
-            while ((match = modulepreloadRegex.exec(html)) !== null) {
+            // 雿輻 exec 靘???????蝵桐縑??            while ((match = modulepreloadRegex.exec(html)) !== null) {
               matches.push({
                 fullMatch: match[0],
                 index: match.index,
@@ -34,7 +32,7 @@ export default defineConfig(({ mode }) => {
 
             if (matches.length === 0) return html;
 
-            // 分離 react-core 和其他 chunk
+            // ? react-core ?隞?chunk
             const reactCorePreloads = [];
             const otherPreloads = [];
 
@@ -46,19 +44,42 @@ export default defineConfig(({ mode }) => {
               }
             });
 
-            // 重新排序：react-core 在最前面，然後是其他 chunk
+            // ???嚗eact-core ?冽??嚗敺?嗡? chunk
             const reorderedPreloads = [...reactCorePreloads, ...otherPreloads];
 
-            // ✅ 修復：從後往前替換，避免索引偏移問題
+            // ??靽桀儔嚗?敺?????踹?蝝Ｗ??宏??
             let newHtml = html;
             for (let i = matches.length - 1; i >= 0; i--) {
               const { fullMatch, index } = matches[i];
               const replacement = reorderedPreloads[i] || fullMatch;
-              // 使用 substring 進行精確替換
+              // 雿輻 substring ?脰?蝎曄Ⅱ?踵?
               newHtml =
                 newHtml.substring(0, index) +
                 replacement +
                 newHtml.substring(index + fullMatch.length);
+            }
+
+            // ???啣?嚗? react-core 敺?modulepreload ?寧 script 璅惜
+            // 蝣箔?摰 index.js 銋??瑁?嚗??PureComponent ?航炊
+            const reactCorePreload = newHtml.match(
+              /<link rel="modulepreload"[^>]*react-core[^>]*>/
+            );
+            if (reactCorePreload) {
+              const reactCoreHref =
+                reactCorePreload[0].match(/href="([^"]+)"/)?.[1];
+              if (reactCoreHref) {
+                // 蝘駁 modulepreload
+                newHtml = newHtml.replace(reactCorePreload[0], '');
+                // ??index.js 銋?? script 璅惜
+                const indexScriptRegex =
+                  /<script type="module"[^>]*src="[^"]*index[^"]*\.js"[^>]*><\/script>/;
+                if (indexScriptRegex.test(newHtml)) {
+                  newHtml = newHtml.replace(
+                    indexScriptRegex,
+                    `<script type="module" crossorigin src="${reactCoreHref}"></script>\n    $&`
+                  );
+                }
+              }
             }
 
             return newHtml;
@@ -68,19 +89,19 @@ export default defineConfig(({ mode }) => {
       {
         name: 'copy-well-known',
         closeBundle() {
-          // 使用 setTimeout 確保在 Vite 建置流程完全結束後再執行檔案操作
-          // 這樣可以避免檔案鎖定或建置流程卡住的問題
+          // 雿輻 setTimeout 蝣箔???Vite 撱箇蔭瘚?摰蝯?敺??瑁?瑼???
+          // ?見?臭誑?踹?瑼????遣蝵格?蝔雿???
           setTimeout(() => {
             try {
               const distPath = resolve('dist');
 
-              // 確保 dist 目錄存在
+              // 蝣箔? dist ?桅?摮
               if (!existsSync(distPath)) {
-                console.warn('⚠️ dist 目錄不存在，跳過複製');
+                console.warn('?? dist ?桅?銝??剁?頝喲?銴ˊ');
                 return;
               }
 
-              // 方法1：複製到 .well-known 目錄
+              // ?寞?1嚗?鋆賢 .well-known ?桅?
               const wellKnownSrc = resolve(
                 'public/.well-known/assetlinks.json'
               );
@@ -88,77 +109,74 @@ export default defineConfig(({ mode }) => {
 
               if (existsSync(wellKnownSrc)) {
                 try {
-                  // 確保目標目錄存在
+                  // 蝣箔??格??桅?摮
                   const wellKnownDir = resolve('dist/.well-known');
                   if (!existsSync(wellKnownDir)) {
                     mkdirSync(wellKnownDir, { recursive: true });
                   }
 
-                  // 檢查檔案是否可讀（避免檔案鎖定問題）
+                  // 瑼Ｘ瑼??臬?航?嚗??獢?摰?憿?
                   try {
                     const stats = statSync(wellKnownSrc);
                     if (stats.isFile()) {
                       copyFileSync(wellKnownSrc, wellKnownDest);
-                      console.log('✅ 已複製 .well-known/assetlinks.json');
+                      console.log('??撌脰?鋆?.well-known/assetlinks.json');
                     }
                   } catch (statError) {
                     console.warn(
-                      '⚠️ 無法讀取源檔案，跳過 .well-known 複製:',
+                      '?? ?⊥?霈??瑼?嚗歲??.well-known 銴ˊ:',
                       statError.message
                     );
                   }
                 } catch (copyError) {
-                  // 檔案操作失敗不影響建置流程
-                  console.warn(
-                    '⚠️ 複製 .well-known 檔案失敗，但不影響建置:',
+                  // 瑼???憭望?銝蔣?踹遣蝵格?蝔?                  console.warn(
+                    '?? 銴ˊ .well-known 瑼?憭望?嚗?銝蔣?踹遣蝵?',
                     copyError.message
                   );
                 }
               } else {
                 console.warn(
-                  '⚠️ public/.well-known/assetlinks.json 不存在，跳過'
+                  '?? public/.well-known/assetlinks.json 銝??剁?頝喲?'
                 );
               }
 
-              // 方法2：複製到根目錄（備用方案）
-              const rootSrc = resolve('public/assetlinks.json');
+              // ?寞?2嚗?鋆賢?寧????寞?嚗?              const rootSrc = resolve('public/assetlinks.json');
               const rootDest = resolve('dist/assetlinks.json');
 
               if (existsSync(rootSrc)) {
                 try {
-                  // 檢查檔案是否可讀
+                  // 瑼Ｘ瑼??臬?航?
                   try {
                     const stats = statSync(rootSrc);
                     if (stats.isFile()) {
                       copyFileSync(rootSrc, rootDest);
-                      console.log('✅ 已複製 assetlinks.json 到根目錄');
+                      console.log('??撌脰?鋆?assetlinks.json ?唳?桅?');
                     }
                   } catch (statError) {
                     console.warn(
-                      '⚠️ 無法讀取源檔案，跳過根目錄複製:',
+                      '?? ?⊥?霈??瑼?嚗歲??桅?銴ˊ:',
                       statError.message
                     );
                   }
                 } catch (copyError) {
-                  // 檔案操作失敗不影響建置流程
-                  console.warn(
-                    '⚠️ 複製根目錄檔案失敗，但不影響建置:',
+                  // 瑼???憭望?銝蔣?踹遣蝵格?蝔?                  console.warn(
+                    '?? 銴ˊ?寧??獢仃??雿?敶梢撱箇蔭:',
                     copyError.message
                   );
                 }
               } else {
-                console.warn('⚠️ public/assetlinks.json 不存在，跳過');
+                console.warn('?? public/assetlinks.json 銝??剁?頝喲?');
               }
 
-              console.log('✅ assetlinks.json 複製流程完成');
+              console.log('??assetlinks.json 銴ˊ瘚?摰?');
             } catch (error) {
-              // 任何錯誤都不應該中斷建置流程
+              // 隞颱??航炊?賭??府銝剜撱箇蔭瘚?
               console.error(
-                '❌ copy-well-known 插件發生錯誤（但不影響建置）:',
+                '??copy-well-known ?辣?潛??航炊嚗?銝蔣?踹遣蝵殷?:',
                 error.message
               );
             }
-          }, 100); // 延遲 100ms 確保建置流程完全結束
+          }, 100); // 撱園 100ms 蝣箔?撱箇蔭瘚?摰蝯?
         },
       },
     ],
@@ -166,20 +184,19 @@ export default defineConfig(({ mode }) => {
     server: {
       port: 5173,
       open: true,
-      // 防止 Windows 檔案鎖定問題
+      // ?脫迫 Windows 瑼?????
       fs: {
         strict: false,
       },
-      // 優化 HMR 配置，防止檔案鎖定
-      hmr: {
+      // ?芸? HMR ?蔭嚗甇Ｘ?獢?摰?      hmr: {
         overlay: false,
       },
-      // 防止 Windows 檔案鎖定
+      // ?脫迫 Windows 瑼???
       watch: {
         usePolling: false,
         interval: 1000,
       },
-      // 開發環境：只在需要時允許 eval
+      // ??啣?嚗?券?閬??迂 eval
       headers:
         mode === 'development'
           ? {
@@ -197,99 +214,89 @@ export default defineConfig(({ mode }) => {
     },
 
     build: {
-      // ✅ 優化：更細粒度的代碼分割
+      // ???芸?嚗蝝啁?摨衣?隞?Ⅳ?
       rollupOptions: {
         output: {
-          // ✅ 智能 chunk 分割函數
-          // ✅ 修復：確保 React 核心優先載入，避免 PureComponent 錯誤
+          // ???箄 chunk ??賣
+          // ??靽桀儔嚗Ⅱ靽?React ?詨??芸?頛嚗??PureComponent ?航炊
           manualChunks: id => {
-            // ✅ 修復：React 核心 + 關鍵同步依賴（必須一起載入）
-            // 確保這些在應用初始化時就可用，避免 vendor 中的庫找不到 React
-            // 這些都是同步導入，必須在首屏載入，合併不會影響優化效果
-            if (
+            // ??靽桀儔嚗eact ?詨? + ??郊靘陷嚗???韏瑁??伐?
+            // 蝣箔????冽??典?憪??停?舐嚗??vendor 銝剔?摨急銝 React
+            // ???賣?郊撠嚗??擐?頛嚗?雿萎??蔣?踹????            if (
               id.includes('node_modules/react/') ||
               id.includes('node_modules/react-dom/') ||
-              id.includes('node_modules/react-router') || // ✅ 合併：同步導入，必須首屏載入
-              id.includes('node_modules/react-i18next') || // ✅ 合併：同步導入，必須首屏載入
-              id.includes('node_modules/i18next') // ✅ 合併：i18next 核心庫
+              id.includes('node_modules/react-router') || // ✅ 合併：路由依賴，必須與 React 一起載入
+              id.includes('node_modules/react-i18next') || // ✅ 合併：i18n 依賴，必須與 React 一起載入
+              id.includes('node_modules/i18next') || // ✅ 合併：i18next 核心庫
+              id.includes('node_modules/prop-types') || // ✅ 合併：prop-types 被大量組件使用
+              id.includes('node_modules/recharts') || // ✅ 關鍵修復：recharts 合併到 react-core，避免 APK 載入順序問題
+              id.includes('/recharts/') // ✅ 額外匹配：確保所有 recharts 路徑都被匹配
             ) {
               return 'react-core';
             }
 
-            // Charts（依賴 React，會在 react-core 之後載入）
-            // ✅ 修復：確保 recharts 在 react-core 之後載入，避免 PureComponent 錯誤
-            if (id.includes('node_modules/recharts')) {
-              return 'charts';
-            }
+            
 
-            // Firebase（按需載入，只有需要認證的頁面才載入）
+            // Firebase嚗??頛嚗??閬?霅?????伐?
             if (id.includes('node_modules/firebase')) {
               return 'firebase';
             }
 
-            // Capacitor（原生功能，按需載入）
-            if (id.includes('node_modules/@capacitor')) {
+            // Capacitor嚗????踝???頛嚗?            if (id.includes('node_modules/@capacitor')) {
               return 'capacitor';
             }
 
-            // PropTypes（開發工具，可以單獨打包）
-            if (id.includes('node_modules/prop-types')) {
-              return 'prop-types';
+            // ???寞?鈭?撠??隞?node_modules 靘陷銋?雿萄 react-core
+            // ?見?臭誑蝣箔????鞈湧??React 銋?頛
+            // ?????react-core ?之撠?雿隞亥圾瘙?PureComponent ?航炊
+            // ??靘陷?砌?撠勗??擐?頛嚗?甇亙??伐?嚗?雿萎??蔣?踹????            if (id.includes('node_modules')) {
+              return 'react-core'; // ???寧 react-core嚗???vendor
             }
 
-            // ✅ 修復：其他 node_modules 依賴放在最後
-            // 確保所有 React 相關的庫都已經被分離出來
-            if (id.includes('node_modules')) {
-              return 'vendor';
-            }
-
-            // ✅ 業務代碼按頁面分割（進一步優化）
-            // 天梯頁面（可能較大）
+            // ??璆剖?隞?Ⅳ???Ｗ??莎??脖?甇亙??
+            // 憭拇０?嚗?質?憭改?
             if (id.includes('/src/components/Ladder')) {
               return 'ladder';
             }
 
-            // 社群頁面（可能較大）
+            // 蝷曄黎?嚗?質?憭改?
             if (id.includes('/src/components/Community')) {
               return 'community';
             }
 
-            // 工具頁面
+            // 撌亙?
             if (id.includes('/src/components/TrainingTools')) {
               return 'training-tools';
             }
 
-            // 好友動態頁面
+            // 憟賢????
             if (id.includes('/src/components/FriendFeed')) {
               return 'friend-feed';
             }
           },
-          // ✅ 優化 chunk 命名
+          // ???芸? chunk ?賢?
           chunkFileNames: 'assets/[name]-[hash].js',
           entryFileNames: 'assets/[name]-[hash].js',
           assetFileNames: 'assets/[name]-[hash].[ext]',
         },
       },
-      // ✅ 降低警告閾值，更積極優化
-      chunkSizeWarningLimit: 500,
-      // ✅ 使用 esbuild 壓縮（Vite 默認，更快）
+      // ????霅血??曉潘??渡?璆萄??      chunkSizeWarningLimit: 500,
+      // ??雿輻 esbuild 憯葬嚗ite 暺?嚗敹恬?
       minify: 'esbuild',
-      // ✅ 生產環境移除 console
+      // ????啣?蝘駁 console
       esbuild: {
         drop: mode === 'production' ? ['console', 'debugger'] : [],
       },
-      // ✅ 啟用 source map（生產環境可選）
+      // ??? source map嚗??Ｙ憓?賂?
       sourcemap: mode === 'development',
-      // ✅ 修復：確保正確的構建目標和模組格式
-      target: 'esnext',
+      // ??靽桀儔嚗Ⅱ靽迤蝣箇?瑽遣?格??芋蝯撘?      target: 'esnext',
       modulePreload: {
         polyfill: true,
       },
-      // ✅ 修復：確保資源正確處理
-      assetsInlineLimit: 4096,
+      // ??靽桀儔嚗Ⅱ靽?皞迤蝣箄???      assetsInlineLimit: 4096,
     },
 
-    // 優化依賴預建置，防止檔案鎖定
+    // ?芸?靘陷?遣蝵殷??脫迫瑼???
     optimizeDeps: {
       force: false,
       entries: [],
@@ -304,7 +311,7 @@ export default defineConfig(({ mode }) => {
       ],
     },
 
-    // 解決路徑問題
+    // 閫?捱頝臬???
     resolve: {
       alias: {
         '@': '/src',
