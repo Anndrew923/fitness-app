@@ -235,7 +235,7 @@ export default defineConfig(({ mode }) => {
             // ??靽桀儔嚗eact ?詨? + ??郊靘陷嚗???韏瑁??伐?
             // 蝣箔????冽??典?憪??停?舐嚗??vendor 銝剔?摨急銝 React
 
-            // ✅ 關鍵修正：將所有 Capacitor 相關庫（包括插件）合併到 react-core
+            // ✅ 關鍵修正：將所有核心庫（包括 Firebase 和 Capacitor）合併到 react-core
             // 確保這些庫與 React 一起載入，避免載入順序和初始化錯誤
             // 注意：Capacitor 插件是動態導入的，不會影響初始載入大小
             if (
@@ -253,17 +253,17 @@ export default defineConfig(({ mode }) => {
               // 避免 capacitor-plugins chunk 的載入順序問題
               id.includes('node_modules/@capacitor') || // 所有 @capacitor/* 插件
               id.includes('node_modules/@belongnet/capacitor') || // Google Auth 插件
-              id.includes('node_modules/@capacitor-community') // AdMob 等社群插件
+              id.includes('node_modules/@capacitor-community') || // AdMob 等社群插件
+              // ✅ 關鍵修正：將 Firebase 也合併到 react-core
+              // Firebase 在應用啟動時就被導入（App.jsx），必須與 React 一起載入
+              // 避免 firebase chunk 的初始化順序問題
+              id.includes('node_modules/firebase')
             ) {
               return 'react-core';
             }
 
-            if (id.includes('node_modules/firebase')) {
-              return 'firebase';
-            }
-
-            // ✅ 移除：不再單獨打包 Capacitor 插件（已合併到 react-core）
-            // 這避免了 capacitor-plugins chunk 的初始化順序問題
+            // ✅ 移除：不再單獨打包 Firebase 和 Capacitor 插件（已合併到 react-core）
+            // 這避免了載入順序和初始化問題
 
             // ???寞?鈭?撠??隞?node_modules 靘陷銋?雿萄 react-core
             // ?見?臭誑蝣箔????鞈湧??React 銋?頛
