@@ -28,6 +28,67 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* ✅ 新增：Status Bar 和 Navigation Bar 白色背景覆蓋層 */
+/* 在 Edge-to-Edge 模式下，確保系統 UI 區域始終顯示白色背景 */
+/* 使用偽元素確保不影響頁面結構和觸控事件 */
+
+/* Status Bar 白色背景覆蓋層（頂部） */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  /* 使用安全區域高度，自動適應不同設備 */
+  height: env(safe-area-inset-top, 0px);
+  background-color: #ffffff;
+  z-index: 9999;
+  pointer-events: none; /* 不阻擋觸控事件，確保不影響功能 */
+  /* 確保覆蓋層在系統 UI 上方 */
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+
+/* Navigation Bar 白色背景覆蓋層（底部） */
+body::after {
+  content: '';
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  /* 使用安全區域高度，自動適應不同設備（Android 14: 0px, Android 15: 48px） */
+  height: env(safe-area-inset-bottom, 0px);
+  background-color: #ffffff;
+  z-index: 9999;
+  pointer-events: none; /* 不阻擋觸控事件，確保不影響功能 */
+  /* 確保覆蓋層在系統 UI 上方 */
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+
+/* 只在原生平台（Android/iOS）顯示覆蓋層 */
+/* 使用 @supports 檢測是否支援 safe-area-inset */
+@supports (padding: env(safe-area-inset-top)) {
+  body::before {
+    display: block;
+  }
+  body::after {
+    display: block;
+  }
+}
+
+/* 網頁版隱藏覆蓋層（避免在瀏覽器中顯示） */
+/* 檢測是否在瀏覽器中運行 */
+@media (display-mode: browser) {
+  body::before,
+  body::after {
+    display: none !important;
+  }
+}
+
+/* 注意：如果 safe-area-inset 為 0，覆蓋層高度自動為 0，不會影響視覺 */
+/* 不需要額外的媒體查詢，因為 height: env(safe-area-inset-top, 0px) 已經處理了這種情況 */
+
 /* 手機優先設計 */
 .gender-selection,
 .user-info,
