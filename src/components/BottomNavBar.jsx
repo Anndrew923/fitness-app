@@ -245,11 +245,13 @@ function BottomNavBar() {
           bottom: 0,
           left: 0,
           right: 0,
-          height: '64px',
-          // 🔧 階段 4：添加底部安全區域 padding，解決 Android 15 導覽列重疊問題
-          // env(safe-area-inset-bottom, 0px) 的行為：
-          // - Android 15: 提供實際安全區域值（例如 48px），為系統導覽列預留空間
-          // - Android 14 及以下: 回退為 0px，不影響現有布局（向後兼容）
+          // 🔧 修正：使用 minHeight + calc 計算總高度（參考 Material Design 標準做法）
+          // 總高度 = 內容高度(64px) + 安全區域
+          // Android 15: calc(64px + 48px) = 112px（正確高度）
+          // Android 14: calc(64px + 0px) = 64px（保持原樣，向後兼容）
+          minHeight: '64px',
+          height: 'calc(64px + env(safe-area-inset-bottom, 0px))',
+          // 添加底部 padding 為系統導覽列預留空間
           paddingBottom: 'env(safe-area-inset-bottom, 0px)',
           background: '#fff',
           borderTop: '1px solid #eee',
