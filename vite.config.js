@@ -40,6 +40,15 @@ export default defineConfig(({ mode }) => {
             matches.forEach(({ fullMatch }) => {
               if (fullMatch.includes('react-core')) {
                 reactCorePreloads.push(fullMatch);
+              } else if (
+                fullMatch.includes('community') ||
+                fullMatch.includes('ladder') ||
+                fullMatch.includes('training-tools') ||
+                fullMatch.includes('friend-feed')
+              ) {
+                // ✅ 關鍵修正：識別業務代碼 chunk，這些不應該預載入
+                // 這些 chunk 依賴 react-core 中的 Firebase，預載入會導致初始化順序問題
+                // 不加入任何數組，稍後會被移除
               } else {
                 otherPreloads.push(fullMatch);
               }
@@ -52,7 +61,24 @@ export default defineConfig(({ mode }) => {
             let newHtml = html;
             for (let i = matches.length - 1; i >= 0; i--) {
               const { fullMatch, index } = matches[i];
-              const replacement = reorderedPreloads[i] || fullMatch;
+              // ✅ 如果是業務代碼 chunk，直接移除 modulepreload
+              if (
+                fullMatch.includes('community') ||
+                fullMatch.includes('ladder') ||
+                fullMatch.includes('training-tools') ||
+                fullMatch.includes('friend-feed')
+              ) {
+                // 移除這個 modulepreload，讓業務代碼真正按需載入
+                newHtml =
+                  newHtml.substring(0, index) +
+                  newHtml.substring(index + fullMatch.length);
+                continue;
+              }
+              // 其他 chunk 保持原樣或重新排序
+              const replacement =
+                reorderedPreloads.find(p =>
+                  p.includes(fullMatch.match(/href="([^"]+)"/)?.[1] || '')
+                ) || fullMatch;
               // 雿輻 substring ?脰?蝎曄Ⅱ?踵?
               newHtml =
                 newHtml.substring(0, index) +
