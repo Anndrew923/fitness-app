@@ -12,39 +12,65 @@ function SocialLogin({ onLogin, onError }) {
 
   // 初始化 Google Auth - 增強版本
   useEffect(() => {
+    // ✅ 修正：安全地檢查 Bridge 錯誤和 Google API 載入錯誤
+    const originalConsoleError = console.error;
+    let isMounted = true;
+
+    // 設置錯誤過濾器
+    console.error = (...args) => {
+      // ✅ 改進：安全地檢查字符串（如果 args[0] 是 Error 對象，轉換為字符串）
+      const firstArg = args[0];
+      if (firstArg) {
+        const firstArgStr =
+          typeof firstArg === 'string'
+            ? firstArg
+            : firstArg.toString
+              ? firstArg.toString()
+              : String(firstArg);
+
+        // ✅ 新增：過濾 Google API platform.js 載入錯誤
+        // 這些錯誤不影響功能，但會造成控制台噪音
+        if (
+          firstArgStr.includes('J[P] is not a function') ||
+          firstArgStr.includes('platform.js') ||
+          (firstArgStr.includes('gapi') && firstArgStr.includes('TypeError')) ||
+          (firstArgStr.includes('gapi.loaded') && firstArgStr.includes('is not a function'))
+        ) {
+          // 靜默處理，不影響用戶體驗
+          console.debug('🔇 Google API 載入警告（已過濾）:', firstArgStr);
+          return; // 不輸出錯誤
+        }
+
+        if (firstArgStr.includes('androidBridge')) {
+          console.log('🔍 檢測到 Bridge 通信錯誤，嘗試重新初始化...');
+        }
+      }
+      originalConsoleError.apply(console, args);
+    };
+
     const initializeGoogleAuth = async () => {
       try {
-        // ✅ 修正：安全地檢查 Bridge 錯誤
-        const originalConsoleError = console.error;
-        console.error = (...args) => {
-          // ✅ 改進：安全地檢查字符串（如果 args[0] 是 Error 對象，轉換為字符串）
-          const firstArg = args[0];
-          if (firstArg) {
-            const firstArgStr =
-              typeof firstArg === 'string'
-                ? firstArg
-                : firstArg.toString
-                  ? firstArg.toString()
-                  : String(firstArg);
-
-            if (firstArgStr.includes('androidBridge')) {
-              console.log('🔍 檢測到 Bridge 通信錯誤，嘗試重新初始化...');
-            }
-          }
-          originalConsoleError.apply(console, args);
-        };
-
         await NativeGoogleAuth.initialize();
-        setIsInitialized(true);
-        console.log('✅ Google Auth 初始化完成');
+        if (isMounted) {
+          setIsInitialized(true);
+          console.log('✅ Google Auth 初始化完成');
+        }
       } catch (error) {
-        console.error('❌ Google Auth 初始化失敗:', error);
-        setIsInitialized(false);
-        // 不阻止應用啟動，只是記錄錯誤
+        if (isMounted) {
+          console.error('❌ Google Auth 初始化失敗:', error);
+          setIsInitialized(false);
+          // 不阻止應用啟動，只是記錄錯誤
+        }
       }
     };
 
     initializeGoogleAuth();
+
+    // ✅ 清理函數：組件卸載時恢復原始 console.error
+    return () => {
+      isMounted = false;
+      console.error = originalConsoleError;
+    };
   }, []);
 
   // 處理 Google 登入 - Capacitor 版本
