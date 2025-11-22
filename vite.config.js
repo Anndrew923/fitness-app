@@ -235,8 +235,9 @@ export default defineConfig(({ mode }) => {
             // ??靽桀儔嚗eact ?詨? + ??郊靘陷嚗???韏瑁??伐?
             // 蝣箔????冽??典?憪??停?舐嚗??vendor 銝剔?摨急銝 React
 
-            // ✅ 關鍵修正：將 Capacitor Core 和 App 合併到 react-core
-            // 確保這些核心庫與 React 一起載入，避免載入順序問題
+            // ✅ 關鍵修正：將所有 Capacitor 相關庫（包括插件）合併到 react-core
+            // 確保這些庫與 React 一起載入，避免載入順序和初始化錯誤
+            // 注意：Capacitor 插件是動態導入的，不會影響初始載入大小
             if (
               id.includes('node_modules/react/') ||
               id.includes('node_modules/react-dom/') ||
@@ -247,7 +248,12 @@ export default defineConfig(({ mode }) => {
               id.includes('node_modules/recharts') || // ✅ 關鍵修復：recharts 合併到 react-core，避免 APK 載入順序問題
               id.includes('/recharts/') || // ✅ 額外匹配：確保所有 recharts 路徑都被匹配
               id.includes('node_modules/@capacitor/core') || // ✅ 新增：Capacitor 核心必須與 React 一起載入
-              id.includes('node_modules/@capacitor/app') // ✅ 新增：App 生命週期管理也需要早期載入
+              id.includes('node_modules/@capacitor/app') || // ✅ 新增：App 生命週期管理也需要早期載入
+              // ✅ 關鍵修正：將所有 Capacitor 插件也合併到 react-core
+              // 避免 capacitor-plugins chunk 的載入順序問題
+              id.includes('node_modules/@capacitor') || // 所有 @capacitor/* 插件
+              id.includes('node_modules/@belongnet/capacitor') || // Google Auth 插件
+              id.includes('node_modules/@capacitor-community') // AdMob 等社群插件
             ) {
               return 'react-core';
             }
@@ -256,10 +262,8 @@ export default defineConfig(({ mode }) => {
               return 'firebase';
             }
 
-            // ✅ 修改：只將其他 Capacitor 插件單獨打包（非核心）
-            if (id.includes('node_modules/@capacitor')) {
-              return 'capacitor-plugins'; // 改名為更明確的名稱
-            }
+            // ✅ 移除：不再單獨打包 Capacitor 插件（已合併到 react-core）
+            // 這避免了 capacitor-plugins chunk 的初始化順序問題
 
             // ???寞?鈭?撠??隞?node_modules 靘陷銋?雿萄 react-core
             // ?見?臭誑蝣箔????鞈湧??React 銋?頛
