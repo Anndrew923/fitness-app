@@ -283,7 +283,12 @@ export default defineConfig(({ mode }) => {
               // ✅ 關鍵修正：將 Firebase 也合併到 react-core
               // Firebase 在應用啟動時就被導入（App.jsx），必須與 React 一起載入
               // 避免 firebase chunk 的初始化順序問題
-              id.includes('node_modules/firebase')
+              id.includes('node_modules/firebase') ||
+              // ✅ 關鍵修正：將 firebase.js 也合併到 react-core
+              // firebase.js 包含 Firebase 初始化代碼，必須與 Firebase 庫一起載入
+              // 避免 firebase.js 被包含在業務代碼 chunk 中，導致初始化順序問題
+              id.includes('/src/firebase.js') ||
+              id.includes('\\src\\firebase.js') // Windows 路徑支持
             ) {
               return 'react-core';
             }
