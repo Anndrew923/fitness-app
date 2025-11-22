@@ -288,7 +288,16 @@ export default defineConfig(({ mode }) => {
               // firebase.js 包含 Firebase 初始化代碼，必須與 Firebase 庫一起載入
               // 避免 firebase.js 被包含在業務代碼 chunk 中，導致初始化順序問題
               id.includes('/src/firebase.js') ||
-              id.includes('\\src\\firebase.js') // Windows 路徑支持
+              id.includes('\\src\\firebase.js') || // Windows 路徑支持
+              // ✅ 關鍵修正：將 UserContext.jsx 也合併到 react-core
+              // UserContext 使用 createContext，在模組載入時就執行
+              // 被所有動態導入的組件使用（Community, Ladder, FriendFeed, Settings 等）
+              // 必須與 React 一起載入，避免業務代碼 chunk 載入時 React 未初始化的問題
+              id.includes('/src/UserContext.jsx') ||
+              id.includes('\\src\\UserContext.jsx') || // Windows 路徑支持
+              // ✅ 額外修正：確保所有 UserContext 相關路徑都被匹配
+              id.includes('/UserContext') ||
+              id.includes('\\UserContext')
             ) {
               return 'react-core';
             }
