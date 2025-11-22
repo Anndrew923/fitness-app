@@ -1012,7 +1012,7 @@ const zhTW = {
         invalidVideoLink:
           '請輸入有效的影片連結（需以 http:// 或 https:// 開頭）',
         submitFailed: '申請失敗，請稍後再試',
-        submitSuccess: '申請已提交！申請編號：{number}',
+        submitSuccess: '申請已提交！申請編號：{{number}}',
         needLogin: '請先登入',
         userNotFound: '用戶資料不存在',
         alreadyVerified: '您已經通過榮譽認證',
@@ -1038,6 +1038,7 @@ const zhTW = {
         rejectionReason: '拒絕原因：',
         verifiedScore: '認證分數：',
         verifiedTime: '認證時間：',
+        noReasonProvided: '未提供原因',
       },
       messages: {
         success: '申請已提交，我們會盡快審核',
@@ -1045,7 +1046,7 @@ const zhTW = {
         alreadyApplied: '您已有待審核的申請',
         alreadyVerified: '您已經通過榮譽認證',
         noLadderScore: '請先提交天梯分數',
-        cooldown: '上次申請被拒絕，請等待 {days} 天後再申請',
+        cooldown: '上次申請被拒絕，請等待 {{days}} 天後再申請',
       },
     },
 
@@ -3019,7 +3020,7 @@ const enUS = {
         invalidVideoLink:
           'Please enter a valid video link (must start with http:// or https://)',
         submitFailed: 'Application failed. Please try again later.',
-        submitSuccess: 'Application submitted! Application Number: {number}',
+        submitSuccess: 'Application submitted! Application Number: {{number}}',
         needLogin: 'Please login first',
         userNotFound: 'User data not found',
         alreadyVerified: "You're already verified!",
@@ -3045,6 +3046,7 @@ const enUS = {
         rejectionReason: 'Rejection Reason:',
         verifiedScore: 'Verified Score:',
         verifiedTime: 'Verified Time:',
+        noReasonProvided: 'Reason not provided',
       },
       messages: {
         success: "Application submitted! We'll review it soon.",
@@ -3053,7 +3055,7 @@ const enUS = {
         alreadyVerified: "You're already verified!",
         noLadderScore: 'Please submit your ladder score first',
         cooldown:
-          'Your last application was rejected. Please wait {days} days before applying again.',
+          'Your last application was rejected. Please wait {{days}} days before applying again.',
       },
     },
 

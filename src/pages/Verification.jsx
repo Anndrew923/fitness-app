@@ -231,7 +231,10 @@ function Verification() {
                 {verificationStatus.request.status === 'rejected' &&
                   verificationStatus.request.rejectionReason && (
                     <p className="rejection-reason">
-                      {t('verification.statusDetails.rejectionReason')} {verificationStatus.request.rejectionReason}
+                      {t('verification.statusDetails.rejectionReason')}{' '}
+                      {verificationStatus.request.rejectionReason === '__NO_REASON_PROVIDED__'
+                        ? t('verification.statusDetails.noReasonProvided')
+                        : verificationStatus.request.rejectionReason}
                     </p>
                   )}
               </div>

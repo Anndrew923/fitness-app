@@ -325,7 +325,7 @@ class AdminSystem {
         status: 'rejected',
         reviewedAt: new Date().toISOString(),
         reviewedBy: auth.currentUser.uid,
-        rejectionReason: rejectionReason || '未提供原因',
+        rejectionReason: rejectionReason || '__NO_REASON_PROVIDED__',
         updatedAt: new Date().toISOString(),
       });
 
