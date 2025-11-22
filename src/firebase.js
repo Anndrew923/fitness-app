@@ -97,33 +97,21 @@ try {
     logger.warn('⚠️ Firestore 離線支持不可用:', offlineError);
   }
 
-  // ✅ 新增：監聽網路狀態變化
+  // ✅ 修正：Firestore 會自動管理連接狀態，不需要手動調用 enableNetwork()
+  // 移除所有 enableNetwork() 調用，避免 "Unexpected state" 錯誤導致功能中斷
+  // Firestore 會自動處理網路狀態變化，手動調用會導致內部狀態衝突
   if (typeof window !== 'undefined') {
-    window.addEventListener('online', async () => {
-      logger.info('🌐 網路已連接，恢復 Firestore 連接');
-      try {
-        await enableNetwork(db);
-        logger.info('✅ Firestore 連接已恢復');
-      } catch (error) {
-        logger.error('❌ 恢復 Firestore 連接失敗:', error);
-      }
+    window.addEventListener('online', () => {
+      logger.info('🌐 網路已連接，Firestore 將自動恢復連接');
+      // Firestore 會自動處理，不需要手動調用 enableNetwork()
     });
 
     window.addEventListener('offline', () => {
       logger.warn('📴 網路已斷開，Firestore 將使用離線緩存');
     });
 
-    // ✅ 新增：定期檢查連接狀態（僅生產環境）
-    if (!isDevelopment) {
-      setInterval(async () => {
-        try {
-          // 靜默檢查連接，不影響用戶體驗
-          await enableNetwork(db);
-        } catch (error) {
-          // 靜默處理錯誤，避免控制台噪音
-        }
-      }, 30000); // 每 30 秒檢查一次
-    }
+    // ✅ 移除定期檢查，避免重複調用 enableNetwork() 導致狀態衝突
+    // Firestore 會自動管理連接狀態，定期調用會導致 "Unexpected state" 錯誤
   }
 
   // 初始化社交登入提供者

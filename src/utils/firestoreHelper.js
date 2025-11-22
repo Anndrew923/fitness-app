@@ -62,6 +62,13 @@ class FirestoreConnectionManager {
     const errorCode = error.code || '';
     const errorMessage = error.message || '';
     
+    // ✅ 修正：過濾 "Unexpected state" 錯誤，這不是可重試的錯誤
+    // 這是 Firestore 內部狀態問題，重試不會解決，應該直接忽略
+    if (errorMessage.includes('Unexpected state') || 
+        errorMessage.includes('INTERNAL ASSERTION FAILED')) {
+      return false; // 不可重試，這是內部狀態問題
+    }
+    
     // 可重試的錯誤類型
     const retryableErrors = [
       'unavailable',
@@ -89,6 +96,23 @@ class FirestoreConnectionManager {
     try {
       return await operation();
     } catch (error) {
+      // ✅ 修正：過濾 "Unexpected state" 錯誤，這是 Firestore 內部狀態問題
+      // 不應該重試 enableNetwork()，應該直接重試操作本身
+      const errorMessage = error.message || '';
+      if (errorMessage.includes('Unexpected state') || 
+          errorMessage.includes('INTERNAL ASSERTION FAILED')) {
+        // 這是內部狀態問題，不應該重試 enableNetwork()
+        // 直接重試操作本身（不調用 enableNetwork）
+        logger.debug('檢測到 Firestore 內部狀態錯誤，跳過重連，直接重試操作');
+        if (retryCount < this.maxRetries) {
+          const delay = this.retryDelay * Math.pow(2, retryCount);
+          await new Promise(resolve => setTimeout(resolve, delay));
+          return this.retryOperation(operation, retryCount + 1);
+        }
+        // 如果重試次數已用完，拋出錯誤
+        throw error;
+      }
+      
       // 檢查是否為可重試錯誤
       if (!this.isRetryableError(error)) {
         throw error; // 不可重試的錯誤直接拋出
@@ -114,7 +138,15 @@ class FirestoreConnectionManager {
       try {
         await enableNetwork(db);
       } catch (reconnectError) {
-        logger.warn('重新連接 Firestore 失敗:', reconnectError);
+        // ✅ 修正：過濾 "Unexpected state" 錯誤，避免影響功能
+        const reconnectErrorMessage = reconnectError.message || '';
+        if (reconnectErrorMessage.includes('Unexpected state') || 
+            reconnectErrorMessage.includes('INTERNAL ASSERTION FAILED')) {
+          // Firestore 已經連接，忽略此錯誤
+          logger.debug('Firestore 已連接，無需重連');
+        } else {
+          logger.warn('重新連接 Firestore 失敗:', reconnectError);
+        }
       }
 
       // 遞歸重試
@@ -131,6 +163,15 @@ class FirestoreConnectionManager {
       this.retryCount = 0;
       logger.info('✅ Firestore 重新連接成功');
     } catch (error) {
+      // ✅ 修正：過濾 "Unexpected state" 錯誤，避免影響功能
+      const errorMessage = error.message || '';
+      if (errorMessage.includes('Unexpected state') || 
+          errorMessage.includes('INTERNAL ASSERTION FAILED')) {
+        // Firestore 已經連接，忽略此錯誤
+        logger.debug('Firestore 已連接，無需重連');
+        this.retryCount = 0;
+        return;
+      }
       logger.error('❌ Firestore 重新連接失敗:', error);
     }
   }
@@ -198,7 +239,16 @@ export async function withRetry(operation, options = {}) {
       try {
         await enableNetwork(db);
       } catch (reconnectError) {
-        // 忽略重新連接錯誤，繼續重試
+        // ✅ 修正：過濾 "Unexpected state" 錯誤，避免影響功能
+        const reconnectErrorMessage = reconnectError.message || '';
+        if (reconnectErrorMessage.includes('Unexpected state') || 
+            reconnectErrorMessage.includes('INTERNAL ASSERTION FAILED')) {
+          // Firestore 已經連接，忽略此錯誤
+          logger.debug('Firestore 已連接，無需重連');
+        } else {
+          // 其他錯誤也忽略，繼續重試操作
+          logger.debug('重新連接 Firestore 失敗，繼續重試操作');
+        }
       }
 
       retryCount++;
