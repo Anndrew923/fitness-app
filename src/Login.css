@@ -5,6 +5,9 @@
   background-color: #ffffff;
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  /* ✅ 最佳實踐：為登入頁面添加底部安全區域 margin */
+  /* 確保內容不被系統導覽列遮擋（登入頁面沒有底部導覽列） */
+  margin-bottom: calc(1.5rem + env(safe-area-inset-bottom, 0px));
 }
 
 .input-field {
@@ -192,5 +195,7 @@
 @media (min-width: 768px) {
   .login-container {
     max-width: 400px;
+    /* ✅ 最佳實踐：桌面版也考慮安全區域（雖然通常為 0） */
+    margin-bottom: calc(1.5rem + env(safe-area-inset-bottom, 0px));
   }
 }

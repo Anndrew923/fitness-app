@@ -1022,10 +1022,12 @@
   }
 }
 
-/* 浮動排名顯示框 */
+/* 浮動排名顯示框 - 考慮安全區域 */
 .floating-rank-display {
   position: fixed;
-  bottom: 84px; /* 64px導覽列高度 + 20px間距 */
+  /* ✅ 修正：考慮底部導覽列總高度（包含安全區域）+ 間距 */
+  /* 64px導覽列高度 + 20px間距 + 安全區域 = 正確位置 */
+  bottom: calc(64px + 20px + env(safe-area-inset-bottom, 0px));
   left: 50%;
   transform: translateX(-50%);
   z-index: 100;
@@ -1128,7 +1130,9 @@
 /* 響應式設計 */
 @media (max-width: 768px) {
   .floating-rank-display {
-    bottom: 74px; /* 64px導覽列高度 + 10px間距 */
+    /* ✅ 修正：考慮底部導覽列總高度（包含安全區域）+ 間距 */
+    /* 64px導覽列高度 + 10px間距 + 安全區域 = 正確位置 */
+    bottom: calc(64px + 10px + env(safe-area-inset-bottom, 0px));
     left: 50%;
     transform: translateX(-50%);
     padding: 0 16px; /* 跟移動版天梯容器的padding一致 */

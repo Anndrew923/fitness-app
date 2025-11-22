@@ -11,19 +11,21 @@
   z-index: 900; /* 確保廣告在底部導航之下 */
 }
 
-/* 固定在底部的廣告樣式 */
+/* 固定在底部的廣告樣式 - 業界標準做法，考慮安全區域 */
 .ad-banner--fixed {
   position: fixed;
-  bottom: 64px; /* 與底部導覽列高度一致，完全緊貼 */
+  /* ✅ 最佳實踐：使用 calc 動態計算，考慮底部導覽列總高度（包含安全區域） */
+  /* 底部導覽列高度(64px) + 安全區域 = 正確位置 */
+  bottom: calc(64px + env(safe-area-inset-bottom, 0px));
   left: 0;
   right: 0;
   margin: 0;
-  padding: 0; /* 移除內邊距，確保完全緊貼 */
+  padding: 0;
   border-radius: 0;
   border-left: none;
   border-right: none;
-  border-bottom: none; /* 移除底部邊框，避免視覺間隙 */
-  z-index: 950; /* 調整z-index，在底部導航之下，但在其他內容之上 */
+  border-bottom: none;
+  z-index: 950;
   animation: slideUpAd 0.5s ease-out;
   backdrop-filter: blur(10px);
   background: linear-gradient(
@@ -162,9 +164,9 @@
   }
 }
 
-/* 為固定廣告預留空間 */
+/* 為固定廣告預留空間 - 考慮安全區域 */
 .page-with-fixed-ad {
-  padding-bottom: 120px; /* 為固定廣告和底部導航預留空間 */
+  padding-bottom: calc(120px + env(safe-area-inset-bottom, 0px));
 }
 
 /* 隱藏頂部廣告 - 避免影響用戶體驗 */
@@ -183,14 +185,15 @@ ins[data-ad-status='filled'] {
   display: none !important;
 }
 
-/* 只顯示底部廣告 */
+/* 只顯示底部廣告 - 考慮安全區域 */
 .adsbygoogle[data-ad-format='auto'] {
   position: fixed !important;
-  bottom: 64px !important; /* 與底部導覽列高度一致，完全緊貼 */
+  /* ✅ 最佳實踐：與 .ad-banner--fixed 保持一致，考慮安全區域 */
+  bottom: calc(64px + env(safe-area-inset-bottom, 0px)) !important;
   left: 0 !important;
   right: 0 !important;
-  margin: 0 !important; /* 移除邊距 */
-  padding: 0 !important; /* 移除內邊距 */
+  margin: 0 !important;
+  padding: 0 !important;
   z-index: 950 !important;
 }
 
@@ -209,17 +212,32 @@ ins[data-ad-status='filled'] {
   }
 
   .ad-banner--fixed {
-    bottom: 64px; /* 手機版底部導航高度，完全緊貼 */
+    /* ✅ 最佳實踐：響應式斷點中也使用 calc，確保一致性 */
+    bottom: calc(64px + env(safe-area-inset-bottom, 0px));
   }
 
   .page-with-fixed-ad {
-    padding-bottom: 114px; /* 手機版調整間距 */
+    /* ✅ 最佳實踐：頁面 padding 也考慮安全區域 */
+    padding-bottom: calc(114px + env(safe-area-inset-bottom, 0px));
   }
 
   /* 手機版隱藏頂部廣告 */
   .adsbygoogle[data-ad-format='auto'] {
-    bottom: 64px !important; /* 與底部導覽列完全緊貼 */
-    margin: 0 !important; /* 移除邊距 */
-    padding: 0 !important; /* 移除內邊距 */
+    /* ✅ 最佳實踐：保持一致性 */
+    bottom: calc(64px + env(safe-area-inset-bottom, 0px)) !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+}
+
+/* 小螢幕設備額外優化（可選，但建議） */
+@media (max-width: 480px) {
+  .ad-banner--fixed {
+    /* ✅ 最佳實踐：小螢幕也使用相同計算方式 */
+    bottom: calc(64px + env(safe-area-inset-bottom, 0px));
+  }
+  
+  .adsbygoogle[data-ad-format='auto'] {
+    bottom: calc(64px + env(safe-area-inset-bottom, 0px)) !important;
   }
 }
