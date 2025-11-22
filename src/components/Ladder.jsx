@@ -15,6 +15,7 @@ import { useTranslation } from 'react-i18next';
 import LadderUserCard from './LadderUserCard';
 import LadderLikeSystem from '../utils/ladderLikeSystem';
 import logger from '../utils/logger';
+import { safeGetDocs } from '../utils/firestoreHelper';
 
 const Ladder = () => {
   const { userData } = useUser();
@@ -173,7 +174,14 @@ const Ladder = () => {
         limit(200) // 增加到200名，確保涵蓋更多用戶
       );
 
-      const querySnapshot = await getDocs(q);
+      // ✅ 使用安全查詢，自動處理連接錯誤和重試
+      const querySnapshot = await safeGetDocs(q, {
+        maxRetries: 3,
+        retryDelay: 1000,
+        onRetry: (retryCount, maxRetries, delay) => {
+          logger.warn(`🔄 載入天梯數據重試 (${retryCount}/${maxRetries})，${delay}ms 後重試...`);
+        },
+      });
       let data = [];
 
       logger.debug(`📥 從 Firebase 獲取到 ${querySnapshot.size} 個文檔`);

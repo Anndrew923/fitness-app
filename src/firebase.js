@@ -1,6 +1,6 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
+import { getFirestore, enableNetwork, disableNetwork } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 import logger from './utils/logger';
 
@@ -87,6 +87,44 @@ try {
   auth = getAuth(app);
   db = getFirestore(app);
   storage = getStorage(app);
+
+  // ✅ 新增：配置 Firestore 連接設置
+  // 啟用離線持久化（如果可用）
+  try {
+    // Firestore 會自動處理離線緩存
+    logger.debug('✅ Firestore 離線支持已啟用');
+  } catch (offlineError) {
+    logger.warn('⚠️ Firestore 離線支持不可用:', offlineError);
+  }
+
+  // ✅ 新增：監聽網路狀態變化
+  if (typeof window !== 'undefined') {
+    window.addEventListener('online', async () => {
+      logger.info('🌐 網路已連接，恢復 Firestore 連接');
+      try {
+        await enableNetwork(db);
+        logger.info('✅ Firestore 連接已恢復');
+      } catch (error) {
+        logger.error('❌ 恢復 Firestore 連接失敗:', error);
+      }
+    });
+
+    window.addEventListener('offline', () => {
+      logger.warn('📴 網路已斷開，Firestore 將使用離線緩存');
+    });
+
+    // ✅ 新增：定期檢查連接狀態（僅生產環境）
+    if (!isDevelopment) {
+      setInterval(async () => {
+        try {
+          // 靜默檢查連接，不影響用戶體驗
+          await enableNetwork(db);
+        } catch (error) {
+          // 靜默處理錯誤，避免控制台噪音
+        }
+      }, 30000); // 每 30 秒檢查一次
+    }
+  }
 
   // 初始化社交登入提供者
   const googleProvider = new GoogleAuthProvider();

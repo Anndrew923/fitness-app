@@ -14,11 +14,11 @@
       },
       "oauth_client": [
         {
-          "client_id": "5144099869-n8eqotfij5eg6gv97e9s83l22kgqgm6i.apps.googleusercontent.com",
+          "client_id": "5144099869-484pilt5daqpscf5bs4i2ca3qhpvd64a.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.ultimatephysique.fitness2025",
-            "certificate_hash": "3185828c3d0cfb0df7d976651b91ffcde8180e59"
+            "certificate_hash": "88ec67781c823cda061a92dac74c234846925e1a"
           }
         },
         {

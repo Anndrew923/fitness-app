@@ -140,7 +140,8 @@ export default defineConfig(({ mode }) => {
                 );
               }
 
-              // ?寞?2嚗?鋆賢?寧????寞?嚗?              const rootSrc = resolve('public/assetlinks.json');
+              // ?寞?2嚗?鋆賢?寧????寞?嚗?
+              const rootSrc = resolve('public/assetlinks.json');
               const rootDest = resolve('dist/assetlinks.json');
 
               if (existsSync(rootSrc)) {
@@ -202,16 +203,26 @@ export default defineConfig(({ mode }) => {
         mode === 'development'
           ? {
               'Content-Security-Policy': [
-                "default-src 'self'",
-                "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://apis.google.com https://accounts.google.com",
-                "frame-src 'self' https://*.firebaseapp.com https://accounts.google.com",
-                "connect-src 'self' ws://localhost:* https://*.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com https://*.googleusercontent.com",
-                "style-src 'self' 'unsafe-inline'",
-                "img-src 'self' data: https:",
-                "font-src 'self' data:",
+                // ✅ 修正：與 index.html 保持一致，確保開發環境和生產環境行為一致
+                "default-src 'self' data: blob:",
+                // ✅ 修正：添加完整的 Google 域名支持，包括 gstatic.com
+                "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.google.com https://*.googleapis.com https://*.googleusercontent.com https://*.gstatic.com",
+                // ✅ 新增：script-src-elem 用於 <script> 標籤（與 index.html 一致）
+                "script-src-elem 'self' 'unsafe-inline' 'unsafe-eval' https://*.google.com https://*.googleapis.com https://*.googleusercontent.com https://*.gstatic.com",
+                // ✅ 修正：添加 *.google.com 到 frame-src（支持 Google OAuth iframe）
+                "frame-src 'self' https://*.firebaseapp.com https://*.google.com https://accounts.google.com",
+                // ✅ 修正：添加完整的 Google 域名到 connect-src（支持所有 Google API）
+                "connect-src 'self' ws://localhost:* wss://localhost:* https://*.google.com https://*.googleapis.com https://*.googleusercontent.com https://*.firebaseio.com wss://*.firebaseio.com",
+                "style-src 'self' 'unsafe-inline' https://*.googleapis.com",
+                "img-src 'self' data: blob: https:",
+                // ✅ 修正：添加 gstatic.com 到 font-src（支持 Google 字體）
+                "font-src 'self' data: https://*.gstatic.com",
+                // ✅ 新增：worker-src 和 child-src（與 index.html 一致）
+                "worker-src 'self' blob:",
+                "child-src 'self' blob:",
               ].join('; '),
             }
-          : {},
+          : {}, // ✅ 重要：生產環境保持為空，使用 index.html 的 CSP（APK 使用此配置）
     },
 
     build: {
@@ -224,6 +235,8 @@ export default defineConfig(({ mode }) => {
             // ??靽桀儔嚗eact ?詨? + ??郊靘陷嚗???韏瑁??伐?
             // 蝣箔????冽??典?憪??停?舐嚗??vendor 銝剔?摨急銝 React
 
+            // ✅ 關鍵修正：將 Capacitor Core 和 App 合併到 react-core
+            // 確保這些核心庫與 React 一起載入，避免載入順序問題
             if (
               id.includes('node_modules/react/') ||
               id.includes('node_modules/react-dom/') ||
@@ -232,7 +245,9 @@ export default defineConfig(({ mode }) => {
               id.includes('node_modules/i18next') || // ✅ 合併：i18next 核心庫
               id.includes('node_modules/prop-types') || // ✅ 合併：prop-types 被大量組件使用
               id.includes('node_modules/recharts') || // ✅ 關鍵修復：recharts 合併到 react-core，避免 APK 載入順序問題
-              id.includes('/recharts/') // ✅ 額外匹配：確保所有 recharts 路徑都被匹配
+              id.includes('/recharts/') || // ✅ 額外匹配：確保所有 recharts 路徑都被匹配
+              id.includes('node_modules/@capacitor/core') || // ✅ 新增：Capacitor 核心必須與 React 一起載入
+              id.includes('node_modules/@capacitor/app') // ✅ 新增：App 生命週期管理也需要早期載入
             ) {
               return 'react-core';
             }
@@ -241,8 +256,9 @@ export default defineConfig(({ mode }) => {
               return 'firebase';
             }
 
+            // ✅ 修改：只將其他 Capacitor 插件單獨打包（非核心）
             if (id.includes('node_modules/@capacitor')) {
-              return 'capacitor';
+              return 'capacitor-plugins'; // 改名為更明確的名稱
             }
 
             // ???寞?鈭?撠??隞?node_modules 靘陷銋?雿萄 react-core
