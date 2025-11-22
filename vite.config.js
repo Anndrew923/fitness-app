@@ -315,19 +315,54 @@ export default defineConfig(({ mode }) => {
 
             // ??璆剖?隞?Ⅳ???Ｗ??莎??脖?甇亙??
 
-            if (id.includes('/src/components/Ladder')) {
+            // ✅ 一次性解決方案：將所有共享的 src/ 文件（除了業務代碼本身）都合併到 react-core
+            // 這確保所有共享代碼（utils、共享組件等）都與 React 一起載入
+            // 避免業務代碼 chunk 載入時共享代碼未初始化的問題
+            if (id.includes('/src/') || id.includes('\\src\\')) {
+              // 排除業務代碼 chunk 的組件
+              if (
+                id.includes('/src/components/Ladder') ||
+                id.includes('\\src\\components\\Ladder') ||
+                id.includes('/src/components/Community') ||
+                id.includes('\\src\\components\\Community') ||
+                id.includes('/src/components/TrainingTools') ||
+                id.includes('\\src\\components\\TrainingTools') ||
+                id.includes('/src/components/FriendFeed') ||
+                id.includes('\\src\\components\\FriendFeed')
+              ) {
+                // 這些是業務代碼，稍後會單獨處理
+              } else {
+                // 所有其他 src/ 文件（utils、共享組件、其他頁面等）都合併到 react-core
+                return 'react-core';
+              }
+            }
+
+            // 業務代碼分割（只包含業務邏輯本身，不包含共享代碼）
+            if (
+              id.includes('/src/components/Ladder') ||
+              id.includes('\\src\\components\\Ladder')
+            ) {
               return 'ladder';
             }
 
-            if (id.includes('/src/components/Community')) {
+            if (
+              id.includes('/src/components/Community') ||
+              id.includes('\\src\\components\\Community')
+            ) {
               return 'community';
             }
 
-            if (id.includes('/src/components/TrainingTools')) {
+            if (
+              id.includes('/src/components/TrainingTools') ||
+              id.includes('\\src\\components\\TrainingTools')
+            ) {
               return 'training-tools';
             }
 
-            if (id.includes('/src/components/FriendFeed')) {
+            if (
+              id.includes('/src/components/FriendFeed') ||
+              id.includes('\\src\\components\\FriendFeed')
+            ) {
               return 'friend-feed';
             }
           },
