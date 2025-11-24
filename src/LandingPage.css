@@ -31,7 +31,9 @@
 /* Header */
 .landing-header {
   position: fixed;
-  top: 0;
+  /* ✅ 修正：從 Status Bar 下方開始，而不是視窗頂部 */
+  /* 使用 env(safe-area-inset-top) 自動適應不同設備的 Status Bar 高度 */
+  top: env(safe-area-inset-top, 0px);
   left: 0;
   right: 0;
   z-index: 1000;
