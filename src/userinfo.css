@@ -4,7 +4,8 @@
 .user-info-container {
   max-width: 800px;
   margin: 0 auto;
-  padding: 15px;
+  /* ✅ 修正：為 Status Bar 預留空間 */
+  padding: calc(15px + env(safe-area-inset-top, 0px)) 15px 15px;
   min-height: 100vh;
   background: linear-gradient(135deg, #81d8d0 0%, #5f9ea0 100%);
   position: relative;
@@ -931,7 +932,8 @@
 /* 響應式設計 */
 @media (max-width: 768px) {
   .user-info-container {
-    padding: 15px;
+    /* ✅ 修正：為 Status Bar 預留空間（響應式設計） */
+    padding: calc(15px + env(safe-area-inset-top, 0px)) 15px 15px;
   }
 
   .page-title {
@@ -2213,7 +2215,8 @@
 /* 設定按鈕 - 右上角 */
 .user-info__settings-btn {
   position: fixed !important;
-  top: 15px !important;
+  /* ✅ 修正：考慮 Status Bar 高度 */
+  top: calc(15px + env(safe-area-inset-top, 0px)) !important;
   right: 15px !important;
   width: 44px !important;
   height: 44px !important;

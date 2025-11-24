@@ -16,8 +16,8 @@ android {
         applicationId "com.ultimatephysique.fitness2025"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 15
-        versionName "1.15"
+        versionCode 17
+        versionName "1.17"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
         // Add this missing dimension strategy to resolve the variant matching error.
