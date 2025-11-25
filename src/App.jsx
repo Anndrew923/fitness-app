@@ -212,6 +212,87 @@ function AppContent() {
     return () => clearTimeout(timer);
   }, [location.pathname]);
 
+  // ✅ 處理 Android Status Bar 高度（確保在不同設備上正確響應）
+  useEffect(() => {
+    // 只在 Android 原生應用中處理
+    if (Capacitor.isNativePlatform() && Capacitor.getPlatform() === 'android') {
+      const setStatusBarHeight = () => {
+        // 方法 1: 使用 visualViewport（最可靠）
+        let statusBarHeight = 0;
+        
+        if (window.visualViewport) {
+          // visualViewport.offsetTop 通常就是 status bar 的高度
+          statusBarHeight = window.visualViewport.offsetTop || 0;
+        }
+        
+        // 方法 2: 如果 visualViewport 不可用，使用屏幕高度差異
+        if (statusBarHeight === 0) {
+          const screenHeight = window.screen.height;
+          const windowHeight = window.innerHeight;
+          const heightDiff = screenHeight - windowHeight;
+          
+          // 如果差異在合理範圍內（24-48px），使用它
+          if (heightDiff > 0 && heightDiff <= 48) {
+            statusBarHeight = heightDiff;
+          } else {
+            // 備用方案：使用常見的 Android status bar 高度
+            // 大多數 Android 設備為 24px，但有些可能是 48px
+            statusBarHeight = 24;
+          }
+        }
+        
+        // 設置 CSS 變量（優先使用）
+        document.documentElement.style.setProperty(
+          '--safe-area-inset-top',
+          `${statusBarHeight}px`
+        );
+        
+        // 同時更新 :root 中的 CSS 變量定義
+        const styleId = 'android-status-bar-height-fix';
+        let styleElement = document.getElementById(styleId);
+        
+        if (!styleElement) {
+          styleElement = document.createElement('style');
+          styleElement.id = styleId;
+          document.head.appendChild(styleElement);
+        }
+        
+        styleElement.textContent = `
+          :root {
+            --safe-area-inset-top: ${statusBarHeight}px !important;
+          }
+        `;
+        
+        logger.debug('Status bar height set to:', statusBarHeight, 'px');
+      };
+      
+      // 延遲執行以確保視窗已完全載入
+      const timer = setTimeout(setStatusBarHeight, 100);
+      
+      // 監聽視窗大小變化（處理旋轉、全屏切換等）
+      window.addEventListener('resize', setStatusBarHeight);
+      window.addEventListener('orientationchange', () => {
+        setTimeout(setStatusBarHeight, 200);
+      });
+      
+      // 監聽 visualViewport 變化（如果支持）
+      if (window.visualViewport) {
+        window.visualViewport.addEventListener('resize', setStatusBarHeight);
+        window.visualViewport.addEventListener('scroll', setStatusBarHeight);
+      }
+      
+      return () => {
+        clearTimeout(timer);
+        window.removeEventListener('resize', setStatusBarHeight);
+        window.removeEventListener('orientationchange', setStatusBarHeight);
+        if (window.visualViewport) {
+          window.visualViewport.removeEventListener('resize', setStatusBarHeight);
+          window.visualViewport.removeEventListener('scroll', setStatusBarHeight);
+        }
+      };
+    }
+  }, []);
+
   // ✅ 預載入常用頁面（在空閒時間）
   useEffect(() => {
     const preloadPages = () => {

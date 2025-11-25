@@ -1,8 +1,8 @@
 .ladder {
   max-width: 800px;
   margin: 0 auto;
-  /* ✅ 修正：為 Status Bar 預留空間 */
-  padding: calc(16px + env(safe-area-inset-top, 0px)) 16px 16px;
+  /* ✅ 修正：優先使用 CSS 變量，後備使用 env() */
+  padding: calc(16px + var(--safe-area-inset-top, env(safe-area-inset-top, 0px))) 16px 16px;
   background: linear-gradient(135deg, #ff6b35 0%, #f7931e 50%, #ffd700 100%);
   border-radius: 16px;
   box-shadow: 0 8px 24px rgba(255, 107, 53, 0.3);
@@ -716,8 +716,8 @@
 /* 響應式設計 */
 @media (max-width: 768px) {
   .ladder {
-    /* ✅ 修正：為 Status Bar 預留空間（響應式設計） */
-    padding: calc(12px + env(safe-area-inset-top, 0px)) 12px 12px;
+    /* ✅ 修正：優先使用 CSS 變量，後備使用 env()（響應式設計） */
+    padding: calc(12px + var(--safe-area-inset-top, env(safe-area-inset-top, 0px))) 12px 12px;
   }
 
   .ladder__header {

@@ -4,8 +4,8 @@
 .user-info-container {
   max-width: 800px;
   margin: 0 auto;
-  /* ✅ 修正：為 Status Bar 預留空間 */
-  padding: calc(15px + env(safe-area-inset-top, 0px)) 15px 15px;
+  /* ✅ 修正：優先使用 CSS 變量，後備使用 env() */
+  padding: calc(15px + var(--safe-area-inset-top, env(safe-area-inset-top, 0px))) 15px 15px;
   min-height: 100vh;
   background: linear-gradient(135deg, #81d8d0 0%, #5f9ea0 100%);
   position: relative;
@@ -932,8 +932,8 @@
 /* 響應式設計 */
 @media (max-width: 768px) {
   .user-info-container {
-    /* ✅ 修正：為 Status Bar 預留空間（響應式設計） */
-    padding: calc(15px + env(safe-area-inset-top, 0px)) 15px 15px;
+    /* ✅ 修正：優先使用 CSS 變量，後備使用 env()（響應式設計） */
+    padding: calc(15px + var(--safe-area-inset-top, env(safe-area-inset-top, 0px))) 15px 15px;
   }
 
   .page-title {
@@ -2215,8 +2215,8 @@
 /* 設定按鈕 - 右上角 */
 .user-info__settings-btn {
   position: fixed !important;
-  /* ✅ 修正：考慮 Status Bar 高度 */
-  top: calc(15px + env(safe-area-inset-top, 0px)) !important;
+  /* ✅ 修正：優先使用 CSS 變量，後備使用 env()，確保在不同設備上正確響應 */
+  top: calc(15px + var(--safe-area-inset-top, env(safe-area-inset-top, 0px))) !important;
   right: 15px !important;
   width: 44px !important;
   height: 44px !important;
@@ -2253,7 +2253,8 @@
 /* 響應式調整 */
 @media (max-width: 768px) {
   .user-info__settings-btn {
-    top: 10px !important;
+    /* ✅ 修正：移動版也考慮 Status Bar 高度，使用 CSS 變量優先 */
+    top: calc(10px + var(--safe-area-inset-top, env(safe-area-inset-top, 0px))) !important;
     right: 10px !important;
     width: 40px !important;
     height: 40px !important;
