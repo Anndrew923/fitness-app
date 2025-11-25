@@ -4,6 +4,7 @@ import React, {
   useMemo,
   useCallback,
   useRef,
+  memo,
 } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useUser } from './UserContext';
@@ -34,6 +35,7 @@ import logger from './utils/logger';
 
 import './userinfo.css';
 import { useTranslation } from 'react-i18next';
+import { useIntersectionObserver } from './hooks/useIntersectionObserver';
 
 // 開發環境下載入調試工具
 if (process.env.NODE_ENV === 'development') {
@@ -49,6 +51,113 @@ const DEFAULT_SCORES = {
 };
 
 const GENDER_OPTIONS = ['male', 'female'];
+
+// 自定義軸標籤組件 - 使用 React.memo 優化性能
+const CustomAxisTick = memo(
+  ({ payload, x, y, radarChartData, t }) => {
+    const data = radarChartData.find(item => item.name === payload.value);
+
+    // 計算調整後的位置 - 使用相對偏移而不是固定像素值
+    let adjustedX = x;
+    let adjustedY = y;
+
+    // 計算從中心到當前點的距離，用於相對偏移
+    const distance = Math.sqrt(x * x + y * y);
+    const angle = Math.atan2(y, x);
+
+    // 力量標籤特殊處理：移到正上方
+    if (payload.value === t('userInfo.radarLabels.strength')) {
+      adjustedX = x;
+      adjustedY = y - distance * 0.12;
+    } else if (payload.value === t('userInfo.radarLabels.explosivePower')) {
+      adjustedX = x + Math.cos(angle) * (distance * 0.03);
+      adjustedY = y + Math.sin(angle) * (distance * 0.06);
+    } else if (payload.value === t('userInfo.radarLabels.ffmi')) {
+      adjustedX = x + Math.cos(angle) * (distance * -0.2);
+      adjustedY = y + Math.sin(angle) * (distance * 0.06);
+    } else if (payload.value === t('userInfo.radarLabels.cardio')) {
+      adjustedX = x + Math.cos(angle) * (distance * 0.01);
+      adjustedY = y + Math.sin(angle) * (distance * 0.06);
+    } else if (payload.value === t('userInfo.radarLabels.muscle')) {
+      adjustedX = x + Math.cos(angle) * (distance * -0.05);
+      adjustedY = y + Math.sin(angle) * (distance * 0.06);
+    } else {
+      adjustedX = x + Math.cos(angle) * (distance * 0.1);
+      adjustedY = y + Math.sin(angle) * (distance * 0.1);
+    }
+
+    return (
+      <g transform={`translate(${adjustedX},${adjustedY})`}>
+        {/* 外圈光暈 - 使用外部定義的 filter */}
+        <circle
+          cx={0}
+          cy={0}
+          r={16}
+          fill="rgba(129, 216, 208, 0.1)"
+          filter="url(#glow)"
+        />
+        {/* 主圓圈 */}
+        <circle
+          cx={0}
+          cy={0}
+          r={14}
+          fill="rgba(255, 255, 255, 0.95)"
+          stroke="rgba(129, 216, 208, 0.4)"
+          strokeWidth={2}
+          filter="drop-shadow(0 2px 4px rgba(129, 216, 208, 0.2))"
+        />
+        {/* 圖標 - 垂直排列上方 */}
+        <text
+          x={0}
+          y={-8}
+          textAnchor="middle"
+          fill="#4a5568"
+          fontSize="16"
+          fontWeight="600"
+          dominantBaseline="middle"
+          filter="drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1))"
+        >
+          {data?.icon}
+        </text>
+        {/* 標籤文字 - 垂直排列下方 */}
+        <text
+          x={0}
+          y={12}
+          textAnchor="middle"
+          fill="#2d3748"
+          fontSize="13"
+          fontWeight="700"
+          dominantBaseline="middle"
+          filter="drop-shadow(0 1px 3px rgba(255, 255, 255, 0.9))"
+        >
+          {payload.value}
+        </text>
+      </g>
+    );
+  },
+  (prevProps, nextProps) => {
+    // 自定義比較函數，只在必要時重新渲染
+    return (
+      prevProps.payload.value === nextProps.payload.value &&
+      Math.abs(prevProps.x - nextProps.x) < 0.1 &&
+      Math.abs(prevProps.y - nextProps.y) < 0.1 &&
+      prevProps.radarChartData === nextProps.radarChartData &&
+      prevProps.t === nextProps.t
+    );
+  }
+);
+
+CustomAxisTick.displayName = 'CustomAxisTick';
+
+CustomAxisTick.propTypes = {
+  payload: PropTypes.shape({
+    value: PropTypes.string.isRequired,
+  }).isRequired,
+  x: PropTypes.number.isRequired,
+  y: PropTypes.number.isRequired,
+  radarChartData: PropTypes.array.isRequired,
+  t: PropTypes.func.isRequired,
+};
 
 // 新增：對話框組件
 const Modal = ({
@@ -399,6 +508,7 @@ function UserInfo({ testData, onLogout, clearTestData }) {
   const navigate = useNavigate();
   const location = useLocation();
   const radarSectionRef = useRef(null);
+  const radarContainerRef = useRef(null);
   const testsSectionRef = useRef(null);
   const formSectionRef = useRef(null);
   const nicknameTimeoutRef = useRef(null); // 新增：暱稱輸入防抖定時器
@@ -406,6 +516,13 @@ function UserInfo({ testData, onLogout, clearTestData }) {
   const [avatarError, setAvatarError] = useState(null);
   // 記錄上一次應用過的 testData，避免重複觸發寫入
   const lastAppliedTestDataKeyRef = useRef(null);
+
+  // ✅ 使用 Intersection Observer 優化雷達圖性能
+  const { elementRef: radarObserverRef, isIntersecting: isRadarVisible } =
+    useIntersectionObserver({
+      threshold: 0.3, // 當 30% 可見時才開始渲染
+      rootMargin: '100px', // 提前 100px 開始準備
+    });
 
   // 新增：對話框狀態
   const [modalState, setModalState] = useState({
@@ -784,119 +901,11 @@ function UserInfo({ testData, onLogout, clearTestData }) {
         icon: '📊',
       },
     ];
-  }, [userData.scores]);
+  }, [userData.scores, t]); // ✅ 添加 t 到依賴項
 
   const isGuest = useMemo(() => {
     return sessionStorage.getItem('guestMode') === 'true';
   }, []);
-
-  // 自定義軸標籤組件
-  const CustomAxisTick = ({ payload, x, y }) => {
-    const data = radarChartData.find(item => item.name === payload.value);
-
-    // 計算調整後的位置 - 使用相對偏移而不是固定像素值
-    let adjustedX = x;
-    let adjustedY = y;
-
-    // 計算從中心到當前點的距離，用於相對偏移
-    const distance = Math.sqrt(x * x + y * y);
-    const angle = Math.atan2(y, x);
-
-    // 力量標籤特殊處理：移到正上方
-    if (payload.value === t('userInfo.radarLabels.strength')) {
-      // 使用相對位置，保持在正上方
-      adjustedX = x; // 保持原始x位置
-      adjustedY = y - distance * 0.12; // 使用距離的12%作為向上偏移
-    } else if (payload.value === t('userInfo.radarLabels.explosivePower')) {
-      // 爆發力標籤微調：稍微往左、往上移動
-      adjustedX = x + Math.cos(angle) * (distance * 0.03); // 減少到3%
-      adjustedY = y + Math.sin(angle) * (distance * 0.06); // 減少到6%
-    } else if (payload.value === t('userInfo.radarLabels.ffmi')) {
-      // FFMI標籤微調：遠離雷達圖
-      adjustedX = x + Math.cos(angle) * (distance * -0.2); // 減少到-20%
-      adjustedY = y + Math.sin(angle) * (distance * 0.06); // 保持6%
-    } else if (payload.value === t('userInfo.radarLabels.cardio')) {
-      // 心肺耐力標籤：保持不變
-      adjustedX = x + Math.cos(angle) * (distance * 0.01); // 保持1%
-      adjustedY = y + Math.sin(angle) * (distance * 0.06); // 保持6%
-    } else if (payload.value === t('userInfo.radarLabels.muscle')) {
-      // 骨骼肌肉量標籤：遠離雷達圖
-      adjustedX = x + Math.cos(angle) * (distance * -0.05); // 調整到-5%
-      adjustedY = y + Math.sin(angle) * (distance * 0.06); // 保持6%
-    } else {
-      // 其他標籤增加小幅偏移，避免重疊雷達圖
-      adjustedX = x + Math.cos(angle) * (distance * 0.1); // 使用距離的10%作為偏移
-      adjustedY = y + Math.sin(angle) * (distance * 0.1);
-    }
-
-    return (
-      <g transform={`translate(${adjustedX},${adjustedY})`}>
-        {/* 圖標背景圓圈 - 更精緻的設計 */}
-        <defs>
-          <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
-            <feGaussianBlur stdDeviation="3" result="coloredBlur" />
-            <feMerge>
-              <feMergeNode in="coloredBlur" />
-              <feMergeNode in="SourceGraphic" />
-            </feMerge>
-          </filter>
-        </defs>
-        {/* 外圈光暈 */}
-        <circle
-          cx={0}
-          cy={0}
-          r={16}
-          fill="rgba(129, 216, 208, 0.1)"
-          filter="url(#glow)"
-        />
-        {/* 主圓圈 */}
-        <circle
-          cx={0}
-          cy={0}
-          r={14}
-          fill="rgba(255, 255, 255, 0.95)"
-          stroke="rgba(129, 216, 208, 0.4)"
-          strokeWidth={2}
-          filter="drop-shadow(0 2px 4px rgba(129, 216, 208, 0.2))"
-        />
-
-        {/* 圖標 - 垂直排列上方 */}
-        <text
-          x={0}
-          y={-8}
-          textAnchor="middle"
-          fill="#4a5568"
-          fontSize="16"
-          fontWeight="600"
-          dominantBaseline="middle"
-          filter="drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1))"
-        >
-          {data?.icon}
-        </text>
-        {/* 標籤文字 - 垂直排列下方 */}
-        <text
-          x={0}
-          y={12}
-          textAnchor="middle"
-          fill="#2d3748"
-          fontSize="13"
-          fontWeight="700"
-          dominantBaseline="middle"
-          filter="drop-shadow(0 1px 3px rgba(255, 255, 255, 0.9))"
-        >
-          {payload.value}
-        </text>
-      </g>
-    );
-  };
-
-  CustomAxisTick.propTypes = {
-    payload: PropTypes.shape({
-      value: PropTypes.string.isRequired,
-    }).isRequired,
-    x: PropTypes.number.isRequired,
-    y: PropTypes.number.isRequired,
-  };
 
   // 監聽認證狀態
   useEffect(() => {
@@ -943,6 +952,17 @@ function UserInfo({ testData, onLogout, clearTestData }) {
     userData.weight,
     userData.age,
   ]);
+
+  // ✅ 將 Intersection Observer ref 附加到 radar section
+  useEffect(() => {
+    if (radarSectionRef.current && radarObserverRef) {
+      if (typeof radarObserverRef === 'function') {
+        radarObserverRef(radarSectionRef.current);
+      } else if (radarObserverRef.current !== radarSectionRef.current) {
+        radarObserverRef.current = radarSectionRef.current;
+      }
+    }
+  }, [radarObserverRef]);
 
   // 處理從評測頁面返回時自動滾動到雷達圖
   useEffect(() => {
@@ -2156,7 +2176,12 @@ function UserInfo({ testData, onLogout, clearTestData }) {
               <p>正在載入數據...</p>
             </div>
           ) : (
-            <div className="radar-chart-container">
+            <div
+              className={`radar-chart-container ${
+                isRadarVisible ? 'visible' : 'hidden'
+              }`}
+              ref={radarContainerRef}
+            >
               <ResponsiveContainer width="100%" height={400}>
                 <RadarChart data={radarChartData}>
                   <PolarGrid
@@ -2167,7 +2192,9 @@ function UserInfo({ testData, onLogout, clearTestData }) {
                   />
                   <PolarAngleAxis
                     dataKey="name"
-                    tick={<CustomAxisTick />}
+                    tick={
+                      <CustomAxisTick radarChartData={radarChartData} t={t} />
+                    }
                     axisLine={false}
                   />
                   <PolarRadiusAxis
@@ -2192,6 +2219,20 @@ function UserInfo({ testData, onLogout, clearTestData }) {
                     strokeLinejoin="round"
                   />
                   <defs>
+                    {/* 將 glow filter 移到這裡，只定義一次，避免重複 */}
+                    <filter
+                      id="glow"
+                      x="-50%"
+                      y="-50%"
+                      width="200%"
+                      height="200%"
+                    >
+                      <feGaussianBlur stdDeviation="3" result="coloredBlur" />
+                      <feMerge>
+                        <feMergeNode in="coloredBlur" />
+                        <feMergeNode in="SourceGraphic" />
+                      </feMerge>
+                    </filter>
                     <linearGradient
                       id="tiffanyGradient"
                       x1="0%"

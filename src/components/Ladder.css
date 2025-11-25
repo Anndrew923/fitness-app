@@ -2,7 +2,10 @@
   max-width: 800px;
   margin: 0 auto;
   /* ✅ 修正：優先使用 CSS 變量，後備使用 env() */
-  padding: calc(16px + var(--safe-area-inset-top, env(safe-area-inset-top, 0px))) 16px 16px;
+  padding: calc(
+      16px + var(--safe-area-inset-top, env(safe-area-inset-top, 0px))
+    )
+    16px 16px;
   background: linear-gradient(135deg, #ff6b35 0%, #f7931e 50%, #ffd700 100%);
   border-radius: 16px;
   box-shadow: 0 8px 24px rgba(255, 107, 53, 0.3);
@@ -717,7 +720,10 @@
 @media (max-width: 768px) {
   .ladder {
     /* ✅ 修正：優先使用 CSS 變量，後備使用 env()（響應式設計） */
-    padding: calc(12px + var(--safe-area-inset-top, env(safe-area-inset-top, 0px))) 12px 12px;
+    padding: calc(
+        12px + var(--safe-area-inset-top, env(safe-area-inset-top, 0px))
+      )
+      12px 12px;
   }
 
   .ladder__header {
@@ -1575,23 +1581,24 @@
 .ladder-notification.first-time {
   background: linear-gradient(135deg, #ff6b35 0%, #f7931e 50%, #ffd700 100%);
   border: 3px solid #ffd700;
-  box-shadow: 0 10px 40px rgba(255, 107, 53, 0.5), 0 0 60px rgba(255, 215, 0, 0.3);
+  box-shadow: 0 10px 40px rgba(255, 107, 53, 0.5),
+    0 0 60px rgba(255, 215, 0, 0.3);
 }
 
 /* 提升 - 金紅色風格（與排行榜一致） */
 .ladder-notification.improved {
   background: linear-gradient(135deg, #ff6b35 0%, #f7931e 50%, #ffd700 100%);
   border: 3px solid #ffd700;
-  box-shadow: 0 10px 40px rgba(255, 107, 53, 0.5), 0 0 60px rgba(255, 215, 0, 0.3);
+  box-shadow: 0 10px 40px rgba(255, 107, 53, 0.5),
+    0 0 60px rgba(255, 215, 0, 0.3);
 }
 
 /* 排名下滑 - 金屬灰風格 */
 .ladder-notification.declined {
-  background: linear-gradient(135deg, #4A5568 0%, #2D3748 100%);
+  background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
   border: 3px solid #718096;
   box-shadow: 0 10px 40px rgba(74, 85, 104, 0.4), 0 0 60px rgba(45, 55, 72, 0.2);
 }
-
 
 .ladder-notification__close {
   position: absolute;
@@ -1739,7 +1746,8 @@
 }
 
 @keyframes pulse {
-  0%, 100% {
+  0%,
+  100% {
     transform: scale(1);
   }
   50% {
@@ -1756,7 +1764,7 @@
 .ladder-notification__stat-improvement {
   font-size: 20px;
   font-weight: 700;
-  color: #90EE90;
+  color: #90ee90;
   text-shadow: 0 0 8px rgba(144, 238, 144, 0.8);
   animation: glow 2s ease-in-out infinite;
 }
@@ -1764,17 +1772,19 @@
 .ladder-notification__stat-decline {
   font-size: 20px;
   font-weight: 700;
-  color: #FFB6C1;
+  color: #ffb6c1;
   text-shadow: 0 0 8px rgba(255, 182, 193, 0.8);
   opacity: 0.9;
 }
 
 @keyframes glow {
-  0%, 100% {
+  0%,
+  100% {
     text-shadow: 0 0 8px rgba(144, 238, 144, 0.8);
   }
   50% {
-    text-shadow: 0 0 16px rgba(144, 238, 144, 1), 0 0 24px rgba(144, 238, 144, 0.6);
+    text-shadow: 0 0 16px rgba(144, 238, 144, 1),
+      0 0 24px rgba(144, 238, 144, 0.6);
   }
 }
 

@@ -5,7 +5,10 @@
   max-width: 800px;
   margin: 0 auto;
   /* ✅ 修正：優先使用 CSS 變量，後備使用 env() */
-  padding: calc(15px + var(--safe-area-inset-top, env(safe-area-inset-top, 0px))) 15px 15px;
+  padding: calc(
+      15px + var(--safe-area-inset-top, env(safe-area-inset-top, 0px))
+    )
+    15px 15px;
   min-height: 100vh;
   background: linear-gradient(135deg, #81d8d0 0%, #5f9ea0 100%);
   position: relative;
@@ -627,12 +630,31 @@
     0 4px 12px rgba(129, 216, 208, 0.1);
   position: relative;
   border: 1px solid rgba(129, 216, 208, 0.1);
+  /* ✅ 優化：在移動設備上降低 backdrop-filter 強度 */
   backdrop-filter: blur(10px);
   /* 確保容器有足夠的空間容納軸標籤 */
   min-height: 500px;
   display: flex;
   align-items: center;
   justify-content: center;
+  /* ✅ 性能優化：啟用硬體加速和渲染優化 */
+  will-change: transform;
+  transform: translateZ(0);
+  contain: layout style paint;
+  /* ✅ 優化：當不可見時降低不透明度，減少渲染負擔 */
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+/* ✅ 新增：當雷達圖可見時才完全顯示 */
+.radar-chart-container.visible {
+  opacity: 1;
+}
+
+.radar-chart-container.hidden {
+  opacity: 0;
+  /* 不可見時暫停所有動畫 */
+  pointer-events: none;
 }
 
 .radar-chart-container::before {
@@ -652,6 +674,15 @@
   border-radius: 50%;
   pointer-events: none;
   animation: rotate 20s linear infinite;
+  /* ✅ 優化：當容器不可見時暫停動畫 */
+  animation-play-state: running;
+  will-change: transform;
+  transform: translate(-50%, -50%) translateZ(0);
+}
+
+/* ✅ 新增：當容器不可見時暫停動畫 */
+.radar-chart-container.hidden::before {
+  animation-play-state: paused;
 }
 
 .radar-chart-container::after {
@@ -682,11 +713,14 @@
 
 /* 自定義雷達圖軸標籤樣式 */
 .radar-chart-container .recharts-polar-angle-axis-tick {
-  filter: drop-shadow(0 2px 4px rgba(129, 216, 208, 0.2));
+  /* ✅ 優化：移除 filter，改用更輕量的效果 */
+  /* filter: drop-shadow(0 2px 4px rgba(129, 216, 208, 0.2)); */
   animation: fadeInScale 0.8s ease-out;
   /* 確保軸標籤在各種設備上都能正確顯示 */
   transform-origin: center;
   pointer-events: none;
+  /* 使用 will-change 優化 */
+  will-change: transform, opacity;
 }
 
 .radar-chart-container .recharts-polar-grid-angle-line {
@@ -711,8 +745,19 @@
 }
 
 .radar-chart-container .recharts-radar {
-  filter: drop-shadow(0 4px 8px rgba(129, 216, 208, 0.3));
+  /* ✅ 優化：保留但簡化 filter */
+  filter: drop-shadow(0 2px 4px rgba(129, 216, 208, 0.2));
   animation: radarAppear 1.6s ease-out;
+  will-change: transform, opacity;
+}
+
+/* ✅ 新增：當容器不可見時，暫停所有子元素的動畫 */
+.radar-chart-container.hidden .recharts-polar-angle-axis-tick,
+.radar-chart-container.hidden .recharts-polar-grid-angle-line,
+.radar-chart-container.hidden .recharts-polar-grid-concentric-line,
+.radar-chart-container.hidden .recharts-polar-radius-axis-tick,
+.radar-chart-container.hidden .recharts-radar {
+  animation-play-state: paused;
 }
 
 @keyframes fadeIn {
@@ -933,7 +978,10 @@
 @media (max-width: 768px) {
   .user-info-container {
     /* ✅ 修正：優先使用 CSS 變量，後備使用 env()（響應式設計） */
-    padding: calc(15px + var(--safe-area-inset-top, env(safe-area-inset-top, 0px))) 15px 15px;
+    padding: calc(
+        15px + var(--safe-area-inset-top, env(safe-area-inset-top, 0px))
+      )
+      15px 15px;
   }
 
   .page-title {
@@ -1000,11 +1048,29 @@
     margin-bottom: 20px;
   }
 
+  /* ✅ 優化：在移動設備上降低 backdrop-filter 強度 */
   .radar-chart-container {
     padding: 15px;
     min-height: 400px;
+    /* ✅ 優化：在移動設備上降低 backdrop-filter 強度 */
+    backdrop-filter: blur(3px); /* 從 10px 降低到 3px */
+  }
+}
+
+/* ✅ 優化：在低性能設備上進一步簡化 */
+@media (max-width: 480px) {
+  .radar-chart-container {
+    backdrop-filter: blur(1px); /* 進一步降低 */
+    padding: 30px; /* 減少 padding */
   }
 
+  .radar-chart-container::before {
+    animation-duration: 30s; /* 減慢動畫速度 */
+  }
+}
+
+/* 響應式設計 - score-section */
+@media (max-width: 768px) {
   .score-section {
     padding: 20px;
     margin-top: 20px;
@@ -2216,7 +2282,9 @@
 .user-info__settings-btn {
   position: fixed !important;
   /* ✅ 修正：優先使用 CSS 變量，後備使用 env()，確保在不同設備上正確響應 */
-  top: calc(15px + var(--safe-area-inset-top, env(safe-area-inset-top, 0px))) !important;
+  top: calc(
+    15px + var(--safe-area-inset-top, env(safe-area-inset-top, 0px))
+  ) !important;
   right: 15px !important;
   width: 44px !important;
   height: 44px !important;
@@ -2254,12 +2322,14 @@
 @media (max-width: 768px) {
   .user-info__settings-btn {
     /* ✅ 修正：移動版也考慮 Status Bar 高度，使用 CSS 變量優先 */
-    top: calc(10px + var(--safe-area-inset-top, env(safe-area-inset-top, 0px))) !important;
+    top: calc(
+      10px + var(--safe-area-inset-top, env(safe-area-inset-top, 0px))
+    ) !important;
     right: 10px !important;
     width: 40px !important;
     height: 40px !important;
   }
-  
+
   .user-info__settings-btn svg {
     width: 18px !important;
     height: 18px !important;

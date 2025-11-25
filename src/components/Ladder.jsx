@@ -514,14 +514,24 @@ const Ladder = () => {
                 `[data-user-id="${userData?.userId || auth.currentUser?.uid}"]`
               );
               if (userElement) {
+                // ✅ 獲取 status bar 高度
+                const statusBarHeight = parseFloat(
+                  getComputedStyle(document.documentElement)
+                    .getPropertyValue('--safe-area-inset-top')
+                    .replace('px', '')
+                ) || 0;
+
                 // 計算用戶元素的實際位置
                 const elementRect = userElement.getBoundingClientRect();
                 const elementTop = elementRect.top;
                 const currentScrollY =
                   window.scrollY || document.documentElement.scrollTop;
-                const targetScrollY = currentScrollY + elementTop;
+                
+                // ✅ 修正：減去 status bar 高度，並添加額外間距確保整個排名框都顯示
+                // 額外減去 10px 確保排名框完全可見，不被 status bar 遮擋
+                const targetScrollY = currentScrollY + elementTop - statusBarHeight - 10;
 
-                // 使用 window.scrollTo 精確滾動到用戶位置（考慮可能的固定 header）
+                // 使用 window.scrollTo 精確滾動到用戶位置（考慮 status bar 高度）
                 window.scrollTo({
                   top: Math.max(0, targetScrollY),
                   behavior: 'smooth',
@@ -530,7 +540,9 @@ const Ladder = () => {
                   '✅ 自動滾動到用戶排名:',
                   userRank,
                   '目標位置:',
-                  targetScrollY
+                  targetScrollY,
+                  'Status Bar 高度:',
+                  statusBarHeight
                 );
                 hasAutoScrolledRef.current = true;
               }
