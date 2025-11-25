@@ -518,11 +518,14 @@ function UserInfo({ testData, onLogout, clearTestData }) {
   const lastAppliedTestDataKeyRef = useRef(null);
 
   // ✅ 使用 Intersection Observer 優化雷達圖性能
-  const { elementRef: radarObserverRef, isIntersecting: isRadarVisible } =
-    useIntersectionObserver({
-      threshold: 0.3, // 當 30% 可見時才開始渲染
-      rootMargin: '100px', // 提前 100px 開始準備
-    });
+  const {
+    elementRef: radarObserverRef,
+    isIntersecting: isRadarVisible,
+    hasIntersected,
+  } = useIntersectionObserver({
+    threshold: 0.3, // 當 30% 可見時才開始渲染
+    rootMargin: '100px', // 提前 100px 開始準備
+  });
 
   // 新增：對話框狀態
   const [modalState, setModalState] = useState({
@@ -2178,7 +2181,7 @@ function UserInfo({ testData, onLogout, clearTestData }) {
           ) : (
             <div
               className={`radar-chart-container ${
-                isRadarVisible ? 'visible' : 'hidden'
+                isRadarVisible || hasIntersected ? 'visible' : 'hidden'
               }`}
               ref={radarContainerRef}
             >

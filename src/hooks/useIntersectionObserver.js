@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 
 /**
  * Intersection Observer Hook
@@ -11,16 +11,52 @@ const useIntersectionObserver = (options = {}, dependencies = []) => {
   const elementRef = useRef(null);
   const observerRef = useRef(null);
 
-  const defaultOptions = {
-    threshold: 0.1,
-    rootMargin: '0px',
-    ...options,
-  };
+  // ✅ 使用 useMemo 包裝 defaultOptions，避免每次渲染都創建新對象
+  const defaultOptions = useMemo(
+    () => ({
+      threshold: 0.1,
+      rootMargin: '0px',
+      ...options,
+    }),
+    [options]
+  );
+
+  // ✅ 新增：檢查元素是否在視窗內（初始可見性檢查）
+  const checkInitialVisibility = useCallback(() => {
+    if (!elementRef.current) return false;
+
+    const rect = elementRef.current.getBoundingClientRect();
+    const windowHeight =
+      window.innerHeight || document.documentElement.clientHeight;
+    const windowWidth =
+      window.innerWidth || document.documentElement.clientWidth;
+
+    // 解析 rootMargin（簡化處理，只處理數字格式如 "100px"）
+    const rootMarginStr = String(defaultOptions.rootMargin || '0px');
+    const rootMarginValue = parseInt(rootMarginStr) || 0;
+
+    // 檢查元素是否在視窗內（考慮 rootMargin）
+    const isVisible =
+      rect.top < windowHeight + rootMarginValue &&
+      rect.bottom > -rootMarginValue &&
+      rect.left < windowWidth &&
+      rect.right > 0;
+
+    return isVisible;
+  }, [defaultOptions.rootMargin]);
 
   // 創建觀察器
   const createObserver = useCallback(() => {
     if (typeof IntersectionObserver === 'undefined') {
       console.warn('IntersectionObserver not supported');
+      // ✅ 如果不支持 Intersection Observer，檢查初始可見性
+      if (elementRef.current) {
+        const isInitiallyVisible = checkInitialVisibility();
+        if (isInitiallyVisible) {
+          setIsIntersecting(true);
+          setHasIntersected(true);
+        }
+      }
       return null;
     }
 
@@ -34,7 +70,7 @@ const useIntersectionObserver = (options = {}, dependencies = []) => {
         }
       });
     }, defaultOptions);
-  }, [defaultOptions, hasIntersected]);
+  }, [defaultOptions, hasIntersected, checkInitialVisibility]);
 
   // 開始觀察
   const startObserving = useCallback(() => {
@@ -56,12 +92,34 @@ const useIntersectionObserver = (options = {}, dependencies = []) => {
     startObserving();
   }, [stopObserving, startObserving]);
 
-  // 初始化觀察器
+  // ✅ 改進：初始化觀察器時立即檢查可見性
   useEffect(() => {
     observerRef.current = createObserver();
 
     if (observerRef.current && elementRef.current) {
       startObserving();
+      // ✅ 立即觸發一次檢查，處理元素一開始就在視窗內的情況
+      // 使用 requestAnimationFrame 確保 DOM 已渲染
+      requestAnimationFrame(() => {
+        if (elementRef.current && observerRef.current) {
+          // 簡化檢查：如果元素在視窗內，立即設置為可見
+          const rect = elementRef.current.getBoundingClientRect();
+          const windowHeight =
+            window.innerHeight || document.documentElement.clientHeight;
+
+          if (rect.top < windowHeight && rect.bottom > 0) {
+            setIsIntersecting(true);
+            setHasIntersected(true);
+          }
+        }
+      });
+    } else if (!observerRef.current && elementRef.current) {
+      // ✅ Fallback：如果不支持 Intersection Observer，檢查初始可見性
+      const isInitiallyVisible = checkInitialVisibility();
+      if (isInitiallyVisible) {
+        setIsIntersecting(true);
+        setHasIntersected(true);
+      }
     }
 
     return () => {
@@ -70,6 +128,7 @@ const useIntersectionObserver = (options = {}, dependencies = []) => {
         observerRef.current = null;
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, dependencies);
 
   // 當元素變化時重新觀察
@@ -78,6 +137,24 @@ const useIntersectionObserver = (options = {}, dependencies = []) => {
       restartObserving();
     }
   }, [restartObserving]);
+
+  // ✅ 改進：當元素附加後立即檢查可見性
+  useEffect(() => {
+    if (elementRef.current) {
+      // 延遲檢查，確保 DOM 已完全渲染
+      const checkTimer = setTimeout(() => {
+        if (elementRef.current) {
+          const isInitiallyVisible = checkInitialVisibility();
+          if (isInitiallyVisible && !hasIntersected) {
+            setIsIntersecting(true);
+            setHasIntersected(true);
+          }
+        }
+      }, 100); // 100ms 後檢查，確保渲染完成
+
+      return () => clearTimeout(checkTimer);
+    }
+  }, [checkInitialVisibility, hasIntersected]);
 
   return {
     elementRef,
