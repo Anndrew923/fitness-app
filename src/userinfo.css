@@ -646,17 +646,8 @@
   transition: opacity 0.3s ease;
 }
 
-/* ✅ 移除：不再需要 visible 類別控制可見性 */
-/* .radar-chart-container.visible {
-  opacity: 1;
-} */
-
-/* ✅ 修改：hidden 類別只用於暫停動畫以優化性能，不控制可見性 */
-.radar-chart-container.hidden {
-  /* 不設置 opacity，保持可見 */
-  /* 不可見時暫停所有動畫以優化性能 */
-  pointer-events: none;
-}
+/* ✅ 移除：不再需要 visible 和 hidden 類別 */
+/* 雷達圖始終可見，確保即使 JavaScript 錯誤也能正常顯示 */
 
 .radar-chart-container::before {
   content: '';
@@ -675,15 +666,15 @@
   border-radius: 50%;
   pointer-events: none;
   animation: rotate 20s linear infinite;
-  /* ✅ 優化：當容器不可見時暫停動畫 */
-  animation-play-state: running;
   will-change: transform;
   transform: translate(-50%, -50%) translateZ(0);
 }
 
-/* ✅ 新增：當容器不可見時暫停動畫 */
-.radar-chart-container.hidden::before {
-  animation-play-state: paused;
+/* ✅ 優化：如果用戶偏好減少動畫，暫停背景動畫 */
+@media (prefers-reduced-motion: reduce) {
+  .radar-chart-container::before {
+    animation-play-state: paused;
+  }
 }
 
 .radar-chart-container::after {
@@ -752,14 +743,8 @@
   will-change: transform, opacity;
 }
 
-/* ✅ 新增：當容器不可見時，暫停所有子元素的動畫 */
-.radar-chart-container.hidden .recharts-polar-angle-axis-tick,
-.radar-chart-container.hidden .recharts-polar-grid-angle-line,
-.radar-chart-container.hidden .recharts-polar-grid-concentric-line,
-.radar-chart-container.hidden .recharts-polar-radius-axis-tick,
-.radar-chart-container.hidden .recharts-radar {
-  animation-play-state: paused;
-}
+/* ✅ 移除：不再需要 hidden 類別的動畫暫停 */
+/* 雷達圖始終可見和可渲染，性能優化通過其他方式實現 */
 
 @keyframes fadeIn {
   from {

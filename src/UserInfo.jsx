@@ -35,7 +35,6 @@ import logger from './utils/logger';
 
 import './userinfo.css';
 import { useTranslation } from 'react-i18next';
-import { useIntersectionObserver } from './hooks/useIntersectionObserver';
 
 // 開發環境下載入調試工具
 if (process.env.NODE_ENV === 'development') {
@@ -517,12 +516,8 @@ function UserInfo({ testData, onLogout, clearTestData }) {
   // 記錄上一次應用過的 testData，避免重複觸發寫入
   const lastAppliedTestDataKeyRef = useRef(null);
 
-  // ✅ 使用 Intersection Observer 優化雷達圖性能（僅用於動畫控制，不控制可見性）
-  const { elementRef: radarObserverRef, isIntersecting: isRadarVisible } =
-    useIntersectionObserver({
-      threshold: 0.3, // 當 30% 可見時才開始動畫
-      rootMargin: '100px', // 提前 100px 開始準備
-    });
+  // ✅ 移除：不再使用 Intersection Observer 控制雷達圖
+  // 雷達圖始終可見，確保即使 JavaScript 錯誤也能正常顯示
 
   // 新增：對話框狀態
   const [modalState, setModalState] = useState({
@@ -953,16 +948,7 @@ function UserInfo({ testData, onLogout, clearTestData }) {
     userData.age,
   ]);
 
-  // ✅ 將 Intersection Observer ref 附加到 radar section
-  useEffect(() => {
-    if (radarSectionRef.current && radarObserverRef) {
-      if (typeof radarObserverRef === 'function') {
-        radarObserverRef(radarSectionRef.current);
-      } else if (radarObserverRef.current !== radarSectionRef.current) {
-        radarObserverRef.current = radarSectionRef.current;
-      }
-    }
-  }, [radarObserverRef]);
+  // ✅ 移除：不再需要 Intersection Observer ref 附加
 
   // 處理從評測頁面返回時自動滾動到雷達圖
   useEffect(() => {
@@ -2176,12 +2162,7 @@ function UserInfo({ testData, onLogout, clearTestData }) {
               <p>正在載入數據...</p>
             </div>
           ) : (
-            <div
-              className={`radar-chart-container ${
-                isRadarVisible ? '' : 'hidden'
-              }`}
-              ref={radarContainerRef}
-            >
+            <div className="radar-chart-container" ref={radarContainerRef}>
               <ResponsiveContainer width="100%" height={400}>
                 <RadarChart data={radarChartData}>
                   <PolarGrid
