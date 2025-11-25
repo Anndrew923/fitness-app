@@ -176,4 +176,6 @@ export const useVisibilityTracker = (onVisible, onHidden, options = {}) => {
   };
 };
 
+// 同時提供命名導出和 default 導出，確保兼容性
+export { useIntersectionObserver };
 export default useIntersectionObserver;
