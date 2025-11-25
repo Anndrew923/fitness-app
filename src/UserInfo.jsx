@@ -865,38 +865,61 @@ function UserInfo({ testData, onLogout, clearTestData }) {
     auth.currentUser,
   ]);
 
+  // ✅ 改進：確保雷達圖數據始終有值，添加錯誤處理
   const radarChartData = useMemo(() => {
-    const scores = userData.scores || DEFAULT_SCORES;
-    return [
-      {
-        name: t('userInfo.radarLabels.strength'),
-        value: scores.strength ? Number(scores.strength).toFixed(2) * 1 : 0,
-        icon: '💪',
-      },
-      {
-        name: t('userInfo.radarLabels.explosivePower'),
-        value: scores.explosivePower
-          ? Number(scores.explosivePower).toFixed(2) * 1
-          : 0,
-        icon: '⚡',
-      },
-      {
-        name: t('userInfo.radarLabels.cardio'),
-        value: scores.cardio ? Number(scores.cardio).toFixed(2) * 1 : 0,
-        icon: '❤️',
-      },
-      {
-        name: t('userInfo.radarLabels.muscle'),
-        value: scores.muscleMass ? Number(scores.muscleMass).toFixed(2) * 1 : 0,
-        icon: '🥩',
-      },
-      {
-        name: t('userInfo.radarLabels.ffmi'),
-        value: scores.bodyFat ? Number(scores.bodyFat).toFixed(2) * 1 : 0,
-        icon: '📊',
-      },
-    ];
-  }, [userData.scores, t]); // ✅ 添加 t 到依賴項
+    try {
+      const scores = userData?.scores || DEFAULT_SCORES;
+      const data = [
+        {
+          name: t('userInfo.radarLabels.strength'),
+          value: scores.strength ? Number(scores.strength).toFixed(2) * 1 : 0,
+          icon: '💪',
+        },
+        {
+          name: t('userInfo.radarLabels.explosivePower'),
+          value: scores.explosivePower
+            ? Number(scores.explosivePower).toFixed(2) * 1
+            : 0,
+          icon: '⚡',
+        },
+        {
+          name: t('userInfo.radarLabels.cardio'),
+          value: scores.cardio ? Number(scores.cardio).toFixed(2) * 1 : 0,
+          icon: '❤️',
+        },
+        {
+          name: t('userInfo.radarLabels.muscle'),
+          value: scores.muscleMass
+            ? Number(scores.muscleMass).toFixed(2) * 1
+            : 0,
+          icon: '🥩',
+        },
+        {
+          name: t('userInfo.radarLabels.ffmi'),
+          value: scores.bodyFat ? Number(scores.bodyFat).toFixed(2) * 1 : 0,
+          icon: '📊',
+        },
+      ];
+      // ✅ 確保數據有效
+      return data.filter(
+        item => item.value !== null && item.value !== undefined
+      );
+    } catch (error) {
+      console.error('雷達圖數據計算錯誤:', error);
+      // 返回默認數據
+      return [
+        { name: t('userInfo.radarLabels.strength'), value: 0, icon: '💪' },
+        {
+          name: t('userInfo.radarLabels.explosivePower'),
+          value: 0,
+          icon: '⚡',
+        },
+        { name: t('userInfo.radarLabels.cardio'), value: 0, icon: '❤️' },
+        { name: t('userInfo.radarLabels.muscle'), value: 0, icon: '🥩' },
+        { name: t('userInfo.radarLabels.ffmi'), value: 0, icon: '📊' },
+      ];
+    }
+  }, [userData?.scores, t]);
 
   const isGuest = useMemo(() => {
     return sessionStorage.getItem('guestMode') === 'true';
@@ -2156,12 +2179,13 @@ function UserInfo({ testData, onLogout, clearTestData }) {
           <div className="corner-decoration bottom-right"></div>
 
           <h2 className="radar-title">{t('userInfo.radarOverview')}</h2>
+          {/* ✅ 改進：確保數據存在才渲染，添加 fallback */}
           {loading ? (
             <div className="loading-container">
               <div className="loading-spinner"></div>
               <p>正在載入數據...</p>
             </div>
-          ) : (
+          ) : radarChartData && radarChartData.length > 0 ? (
             <div className="radar-chart-container" ref={radarContainerRef}>
               <ResponsiveContainer width="100%" height={400}>
                 <RadarChart data={radarChartData}>
@@ -2236,6 +2260,10 @@ function UserInfo({ testData, onLogout, clearTestData }) {
                   </defs>
                 </RadarChart>
               </ResponsiveContainer>
+            </div>
+          ) : (
+            <div className="loading-container">
+              <p>數據載入中...</p>
             </div>
           )}
 

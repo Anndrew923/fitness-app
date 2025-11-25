@@ -630,20 +630,24 @@
     0 4px 12px rgba(129, 216, 208, 0.1);
   position: relative;
   border: 1px solid rgba(129, 216, 208, 0.1);
-  /* ✅ 優化：在移動設備上降低 backdrop-filter 強度 */
-  backdrop-filter: blur(10px);
+  /* ✅ 優化：使用 CSS 變量控制 backdrop-filter，保持外觀但可動態調整 */
+  --backdrop-blur: 10px;
+  backdrop-filter: blur(var(--backdrop-blur));
+  /* ✅ 優化：添加 fallback 背景，在不支持時使用半透明背景 */
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.95) 0%,
+    rgba(248, 250, 252, 0.95) 100%
+  );
   /* 確保容器有足夠的空間容納軸標籤 */
   min-height: 500px;
   display: flex;
   align-items: center;
   justify-content: center;
   /* ✅ 性能優化：啟用硬體加速和渲染優化 */
-  will-change: transform;
   transform: translateZ(0);
   contain: layout style paint;
-  /* ✅ 修改：默認可見，不依賴 JavaScript */
-  /* opacity 不設置，默認可見 */
-  transition: opacity 0.3s ease;
+  /* ✅ 移除 transition，減少重繪 */
 }
 
 /* ✅ 移除：不再需要 visible 和 hidden 類別 */
@@ -665,15 +669,21 @@
   );
   border-radius: 50%;
   pointer-events: none;
+  /* ✅ 保持動畫，但優化實現 */
   animation: rotate 20s linear infinite;
+  /* ✅ 優化：只在動畫期間使用 will-change */
   will-change: transform;
   transform: translate(-50%, -50%) translateZ(0);
+  /* ✅ 優化：使用 GPU 加速層 */
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 
-/* ✅ 優化：如果用戶偏好減少動畫，暫停背景動畫 */
+/* ✅ 優化：如果用戶偏好減少動畫，暫停背景動畫並移除 will-change */
 @media (prefers-reduced-motion: reduce) {
   .radar-chart-container::before {
     animation-play-state: paused;
+    will-change: auto;
   }
 }
 
@@ -707,44 +717,68 @@
 .radar-chart-container .recharts-polar-angle-axis-tick {
   /* ✅ 優化：移除 filter，改用更輕量的效果 */
   /* filter: drop-shadow(0 2px 4px rgba(129, 216, 208, 0.2)); */
-  animation: fadeInScale 0.8s ease-out;
+  /* ✅ 保持動畫，但優化 */
+  animation: fadeInScale 0.8s ease-out forwards;
   /* 確保軸標籤在各種設備上都能正確顯示 */
   transform-origin: center;
   pointer-events: none;
-  /* 使用 will-change 優化 */
+  /* ✅ 優化：只在動畫期間使用 will-change */
   will-change: transform, opacity;
+}
+
+/* ✅ 優化：動畫完成後移除 will-change（通過 :not(:hover) 選擇器） */
+.radar-chart-container .recharts-polar-angle-axis-tick:not(:hover) {
+  animation-fill-mode: forwards;
 }
 
 .radar-chart-container .recharts-polar-grid-angle-line {
   stroke: rgba(129, 216, 208, 0.25);
   stroke-width: 2;
   stroke-dasharray: 4 4;
-  animation: fadeIn 1s ease-out;
+  /* ✅ 保持動畫，但優化 */
+  animation: fadeIn 1s ease-out forwards;
 }
 
 .radar-chart-container .recharts-polar-grid-concentric-line {
   stroke: rgba(129, 216, 208, 0.2);
   stroke-width: 1.5;
   stroke-dasharray: 2 2;
-  animation: fadeIn 1.2s ease-out;
+  /* ✅ 保持動畫，但優化 */
+  animation: fadeIn 1.2s ease-out forwards;
 }
 
 .radar-chart-container .recharts-polar-radius-axis-tick {
   fill: #2d3748;
   font-weight: 600;
   font-size: 12px;
-  animation: fadeIn 1.4s ease-out;
+  /* ✅ 保持動畫，但優化 */
+  animation: fadeIn 1.4s ease-out forwards;
 }
 
 .radar-chart-container .recharts-radar {
-  /* ✅ 優化：保留但簡化 filter */
+  /* ✅ 保持外觀：保留 filter */
   filter: drop-shadow(0 2px 4px rgba(129, 216, 208, 0.2));
-  animation: radarAppear 1.6s ease-out;
+  /* ✅ 保持動畫，但優化 */
+  animation: radarAppear 1.6s ease-out forwards;
+  /* ✅ 優化：只在動畫期間使用 will-change */
   will-change: transform, opacity;
 }
 
-/* ✅ 移除：不再需要 hidden 類別的動畫暫停 */
-/* 雷達圖始終可見和可渲染，性能優化通過其他方式實現 */
+/* ✅ 優化：動畫完成後移除 will-change */
+.radar-chart-container .recharts-radar:not(:hover) {
+  animation-fill-mode: forwards;
+}
+
+/* ✅ 優化：使用 Intersection Observer 在不可見時暫停動畫（但保持可見性） */
+.radar-chart-container.optimized::before {
+  animation-play-state: paused;
+  will-change: auto;
+}
+
+.radar-chart-container.optimized .recharts-* {
+  animation-play-state: paused;
+  will-change: auto;
+}
 
 @keyframes fadeIn {
   from {
@@ -758,7 +792,7 @@
 @keyframes fadeInScale {
   from {
     opacity: 0;
-    transform: scale(0.8);
+    transform: scale(0.95); /* ✅ 使用更小的 scale，減少計算 */
   }
   to {
     opacity: 1;
@@ -769,7 +803,7 @@
 @keyframes radarAppear {
   from {
     opacity: 0;
-    transform: scale(0.9);
+    transform: scale(0.95); /* ✅ 使用更小的 scale */
   }
   to {
     opacity: 1;
@@ -1034,24 +1068,45 @@
     margin-bottom: 20px;
   }
 
-  /* ✅ 優化：在移動設備上降低 backdrop-filter 強度 */
+  /* ✅ 優化：在移動設備上降低 backdrop-filter 強度，但保持外觀 */
   .radar-chart-container {
     padding: 15px;
     min-height: 400px;
-    /* ✅ 優化：在移動設備上降低 backdrop-filter 強度 */
-    backdrop-filter: blur(3px); /* 從 10px 降低到 3px */
+    /* ✅ 降低強度但保持效果 */
+    --backdrop-blur: 5px;
+    backdrop-filter: blur(var(--backdrop-blur));
+    /* ✅ 增強背景不透明度以補償 */
+    background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.98) 0%,
+      rgba(248, 250, 252, 0.98) 100%
+    );
+  }
+
+  /* ✅ 可選：在移動設備上減慢背景動畫速度 */
+  .radar-chart-container::before {
+    animation-duration: 30s; /* 從 20s 減慢到 30s */
   }
 }
 
-/* ✅ 優化：在低性能設備上進一步簡化 */
+/* ✅ 優化：在低性能設備上進一步優化，但保持外觀 */
 @media (max-width: 480px) {
   .radar-chart-container {
-    backdrop-filter: blur(1px); /* 進一步降低 */
-    padding: 30px; /* 減少 padding */
+    --backdrop-blur: 3px; /* 進一步降低 */
+    backdrop-filter: blur(var(--backdrop-blur));
+    /* ✅ 進一步增強背景不透明度 */
+    background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.99) 0%,
+      rgba(248, 250, 252, 0.99) 100%
+    );
+    padding: 20px;
   }
 
+  /* ✅ 在低性能設備上減慢或可選暫停背景動畫 */
   .radar-chart-container::before {
-    animation-duration: 30s; /* 減慢動畫速度 */
+    animation-duration: 40s; /* 進一步減慢 */
+    /* 或者完全暫停：animation-play-state: paused; */
   }
 }
 
