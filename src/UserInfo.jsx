@@ -517,15 +517,12 @@ function UserInfo({ testData, onLogout, clearTestData }) {
   // 記錄上一次應用過的 testData，避免重複觸發寫入
   const lastAppliedTestDataKeyRef = useRef(null);
 
-  // ✅ 使用 Intersection Observer 優化雷達圖性能
-  const {
-    elementRef: radarObserverRef,
-    isIntersecting: isRadarVisible,
-    hasIntersected,
-  } = useIntersectionObserver({
-    threshold: 0.3, // 當 30% 可見時才開始渲染
-    rootMargin: '100px', // 提前 100px 開始準備
-  });
+  // ✅ 使用 Intersection Observer 優化雷達圖性能（僅用於動畫控制，不控制可見性）
+  const { elementRef: radarObserverRef, isIntersecting: isRadarVisible } =
+    useIntersectionObserver({
+      threshold: 0.3, // 當 30% 可見時才開始動畫
+      rootMargin: '100px', // 提前 100px 開始準備
+    });
 
   // 新增：對話框狀態
   const [modalState, setModalState] = useState({
@@ -2181,7 +2178,7 @@ function UserInfo({ testData, onLogout, clearTestData }) {
           ) : (
             <div
               className={`radar-chart-container ${
-                isRadarVisible || hasIntersected ? 'visible' : 'hidden'
+                isRadarVisible ? '' : 'hidden'
               }`}
               ref={radarContainerRef}
             >

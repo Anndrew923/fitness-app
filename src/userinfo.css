@@ -641,19 +641,20 @@
   will-change: transform;
   transform: translateZ(0);
   contain: layout style paint;
-  /* ✅ 優化：當不可見時降低不透明度，減少渲染負擔 */
-  opacity: 0;
+  /* ✅ 修改：默認可見，不依賴 JavaScript */
+  /* opacity 不設置，默認可見 */
   transition: opacity 0.3s ease;
 }
 
-/* ✅ 新增：當雷達圖可見時才完全顯示 */
-.radar-chart-container.visible {
+/* ✅ 移除：不再需要 visible 類別控制可見性 */
+/* .radar-chart-container.visible {
   opacity: 1;
-}
+} */
 
+/* ✅ 修改：hidden 類別只用於暫停動畫以優化性能，不控制可見性 */
 .radar-chart-container.hidden {
-  opacity: 0;
-  /* 不可見時暫停所有動畫 */
+  /* 不設置 opacity，保持可見 */
+  /* 不可見時暫停所有動畫以優化性能 */
   pointer-events: none;
 }
 
