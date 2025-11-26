@@ -217,7 +217,19 @@ function AppContent() {
     // 只在 Android 原生應用中處理
     if (Capacitor.isNativePlatform() && Capacitor.getPlatform() === 'android') {
       const setStatusBarHeight = () => {
-        // 方法 1: 使用 visualViewport（最可靠）
+        // ✅ 優先檢查：是否已從原生注入（最準確的方法）
+        const nativeInjected = window.__nativeInsetsInjected;
+        const existingTop = getComputedStyle(document.documentElement)
+          .getPropertyValue('--safe-area-inset-top')
+          .trim();
+        
+        // 如果原生已注入且值有效，優先使用原生值
+        if (nativeInjected && existingTop && existingTop !== '0px') {
+          logger.debug('Using native-injected status bar height:', existingTop);
+          return; // 不覆蓋原生注入的準確值
+        }
+
+        // 方法 1: 使用 visualViewport（備用方法）
         let statusBarHeight = 0;
 
         if (window.visualViewport) {
@@ -231,17 +243,32 @@ function AppContent() {
           const windowHeight = window.innerHeight;
           const heightDiff = screenHeight - windowHeight;
 
-          // 如果差異在合理範圍內（24-48px），使用它
-          if (heightDiff > 0 && heightDiff <= 48) {
+          // ✅ 改進：擴大檢測範圍，支援 Android 15 的更大 status bar（24-80px）
+          if (heightDiff > 0 && heightDiff <= 80) {
             statusBarHeight = heightDiff;
           } else {
-            // 備用方案：使用常見的 Android status bar 高度
-            // 大多數 Android 設備為 24px，但有些可能是 48px
-            statusBarHeight = 24;
+            // 備用方案：檢測 Android 版本，針對 Android 15 使用更大的預設值
+            const userAgent = navigator.userAgent || '';
+            const androidVersionMatch = userAgent.match(/Android\s([0-9\.]*)/);
+            const androidVersion = androidVersionMatch ? parseFloat(androidVersionMatch[1]) : 0;
+            
+            if (androidVersion >= 15) {
+              statusBarHeight = 48; // Android 15 通常使用 48px
+            } else {
+              statusBarHeight = 24; // 舊版本使用 24px
+            }
           }
         }
 
-        // 設置 CSS 變量（優先使用）
+        // ✅ 改進：驗證檢測結果的合理性
+        if (statusBarHeight > 0 && statusBarHeight < 20) {
+          logger.warn(
+            `Detected status bar height ${statusBarHeight}px seems too small, using 24px`
+          );
+          statusBarHeight = 24;
+        }
+
+        // 設置 CSS 變量（僅在原生未注入時使用）
         document.documentElement.style.setProperty(
           '--safe-area-inset-top',
           `${statusBarHeight}px`
@@ -263,11 +290,19 @@ function AppContent() {
           }
         `;
 
-        logger.debug('Status bar height set to:', statusBarHeight, 'px');
+        logger.debug('Status bar height set to (fallback):', statusBarHeight, 'px');
       };
 
-      // 延遲執行以確保視窗已完全載入
-      const timer = setTimeout(setStatusBarHeight, 100);
+      // ✅ 新增：監聽原生注入事件
+      const handleNativeInsetsUpdate = (event) => {
+        if (event.detail) {
+          logger.debug('Native insets updated:', event.detail);
+        }
+      };
+      window.addEventListener('nativeInsetsUpdated', handleNativeInsetsUpdate);
+
+      // 延遲執行以確保視窗已完全載入（給原生注入一些時間）
+      const timer = setTimeout(setStatusBarHeight, 300);
 
       // 監聽視窗大小變化（處理旋轉、全屏切換等）
       window.addEventListener('resize', setStatusBarHeight);
@@ -285,6 +320,7 @@ function AppContent() {
         clearTimeout(timer);
         window.removeEventListener('resize', setStatusBarHeight);
         window.removeEventListener('orientationchange', setStatusBarHeight);
+        window.removeEventListener('nativeInsetsUpdated', handleNativeInsetsUpdate);
         if (window.visualViewport) {
           window.visualViewport.removeEventListener(
             'resize',

@@ -1,11 +1,18 @@
 package com.ultimatephysique.fitness2025;
 
 import android.os.Bundle;
+import android.util.Log;
+import android.view.View;
+import android.webkit.WebView;
+import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
 import com.getcapacitor.BridgeActivity;
 
 public class MainActivity extends BridgeActivity {
+    private static final String TAG = "MainActivity";
+    
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -32,5 +39,162 @@ public class MainActivity extends BridgeActivity {
         // ✅ 修正：設定導覽列為白色背景（不透明）
         // 使用白色背景，確保導覽列有自己獨立的區塊
         getWindow().setNavigationBarColor(android.graphics.Color.WHITE);
+        
+        // ✅ 新增：獲取 status bar 高度並注入到 WebView（使用 WindowInsets API）
+        // 使用 post() 確保在視圖完全準備好後再執行
+        View decorView = getWindow().getDecorView();
+        decorView.post(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    injectStatusBarHeight();
+                } catch (Exception e) {
+                    Log.e(TAG, "Failed to inject status bar height", e);
+                }
+            }
+        });
+    }
+    
+    /**
+     * 使用 WindowInsets API 獲取準確的 status bar 和 navigation bar 高度
+     * 並注入到 WebView 的 JavaScript 環境中
+     */
+    private void injectStatusBarHeight() {
+        try {
+            View decorView = getWindow().getDecorView();
+            if (decorView == null) {
+                Log.w(TAG, "DecorView is null, cannot get WindowInsets");
+                return;
+            }
+            
+            WindowInsetsCompat windowInsets = ViewCompat.getRootWindowInsets(decorView);
+            if (windowInsets == null) {
+                Log.w(TAG, "WindowInsets is null, using fallback method");
+                // 備用方案：使用資源獲取 status bar 高度
+                injectStatusBarHeightFromResources();
+                return;
+            }
+            
+            // 獲取 status bar 高度（最準確的方法）
+            int statusBarHeight = windowInsets.getInsets(WindowInsetsCompat.Type.statusBars()).top;
+            // 獲取 navigation bar 高度
+            int navBarHeight = windowInsets.getInsets(WindowInsetsCompat.Type.navigationBars()).bottom;
+            // 獲取左側 insets（用於處理異形屏）
+            int leftInset = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars()).left;
+            // 獲取右側 insets（用於處理異形屏）
+            int rightInset = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars()).right;
+            
+            // 驗證獲取的值是否合理
+            if (statusBarHeight < 0) {
+                Log.w(TAG, "Invalid status bar height: " + statusBarHeight + ", using fallback");
+                injectStatusBarHeightFromResources();
+                return;
+            }
+            
+            // 獲取 WebView 實例
+            WebView webView = getBridge().getWebView();
+            if (webView == null) {
+                Log.w(TAG, "WebView is null, will retry later");
+                // 如果 WebView 還沒準備好，稍後再試
+                decorView.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        injectStatusBarHeight();
+                    }
+                }, 200);
+                return;
+            }
+            
+            // 構建 JavaScript 代碼來注入 insets
+            String js = buildInjectionScript(statusBarHeight, navBarHeight, leftInset, rightInset);
+            
+            // 執行 JavaScript 注入
+            webView.evaluateJavascript(js, null);
+            
+            Log.d(TAG, String.format(
+                "Status bar height injected: top=%dpx, bottom=%dpx, left=%dpx, right=%dpx",
+                statusBarHeight, navBarHeight, leftInset, rightInset
+            ));
+            
+        } catch (Exception e) {
+            Log.e(TAG, "Error injecting status bar height", e);
+            // 發生錯誤時使用備用方案
+            injectStatusBarHeightFromResources();
+        }
+    }
+    
+    /**
+     * 備用方案：從 Android 資源中獲取 status bar 高度
+     */
+    private void injectStatusBarHeightFromResources() {
+        try {
+            int resourceId = getResources().getIdentifier("status_bar_height", "dimen", "android");
+            int statusBarHeight = resourceId > 0 
+                ? getResources().getDimensionPixelSize(resourceId) 
+                : 0;
+            
+            // 如果資源獲取失敗，使用常見的預設值
+            if (statusBarHeight <= 0) {
+                statusBarHeight = 24; // Android 標準 status bar 高度
+            }
+            
+            WebView webView = getBridge().getWebView();
+            if (webView != null) {
+                String js = buildInjectionScript(statusBarHeight, 0, 0, 0);
+                webView.evaluateJavascript(js, null);
+                Log.d(TAG, "Status bar height injected from resources: " + statusBarHeight + "px");
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error injecting status bar height from resources", e);
+        }
+    }
+    
+    /**
+     * 構建 JavaScript 注入腳本
+     */
+    private String buildInjectionScript(int top, int bottom, int left, int right) {
+        return String.format(
+            "(function() { " +
+            "  try { " +
+            "    // 檢查是否已有注入的樣式，避免重複創建 " +
+            "    var style = document.getElementById('android-status-bar-height-fix'); " +
+            "    if (!style) { " +
+            "      style = document.createElement('style'); " +
+            "      style.id = 'android-status-bar-height-fix'; " +
+            "      document.head.appendChild(style); " +
+            "    } " +
+            "    " +
+            "    // 設置 CSS 變量 " +
+            "    document.documentElement.style.setProperty('--safe-area-inset-top', '%dpx'); " +
+            "    document.documentElement.style.setProperty('--safe-area-inset-bottom', '%dpx'); " +
+            "    document.documentElement.style.setProperty('--safe-area-inset-left', '%dpx'); " +
+            "    document.documentElement.style.setProperty('--safe-area-inset-right', '%dpx'); " +
+            "    " +
+            "    // 更新樣式表以確保優先級 " +
+            "    style.textContent = ':root { " +
+            "      --safe-area-inset-top: %dpx !important; " +
+            "      --safe-area-inset-bottom: %dpx !important; " +
+            "      --safe-area-inset-left: %dpx !important; " +
+            "      --safe-area-inset-right: %dpx !important; " +
+            "    }'; " +
+            "    " +
+            "    // 標記已從原生注入，避免 JavaScript 覆蓋 " +
+            "    window.__nativeInsetsInjected = true; " +
+            "    " +
+            "    // 觸發自定義事件，通知其他代碼 insets 已更新 " +
+            "    window.dispatchEvent(new CustomEvent('nativeInsetsUpdated', { " +
+            "      detail: { top: %d, bottom: %d, left: %d, right: %d } " +
+            "    })); " +
+            "    " +
+            "    console.log('[Native] Status bar insets injected: top=%dpx, bottom=%dpx, left=%dpx, right=%dpx'); " +
+            "  } catch (e) { " +
+            "    console.error('[Native] Error injecting status bar height:', e); " +
+            "  } " +
+            "})();",
+            top, bottom, left, right,
+            top, bottom, left, right,
+            top, bottom, left, right,
+            top, bottom, left, right
+        );
     }
 }
