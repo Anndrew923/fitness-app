@@ -4,7 +4,29 @@ import { signInWithCredential, GoogleAuthProvider } from 'firebase/auth';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
 
 class NativeGoogleAuth {
-  // 初始化 - 完整修正版本
+  // 定義正確的 Client ID 常量
+  static CORRECT_CLIENT_ID =
+    '5144099869-6kes2gchrinle0io7dl8c12f83rgfso6.apps.googleusercontent.com';
+  static ERROR_CLIENT_ID_PATTERN = '6kes2gchrinle0io7d18c'; // 錯誤的 Client ID 模式（d18c）
+
+  // 驗證 Client ID 的輔助方法（安全檢查）
+  static validateClientId(clientId) {
+    if (!clientId) {
+      throw new Error('Client ID 未定義');
+    }
+
+    // 檢查是否包含錯誤的模式（d18c）
+    if (clientId.includes(this.ERROR_CLIENT_ID_PATTERN)) {
+      console.error('❌ 發現錯誤的 Client ID (包含 d18c):', clientId);
+      throw new Error(
+        `Client ID 配置錯誤：發現錯誤的 Client ID (d18c)。請檢查所有配置文件，確保使用正確的 Client ID (dl8c)。`
+      );
+    }
+
+    return true;
+  }
+
+  // 初始化 - 簡化版本（直接使用正確的 Client ID）
   static async initialize() {
     try {
       console.log('🔍 初始化 Capacitor Google Auth...');
@@ -17,27 +39,25 @@ class NativeGoogleAuth {
 
       console.log('🔍 環境檢測:', { isWebView, isCapacitor });
 
-      // 添加調試資訊
-      console.log('🔍 當前配置檢查:');
-      console.log(
-        '- strings.xml server_client_id: 5144099869-6kes2gchrinle0io7dl8c12f83rgfso6.apps.googleusercontent.com'
-      );
-      console.log(
-        '- capacitor.config.json serverClientId: 5144099869-6kes2gchrinle0io7dl8c12f83rgfso6.apps.googleusercontent.com'
-      );
-      console.log(
-        '- AndroidManifest.xml GOOGLE_SIGN_IN_CLIENT_ID: 5144099869-6kes2gchrinle0io7dl8c12f83rgfso6.apps.googleusercontent.com'
-      );
-      console.log('- 準備初始化外掛...');
+      // ✅ 直接使用正確的 Client ID（已確認正確）
+      const clientId = this.CORRECT_CLIENT_ID;
 
-      // ✅ 恢復：使用完整版本 Client ID（之前能正常登入的配置）
+      // ✅ 驗證 Client ID（安全檢查）
+      this.validateClientId(clientId);
+
+      console.log('🔍 當前配置檢查:');
+      console.log(`- 使用的 Client ID: ${clientId}`);
+      console.log('- ✅ Client ID 驗證通過');
+
+      // 使用正確的 Client ID 進行初始化
       await GoogleAuth.initialize({
-        clientId: '5144099869-6kes2gchrinle0io7dl8c12f83rgfso6.apps.googleusercontent.com',
+        clientId: clientId,
         scopes: ['profile', 'email'],
         grantOfflineAccess: true,
       });
 
       console.log('✅ Google Auth 初始化成功');
+      console.log(`✅ 使用的 Client ID: ${clientId}`);
       return true;
     } catch (error) {
       console.error('❌ Google Auth 初始化失敗:', error);
@@ -51,17 +71,21 @@ class NativeGoogleAuth {
     }
   }
 
-  // 執行 Google 登入 - 完整修正版本
+  // 執行 Google 登入 - 簡化版本（直接使用正確的 Client ID）
   static async signIn() {
     try {
       console.log('🔄 開始 Google 登入...');
 
-      // 添加調試資訊
+      // ✅ 直接使用正確的 Client ID
+      const clientId = this.CORRECT_CLIENT_ID;
+
+      // ✅ 驗證 Client ID（安全檢查）
+      this.validateClientId(clientId);
+
+      // 添加調試資訊（顯示實際使用的 Client ID）
       console.log('🔍 登入前檢查:');
       console.log('- 外掛狀態: 已初始化');
-      console.log(
-        '- Client ID: 5144099869-6kes2gchrinle0io7dl8c12f83rgfso6.apps.googleusercontent.com'
-      );
+      console.log(`- 使用的 Client ID: ${clientId}`);
       console.log('- 環境: Android WebView');
 
       // ✅ 改進：直接調用，不使用 Promise.race（避免錯誤被吞掉）
@@ -101,10 +125,7 @@ class NativeGoogleAuth {
       }
 
       console.log('✅ Google 登入成功:', result);
-      console.log(
-        '🔍 Google 結果完整結構:',
-        JSON.stringify(result, null, 2)
-      );
+      console.log('🔍 Google 結果完整結構:', JSON.stringify(result, null, 2));
 
       // 驗證結果完整性
       if (!result.id || !result.email) {
@@ -126,16 +147,22 @@ class NativeGoogleAuth {
 
       if (error.message.includes('Something went wrong')) {
         console.error('🔍 可能原因分析:');
-        console.error('1. Client ID 配置不正確');
+        console.error('1. Client ID 配置不正確（檢查是否有 d18c 錯誤）');
         console.error('2. Google Console 設定問題');
         console.error('3. 外掛版本相容性問題');
         console.error('4. Android WebView 權限問題');
+        console.error(
+          '5. SHA-1 指紋不匹配（確認已添加 Google Play 應用程式簽名金鑰的 SHA-1）'
+        );
         console.error('🔍 建議檢查:');
         console.error(
           '- Firebase Console > Authentication > Sign-in method > Google'
         );
         console.error('- Google Cloud Console > OAuth 2.0 客戶端 ID');
         console.error('- Android 應用程式簽名 (SHA-1)');
+        console.error(
+          '- 確認所有配置文件使用正確的 Client ID (dl8c，不是 d18c)'
+        );
       }
 
       // 重試機制
@@ -152,7 +179,7 @@ class NativeGoogleAuth {
     }
   }
 
-  // 重試機制 - 增強版本
+  // 重試機制 - 簡化版本
   static async retrySignIn(retryCount = 0) {
     const maxRetries = 3;
 
@@ -166,10 +193,14 @@ class NativeGoogleAuth {
         setTimeout(resolve, 1000 * (retryCount + 1))
       );
 
+      // ✅ 直接使用正確的 Client ID
+      const clientId = this.CORRECT_CLIENT_ID;
+
+      // ✅ 驗證 Client ID（安全檢查）
+      this.validateClientId(clientId);
+
       console.log(`🔄 第 ${retryCount + 1} 次重試...`);
-      console.log(
-        `🔍 重試前檢查: Client ID = 5144099869-6kes2gchrinle0io7dl8c12f83rgfso6.apps.googleusercontent.com`
-      );
+      console.log(`🔍 重試前檢查: 使用的 Client ID = ${clientId}`);
 
       const result = await GoogleAuth.signIn();
 
@@ -352,7 +383,7 @@ class NativeGoogleAuth {
     try {
       const result = await GoogleAuth.refresh();
       return result;
-    } catch (error) {
+    } catch {
       console.log('用戶未登入或 token 已過期');
       return null;
     }
