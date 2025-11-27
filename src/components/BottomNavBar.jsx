@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { auth } from '../firebase';
 import GuestModal from './GuestModal';
 import { useTranslation } from 'react-i18next';
+import { Capacitor } from '@capacitor/core';
 
 const navItems = [
   {
@@ -153,6 +154,8 @@ function BottomNavBar() {
   const { t } = useTranslation();
   const [modalOpen, setModalOpen] = useState(false);
   const [screenSize, setScreenSize] = useState('medium');
+  // ✅ 新增：鍵盤可見狀態
+  const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
 
   // 檢測螢幕大小並分類
   useEffect(() => {
@@ -171,6 +174,36 @@ function BottomNavBar() {
     window.addEventListener('resize', checkScreenSize);
 
     return () => window.removeEventListener('resize', checkScreenSize);
+  }, []);
+
+  // ✅ 新增：監聽鍵盤狀態變化（僅在原生平台）
+  useEffect(() => {
+    // 只在原生平台監聽
+    if (!Capacitor.isNativePlatform()) {
+      return;
+    }
+
+    const handleKeyboardToggle = (event) => {
+      setIsKeyboardVisible(event.detail.isVisible);
+    };
+
+    // 監聽鍵盤狀態變化事件
+    window.addEventListener('keyboardToggle', handleKeyboardToggle);
+    
+    // 初始檢查 CSS 變數
+    const checkInitialState = () => {
+      const isVisible = getComputedStyle(document.documentElement)
+        .getPropertyValue('--is-keyboard-visible') === '1';
+      setIsKeyboardVisible(isVisible);
+    };
+    
+    // 延遲檢查，確保 CSS 變數已設置
+    const timer = setTimeout(checkInitialState, 200);
+
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('keyboardToggle', handleKeyboardToggle);
+    };
   }, []);
 
   // 檢測是否為英文
@@ -260,9 +293,14 @@ function BottomNavBar() {
           alignItems: 'center',
           zIndex: 1200,
           boxShadow: '0 -2px 8px rgba(0,0,0,0.04)',
-          // 確保不受硬體加速影響
-          transform: 'none',
-          willChange: 'auto',
+          // ✅ 新增：鍵盤開啟時隱藏導覽列（原生應用優化）
+          transform: isKeyboardVisible ? 'translateY(100%)' : 'translateY(0)',
+          transition: 'transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
+          opacity: isKeyboardVisible ? 0 : 1,
+          visibility: isKeyboardVisible ? 'hidden' : 'visible',
+          pointerEvents: isKeyboardVisible ? 'none' : 'auto',
+          // 優化性能
+          willChange: isKeyboardVisible ? 'transform, opacity' : 'auto',
         }}
       >
         {navItems.map(item => (

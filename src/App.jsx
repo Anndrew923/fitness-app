@@ -335,6 +335,141 @@ function AppContent() {
     }
   }, []);
 
+  // ✅ 新增：原生應用鍵盤檢測邏輯（僅在 iOS/Android 平台）
+  useEffect(() => {
+    // 只在原生平台運行
+    if (!Capacitor.isNativePlatform()) {
+      return;
+    }
+
+    let keyboardHeight = 0;
+    let isKeyboardVisible = false;
+    let resizeTimeout = null;
+    let lastWindowHeight = window.innerHeight;
+
+    const handleKeyboardDetection = () => {
+      // 防抖處理，避免頻繁觸發
+      if (resizeTimeout) {
+        clearTimeout(resizeTimeout);
+      }
+
+      resizeTimeout = setTimeout(() => {
+        const currentHeight = window.innerHeight;
+        const screenHeight = window.screen.height;
+        
+        // 方法 1: 使用 visualViewport API（最準確，iOS 和 Android 都支援）
+        if (window.visualViewport) {
+          const viewport = window.visualViewport;
+          const viewportHeight = viewport.height;
+          const windowHeight = window.innerHeight;
+          
+          // 計算鍵盤高度
+          const newKeyboardHeight = Math.max(0, windowHeight - viewportHeight);
+          
+          // 原生應用中，鍵盤高度通常超過 200px
+          const newIsKeyboardVisible = newKeyboardHeight > 200;
+          
+          // 只在狀態改變時更新
+          if (newIsKeyboardVisible !== isKeyboardVisible || Math.abs(newKeyboardHeight - keyboardHeight) > 20) {
+            isKeyboardVisible = newIsKeyboardVisible;
+            keyboardHeight = newKeyboardHeight;
+            
+            updateKeyboardState(isKeyboardVisible, keyboardHeight);
+          }
+        } else {
+          // 方法 2: 備用方案 - 使用視窗高度變化檢測
+          const heightDiff = lastWindowHeight - currentHeight;
+          
+          // 如果視窗高度減少超過 200px，可能是鍵盤開啟
+          // 原生應用中，鍵盤通常會讓視窗高度減少 300-500px
+          const newIsKeyboardVisible = heightDiff > 200 && currentHeight < screenHeight * 0.7;
+          
+          if (newIsKeyboardVisible !== isKeyboardVisible) {
+            isKeyboardVisible = newIsKeyboardVisible;
+            keyboardHeight = newIsKeyboardVisible ? heightDiff : 0;
+            
+            updateKeyboardState(isKeyboardVisible, keyboardHeight);
+          }
+          
+          lastWindowHeight = currentHeight;
+        }
+      }, 150); // 150ms 防抖延遲，適合原生應用
+    };
+
+    const updateKeyboardState = (isVisible, height) => {
+      // 設置 CSS 變數
+      document.documentElement.style.setProperty(
+        '--keyboard-height',
+        `${height}px`
+      );
+      document.documentElement.style.setProperty(
+        '--is-keyboard-visible',
+        isVisible ? '1' : '0'
+      );
+      
+      // 設置 data 屬性，供 CSS 選擇器使用
+      if (isVisible) {
+        document.documentElement.setAttribute('data-keyboard-visible', 'true');
+      } else {
+        document.documentElement.removeAttribute('data-keyboard-visible');
+      }
+      
+      // 觸發自定義事件
+      window.dispatchEvent(new CustomEvent('keyboardToggle', {
+        detail: { 
+          isVisible: isVisible, 
+          height: height 
+        }
+      }));
+      
+      logger.debug('鍵盤狀態變化（原生）:', { 
+        isVisible: isVisible, 
+        height: height,
+        platform: Capacitor.getPlatform()
+      });
+    };
+
+    // 監聽視口變化（優先使用）
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', handleKeyboardDetection);
+      window.visualViewport.addEventListener('scroll', handleKeyboardDetection);
+    }
+    
+    // 監聽視窗大小變化
+    window.addEventListener('resize', handleKeyboardDetection);
+    
+    // 監聽輸入框焦點事件（輔助檢測，原生應用中更可靠）
+    const handleInputFocus = () => {
+      // 延遲檢查，給鍵盤時間彈出（原生應用鍵盤彈出較快）
+      setTimeout(handleKeyboardDetection, 200);
+    };
+    
+    const handleInputBlur = () => {
+      // 延遲檢查，給鍵盤時間收起
+      setTimeout(handleKeyboardDetection, 200);
+    };
+    
+    // 監聽所有輸入元素的焦點事件
+    document.addEventListener('focusin', handleInputFocus, true);
+    document.addEventListener('focusout', handleInputBlur, true);
+    
+    // 初始檢查
+    setTimeout(handleKeyboardDetection, 300);
+
+    return () => {
+      if (resizeTimeout) {
+        clearTimeout(resizeTimeout);
+      }
+      if (window.visualViewport) {
+        window.visualViewport.removeEventListener('resize', handleKeyboardDetection);
+        window.visualViewport.removeEventListener('scroll', handleKeyboardDetection);
+      }
+      window.removeEventListener('resize', handleKeyboardDetection);
+      document.removeEventListener('focusin', handleInputFocus, true);
+      document.removeEventListener('focusout', handleInputBlur, true);
+    };
+  }, []);
+
   // ✅ 預載入常用頁面（在空閒時間）
   useEffect(() => {
     const preloadPages = () => {

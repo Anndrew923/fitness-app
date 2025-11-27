@@ -241,3 +241,51 @@ ins[data-ad-status='filled'] {
     bottom: calc(64px + env(safe-area-inset-bottom, 0px)) !important;
   }
 }
+
+/* ✅ 新增：原生應用鍵盤開啟時隱藏固定廣告 */
+/* 使用 data 屬性選擇器，針對 iOS/Android 原生應用 */
+html[data-keyboard-visible="true"] .ad-banner--fixed,
+html[data-keyboard-visible="true"] .adsbygoogle[data-ad-format='auto'] {
+  transform: translateY(100%);
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), 
+              opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1), 
+              visibility 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ✅ 優化：使用 will-change 提升原生應用性能 */
+.ad-banner--fixed {
+  will-change: transform, opacity;
+}
+
+/* ✅ 鍵盤開啟時，確保廣告完全隱藏，不佔用空間（原生應用優化） */
+html[data-keyboard-visible="true"] .ad-banner--fixed {
+  position: absolute !important;
+  bottom: -1000px !important; /* 移到視窗外，避免影響佈局 */
+  height: 0 !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+}
+
+/* ✅ 原生應用響應式優化 - 鍵盤處理 */
+@media (max-width: 768px) {
+  /* 鍵盤開啟時隱藏廣告 */
+  html[data-keyboard-visible="true"] .ad-banner--fixed {
+    transform: translateY(100%);
+    opacity: 0;
+    visibility: hidden;
+    bottom: -1000px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  /* 小螢幕鍵盤處理 */
+  html[data-keyboard-visible="true"] .ad-banner--fixed {
+    transform: translateY(100%);
+    opacity: 0;
+    visibility: hidden;
+    bottom: -1000px !important;
+  }
+}

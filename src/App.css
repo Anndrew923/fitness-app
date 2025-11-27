@@ -11,6 +11,9 @@
   --safe-area-inset-right: env(safe-area-inset-right, 0px);
   --safe-area-inset-bottom: env(safe-area-inset-bottom, 0px);
   --safe-area-inset-left: env(safe-area-inset-left, 0px);
+  /* ✅ 新增：原生應用鍵盤檢測相關 CSS 變數 */
+  --keyboard-height: 0px;
+  --is-keyboard-visible: 0;
 }
 
 body {
@@ -88,6 +91,12 @@ body::after {
 
 /* 注意：如果 safe-area-inset 為 0，覆蓋層高度自動為 0，不會影響視覺 */
 /* 不需要額外的媒體查詢，因為 height: env(safe-area-inset-top, 0px) 已經處理了這種情況 */
+
+/* ✅ 新增：鍵盤開啟時，防止頁面內容被底部元素遮擋（原生應用） */
+html[data-keyboard-visible="true"] {
+  /* 可以添加其他全局樣式調整 */
+  /* 例如：調整頁面底部 padding */
+}
 
 /* 手機優先設計 */
 .gender-selection,
