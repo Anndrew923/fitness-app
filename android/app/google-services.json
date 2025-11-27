@@ -22,6 +22,14 @@
           }
         },
         {
+          "client_id": "5144099869-org039ohcg6l5h83n3bndr0qirisnai6.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.ultimatephysique.fitness2025",
+            "certificate_hash": "94d30cc0dfeca9fc7c2cf3fd96fea71e17e7ff82"
+          }
+        },
+        {
           "client_id": "5144099869-sl5cra0skr95cj2uq7jitgdg8br23svd.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {

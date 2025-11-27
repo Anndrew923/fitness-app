@@ -504,6 +504,7 @@ function UserInfo({ testData, onLogout, clearTestData }) {
   const [loading, setLoading] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
   const [dataLoaded, setDataLoaded] = useState(false);
+  const [isPageReady, setIsPageReady] = useState(false); // ✅ 新增：頁面準備狀態
   const navigate = useNavigate();
   const location = useLocation();
   const radarSectionRef = useRef(null);
@@ -972,6 +973,41 @@ function UserInfo({ testData, onLogout, clearTestData }) {
   ]);
 
   // ✅ 移除：不再需要 Intersection Observer ref 附加
+
+  // ✅ 新增：檢查頁面是否準備好顯示
+  useEffect(() => {
+    const checkPageReady = () => {
+      // 檢查所有必要條件：
+      // 1. 數據已載入（dataLoaded 或 guest 模式）
+      // 2. 用戶認證完成（currentUser 或 guest）
+      // 3. 雷達圖數據已計算完成（即使為空數組也可以，因為有 fallback UI）
+      // 4. 不在載入狀態
+      const userReady = currentUser || isGuest;
+      const dataReady = dataLoaded || isGuest;
+      // ✅ 優化：radarChartData 只要存在即可（即使為空數組也有 fallback UI）
+      const radarReady = radarChartData !== undefined && radarChartData !== null;
+      const notLoading = !isLoading && !loading;
+
+      const ready = userReady && dataReady && radarReady && notLoading;
+
+      if (ready && !isPageReady) {
+        // ✅ 添加小延遲，確保所有計算完成和 DOM 準備好
+        setTimeout(() => {
+          setIsPageReady(true);
+        }, 150);
+      }
+    };
+
+    checkPageReady();
+  }, [
+    currentUser,
+    isGuest,
+    dataLoaded,
+    isLoading,
+    loading,
+    radarChartData,
+    isPageReady,
+  ]);
 
   // 處理從評測頁面返回時自動滾動到雷達圖
   useEffect(() => {
@@ -1636,19 +1672,21 @@ function UserInfo({ testData, onLogout, clearTestData }) {
     }
   };
 
-  // 顯示載入中狀態
-  if (isLoading && !dataLoaded) {
+  // ✅ 修改：顯示全屏載入動畫，直到頁面準備好
+  if (!isPageReady) {
     return (
-      <div className="user-info-container">
-        <div className="loading-message">
-          <p>{t('common.loading')}</p>
+      <div className="user-info-container page-loading">
+        <div className="full-page-loader">
+          <div className="loading-spinner-large"></div>
+          <p className="loading-text">{t('common.loading')}</p>
         </div>
       </div>
     );
   }
 
+  // ✅ 修改：頁面準備好後，一次性顯示所有內容（帶淡入動畫）
   return (
-    <div className="user-info-container">
+    <div className="user-info-container page-ready">
       {/* 右上角設定按鈕 */}
       <button
         type="button"
