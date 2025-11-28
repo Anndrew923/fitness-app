@@ -231,21 +231,26 @@ function AppContent() {
     
     // ✅ 初始化：在應用啟動時記錄初始 Status Bar 高度
     const initializeStatusBarHeight = () => {
-      if (isInitialized) return;
+      if (isInitialized && initialStatusBarHeight > 0) return;
       
-      // 優先使用原生注入的值
+      // ✅ 優先使用原生注入的值（最準確，不應該被覆蓋）
       const nativeInjected = window.__nativeInsetsInjected;
       const existingTop = getComputedStyle(document.documentElement)
         .getPropertyValue('--safe-area-inset-top')
         .trim();
       
       if (nativeInjected && existingTop && existingTop !== '0px') {
-        initialStatusBarHeight = parseFloat(existingTop.replace('px', '')) || 0;
-        isInitialized = true;
-        lastKnownStatusBarHeight = initialStatusBarHeight;
-        return;
+        const parsedHeight = parseFloat(existingTop.replace('px', '')) || 0;
+        if (parsedHeight > 0) {
+          initialStatusBarHeight = parsedHeight;
+          isInitialized = true;
+          lastKnownStatusBarHeight = initialStatusBarHeight;
+          logger.debug('Status bar height initialized from native:', initialStatusBarHeight, 'px');
+          return; // ✅ 關鍵：原生注入的值最準確，不需要重新計算
+        }
       }
       
+      // 只有在原生注入失敗時，才使用 JavaScript 計算
       // 計算初始 Status Bar 高度（應用啟動時，鍵盤肯定未開啟）
       const initialHeightDiff = initialScreenHeight - initialWindowHeight;
       
@@ -267,25 +272,28 @@ function AppContent() {
       isInitialized = true;
       lastKnownStatusBarHeight = initialStatusBarHeight;
       
-      // 設置初始值
-      document.documentElement.style.setProperty(
-        '--safe-area-inset-top',
-        `${initialStatusBarHeight}px`
-      );
-      
-      const styleId = 'android-status-bar-height-fix';
-      let styleElement = document.getElementById(styleId);
-      if (!styleElement) {
-        styleElement = document.createElement('style');
-        styleElement.id = styleId;
-        document.head.appendChild(styleElement);
-      }
-      
-      styleElement.textContent = `
-        :root {
-          --safe-area-inset-top: ${initialStatusBarHeight}px !important;
+      // ✅ 關鍵：只有在原生注入失敗時，才設置 CSS 變量
+      // 如果原生已注入，不應該覆蓋
+      if (!nativeInjected) {
+        document.documentElement.style.setProperty(
+          '--safe-area-inset-top',
+          `${initialStatusBarHeight}px`
+        );
+        
+        const styleId = 'android-status-bar-height-fix';
+        let styleElement = document.getElementById(styleId);
+        if (!styleElement) {
+          styleElement = document.createElement('style');
+          styleElement.id = styleId;
+          document.head.appendChild(styleElement);
         }
-      `;
+        
+        styleElement.textContent = `
+          :root {
+            --safe-area-inset-top: ${initialStatusBarHeight}px !important;
+          }
+        `;
+      }
       
       logger.debug('Status bar height initialized:', initialStatusBarHeight, 'px');
     };
@@ -334,34 +342,70 @@ function AppContent() {
           lastKnownViewportHeight = currentViewportHeight;
           lastKnownWindowHeight = currentWindowHeight;
           
-          // 只有在鍵盤未開啟時，才更新 Status Bar
-          // ✅ 優先檢查：是否已從原生注入（最準確的方法）
+          // ✅ 關鍵改進：優先檢查原生注入的值（最準確，不應該被覆蓋）
           const nativeInjected = window.__nativeInsetsInjected;
           const existingTop = getComputedStyle(document.documentElement)
             .getPropertyValue('--safe-area-inset-top')
             .trim();
           
-          // 如果原生已注入且值有效，優先使用原生值
+          // ✅ 關鍵：如果原生已注入且值有效，直接使用，不再重新計算
           if (nativeInjected && existingTop && existingTop !== '0px') {
             const parsedHeight = parseFloat(existingTop.replace('px', '')) || 0;
-            if (parsedHeight > 0 && parsedHeight !== lastKnownStatusBarHeight) {
-              lastKnownStatusBarHeight = parsedHeight;
-              initialStatusBarHeight = parsedHeight;
-              isInitialized = true;
+            if (parsedHeight > 0) {
+              // 更新初始值（如果還沒初始化）
+              if (!isInitialized || initialStatusBarHeight === 0) {
+                initialStatusBarHeight = parsedHeight;
+                isInitialized = true;
+                lastKnownStatusBarHeight = parsedHeight;
+                logger.debug('Status bar height updated from native injection:', parsedHeight, 'px');
+              }
+              return; // ✅ 關鍵：原生注入的值最準確，不應該被覆蓋
             }
-            return; // 不覆蓋原生注入的準確值
           }
           
-          // ✅ 關鍵改進：使用初始值計算，而不是當前值（避免鍵盤影響）
-          // 只有在鍵盤未開啟時，才使用當前值計算
-          let statusBarHeight = initialStatusBarHeight || 0;
+          // ✅ 關鍵改進：如果已初始化且初始值有效，直接使用，不再重新計算
+          // 這確保不會因為鍵盤影響而重新計算錯誤的值
+          if (isInitialized && initialStatusBarHeight > 0) {
+            // 只有在值改變時才更新（避免不必要的 DOM 操作）
+            if (initialStatusBarHeight !== lastKnownStatusBarHeight) {
+              lastKnownStatusBarHeight = initialStatusBarHeight;
+              
+              // ✅ 關鍵：只有在原生注入失敗時，才設置 CSS 變量
+              // 如果原生已注入，不應該覆蓋
+              if (!nativeInjected) {
+                document.documentElement.style.setProperty(
+                  '--safe-area-inset-top',
+                  `${initialStatusBarHeight}px`
+                );
+
+                const styleId = 'android-status-bar-height-fix';
+                let styleElement = document.getElementById(styleId);
+                if (!styleElement) {
+                  styleElement = document.createElement('style');
+                  styleElement.id = styleId;
+                  document.head.appendChild(styleElement);
+                }
+
+                styleElement.textContent = `
+                  :root {
+                    --safe-area-inset-top: ${initialStatusBarHeight}px !important;
+                  }
+                `;
+                
+                logger.debug('Status bar height updated (unified):', initialStatusBarHeight, 'px');
+              }
+            }
+            return; // ✅ 關鍵：已初始化，直接返回，不再重新計算
+          }
           
-          // 如果還沒初始化，使用當前值計算（但必須確保鍵盤未開啟）
-          if (!isInitialized || statusBarHeight === 0) {
+          // ✅ 只有在未初始化時才計算，且必須確保鍵盤未開啟
+          if (!isInitialized) {
             const screenHeight = window.screen.height;
             const windowHeight = window.innerHeight;
             const heightDiff = screenHeight - windowHeight;
 
+            let statusBarHeight = 0;
+            
             if (heightDiff > 0 && heightDiff <= 80) {
               statusBarHeight = heightDiff;
             } else {
@@ -376,49 +420,42 @@ function AppContent() {
                 statusBarHeight = 24;
               }
             }
+
+            // ✅ 改進：驗證檢測結果的合理性（靜默處理，不顯示警告）
+            if (statusBarHeight > 0 && statusBarHeight < 20) {
+              statusBarHeight = 24;
+            }
             
             // 更新初始值
-            if (!isInitialized) {
+            if (statusBarHeight > 0) {
               initialStatusBarHeight = statusBarHeight;
               isInitialized = true;
-            }
-          }
+              lastKnownStatusBarHeight = statusBarHeight;
+              
+              // ✅ 關鍵：只有在原生注入失敗時，才設置 CSS 變量
+              if (!nativeInjected) {
+                document.documentElement.style.setProperty(
+                  '--safe-area-inset-top',
+                  `${statusBarHeight}px`
+                );
 
-          // ✅ 改進：驗證檢測結果的合理性（靜默處理，不顯示警告）
-          if (statusBarHeight > 0 && statusBarHeight < 20) {
-            statusBarHeight = 24;
-            if (!isInitialized) {
-              initialStatusBarHeight = 24;
-              isInitialized = true;
-            }
-          }
+                const styleId = 'android-status-bar-height-fix';
+                let styleElement = document.getElementById(styleId);
+                if (!styleElement) {
+                  styleElement = document.createElement('style');
+                  styleElement.id = styleId;
+                  document.head.appendChild(styleElement);
+                }
 
-          // 只有在值改變時才更新（避免不必要的 DOM 操作）
-          if (statusBarHeight > 0 && statusBarHeight !== lastKnownStatusBarHeight) {
-            lastKnownStatusBarHeight = statusBarHeight;
-            
-            // 設置 CSS 變量
-            document.documentElement.style.setProperty(
-              '--safe-area-inset-top',
-              `${statusBarHeight}px`
-            );
-
-            // 更新 :root 中的 CSS 變量定義
-            const styleId = 'android-status-bar-height-fix';
-            let styleElement = document.getElementById(styleId);
-            if (!styleElement) {
-              styleElement = document.createElement('style');
-              styleElement.id = styleId;
-              document.head.appendChild(styleElement);
-            }
-
-            styleElement.textContent = `
-              :root {
-                --safe-area-inset-top: ${statusBarHeight}px !important;
+                styleElement.textContent = `
+                  :root {
+                    --safe-area-inset-top: ${statusBarHeight}px !important;
+                  }
+                `;
+                
+                logger.debug('Status bar height initialized (unified):', statusBarHeight, 'px');
               }
-            `;
-            
-            logger.debug('Status bar height updated (unified):', statusBarHeight, 'px');
+            }
           }
         } catch (error) {
           logger.error('Unified viewport change handler error:', error);
@@ -429,19 +466,36 @@ function AppContent() {
     // 初始化 Status Bar 高度
     initializeStatusBarHeight();
     
+    // ✅ 關鍵改進：監聽原生注入事件，更新初始值（確保原生值優先）
+    const handleNativeInsetsUpdate = (event) => {
+      if (event.detail) {
+        const { top, bottom } = event.detail;
+        if (top > 0) {
+          initialStatusBarHeight = top;
+          isInitialized = true;
+          lastKnownStatusBarHeight = top;
+          logger.debug('Status bar height updated from native event:', top, 'px');
+        }
+        // ✅ 關鍵：不修改 --safe-area-inset-bottom，由原生注入管理
+        // bottom 值由原生注入，JavaScript 不應該覆蓋
+      }
+    };
+    window.addEventListener('nativeInsetsUpdated', handleNativeInsetsUpdate);
+    
     // 監聽視口變化（統一處理）
     if (window.visualViewport) {
       window.visualViewport.addEventListener('resize', handleUnifiedViewportChange);
     }
     window.addEventListener('resize', handleUnifiedViewportChange);
     
-    // 初始檢查
-    setTimeout(handleUnifiedViewportChange, 300);
+    // ✅ 改進：初始檢查（延遲執行，給原生注入時間）
+    setTimeout(handleUnifiedViewportChange, 500);
     
     return () => {
       if (viewportChangeTimeout) {
         clearTimeout(viewportChangeTimeout);
       }
+      window.removeEventListener('nativeInsetsUpdated', handleNativeInsetsUpdate);
       if (window.visualViewport) {
         window.visualViewport.removeEventListener('resize', handleUnifiedViewportChange);
       }
