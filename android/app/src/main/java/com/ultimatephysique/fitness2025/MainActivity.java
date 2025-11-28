@@ -1,11 +1,14 @@
 package com.ultimatephysique.fitness2025;
 
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.graphics.Rect;
 import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -15,12 +18,19 @@ import com.getcapacitor.BridgeActivity;
 public class MainActivity extends BridgeActivity {
     private static final String TAG = "MainActivity";
     
+    // ✅ 新增：追蹤狀態，避免重複注入和頻繁更新
+    private boolean isWebViewReady = false;
+    private boolean lastKeyboardState = false;
+    private int lastKeyboardHeight = 0;
+    private Handler mainHandler = new Handler(Looper.getMainLooper());
+    private Runnable keyboardDetectionRunnable = null;
+    private static final long KEYBOARD_DETECTION_DELAY = 100; // 防抖延遲
+    
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         
         // 啟用邊緣到邊緣顯示（Edge-to-Edge）
-        // 這會讓 WebView 內容延伸到狀態列和導覽列下方
         WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
         
         // 設定狀態列和導覽列樣式
@@ -28,54 +38,106 @@ public class MainActivity extends BridgeActivity {
             WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView());
         
         if (windowInsetsController != null) {
-            // ✅ 修正：設定狀態列圖示為深色（適合白色背景）
             windowInsetsController.setAppearanceLightStatusBars(true);
-            // ✅ 修正：設定導覽列圖示為深色（適合白色背景）
             windowInsetsController.setAppearanceLightNavigationBars(true);
         }
         
-        // ✅ 修正：設定狀態列為白色背景（不透明）
-        // 使用白色背景，確保狀態列一直保持白色，不會變成透明
         getWindow().setStatusBarColor(android.graphics.Color.WHITE);
-        
-        // ✅ 修正：設定導覽列為白色背景（不透明）
-        // 使用白色背景，確保導覽列有自己獨立的區塊
         getWindow().setNavigationBarColor(android.graphics.Color.WHITE);
         
-        // ✅ 新增：獲取 status bar 高度並注入到 WebView（使用 WindowInsets API）
-        // 使用 post() 確保在視圖完全準備好後再執行
-        View decorView = getWindow().getDecorView();
-        decorView.post(new Runnable() {
+        // ✅ 關鍵改進：等待 WebView 完全準備好後再注入
+        setupWebViewReadyListener();
+    }
+    
+    /**
+     * ✅ 關鍵改進：設置 WebView 準備就緒監聽器
+     * 確保在 WebView 完全初始化並加載完成後再執行 JavaScript 注入
+     */
+    private void setupWebViewReadyListener() {
+        // 延遲獲取 WebView，確保 Capacitor Bridge 已初始化
+        mainHandler.postDelayed(new Runnable() {
             @Override
             public void run() {
                 try {
-                    injectStatusBarHeight();
+                    WebView webView = getBridge().getWebView();
+                    if (webView == null) {
+                        // WebView 還沒準備好，繼續等待
+                        mainHandler.postDelayed(this, 200);
+                        return;
+                    }
+                    
+                    // 設置 WebViewClient 監聽頁面加載完成
+                    webView.setWebViewClient(new WebViewClient() {
+                        @Override
+                        public void onPageFinished(WebView view, String url) {
+                            super.onPageFinished(view, url);
+                            
+                            // ✅ 頁面加載完成，標記 WebView 準備就緒
+                            if (!isWebViewReady) {
+                                isWebViewReady = true;
+                                Log.d(TAG, "WebView is ready, page loaded: " + url);
+                                
+                                // 延遲注入，確保 JavaScript 環境完全準備好
+                                mainHandler.postDelayed(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        injectStatusBarHeight();
+                                        setupKeyboardListener();
+                                    }
+                                }, 300);
+                            }
+                        }
+                    });
+                    
                 } catch (Exception e) {
-                    Log.e(TAG, "Failed to inject status bar height", e);
+                    Log.e(TAG, "Error setting up WebView listener", e);
+                    // 如果出錯，稍後重試
+                    mainHandler.postDelayed(this, 500);
                 }
             }
-        });
-        
-        // ✅ 新增：原生鍵盤監聽（提供最準確的鍵盤檢測）
-        // 使用 ViewTreeObserver 監聽佈局變化，檢測鍵盤顯示/隱藏
+        }, 100);
+    }
+    
+    /**
+     * ✅ 關鍵改進：只有在 WebView 準備好後才設置鍵盤監聽
+     */
+    private void setupKeyboardListener() {
+        View decorView = getWindow().getDecorView();
         decorView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
             public void onGlobalLayout() {
-                try {
-                    detectKeyboardState();
-                } catch (Exception e) {
-                    Log.e(TAG, "Error detecting keyboard state", e);
+                // 只有在 WebView 準備好後才執行
+                if (!isWebViewReady) {
+                    return;
                 }
+                
+                // ✅ 使用防抖機制，避免頻繁觸發
+                if (keyboardDetectionRunnable != null) {
+                    mainHandler.removeCallbacks(keyboardDetectionRunnable);
+                }
+                
+                keyboardDetectionRunnable = new Runnable() {
+                    @Override
+                    public void run() {
+                        detectKeyboardState();
+                    }
+                };
+                
+                mainHandler.postDelayed(keyboardDetectionRunnable, KEYBOARD_DETECTION_DELAY);
             }
         });
     }
     
     /**
      * 檢測鍵盤狀態並注入到 WebView
-     * 使用 ViewTreeObserver 監聽佈局變化，這是 Android 檢測鍵盤最準確的方法
+     * ✅ 改進：只有狀態真正改變時才注入
      */
     private void detectKeyboardState() {
         try {
+            if (!isWebViewReady) {
+                return;
+            }
+            
             View decorView = getWindow().getDecorView();
             if (decorView == null) {
                 return;
@@ -91,10 +153,19 @@ public class MainActivity extends BridgeActivity {
             // 計算鍵盤高度（屏幕高度 - 可見區域底部）
             int keypadHeight = screenHeight - r.bottom;
             
-            // ✅ 改進：使用更精確的閾值（100px 或屏幕的 10%，取較大值）
-            // 這樣可以過濾掉系統 UI（狀態列、導覽列）的變化，同時在較小設備上也能正確檢測
+            // 使用更精確的閾值
             int threshold = Math.max(100, (int)(screenHeight * 0.10));
             boolean isKeyboardVisible = keypadHeight > threshold;
+            
+            // ✅ 關鍵改進：只有狀態真正改變時才注入（避免頻繁更新）
+            if (isKeyboardVisible == lastKeyboardState && 
+                Math.abs(keypadHeight - lastKeyboardHeight) < 20) {
+                return; // 狀態沒有變化，跳過
+            }
+            
+            // 更新狀態
+            lastKeyboardState = isKeyboardVisible;
+            lastKeyboardHeight = keypadHeight;
             
             // 獲取 WebView 實例
             WebView webView = getBridge().getWebView();
@@ -102,26 +173,29 @@ public class MainActivity extends BridgeActivity {
                 return;
             }
             
-            // ✅ 改進：只有在狀態真正改變時才注入（避免頻繁更新）
-            // 檢查當前狀態（通過 JavaScript 獲取）
-            String checkStateScript = String.format(
-                "(function() { " +
-                "  var isVisible = document.documentElement.getAttribute('data-keyboard-visible') === 'true'; " +
-                "  var height = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--keyboard-height')) || 0; " +
-                "  return JSON.stringify({ isVisible: isVisible, height: height }); " +
-                "})();"
-            );
-            
             // 構建 JavaScript 代碼來注入鍵盤狀態
-            String js = buildKeyboardStateScript(isKeyboardVisible, keypadHeight);
+            final String js = buildKeyboardStateScript(isKeyboardVisible, keypadHeight);
+            final boolean finalIsKeyboardVisible = isKeyboardVisible;
+            final int finalKeypadHeight = keypadHeight;
             
-            // 執行 JavaScript 注入
-            webView.evaluateJavascript(js, null);
-            
-            Log.d(TAG, String.format(
-                "Keyboard state detected: visible=%s, height=%dpx, threshold=%dpx",
-                isKeyboardVisible, keypadHeight, threshold
-            ));
+            // ✅ 確保在主線程執行
+            mainHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        WebView wv = getBridge().getWebView();
+                        if (wv != null && isWebViewReady) {
+                            wv.evaluateJavascript(js, null);
+                            Log.d(TAG, String.format(
+                                "Keyboard state injected: visible=%s, height=%dpx",
+                                finalIsKeyboardVisible, finalKeypadHeight
+                            ));
+                        }
+                    } catch (Exception e) {
+                        Log.e(TAG, "Error evaluating keyboard script", e);
+                    }
+                }
+            });
             
         } catch (Exception e) {
             Log.e(TAG, "Error in detectKeyboardState", e);
@@ -132,102 +206,92 @@ public class MainActivity extends BridgeActivity {
      * 構建鍵盤狀態 JavaScript 注入腳本
      */
     private String buildKeyboardStateScript(boolean isVisible, int height) {
-        return String.format(
-            "(function() { " +
-            "  try { " +
-            "    var isVisible = %s; " +
-            "    var height = %d; " +
-            "    " +
-            "    // 設置 CSS 變數 " +
-            "    document.documentElement.style.setProperty('--keyboard-height', height + 'px'); " +
-            "    document.documentElement.style.setProperty('--is-keyboard-visible', isVisible ? '1' : '0'); " +
-            "    " +
-            "    // 設置 data 屬性，供 CSS 選擇器使用 " +
-            "    if (isVisible) { " +
-            "      document.documentElement.setAttribute('data-keyboard-visible', 'true'); " +
-            "    } else { " +
-            "      document.documentElement.removeAttribute('data-keyboard-visible'); " +
-            "    } " +
-            "    " +
-            "    // 觸發自定義事件，通知其他組件 " +
-            "    window.dispatchEvent(new CustomEvent('keyboardToggle', { " +
-            "      detail: { isVisible: isVisible, height: height } " +
-            "    })); " +
-            "    " +
-            "    console.log('[Native] Keyboard state updated: visible=' + isVisible + ', height=' + height + 'px'); " +
-            "  } catch (e) { " +
-            "    console.error('[Native] Error updating keyboard state:', e); " +
-            "  } " +
-            "})();",
-            isVisible ? "true" : "false",
-            height
-        );
+        StringBuilder js = new StringBuilder();
+        js.append("(function() { ");
+        js.append("  try { ");
+        js.append("    var isVisible = ").append(isVisible ? "true" : "false").append("; ");
+        js.append("    var height = ").append(height).append("; ");
+        js.append("    document.documentElement.style.setProperty('--keyboard-height', height + 'px'); ");
+        js.append("    document.documentElement.style.setProperty('--is-keyboard-visible', isVisible ? '1' : '0'); ");
+        js.append("    if (isVisible) { ");
+        js.append("      document.documentElement.setAttribute('data-keyboard-visible', 'true'); ");
+        js.append("    } else { ");
+        js.append("      document.documentElement.removeAttribute('data-keyboard-visible'); ");
+        js.append("    } ");
+        js.append("    window.dispatchEvent(new CustomEvent('keyboardToggle', { ");
+        js.append("      detail: { isVisible: isVisible, height: height } ");
+        js.append("    })); ");
+        js.append("  } catch (e) { ");
+        js.append("    console.error('[Native] Error updating keyboard state:', e); ");
+        js.append("  } ");
+        js.append("})();");
+        
+        return js.toString();
     }
     
     /**
      * 使用 WindowInsets API 獲取準確的 status bar 和 navigation bar 高度
-     * 並注入到 WebView 的 JavaScript 環境中
      */
     private void injectStatusBarHeight() {
         try {
+            if (!isWebViewReady) {
+                Log.d(TAG, "WebView not ready, skipping status bar injection");
+                return;
+            }
+            
             View decorView = getWindow().getDecorView();
             if (decorView == null) {
-                Log.w(TAG, "DecorView is null, cannot get WindowInsets");
+                Log.w(TAG, "DecorView is null");
                 return;
             }
             
             WindowInsetsCompat windowInsets = ViewCompat.getRootWindowInsets(decorView);
             if (windowInsets == null) {
-                Log.w(TAG, "WindowInsets is null, using fallback method");
-                // 備用方案：使用資源獲取 status bar 高度
+                Log.w(TAG, "WindowInsets is null, using fallback");
                 injectStatusBarHeightFromResources();
                 return;
             }
             
-            // 獲取 status bar 高度（最準確的方法）
-            int statusBarHeight = windowInsets.getInsets(WindowInsetsCompat.Type.statusBars()).top;
-            // 獲取 navigation bar 高度
-            int navBarHeight = windowInsets.getInsets(WindowInsetsCompat.Type.navigationBars()).bottom;
-            // 獲取左側 insets（用於處理異形屏）
-            int leftInset = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars()).left;
-            // 獲取右側 insets（用於處理異形屏）
-            int rightInset = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars()).right;
+            final int statusBarHeight = windowInsets.getInsets(WindowInsetsCompat.Type.statusBars()).top;
+            final int navBarHeight = windowInsets.getInsets(WindowInsetsCompat.Type.navigationBars()).bottom;
+            final int leftInset = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars()).left;
+            final int rightInset = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars()).right;
             
-            // 驗證獲取的值是否合理
-            if (statusBarHeight < 0) {
-                Log.w(TAG, "Invalid status bar height: " + statusBarHeight + ", using fallback");
+            if (statusBarHeight <= 0) {
+                Log.w(TAG, "Invalid status bar height, using fallback");
                 injectStatusBarHeightFromResources();
                 return;
             }
             
-            // 獲取 WebView 實例
             WebView webView = getBridge().getWebView();
             if (webView == null) {
-                Log.w(TAG, "WebView is null, will retry later");
-                // 如果 WebView 還沒準備好，稍後再試
-                decorView.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        injectStatusBarHeight();
-                    }
-                }, 200);
+                Log.w(TAG, "WebView is null");
                 return;
             }
             
-            // 構建 JavaScript 代碼來注入 insets
-            String js = buildInjectionScript(statusBarHeight, navBarHeight, leftInset, rightInset);
+            final String js = buildInjectionScript(statusBarHeight, navBarHeight, leftInset, rightInset);
             
-            // 執行 JavaScript 注入
-            webView.evaluateJavascript(js, null);
-            
-            Log.d(TAG, String.format(
-                "Status bar height injected: top=%dpx, bottom=%dpx, left=%dpx, right=%dpx",
-                statusBarHeight, navBarHeight, leftInset, rightInset
-            ));
+            // ✅ 確保在主線程執行
+            mainHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        WebView wv = getBridge().getWebView();
+                        if (wv != null && isWebViewReady) {
+                            wv.evaluateJavascript(js, null);
+                            Log.d(TAG, String.format(
+                                "Status bar injected: top=%dpx, bottom=%dpx",
+                                statusBarHeight, navBarHeight
+                            ));
+                        }
+                    } catch (Exception e) {
+                        Log.e(TAG, "Error evaluating status bar script", e);
+                    }
+                }
+            });
             
         } catch (Exception e) {
             Log.e(TAG, "Error injecting status bar height", e);
-            // 發生錯誤時使用備用方案
             injectStatusBarHeightFromResources();
         }
     }
@@ -237,24 +301,38 @@ public class MainActivity extends BridgeActivity {
      */
     private void injectStatusBarHeightFromResources() {
         try {
+            if (!isWebViewReady) {
+                return;
+            }
+            
             int resourceId = getResources().getIdentifier("status_bar_height", "dimen", "android");
             int statusBarHeight = resourceId > 0 
                 ? getResources().getDimensionPixelSize(resourceId) 
-                : 0;
+                : 24;
             
-            // 如果資源獲取失敗，使用常見的預設值
             if (statusBarHeight <= 0) {
-                statusBarHeight = 24; // Android 標準 status bar 高度
+                statusBarHeight = 24;
             }
             
-            WebView webView = getBridge().getWebView();
-            if (webView != null) {
-                String js = buildInjectionScript(statusBarHeight, 0, 0, 0);
-                webView.evaluateJavascript(js, null);
-                Log.d(TAG, "Status bar height injected from resources: " + statusBarHeight + "px");
-            }
+            final int finalHeight = statusBarHeight;
+            final String js = buildInjectionScript(finalHeight, 0, 0, 0);
+            
+            mainHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        WebView webView = getBridge().getWebView();
+                        if (webView != null && isWebViewReady) {
+                            webView.evaluateJavascript(js, null);
+                            Log.d(TAG, "Status bar injected from resources: " + finalHeight + "px");
+                        }
+                    } catch (Exception e) {
+                        Log.e(TAG, "Error evaluating fallback script", e);
+                    }
+                }
+            });
         } catch (Exception e) {
-            Log.e(TAG, "Error injecting status bar height from resources", e);
+            Log.e(TAG, "Error injecting from resources", e);
         }
     }
     
@@ -262,48 +340,34 @@ public class MainActivity extends BridgeActivity {
      * 構建 JavaScript 注入腳本
      */
     private String buildInjectionScript(int top, int bottom, int left, int right) {
-        return String.format(
-            "(function() { " +
-            "  try { " +
-            "    // 檢查是否已有注入的樣式，避免重複創建 " +
-            "    var style = document.getElementById('android-status-bar-height-fix'); " +
-            "    if (!style) { " +
-            "      style = document.createElement('style'); " +
-            "      style.id = 'android-status-bar-height-fix'; " +
-            "      document.head.appendChild(style); " +
-            "    } " +
-            "    " +
-            "    // 設置 CSS 變量 " +
-            "    document.documentElement.style.setProperty('--safe-area-inset-top', '%dpx'); " +
-            "    document.documentElement.style.setProperty('--safe-area-inset-bottom', '%dpx'); " +
-            "    document.documentElement.style.setProperty('--safe-area-inset-left', '%dpx'); " +
-            "    document.documentElement.style.setProperty('--safe-area-inset-right', '%dpx'); " +
-            "    " +
-            "    // 更新樣式表以確保優先級 " +
-            "    style.textContent = ':root { " +
-            "      --safe-area-inset-top: %dpx !important; " +
-            "      --safe-area-inset-bottom: %dpx !important; " +
-            "      --safe-area-inset-left: %dpx !important; " +
-            "      --safe-area-inset-right: %dpx !important; " +
-            "    }'; " +
-            "    " +
-            "    // 標記已從原生注入，避免 JavaScript 覆蓋 " +
-            "    window.__nativeInsetsInjected = true; " +
-            "    " +
-            "    // 觸發自定義事件，通知其他代碼 insets 已更新 " +
-            "    window.dispatchEvent(new CustomEvent('nativeInsetsUpdated', { " +
-            "      detail: { top: %d, bottom: %d, left: %d, right: %d } " +
-            "    })); " +
-            "    " +
-            "    console.log('[Native] Status bar insets injected: top=%dpx, bottom=%dpx, left=%dpx, right=%dpx'); " +
-            "  } catch (e) { " +
-            "    console.error('[Native] Error injecting status bar height:', e); " +
-            "  } " +
-            "})();",
-            top, bottom, left, right,
-            top, bottom, left, right,
-            top, bottom, left, right,
-            top, bottom, left, right
-        );
+        StringBuilder js = new StringBuilder();
+        js.append("(function() { ");
+        js.append("  try { ");
+        js.append("    var style = document.getElementById('android-status-bar-height-fix'); ");
+        js.append("    if (!style) { ");
+        js.append("      style = document.createElement('style'); ");
+        js.append("      style.id = 'android-status-bar-height-fix'; ");
+        js.append("      document.head.appendChild(style); ");
+        js.append("    } ");
+        js.append("    document.documentElement.style.setProperty('--safe-area-inset-top', '").append(top).append("px'); ");
+        js.append("    document.documentElement.style.setProperty('--safe-area-inset-bottom', '").append(bottom).append("px'); ");
+        js.append("    document.documentElement.style.setProperty('--safe-area-inset-left', '").append(left).append("px'); ");
+        js.append("    document.documentElement.style.setProperty('--safe-area-inset-right', '").append(right).append("px'); ");
+        js.append("    style.textContent = ':root { ");
+        js.append("      --safe-area-inset-top: ").append(top).append("px !important; ");
+        js.append("      --safe-area-inset-bottom: ").append(bottom).append("px !important; ");
+        js.append("      --safe-area-inset-left: ").append(left).append("px !important; ");
+        js.append("      --safe-area-inset-right: ").append(right).append("px !important; ");
+        js.append("    }'; ");
+        js.append("    window.__nativeInsetsInjected = true; ");
+        js.append("    window.dispatchEvent(new CustomEvent('nativeInsetsUpdated', { ");
+        js.append("      detail: { top: ").append(top).append(", bottom: ").append(bottom).append(", left: ").append(left).append(", right: ").append(right).append(" } ");
+        js.append("    })); ");
+        js.append("  } catch (e) { ");
+        js.append("    console.error('[Native] Error injecting status bar:', e); ");
+        js.append("  } ");
+        js.append("})();");
+        
+        return js.toString();
     }
 }
