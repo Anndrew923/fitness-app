@@ -346,6 +346,7 @@ function AppContent() {
     let isKeyboardVisible = false;
     let resizeTimeout = null;
     let lastWindowHeight = window.innerHeight;
+    let lastViewportHeight = window.visualViewport?.height || window.innerHeight;
 
     const handleKeyboardDetection = () => {
       // 防抖處理，避免頻繁觸發
@@ -354,46 +355,52 @@ function AppContent() {
       }
 
       resizeTimeout = setTimeout(() => {
-        const currentHeight = window.innerHeight;
-        const screenHeight = window.screen.height;
-        
-        // 方法 1: 使用 visualViewport API（最準確，iOS 和 Android 都支援）
-        if (window.visualViewport) {
-          const viewport = window.visualViewport;
-          const viewportHeight = viewport.height;
-          const windowHeight = window.innerHeight;
+        try {
+          const currentHeight = window.innerHeight;
+          const screenHeight = window.screen.height;
           
-          // 計算鍵盤高度
-          const newKeyboardHeight = Math.max(0, windowHeight - viewportHeight);
-          
-          // 原生應用中，鍵盤高度通常超過 200px
-          const newIsKeyboardVisible = newKeyboardHeight > 200;
-          
-          // 只在狀態改變時更新
-          if (newIsKeyboardVisible !== isKeyboardVisible || Math.abs(newKeyboardHeight - keyboardHeight) > 20) {
-            isKeyboardVisible = newIsKeyboardVisible;
-            keyboardHeight = newKeyboardHeight;
+          // 方法 1: 使用 visualViewport API（最準確，iOS 和 Android 都支援）
+          if (window.visualViewport) {
+            const viewport = window.visualViewport;
+            const viewportHeight = viewport.height;
+            const windowHeight = window.innerHeight;
             
-            updateKeyboardState(isKeyboardVisible, keyboardHeight);
-          }
-        } else {
-          // 方法 2: 備用方案 - 使用視窗高度變化檢測
-          const heightDiff = lastWindowHeight - currentHeight;
-          
-          // 如果視窗高度減少超過 200px，可能是鍵盤開啟
-          // 原生應用中，鍵盤通常會讓視窗高度減少 300-500px
-          const newIsKeyboardVisible = heightDiff > 200 && currentHeight < screenHeight * 0.7;
-          
-          if (newIsKeyboardVisible !== isKeyboardVisible) {
-            isKeyboardVisible = newIsKeyboardVisible;
-            keyboardHeight = newIsKeyboardVisible ? heightDiff : 0;
+            // 計算鍵盤高度
+            const newKeyboardHeight = Math.max(0, windowHeight - viewportHeight);
             
-            updateKeyboardState(isKeyboardVisible, keyboardHeight);
+            // ✅ 改進：降低閾值到 150px，更早檢測到鍵盤（避免短暫顯示）
+            // 原生檢測優先，JavaScript 檢測作為備用，所以降低閾值風險較低
+            const newIsKeyboardVisible = newKeyboardHeight > 150;
+            
+            // ✅ 改進：使用更小的變化閾值（10px），更敏感
+            if (newIsKeyboardVisible !== isKeyboardVisible || Math.abs(newKeyboardHeight - keyboardHeight) > 10) {
+              isKeyboardVisible = newIsKeyboardVisible;
+              keyboardHeight = newKeyboardHeight;
+              
+              updateKeyboardState(isKeyboardVisible, keyboardHeight);
+            }
+            
+            lastViewportHeight = viewportHeight;
+          } else {
+            // 方法 2: 備用方案 - 使用視窗高度變化檢測
+            const heightDiff = lastWindowHeight - currentHeight;
+            
+            // ✅ 改進：降低閾值到 150px，更快響應
+            const newIsKeyboardVisible = heightDiff > 150 && currentHeight < screenHeight * 0.75;
+            
+            if (newIsKeyboardVisible !== isKeyboardVisible) {
+              isKeyboardVisible = newIsKeyboardVisible;
+              keyboardHeight = newIsKeyboardVisible ? heightDiff : 0;
+              
+              updateKeyboardState(isKeyboardVisible, keyboardHeight);
+            }
+            
+            lastWindowHeight = currentHeight;
           }
-          
-          lastWindowHeight = currentHeight;
+        } catch (error) {
+          logger.error('鍵盤檢測錯誤:', error);
         }
-      }, 150); // 150ms 防抖延遲，適合原生應用
+      }, 100); // ✅ 改進：減少防抖延遲到 100ms，更快響應
     };
 
     const updateKeyboardState = (isVisible, height) => {
@@ -438,14 +445,15 @@ function AppContent() {
     // 監聽視窗大小變化
     window.addEventListener('resize', handleKeyboardDetection);
     
-    // 監聽輸入框焦點事件（輔助檢測，原生應用中更可靠）
+    // ✅ 改進：輸入框焦點時立即檢查（不延遲）
     const handleInputFocus = () => {
-      // 延遲檢查，給鍵盤時間彈出（原生應用鍵盤彈出較快）
-      setTimeout(handleKeyboardDetection, 200);
+      // 立即檢查，然後再延遲檢查一次確保準確
+      handleKeyboardDetection();
+      setTimeout(handleKeyboardDetection, 150);
     };
     
     const handleInputBlur = () => {
-      // 延遲檢查，給鍵盤時間收起
+      // 鍵盤收起可能較慢，延遲檢查
       setTimeout(handleKeyboardDetection, 200);
     };
     
@@ -453,8 +461,8 @@ function AppContent() {
     document.addEventListener('focusin', handleInputFocus, true);
     document.addEventListener('focusout', handleInputBlur, true);
     
-    // 初始檢查
-    setTimeout(handleKeyboardDetection, 300);
+    // ✅ 改進：初始檢查更快
+    setTimeout(handleKeyboardDetection, 100);
 
     return () => {
       if (resizeTimeout) {
@@ -467,6 +475,113 @@ function AppContent() {
       window.removeEventListener('resize', handleKeyboardDetection);
       document.removeEventListener('focusin', handleInputFocus, true);
       document.removeEventListener('focusout', handleInputBlur, true);
+    };
+  }, []);
+
+  // ✅ 新增：輸入框獲得焦點時自動滾動到可見區域（方案 4）
+  // 確保輸入框在鍵盤彈出時可見，提升用戶體驗
+  useEffect(() => {
+    if (!Capacitor.isNativePlatform()) {
+      return;
+    }
+
+    // 記錄上次滾動時間，避免頻繁滾動
+    let lastScrollTime = 0;
+    const SCROLL_COOLDOWN = 500; // 500ms 冷卻時間，避免頻繁滾動
+    
+    // 記錄正在滾動的輸入框，避免重複滾動
+    let scrollingInput = null;
+
+    const handleInputFocus = (e) => {
+      try {
+        const input = e.target;
+        
+        // 只處理 INPUT 和 TEXTAREA 元素
+        if (input.tagName !== 'INPUT' && input.tagName !== 'TEXTAREA') {
+          return;
+        }
+        
+        // 檢查是否為隱藏或禁用的輸入框
+        if (input.type === 'hidden' || input.disabled || input.readOnly) {
+          return;
+        }
+        
+        // 檢查冷卻時間，避免頻繁滾動
+        const now = Date.now();
+        if (now - lastScrollTime < SCROLL_COOLDOWN && scrollingInput === input) {
+          return;
+        }
+        
+        // 獲取鍵盤高度
+        const keyboardHeight = parseFloat(
+          getComputedStyle(document.documentElement)
+            .getPropertyValue('--keyboard-height')
+            .replace('px', '')
+        ) || 0;
+        
+        // 延遲執行，確保鍵盤已彈出（給原生檢測時間）
+        setTimeout(() => {
+          try {
+            // 重新獲取鍵盤高度（鍵盤可能已經彈出）
+            const currentKeyboardHeight = parseFloat(
+              getComputedStyle(document.documentElement)
+                .getPropertyValue('--keyboard-height')
+                .replace('px', '')
+            ) || 0;
+            
+            // 檢查輸入框是否已經在可見區域
+            const rect = input.getBoundingClientRect();
+            const viewportHeight = window.innerHeight;
+            
+            // 計算可見區域（考慮鍵盤）
+            const visibleArea = viewportHeight - Math.max(currentKeyboardHeight, 0);
+            
+            // 如果輸入框已經在可見區域內，不需要滾動
+            // 留出一些邊距（20px）確保輸入框完全可見
+            if (rect.top >= 20 && rect.bottom <= visibleArea - 20) {
+              return;
+            }
+            
+            // 標記正在滾動的輸入框
+            scrollingInput = input;
+            
+            // 使用 scrollIntoView 確保輸入框可見
+            // block: 'center' 讓輸入框在可見區域中央
+            input.scrollIntoView({ 
+              behavior: 'smooth', 
+              block: 'center',
+              inline: 'nearest'
+            });
+            
+            lastScrollTime = Date.now();
+            
+            // 清除滾動標記（延遲清除，避免立即重複）
+            setTimeout(() => {
+              scrollingInput = null;
+            }, 1000);
+            
+            logger.debug('輸入框自動滾動:', {
+              input: input.tagName,
+              type: input.type || 'text',
+              keyboardHeight: currentKeyboardHeight,
+              position: { top: rect.top, bottom: rect.bottom, visibleArea }
+            });
+          } catch (error) {
+            logger.error('輸入框滾動失敗:', error);
+            scrollingInput = null;
+          }
+        }, 350); // 350ms 延遲，確保鍵盤已彈出且原生檢測已完成
+      } catch (error) {
+        logger.error('輸入框焦點處理錯誤:', error);
+      }
+    };
+
+    // 使用 capture phase 確保優先捕獲
+    document.addEventListener('focusin', handleInputFocus, true);
+
+    return () => {
+      document.removeEventListener('focusin', handleInputFocus, true);
+      scrollingInput = null;
     };
   }, []);
 

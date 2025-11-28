@@ -295,7 +295,8 @@ function BottomNavBar() {
           boxShadow: '0 -2px 8px rgba(0,0,0,0.04)',
           // ✅ 新增：鍵盤開啟時隱藏導覽列（原生應用優化）
           transform: isKeyboardVisible ? 'translateY(100%)' : 'translateY(0)',
-          transition: 'transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
+          // ✅ 改進：更快的動畫（150ms 而不是 250ms），避免短暫顯示
+          transition: 'transform 0.15s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.15s cubic-bezier(0.4, 0, 0.2, 1)',
           opacity: isKeyboardVisible ? 0 : 1,
           visibility: isKeyboardVisible ? 'hidden' : 'visible',
           pointerEvents: isKeyboardVisible ? 'none' : 'auto',

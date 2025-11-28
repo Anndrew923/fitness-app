@@ -3,6 +3,8 @@ package com.ultimatephysique.fitness2025;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewTreeObserver;
+import android.graphics.Rect;
 import android.webkit.WebView;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowCompat;
@@ -53,6 +55,102 @@ public class MainActivity extends BridgeActivity {
                 }
             }
         });
+        
+        // ✅ 新增：原生鍵盤監聽（提供最準確的鍵盤檢測）
+        // 使用 ViewTreeObserver 監聽佈局變化，檢測鍵盤顯示/隱藏
+        decorView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                try {
+                    detectKeyboardState();
+                } catch (Exception e) {
+                    Log.e(TAG, "Error detecting keyboard state", e);
+                }
+            }
+        });
+    }
+    
+    /**
+     * 檢測鍵盤狀態並注入到 WebView
+     * 使用 ViewTreeObserver 監聽佈局變化，這是 Android 檢測鍵盤最準確的方法
+     */
+    private void detectKeyboardState() {
+        try {
+            View decorView = getWindow().getDecorView();
+            if (decorView == null) {
+                return;
+            }
+            
+            // 獲取可見區域的矩形
+            Rect r = new Rect();
+            decorView.getWindowVisibleDisplayFrame(r);
+            
+            // 獲取屏幕總高度
+            int screenHeight = decorView.getRootView().getHeight();
+            
+            // 計算鍵盤高度（屏幕高度 - 可見區域底部）
+            int keypadHeight = screenHeight - r.bottom;
+            
+            // 如果鍵盤高度超過屏幕的 15%，認為鍵盤已開啟
+            // 這個閾值可以過濾掉系統 UI（狀態列、導覽列）的變化
+            boolean isKeyboardVisible = keypadHeight > screenHeight * 0.15;
+            
+            // 獲取 WebView 實例
+            WebView webView = getBridge().getWebView();
+            if (webView == null) {
+                return;
+            }
+            
+            // 構建 JavaScript 代碼來注入鍵盤狀態
+            String js = buildKeyboardStateScript(isKeyboardVisible, keypadHeight);
+            
+            // 執行 JavaScript 注入
+            webView.evaluateJavascript(js, null);
+            
+            Log.d(TAG, String.format(
+                "Keyboard state detected: visible=%s, height=%dpx",
+                isKeyboardVisible, keypadHeight
+            ));
+            
+        } catch (Exception e) {
+            Log.e(TAG, "Error in detectKeyboardState", e);
+        }
+    }
+    
+    /**
+     * 構建鍵盤狀態 JavaScript 注入腳本
+     */
+    private String buildKeyboardStateScript(boolean isVisible, int height) {
+        return String.format(
+            "(function() { " +
+            "  try { " +
+            "    var isVisible = %s; " +
+            "    var height = %d; " +
+            "    " +
+            "    // 設置 CSS 變數 " +
+            "    document.documentElement.style.setProperty('--keyboard-height', height + 'px'); " +
+            "    document.documentElement.style.setProperty('--is-keyboard-visible', isVisible ? '1' : '0'); " +
+            "    " +
+            "    // 設置 data 屬性，供 CSS 選擇器使用 " +
+            "    if (isVisible) { " +
+            "      document.documentElement.setAttribute('data-keyboard-visible', 'true'); " +
+            "    } else { " +
+            "      document.documentElement.removeAttribute('data-keyboard-visible'); " +
+            "    } " +
+            "    " +
+            "    // 觸發自定義事件，通知其他組件 " +
+            "    window.dispatchEvent(new CustomEvent('keyboardToggle', { " +
+            "      detail: { isVisible: isVisible, height: height } " +
+            "    })); " +
+            "    " +
+            "    console.log('[Native] Keyboard state updated: visible=' + isVisible + ', height=' + height + 'px'); " +
+            "  } catch (e) { " +
+            "    console.error('[Native] Error updating keyboard state:', e); " +
+            "  } " +
+            "})();",
+            isVisible ? "true" : "false",
+            height
+        );
     }
     
     /**

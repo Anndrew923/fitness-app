@@ -16,7 +16,10 @@
             android:label="@string/title_activity_main"
             android:theme="@style/AppTheme.NoActionBarLaunch"
             android:launchMode="singleTask"
-            android:exported="true">
+            android:exported="true"
+            android:windowSoftInputMode="adjustResize">
+            <!-- ✅ 新增：adjustResize 讓 WebView 自動調整大小，鍵盤不會覆蓋內容 -->
+            <!-- 這是微信、Instagram 等知名 app 使用的標準配置 -->
 
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
