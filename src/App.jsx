@@ -223,6 +223,72 @@ function AppContent() {
     let lastKnownStatusBarHeight = 0;
     let lastKnownViewportHeight = window.visualViewport?.height || window.innerHeight;
     let lastKnownWindowHeight = window.innerHeight;
+    // ✅ 關鍵改進：記錄初始值（應用啟動時的 window.innerHeight）
+    let initialWindowHeight = window.innerHeight;
+    let initialScreenHeight = window.screen.height;
+    let initialStatusBarHeight = 0;
+    let isInitialized = false;
+    
+    // ✅ 初始化：在應用啟動時記錄初始 Status Bar 高度
+    const initializeStatusBarHeight = () => {
+      if (isInitialized) return;
+      
+      // 優先使用原生注入的值
+      const nativeInjected = window.__nativeInsetsInjected;
+      const existingTop = getComputedStyle(document.documentElement)
+        .getPropertyValue('--safe-area-inset-top')
+        .trim();
+      
+      if (nativeInjected && existingTop && existingTop !== '0px') {
+        initialStatusBarHeight = parseFloat(existingTop.replace('px', '')) || 0;
+        isInitialized = true;
+        lastKnownStatusBarHeight = initialStatusBarHeight;
+        return;
+      }
+      
+      // 計算初始 Status Bar 高度（應用啟動時，鍵盤肯定未開啟）
+      const initialHeightDiff = initialScreenHeight - initialWindowHeight;
+      
+      if (initialHeightDiff > 0 && initialHeightDiff <= 80) {
+        initialStatusBarHeight = initialHeightDiff;
+      } else {
+        // 備用方案：檢測 Android 版本
+        const userAgent = navigator.userAgent || '';
+        const androidVersionMatch = userAgent.match(/Android\s([0-9\.]*)/);
+        const androidVersion = androidVersionMatch ? parseFloat(androidVersionMatch[1]) : 0;
+        
+        if (androidVersion >= 15) {
+          initialStatusBarHeight = 48;
+        } else {
+          initialStatusBarHeight = 24;
+        }
+      }
+      
+      isInitialized = true;
+      lastKnownStatusBarHeight = initialStatusBarHeight;
+      
+      // 設置初始值
+      document.documentElement.style.setProperty(
+        '--safe-area-inset-top',
+        `${initialStatusBarHeight}px`
+      );
+      
+      const styleId = 'android-status-bar-height-fix';
+      let styleElement = document.getElementById(styleId);
+      if (!styleElement) {
+        styleElement = document.createElement('style');
+        styleElement.id = styleId;
+        document.head.appendChild(styleElement);
+      }
+      
+      styleElement.textContent = `
+        :root {
+          --safe-area-inset-top: ${initialStatusBarHeight}px !important;
+        }
+      `;
+      
+      logger.debug('Status bar height initialized:', initialStatusBarHeight, 'px');
+    };
     
     const handleUnifiedViewportChange = () => {
       // 清除之前的定時器
@@ -233,7 +299,7 @@ function AppContent() {
       // 防抖處理，避免頻繁觸發
       viewportChangeTimeout = setTimeout(() => {
         try {
-          // ✅ 關鍵改進：多重檢查鍵盤狀態
+          // ✅ 關鍵改進：多重檢查鍵盤狀態（在計算 heightDiff 之前）
           const nativeKeyboardVisible = getComputedStyle(document.documentElement)
             .getPropertyValue('--is-keyboard-visible') === '1';
           const nativeKeyboardHeight = parseFloat(
@@ -248,9 +314,13 @@ function AppContent() {
           const viewportHeightDiff = lastKnownViewportHeight - currentViewportHeight;
           const windowHeightDiff = lastKnownWindowHeight - currentWindowHeight;
           
+          // ✅ 關鍵改進：使用初始值比較，更準確判斷鍵盤狀態
+          const windowHeightDiffFromInitial = initialWindowHeight - currentWindowHeight;
+          
           // 如果視口高度明顯減少（>150px），很可能鍵盤已開啟
           const likelyKeyboardOpen = viewportHeightDiff > 150 || 
                                      windowHeightDiff > 150 || 
+                                     windowHeightDiffFromInitial > 150 ||
                                      nativeKeyboardHeight > 150 ||
                                      nativeKeyboardVisible;
           
@@ -273,35 +343,54 @@ function AppContent() {
           
           // 如果原生已注入且值有效，優先使用原生值
           if (nativeInjected && existingTop && existingTop !== '0px') {
+            const parsedHeight = parseFloat(existingTop.replace('px', '')) || 0;
+            if (parsedHeight > 0 && parsedHeight !== lastKnownStatusBarHeight) {
+              lastKnownStatusBarHeight = parsedHeight;
+              initialStatusBarHeight = parsedHeight;
+              isInitialized = true;
+            }
             return; // 不覆蓋原生注入的準確值
           }
           
-          // ✅ 關鍵改進：完全禁用 visualViewport.offsetTop（在鍵盤可能開啟時不準確）
-          // 直接使用屏幕高度差異方法，更可靠
-          let statusBarHeight = 0;
+          // ✅ 關鍵改進：使用初始值計算，而不是當前值（避免鍵盤影響）
+          // 只有在鍵盤未開啟時，才使用當前值計算
+          let statusBarHeight = initialStatusBarHeight || 0;
           
-          const screenHeight = window.screen.height;
-          const windowHeight = window.innerHeight;
-          const heightDiff = screenHeight - windowHeight;
+          // 如果還沒初始化，使用當前值計算（但必須確保鍵盤未開啟）
+          if (!isInitialized || statusBarHeight === 0) {
+            const screenHeight = window.screen.height;
+            const windowHeight = window.innerHeight;
+            const heightDiff = screenHeight - windowHeight;
 
-          if (heightDiff > 0 && heightDiff <= 80) {
-            statusBarHeight = heightDiff;
-          } else {
-            // 備用方案：檢測 Android 版本
-            const userAgent = navigator.userAgent || '';
-            const androidVersionMatch = userAgent.match(/Android\s([0-9\.]*)/);
-            const androidVersion = androidVersionMatch ? parseFloat(androidVersionMatch[1]) : 0;
-            
-            if (androidVersion >= 15) {
-              statusBarHeight = 48;
+            if (heightDiff > 0 && heightDiff <= 80) {
+              statusBarHeight = heightDiff;
             } else {
-              statusBarHeight = 24;
+              // 備用方案：檢測 Android 版本
+              const userAgent = navigator.userAgent || '';
+              const androidVersionMatch = userAgent.match(/Android\s([0-9\.]*)/);
+              const androidVersion = androidVersionMatch ? parseFloat(androidVersionMatch[1]) : 0;
+              
+              if (androidVersion >= 15) {
+                statusBarHeight = 48;
+              } else {
+                statusBarHeight = 24;
+              }
+            }
+            
+            // 更新初始值
+            if (!isInitialized) {
+              initialStatusBarHeight = statusBarHeight;
+              isInitialized = true;
             }
           }
 
           // ✅ 改進：驗證檢測結果的合理性（靜默處理，不顯示警告）
           if (statusBarHeight > 0 && statusBarHeight < 20) {
             statusBarHeight = 24;
+            if (!isInitialized) {
+              initialStatusBarHeight = 24;
+              isInitialized = true;
+            }
           }
 
           // 只有在值改變時才更新（避免不必要的 DOM 操作）
@@ -337,6 +426,9 @@ function AppContent() {
       }, 150);
     };
     
+    // 初始化 Status Bar 高度
+    initializeStatusBarHeight();
+    
     // 監聽視口變化（統一處理）
     if (window.visualViewport) {
       window.visualViewport.addEventListener('resize', handleUnifiedViewportChange);
@@ -357,133 +449,8 @@ function AppContent() {
     };
   }, []);
 
-  // ✅ 處理 Android Status Bar 高度（改進版 - 完全禁用 visualViewport.offsetTop）
-  useEffect(() => {
-    // 只在 Android 原生應用中處理
-    if (Capacitor.isNativePlatform() && Capacitor.getPlatform() === 'android') {
-      const setStatusBarHeight = () => {
-        // ✅ 關鍵改進：多重檢查鍵盤狀態
-        const isKeyboardVisible = getComputedStyle(document.documentElement)
-          .getPropertyValue('--is-keyboard-visible') === '1';
-        const keyboardHeight = parseFloat(
-          getComputedStyle(document.documentElement)
-            .getPropertyValue('--keyboard-height')
-            .replace('px', '')
-        ) || 0;
-        
-        // ✅ 改進：使用視口高度變化來輔助判斷
-        const currentViewportHeight = window.visualViewport?.height || window.innerHeight;
-        const screenHeight = window.screen.height;
-        const viewportHeightRatio = currentViewportHeight / screenHeight;
-        const likelyKeyboardOpen = keyboardHeight > 150 || 
-                                   isKeyboardVisible || 
-                                   viewportHeightRatio < 0.75; // 視口高度小於屏幕的 75%
-        
-        if (likelyKeyboardOpen) {
-          // 鍵盤已開啟，不更新 Status Bar（避免衝突）
-          return;
-        }
-        
-        // ✅ 優先檢查：是否已從原生注入（最準確的方法）
-        const nativeInjected = window.__nativeInsetsInjected;
-        const existingTop = getComputedStyle(document.documentElement)
-          .getPropertyValue('--safe-area-inset-top')
-          .trim();
-        
-        // 如果原生已注入且值有效，優先使用原生值
-        if (nativeInjected && existingTop && existingTop !== '0px') {
-          logger.debug('Using native-injected status bar height:', existingTop);
-          return; // 不覆蓋原生注入的準確值
-        }
-
-        // ✅ 關鍵改進：完全禁用 visualViewport.offsetTop（在鍵盤可能開啟時不準確）
-        // 直接使用屏幕高度差異方法，更可靠
-        let statusBarHeight = 0;
-        
-        const windowHeight = window.innerHeight;
-        const heightDiff = screenHeight - windowHeight;
-
-        // ✅ 改進：擴大檢測範圍，支援 Android 15 的更大 status bar（24-80px）
-        if (heightDiff > 0 && heightDiff <= 80) {
-          statusBarHeight = heightDiff;
-        } else {
-          // 備用方案：檢測 Android 版本，針對 Android 15 使用更大的預設值
-          const userAgent = navigator.userAgent || '';
-          const androidVersionMatch = userAgent.match(/Android\s([0-9\.]*)/);
-          const androidVersion = androidVersionMatch ? parseFloat(androidVersionMatch[1]) : 0;
-          
-          if (androidVersion >= 15) {
-            statusBarHeight = 48; // Android 15 通常使用 48px
-          } else {
-            statusBarHeight = 24; // 舊版本使用 24px
-          }
-        }
-
-        // ✅ 改進：驗證檢測結果的合理性（靜默處理，移除警告）
-        if (statusBarHeight > 0 && statusBarHeight < 20) {
-          // 靜默使用預設值，不顯示警告
-          statusBarHeight = 24;
-        }
-
-        // 設置 CSS 變量（僅在原生未注入時使用）
-        document.documentElement.style.setProperty(
-          '--safe-area-inset-top',
-          `${statusBarHeight}px`
-        );
-
-        // 同時更新 :root 中的 CSS 變量定義
-        const styleId = 'android-status-bar-height-fix';
-        let styleElement = document.getElementById(styleId);
-
-        if (!styleElement) {
-          styleElement = document.createElement('style');
-          styleElement.id = styleId;
-          document.head.appendChild(styleElement);
-        }
-
-        styleElement.textContent = `
-          :root {
-            --safe-area-inset-top: ${statusBarHeight}px !important;
-          }
-        `;
-
-        logger.debug('Status bar height set to (fallback):', statusBarHeight, 'px');
-      };
-
-      // ✅ 新增：監聽原生注入事件
-      const handleNativeInsetsUpdate = (event) => {
-        if (event.detail) {
-          logger.debug('Native insets updated:', event.detail);
-        }
-      };
-      window.addEventListener('nativeInsetsUpdated', handleNativeInsetsUpdate);
-
-      // ✅ 改進：監聽鍵盤狀態變化，鍵盤關閉時重新檢測 Status Bar
-      const handleKeyboardToggle = (event) => {
-        if (!event.detail.isVisible) {
-          // 鍵盤關閉，重新檢測 Status Bar（延遲確保鍵盤完全收起）
-          setTimeout(setStatusBarHeight, 300);
-        }
-      };
-      window.addEventListener('keyboardToggle', handleKeyboardToggle);
-
-      // 延遲執行以確保視窗已完全載入（給原生注入一些時間）
-      const timer = setTimeout(setStatusBarHeight, 300);
-
-      // ✅ 改進：移除 visualViewport 監聽（由統一管理器處理）
-      // 只保留 orientationchange 監聽
-      window.addEventListener('orientationchange', () => {
-        setTimeout(setStatusBarHeight, 200);
-      });
-
-      return () => {
-        clearTimeout(timer);
-        window.removeEventListener('orientationchange', setStatusBarHeight);
-        window.removeEventListener('nativeInsetsUpdated', handleNativeInsetsUpdate);
-        window.removeEventListener('keyboardToggle', handleKeyboardToggle);
-      };
-    }
-  }, []);
+  // ✅ 已移除：第二個 Status Bar 檢測 useEffect
+  // 所有 Status Bar 檢測邏輯已統一由上面的統一事件管理器處理，避免重複檢測和衝突
 
   // ✅ 改進：原生應用鍵盤檢測邏輯 - 優先使用原生檢測，JavaScript 作為備用
   useEffect(() => {
