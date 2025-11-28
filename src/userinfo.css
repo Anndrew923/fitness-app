@@ -21,9 +21,9 @@
   min-height: 100vh;
   background: linear-gradient(135deg, #81d8d0 0%, #5f9ea0 100%);
   position: relative;
-  /* ✅ 終極優化：啟用內容可見性優化 */
-  content-visibility: auto;
-  contain-intrinsic-size: auto 1000px;
+  /* ✅ 修復 3: 移除 content-visibility，可能導致渲染問題和雷達圖消失 */
+  /* content-visibility: auto; */
+  /* contain-intrinsic-size: auto 1000px; */
   /* ✅ 啟用硬體加速 */
   transform: translateZ(0);
   /* ✅ 滾動性能優化 */
@@ -740,12 +740,13 @@
   transform: translateZ(0);
   /* ✅ 渲染隔離 */
   contain: layout style paint;
-  /* ✅ 內容可見性優化 */
-  content-visibility: auto;
-  contain-intrinsic-size: auto 500px;
+  /* ✅ 修復 3: 移除 content-visibility，可能導致渲染問題和雷達圖消失 */
+  /* content-visibility: auto; */
+  /* contain-intrinsic-size: auto 500px; */
   /* ✅ 滾動性能 */
   -webkit-overflow-scrolling: touch;
-  will-change: transform, opacity;
+  /* ✅ 修復 6: 移除 will-change，讓瀏覽器自動管理，減少內存使用 */
+  will-change: auto;
 }
 
 /* ✅ 移除：不再需要 visible 和 hidden 類別 */
@@ -958,9 +959,15 @@
     opacity: 0;
     transform: scale(0.95); /* ✅ 使用更小的 scale，減少計算 */
   }
-  to {
+  99% {
     opacity: 1;
     transform: scale(1);
+    will-change: transform, opacity; /* ✅ 動畫進行中 */
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+    will-change: auto; /* ✅ 修復 6: 動畫完成後移除 will-change */
   }
 }
 

@@ -14,7 +14,6 @@ import {
   PolarAngleAxis,
   PolarRadiusAxis,
   Radar,
-  ResponsiveContainer,
 } from 'recharts';
 import { auth, db } from './firebase';
 import { storage } from './firebase';
@@ -525,6 +524,10 @@ function UserInfo({ testData, onLogout, clearTestData }) {
   const lastScrollTimeRef = useRef(0);
   const isScrollingRef = useRef(false);
   const idleCallbackIdRef = useRef(null); // ✅ 修復 2: 保存 idle callback ID 用於清理
+  // ✅ 修復 1: 使用穩定的 ref 追蹤雷達圖是否已渲染，防止消失
+  const radarChartRenderedRef = useRef(false);
+  // ✅ 修復 4: 使用固定尺寸替代 ResponsiveContainer，減少重新計算
+  const [chartDimensions, setChartDimensions] = useState({ width: 750, height: 400 });
 
   // ✅ 終極優化：使用 Intersection Observer 優化可見性
   const { elementRef: intersectionRef, isIntersecting: isRadarVisible } = useIntersectionObserver(
@@ -540,6 +543,14 @@ function UserInfo({ testData, onLogout, clearTestData }) {
     radarContainerRef.current = node;
     if (intersectionRef) {
       intersectionRef.current = node;
+    }
+    // ✅ 修復 4: 當容器設置後，立即計算圖表尺寸
+    if (node) {
+      requestAnimationFrame(() => {
+        const width = Math.min(750, node.offsetWidth - 80);
+        const height = Math.min(400, window.innerHeight * 0.5);
+        setChartDimensions({ width, height });
+      });
     }
   }, [intersectionRef]);
 
@@ -924,10 +935,12 @@ function UserInfo({ testData, onLogout, clearTestData }) {
         icon: '📊',
       },
     ];
-      // ✅ 確保數據有效
-      return data.filter(
+      // ✅ 修復 7: 確保數據有效，防止過濾後為空導致雷達圖消失
+      const filtered = data.filter(
         item => item.value !== null && item.value !== undefined
       );
+      // ✅ 如果過濾後為空，返回原始數據（至少保證有數據顯示）
+      return filtered.length > 0 ? filtered : data;
     } catch (error) {
       console.error('雷達圖數據計算錯誤:', error);
       // 返回默認數據
@@ -1080,45 +1093,75 @@ function UserInfo({ testData, onLogout, clearTestData }) {
     };
   }, []);
 
-  // ✅ 終極優化 2: 根據可見性動態調整性能模式
+  // ✅ 修復 2: 改進 Intersection Observer，確保在元素渲染後才設置樣式
   useEffect(() => {
+    // ✅ 等待元素完全渲染後再設置樣式
     if (radarContainerRef.current) {
-      if (isRadarVisible && performanceMode !== 'scrolling') {
-        radarContainerRef.current.style.setProperty('--animation-play-state', 'running');
-        radarContainerRef.current.style.setProperty('--backdrop-blur', '10px');
-      } else if (!isRadarVisible) {
-        radarContainerRef.current.style.setProperty('--animation-play-state', 'paused');
-        radarContainerRef.current.style.setProperty('--backdrop-blur', '0px');
-      }
+      // ✅ 使用雙重 requestAnimationFrame 確保 DOM 已完全渲染
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          if (radarContainerRef.current) {
+            if (isRadarVisible && performanceMode !== 'scrolling') {
+              radarContainerRef.current.style.setProperty('--animation-play-state', 'running');
+              radarContainerRef.current.style.setProperty('--backdrop-blur', '10px');
+            } else if (!isRadarVisible) {
+              radarContainerRef.current.style.setProperty('--animation-play-state', 'paused');
+              radarContainerRef.current.style.setProperty('--backdrop-blur', '0px');
+            }
+          }
+        });
+      });
     }
   }, [isRadarVisible, performanceMode]);
 
-  // ✅ 終極優化 3: 使用 ResizeObserver 優化響應式計算（防抖）
+  // ✅ 修復 4: 計算圖表尺寸（只在必要時更新），替代 ResponsiveContainer
   useEffect(() => {
-    const container = radarContainerRef.current;
-    if (!container || !window.ResizeObserver) return;
+    const updateChartDimensions = () => {
+      const container = radarContainerRef.current;
+      if (container) {
+        const width = Math.min(750, container.offsetWidth - 80); // 減去 padding
+        const height = Math.min(400, window.innerHeight * 0.5);
+        setChartDimensions(prev => {
+          // ✅ 只在尺寸真正改變時更新，避免不必要的重新渲染
+          if (prev.width !== width || prev.height !== height) {
+            return { width, height };
+          }
+          return prev;
+        });
+      }
+    };
 
-    let resizeTimeout;
-    const resizeObserver = new ResizeObserver((entries) => {
-      // ✅ 防抖處理，避免頻繁計算
-      clearTimeout(resizeTimeout);
-      resizeTimeout = setTimeout(() => {
+    // ✅ 等待容器渲染後再計算尺寸
+    const checkAndUpdate = () => {
+      if (radarContainerRef.current) {
+        updateChartDimensions();
+      } else {
+        // ✅ 如果容器還沒渲染，使用 requestAnimationFrame 等待
         requestAnimationFrame(() => {
-          // ✅ 只在必要時更新尺寸
-          entries.forEach(() => {
-            // 可以在此處更新圖表尺寸
+          requestAnimationFrame(() => {
+            if (radarContainerRef.current) {
+              updateChartDimensions();
+            }
           });
         });
-      }, 150);
-    });
+      }
+    };
 
-    resizeObserver.observe(container);
+    // ✅ 只在窗口大小變化時更新，使用防抖
+    let resizeTimeout;
+    const handleResize = () => {
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(() => {
+        requestAnimationFrame(updateChartDimensions);
+      }, 300);
+    };
 
+    window.addEventListener('resize', handleResize);
     return () => {
-      resizeObserver.disconnect();
+      window.removeEventListener('resize', handleResize);
       clearTimeout(resizeTimeout);
     };
-  }, []);
+  }, []); // ✅ 只在組件掛載時設置一次
 
   // ✅ 新增：檢查頁面是否準備好顯示
   useEffect(() => {
@@ -1136,6 +1179,7 @@ function UserInfo({ testData, onLogout, clearTestData }) {
 
       const ready = userReady && dataReady && radarReady && notLoading;
 
+      // ✅ 修復 5: 一旦設置為 true，就不再設置為 false，避免頁面重新進入載入狀態
       if (ready && !isPageReady) {
         // ✅ 使用雙重 requestAnimationFrame 確保渲染完成
         requestAnimationFrame(() => {
@@ -1144,6 +1188,7 @@ function UserInfo({ testData, onLogout, clearTestData }) {
           });
         });
       }
+      // ✅ 移除：不再檢查 ready === false 的情況，避免重新進入載入狀態
     };
 
     checkPageReady();
@@ -2413,16 +2458,17 @@ function UserInfo({ testData, onLogout, clearTestData }) {
           <div className="corner-decoration bottom-right"></div>
 
           <h2 className="radar-title">{t('userInfo.radarOverview')}</h2>
-          {/* ✅ 改進：確保數據存在才渲染，添加 fallback */}
-          {loading ? (
-            <div className="loading-container">
-              <div className="loading-spinner"></div>
-              <p>正在載入數據...</p>
-            </div>
-          ) : radarChartData && radarChartData.length > 0 ? (
-            <div className="radar-chart-container" ref={setRadarContainerRef}>
-              <ResponsiveContainer width="100%" height={400}>
-                <RadarChart data={radarChartData}>
+          {/* ✅ 修復 1: 使用更穩定的條件，避免因 loading 狀態導致雷達圖消失 */}
+          {(() => {
+            // ✅ 如果雷達圖已經渲染過，即使 loading 為 true 也保持顯示
+            if (radarChartRenderedRef.current && radarChartData && radarChartData.length > 0) {
+              return (
+                <div className="radar-chart-container" ref={setRadarContainerRef}>
+                  <RadarChart 
+                    width={chartDimensions.width} 
+                    height={chartDimensions.height}
+                    data={radarChartData}
+                  >
                   <PolarGrid
                     gridType="polygon"
                     stroke="rgba(129, 216, 208, 0.25)"
@@ -2492,14 +2538,111 @@ function UserInfo({ testData, onLogout, clearTestData }) {
                       />
                     </linearGradient>
                   </defs>
-                </RadarChart>
-              </ResponsiveContainer>
-            </div>
-          ) : (
-            <div className="loading-container">
-              <p>數據載入中...</p>
-            </div>
-          )}
+                  </RadarChart>
+                </div>
+              );
+            }
+            
+            // ✅ 首次渲染或數據載入中
+            if (loading && !radarChartRenderedRef.current) {
+              return (
+                <div className="loading-container">
+                  <div className="loading-spinner"></div>
+                  <p>正在載入數據...</p>
+                </div>
+              );
+            }
+            
+            // ✅ 有數據時渲染雷達圖
+            if (radarChartData && radarChartData.length > 0) {
+              radarChartRenderedRef.current = true; // ✅ 標記已渲染
+              return (
+                <div className="radar-chart-container" ref={setRadarContainerRef}>
+                  <RadarChart 
+                    width={chartDimensions.width} 
+                    height={chartDimensions.height}
+                    data={radarChartData}
+                  >
+                    <PolarGrid
+                      gridType="polygon"
+                      stroke="rgba(129, 216, 208, 0.25)"
+                      strokeWidth={2}
+                      strokeDasharray="4 4"
+                    />
+                    <PolarAngleAxis
+                      dataKey="name"
+                      tick={
+                        <CustomAxisTick radarChartData={radarChartData} t={t} />
+                      }
+                      axisLine={false}
+                    />
+                    <PolarRadiusAxis
+                      angle={90}
+                      domain={[0, 100]}
+                      tickCount={5}
+                      tick={{
+                        fontSize: 12,
+                        fill: '#2d3748',
+                        fontWeight: 600,
+                      }}
+                      axisLine={false}
+                    />
+                    <Radar
+                      name={t('userInfo.yourPerformance')}
+                      dataKey="value"
+                      stroke="#81D8D0"
+                      fill="url(#tiffanyGradient)"
+                      fillOpacity={0.8}
+                      strokeWidth={4}
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                    <defs>
+                      <filter
+                        id="glow"
+                        x="-50%"
+                        y="-50%"
+                        width="200%"
+                        height="200%"
+                      >
+                        <feGaussianBlur stdDeviation="3" result="coloredBlur" />
+                        <feMerge>
+                          <feMergeNode in="coloredBlur" />
+                          <feMergeNode in="SourceGraphic" />
+                        </feMerge>
+                      </filter>
+                      <linearGradient
+                        id="tiffanyGradient"
+                        x1="0%"
+                        y1="0%"
+                        x2="100%"
+                        y2="100%"
+                      >
+                        <stop offset="0%" stopColor="#81D8D0" stopOpacity={0.9} />
+                        <stop
+                          offset="50%"
+                          stopColor="#5F9EA0"
+                          stopOpacity={0.7}
+                        />
+                        <stop
+                          offset="100%"
+                          stopColor="#81D8D0"
+                          stopOpacity={0.6}
+                        />
+                      </linearGradient>
+                    </defs>
+                  </RadarChart>
+                </div>
+              );
+            }
+            
+            // ✅ 無數據時的 fallback
+            return (
+              <div className="loading-container">
+                <p>數據載入中...</p>
+              </div>
+            );
+          })()}
 
           {/* 分數顯示區域 */}
           {!loading && (
