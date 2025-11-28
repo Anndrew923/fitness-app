@@ -1,5 +1,14 @@
 /* UserInfo 頁面美化樣式 */
 
+/* ✅ 終極優化 1: 使用 CSS 變量系統控制性能 */
+:root {
+  --performance-mode: normal;
+  --animation-play-state: running;
+  --backdrop-blur: 10px;
+  --backdrop-opacity: 0.95;
+  --transition-duration: 0.3s;
+}
+
 /* 主容器 */
 .user-info-container {
   max-width: 800px;
@@ -12,6 +21,16 @@
   min-height: 100vh;
   background: linear-gradient(135deg, #81d8d0 0%, #5f9ea0 100%);
   position: relative;
+  /* ✅ 終極優化：啟用內容可見性優化 */
+  content-visibility: auto;
+  contain-intrinsic-size: auto 1000px;
+  /* ✅ 啟用硬體加速 */
+  transform: translateZ(0);
+  /* ✅ 滾動性能優化 */
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  /* ✅ 使用 CSS containment */
+  contain: layout style paint;
 }
 
 .user-info-container::before {
@@ -701,32 +720,32 @@
   padding: 40px;
   background: linear-gradient(
     135deg,
-    rgba(255, 255, 255, 0.9) 0%,
-    rgba(248, 250, 252, 0.9) 100%
+    rgba(255, 255, 255, var(--backdrop-opacity, 0.95)) 0%,
+    rgba(248, 250, 252, var(--backdrop-opacity, 0.95)) 100%
   );
   border-radius: 20px;
   box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.06),
     0 4px 12px rgba(129, 216, 208, 0.1);
   position: relative;
   border: 1px solid rgba(129, 216, 208, 0.1);
-  /* ✅ 優化：使用 CSS 變量控制 backdrop-filter，保持外觀但可動態調整 */
+  /* ✅ 終極優化：動態 backdrop-filter */
   --backdrop-blur: 10px;
   backdrop-filter: blur(var(--backdrop-blur));
-  /* ✅ 優化：添加 fallback 背景，在不支持時使用半透明背景 */
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.95) 0%,
-    rgba(248, 250, 252, 0.95) 100%
-  );
   /* 確保容器有足夠的空間容納軸標籤 */
   min-height: 500px;
   display: flex;
   align-items: center;
   justify-content: center;
-  /* ✅ 性能優化：啟用硬體加速和渲染優化 */
+  /* ✅ GPU 加速 */
   transform: translateZ(0);
+  /* ✅ 渲染隔離 */
   contain: layout style paint;
-  /* ✅ 移除 transition，減少重繪 */
+  /* ✅ 內容可見性優化 */
+  content-visibility: auto;
+  contain-intrinsic-size: auto 500px;
+  /* ✅ 滾動性能 */
+  -webkit-overflow-scrolling: touch;
+  will-change: transform, opacity;
 }
 
 /* ✅ 移除：不再需要 visible 和 hidden 類別 */
@@ -737,7 +756,7 @@
   position: absolute;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%) translateZ(0);
   width: 85%;
   height: 85%;
   background: radial-gradient(
@@ -748,14 +767,42 @@
   );
   border-radius: 50%;
   pointer-events: none;
-  /* ✅ 保持動畫，但優化實現 */
+  /* ✅ 終極優化：使用 CSS 變量控制動畫 */
   animation: rotate 20s linear infinite;
-  /* ✅ 優化：只在動畫期間使用 will-change */
+  animation-play-state: var(--animation-play-state, running);
+  /* ✅ 優化 will-change */
   will-change: transform;
-  transform: translate(-50%, -50%) translateZ(0);
-  /* ✅ 優化：使用 GPU 加速層 */
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
+}
+
+/* ✅ 終極優化 3: 滾動時的性能模式 */
+.radar-chart-container.scrolling,
+.user-info-container.performance-mode-scrolling .radar-chart-container {
+  /* ✅ 滾動時暫停動畫 */
+  --animation-play-state: paused !important;
+  /* ✅ 滾動時降低 backdrop-filter */
+  --backdrop-blur: 2px;
+  backdrop-filter: blur(var(--backdrop-blur));
+  /* ✅ 增強背景不透明度保持視覺 */
+  --backdrop-opacity: 0.98;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, var(--backdrop-opacity)) 0%,
+    rgba(248, 250, 252, var(--backdrop-opacity)) 100%
+  );
+  /* ✅ 簡化陰影 */
+  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.04),
+    0 2px 6px rgba(129, 216, 208, 0.08);
+  /* ✅ 移除 will-change 減少內存 */
+  will-change: auto;
+}
+
+/* ✅ 滾動時暫停背景動畫 */
+.radar-chart-container.scrolling::before,
+.user-info-container.performance-mode-scrolling .radar-chart-container::before {
+  animation-play-state: paused !important;
+  will-change: auto;
 }
 
 /* ✅ 優化：如果用戶偏好減少動畫，暫停背景動畫並移除 will-change */
@@ -814,38 +861,76 @@
   stroke: rgba(129, 216, 208, 0.25);
   stroke-width: 2;
   stroke-dasharray: 4 4;
-  /* ✅ 保持動畫，但優化 */
+  /* ✅ 修復 3: 統一動畫狀態控制 */
   animation: fadeIn 1s ease-out forwards;
+  animation-play-state: var(--animation-play-state, running);
 }
 
 .radar-chart-container .recharts-polar-grid-concentric-line {
   stroke: rgba(129, 216, 208, 0.2);
   stroke-width: 1.5;
   stroke-dasharray: 2 2;
-  /* ✅ 保持動畫，但優化 */
+  /* ✅ 修復 3: 統一動畫狀態控制 */
   animation: fadeIn 1.2s ease-out forwards;
+  animation-play-state: var(--animation-play-state, running);
 }
 
 .radar-chart-container .recharts-polar-radius-axis-tick {
   fill: #2d3748;
   font-weight: 600;
   font-size: 12px;
-  /* ✅ 保持動畫，但優化 */
+  /* ✅ 修復 3: 統一動畫狀態控制 */
   animation: fadeIn 1.4s ease-out forwards;
+  animation-play-state: var(--animation-play-state, running);
 }
 
 .radar-chart-container .recharts-radar {
   /* ✅ 保持外觀：保留 filter */
   filter: drop-shadow(0 2px 4px rgba(129, 216, 208, 0.2));
-  /* ✅ 保持動畫，但優化 */
+  /* ✅ 終極優化：使用 CSS 變量控制動畫 */
   animation: radarAppear 1.6s ease-out forwards;
+  animation-play-state: var(--animation-play-state, running);
   /* ✅ 優化：只在動畫期間使用 will-change */
   will-change: transform, opacity;
+}
+
+/* ✅ 滾動時簡化 filter */
+.radar-chart-container.scrolling .recharts-radar,
+.user-info-container.performance-mode-scrolling .radar-chart-container .recharts-radar {
+  filter: none;
+  opacity: 0.98;
+  animation-play-state: paused !important;
+  will-change: auto;
 }
 
 /* ✅ 優化：動畫完成後移除 will-change */
 .radar-chart-container .recharts-radar:not(:hover) {
   animation-fill-mode: forwards;
+}
+
+/* ✅ 終極優化 9: 空閒模式優化 */
+.user-info-container.performance-mode-idle .radar-chart-container {
+  --animation-play-state: running;
+  --backdrop-blur: 10px;
+  backdrop-filter: blur(var(--backdrop-blur));
+}
+
+/* ✅ 終極優化 10: 減少動畫偏好 */
+@media (prefers-reduced-motion: reduce) {
+  .radar-chart-container::before,
+  .radar-chart-container .recharts-polar-angle-axis-tick,
+  .radar-chart-container .recharts-polar-grid-angle-line,
+  .radar-chart-container .recharts-radar {
+    animation: none !important;
+    animation-play-state: paused !important;
+    will-change: auto !important;
+  }
+}
+
+/* ✅ 終極優化 11: 滾動時禁用過渡 */
+.user-info-container.performance-mode-scrolling *,
+.radar-chart-container.scrolling * {
+  transition: none !important;
 }
 
 /* ✅ 優化：使用 Intersection Observer 在不可見時暫停動畫（但保持可見性） */
@@ -1073,7 +1158,7 @@
   text-align: center;
 }
 
-/* 響應式設計 */
+/* ✅ 終極優化 8: 移動設備特殊優化 */
 @media (max-width: 768px) {
   .user-info-container {
     /* ✅ 修正：優先使用 CSS 變量，後備使用 env()（響應式設計） */
@@ -1081,7 +1166,49 @@
         15px + var(--safe-area-inset-top, env(safe-area-inset-top, 0px))
       )
       15px 15px;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
   }
+
+  .radar-chart-container {
+    --backdrop-blur: 5px;
+    padding: 20px;
+    min-height: 400px;
+  }
+
+  .radar-chart-container.scrolling,
+  .user-info-container.performance-mode-scrolling .radar-chart-container {
+    --backdrop-blur: 0px;
+    backdrop-filter: none;
+    background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 1) 0%,
+      rgba(248, 250, 252, 1) 100%
+    );
+  }
+
+  .radar-chart-container::before {
+    animation-duration: 25s;
+  }
+}
+
+@media (max-width: 480px) {
+  .radar-chart-container {
+    --backdrop-blur: 3px;
+    padding: 15px;
+    min-height: 350px;
+  }
+
+  .radar-chart-container.scrolling,
+  .user-info-container.performance-mode-scrolling .radar-chart-container {
+    --backdrop-blur: 0px;
+    backdrop-filter: none;
+  }
+
+  .radar-chart-container::before {
+    animation-duration: 30s;
+  }
+}
 
   .page-title {
     font-size: 24px;
@@ -2449,7 +2576,7 @@
     width: 40px !important;
     height: 40px !important;
   }
-
+  
   .user-info__settings-btn svg {
     width: 18px !important;
     height: 18px !important;

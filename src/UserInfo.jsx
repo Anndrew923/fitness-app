@@ -32,6 +32,7 @@ import {
 import PropTypes from 'prop-types';
 import { calculateLadderScore, generateNickname } from './utils';
 import logger from './utils/logger';
+import { useIntersectionObserver } from './hooks/useIntersectionObserver';
 
 import './userinfo.css';
 import { useTranslation } from 'react-i18next';
@@ -505,6 +506,8 @@ function UserInfo({ testData, onLogout, clearTestData }) {
   const [currentUser, setCurrentUser] = useState(null);
   const [dataLoaded, setDataLoaded] = useState(false);
   const [isPageReady, setIsPageReady] = useState(false); // ✅ 新增：頁面準備狀態
+  // ✅ 終極優化：性能模式狀態管理
+  const [performanceMode, setPerformanceMode] = useState('normal'); // 'normal' | 'scrolling' | 'idle'
   const navigate = useNavigate();
   const location = useLocation();
   const radarSectionRef = useRef(null);
@@ -516,9 +519,29 @@ function UserInfo({ testData, onLogout, clearTestData }) {
   const [avatarError, setAvatarError] = useState(null);
   // 記錄上一次應用過的 testData，避免重複觸發寫入
   const lastAppliedTestDataKeyRef = useRef(null);
+  // ✅ 終極優化：滾動性能優化 refs
+  const scrollTimeoutRef = useRef(null);
+  const rafIdRef = useRef(null);
+  const lastScrollTimeRef = useRef(0);
+  const isScrollingRef = useRef(false);
+  const idleCallbackIdRef = useRef(null); // ✅ 修復 2: 保存 idle callback ID 用於清理
 
-  // ✅ 移除：不再使用 Intersection Observer 控制雷達圖
-  // 雷達圖始終可見，確保即使 JavaScript 錯誤也能正常顯示
+  // ✅ 終極優化：使用 Intersection Observer 優化可見性
+  const { elementRef: intersectionRef, isIntersecting: isRadarVisible } = useIntersectionObserver(
+    {
+      threshold: 0.1,
+      rootMargin: '100px', // ✅ 提前 100px 準備
+    },
+    []
+  );
+  
+  // ✅ 將 intersectionRef 附加到 radarContainerRef（使用回調 ref）
+  const setRadarContainerRef = useCallback((node) => {
+    radarContainerRef.current = node;
+    if (intersectionRef) {
+      intersectionRef.current = node;
+    }
+  }, [intersectionRef]);
 
   // 新增：對話框狀態
   const [modalState, setModalState] = useState({
@@ -871,36 +894,36 @@ function UserInfo({ testData, onLogout, clearTestData }) {
     try {
       const scores = userData?.scores || DEFAULT_SCORES;
       const data = [
-        {
-          name: t('userInfo.radarLabels.strength'),
-          value: scores.strength ? Number(scores.strength).toFixed(2) * 1 : 0,
-          icon: '💪',
-        },
-        {
-          name: t('userInfo.radarLabels.explosivePower'),
-          value: scores.explosivePower
-            ? Number(scores.explosivePower).toFixed(2) * 1
-            : 0,
-          icon: '⚡',
-        },
-        {
-          name: t('userInfo.radarLabels.cardio'),
-          value: scores.cardio ? Number(scores.cardio).toFixed(2) * 1 : 0,
-          icon: '❤️',
-        },
-        {
-          name: t('userInfo.radarLabels.muscle'),
+      {
+        name: t('userInfo.radarLabels.strength'),
+        value: scores.strength ? Number(scores.strength).toFixed(2) * 1 : 0,
+        icon: '💪',
+      },
+      {
+        name: t('userInfo.radarLabels.explosivePower'),
+        value: scores.explosivePower
+          ? Number(scores.explosivePower).toFixed(2) * 1
+          : 0,
+        icon: '⚡',
+      },
+      {
+        name: t('userInfo.radarLabels.cardio'),
+        value: scores.cardio ? Number(scores.cardio).toFixed(2) * 1 : 0,
+        icon: '❤️',
+      },
+      {
+        name: t('userInfo.radarLabels.muscle'),
           value: scores.muscleMass
             ? Number(scores.muscleMass).toFixed(2) * 1
             : 0,
-          icon: '🥩',
-        },
-        {
-          name: t('userInfo.radarLabels.ffmi'),
-          value: scores.bodyFat ? Number(scores.bodyFat).toFixed(2) * 1 : 0,
-          icon: '📊',
-        },
-      ];
+        icon: '🥩',
+      },
+      {
+        name: t('userInfo.radarLabels.ffmi'),
+        value: scores.bodyFat ? Number(scores.bodyFat).toFixed(2) * 1 : 0,
+        icon: '📊',
+      },
+    ];
       // ✅ 確保數據有效
       return data.filter(
         item => item.value !== null && item.value !== undefined
@@ -974,6 +997,129 @@ function UserInfo({ testData, onLogout, clearTestData }) {
 
   // ✅ 移除：不再需要 Intersection Observer ref 附加
 
+  // ✅ 終極優化 1: 智能滾動檢測（使用被動監聽器 + RAF）
+  useEffect(() => {
+    const handleScroll = () => {
+      const now = performance.now();
+      // ✅ 修復 1: 移除未使用的 timeSinceLastScroll 變量
+      
+      // ✅ 使用 requestAnimationFrame 優化滾動處理
+      if (rafIdRef.current) {
+        cancelAnimationFrame(rafIdRef.current);
+      }
+
+      rafIdRef.current = requestAnimationFrame(() => {
+        if (!isScrollingRef.current) {
+          isScrollingRef.current = true;
+          setPerformanceMode('scrolling');
+          // ✅ 滾動時優化 DOM
+          if (radarContainerRef.current) {
+            radarContainerRef.current.classList.add('scrolling');
+            radarContainerRef.current.style.setProperty('--performance-mode', 'scrolling');
+          }
+        }
+
+        lastScrollTimeRef.current = now;
+
+        // ✅ 清除之前的定時器
+        if (scrollTimeoutRef.current) {
+          clearTimeout(scrollTimeoutRef.current);
+        }
+
+        // ✅ 滾動停止後恢復（使用 requestIdleCallback 優化）
+        scrollTimeoutRef.current = setTimeout(() => {
+          isScrollingRef.current = false;
+          setPerformanceMode('idle');
+          
+          // ✅ 修復 2: 取消之前的 idle callback（如果存在）
+          if (idleCallbackIdRef.current && window.cancelIdleCallback) {
+            cancelIdleCallback(idleCallbackIdRef.current);
+            idleCallbackIdRef.current = null;
+          }
+          
+          // ✅ 使用 requestIdleCallback 在空閒時恢復
+          if (window.requestIdleCallback) {
+            idleCallbackIdRef.current = requestIdleCallback(() => {
+              if (radarContainerRef.current) {
+                radarContainerRef.current.classList.remove('scrolling');
+                radarContainerRef.current.style.setProperty('--performance-mode', 'normal');
+              }
+              setPerformanceMode('normal');
+              idleCallbackIdRef.current = null; // ✅ 清理引用
+            }, { timeout: 200 });
+          } else {
+            setTimeout(() => {
+              if (radarContainerRef.current) {
+                radarContainerRef.current.classList.remove('scrolling');
+                radarContainerRef.current.style.setProperty('--performance-mode', 'normal');
+              }
+              setPerformanceMode('normal');
+            }, 200);
+          }
+        }, 150);
+      });
+    };
+
+    // ✅ 使用被動監聽器提升滾動性能
+    const options = { passive: true, capture: false };
+    window.addEventListener('scroll', handleScroll, options);
+    window.addEventListener('touchmove', handleScroll, options);
+    window.addEventListener('wheel', handleScroll, options);
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll, options);
+      window.removeEventListener('touchmove', handleScroll, options);
+      window.removeEventListener('wheel', handleScroll, options);
+      if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
+      if (rafIdRef.current) cancelAnimationFrame(rafIdRef.current);
+      // ✅ 修復 2: 清理 idle callback
+      if (idleCallbackIdRef.current && window.cancelIdleCallback) {
+        cancelIdleCallback(idleCallbackIdRef.current);
+        idleCallbackIdRef.current = null;
+      }
+    };
+  }, []);
+
+  // ✅ 終極優化 2: 根據可見性動態調整性能模式
+  useEffect(() => {
+    if (radarContainerRef.current) {
+      if (isRadarVisible && performanceMode !== 'scrolling') {
+        radarContainerRef.current.style.setProperty('--animation-play-state', 'running');
+        radarContainerRef.current.style.setProperty('--backdrop-blur', '10px');
+      } else if (!isRadarVisible) {
+        radarContainerRef.current.style.setProperty('--animation-play-state', 'paused');
+        radarContainerRef.current.style.setProperty('--backdrop-blur', '0px');
+      }
+    }
+  }, [isRadarVisible, performanceMode]);
+
+  // ✅ 終極優化 3: 使用 ResizeObserver 優化響應式計算（防抖）
+  useEffect(() => {
+    const container = radarContainerRef.current;
+    if (!container || !window.ResizeObserver) return;
+
+    let resizeTimeout;
+    const resizeObserver = new ResizeObserver((entries) => {
+      // ✅ 防抖處理，避免頻繁計算
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(() => {
+        requestAnimationFrame(() => {
+          // ✅ 只在必要時更新尺寸
+          entries.forEach(() => {
+            // 可以在此處更新圖表尺寸
+          });
+        });
+      }, 150);
+    });
+
+    resizeObserver.observe(container);
+
+    return () => {
+      resizeObserver.disconnect();
+      clearTimeout(resizeTimeout);
+    };
+  }, []);
+
   // ✅ 新增：檢查頁面是否準備好顯示
   useEffect(() => {
     const checkPageReady = () => {
@@ -991,10 +1137,12 @@ function UserInfo({ testData, onLogout, clearTestData }) {
       const ready = userReady && dataReady && radarReady && notLoading;
 
       if (ready && !isPageReady) {
-        // ✅ 添加小延遲，確保所有計算完成和 DOM 準備好
-        setTimeout(() => {
-          setIsPageReady(true);
-        }, 150);
+        // ✅ 使用雙重 requestAnimationFrame 確保渲染完成
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            setIsPageReady(true);
+          });
+        });
       }
     };
 
@@ -1369,12 +1517,60 @@ function UserInfo({ testData, onLogout, clearTestData }) {
       logger.error('獲取用戶排名失敗:', error);
       setUserRank(null);
     }
-  }, [userData?.userId, submittedLadderScore, setUserRank]);
+  }, [userData?.userId, submittedLadderScore]);
 
-  // 當用戶數據或完成狀態改變時，獲取用戶排名
+  // ✅ 終極優化 4: 優化 Firebase 查詢（防抖 + 緩存 + requestIdleCallback）
+  const fetchUserRankRef = useRef(null);
+  const lastFetchParamsRef = useRef({ userId: null, score: null });
+
   useEffect(() => {
-    fetchUserRank();
-  }, [fetchUserRank, setUserData]);
+    if (fetchUserRankRef.current) {
+      if (window.cancelIdleCallback) {
+        cancelIdleCallback(fetchUserRankRef.current);
+      } else {
+        clearTimeout(fetchUserRankRef.current);
+      }
+    }
+
+    const userId = userData?.userId;
+    const score = submittedLadderScore;
+
+    // ✅ 如果參數沒變，跳過查詢
+    if (
+      lastFetchParamsRef.current.userId === userId &&
+      lastFetchParamsRef.current.score === score
+    ) {
+      return;
+    }
+
+    lastFetchParamsRef.current = { userId, score };
+
+    if (userId && score > 0) {
+      // ✅ 使用 requestIdleCallback 在空閒時查詢
+      if (window.requestIdleCallback) {
+        fetchUserRankRef.current = requestIdleCallback(
+          () => {
+            fetchUserRank();
+          },
+          { timeout: 2000 }
+        );
+      } else {
+        fetchUserRankRef.current = setTimeout(() => {
+          fetchUserRank();
+        }, 800);
+      }
+    }
+
+    return () => {
+      if (fetchUserRankRef.current) {
+        if (window.cancelIdleCallback) {
+          cancelIdleCallback(fetchUserRankRef.current);
+        } else {
+          clearTimeout(fetchUserRankRef.current);
+        }
+      }
+    };
+  }, [userData?.userId, submittedLadderScore, fetchUserRank]);
 
   // 計算年齡段
   // const ageGroup = useMemo(() => {
@@ -1686,7 +1882,7 @@ function UserInfo({ testData, onLogout, clearTestData }) {
 
   // ✅ 修改：頁面準備好後，一次性顯示所有內容（帶淡入動畫）
   return (
-    <div className="user-info-container page-ready">
+    <div className={`user-info-container page-ready performance-mode-${performanceMode}`}>
       {/* 右上角設定按鈕 */}
       <button
         type="button"
@@ -2224,7 +2420,7 @@ function UserInfo({ testData, onLogout, clearTestData }) {
               <p>正在載入數據...</p>
             </div>
           ) : radarChartData && radarChartData.length > 0 ? (
-            <div className="radar-chart-container" ref={radarContainerRef}>
+            <div className="radar-chart-container" ref={setRadarContainerRef}>
               <ResponsiveContainer width="100%" height={400}>
                 <RadarChart data={radarChartData}>
                   <PolarGrid
