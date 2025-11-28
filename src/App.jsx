@@ -212,11 +212,151 @@ function AppContent() {
     return () => clearTimeout(timer);
   }, [location.pathname]);
 
-  // ✅ 處理 Android Status Bar 高度（確保在不同設備上正確響應）
+  // ✅ 改進：統一的事件管理器，避免 Status Bar 和鍵盤檢測衝突
+  useEffect(() => {
+    if (!Capacitor.isNativePlatform() || Capacitor.getPlatform() !== 'android') {
+      return;
+    }
+
+    // 統一的視口變化處理器
+    let viewportChangeTimeout = null;
+    let lastKnownStatusBarHeight = 0;
+    
+    const handleUnifiedViewportChange = () => {
+      // 清除之前的定時器
+      if (viewportChangeTimeout) {
+        clearTimeout(viewportChangeTimeout);
+      }
+      
+      // 防抖處理，避免頻繁觸發
+      viewportChangeTimeout = setTimeout(() => {
+        try {
+          // ✅ 關鍵改進：優先檢查鍵盤狀態，如果鍵盤已開啟，跳過 Status Bar 檢測（避免衝突）
+          const nativeKeyboardVisible = getComputedStyle(document.documentElement)
+            .getPropertyValue('--is-keyboard-visible') === '1';
+          const nativeKeyboardHeight = parseFloat(
+            getComputedStyle(document.documentElement)
+              .getPropertyValue('--keyboard-height')
+              .replace('px', '')
+          ) || 0;
+          
+          // 如果原生已檢測到鍵盤，跳過 Status Bar 檢測（避免衝突）
+          if (nativeKeyboardVisible && nativeKeyboardHeight > 150) {
+            // 鍵盤已開啟，不更新 Status Bar（保持上次的值）
+            return;
+          }
+          
+          // 只有在鍵盤未開啟時，才更新 Status Bar
+          // ✅ 優先檢查：是否已從原生注入（最準確的方法）
+          const nativeInjected = window.__nativeInsetsInjected;
+          const existingTop = getComputedStyle(document.documentElement)
+            .getPropertyValue('--safe-area-inset-top')
+            .trim();
+          
+          // 如果原生已注入且值有效，優先使用原生值
+          if (nativeInjected && existingTop && existingTop !== '0px') {
+            return; // 不覆蓋原生注入的準確值
+          }
+          
+          // 使用 visualViewport.offsetTop（最準確，不受鍵盤影響）
+          let statusBarHeight = 0;
+          if (window.visualViewport) {
+            statusBarHeight = window.visualViewport.offsetTop || 0;
+          }
+
+          // 方法 2: 如果 visualViewport 不可用，使用屏幕高度差異（僅在鍵盤未開啟時）
+          if (statusBarHeight === 0) {
+            const screenHeight = window.screen.height;
+            const windowHeight = window.innerHeight;
+            const heightDiff = screenHeight - windowHeight;
+
+            if (heightDiff > 0 && heightDiff <= 80) {
+              statusBarHeight = heightDiff;
+            } else {
+              const userAgent = navigator.userAgent || '';
+              const androidVersionMatch = userAgent.match(/Android\s([0-9\.]*)/);
+              const androidVersion = androidVersionMatch ? parseFloat(androidVersionMatch[1]) : 0;
+              
+              if (androidVersion >= 15) {
+                statusBarHeight = 48;
+              } else {
+                statusBarHeight = 24;
+              }
+            }
+          }
+
+          // 驗證檢測結果的合理性
+          if (statusBarHeight > 0 && statusBarHeight < 20) {
+            statusBarHeight = 24;
+          }
+
+          // 只有在值改變時才更新（避免不必要的 DOM 操作）
+          if (statusBarHeight > 0 && statusBarHeight !== lastKnownStatusBarHeight) {
+            lastKnownStatusBarHeight = statusBarHeight;
+            
+            // 設置 CSS 變量
+            document.documentElement.style.setProperty(
+              '--safe-area-inset-top',
+              `${statusBarHeight}px`
+            );
+
+            // 更新 :root 中的 CSS 變量定義
+            const styleId = 'android-status-bar-height-fix';
+            let styleElement = document.getElementById(styleId);
+            if (!styleElement) {
+              styleElement = document.createElement('style');
+              styleElement.id = styleId;
+              document.head.appendChild(styleElement);
+            }
+
+            styleElement.textContent = `
+              :root {
+                --safe-area-inset-top: ${statusBarHeight}px !important;
+              }
+            `;
+            
+            logger.debug('Status bar height updated (unified):', statusBarHeight, 'px');
+          }
+        } catch (error) {
+          logger.error('Unified viewport change handler error:', error);
+        }
+      }, 150);
+    };
+    
+    // 監聽視口變化（統一處理）
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', handleUnifiedViewportChange);
+    }
+    window.addEventListener('resize', handleUnifiedViewportChange);
+    
+    // 初始檢查
+    setTimeout(handleUnifiedViewportChange, 300);
+    
+    return () => {
+      if (viewportChangeTimeout) {
+        clearTimeout(viewportChangeTimeout);
+      }
+      if (window.visualViewport) {
+        window.visualViewport.removeEventListener('resize', handleUnifiedViewportChange);
+      }
+      window.removeEventListener('resize', handleUnifiedViewportChange);
+    };
+  }, []);
+
+  // ✅ 處理 Android Status Bar 高度（改進版 - 只在鍵盤未開啟時運行）
   useEffect(() => {
     // 只在 Android 原生應用中處理
     if (Capacitor.isNativePlatform() && Capacitor.getPlatform() === 'android') {
       const setStatusBarHeight = () => {
+        // ✅ 關鍵改進：檢查鍵盤狀態，如果鍵盤已開啟，跳過 Status Bar 檢測
+        const isKeyboardVisible = getComputedStyle(document.documentElement)
+          .getPropertyValue('--is-keyboard-visible') === '1';
+        
+        if (isKeyboardVisible) {
+          // 鍵盤已開啟，不更新 Status Bar（避免衝突）
+          return;
+        }
+        
         // ✅ 優先檢查：是否已從原生注入（最準確的方法）
         const nativeInjected = window.__nativeInsetsInjected;
         const existingTop = getComputedStyle(document.documentElement)
@@ -301,41 +441,34 @@ function AppContent() {
       };
       window.addEventListener('nativeInsetsUpdated', handleNativeInsetsUpdate);
 
+      // ✅ 改進：監聽鍵盤狀態變化，鍵盤關閉時重新檢測 Status Bar
+      const handleKeyboardToggle = (event) => {
+        if (!event.detail.isVisible) {
+          // 鍵盤關閉，重新檢測 Status Bar
+          setTimeout(setStatusBarHeight, 200);
+        }
+      };
+      window.addEventListener('keyboardToggle', handleKeyboardToggle);
+
       // 延遲執行以確保視窗已完全載入（給原生注入一些時間）
       const timer = setTimeout(setStatusBarHeight, 300);
 
-      // 監聽視窗大小變化（處理旋轉、全屏切換等）
-      window.addEventListener('resize', setStatusBarHeight);
+      // ✅ 改進：移除 visualViewport 監聽（由統一管理器處理）
+      // 只保留 orientationchange 監聽
       window.addEventListener('orientationchange', () => {
         setTimeout(setStatusBarHeight, 200);
       });
 
-      // 監聽 visualViewport 變化（如果支持）
-      if (window.visualViewport) {
-        window.visualViewport.addEventListener('resize', setStatusBarHeight);
-        window.visualViewport.addEventListener('scroll', setStatusBarHeight);
-      }
-
       return () => {
         clearTimeout(timer);
-        window.removeEventListener('resize', setStatusBarHeight);
         window.removeEventListener('orientationchange', setStatusBarHeight);
         window.removeEventListener('nativeInsetsUpdated', handleNativeInsetsUpdate);
-        if (window.visualViewport) {
-          window.visualViewport.removeEventListener(
-            'resize',
-            setStatusBarHeight
-          );
-          window.visualViewport.removeEventListener(
-            'scroll',
-            setStatusBarHeight
-          );
-        }
+        window.removeEventListener('keyboardToggle', handleKeyboardToggle);
       };
     }
   }, []);
 
-  // ✅ 新增：原生應用鍵盤檢測邏輯（僅在 iOS/Android 平台）
+  // ✅ 改進：原生應用鍵盤檢測邏輯 - 優先使用原生檢測，JavaScript 作為備用
   useEffect(() => {
     // 只在原生平台運行
     if (!Capacitor.isNativePlatform()) {
@@ -347,8 +480,36 @@ function AppContent() {
     let resizeTimeout = null;
     let lastWindowHeight = window.innerHeight;
     let lastViewportHeight = window.visualViewport?.height || window.innerHeight;
+    let nativeDetectionActive = false;
+    let lastNativeKeyboardState = null;
+
+    // ✅ 改進：監聽原生檢測結果，標記原生檢測已激活
+    const handleNativeKeyboardToggle = (event) => {
+      if (event.detail) {
+        nativeDetectionActive = true;
+        isKeyboardVisible = event.detail.isVisible;
+        keyboardHeight = event.detail.height || 0;
+        
+        // 只有在狀態真正改變時才更新（避免重複更新）
+        const stateKey = `${isKeyboardVisible}-${keyboardHeight}`;
+        if (stateKey !== lastNativeKeyboardState) {
+          lastNativeKeyboardState = stateKey;
+          // 原生檢測優先，直接使用原生結果
+          updateKeyboardState(isKeyboardVisible, keyboardHeight);
+        }
+      }
+    };
+    window.addEventListener('keyboardToggle', handleNativeKeyboardToggle);
 
     const handleKeyboardDetection = () => {
+      // ✅ 改進：如果原生檢測已激活，跳過 JavaScript 檢測（避免衝突）
+      // 但保留作為備用機制（如果原生檢測失敗）
+      if (nativeDetectionActive && lastNativeKeyboardState !== null) {
+        // 原生檢測優先，但保留 JavaScript 檢測作為備用
+        // 只在原生檢測明顯失敗時才使用（例如：原生檢測說鍵盤關閉，但視口明顯變小）
+        return;
+      }
+
       // 防抖處理，避免頻繁觸發
       if (resizeTimeout) {
         clearTimeout(resizeTimeout);
@@ -369,7 +530,6 @@ function AppContent() {
             const newKeyboardHeight = Math.max(0, windowHeight - viewportHeight);
             
             // ✅ 改進：降低閾值到 150px，更早檢測到鍵盤（避免短暫顯示）
-            // 原生檢測優先，JavaScript 檢測作為備用，所以降低閾值風險較低
             const newIsKeyboardVisible = newKeyboardHeight > 150;
             
             // ✅ 改進：使用更小的變化閾值（10px），更敏感
@@ -421,7 +581,7 @@ function AppContent() {
         document.documentElement.removeAttribute('data-keyboard-visible');
       }
       
-      // 觸發自定義事件
+      // 觸發自定義事件（避免重複觸發）
       window.dispatchEvent(new CustomEvent('keyboardToggle', {
         detail: { 
           isVisible: isVisible, 
@@ -429,50 +589,56 @@ function AppContent() {
         }
       }));
       
-      logger.debug('鍵盤狀態變化（原生）:', { 
+      logger.debug('鍵盤狀態變化:', { 
         isVisible: isVisible, 
         height: height,
-        platform: Capacitor.getPlatform()
+        platform: Capacitor.getPlatform(),
+        source: nativeDetectionActive ? 'native' : 'javascript'
       });
     };
 
-    // 監聽視口變化（優先使用）
-    if (window.visualViewport) {
+    // ✅ 改進：減少監聽器，避免與 Status Bar 檢測衝突
+    // 只在 visualViewport 可用且原生檢測未激活時監聽（原生檢測優先）
+    if (window.visualViewport && !nativeDetectionActive) {
       window.visualViewport.addEventListener('resize', handleKeyboardDetection);
-      window.visualViewport.addEventListener('scroll', handleKeyboardDetection);
     }
     
-    // 監聽視窗大小變化
-    window.addEventListener('resize', handleKeyboardDetection);
-    
-    // ✅ 改進：輸入框焦點時立即檢查（不延遲）
+    // ✅ 改進：輸入框焦點處理 - 與輸入框滾動合併（不重複監聽 focusin）
     const handleInputFocus = () => {
-      // 立即檢查，然後再延遲檢查一次確保準確
-      handleKeyboardDetection();
-      setTimeout(handleKeyboardDetection, 150);
+      // 立即檢查鍵盤狀態（僅在原生檢測未激活時）
+      if (!nativeDetectionActive) {
+        handleKeyboardDetection();
+        setTimeout(handleKeyboardDetection, 150);
+      }
     };
     
     const handleInputBlur = () => {
-      // 鍵盤收起可能較慢，延遲檢查
-      setTimeout(handleKeyboardDetection, 200);
+      setTimeout(() => {
+        if (!nativeDetectionActive) {
+          handleKeyboardDetection();
+        }
+      }, 200);
     };
     
-    // 監聽所有輸入元素的焦點事件
+    // 監聽所有輸入元素的焦點事件（僅作為備用）
     document.addEventListener('focusin', handleInputFocus, true);
     document.addEventListener('focusout', handleInputBlur, true);
     
-    // ✅ 改進：初始檢查更快
-    setTimeout(handleKeyboardDetection, 100);
+    // ✅ 改進：初始檢查（僅在原生檢測未激活時）
+    setTimeout(() => {
+      if (!nativeDetectionActive) {
+        handleKeyboardDetection();
+      }
+    }, 100);
 
     return () => {
       if (resizeTimeout) {
         clearTimeout(resizeTimeout);
       }
+      window.removeEventListener('keyboardToggle', handleNativeKeyboardToggle);
       if (window.visualViewport) {
         window.visualViewport.removeEventListener('resize', handleKeyboardDetection);
-        window.visualViewport.removeEventListener('scroll', handleKeyboardDetection);
       }
-      window.removeEventListener('resize', handleKeyboardDetection);
       document.removeEventListener('focusin', handleInputFocus, true);
       document.removeEventListener('focusout', handleInputBlur, true);
     };
@@ -519,7 +685,7 @@ function AppContent() {
             .replace('px', '')
         ) || 0;
         
-        // 延遲執行，確保鍵盤已彈出（給原生檢測時間）
+        // ✅ 改進：等待原生檢測完成（400ms，給原生檢測足夠時間）
         setTimeout(() => {
           try {
             // 重新獲取鍵盤高度（鍵盤可能已經彈出）
@@ -570,7 +736,7 @@ function AppContent() {
             logger.error('輸入框滾動失敗:', error);
             scrollingInput = null;
           }
-        }, 350); // 350ms 延遲，確保鍵盤已彈出且原生檢測已完成
+            }, 400); // ✅ 改進：增加到 400ms，確保原生檢測完成，確保鍵盤已彈出且原生檢測已完成
       } catch (error) {
         logger.error('輸入框焦點處理錯誤:', error);
       }

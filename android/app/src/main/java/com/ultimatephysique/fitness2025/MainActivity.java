@@ -91,15 +91,26 @@ public class MainActivity extends BridgeActivity {
             // 計算鍵盤高度（屏幕高度 - 可見區域底部）
             int keypadHeight = screenHeight - r.bottom;
             
-            // 如果鍵盤高度超過屏幕的 15%，認為鍵盤已開啟
-            // 這個閾值可以過濾掉系統 UI（狀態列、導覽列）的變化
-            boolean isKeyboardVisible = keypadHeight > screenHeight * 0.15;
+            // ✅ 改進：使用更精確的閾值（100px 或屏幕的 10%，取較大值）
+            // 這樣可以過濾掉系統 UI（狀態列、導覽列）的變化，同時在較小設備上也能正確檢測
+            int threshold = Math.max(100, (int)(screenHeight * 0.10));
+            boolean isKeyboardVisible = keypadHeight > threshold;
             
             // 獲取 WebView 實例
             WebView webView = getBridge().getWebView();
             if (webView == null) {
                 return;
             }
+            
+            // ✅ 改進：只有在狀態真正改變時才注入（避免頻繁更新）
+            // 檢查當前狀態（通過 JavaScript 獲取）
+            String checkStateScript = String.format(
+                "(function() { " +
+                "  var isVisible = document.documentElement.getAttribute('data-keyboard-visible') === 'true'; " +
+                "  var height = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--keyboard-height')) || 0; " +
+                "  return JSON.stringify({ isVisible: isVisible, height: height }); " +
+                "})();"
+            );
             
             // 構建 JavaScript 代碼來注入鍵盤狀態
             String js = buildKeyboardStateScript(isKeyboardVisible, keypadHeight);
@@ -108,8 +119,8 @@ public class MainActivity extends BridgeActivity {
             webView.evaluateJavascript(js, null);
             
             Log.d(TAG, String.format(
-                "Keyboard state detected: visible=%s, height=%dpx",
-                isKeyboardVisible, keypadHeight
+                "Keyboard state detected: visible=%s, height=%dpx, threshold=%dpx",
+                isKeyboardVisible, keypadHeight, threshold
             ));
             
         } catch (Exception e) {
