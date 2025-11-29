@@ -19,8 +19,8 @@ android {
         applicationId "com.ultimatephysique.fitness2025"
         minSdkVersion 21
         targetSdkVersion 35
-        versionCode 13
-        versionName "1.13"
+        versionCode 19
+        versionName "1.19"
 
         // 基本資源值
         resValue "string", "app_name", "最強肉體"

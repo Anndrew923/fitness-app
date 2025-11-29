@@ -51,7 +51,7 @@ public class MainActivity extends BridgeActivity {
     
     /**
      * ✅ 關鍵改進：設置 WebView 準備就緒監聽器
-     * 確保在 WebView 完全初始化並加載完成後再執行 JavaScript 注入
+     * 不覆蓋 Capacitor 的 WebViewClient，使用 JavaScript 檢查頁面準備狀態
      */
     private void setupWebViewReadyListener() {
         // 延遲獲取 WebView，確保 Capacitor Bridge 已初始化
@@ -66,28 +66,9 @@ public class MainActivity extends BridgeActivity {
                         return;
                     }
                     
-                    // 設置 WebViewClient 監聽頁面加載完成
-                    webView.setWebViewClient(new WebViewClient() {
-                        @Override
-                        public void onPageFinished(WebView view, String url) {
-                            super.onPageFinished(view, url);
-                            
-                            // ✅ 頁面加載完成，標記 WebView 準備就緒
-                            if (!isWebViewReady) {
-                                isWebViewReady = true;
-                                Log.d(TAG, "WebView is ready, page loaded: " + url);
-                                
-                                // 延遲注入，確保 JavaScript 環境完全準備好
-                                mainHandler.postDelayed(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        injectStatusBarHeight();
-                                        setupKeyboardListener();
-                                    }
-                                }, 300);
-                            }
-                        }
-                    });
+                    // ✅ 關鍵改進：不覆蓋 Capacitor 的 WebViewClient
+                    // 使用 JavaScript 注入來檢查頁面是否準備好
+                    checkWebViewReady();
                     
                 } catch (Exception e) {
                     Log.e(TAG, "Error setting up WebView listener", e);
@@ -95,7 +76,54 @@ public class MainActivity extends BridgeActivity {
                     mainHandler.postDelayed(this, 500);
                 }
             }
-        }, 100);
+        }, 500); // ✅ 增加初始延遲，確保 Capacitor 完全初始化
+    }
+    
+    /**
+     * ✅ 改進：使用 JavaScript 檢查頁面是否準備好，不覆蓋 WebViewClient
+     */
+    private void checkWebViewReady() {
+        WebView webView = getBridge().getWebView();
+        if (webView == null) {
+            return;
+        }
+        
+        // 使用 JavaScript 檢查 document.readyState
+        String checkScript = "(function() { " +
+            "  if (document.readyState === 'complete' || document.readyState === 'interactive') { " +
+            "    return 'ready'; " +
+            "  } " +
+            "  return 'loading'; " +
+            "})();";
+        
+        webView.evaluateJavascript(checkScript, new android.webkit.ValueCallback<String>() {
+            @Override
+            public void onReceiveValue(String value) {
+                if (value != null && value.contains("ready")) {
+                    if (!isWebViewReady) {
+                        isWebViewReady = true;
+                        Log.d(TAG, "WebView is ready");
+                        
+                        // 延遲注入，確保 JavaScript 環境完全準備好
+                        mainHandler.postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                injectStatusBarHeight();
+                                setupKeyboardListener();
+                            }
+                        }, 300);
+                    }
+                } else {
+                    // 頁面還沒準備好，繼續檢查
+                    mainHandler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            checkWebViewReady();
+                        }
+                    }, 200);
+                }
+            }
+        });
     }
     
     /**
