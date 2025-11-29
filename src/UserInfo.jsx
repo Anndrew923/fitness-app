@@ -1203,16 +1203,14 @@ function UserInfo({ testData, onLogout, clearTestData }) {
       // 檢查所有必要條件：
       // 1. 數據已載入（dataLoaded 或 guest 模式）
       // 2. 用戶認證完成（currentUser 或 guest）
-      // 3. 雷達圖數據已計算完成（即使為空數組也可以，因為有 fallback UI）
-      // 4. 不在載入狀態
+      // 3. 不在載入狀態
+      // ✅ 修復：移除對 radarChartData 的依賴，避免循環依賴導致頁面無法顯示
+      // radarChartData 會在組件渲染時自動計算，不需要在這裡等待
       const userReady = currentUser || isGuest;
       const dataReady = dataLoaded || isGuest;
-      // ✅ 優化：radarChartData 只要存在即可（即使為空數組也有 fallback UI）
-      const radarReady =
-        radarChartData !== undefined && radarChartData !== null;
       const notLoading = !isLoading && !loading;
 
-      const ready = userReady && dataReady && radarReady && notLoading;
+      const ready = userReady && dataReady && notLoading;
 
       // ✅ 修復 5: 一旦設置為 true，就不再設置為 false，避免頁面重新進入載入狀態
       if (ready && !isPageReady) {
@@ -1233,7 +1231,7 @@ function UserInfo({ testData, onLogout, clearTestData }) {
     dataLoaded,
     isLoading,
     loading,
-    radarChartData,
+    // ✅ 修復：移除 radarChartData 依賴，避免循環依賴
     isPageReady,
   ]);
 
@@ -1961,9 +1959,11 @@ function UserInfo({ testData, onLogout, clearTestData }) {
   }
 
   // ✅ 修改：頁面準備好後，一次性顯示所有內容（帶淡入動畫）
+  // ✅ 修復：強制設置 opacity 確保內容可見，避免動畫未執行時內容不可見
   return (
     <div
       className={`user-info-container page-ready performance-mode-${performanceMode}`}
+      style={{ opacity: 1 }}
     >
       {/* 右上角設定按鈕 */}
       <button

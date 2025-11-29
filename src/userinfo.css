@@ -88,12 +88,13 @@
 /* ✅ 新增：頁面準備好後的淡入動畫 */
 .user-info-container.page-ready {
   animation: pageFadeIn 0.5s ease-out forwards;
-  opacity: 0;
+  /* ✅ 修復：確保初始狀態可見，避免動畫未執行時內容不可見 */
+  opacity: 1 !important; /* 強制可見，動畫會處理過渡效果 */
 }
 
 @keyframes pageFadeIn {
   from {
-    opacity: 0;
+    opacity: 0.3; /* ✅ 從半透明開始，而不是完全透明，確保內容始終可見 */
     transform: translateY(10px);
   }
   to {

@@ -100,17 +100,24 @@ html[data-keyboard-visible="true"] {
 
 /* ✅ 關鍵修復：鍵盤開啟時，隱藏底部 Navigation Bar 覆蓋層，避免白色區塊 */
 /* 當鍵盤彈出時，Navigation Bar 會被鍵盤覆蓋，不需要顯示白色覆蓋層 */
+/* ✅ 改進：使用更強的選擇器優先級，確保覆蓋 @supports 規則 */
 html[data-keyboard-visible="true"] body::after {
   display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  height: 0 !important;
+  max-height: 0 !important;
 }
 
-/* ✅ 改進：鍵盤開啟時，確保 Status Bar 覆蓋層不會在鍵盤上方顯示 */
-/* Status Bar 覆蓋層應該保持在頂部，但確保不會延伸到鍵盤區域 */
+/* ✅ 關鍵修復：鍵盤開啟時，也隱藏頂部 Status Bar 覆蓋層，避免滾動時在鍵盤上方顯示 */
+/* 當鍵盤彈出時，Status Bar 覆蓋層可能會在滾動時顯示在鍵盤上方，造成白色區塊 */
+/* ✅ 改進：使用多重隱藏方式，確保完全隱藏，優先級高於 @supports 規則 */
 html[data-keyboard-visible="true"] body::before {
-  /* 保持顯示，但確保高度正確 */
-  height: env(safe-area-inset-top, 0px);
-  /* 確保不會在鍵盤上方顯示（通過限制最大高度） */
-  max-height: env(safe-area-inset-top, 0px);
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  height: 0 !important;
+  max-height: 0 !important;
 }
 
 /* 手機優先設計 */
