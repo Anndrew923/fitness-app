@@ -234,12 +234,12 @@ function AppContent() {
       if (isInitialized && initialStatusBarHeight > 0) return;
       
       // ✅ 優先使用原生注入的值（最準確，不應該被覆蓋）
-      const nativeInjected = window.__nativeInsetsInjected;
-      const existingTop = getComputedStyle(document.documentElement)
-        .getPropertyValue('--safe-area-inset-top')
-        .trim();
-      
-      if (nativeInjected && existingTop && existingTop !== '0px') {
+        const nativeInjected = window.__nativeInsetsInjected;
+        const existingTop = getComputedStyle(document.documentElement)
+          .getPropertyValue('--safe-area-inset-top')
+          .trim();
+        
+        if (nativeInjected && existingTop && existingTop !== '0px') {
         const parsedHeight = parseFloat(existingTop.replace('px', '')) || 0;
         if (parsedHeight > 0) {
           initialStatusBarHeight = parsedHeight;
@@ -248,8 +248,8 @@ function AppContent() {
           logger.debug('Status bar height initialized from native:', initialStatusBarHeight, 'px');
           return; // ✅ 關鍵：原生注入的值最準確，不需要重新計算
         }
-      }
-      
+        }
+
       // 只有在原生注入失敗時，才使用 JavaScript 計算
       // 計算初始 Status Bar 高度（應用啟動時，鍵盤肯定未開啟）
       const initialHeightDiff = initialScreenHeight - initialWindowHeight;
@@ -400,32 +400,32 @@ function AppContent() {
           
           // ✅ 只有在未初始化時才計算，且必須確保鍵盤未開啟
           if (!isInitialized) {
-            const screenHeight = window.screen.height;
-            const windowHeight = window.innerHeight;
-            const heightDiff = screenHeight - windowHeight;
+          const screenHeight = window.screen.height;
+          const windowHeight = window.innerHeight;
+          const heightDiff = screenHeight - windowHeight;
 
             let statusBarHeight = 0;
             
-            if (heightDiff > 0 && heightDiff <= 80) {
-              statusBarHeight = heightDiff;
-            } else {
+          if (heightDiff > 0 && heightDiff <= 80) {
+            statusBarHeight = heightDiff;
+          } else {
               // 備用方案：檢測 Android 版本
-              const userAgent = navigator.userAgent || '';
-              const androidVersionMatch = userAgent.match(/Android\s([0-9\.]*)/);
-              const androidVersion = androidVersionMatch ? parseFloat(androidVersionMatch[1]) : 0;
-              
-              if (androidVersion >= 15) {
+            const userAgent = navigator.userAgent || '';
+            const androidVersionMatch = userAgent.match(/Android\s([0-9\.]*)/);
+            const androidVersion = androidVersionMatch ? parseFloat(androidVersionMatch[1]) : 0;
+            
+            if (androidVersion >= 15) {
                 statusBarHeight = 48;
-              } else {
+            } else {
                 statusBarHeight = 24;
-              }
-            }
+          }
+        }
 
             // ✅ 改進：驗證檢測結果的合理性（靜默處理，不顯示警告）
-            if (statusBarHeight > 0 && statusBarHeight < 20) {
-              statusBarHeight = 24;
-            }
-            
+        if (statusBarHeight > 0 && statusBarHeight < 20) {
+          statusBarHeight = 24;
+        }
+
             // 更新初始值
             if (statusBarHeight > 0) {
               initialStatusBarHeight = statusBarHeight;
@@ -434,25 +434,25 @@ function AppContent() {
               
               // ✅ 關鍵：只有在原生注入失敗時，才設置 CSS 變量
               if (!nativeInjected) {
-                document.documentElement.style.setProperty(
-                  '--safe-area-inset-top',
-                  `${statusBarHeight}px`
-                );
+        document.documentElement.style.setProperty(
+          '--safe-area-inset-top',
+          `${statusBarHeight}px`
+        );
 
-                const styleId = 'android-status-bar-height-fix';
-                let styleElement = document.getElementById(styleId);
-                if (!styleElement) {
-                  styleElement = document.createElement('style');
-                  styleElement.id = styleId;
-                  document.head.appendChild(styleElement);
-                }
+        const styleId = 'android-status-bar-height-fix';
+        let styleElement = document.getElementById(styleId);
+        if (!styleElement) {
+          styleElement = document.createElement('style');
+          styleElement.id = styleId;
+          document.head.appendChild(styleElement);
+        }
 
-                styleElement.textContent = `
-                  :root {
-                    --safe-area-inset-top: ${statusBarHeight}px !important;
-                  }
-                `;
-                
+        styleElement.textContent = `
+          :root {
+            --safe-area-inset-top: ${statusBarHeight}px !important;
+          }
+        `;
+
                 logger.debug('Status bar height initialized (unified):', statusBarHeight, 'px');
               }
             }
@@ -465,10 +465,10 @@ function AppContent() {
     
     // 初始化 Status Bar 高度
     initializeStatusBarHeight();
-    
+
     // ✅ 關鍵改進：監聽原生注入事件，更新初始值（確保原生值優先）
-    const handleNativeInsetsUpdate = (event) => {
-      if (event.detail) {
+      const handleNativeInsetsUpdate = (event) => {
+        if (event.detail) {
         const { top, bottom } = event.detail;
         if (top > 0) {
           initialStatusBarHeight = top;
@@ -478,25 +478,25 @@ function AppContent() {
         }
         // ✅ 關鍵：不修改 --safe-area-inset-bottom，由原生注入管理
         // bottom 值由原生注入，JavaScript 不應該覆蓋
-      }
-    };
-    window.addEventListener('nativeInsetsUpdated', handleNativeInsetsUpdate);
-    
+        }
+      };
+      window.addEventListener('nativeInsetsUpdated', handleNativeInsetsUpdate);
+
     // 監聽視口變化（統一處理）
-    if (window.visualViewport) {
+      if (window.visualViewport) {
       window.visualViewport.addEventListener('resize', handleUnifiedViewportChange);
-    }
+      }
     window.addEventListener('resize', handleUnifiedViewportChange);
     
     // ✅ 改進：初始檢查（延遲執行，給原生注入時間）
     setTimeout(handleUnifiedViewportChange, 500);
-    
-    return () => {
+
+      return () => {
       if (viewportChangeTimeout) {
         clearTimeout(viewportChangeTimeout);
       }
-      window.removeEventListener('nativeInsetsUpdated', handleNativeInsetsUpdate);
-      if (window.visualViewport) {
+        window.removeEventListener('nativeInsetsUpdated', handleNativeInsetsUpdate);
+        if (window.visualViewport) {
         window.visualViewport.removeEventListener('resize', handleUnifiedViewportChange);
       }
       window.removeEventListener('resize', handleUnifiedViewportChange);
@@ -744,7 +744,7 @@ function AppContent() {
             // 留出一些邊距（20px）確保輸入框完全可見
             if (rect.top >= 20 && rect.bottom <= visibleArea - 20) {
               return;
-            }
+        }
             
             // 標記正在滾動的輸入框
             scrollingInput = input;

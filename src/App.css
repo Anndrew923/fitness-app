@@ -98,6 +98,21 @@ html[data-keyboard-visible="true"] {
   /* 例如：調整頁面底部 padding */
 }
 
+/* ✅ 關鍵修復：鍵盤開啟時，隱藏底部 Navigation Bar 覆蓋層，避免白色區塊 */
+/* 當鍵盤彈出時，Navigation Bar 會被鍵盤覆蓋，不需要顯示白色覆蓋層 */
+html[data-keyboard-visible="true"] body::after {
+  display: none !important;
+}
+
+/* ✅ 改進：鍵盤開啟時，確保 Status Bar 覆蓋層不會在鍵盤上方顯示 */
+/* Status Bar 覆蓋層應該保持在頂部，但確保不會延伸到鍵盤區域 */
+html[data-keyboard-visible="true"] body::before {
+  /* 保持顯示，但確保高度正確 */
+  height: env(safe-area-inset-top, 0px);
+  /* 確保不會在鍵盤上方顯示（通過限制最大高度） */
+  max-height: env(safe-area-inset-top, 0px);
+}
+
 /* 手機優先設計 */
 .gender-selection,
 .user-info,
