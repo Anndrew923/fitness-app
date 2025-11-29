@@ -719,34 +719,29 @@
   max-width: 750px;
   margin: 0 auto;
   padding: 40px;
+  /* ✅ 修復：使用固定背景色，不使用變量，確保顏色穩定 */
   background: linear-gradient(
     135deg,
-    rgba(255, 255, 255, var(--backdrop-opacity, 0.95)) 0%,
-    rgba(248, 250, 252, var(--backdrop-opacity, 0.95)) 100%
+    rgba(255, 255, 255, 0.95) 0%,
+    rgba(248, 250, 252, 0.95) 100%
   );
   border-radius: 20px;
   box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.06),
     0 4px 12px rgba(129, 216, 208, 0.1);
   position: relative;
   border: 1px solid rgba(129, 216, 208, 0.1);
-  /* ✅ 終極優化：動態 backdrop-filter */
-  --backdrop-blur: 10px;
-  backdrop-filter: blur(var(--backdrop-blur));
+  /* ✅ 修復：移除動態 backdrop-filter，避免顏色問題 */
+  /* backdrop-filter: blur(10px); */
   /* 確保容器有足夠的空間容納軸標籤 */
   min-height: 500px;
   display: flex;
   align-items: center;
   justify-content: center;
-  /* ✅ GPU 加速 */
-  transform: translateZ(0);
-  /* ✅ 渲染隔離 */
-  contain: layout style paint;
-  /* ✅ 修復 3: 移除 content-visibility，可能導致渲染問題和雷達圖消失 */
-  /* content-visibility: auto; */
-  /* contain-intrinsic-size: auto 500px; */
+  /* ✅ 修復：移除可能導致渲染問題的 CSS containment */
+  /* transform: translateZ(0); */
+  /* contain: layout style paint; */
   /* ✅ 滾動性能 */
   -webkit-overflow-scrolling: touch;
-  /* ✅ 修復 6: 移除 will-change，讓瀏覽器自動管理，減少內存使用 */
   will-change: auto;
 }
 
@@ -758,7 +753,7 @@
   position: absolute;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%) translateZ(0);
+  transform: translate(-50%, -50%);
   width: 85%;
   height: 85%;
   background: radial-gradient(
@@ -769,34 +764,20 @@
   );
   border-radius: 50%;
   pointer-events: none;
-  /* ✅ 終極優化：使用 CSS 變量控制動畫 */
+  /* ✅ 修復：使用固定動畫，不使用變量，確保穩定 */
   animation: rotate 20s linear infinite;
   animation-play-state: var(--animation-play-state, running);
-  /* ✅ 優化 will-change */
   will-change: transform;
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
 }
 
-/* ✅ 終極優化 3: 滾動時的性能模式 */
+/* ✅ 修復：簡化滾動時的樣式，只暫停動畫，不改變顏色和格式 */
 .radar-chart-container.scrolling,
 .user-info-container.performance-mode-scrolling .radar-chart-container {
-  /* ✅ 滾動時暫停動畫 */
+  /* ✅ 只暫停動畫，不改變其他樣式 */
   --animation-play-state: paused !important;
-  /* ✅ 滾動時降低 backdrop-filter */
-  --backdrop-blur: 2px;
-  backdrop-filter: blur(var(--backdrop-blur));
-  /* ✅ 增強背景不透明度保持視覺 */
-  --backdrop-opacity: 0.98;
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, var(--backdrop-opacity)) 0%,
-    rgba(248, 250, 252, var(--backdrop-opacity)) 100%
-  );
-  /* ✅ 簡化陰影 */
-  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.04),
-    0 2px 6px rgba(129, 216, 208, 0.08);
-  /* ✅ 移除 will-change 減少內存 */
+  /* ✅ 移除：不改變 backdrop-filter、背景色、陰影，避免影響顏色和格式 */
   will-change: auto;
 }
 
@@ -889,19 +870,20 @@
 .radar-chart-container .recharts-radar {
   /* ✅ 保持外觀：保留 filter */
   filter: drop-shadow(0 2px 4px rgba(129, 216, 208, 0.2));
-  /* ✅ 終極優化：使用 CSS 變量控制動畫 */
+  /* ✅ 修復：使用固定動畫，確保穩定 */
   animation: radarAppear 1.6s ease-out forwards;
   animation-play-state: var(--animation-play-state, running);
-  /* ✅ 優化：只在動畫期間使用 will-change */
   will-change: transform, opacity;
 }
 
-/* ✅ 滾動時簡化 filter */
+/* ✅ 修復：滾動時只暫停動畫，不改變 filter 和 opacity，避免影響顏色和格式 */
 .radar-chart-container.scrolling .recharts-radar,
 .user-info-container.performance-mode-scrolling .radar-chart-container .recharts-radar {
-  filter: none;
-  opacity: 0.98;
+  /* ✅ 只暫停動畫，不改變 filter 和 opacity */
   animation-play-state: paused !important;
+  /* ✅ 移除：不改變 filter 和 opacity，避免影響顏色 */
+  /* filter: none; */
+  /* opacity: 0.98; */
   will-change: auto;
 }
 
@@ -910,11 +892,12 @@
   animation-fill-mode: forwards;
 }
 
-/* ✅ 終極優化 9: 空閒模式優化 */
+/* ✅ 修復：空閒模式只控制動畫，不改變顏色 */
 .user-info-container.performance-mode-idle .radar-chart-container {
   --animation-play-state: running;
-  --backdrop-blur: 10px;
-  backdrop-filter: blur(var(--backdrop-blur));
+  /* ✅ 移除：不改變 backdrop-filter，避免影響顏色 */
+  /* --backdrop-blur: 10px; */
+  /* backdrop-filter: blur(var(--backdrop-blur)); */
 }
 
 /* ✅ 終極優化 10: 減少動畫偏好 */
@@ -1179,20 +1162,17 @@
   }
 
   .radar-chart-container {
-    --backdrop-blur: 5px;
+    /* ✅ 修復：移除 backdrop-blur，使用固定背景色 */
     padding: 20px;
     min-height: 400px;
   }
 
   .radar-chart-container.scrolling,
   .user-info-container.performance-mode-scrolling .radar-chart-container {
-    --backdrop-blur: 0px;
-    backdrop-filter: none;
-    background: linear-gradient(
-      135deg,
-      rgba(255, 255, 255, 1) 0%,
-      rgba(248, 250, 252, 1) 100%
-    );
+    /* ✅ 修復：不改變背景色和 backdrop-filter，避免影響顏色 */
+    /* --backdrop-blur: 0px; */
+    /* backdrop-filter: none; */
+    /* background: linear-gradient(...); */
   }
 
   .radar-chart-container::before {
@@ -1202,15 +1182,16 @@
 
 @media (max-width: 480px) {
   .radar-chart-container {
-    --backdrop-blur: 3px;
+    /* ✅ 修復：移除 backdrop-blur，使用固定背景色 */
     padding: 15px;
     min-height: 350px;
   }
 
   .radar-chart-container.scrolling,
   .user-info-container.performance-mode-scrolling .radar-chart-container {
-    --backdrop-blur: 0px;
-    backdrop-filter: none;
+    /* ✅ 修復：不改變 backdrop-filter，避免影響顏色 */
+    /* --backdrop-blur: 0px; */
+    /* backdrop-filter: none; */
   }
 
   .radar-chart-container::before {
@@ -1282,18 +1263,15 @@
     margin-bottom: 20px;
   }
 
-  /* ✅ 優化：在移動設備上降低 backdrop-filter 強度，但保持外觀 */
+  /* ✅ 修復：在移動設備上使用固定背景色，不使用 backdrop-filter */
   .radar-chart-container {
     padding: 15px;
     min-height: 400px;
-    /* ✅ 降低強度但保持效果 */
-    --backdrop-blur: 5px;
-    backdrop-filter: blur(var(--backdrop-blur));
-    /* ✅ 增強背景不透明度以補償 */
+    /* ✅ 使用固定背景色，確保顏色穩定 */
     background: linear-gradient(
       135deg,
-      rgba(255, 255, 255, 0.98) 0%,
-      rgba(248, 250, 252, 0.98) 100%
+      rgba(255, 255, 255, 0.95) 0%,
+      rgba(248, 250, 252, 0.95) 100%
     );
   }
 
@@ -1303,16 +1281,14 @@
   }
 }
 
-/* ✅ 優化：在低性能設備上進一步優化，但保持外觀 */
+/* ✅ 修復：在低性能設備上使用固定背景色，不使用 backdrop-filter */
 @media (max-width: 480px) {
   .radar-chart-container {
-    --backdrop-blur: 3px; /* 進一步降低 */
-    backdrop-filter: blur(var(--backdrop-blur));
-    /* ✅ 進一步增強背景不透明度 */
+    /* ✅ 使用固定背景色，確保顏色穩定 */
     background: linear-gradient(
       135deg,
-      rgba(255, 255, 255, 0.99) 0%,
-      rgba(248, 250, 252, 0.99) 100%
+      rgba(255, 255, 255, 0.95) 0%,
+      rgba(248, 250, 252, 0.95) 100%
     );
     padding: 20px;
   }

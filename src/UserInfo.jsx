@@ -532,15 +532,15 @@ function UserInfo({ testData, onLogout, clearTestData }) {
     height: 400,
   });
 
-  // ✅ 終極優化：使用 Intersection Observer 優化可見性
-  const { elementRef: intersectionRef, isIntersecting: isRadarVisible } =
-    useIntersectionObserver(
-      {
-        threshold: 0.1,
-        rootMargin: '100px', // ✅ 提前 100px 準備
-      },
-      []
-    );
+  // ✅ 修復：暫時移除 Intersection Observer，避免干擾雷達圖顯示
+  // 保留 intersectionRef 用於 ref 附加，但不使用 isRadarVisible
+  const { elementRef: intersectionRef } = useIntersectionObserver(
+    {
+      threshold: 0.1,
+      rootMargin: '100px',
+    },
+    []
+  );
 
   // ✅ 將 intersectionRef 附加到 radarContainerRef（使用回調 ref）
   const setRadarContainerRef = useCallback(
@@ -1112,38 +1112,37 @@ function UserInfo({ testData, onLogout, clearTestData }) {
     };
   }, []);
 
-  // ✅ 修復 2: 改進 Intersection Observer，確保在元素渲染後才設置樣式
-  useEffect(() => {
-    // ✅ 等待元素完全渲染後再設置樣式
-    if (radarContainerRef.current) {
-      // ✅ 使用雙重 requestAnimationFrame 確保 DOM 已完全渲染
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          if (radarContainerRef.current) {
-            if (isRadarVisible && performanceMode !== 'scrolling') {
-              radarContainerRef.current.style.setProperty(
-                '--animation-play-state',
-                'running'
-              );
-              radarContainerRef.current.style.setProperty(
-                '--backdrop-blur',
-                '10px'
-              );
-            } else if (!isRadarVisible) {
-              radarContainerRef.current.style.setProperty(
-                '--animation-play-state',
-                'paused'
-              );
-              radarContainerRef.current.style.setProperty(
-                '--backdrop-blur',
-                '0px'
-              );
-            }
-          }
-        });
-      });
-    }
-  }, [isRadarVisible, performanceMode]);
+  // ✅ 修復：移除 Intersection Observer 的動態樣式設置，避免干擾雷達圖顯示
+  // 註釋掉可能導致顏色和格式問題的動態樣式設置
+  // useEffect(() => {
+  //   if (radarContainerRef.current) {
+  //     requestAnimationFrame(() => {
+  //       requestAnimationFrame(() => {
+  //         if (radarContainerRef.current) {
+  //           if (isRadarVisible && performanceMode !== 'scrolling') {
+  //             radarContainerRef.current.style.setProperty(
+  //               '--animation-play-state',
+  //               'running'
+  //             );
+  //             radarContainerRef.current.style.setProperty(
+  //               '--backdrop-blur',
+  //               '10px'
+  //             );
+  //           } else if (!isRadarVisible) {
+  //             radarContainerRef.current.style.setProperty(
+  //               '--animation-play-state',
+  //               'paused'
+  //             );
+  //             radarContainerRef.current.style.setProperty(
+  //               '--backdrop-blur',
+  //               '0px'
+  //             );
+  //           }
+  //         }
+  //       });
+  //     });
+  //   }
+  // }, [isRadarVisible, performanceMode]);
 
   // ✅ 修復 4: 計算圖表尺寸（只在必要時更新），替代 ResponsiveContainer
   useEffect(() => {
@@ -2496,6 +2495,29 @@ function UserInfo({ testData, onLogout, clearTestData }) {
 
           <h2 className="radar-title">{t('userInfo.radarOverview')}</h2>
           {/* ✅ 修復：增強條件邏輯，確保雷達圖穩定顯示 */}
+          {/* ✅ 修復：將 SVG defs 移到外部，避免重複 ID 導致顏色和格式問題 */}
+          <svg style={{ position: 'absolute', width: 0, height: 0 }}>
+            <defs>
+              <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur stdDeviation="3" result="coloredBlur" />
+                <feMerge>
+                  <feMergeNode in="coloredBlur" />
+                  <feMergeNode in="SourceGraphic" />
+                </feMerge>
+              </filter>
+              <linearGradient
+                id="tiffanyGradient"
+                x1="0%"
+                y1="0%"
+                x2="100%"
+                y2="100%"
+              >
+                <stop offset="0%" stopColor="#81D8D0" stopOpacity={0.9} />
+                <stop offset="50%" stopColor="#5F9EA0" stopOpacity={0.7} />
+                <stop offset="100%" stopColor="#81D8D0" stopOpacity={0.6} />
+              </linearGradient>
+            </defs>
+          </svg>
           {(() => {
             // ✅ 防禦性檢查：確保 radarChartData 是有效的數組
             const hasValidData =
@@ -2549,45 +2571,6 @@ function UserInfo({ testData, onLogout, clearTestData }) {
                       strokeLinecap="round"
                       strokeLinejoin="round"
                     />
-                    <defs>
-                      {/* 將 glow filter 移到這裡，只定義一次，避免重複 */}
-                      <filter
-                        id="glow"
-                        x="-50%"
-                        y="-50%"
-                        width="200%"
-                        height="200%"
-                      >
-                        <feGaussianBlur stdDeviation="3" result="coloredBlur" />
-                        <feMerge>
-                          <feMergeNode in="coloredBlur" />
-                          <feMergeNode in="SourceGraphic" />
-                        </feMerge>
-                      </filter>
-                      <linearGradient
-                        id="tiffanyGradient"
-                        x1="0%"
-                        y1="0%"
-                        x2="100%"
-                        y2="100%"
-                      >
-                        <stop
-                          offset="0%"
-                          stopColor="#81D8D0"
-                          stopOpacity={0.9}
-                        />
-                        <stop
-                          offset="50%"
-                          stopColor="#5F9EA0"
-                          stopOpacity={0.7}
-                        />
-                        <stop
-                          offset="100%"
-                          stopColor="#81D8D0"
-                          stopOpacity={0.6}
-                        />
-                      </linearGradient>
-                    </defs>
                   </RadarChart>
                 </div>
               );
@@ -2641,44 +2624,6 @@ function UserInfo({ testData, onLogout, clearTestData }) {
                       strokeLinecap="round"
                       strokeLinejoin="round"
                     />
-                    <defs>
-                      <filter
-                        id="glow"
-                        x="-50%"
-                        y="-50%"
-                        width="200%"
-                        height="200%"
-                      >
-                        <feGaussianBlur stdDeviation="3" result="coloredBlur" />
-                        <feMerge>
-                          <feMergeNode in="coloredBlur" />
-                          <feMergeNode in="SourceGraphic" />
-                        </feMerge>
-                      </filter>
-                      <linearGradient
-                        id="tiffanyGradient"
-                        x1="0%"
-                        y1="0%"
-                        x2="100%"
-                        y2="100%"
-                      >
-                        <stop
-                          offset="0%"
-                          stopColor="#81D8D0"
-                          stopOpacity={0.9}
-                        />
-                        <stop
-                          offset="50%"
-                          stopColor="#5F9EA0"
-                          stopOpacity={0.7}
-                        />
-                        <stop
-                          offset="100%"
-                          stopColor="#81D8D0"
-                          stopOpacity={0.6}
-                        />
-                      </linearGradient>
-                    </defs>
                   </RadarChart>
                 </div>
               );
