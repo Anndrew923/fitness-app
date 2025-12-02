@@ -2067,8 +2067,14 @@
   bottom: 0;
   overflow-y: auto; /* 允許滾動 */
   -webkit-overflow-scrolling: touch; /* iOS 平滑滾動 */
-  /* ✅ 問題1 修復：為底部導航欄預留空間（64px 導航欄 + safe-area-inset-bottom + 邊距） */
-  padding-bottom: calc(90px + var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)));
+  /* ✅ 問題1 修復：覆蓋 .modal-overlay 的 padding，為底部導航欄預留空間 */
+  padding: 0 !important;
+  padding-left: 20px !important;
+  padding-right: 20px !important;
+  /* ✅ 問題2 修復：status bar 下方空間縮小，只保留 status bar 高度 + 少量間距 */
+  padding-top: calc(env(safe-area-inset-top, 0px) + 10px) !important;
+  /* ✅ 問題1 修復：增加底部 padding，確保按鈕完整顯示（底部導航欄 64px + 額外空間） */
+  padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px)) !important;
   /* 阻止背景滾動 */
   overscroll-behavior: contain;
   /* 確保背景不會滾動 */
@@ -2081,15 +2087,19 @@
   border: 2px solid #4a5568;
   box-shadow: 0 25px 80px rgba(0, 0, 0, 0.4);
   padding: 20px;
-  /* ✅ Bug 1 修复：为 footer 预留空间（大约 100px），确保按钮始终可见 */
-  max-height: calc(90vh - 100px);
+  /* ✅ 問題1 修復：調整 max-height，為底部按鈕預留足夠空間 */
+  max-height: calc(90vh - 80px - env(safe-area-inset-bottom, 0px));
   overflow-y: auto;
   -webkit-overflow-scrolling: touch; /* iOS 平滑滾動 */
   /* 確保內容可以完整顯示 */
   display: flex;
   flex-direction: column;
-  margin: 20px auto;
-  /* 確保在 overlay 中居中 */
+  /* ✅ 問題2 修復：減少頂部 margin，縮小 status bar 下方的空間 */
+  margin-top: 10px;
+  margin-bottom: 0;
+  margin-left: auto;
+  margin-right: auto;
+  /* 確保在 overlay 中水平居中，但從頂部開始 */
   position: relative;
   animation: confirmModalSlideIn 0.4s ease-out;
 }
@@ -2310,20 +2320,25 @@
 /* 響應式設計 */
 @media (max-width: 480px) {
   .submit-confirm-overlay {
-    padding: 10px;
+    /* ✅ 問題1 修復：移除 padding: 10px，改用個別屬性，避免覆蓋 padding-bottom */
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+    /* ✅ 問題2 修復：status bar 下方空間縮小，只保留 status bar 高度 + 少量間距 */
+    padding-top: calc(env(safe-area-inset-top, 0px) + 10px) !important;
+    /* ✅ 問題1 修復：手機上也為底部導航欄預留空間，確保按鈕完整顯示 */
+    padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px)) !important;
     /* 確保在手機上可以滾動 */
     align-items: flex-start;
-    padding-top: 20px;
-    /* ✅ 問題1 修復：手機上也為底部導航欄預留空間 */
-    padding-bottom: calc(90px + var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)));
   }
 
   .submit-confirm-content {
     margin: 0 auto;
     max-width: calc(100% - 20px);
-    /* ✅ Bug 1 修复：手机上也预留 footer 空间 */
-    max-height: calc(100vh - 140px);
+    /* ✅ 問題1 修復：手機上也為底部按鈕預留足夠空間 */
+    max-height: calc(100vh - 80px - env(safe-area-inset-bottom, 0px));
     padding: 16px;
+    /* ✅ 問題2 修復：減少頂部 margin，縮小 status bar 下方的空間 */
+    margin-top: 10px;
   }
 
   .submit-confirm-content .modal-body {
