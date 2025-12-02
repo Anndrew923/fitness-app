@@ -2114,14 +2114,14 @@
   -webkit-overflow-scrolling: touch;
   min-height: 0; /* 允許 flex 子元素縮小 */
   padding: 16px 20px;
-  /* ✅ 修復：限制高度為螢幕的 80%，讓按鈕固定在下方 */
-  max-height: calc(80vh - 100px); /* 80vh 減去 header 和 padding */
+  /* ✅ 修復：限制高度為螢幕的 60%，讓按鈕固定在下方 */
+  max-height: calc(60vh - 100px); /* 60vh 減去 header 和 padding */
 }
 
-/* ✅ 修復：將按鈕固定在螢幕 80% 位置（從頂部往下） */
+/* ✅ 修復：將按鈕固定在螢幕 60% 位置（從頂部往下） */
 .submit-confirm-content .submit-confirm-footer {
   position: absolute;
-  top: 80%; /* 從頂部往下 80% 的位置 */
+  top: 60%; /* 從頂部往下 60% 的位置 */
   left: 0;
   right: 0;
   flex-shrink: 0;
@@ -2322,7 +2322,7 @@
     padding-right: 10px !important;
     /* ✅ 問題2 修復：status bar 下方空間縮小，只保留 status bar 高度 + 少量間距 */
     padding-top: calc(env(safe-area-inset-top, 0px) + 10px) !important;
-    /* ✅ 修復：按鈕已改為 absolute 定位在 80% 位置，不需要為底部預留空間 */
+    /* ✅ 修復：按鈕已改為 absolute 定位在 60% 位置，不需要為底部預留空間 */
     padding-bottom: 0 !important;
     /* 確保在手機上可以滾動 */
     align-items: flex-start;
@@ -2339,8 +2339,8 @@
   }
 
   .submit-confirm-content .modal-body {
-    /* ✅ 修復：與主樣式一致，限制高度為螢幕的 80% */
-    max-height: calc(80vh - 100px);
+    /* ✅ 修復：與主樣式一致，限制高度為螢幕的 60% */
+    max-height: calc(60vh - 100px);
     overflow-y: auto;
     padding: 16px 20px;
   }
@@ -2348,9 +2348,9 @@
   .submit-confirm-content .submit-confirm-footer {
     flex-direction: column;
     gap: 8px;
-    /* ✅ 修復：與主樣式一致，使用 absolute 定位在 80% 位置 */
+    /* ✅ 修復：與主樣式一致，使用 absolute 定位在 60% 位置 */
     position: absolute;
-    top: 80%;
+    top: 60%;
     left: 0;
     right: 0;
     flex-shrink: 0;
