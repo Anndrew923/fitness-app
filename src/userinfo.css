@@ -13,11 +13,9 @@
 .user-info-container {
   max-width: 800px;
   margin: 0 auto;
-  /* ✅ 修正：優先使用 CSS 變量，後備使用 env() */
-  padding: calc(
-      15px + var(--safe-area-inset-top, env(safe-area-inset-top, 0px))
-    )
-    15px 15px;
+  /* ✅ Bug 2 修复：移除重复的 safe-area-inset-top，因为 body 已经有 padding-top */
+  /* ✅ 問題2 修復：將 padding-top 從 15px 縮小為 10px，減少 status bar 下方空白 */
+  padding: 10px 15px calc(15px + var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)));
   min-height: 100vh;
   background: linear-gradient(135deg, #81d8d0 0%, #5f9ea0 100%);
   position: relative;
@@ -1152,11 +1150,9 @@
 /* ✅ 終極優化 8: 移動設備特殊優化 */
 @media (max-width: 768px) {
   .user-info-container {
-    /* ✅ 修正：優先使用 CSS 變量，後備使用 env()（響應式設計） */
-    padding: calc(
-        15px + var(--safe-area-inset-top, env(safe-area-inset-top, 0px))
-      )
-      15px 15px;
+    /* ✅ Bug 2 修复：移除重复的 safe-area-inset-top */
+    /* ✅ 問題2 修復：將 padding-top 從 15px 縮小為 10px */
+    padding: 10px 15px calc(15px + var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)));
     -webkit-overflow-scrolling: touch;
     overscroll-behavior: contain;
   }
@@ -2071,6 +2067,8 @@
   bottom: 0;
   overflow-y: auto; /* 允許滾動 */
   -webkit-overflow-scrolling: touch; /* iOS 平滑滾動 */
+  /* ✅ 問題1 修復：為底部導航欄預留空間（64px 導航欄 + safe-area-inset-bottom + 邊距） */
+  padding-bottom: calc(90px + var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)));
   /* 阻止背景滾動 */
   overscroll-behavior: contain;
   /* 確保背景不會滾動 */
@@ -2083,8 +2081,8 @@
   border: 2px solid #4a5568;
   box-shadow: 0 25px 80px rgba(0, 0, 0, 0.4);
   padding: 20px;
-  /* 允許內容滾動 */
-  max-height: 90vh;
+  /* ✅ Bug 1 修复：为 footer 预留空间（大约 100px），确保按钮始终可见 */
+  max-height: calc(90vh - 100px);
   overflow-y: auto;
   -webkit-overflow-scrolling: touch; /* iOS 平滑滾動 */
   /* 確保內容可以完整顯示 */
@@ -2115,7 +2113,7 @@
   padding: 16px 20px;
 }
 
-/* 確保 footer 固定在底部 */
+/* ✅ Bug 1 修复：確保 footer 固定在底部且始終可見 */
 .submit-confirm-content .submit-confirm-footer {
   flex-shrink: 0;
   margin-top: auto;
@@ -2123,6 +2121,12 @@
   gap: 10px;
   justify-content: space-between;
   padding: 12px 20px 20px 20px;
+  /* ✅ Bug 1 修复：确保 footer 不会被裁剪，始终可见 */
+  position: sticky;
+  bottom: 0;
+  background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  z-index: 10;
 }
 
 .submit-confirm-message {
@@ -2310,13 +2314,15 @@
     /* 確保在手機上可以滾動 */
     align-items: flex-start;
     padding-top: 20px;
-    padding-bottom: 20px;
+    /* ✅ 問題1 修復：手機上也為底部導航欄預留空間 */
+    padding-bottom: calc(90px + var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)));
   }
 
   .submit-confirm-content {
     margin: 0 auto;
     max-width: calc(100% - 20px);
-    max-height: calc(100vh - 40px);
+    /* ✅ Bug 1 修复：手机上也预留 footer 空间 */
+    max-height: calc(100vh - 140px);
     padding: 16px;
   }
 
@@ -2331,8 +2337,13 @@
     gap: 8px;
     margin-top: 12px;
     padding: 10px 16px 16px 16px;
-    /* 確保按鈕固定在底部 */
+    /* ✅ Bug 1 修复：确保手机上的按钮也始终可见 */
     flex-shrink: 0;
+    position: sticky;
+    bottom: 0;
+    background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    z-index: 10;
   }
 
   .confirm-text {
