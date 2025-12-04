@@ -121,6 +121,32 @@
   color: #333;
 }
 
+.tool-action-btn {
+  display: inline-block;
+  width: 100%;
+  padding: 10px 16px;
+  background: linear-gradient(135deg, #81d8d0 0%, #5f9ea0 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(129, 216, 208, 0.3);
+  text-align: center;
+}
+
+.tool-action-btn:hover {
+  background: linear-gradient(135deg, #5f9ea0 0%, #4a7c7a 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(129, 216, 208, 0.4);
+}
+
+.tool-action-btn:active {
+  transform: translateY(0);
+}
+
 /* 響應式設計 */
 @media (max-width: 768px) {
   .tools-grid {
