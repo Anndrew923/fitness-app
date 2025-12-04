@@ -2118,10 +2118,10 @@
   max-height: calc(60vh - 100px); /* 60vh 減去 header 和 padding */
 }
 
-/* ✅ 修復：將按鈕固定在螢幕 60% 位置（從頂部往下） */
+/* ✅ 修復：將按鈕固定在螢幕 60% 位置（從頂部往下，使用視口高度計算） */
 .submit-confirm-content .submit-confirm-footer {
   position: absolute;
-  top: 60%; /* 從頂部往下 60% 的位置 */
+  top: calc(60vh - env(safe-area-inset-top, 0px) - 20px); /* 視口高度的 60% 減去 overlay padding 和 content margin */
   left: 0;
   right: 0;
   flex-shrink: 0;
@@ -2348,9 +2348,9 @@
   .submit-confirm-content .submit-confirm-footer {
     flex-direction: column;
     gap: 8px;
-    /* ✅ 修復：與主樣式一致，使用 absolute 定位在 60% 位置 */
+    /* ✅ 修復：與主樣式一致，使用 absolute 定位在 60% 位置（使用視口高度計算） */
     position: absolute;
-    top: 60%;
+    top: calc(60vh - env(safe-area-inset-top, 0px) - 20px);
     left: 0;
     right: 0;
     flex-shrink: 0;

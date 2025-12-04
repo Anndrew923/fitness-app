@@ -1,13 +1,30 @@
 apply plugin: 'com.android.application'
 apply plugin: 'com.google.gms.google-services'
 
+// ✅ 安全性重構：從 local.properties 讀取簽名憑證
+def keystorePropertiesFile = rootProject.file("local.properties")
+def keystoreProperties = new Properties()
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+}
+
 android {
     signingConfigs {
         release {
-            storeFile file('C:\\Users\\i\\AndroidSigning\\fitness-app.keystore')
-            storePassword 'FitnessApp2025!'
-            keyAlias 'fitnesskey'
-            keyPassword 'FitnessApp2025!'
+            // ✅ 從 local.properties 讀取配置
+            def keystorePath = keystoreProperties['keystore.path'] ?: 'C:\\Users\\i\\AndroidSigning\\fitness-app.keystore'
+            def keystorePassword = keystoreProperties['keystore.password']
+            def keyAliasName = keystoreProperties['keystore.alias'] ?: 'fitnesskey'
+            def keyPassword = keystoreProperties['keystore.key.password']
+            
+            if (keystorePassword && keyPassword) {
+                storeFile file(keystorePath)
+                storePassword keystorePassword
+                keyAlias keyAliasName
+                keyPassword keyPassword
+            } else {
+                throw new GradleException('❌ 錯誤：請在 local.properties 中設置 keystore.password 和 keystore.key.password')
+            }
         }
     }
     namespace "com.ultimatephysique.fitness2025"
@@ -16,8 +33,8 @@ android {
         applicationId "com.ultimatephysique.fitness2025"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 20
-        versionName "1.20"
+        versionCode 21
+        versionName "1.21"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
         // Add this missing dimension strategy to resolve the variant matching error.

@@ -66,3 +66,13 @@ app-release-signed.apk
 app-release-unsigned-aligned.apk
 android.keystore
 *.idsig
+
+# Sensitive files - 敏感文件（包含密钥和密码）
+重要密碼與金鑰備份.md
+*密碼*.md
+*金鑰*.md
+*備份*.md
+*backup*.md
+*password*.md
+*key*.md
+*secret*.md
