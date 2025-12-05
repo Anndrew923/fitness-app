@@ -1722,6 +1722,9 @@ const zhTW = {
         title: '心率區間計算器',
         desc: '計算個人化心率訓練區間，科學化訓練',
       },
+      action: {
+        start: '開始計時',
+      },
     },
 
     // 歡迎頁提示
@@ -3767,6 +3770,9 @@ const enUS = {
       hrZone: {
         title: 'Heart Rate Zone Calculator',
         desc: 'Calculate personalized heart rate training zones for scientific training',
+      },
+      action: {
+        start: 'Start Timer',
       },
     },
 
