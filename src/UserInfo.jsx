@@ -268,6 +268,192 @@ Modal.propTypes = {
   actionText: PropTypes.string,
 };
 
+// ✅ Phase 1 新增：RPG 風格職業描述 Modal
+const RPGClassModal = ({ isOpen, onClose, classInfo }) => {
+  const { t } = useTranslation();
+
+  // 阻止背景滾動
+  useEffect(() => {
+    if (isOpen) {
+      const scrollY = window.scrollY;
+      document.body.style.overflow = 'hidden';
+      document.body.style.position = 'fixed';
+      document.body.style.width = '100%';
+      document.body.style.top = `-${scrollY}px`;
+    } else {
+      const scrollY = document.body.style.top;
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
+      document.body.style.top = '';
+
+      if (scrollY) {
+        window.scrollTo(0, parseInt(scrollY || '0') * -1);
+      }
+    }
+
+    return () => {
+      const scrollY = document.body.style.top;
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
+      document.body.style.top = '';
+
+      if (scrollY) {
+        window.scrollTo(0, parseInt(scrollY || '0') * -1);
+      }
+    };
+  }, [isOpen]);
+
+  if (!isOpen || !classInfo) return null;
+
+  const handleOverlayClick = e => {
+    if (e.target === e.currentTarget) {
+      onClose();
+    }
+  };
+
+  return (
+    <div
+      style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: 'rgba(0, 0, 0, 0.85)',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        zIndex: 10000,
+        padding: '20px',
+      }}
+      onClick={handleOverlayClick}
+    >
+      <div
+        style={{
+          width: '85%',
+          maxWidth: '500px',
+          backgroundColor: '#1E1E1E',
+          borderRadius: '20px',
+          border: '2px solid #FF5722',
+          padding: '25px',
+          boxShadow: '0 0 30px rgba(255, 87, 34, 0.8), 0 0 60px rgba(255, 87, 34, 0.4)',
+          animation: 'rpgModalSlideIn 0.4s ease-out',
+          position: 'relative',
+        }}
+        onClick={e => e.stopPropagation()}
+      >
+        {/* 標題區域 */}
+        <div
+          style={{
+            textAlign: 'center',
+            marginBottom: '20px',
+            paddingBottom: '15px',
+            borderBottom: '1px solid rgba(255, 87, 34, 0.3)',
+          }}
+        >
+          <div
+            style={{
+              fontSize: '32px',
+              marginBottom: '8px',
+            }}
+          >
+            {classInfo.icon}
+          </div>
+          <h3
+            style={{
+              margin: 0,
+              fontSize: '24px',
+              fontWeight: 'bold',
+              color: '#FFD700',
+              textAlign: 'center',
+              textShadow: '0 0 10px rgba(255, 215, 0, 0.5), 0 0 20px rgba(255, 215, 0, 0.3)',
+            }}
+          >
+            {classInfo.name}
+          </h3>
+        </div>
+
+        {/* 描述內容 */}
+        <div
+          style={{
+            fontSize: '16px',
+            color: '#E0E0E0',
+            lineHeight: '26px',
+            textAlign: 'justify',
+            marginBottom: '25px',
+            minHeight: '80px',
+          }}
+        >
+          {classInfo.description}
+        </div>
+
+        {/* 確認按鈕 */}
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+          }}
+        >
+          <button
+            onClick={onClose}
+            style={{
+              padding: '12px 32px',
+              backgroundColor: '#FF5722',
+              color: '#FFFFFF',
+              border: 'none',
+              borderRadius: '12px',
+              fontSize: '16px',
+              fontWeight: 'bold',
+              cursor: 'pointer',
+              transition: 'all 0.3s ease',
+              boxShadow: '0 4px 15px rgba(255, 87, 34, 0.4)',
+              minWidth: '120px',
+            }}
+            onMouseEnter={e => {
+              e.currentTarget.style.backgroundColor = '#FF7043';
+              e.currentTarget.style.transform = 'translateY(-2px)';
+              e.currentTarget.style.boxShadow = '0 6px 20px rgba(255, 87, 34, 0.6)';
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.backgroundColor = '#FF5722';
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = '0 4px 15px rgba(255, 87, 34, 0.4)';
+            }}
+          >
+            {t('common.confirm') || '確認'}
+          </button>
+        </div>
+      </div>
+
+      {/* 添加動畫樣式 */}
+      <style>{`
+        @keyframes rpgModalSlideIn {
+          from {
+            opacity: 0;
+            transform: scale(0.9) translateY(-20px);
+          }
+          to {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+          }
+        }
+      `}</style>
+    </div>
+  );
+};
+
+RPGClassModal.propTypes = {
+  isOpen: PropTypes.bool.isRequired,
+  onClose: PropTypes.func.isRequired,
+  classInfo: PropTypes.shape({
+    icon: PropTypes.string,
+    name: PropTypes.string,
+    description: PropTypes.string,
+  }),
+};
+
 // 新增：提交確認對話框組件
 const SubmitConfirmModal = ({
   isOpen,
@@ -580,6 +766,12 @@ function UserInfo({ testData, onLogout, clearTestData }) {
     lastSubmissionTime: null,
     dailySubmissionCount: 0,
     lastSubmissionDate: null,
+  });
+
+  // ✅ Phase 1 新增：職業描述 Modal 狀態
+  const [rpgClassModalState, setRpgClassModalState] = useState({
+    isOpen: false,
+    classInfo: null,
   });
 
   // 新增：提交確認對話框狀態
@@ -1572,6 +1764,24 @@ function UserInfo({ testData, onLogout, clearTestData }) {
     }
   }, [rpgClassInfo, userData?.rpg_class, userData?.scores, setUserData]);
 
+  // ✅ Phase 1 新增：處理職業標籤點擊
+  const handleRpgClassClick = useCallback(() => {
+    if (rpgClassInfo && rpgClassInfo.class !== 'UNKNOWN') {
+      setRpgClassModalState({
+        isOpen: true,
+        classInfo: rpgClassInfo,
+      });
+    }
+  }, [rpgClassInfo]);
+
+  // ✅ Phase 1 新增：關閉職業描述 Modal
+  const handleCloseRpgClassModal = useCallback(() => {
+    setRpgClassModalState({
+      isOpen: false,
+      classInfo: null,
+    });
+  }, []);
+
   // 獲取用戶排名（基於已提交的天梯分數）
   const fetchUserRank = useCallback(async () => {
     if (
@@ -2034,6 +2244,13 @@ function UserInfo({ testData, onLogout, clearTestData }) {
         onConfirm={confirmSubmitToLadder}
         onCancel={cancelSubmit}
         remainingCount={submitConfirmModal.remainingCount}
+      />
+
+      {/* ✅ Phase 1 新增：職業描述 Modal - RPG 風格 */}
+      <RPGClassModal
+        isOpen={rpgClassModalState.isOpen}
+        onClose={handleCloseRpgClassModal}
+        classInfo={rpgClassModalState.classInfo}
       />
 
       {/* 移除儀式感動畫粒子效果 */}
@@ -2673,21 +2890,37 @@ function UserInfo({ testData, onLogout, clearTestData }) {
                     ⭐ {t('userInfo.powerTitle')}{' '}
                     <span className="score-value-large">{averageScore}</span>
                   </p>
-                  {/* ✅ Phase 1 新增：RPG 職業標籤 */}
+                  {/* ✅ Phase 1 新增：RPG 職業標籤 - 可點擊 */}
                   {rpgClassInfo && rpgClassInfo.class !== 'UNKNOWN' && (
-                    <div className="rpg-class-badge" style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '8px',
-                      marginTop: '12px',
-                      padding: '8px 16px',
-                      background: 'linear-gradient(135deg, rgba(129, 216, 208, 0.2) 0%, rgba(95, 158, 160, 0.2) 100%)',
-                      borderRadius: '20px',
-                      border: '2px solid rgba(129, 216, 208, 0.4)',
-                      fontSize: '16px',
-                      fontWeight: 'bold',
-                      color: '#2d3748',
-                    }}>
+                    <div 
+                      className="rpg-class-badge" 
+                      onClick={handleRpgClassClick}
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        marginTop: '12px',
+                        padding: '8px 16px',
+                        background: 'linear-gradient(135deg, rgba(129, 216, 208, 0.2) 0%, rgba(95, 158, 160, 0.2) 100%)',
+                        borderRadius: '20px',
+                        border: '2px solid rgba(129, 216, 208, 0.4)',
+                        fontSize: '16px',
+                        fontWeight: 'bold',
+                        color: '#2d3748',
+                        cursor: 'pointer',
+                        transition: 'all 0.3s ease',
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.background = 'linear-gradient(135deg, rgba(129, 216, 208, 0.3) 0%, rgba(95, 158, 160, 0.3) 100%)';
+                        e.currentTarget.style.transform = 'scale(1.05)';
+                        e.currentTarget.style.boxShadow = '0 4px 12px rgba(129, 216, 208, 0.3)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.background = 'linear-gradient(135deg, rgba(129, 216, 208, 0.2) 0%, rgba(95, 158, 160, 0.2) 100%)';
+                        e.currentTarget.style.transform = 'scale(1)';
+                        e.currentTarget.style.boxShadow = 'none';
+                      }}
+                    >
                       <span style={{ fontSize: '20px' }}>{rpgClassInfo.icon}</span>
                       <span>{rpgClassInfo.name}</span>
                     </div>

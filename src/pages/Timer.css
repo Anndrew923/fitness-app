@@ -38,31 +38,95 @@
   margin: 0;
 }
 
-/* 倒數時間顯示 */
-.timer-display {
-  background: rgba(255, 255, 255, 0.95);
-  border-radius: 24px;
-  padding: 40px 30px;
-  text-align: center;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
-  min-width: 280px;
+/* 倒數時間顯示 - 帶環形進度條 */
+.timer-display-wrapper {
   width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.timer-display {
+  position: relative;
+  width: 280px;
+  height: 280px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.timer-progress-ring {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+}
+
+.timer-progress-bg {
+  transition: stroke 0.3s ease;
+}
+
+.timer-progress-bar {
+  transition: stroke-dashoffset 0.3s ease;
+}
+
+/* 時間數字容器 */
+.timer-time-container {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 
 .timer-time {
-  font-size: 72px;
-  font-weight: 700;
-  color: #2d3748;
-  font-variant-numeric: tabular-nums;
-  line-height: 1;
-  margin-bottom: 10px;
-  font-family: 'Courier New', monospace;
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 4px;
+  margin-bottom: 8px;
 }
 
-.timer-hint {
+.timer-time-number {
+  font-size: 80px;
+  font-weight: 900;
+  color: #2d3748;
+  font-family: 'Courier New', 'Monaco', 'Menlo', monospace;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  letter-spacing: -2px;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.timer-time-separator {
+  font-size: 80px;
+  font-weight: 700;
+  color: #2d3748;
+  font-family: 'Courier New', 'Monaco', 'Menlo', monospace;
+  line-height: 1;
+}
+
+.timer-time-labels {
+  display: flex;
+  align-items: center;
+  gap: 4px;
   font-size: 14px;
   color: #718096;
-  margin: 0;
+  font-weight: 500;
+}
+
+.timer-time-label {
+  font-size: 14px;
+  color: #718096;
+}
+
+.timer-time-label-separator {
+  font-size: 14px;
+  color: #718096;
+  margin: 0 2px;
 }
 
 /* 常用時間按鈕 */
@@ -79,7 +143,7 @@
   flex: 1;
   min-width: 80px;
   padding: 14px 20px;
-  background: rgba(255, 255, 255, 0.95);
+  background: rgba(255, 255, 255, 0.85);
   border: 2px solid rgba(255, 255, 255, 0.5);
   border-radius: 12px;
   font-size: 16px;
@@ -91,7 +155,7 @@
 }
 
 .timer-quick-btn:hover:not(:disabled) {
-  background: white;
+  background: rgba(255, 255, 255, 0.95);
   transform: translateY(-2px);
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
   border-color: rgba(255, 255, 255, 0.8);
@@ -129,15 +193,27 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
+/* 開始按鈕 - 亮橘色到火焰紅漸層 */
 .timer-start-btn {
-  background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+  background: linear-gradient(90deg, #ff6b35 0%, #f7931e 50%, #ff4500 100%);
   color: white;
+  font-weight: 700;
+  box-shadow: 0 6px 20px rgba(255, 107, 53, 0.4),
+    0 2px 8px rgba(255, 69, 0, 0.3);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 .timer-start-btn:hover:not(:disabled) {
-  background: linear-gradient(135deg, #38a169 0%, #2f855a 100%);
+  background: linear-gradient(90deg, #ff4500 0%, #ff6b35 50%, #f7931e 100%);
   transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(72, 187, 120, 0.4);
+  box-shadow: 0 8px 24px rgba(255, 107, 53, 0.5),
+    0 4px 12px rgba(255, 69, 0, 0.4);
+}
+
+.timer-start-btn:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 4px 16px rgba(255, 107, 53, 0.4),
+    0 2px 6px rgba(255, 69, 0, 0.3);
 }
 
 .timer-pause-btn {
@@ -202,13 +278,17 @@
 
 /* 響應式設計 */
 @media (max-width: 480px) {
-  .timer-time {
+  .timer-time-number {
+    font-size: 64px;
+  }
+
+  .timer-time-separator {
     font-size: 64px;
   }
 
   .timer-display {
-    padding: 30px 20px;
-    min-width: 260px;
+    width: 240px;
+    height: 240px;
   }
 
   .timer-quick-btn {

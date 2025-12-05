@@ -20,9 +20,9 @@ body {
   font-family: Arial, sans-serif;
   line-height: 1.6;
   margin: 0;
-  /* ✅ 關鍵修復：移除 padding-top，因為 setOverlaysWebView(false) 會自動預留空間 */
-  /* 只在原生平台添加左右安全區域 padding，網頁版保持 0 */
-  padding-top: 0; /* 移除：var(--safe-area-inset-top) */
+  /* ✅ Level 3-3: 完全移除 padding-top，因為 fitsSystemWindows 已處理 */
+  /* 畫框式佈局中，系統會自動預留空間，不需要額外 padding */
+  padding-top: 0;
   padding-left: var(--safe-area-inset-left);
   padding-right: var(--safe-area-inset-right);
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
@@ -33,8 +33,12 @@ body {
 }
 
 /* ✅ 移除：Status Bar 和 Navigation Bar 白色背景覆蓋層 */
-/* 不再需要 CSS 覆蓋層，因為 StatusBar.setBackgroundColor() 已設定原生狀態列為白色背景 */
-/* StatusBar.setOverlaysWebView({ overlay: false }) 會自動預留空間，內容不會重疊 */
+/* 不再需要 CSS 覆蓋層，因為：
+   1. styles.xml 已設定 android:statusBarColor 和 android:navigationBarColor
+   2. StatusBar.setBackgroundColor() 已設定原生狀態列為白色背景
+   3. StatusBar.setOverlaysWebView({ overlay: false }) 會自動預留空間
+   4. android:fitsSystemWindows="true" 確保內容不會重疊
+*/
 
 /* ✅ 新增：鍵盤開啟時，防止頁面內容被底部元素遮擋（原生應用） */
 html[data-keyboard-visible="true"] {
@@ -149,9 +153,11 @@ code {
     monospace;
 }
 
-/* 頁尾樣式 */
+/* ✅ Level 3-4: 修正 App 容器高度 */
 .app-container {
-  min-height: 100vh;
+  /* ✅ 使用 100% 而非 100vh，避免包含系統列高度 */
+  height: 100%;
+  min-height: 100%;
   display: flex;
   flex-direction: column;
 }
@@ -169,6 +175,9 @@ code {
 
 .main-content {
   flex: 1;
+  /* ✅ 確保內容區域正確填充可用空間 */
+  height: 100%;
+  overflow-y: auto;
 }
 
 /* 已移除頁尾隱私權政策連結，相關樣式清理 */

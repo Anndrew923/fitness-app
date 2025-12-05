@@ -9,14 +9,37 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
+    <!-- ✅ 關鍵修復：畫框式佈局 - 強制內容適應系統視窗 -->
     <style name="AppTheme.NoActionBar" parent="Theme.AppCompat.DayNight.NoActionBar">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
         <item name="android:background">@null</item>
+        
+        <!-- ✅ Level 1-1: 強制內容適應系統視窗，不被狀態列和導航列遮擋 -->
+        <item name="android:fitsSystemWindows">true</item>
+        
+        <!-- ✅ Level 1-2: 禁止內容延伸到瀏海區域（強制避開瀏海） -->
+        <item name="android:windowLayoutInDisplayCutoutMode">never</item>
+        
+        <!-- ✅ Level 1-3: 確保狀態列不透明（Android 5.0+） -->
+        <item name="android:statusBarColor">#FFFFFF</item>
+        
+        <!-- ✅ Level 1-4: 確保導航列不透明（Android 8.0+） -->
+        <item name="android:navigationBarColor">#FFFFFF</item>
+        
+        <!-- ✅ Level 1-5: 禁止全螢幕模式（確保系統列可見） -->
+        <item name="android:windowFullscreen">false</item>
+        
+        <!-- ✅ Level 1-6: 禁止沉浸式模式（確保系統列固定） -->
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
     </style>
 
 
+    <!-- ✅ 啟動畫面主題（保持簡潔） -->
     <style name="AppTheme.NoActionBarLaunch" parent="Theme.SplashScreen">
         <item name="android:background">@drawable/splash</item>
+        <!-- ✅ 啟動畫面也應用畫框式佈局 -->
+        <item name="android:fitsSystemWindows">true</item>
+        <item name="android:windowLayoutInDisplayCutoutMode">never</item>
     </style>
 </resources>
