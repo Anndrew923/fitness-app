@@ -154,6 +154,11 @@ function Login({ onLogin }) {
           ladderHistory: [],
           isGuest: false,
           lastActive: new Date().toISOString(),
+          // ✅ Phase 1 新增欄位
+          city: '',
+          job_category: '',
+          gym_name: '',
+          rpg_class: '',
         };
 
         console.log('儲存初始用戶數據:', initialUserData);

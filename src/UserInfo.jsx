@@ -32,6 +32,7 @@ import PropTypes from 'prop-types';
 import { calculateLadderScore, generateNickname } from './utils';
 import logger from './utils/logger';
 import { useIntersectionObserver } from './hooks/useIntersectionObserver';
+import { getRPGClass, getRPGClassIcon, getRPGClassName } from './utils/rpgClassCalculator';
 
 import './userinfo.css';
 import { useTranslation } from 'react-i18next';
@@ -1547,6 +1548,30 @@ function UserInfo({ testData, onLogout, clearTestData }) {
     };
   }, [userData?.scores]);
 
+  // ✅ Phase 1 新增：計算 RPG 職業
+  const rpgClassInfo = useMemo(() => {
+    if (!userData?.scores) {
+      return null;
+    }
+    return getRPGClass(userData.scores, {
+      weight: userData.weight,
+      height: userData.height,
+    });
+  }, [userData?.scores, userData?.weight, userData?.height]);
+
+  // ✅ Phase 1 新增：自動計算並保存職業
+  useEffect(() => {
+    if (
+      rpgClassInfo &&
+      rpgClassInfo.class &&
+      rpgClassInfo.class !== userData?.rpg_class &&
+      Object.values(userData?.scores || {}).some(score => score > 0)
+    ) {
+      logger.debug('🔄 自動計算職業:', rpgClassInfo.class, rpgClassInfo.name);
+      setUserData({ rpg_class: rpgClassInfo.class });
+    }
+  }, [rpgClassInfo, userData?.rpg_class, userData?.scores, setUserData]);
+
   // 獲取用戶排名（基於已提交的天梯分數）
   const fetchUserRank = useCallback(async () => {
     if (
@@ -2648,6 +2673,25 @@ function UserInfo({ testData, onLogout, clearTestData }) {
                     ⭐ {t('userInfo.powerTitle')}{' '}
                     <span className="score-value-large">{averageScore}</span>
                   </p>
+                  {/* ✅ Phase 1 新增：RPG 職業標籤 */}
+                  {rpgClassInfo && rpgClassInfo.class !== 'UNKNOWN' && (
+                    <div className="rpg-class-badge" style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      marginTop: '12px',
+                      padding: '8px 16px',
+                      background: 'linear-gradient(135deg, rgba(129, 216, 208, 0.2) 0%, rgba(95, 158, 160, 0.2) 100%)',
+                      borderRadius: '20px',
+                      border: '2px solid rgba(129, 216, 208, 0.4)',
+                      fontSize: '16px',
+                      fontWeight: 'bold',
+                      color: '#2d3748',
+                    }}>
+                      <span style={{ fontSize: '20px' }}>{rpgClassInfo.icon}</span>
+                      <span>{rpgClassInfo.name}</span>
+                    </div>
+                  )}
                   {completionStatus.isFullyCompleted && (
                     <div className="ladder-info">
                       <p className="ladder-rank">

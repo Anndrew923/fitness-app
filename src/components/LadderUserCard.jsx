@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
 import { useUser } from '../UserContext';
 import { auth } from '../firebase';
+import { getRPGClassIcon, getRPGClassName } from '../utils/rpgClassCalculator';
 import {
   RadarChart,
   PolarGrid,
@@ -243,6 +244,25 @@ function LadderUserCard({ user, isOpen, onClose }) {
           {/* 用戶基本資訊 */}
           <div className="ladder-user-card-info">
             <div className="ladder-user-card-name">{user.displayName}</div>
+            {/* ✅ Phase 1 新增：RPG 職業標籤 */}
+            {user.rpg_class && user.rpg_class !== 'UNKNOWN' && (
+              <div className="ladder-user-card-rpg-class" style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                marginTop: '8px',
+                padding: '6px 12px',
+                background: 'linear-gradient(135deg, rgba(129, 216, 208, 0.2) 0%, rgba(95, 158, 160, 0.2) 100%)',
+                borderRadius: '16px',
+                border: '2px solid rgba(129, 216, 208, 0.4)',
+                fontSize: '14px',
+                fontWeight: 'bold',
+                color: '#2d3748',
+              }}>
+                <span>{getRPGClassIcon(user.rpg_class)}</span>
+                <span>{getRPGClassName(user.rpg_class)}</span>
+              </div>
+            )}
             <div className="ladder-user-card-details">
               <div className="detail-item">
                 <span className="detail-label">{t('ladderCard.ageGroup')}：</span>

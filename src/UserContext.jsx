@@ -17,6 +17,29 @@ import logger from './utils/logger';
 
 const UserContext = createContext();
 
+// ✅ Phase 1 新增：職業分類選項
+export const JOB_CATEGORIES = {
+  engineering: { id: 'engineering', name: '工程師', nameEn: 'Software/Hardware Engineer' },
+  medical: { id: 'medical', name: '醫療人員', nameEn: 'Doctor/Nurse' },
+  coach: { id: 'coach', name: '健身教練', nameEn: 'Personal Trainer' },
+  student: { id: 'student', name: '學生', nameEn: 'Student' },
+  police_military: { id: 'police_military', name: '軍警消', nameEn: 'Military/Police' },
+  business: { id: 'business', name: '商業/金融', nameEn: 'Business/Finance' },
+  freelance: { id: 'freelance', name: '自由業/設計', nameEn: 'Freelancer/Design' },
+  other: { id: 'other', name: '其他', nameEn: 'Other' },
+};
+
+// ✅ Phase 1 新增：城市選項（台灣主要城市）
+export const CITY_OPTIONS = [
+  { id: 'taipei', name: '台北' },
+  { id: 'newtaipei', name: '新北' },
+  { id: 'taoyuan', name: '桃園' },
+  { id: 'taichung', name: '台中' },
+  { id: 'tainan', name: '台南' },
+  { id: 'kaohsiung', name: '高雄' },
+  { id: 'other', name: '其他' },
+];
+
 const initialState = {
   gender: '',
   height: 0,
@@ -38,7 +61,12 @@ const initialState = {
   lastActive: new Date().toISOString(),
   // 排行榜資訊（選填）
   country: '', // 國家（選填）
-  region: '', // 行政區/城市（選填）
+  region: '', // 行政區/大區（選填）
+  // ✅ Phase 1 新增欄位
+  city: '', // 城市（下拉選單）
+  job_category: '', // 職業分類（下拉選單 ID）
+  gym_name: '', // 健身房名稱（選填）
+  rpg_class: '', // 系統計算的職業（BERSERKER, ASSASSIN, RANGER, PALADIN, FIGHTER, MAGE, AWAKENED）
   // 原有欄位
   scores: {
     strength: 0,
@@ -129,6 +157,11 @@ export function UserProvider({ children }) {
           // 確保排行榜資訊被正確讀取
           country: firebaseData.country || '',
           region: firebaseData.region || '',
+          // ✅ Phase 1 新增：確保新欄位被正確讀取
+          city: firebaseData.city || '',
+          job_category: firebaseData.job_category || '',
+          gym_name: firebaseData.gym_name || '',
+          rpg_class: firebaseData.rpg_class || '',
         };
 
         if (isMountedRef.current) {
@@ -217,6 +250,11 @@ export function UserProvider({ children }) {
           // 確保排行榜資訊被保存（後期排行榜重要資料）
           country: data.country || '',
           region: data.region || '',
+          // ✅ Phase 1 新增：確保新欄位被保存
+          city: data.city || '',
+          job_category: data.job_category || '',
+          gym_name: data.gym_name || '',
+          rpg_class: data.rpg_class || '',
         };
 
         await setDoc(userRef, dataToSave);
@@ -451,6 +489,11 @@ export function UserProvider({ children }) {
           // 新增：排行榜資訊需持久化（後期排行榜重要資料）
           'country',
           'region',
+          // ✅ Phase 1 新增：新欄位需持久化
+          'city',
+          'job_category',
+          'gym_name',
+          'rpg_class',
         ];
 
         const hasImportantChanges = importantFields.some(field => {
