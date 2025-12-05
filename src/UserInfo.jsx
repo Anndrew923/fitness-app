@@ -32,7 +32,11 @@ import PropTypes from 'prop-types';
 import { calculateLadderScore, generateNickname } from './utils';
 import logger from './utils/logger';
 import { useIntersectionObserver } from './hooks/useIntersectionObserver';
-import { getRPGClass, getRPGClassIcon, getRPGClassName } from './utils/rpgClassCalculator';
+import {
+  getRPGClass,
+  getRPGClassIcon,
+  getRPGClassName,
+} from './utils/rpgClassCalculator';
 
 import './userinfo.css';
 import { useTranslation } from 'react-i18next';
@@ -268,9 +272,22 @@ Modal.propTypes = {
   actionText: PropTypes.string,
 };
 
-// ✅ Phase 1 新增：RPG 風格職業描述 Modal - 使用絕對定位重構
+// ✅ Phase 1.7 防禦性修正：RPG 風格職業描述 Modal - 使用絕對定位重構 + 防禦性檢查
 const RPGClassModal = ({ isOpen, onClose, classInfo }) => {
   const { t } = useTranslation();
+
+  // ✅ Phase 1.7 新增：除錯日誌
+  useEffect(() => {
+    if (isOpen) {
+      console.log('🎭 [DEBUG] RPGClassModal 已打開', {
+        isOpen,
+        classInfo,
+        hasIcon: !!classInfo?.icon,
+        hasName: !!classInfo?.name,
+        hasDescription: !!classInfo?.description,
+      });
+    }
+  }, [isOpen, classInfo]);
 
   // 阻止背景滾動
   useEffect(() => {
@@ -305,7 +322,16 @@ const RPGClassModal = ({ isOpen, onClose, classInfo }) => {
     };
   }, [isOpen]);
 
-  if (!isOpen || !classInfo) return null;
+  // ✅ Phase 1.7 防禦性修正：即使 classInfo 為空也顯示 Modal（顯示預設內容）
+  if (!isOpen) return null;
+
+  // ✅ Phase 1.7 防禦性修正：提供安全的預設值
+  const safeClassInfo = classInfo || {
+    icon: '❓',
+    name: '未知職業',
+    description: '尚未覺醒的潛在力量...',
+    class: 'UNKNOWN',
+  };
 
   const handleOverlayClick = e => {
     if (e.target === e.currentTarget) {
@@ -322,7 +348,7 @@ const RPGClassModal = ({ isOpen, onClose, classInfo }) => {
         right: 0,
         bottom: 0,
         backgroundColor: 'rgba(0, 0, 0, 0.85)',
-        zIndex: 10000,
+        zIndex: 99999, // ✅ Phase 1.7 修正：提升到 99999 確保在最上層
         // ✅ 移除 flexbox 佈局，改用絕對定位控制子元素
       }}
       onClick={handleOverlayClick}
@@ -352,9 +378,10 @@ const RPGClassModal = ({ isOpen, onClose, classInfo }) => {
           borderRadius: '20px',
           border: '2px solid #FF5722',
           padding: '25px',
-          boxShadow: '0 0 30px rgba(255, 87, 34, 0.8), 0 0 60px rgba(255, 87, 34, 0.4)',
+          boxShadow:
+            '0 0 30px rgba(255, 87, 34, 0.8), 0 0 60px rgba(255, 87, 34, 0.4)',
           animation: 'rpgModalSlideIn 0.4s ease-out',
-          zIndex: 10001, // ✅ 確保在背景層之上
+          zIndex: 99999, // ✅ Phase 1.7 修正：提升到 99999 確保在背景層之上
         }}
         onClick={e => e.stopPropagation()}
       >
@@ -374,7 +401,8 @@ const RPGClassModal = ({ isOpen, onClose, classInfo }) => {
               textAlign: 'center',
             }}
           >
-            {classInfo.icon}
+            {/* ✅ Phase 1.7 防禦性修正：如果沒有 icon，顯示預設問號 */}
+            {safeClassInfo.icon || '❓'}
           </div>
           <h3
             style={{
@@ -383,10 +411,12 @@ const RPGClassModal = ({ isOpen, onClose, classInfo }) => {
               fontWeight: 'bold',
               color: '#FFD700',
               textAlign: 'center',
-              textShadow: '0 0 10px rgba(255, 215, 0, 0.5), 0 0 20px rgba(255, 215, 0, 0.3)',
+              textShadow:
+                '0 0 10px rgba(255, 215, 0, 0.5), 0 0 20px rgba(255, 215, 0, 0.3)',
             }}
           >
-            {classInfo.name}
+            {/* ✅ Phase 1.7 防禦性修正：如果沒有 name，顯示預設文字 */}
+            {safeClassInfo.name || '未知職業'}
           </h3>
         </div>
 
@@ -401,7 +431,8 @@ const RPGClassModal = ({ isOpen, onClose, classInfo }) => {
             minHeight: '80px',
           }}
         >
-          {classInfo.description}
+          {/* ✅ Phase 1.7 防禦性修正：如果沒有 description，顯示預設文字 */}
+          {safeClassInfo.description || '尚未覺醒的潛在力量...'}
         </div>
 
         {/* 確認按鈕 - 使用 div 避免 button 標籤被全域 CSS 污染 */}
@@ -429,23 +460,56 @@ const RPGClassModal = ({ isOpen, onClose, classInfo }) => {
               alignItems: 'center',
               justifyContent: 'center',
               border: '1px solid #FF8A65', // ✅ 亮橘色邊框增加立體感
-              boxShadow: '0 4px 15px rgba(255, 87, 34, 0.5), 0 0 20px rgba(255, 87, 34, 0.3)',
+              boxShadow:
+                '0 4px 15px rgba(255, 87, 34, 0.5), 0 0 20px rgba(255, 87, 34, 0.3)',
               cursor: 'pointer',
               transition: 'all 0.3s ease',
               minWidth: '120px',
               outline: 'none',
             }}
             onMouseEnter={e => {
-              e.currentTarget.style.setProperty('background-color', '#FF7043', 'important');
-              e.currentTarget.style.setProperty('border-color', '#FFAB91', 'important');
-              e.currentTarget.style.setProperty('transform', 'translateY(-2px)', 'important');
-              e.currentTarget.style.setProperty('box-shadow', '0 6px 25px rgba(255, 87, 34, 0.7), 0 0 30px rgba(255, 87, 34, 0.4)', 'important');
+              e.currentTarget.style.setProperty(
+                'background-color',
+                '#FF7043',
+                'important'
+              );
+              e.currentTarget.style.setProperty(
+                'border-color',
+                '#FFAB91',
+                'important'
+              );
+              e.currentTarget.style.setProperty(
+                'transform',
+                'translateY(-2px)',
+                'important'
+              );
+              e.currentTarget.style.setProperty(
+                'box-shadow',
+                '0 6px 25px rgba(255, 87, 34, 0.7), 0 0 30px rgba(255, 87, 34, 0.4)',
+                'important'
+              );
             }}
             onMouseLeave={e => {
-              e.currentTarget.style.setProperty('background-color', '#FF5722', 'important');
-              e.currentTarget.style.setProperty('border-color', '#FF8A65', 'important');
-              e.currentTarget.style.setProperty('transform', 'translateY(0)', 'important');
-              e.currentTarget.style.setProperty('box-shadow', '0 4px 15px rgba(255, 87, 34, 0.5), 0 0 20px rgba(255, 87, 34, 0.3)', 'important');
+              e.currentTarget.style.setProperty(
+                'background-color',
+                '#FF5722',
+                'important'
+              );
+              e.currentTarget.style.setProperty(
+                'border-color',
+                '#FF8A65',
+                'important'
+              );
+              e.currentTarget.style.setProperty(
+                'transform',
+                'translateY(0)',
+                'important'
+              );
+              e.currentTarget.style.setProperty(
+                'box-shadow',
+                '0 4px 15px rgba(255, 87, 34, 0.5), 0 0 20px rgba(255, 87, 34, 0.3)',
+                'important'
+              );
             }}
           >
             <span
@@ -1800,15 +1864,37 @@ function UserInfo({ testData, onLogout, clearTestData }) {
     }
   }, [rpgClassInfo, userData?.rpg_class, userData?.scores, setUserData]);
 
-  // ✅ Phase 1 新增：處理職業標籤點擊
+  // ✅ Phase 1.7 防禦性修正：處理職業標籤點擊（添加除錯與安全檢查）
   const handleRpgClassClick = useCallback(() => {
-    if (rpgClassInfo && rpgClassInfo.class !== 'UNKNOWN') {
+    console.log('🔍 [DEBUG] 職業標籤被點擊', {
+      rpgClassInfo,
+      hasClass: !!rpgClassInfo?.class,
+      classValue: rpgClassInfo?.class,
+      userScores: userData?.scores,
+    });
+
+    // ✅ 防禦性檢查：即使數據不完整，也允許打開 Modal（顯示預設內容）
+    if (rpgClassInfo) {
+      // 確保 classInfo 有必要的屬性，如果缺失則使用預設值
+      const safeClassInfo = {
+        icon: rpgClassInfo.icon || '❓',
+        name: rpgClassInfo.name || '未知職業',
+        description: rpgClassInfo.description || '尚未覺醒的潛在力量...',
+        class: rpgClassInfo.class || 'UNKNOWN',
+      };
+
+      console.log('✅ [DEBUG] 打開職業 Modal', safeClassInfo);
       setRpgClassModalState({
         isOpen: true,
-        classInfo: rpgClassInfo,
+        classInfo: safeClassInfo,
+      });
+    } else {
+      console.warn('⚠️ [DEBUG] 無法打開職業 Modal: rpgClassInfo 為空', {
+        rpgClassInfo,
+        userData: userData?.scores,
       });
     }
-  }, [rpgClassInfo]);
+  }, [rpgClassInfo, userData?.scores]);
 
   // ✅ Phase 1 新增：關閉職業描述 Modal
   const handleCloseRpgClassModal = useCallback(() => {
@@ -2928,8 +3014,8 @@ function UserInfo({ testData, onLogout, clearTestData }) {
                   </p>
                   {/* ✅ Phase 1 新增：RPG 職業標籤 - 可點擊 */}
                   {rpgClassInfo && rpgClassInfo.class !== 'UNKNOWN' && (
-                    <div 
-                      className="rpg-class-badge" 
+                    <div
+                      className="rpg-class-badge"
                       onClick={handleRpgClassClick}
                       style={{
                         display: 'inline-flex',
@@ -2937,7 +3023,8 @@ function UserInfo({ testData, onLogout, clearTestData }) {
                         gap: '8px',
                         marginTop: '12px',
                         padding: '8px 16px',
-                        background: 'linear-gradient(135deg, rgba(129, 216, 208, 0.2) 0%, rgba(95, 158, 160, 0.2) 100%)',
+                        background:
+                          'linear-gradient(135deg, rgba(129, 216, 208, 0.2) 0%, rgba(95, 158, 160, 0.2) 100%)',
                         borderRadius: '20px',
                         border: '2px solid rgba(129, 216, 208, 0.4)',
                         fontSize: '16px',
@@ -2946,18 +3033,23 @@ function UserInfo({ testData, onLogout, clearTestData }) {
                         cursor: 'pointer',
                         transition: 'all 0.3s ease',
                       }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.background = 'linear-gradient(135deg, rgba(129, 216, 208, 0.3) 0%, rgba(95, 158, 160, 0.3) 100%)';
+                      onMouseEnter={e => {
+                        e.currentTarget.style.background =
+                          'linear-gradient(135deg, rgba(129, 216, 208, 0.3) 0%, rgba(95, 158, 160, 0.3) 100%)';
                         e.currentTarget.style.transform = 'scale(1.05)';
-                        e.currentTarget.style.boxShadow = '0 4px 12px rgba(129, 216, 208, 0.3)';
+                        e.currentTarget.style.boxShadow =
+                          '0 4px 12px rgba(129, 216, 208, 0.3)';
                       }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.background = 'linear-gradient(135deg, rgba(129, 216, 208, 0.2) 0%, rgba(95, 158, 160, 0.2) 100%)';
+                      onMouseLeave={e => {
+                        e.currentTarget.style.background =
+                          'linear-gradient(135deg, rgba(129, 216, 208, 0.2) 0%, rgba(95, 158, 160, 0.2) 100%)';
                         e.currentTarget.style.transform = 'scale(1)';
                         e.currentTarget.style.boxShadow = 'none';
                       }}
                     >
-                      <span style={{ fontSize: '20px' }}>{rpgClassInfo.icon}</span>
+                      <span style={{ fontSize: '20px' }}>
+                        {rpgClassInfo.icon}
+                      </span>
                       <span>{rpgClassInfo.name}</span>
                     </div>
                   )}
