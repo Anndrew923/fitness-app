@@ -1,11 +1,12 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import backgroundTimer from '../utils/backgroundTimer';
+import timerNotification from '../utils/timerNotification';
 import BottomNavBar from '../components/BottomNavBar';
 import './Timer.css';
 
 /**
- * 休息計時器頁面
+ * 休息計時器頁面 V2.0 - 深色科技儀表板風格
  * 支援背景計時（原生平台）和標準計時（Web 平台）
  */
 function Timer() {
@@ -17,8 +18,43 @@ function Timer() {
   const [isRunning, setIsRunning] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
 
-  // 常用時間按鈕（秒）
-  const quickTimeButtons = [30, 60, 90, 120];
+  // 擴充時間選項（秒）
+  const quickTimeButtons = [30, 60, 90, 120, 150, 180, 240, 300];
+
+  /**
+   * 熱力分級顏色函式
+   * @param {number} seconds - 秒數
+   * @returns {string} 對應的顏色代碼
+   */
+  const getColor = useCallback(seconds => {
+    if (seconds < 90) {
+      return '#00f260'; // 螢光綠
+    } else if (seconds >= 90 && seconds <= 150) {
+      return '#ffc837'; // 活力黃/橘
+    } else {
+      return '#ff0055'; // 警示紅
+    }
+  }, []);
+
+  /**
+   * 計算進度百分比
+   */
+  const progress = useMemo(() => {
+    if (initialSeconds <= 0) return 0;
+    return ((initialSeconds - remainingSeconds) / initialSeconds) * 100;
+  }, [initialSeconds, remainingSeconds]);
+
+  /**
+   * 計算環形進度條的 stroke-dasharray 值
+   */
+  const circumference = useMemo(() => {
+    const radius = 90; // SVG 圓的半徑
+    return 2 * Math.PI * radius;
+  }, []);
+
+  const strokeDashoffset = useMemo(() => {
+    return circumference - (progress / 100) * circumference;
+  }, [circumference, progress]);
 
   /**
    * 格式化時間為 MM:SS
@@ -26,8 +62,13 @@ function Timer() {
   const formatTime = seconds => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
-    return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+    return {
+      mins: String(mins).padStart(2, '0'),
+      secs: String(secs).padStart(2, '0'),
+    };
   };
+
+  const timeDisplay = formatTime(remainingSeconds);
 
   /**
    * 開始計時
@@ -53,17 +94,17 @@ function Timer() {
       const newRemaining = Math.max(0, initialSeconds - elapsedSeconds);
       setRemainingSeconds(newRemaining);
 
-      // 如果時間到了，自動停止
+      // 如果時間到了，自動停止並觸發通知
       if (newRemaining <= 0) {
         backgroundTimer.stop();
         setIsRunning(false);
         setIsPaused(false);
         setRemainingSeconds(0);
-        // 可以添加提示音或震動（原生平台）
-        if (window.Capacitor?.isNativePlatform()) {
-          // 未來可以添加震動或提示音
-          console.log('⏰ 計時結束');
-        }
+
+        // ✅ 觸發通知
+        timerNotification.notifyTimerComplete().catch(error => {
+          console.error('❌ 發送通知失敗:', error);
+        });
       }
     });
   }, [initialSeconds, isPaused]);
@@ -121,18 +162,38 @@ function Timer() {
         const newRemaining = Math.max(0, initialSeconds - elapsed);
         setRemainingSeconds(newRemaining);
 
-        // 如果時間到了，自動停止
+        // 如果時間到了，自動停止並觸發通知
         if (newRemaining <= 0) {
           backgroundTimer.stop();
           setIsRunning(false);
           setIsPaused(false);
           setRemainingSeconds(0);
+
+          // ✅ 觸發通知
+          timerNotification.notifyTimerComplete().catch(error => {
+            console.error('❌ 發送通知失敗:', error);
+          });
         }
       }, 100); // 每 100ms 更新一次，確保 UI 流暢
 
       return () => clearInterval(interval);
     }
   }, [isRunning, initialSeconds]);
+
+  /**
+   * 請求通知權限（組件掛載時）
+   */
+  useEffect(() => {
+    const requestNotificationPermission = async () => {
+      try {
+        await timerNotification.requestPermissions();
+      } catch (error) {
+        console.error('❌ 請求通知權限失敗:', error);
+      }
+    };
+
+    requestNotificationPermission();
+  }, []);
 
   /**
    * 組件卸載時清理計時器
@@ -147,95 +208,418 @@ function Timer() {
   }, []);
 
   return (
-    <div className="timer-page">
-      <div className="timer-container">
+    <div
+      style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        background:
+          'radial-gradient(circle at center, #232526 0%, #414345 100%)',
+        zIndex: 10,
+        display: 'flex',
+        flexDirection: 'column',
+        overflowY: 'auto',
+        color: '#ffffff',
+      }}
+    >
+      <div
+        style={{
+          flex: 1,
+          display: 'flex',
+          flexDirection: 'column',
+          padding: '20px',
+          maxWidth: '600px',
+          margin: '0 auto',
+          width: '100%',
+        }}
+      >
         {/* 標題 */}
-        <div className="timer-header">
-          <h1 className="timer-title">
+        <div
+          style={{
+            textAlign: 'center',
+            marginBottom: '30px',
+            marginTop: '20px',
+          }}
+        >
+          <h1
+            style={{
+              fontSize: '28px',
+              fontWeight: 'bold',
+              color: '#ffffff',
+              margin: '0 0 8px 0',
+              textShadow: '0 2px 10px rgba(0, 242, 96, 0.3)',
+            }}
+          >
             {t('tools.restTimer.title') || '休息計時器'}
           </h1>
-          <p className="timer-subtitle">
+          <p
+            style={{
+              fontSize: '14px',
+              color: 'rgba(255, 255, 255, 0.7)',
+              margin: 0,
+            }}
+          >
             {t('tools.restTimer.desc') || '精準控制組間休息時間，提升訓練效率'}
           </p>
         </div>
 
-        {/* 倒數時間顯示 */}
-        <div className="timer-display">
-          <div className="timer-time">{formatTime(remainingSeconds)}</div>
-          {remainingSeconds === 0 && initialSeconds === 0 && (
-            <p className="timer-hint">
-              {t('timer.selectTime') || '請選擇休息時間'}
-            </p>
-          )}
+        {/* 倒數時間顯示 - 帶環形進度條 */}
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            marginBottom: '40px',
+          }}
+        >
+          <div
+            style={{
+              position: 'relative',
+              width: '220px',
+              height: '220px',
+            }}
+          >
+            {/* 環形進度條 */}
+            <svg
+              style={{
+                width: '100%',
+                height: '100%',
+                transform: 'rotate(-90deg)',
+              }}
+              viewBox="0 0 200 200"
+            >
+              <defs>
+                <linearGradient
+                  id="progressGradient"
+                  x1="0%"
+                  y1="0%"
+                  x2="100%"
+                  y2="0%"
+                >
+                  <stop offset="0%" stopColor="#00f260" />
+                  <stop offset="50%" stopColor="#ffc837" />
+                  <stop offset="100%" stopColor="#ff0055" />
+                </linearGradient>
+                <filter id="glow">
+                  <feGaussianBlur stdDeviation="4" result="coloredBlur" />
+                  <feMerge>
+                    <feMergeNode in="coloredBlur" />
+                    <feMergeNode in="SourceGraphic" />
+                  </feMerge>
+                </filter>
+              </defs>
+              {/* 背景圓 */}
+              <circle
+                cx="100"
+                cy="100"
+                r="90"
+                fill="none"
+                stroke="rgba(255, 255, 255, 0.1)"
+                strokeWidth="8"
+              />
+              {/* 進度圓 */}
+              <circle
+                cx="100"
+                cy="100"
+                r="90"
+                fill="none"
+                stroke="url(#progressGradient)"
+                strokeWidth="8"
+                strokeLinecap="round"
+                strokeDasharray={circumference}
+                strokeDashoffset={strokeDashoffset}
+                filter="url(#glow)"
+                style={{
+                  transition: 'stroke-dashoffset 0.3s ease',
+                }}
+              />
+            </svg>
+
+            {/* 時間數字 */}
+            <div
+              style={{
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                textAlign: 'center',
+              }}
+            >
+              <div
+                style={{
+                  fontSize: '48px',
+                  fontWeight: 'bold',
+                  color: '#ffffff',
+                  lineHeight: '1.2',
+                  fontFamily: 'monospace',
+                  textShadow: '0 0 20px rgba(0, 242, 96, 0.5)',
+                }}
+              >
+                <span>{timeDisplay.mins}</span>
+                <span style={{ margin: '0 4px' }}>:</span>
+                <span>{timeDisplay.secs}</span>
+              </div>
+              <div
+                style={{
+                  fontSize: '12px',
+                  color: 'rgba(255, 255, 255, 0.6)',
+                  marginTop: '4px',
+                }}
+              >
+                <span>分</span>
+                <span style={{ margin: '0 4px' }}>/</span>
+                <span>秒</span>
+              </div>
+            </div>
+          </div>
         </div>
 
-        {/* 常用時間按鈕 */}
-        <div className="timer-quick-buttons">
-          {quickTimeButtons.map(seconds => (
-            <button
-              key={seconds}
-              className="timer-quick-btn"
-              onClick={() => handleSetQuickTime(seconds)}
-              disabled={isRunning}
-            >
-              {seconds}s
-            </button>
-          ))}
+        {/* 常用時間按鈕 - Grid 排版 */}
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(4, 1fr)',
+            gap: '12px',
+            marginBottom: '30px',
+          }}
+        >
+          {quickTimeButtons.map(seconds => {
+            const isSelected = initialSeconds === seconds;
+            const heatColor = getColor(seconds);
+            const displayText = `${seconds}s`;
+
+            return (
+              <button
+                key={seconds}
+                onClick={() => handleSetQuickTime(seconds)}
+                disabled={isRunning}
+                style={{
+                  padding: '14px 8px',
+                  borderRadius: '12px',
+                  border: `2px solid ${heatColor}`,
+                  background: isSelected ? heatColor : 'transparent',
+                  color: isSelected ? '#ffffff' : heatColor,
+                  fontSize: '14px',
+                  fontWeight: 'bold',
+                  cursor: isRunning ? 'not-allowed' : 'pointer',
+                  transition: 'all 0.3s ease',
+                  boxShadow: isSelected
+                    ? `0 0 20px ${heatColor}80, 0 4px 12px ${heatColor}40`
+                    : 'none',
+                  opacity: isRunning ? 0.5 : 1,
+                  textShadow: isSelected
+                    ? '0 0 8px rgba(0, 0, 0, 0.3)'
+                    : 'none',
+                }}
+                onMouseEnter={e => {
+                  if (!isRunning && !isSelected) {
+                    e.currentTarget.style.background = `${heatColor}20`;
+                    e.currentTarget.style.transform = 'translateY(-2px)';
+                    e.currentTarget.style.boxShadow = `0 4px 12px ${heatColor}40`;
+                  }
+                }}
+                onMouseLeave={e => {
+                  if (!isRunning && !isSelected) {
+                    e.currentTarget.style.background = 'transparent';
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.boxShadow = 'none';
+                  }
+                }}
+              >
+                {displayText}
+              </button>
+            );
+          })}
         </div>
 
         {/* 控制按鈕 */}
-        <div className="timer-controls">
+        <div
+          style={{
+            display: 'flex',
+            gap: '12px',
+            justifyContent: 'center',
+            flexWrap: 'wrap',
+            marginBottom: '20px',
+          }}
+        >
           {!isRunning && !isPaused && (
             <button
-              className="timer-control-btn timer-start-btn"
               onClick={handleStart}
               disabled={remainingSeconds <= 0}
+              style={{
+                padding: '16px 32px',
+                borderRadius: '12px',
+                background:
+                  remainingSeconds > 0
+                    ? 'linear-gradient(135deg, #00f260 0%, #00c9ff 100%)'
+                    : 'rgba(255, 255, 255, 0.1)',
+                border: 'none',
+                color: '#ffffff',
+                fontSize: '16px',
+                fontWeight: 'bold',
+                cursor: remainingSeconds > 0 ? 'pointer' : 'not-allowed',
+                boxShadow:
+                  remainingSeconds > 0
+                    ? '0 4px 20px rgba(0, 242, 96, 0.4)'
+                    : 'none',
+                transition: 'all 0.3s ease',
+                opacity: remainingSeconds > 0 ? 1 : 0.5,
+              }}
+              onMouseEnter={e => {
+                if (remainingSeconds > 0) {
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                  e.currentTarget.style.boxShadow =
+                    '0 6px 25px rgba(0, 242, 96, 0.5)';
+                }
+              }}
+              onMouseLeave={e => {
+                if (remainingSeconds > 0) {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow =
+                    '0 4px 20px rgba(0, 242, 96, 0.4)';
+                }
+              }}
             >
-              {t('timer.start') || '開始'}
+              開始計時
             </button>
           )}
 
           {isRunning && (
             <button
-              className="timer-control-btn timer-pause-btn"
               onClick={handlePause}
+              style={{
+                padding: '16px 32px',
+                borderRadius: '12px',
+                background: 'linear-gradient(135deg, #ffc837 0%, #ff9500 100%)',
+                border: 'none',
+                color: '#ffffff',
+                fontSize: '16px',
+                fontWeight: 'bold',
+                cursor: 'pointer',
+                boxShadow: '0 4px 20px rgba(255, 200, 55, 0.4)',
+                transition: 'all 0.3s ease',
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.transform = 'translateY(-2px)';
+                e.currentTarget.style.boxShadow =
+                  '0 6px 25px rgba(255, 200, 55, 0.5)';
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow =
+                  '0 4px 20px rgba(255, 200, 55, 0.4)';
+              }}
             >
-              {t('timer.pause') || '暫停'}
+              暫停
             </button>
           )}
 
           {isPaused && (
             <>
               <button
-                className="timer-control-btn timer-resume-btn"
                 onClick={handleStart}
+                style={{
+                  padding: '16px 32px',
+                  borderRadius: '12px',
+                  background:
+                    'linear-gradient(135deg, #00f260 0%, #00c9ff 100%)',
+                  border: 'none',
+                  color: '#ffffff',
+                  fontSize: '16px',
+                  fontWeight: 'bold',
+                  cursor: 'pointer',
+                  boxShadow: '0 4px 20px rgba(0, 242, 96, 0.4)',
+                  transition: 'all 0.3s ease',
+                }}
+                onMouseEnter={e => {
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                  e.currentTarget.style.boxShadow =
+                    '0 6px 25px rgba(0, 242, 96, 0.5)';
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow =
+                    '0 4px 20px rgba(0, 242, 96, 0.4)';
+                }}
               >
-                {t('timer.resume') || '繼續'}
+                繼續
               </button>
               <button
-                className="timer-control-btn timer-reset-btn"
                 onClick={handleReset}
+                style={{
+                  padding: '16px 32px',
+                  borderRadius: '12px',
+                  background: 'rgba(255, 255, 255, 0.1)',
+                  border: '2px solid rgba(255, 255, 255, 0.3)',
+                  color: '#ffffff',
+                  fontSize: '16px',
+                  fontWeight: 'bold',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease',
+                }}
+                onMouseEnter={e => {
+                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.2)';
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)';
+                  e.currentTarget.style.transform = 'translateY(0)';
+                }}
               >
-                {t('timer.reset') || '重置'}
+                重置
               </button>
             </>
           )}
 
           {!isRunning && !isPaused && remainingSeconds > 0 && (
             <button
-              className="timer-control-btn timer-reset-btn"
               onClick={handleReset}
+              style={{
+                padding: '16px 32px',
+                borderRadius: '12px',
+                background: 'rgba(255, 255, 255, 0.1)',
+                border: '2px solid rgba(255, 255, 255, 0.3)',
+                color: '#ffffff',
+                fontSize: '16px',
+                fontWeight: 'bold',
+                cursor: 'pointer',
+                transition: 'all 0.3s ease',
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.2)';
+                e.currentTarget.style.transform = 'translateY(-2px)';
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)';
+                e.currentTarget.style.transform = 'translateY(0)';
+              }}
             >
-              {t('timer.reset') || '重置'}
+              重置
             </button>
           )}
         </div>
 
         {/* 平台提示 */}
         {!backgroundTimer.isSupported() && (
-          <div className="timer-platform-hint">
-            <p>
-              {t('timer.webHint') || '網頁版：切換分頁或鎖屏時計時可能暫停'}
+          <div
+            style={{
+              textAlign: 'center',
+              padding: '12px',
+              background: 'rgba(255, 255, 255, 0.05)',
+              borderRadius: '8px',
+              marginTop: '20px',
+            }}
+          >
+            <p
+              style={{
+                margin: 0,
+                fontSize: '12px',
+                color: 'rgba(255, 255, 255, 0.7)',
+              }}
+            >
+              💡 網頁版提示：請保持視窗開啟以維持計時準確
             </p>
           </div>
         )}
