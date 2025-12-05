@@ -42,6 +42,7 @@ const FriendFeed = React.lazy(() => import('./components/FriendFeed'));
 const Verification = React.lazy(() => import('./pages/Verification'));
 const AdminPanel = React.lazy(() => import('./pages/AdminPanel'));
 const Timer = React.lazy(() => import('./pages/Timer'));
+const SkillTreePage = React.lazy(() => import('./pages/SkillTreePage')); // ✅ Phase 1.5 新增
 import GlobalAdBanner from './components/GlobalAdBanner';
 import LoadingSpinner from './components/LoadingSpinner';
 import performanceMonitor from './utils/performanceMonitor';
@@ -1197,6 +1198,10 @@ function AppContent() {
               <Route
                 path="/timer"
                 element={<ProtectedRoute element={<Timer />} />}
+              />
+              <Route
+                path="/skill-tree"
+                element={<ProtectedRoute element={<SkillTreePage />} />}
               />
               <Route
                 path="/admin"

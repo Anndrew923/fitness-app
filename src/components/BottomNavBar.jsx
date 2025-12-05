@@ -70,7 +70,7 @@ const navItems = [
         <path d="M9 12h6" />
       </svg>
     ),
-    path: '/user-info',
+    path: '/skill-tree', // ✅ Phase 1.6 修正：指向技能樹頁面
     guestBlock: false,
   },
   {

@@ -268,7 +268,7 @@ Modal.propTypes = {
   actionText: PropTypes.string,
 };
 
-// ✅ Phase 1 新增：RPG 風格職業描述 Modal
+// ✅ Phase 1 新增：RPG 風格職業描述 Modal - 使用絕對定位重構
 const RPGClassModal = ({ isOpen, onClose, classInfo }) => {
   const { t } = useTranslation();
 
@@ -322,16 +322,30 @@ const RPGClassModal = ({ isOpen, onClose, classInfo }) => {
         right: 0,
         bottom: 0,
         backgroundColor: 'rgba(0, 0, 0, 0.85)',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
         zIndex: 10000,
-        padding: '20px',
+        // ✅ 移除 flexbox 佈局，改用絕對定位控制子元素
       }}
       onClick={handleOverlayClick}
     >
+      {/* 點擊背景關閉 */}
       <div
         style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+        }}
+        onClick={handleOverlayClick}
+      />
+
+      {/* 卡片本體 - 強制絕對定位 */}
+      <div
+        style={{
+          position: 'absolute', // ✅ 關鍵：絕對定位
+          bottom: 160, // ✅ 關鍵：距離底部固定像素（避開橘色卡片與 Tab Bar）
+          left: '50%', // ✅ 水平居中技巧
+          transform: 'translateX(-50%)', // ✅ 水平居中
           width: '85%',
           maxWidth: '500px',
           backgroundColor: '#1E1E1E',
@@ -340,7 +354,7 @@ const RPGClassModal = ({ isOpen, onClose, classInfo }) => {
           padding: '25px',
           boxShadow: '0 0 30px rgba(255, 87, 34, 0.8), 0 0 60px rgba(255, 87, 34, 0.4)',
           animation: 'rpgModalSlideIn 0.4s ease-out',
-          position: 'relative',
+          zIndex: 10001, // ✅ 確保在背景層之上
         }}
         onClick={e => e.stopPropagation()}
       >
@@ -355,8 +369,9 @@ const RPGClassModal = ({ isOpen, onClose, classInfo }) => {
         >
           <div
             style={{
-              fontSize: '32px',
-              marginBottom: '8px',
+              fontSize: '40px',
+              marginBottom: '10px',
+              textAlign: 'center',
             }}
           >
             {classInfo.icon}
@@ -389,41 +404,62 @@ const RPGClassModal = ({ isOpen, onClose, classInfo }) => {
           {classInfo.description}
         </div>
 
-        {/* 確認按鈕 */}
+        {/* 確認按鈕 - 使用 div 避免 button 標籤被全域 CSS 污染 */}
         <div
           style={{
             display: 'flex',
             justifyContent: 'center',
           }}
         >
-          <button
+          <div
             onClick={onClose}
+            role="button"
+            tabIndex={0}
+            onKeyDown={e => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                onClose();
+              }
+            }}
             style={{
-              padding: '12px 32px',
-              backgroundColor: '#FF5722',
-              color: '#FFFFFF',
-              border: 'none',
-              borderRadius: '12px',
-              fontSize: '16px',
-              fontWeight: 'bold',
+              backgroundColor: '#FF5722', // ✅ 預設橘色
+              padding: '12px 30px',
+              borderRadius: '25px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              border: '1px solid #FF8A65', // ✅ 亮橘色邊框增加立體感
+              boxShadow: '0 4px 15px rgba(255, 87, 34, 0.5), 0 0 20px rgba(255, 87, 34, 0.3)',
               cursor: 'pointer',
               transition: 'all 0.3s ease',
-              boxShadow: '0 4px 15px rgba(255, 87, 34, 0.4)',
               minWidth: '120px',
+              outline: 'none',
             }}
             onMouseEnter={e => {
-              e.currentTarget.style.backgroundColor = '#FF7043';
-              e.currentTarget.style.transform = 'translateY(-2px)';
-              e.currentTarget.style.boxShadow = '0 6px 20px rgba(255, 87, 34, 0.6)';
+              e.currentTarget.style.setProperty('background-color', '#FF7043', 'important');
+              e.currentTarget.style.setProperty('border-color', '#FFAB91', 'important');
+              e.currentTarget.style.setProperty('transform', 'translateY(-2px)', 'important');
+              e.currentTarget.style.setProperty('box-shadow', '0 6px 25px rgba(255, 87, 34, 0.7), 0 0 30px rgba(255, 87, 34, 0.4)', 'important');
             }}
             onMouseLeave={e => {
-              e.currentTarget.style.backgroundColor = '#FF5722';
-              e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.boxShadow = '0 4px 15px rgba(255, 87, 34, 0.4)';
+              e.currentTarget.style.setProperty('background-color', '#FF5722', 'important');
+              e.currentTarget.style.setProperty('border-color', '#FF8A65', 'important');
+              e.currentTarget.style.setProperty('transform', 'translateY(0)', 'important');
+              e.currentTarget.style.setProperty('box-shadow', '0 4px 15px rgba(255, 87, 34, 0.5), 0 0 20px rgba(255, 87, 34, 0.3)', 'important');
             }}
           >
-            {t('common.confirm') || '確認'}
-          </button>
+            <span
+              style={{
+                color: '#FFFFFF',
+                fontSize: '18px',
+                fontWeight: 'bold',
+                letterSpacing: '2px',
+                userSelect: 'none',
+              }}
+            >
+              確 認
+            </span>
+          </div>
         </div>
       </div>
 
@@ -432,11 +468,11 @@ const RPGClassModal = ({ isOpen, onClose, classInfo }) => {
         @keyframes rpgModalSlideIn {
           from {
             opacity: 0;
-            transform: scale(0.9) translateY(-20px);
+            transform: translateX(-50%) translateY(20px) scale(0.9);
           }
           to {
             opacity: 1;
-            transform: scale(1) translateY(0);
+            transform: translateX(-50%) translateY(0) scale(1);
           }
         }
       `}</style>
@@ -3044,48 +3080,6 @@ function UserInfo({ testData, onLogout, clearTestData }) {
               </div>
             </div>
           )}
-        </div>
-      </div>
-
-      {/* 評測頁面導航 */}
-      <div className="test-buttons-section" ref={testsSectionRef}>
-        <h3 className="section-title">{t('userInfo.startTests')}</h3>
-        <div className="test-buttons-grid">
-          <button
-            onClick={() => handleNavigation('/strength')}
-            className="test-btn strength-btn"
-          >
-            <span className="test-icon">💪</span>
-            <span className="test-label">{t('tests.strength')}</span>
-          </button>
-          <button
-            onClick={() => handleNavigation('/explosive-power')}
-            className="test-btn explosive-btn"
-          >
-            <span className="test-icon">⚡</span>
-            <span className="test-label">{t('tests.explosivePower')}</span>
-          </button>
-          <button
-            onClick={() => handleNavigation('/cardio')}
-            className="test-btn cardio-btn"
-          >
-            <span className="test-icon">❤️</span>
-            <span className="test-label">{t('tests.cardio')}</span>
-          </button>
-          <button
-            onClick={() => handleNavigation('/muscle-mass')}
-            className="test-btn muscle-btn"
-          >
-            <span className="test-icon">🥩</span>
-            <span className="test-label">{t('tests.muscleMass')}</span>
-          </button>
-          <button
-            onClick={() => handleNavigation('/body-fat')}
-            className="test-btn bodyfat-btn"
-          >
-            <span className="test-icon">📊</span>
-            <span className="test-label">{t('tests.bodyFat')}</span>
-          </button>
         </div>
       </div>
 

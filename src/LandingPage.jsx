@@ -40,14 +40,13 @@ function LandingPage() {
       {/* Hero Section */}
       <section className="hero-section">
         <div className="hero-content">
+          {/* ✅ 主標題更新：真身覺醒 */}
           <h2 className="hero-title">
-            {t('landing.hero.title', '科學化健身評測，追蹤你的進步')}
+            真身覺醒
           </h2>
+          {/* ✅ 副標題更新：五維評測．顯現你的潛在系別 */}
           <p className="hero-subtitle">
-            {t(
-              'landing.hero.subtitle',
-              '透過 5 大評測項目，全面了解你的身體素質，與全球用戶一起挑戰天梯排行榜'
-            )}
+            五維評測．顯現你的潛在系別
           </p>
           <div className="hero-actions">
             <button
