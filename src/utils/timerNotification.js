@@ -1,4 +1,5 @@
 import { Capacitor } from '@capacitor/core';
+import { Haptics, ImpactStyle } from '@capacitor/haptics';
 import logger from './logger';
 
 /**
@@ -101,6 +102,22 @@ class TimerNotification {
     }
 
     try {
+      // ✅ 新增：立即触发震动（不等待通知）
+      try {
+        // 使用强震动模式，持续1秒
+        await Haptics.vibrate({ duration: 1000 });
+        // 短暂暂停后再次震动
+        setTimeout(async () => {
+          try {
+            await Haptics.vibrate({ duration: 500 });
+          } catch (e) {
+            logger.warn('⚠️ 第二次震动失败:', e);
+          }
+        }, 200);
+      } catch (error) {
+        logger.warn('⚠️ 震动功能不可用:', error);
+      }
+
       await this.LocalNotifications.schedule({
         notifications: [
           {
@@ -110,14 +127,17 @@ class TimerNotification {
             sound: 'default', // 使用系統預設提示音
             vibrate: true, // 觸發震動
             priority: 'high',
+            importance: 'high', // ✅ 新增：Android 高优先级
             smallIcon: 'ic_notification', // Android 小圖標（可選）
             largeIcon: 'ic_launcher', // Android 大圖標（可選）
             channelId: 'timer-complete', // Android 通知頻道
+            // ✅ 新增：震动模式（长震动）
+            vibration: [0, 500, 200, 500, 200, 500], // 震动模式：立即开始，震动500ms，暂停200ms，重复3次
           },
         ],
       });
 
-      logger.info('✅ 本地通知已發送');
+      logger.info('✅ 本地通知已發送（含强制震动）');
       return true;
     } catch (error) {
       logger.error('❌ 發送本地通知失敗:', error);

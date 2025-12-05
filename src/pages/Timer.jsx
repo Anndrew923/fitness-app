@@ -1,7 +1,10 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Capacitor } from '@capacitor/core';
 import backgroundTimer from '../utils/backgroundTimer';
 import timerNotification from '../utils/timerNotification';
+import timerForegroundService from '../utils/timerForegroundService';
+import { createNotificationChannels } from '../utils/timerNotificationChannels';
 import BottomNavBar from '../components/BottomNavBar';
 import './Timer.css';
 
@@ -87,6 +90,13 @@ function Timer() {
     setIsRunning(true);
     setIsPaused(false);
 
+    // ✅ 新增：启动前台服务（显示持续通知）
+    if (Capacitor.isNativePlatform()) {
+      timerForegroundService.start(initialSeconds, remaining => {
+        setRemainingSeconds(remaining);
+      });
+    }
+
     // 使用 backgroundTimer 開始計時
     // 如果是從暫停繼續，backgroundTimer 會從之前的 elapsedTime 繼續
     // 如果是重新開始，backgroundTimer 會從 0 開始（因為我們調用了 stop）
@@ -94,12 +104,22 @@ function Timer() {
       const newRemaining = Math.max(0, initialSeconds - elapsedSeconds);
       setRemainingSeconds(newRemaining);
 
+      // ✅ 更新前台服务通知
+      if (Capacitor.isNativePlatform()) {
+        timerForegroundService.updateRemaining(newRemaining);
+      }
+
       // 如果時間到了，自動停止並觸發通知
       if (newRemaining <= 0) {
         backgroundTimer.stop();
         setIsRunning(false);
         setIsPaused(false);
         setRemainingSeconds(0);
+
+        // ✅ 停止前台服务
+        if (Capacitor.isNativePlatform()) {
+          timerForegroundService.stop();
+        }
 
         // ✅ 觸發通知
         timerNotification.notifyTimerComplete().catch(error => {
@@ -118,6 +138,11 @@ function Timer() {
     backgroundTimer.pause();
     setIsRunning(false);
     setIsPaused(true);
+
+    // ✅ 新增：暂停时停止前台服务
+    if (Capacitor.isNativePlatform()) {
+      timerForegroundService.stop();
+    }
   }, [isRunning]);
 
   /**
@@ -129,6 +154,11 @@ function Timer() {
     setIsPaused(false);
     // 重置為初始設定的時間
     setRemainingSeconds(initialSeconds);
+
+    // ✅ 新增：重置时停止前台服务
+    if (Capacitor.isNativePlatform()) {
+      timerForegroundService.stop();
+    }
   }, [initialSeconds]);
 
   /**
@@ -169,10 +199,20 @@ function Timer() {
           setIsPaused(false);
           setRemainingSeconds(0);
 
+          // ✅ 停止前台服务
+          if (Capacitor.isNativePlatform()) {
+            timerForegroundService.stop();
+          }
+
           // ✅ 觸發通知
           timerNotification.notifyTimerComplete().catch(error => {
             console.error('❌ 發送通知失敗:', error);
           });
+        } else {
+          // ✅ 更新前台服务通知
+          if (Capacitor.isNativePlatform()) {
+            timerForegroundService.updateRemaining(newRemaining);
+          }
         }
       }, 100); // 每 100ms 更新一次，確保 UI 流暢
 
@@ -181,18 +221,21 @@ function Timer() {
   }, [isRunning, initialSeconds]);
 
   /**
-   * 請求通知權限（組件掛載時）
+   * 請求通知權限並創建通知頻道（組件掛載時）
    */
   useEffect(() => {
-    const requestNotificationPermission = async () => {
+    const initializeNotifications = async () => {
       try {
+        // 创建通知频道（Android 必需）
+        await createNotificationChannels();
+        // 请求通知权限
         await timerNotification.requestPermissions();
       } catch (error) {
-        console.error('❌ 請求通知權限失敗:', error);
+        console.error('❌ 初始化通知失敗:', error);
       }
     };
 
-    requestNotificationPermission();
+    initializeNotifications();
   }, []);
 
   /**
@@ -230,6 +273,7 @@ function Timer() {
           display: 'flex',
           flexDirection: 'column',
           padding: '20px',
+          paddingBottom: '120px', // ✅ 预留空间：系统导航列(~40px) + 广告位(~60px) + 缓冲(20px)
           maxWidth: '600px',
           margin: '0 auto',
           width: '100%',
