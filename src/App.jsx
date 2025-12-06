@@ -15,6 +15,7 @@ import ScrollToTop from './ScrollToTop';
 import { App as CapacitorApp } from '@capacitor/app';
 import { Capacitor } from '@capacitor/core';
 import logger from './utils/logger';
+import useAndroidBackButton from './hooks/useAndroidBackButton'; // ✅ Phase 1.9.5 新增
 const WelcomeSplash = React.lazy(() => import('./WelcomeSplash'));
 const LandingPage = React.lazy(() => import('./LandingPage'));
 const Welcome = React.lazy(() => import('./Welcome'));
@@ -142,6 +143,8 @@ function AppContent() {
   const [testData, setTestData] = useState(null);
   const location = useLocation();
   const navigate = useNavigate();
+  // ✅ Phase 1.9.5 新增：啟用 Android 返回鍵監聽
+  useAndroidBackButton();
   const showNavBar = [
     '/user-info',
     '/history',
