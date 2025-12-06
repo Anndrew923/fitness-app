@@ -2988,7 +2988,7 @@ function UserInfo({ testData, onLogout, clearTestData }) {
                     ⭐ {t('userInfo.powerTitle')}{' '}
                     <span className="score-value-large">{averageScore}</span>
                   </p>
-                  {/* ✅ Phase 1.9 清理：RPG 職業標籤 - 移除除錯代碼，保留功能 */}
+                  {/* ✅ Phase 1.9.1 緊急修復：RPG 職業標籤 - 恢復層級設定 */}
                   {rpgClassInfo && rpgClassInfo.class !== 'UNKNOWN' && (
                     <div
                       className="rpg-class-badge"
@@ -3007,6 +3007,9 @@ function UserInfo({ testData, onLogout, clearTestData }) {
                           'linear-gradient(135deg, rgba(129, 216, 208, 0.2) 0%, rgba(95, 158, 160, 0.2) 100%)',
                         borderRadius: '20px',
                         border: '2px solid rgba(129, 216, 208, 0.4)',
+                        // ✅ Phase 1.9.1 緊急修復：恢復層級設定，確保按鈕浮在隱形遮擋層之上
+                        position: 'relative',
+                        zIndex: 50,
                         fontSize: '16px',
                         fontWeight: 'bold',
                         color: '#2d3748',
