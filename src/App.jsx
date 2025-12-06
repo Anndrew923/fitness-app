@@ -902,39 +902,8 @@ function AppContent() {
     }
   }, []);
 
-  // 處理 Android 返回按鈕
-  useEffect(() => {
-    const handleBackButton = () => {
-      const currentPath = location.pathname;
-
-      // 定義需要特殊處理的頁面（沒有底部導覽列的頁面）
-      const pagesWithoutNavBar = [
-        '/features',
-        '/about',
-        '/privacy-policy',
-        '/terms',
-        '/contact',
-        '/disclaimer',
-      ];
-
-      if (pagesWithoutNavBar.includes(currentPath)) {
-        // 這些頁面沒有導覽列，返回按鈕應該回到首頁
-        logger.debug('🔙 返回按鈕：從', currentPath, '回到首頁');
-        navigate('/landing');
-        return true; // 阻止默認行為
-      }
-
-      // 其他頁面使用默認行為
-      return false;
-    };
-
-    // 監聽返回按鈕事件
-    CapacitorApp.addListener('backButton', handleBackButton);
-
-    return () => {
-      CapacitorApp.removeAllListeners();
-    };
-  }, [location.pathname, navigate]);
+  // ✅ Phase 1.9.5 修正：移除舊的返回鍵處理邏輯，已整合到 useAndroidBackButton hook
+  // 舊的實現已移除，避免與新的 hook 衝突
 
   // 2025-08: V1 不再自動彈出隱私權政策彈窗（保留設定頁/專頁入口）
 

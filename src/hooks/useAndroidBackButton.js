@@ -18,7 +18,25 @@ const useAndroidBackButton = () => {
     const setupListener = async () => {
       try {
         backButtonListener = await App.addListener('backButton', () => {
-          // 定義底部導航的主頁面 (Tab Pages)，在這些頁面按返回鍵會退出 App
+          const currentPath = location.pathname;
+
+          // ✅ Phase 1.9.5 整合：沒有底部導覽列的頁面，返回首頁
+          const pagesWithoutNavBar = [
+            '/features',
+            '/about',
+            '/privacy-policy',
+            '/terms',
+            '/contact',
+            '/disclaimer',
+          ];
+
+          if (pagesWithoutNavBar.includes(currentPath)) {
+            // 這些頁面沒有導覽列，返回按鈕應該回到首頁
+            navigate('/landing');
+            return;
+          }
+
+          // ✅ 定義底部導航的主頁面 (Tab Pages)，在這些頁面按返回鍵會退出 App
           const mainPages = [
             '/',
             '/user-info',
@@ -28,7 +46,7 @@ const useAndroidBackButton = () => {
             '/community',
           ];
 
-          if (!mainPages.includes(location.pathname)) {
+          if (!mainPages.includes(currentPath)) {
             // 如果是子頁面 (如 /settings, /strength, /cardio 等)，則返回上一頁
             navigate(-1);
           } else {

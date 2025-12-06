@@ -1,28 +1,15 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import LanguageSwitcher from './components/LanguageSwitcher';
-import { App as CapacitorApp } from '@capacitor/app';
 import './Features.css';
 
 function Features() {
   const { t } = useTranslation();
   const navigate = useNavigate();
 
-  // 處理 Android 返回按鈕
-  useEffect(() => {
-    const handleBackButton = () => {
-      console.log('🔙 Features 頁面：返回按鈕被點擊，回到首頁');
-      navigate('/landing');
-      return true; // 阻止默認行為
-    };
-
-    CapacitorApp.addListener('backButton', handleBackButton);
-
-    return () => {
-      CapacitorApp.removeAllListeners();
-    };
-  }, [navigate]);
+  // ✅ Phase 1.9.5 修正：移除本地返回鍵處理，已由全局 useAndroidBackButton hook 統一處理
+  // 舊的實現已移除，避免與全局 hook 衝突
 
   const handleBackToLanding = () => {
     navigate('/landing');
