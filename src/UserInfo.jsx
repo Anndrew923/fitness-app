@@ -356,7 +356,7 @@ const RPGClassModal = ({ isOpen, onClose, classInfo }) => {
       <div
         style={{
           position: 'absolute', // ✅ 關鍵：絕對定位
-          bottom: 160, // ✅ 關鍵：距離底部固定像素（避開橘色卡片與 Tab Bar）
+          bottom: 280, // ✅ Phase 1.10 修正：調整為 280px，讓 Modal 懸浮在「角色戰鬥力」卡片上方
           left: '50%', // ✅ 水平居中技巧
           transform: 'translateX(-50%)', // ✅ 水平居中
           width: '85%',
