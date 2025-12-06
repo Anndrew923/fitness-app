@@ -1864,6 +1864,23 @@ function UserInfo({ testData, onLogout, clearTestData }) {
     }
   }, [rpgClassInfo, userData?.rpg_class, userData?.scores, setUserData]);
 
+  // ✅ Phase 1.8 新增：在 rpgClassInfo 計算後加入生命週期 Log
+  useEffect(() => {
+    console.log('🔄 [DEBUG] UserInfo Component Rendered (After rpgClassInfo)', {
+      timestamp: new Date().toISOString(),
+      rpgClassInfo: rpgClassInfo
+        ? {
+            class: rpgClassInfo.class,
+            name: rpgClassInfo.name,
+            hasIcon: !!rpgClassInfo.icon,
+            hasDescription: !!rpgClassInfo.description,
+          }
+        : null,
+      modalState: rpgClassModalState,
+      userScores: userData?.scores,
+    });
+  }, [rpgClassInfo, rpgClassModalState, userData?.scores]);
+
   // ✅ Phase 1.7 防禦性修正：處理職業標籤點擊（添加除錯與安全檢查）
   const handleRpgClassClick = useCallback(() => {
     console.log('🔍 [DEBUG] 職業標籤被點擊', {
@@ -2368,12 +2385,14 @@ function UserInfo({ testData, onLogout, clearTestData }) {
         remainingCount={submitConfirmModal.remainingCount}
       />
 
-      {/* ✅ Phase 1 新增：職業描述 Modal - RPG 風格 */}
-      <RPGClassModal
-        isOpen={rpgClassModalState.isOpen}
-        onClose={handleCloseRpgClassModal}
-        classInfo={rpgClassModalState.classInfo}
-      />
+      {/* ✅ Phase 1.8 修正：職業描述 Modal - 使用條件渲染確保完全移除 DOM */}
+      {rpgClassModalState.isOpen && (
+        <RPGClassModal
+          isOpen={rpgClassModalState.isOpen}
+          onClose={handleCloseRpgClassModal}
+          classInfo={rpgClassModalState.classInfo}
+        />
+      )}
 
       {/* 移除儀式感動畫粒子效果 */}
 
@@ -3012,11 +3031,28 @@ function UserInfo({ testData, onLogout, clearTestData }) {
                     ⭐ {t('userInfo.powerTitle')}{' '}
                     <span className="score-value-large">{averageScore}</span>
                   </p>
-                  {/* ✅ Phase 1 新增：RPG 職業標籤 - 可點擊 */}
+                  {/* ✅ Phase 1.8 修正：RPG 職業標籤 - 加入視覺除錯與點擊穿透保護 */}
                   {rpgClassInfo && rpgClassInfo.class !== 'UNKNOWN' && (
                     <div
                       className="rpg-class-badge"
-                      onClick={handleRpgClassClick}
+                      onClick={e => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        console.log('🎯 [DEBUG] 職業標籤 onClick 事件觸發', {
+                          timestamp: new Date().toISOString(),
+                          rpgClassInfo,
+                          event: e,
+                        });
+                        handleRpgClassClick();
+                      }}
+                      onMouseDown={() => {
+                        console.log(
+                          '🖱️ [DEBUG] 職業標籤 onMouseDown 事件觸發',
+                          {
+                            timestamp: new Date().toISOString(),
+                          }
+                        );
+                      }}
                       style={{
                         display: 'inline-flex',
                         alignItems: 'center',
@@ -3026,14 +3062,26 @@ function UserInfo({ testData, onLogout, clearTestData }) {
                         background:
                           'linear-gradient(135deg, rgba(129, 216, 208, 0.2) 0%, rgba(95, 158, 160, 0.2) 100%)',
                         borderRadius: '20px',
-                        border: '2px solid rgba(129, 216, 208, 0.4)',
+                        // ✅ Phase 1.8 新增：視覺除錯邊框（紅色）
+                        borderWidth: '2px',
+                        borderColor: 'red',
+                        borderStyle: 'solid',
+                        // ✅ Phase 1.8 新增：確保按鈕在最上層
+                        position: 'relative',
+                        zIndex: 99999,
                         fontSize: '16px',
                         fontWeight: 'bold',
                         color: '#2d3748',
                         cursor: 'pointer',
                         transition: 'all 0.3s ease',
+                        // ✅ Phase 1.8 新增：確保點擊區域可觸發
+                        pointerEvents: 'auto',
+                        userSelect: 'none',
                       }}
                       onMouseEnter={e => {
+                        console.log('🖱️ [DEBUG] 職業標籤 onMouseEnter', {
+                          timestamp: new Date().toISOString(),
+                        });
                         e.currentTarget.style.background =
                           'linear-gradient(135deg, rgba(129, 216, 208, 0.3) 0%, rgba(95, 158, 160, 0.3) 100%)';
                         e.currentTarget.style.transform = 'scale(1.05)';
