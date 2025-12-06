@@ -38,8 +38,8 @@ const Ladder = () => {
   const forceReloadProcessedRef = useRef(false);
   // ✅ 新增：記錄上次的 country 和 region，用於檢測變化
   const lastCountryRegionRef = useRef(null);
-  // ✅ 新增：記錄是否已執行首次自動滾動
-  const hasAutoScrolledRef = useRef(false);
+  // 🛑 移除鎖定機制：不再使用 hasAutoScrolledRef
+  // const hasAutoScrolledRef = useRef(false);
   // ✅ 新增：記錄顯示的起始排名
   const [displayStartRank, setDisplayStartRank] = useState(1);
   // ✅ 新增：點讚相關狀態
@@ -55,6 +55,7 @@ const Ladder = () => {
   const [totalUsers, setTotalUsers] = useState(0);
   const [userPage, setUserPage] = useState(0); // 用戶所在頁面
   const hasInitialPageSetRef = useRef(false); // 記錄是否已設置初始頁面
+  const hasDataRef = useRef(false); // 記錄是否已有資料（用於無感更新判斷）
 
   const ageGroups = useMemo(
     () => [
@@ -131,32 +132,83 @@ const Ladder = () => {
     }
   }, []);
 
-  // ✅ 新增：核心跳轉函數 - 自動定位用戶位置
+  // ✅ 新增：獨立的連環滾動執行函數
+  const executeChainScroll = useCallback(targetId => {
+    if (!targetId) return;
+
+    const doScroll = behavior => {
+      const el = document.querySelector(`[data-user-id="${targetId}"]`);
+      if (el) {
+        el.scrollIntoView({ behavior: behavior, block: 'center' });
+        logger.debug('✅ [Ladder] 執行定位鎖定');
+      }
+    };
+
+    // 🚀 連環技：分階段執行，對抗瀏覽器與非同步渲染的干擾
+    // 第一槍：瞬間定位 (Auto)
+    requestAnimationFrame(() => doScroll('auto'));
+
+    // 第二槍：短延遲 (100ms) - 等待初步 Layout
+    setTimeout(() => doScroll('smooth'), 100);
+
+    // 第三槍：中延遲 (300ms) - 覆蓋大部分瀏覽器預設行為
+    setTimeout(() => doScroll('smooth'), 300);
+
+    // 第四槍：長延遲 (600ms) - 最終保險，等待圖片撐開
+    setTimeout(() => doScroll('smooth'), 600);
+
+    // 🛑 第五槍：終極鎖定 (2000ms) - 對抗所有延遲更新
+    setTimeout(() => {
+      doScroll('smooth');
+      logger.debug('✅ [Ladder] 2000ms 終極鎖定執行');
+    }, 2000);
+  }, []);
+
+  // ✅ 修改：核心跳轉函數 - 自動定位用戶位置（單次觸發模式）
   const jumpToCurrentUser = useCallback(() => {
     if (!userData?.userId && !auth.currentUser?.uid) return;
     if (userRank === 0) return; // 未上榜不處理
 
-    // 1. 計算用戶所在的頁面（每頁 50 筆）
+    const targetId = userData?.userId || auth.currentUser?.uid;
     const usersPerPage = 50;
     const targetPage = Math.ceil(userRank / usersPerPage);
 
-    logger.debug(`🎯 jumpToCurrentUser: 用戶排名 ${userRank}，目標頁面 ${targetPage}，當前頁面 ${currentPage}`);
+    logger.debug(
+      `🎯 jumpToCurrentUser: 用戶排名 ${userRank}，目標頁面 ${targetPage}，當前頁面 ${currentPage}`
+    );
 
-    // 2. 決定是否需要切換頁面
+    // 1. 如果不在當前頁面，先切換（這會觸發 loadLadderData 重新載入）
     if (targetPage !== currentPage) {
       logger.debug(`📄 切換到用戶所在頁面: ${targetPage}`);
       setCurrentPage(targetPage);
-      // 切換頁面後，重置自動滾動標記，讓 useEffect 在數據加載完後滾動
-      hasAutoScrolledRef.current = false;
+      // 切換頁面後，設置 forceScrollTrigger 讓數據加載完後執行滾動
+      setForceScrollTrigger(prev => prev + 1);
     } else {
-      // 3. 如果已經在當前頁面，直接執行滾動
-      logger.debug(`✅ 已在用戶所在頁面，直接觸發滾動`);
-      hasAutoScrolledRef.current = false; // 重置標記以允許滾動
+      // 2. 如果已經在當前頁面，立即執行滾動鎖定
+      logger.debug('🎯 相同頁面，立即執行連環鎖定...');
+      executeChainScroll(targetId);
+    }
+  }, [userRank, currentPage, userData, executeChainScroll]);
+
+  // 🛑 已移除：scrollToUserElement 函數，邏輯已移到 executeChainScroll
+  // const scrollToUserElement = useCallback(() => { ... }, [userData]);
+
+  // ✅ 新增：禁用瀏覽器原生捲動恢復機制
+  useEffect(() => {
+    // 進入頁面時，禁用瀏覽器的自動捲動恢復
+    if ('scrollRestoration' in window.history) {
+      window.history.scrollRestoration = 'manual';
+      logger.debug('🛑 [Ladder] 已禁用瀏覽器原生捲動恢復');
     }
 
-    // 4. 強制觸發滾動邏輯（透過 state 變化觸發 useEffect）
-    setForceScrollTrigger(prev => prev + 1);
-  }, [userRank, currentPage, userData]);
+    return () => {
+      // 離開頁面時，恢復成自動，以免影響其他頁面體驗
+      if ('scrollRestoration' in window.history) {
+        window.history.scrollRestoration = 'auto';
+        logger.debug('✅ [Ladder] 已恢復瀏覽器原生捲動恢復');
+      }
+    };
+  }, []);
 
   // 使用 useCallback 優化 loadLadderData 函數
   const loadLadderData = useCallback(async () => {
@@ -192,7 +244,14 @@ const Ladder = () => {
 
     // 設置載入狀態
     loadingRef.current = true;
-    setLoading(true);
+    // 🛑 關鍵修改：
+    // 如果目前已經有天梯資料 (ladderData.length > 0)，代表是用戶在瀏覽中發生的背景更新。
+    // 此時不要顯示 Loading (保持 loading 為 false)，以保留用戶的捲動位置與 DOM 狀態。
+    if (ladderData.length === 0) {
+      setLoading(true);
+    } else {
+      logger.debug('🔄 執行無感更新 (Silent Refresh)，保留目前列表視圖');
+    }
     try {
       logger.debug('🚀 開始載入天梯數據...', loadParams);
 
@@ -208,7 +267,9 @@ const Ladder = () => {
         maxRetries: 3,
         retryDelay: 1000,
         onRetry: (retryCount, maxRetries, delay) => {
-          logger.warn(`🔄 載入天梯數據重試 (${retryCount}/${maxRetries})，${delay}ms 後重試...`);
+          logger.warn(
+            `🔄 載入天梯數據重試 (${retryCount}/${maxRetries})，${delay}ms 後重試...`
+          );
         },
       });
       let data = [];
@@ -349,7 +410,7 @@ const Ladder = () => {
           // 根據當前頁面計算顯示範圍
           const startIndex = (currentPage - 1) * usersPerPage;
           const endIndex = startIndex + usersPerPage;
-          
+
           // 確保索引不超出範圍
           if (startIndex < data.length) {
             displayData = data.slice(startIndex, endIndex);
@@ -366,7 +427,7 @@ const Ladder = () => {
           setUserRank(actualUserRank);
           // ✅ 檢查並顯示提醒框（排名計算完成後）
           checkAndShowNotification(actualUserRank);
-          
+
           logger.debug(
             `🎯 用戶實際排名：第 ${actualUserRank} 名，總共 ${data.length} 名用戶，所在頁面：第 ${calculatedUserPage} 頁，當前顯示：第 ${currentPage} 頁`
           );
@@ -395,6 +456,8 @@ const Ladder = () => {
 
       setDisplayStartRank(startRank);
       setLadderData(displayData);
+      // ✅ 更新資料標記，用於無感更新判斷
+      hasDataRef.current = displayData.length > 0;
 
       // 路由狀態已在 useEffect 中清除，這裡不需要重複清除
     } catch (error) {
@@ -411,35 +474,87 @@ const Ladder = () => {
       // 重置強制重新載入處理標記
       forceReloadProcessedRef.current = false;
     }
-  }, [selectedAgeGroup, selectedTab, userData, currentPage]);
+  }, [selectedAgeGroup, selectedTab, userData, currentPage, ladderData]);
 
   // ✅ 新增：分頁控制函數
   const totalPages = useMemo(() => {
     return Math.ceil(totalUsers / 50);
   }, [totalUsers]);
 
-  const goToPage = useCallback((page) => {
-    const targetPage = Math.max(1, Math.min(page, totalPages));
-    setCurrentPage(targetPage);
-    hasAutoScrolledRef.current = false; // 重置自動滾動標記
-    // 滾動到頂部，方便查看新頁面
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, [totalPages]);
+  const goToPage = useCallback(
+    page => {
+      const targetPage = Math.max(1, Math.min(page, totalPages));
+      setCurrentPage(targetPage);
+      // 🛑 移除 hasAutoScrolledRef 的使用
+      // 滾動到頂部，方便查看新頁面
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    },
+    [totalPages]
+  );
 
   // ✅ 新增：處理下拉表單頁面選擇
-  const handlePageSelect = useCallback((e) => {
-    const selectedPage = parseInt(e.target.value, 10);
-    if (selectedPage && selectedPage >= 1 && selectedPage <= totalPages) {
-      goToPage(selectedPage);
-    }
-  }, [totalPages, goToPage]);
+  const handlePageSelect = useCallback(
+    e => {
+      const selectedPage = parseInt(e.target.value, 10);
+      if (selectedPage && selectedPage >= 1 && selectedPage <= totalPages) {
+        goToPage(selectedPage);
+      }
+    },
+    [totalPages, goToPage]
+  );
 
-  // ✅ 新增：切換年齡段或標籤時重置分頁
+  // ✅ 新增：切換年齡段或標籤時重置分頁並清空數據
   useEffect(() => {
+    // 當篩選條件改變時，主動清空數據並顯示 Loading
+    // 這樣會觸發 loadLadderData 中的 (length === 0) 判斷，正確顯示轉圈圈
+    setLadderData([]); // 清空舊數據
+    setLoading(true); // 強制顯示轉圈
     setCurrentPage(1);
     hasInitialPageSetRef.current = false;
-    hasAutoScrolledRef.current = false;
-  }, [selectedAgeGroup, selectedTab]);
+    // 🛑 移除 hasAutoScrolledRef 的使用
+    hasDataRef.current = false; // 重置資料標記，因為會重新載入
+
+    // 在數據清空後，設置 forceScrollTrigger 確保 loadLadderData 完成後執行滾動
+    const targetId = userData?.userId || auth.currentUser?.uid;
+    if (targetId) {
+      setForceScrollTrigger(prev => prev + 1);
+    }
+  }, [selectedAgeGroup, selectedTab, userData]);
+
+  // ✅ 新增：監聽 forceScrollTrigger 和 loading 完成，執行滾動
+  useEffect(() => {
+    const targetId = userData?.userId || auth.currentUser?.uid;
+    if (
+      forceScrollTrigger > 0 &&
+      !loading &&
+      ladderData.length > 0 &&
+      targetId &&
+      userRank > 0
+    ) {
+      // 檢查用戶是否在顯示的數據中
+      const userInDisplay = ladderData.some(
+        user =>
+          user.id === userData?.userId || user.id === auth.currentUser?.uid
+      );
+
+      if (userInDisplay) {
+        // 執行滾動，並在滾動完成後重置 trigger
+        executeChainScroll(targetId);
+        setForceScrollTrigger(0);
+      } else {
+        // 用戶不在顯示的數據中，直接重置 trigger
+        setForceScrollTrigger(0);
+        logger.debug('✅ 用戶不在顯示的數據中，無需滾動');
+      }
+    }
+  }, [
+    forceScrollTrigger,
+    loading,
+    ladderData,
+    userRank,
+    userData,
+    executeChainScroll,
+  ]);
 
   // 合併所有載入觸發條件到一個 useEffect
   useEffect(() => {
@@ -470,15 +585,17 @@ const Ladder = () => {
       currentCountryRegion !== lastCountryRegion &&
       !loading
     ) {
-      logger.debug(
-        '🔄 檢測到國家/城市變化，等待 Firebase 寫入完成後重新載入天梯資料'
-      );
+      logger.debug('🔄 檢測到區域變化，準備無感更新...');
       // 等待 1 秒，確保 Firebase 寫入完成並同步
       const reloadTimer = setTimeout(() => {
         // 設置強制重新載入標記
         forceReloadRef.current = true;
         // 清除載入參數緩存，確保重新載入
         lastLoadParamsRef.current = null;
+
+        // ✅ 新增：既然要重載，就設置 forceScrollTrigger 觸發滾動
+        setForceScrollTrigger(prev => prev + 1);
+
         // 重新載入天梯資料
         loadLadderData();
       }, 1000); // 等待 1 秒，確保 Firebase 寫入完成
@@ -519,84 +636,8 @@ const Ladder = () => {
     }
   }, [location.state, userData, loadLadderData]);
 
-  // ✅ 修改：首次載入或分頁切換時自動滾動到用戶排名位置（優化版本）
-  useEffect(() => {
-    if (
-      !loading &&
-      ladderData.length > 0 &&
-      userRank > 0 &&
-      (!hasAutoScrolledRef.current || forceScrollTrigger > 0) // ✅ 加入觸發器判斷
-    ) {
-      // 檢查用戶是否在顯示的數據中
-      const userInDisplay = ladderData.some(
-        user =>
-          user.id === userData?.userId || user.id === auth.currentUser?.uid
-      );
-
-      if (userInDisplay) {
-        // 用戶在顯示的數據中，自動滾動到用戶排名位置
-        // 使用多層延遲確保 DOM 完全渲染
-        const scrollTimer = setTimeout(() => {
-          requestAnimationFrame(() => {
-            requestAnimationFrame(() => {
-              const userElement = document.querySelector(
-                `[data-user-id="${userData?.userId || auth.currentUser?.uid}"]`
-              );
-              if (userElement) {
-                // ✅ 獲取 status bar 高度
-                const statusBarHeight = parseFloat(
-                  getComputedStyle(document.documentElement)
-                    .getPropertyValue('--safe-area-inset-top')
-                    .replace('px', '')
-                ) || 0;
-
-                // ✅ 計算 Header 高度（根據實際 Header 高度調整，例如 60px）
-                const headerOffset = 60;
-
-                // 計算用戶元素的實際位置
-                const elementRect = userElement.getBoundingClientRect();
-                const absoluteElementTop = elementRect.top + window.scrollY;
-                
-                // ✅ 修正：減去 status bar 和 header 高度，並添加額外間距
-                // 目標是讓元素出現在頂部，但要扣除 Status Bar 和 Header
-                const targetScrollY = absoluteElementTop - statusBarHeight - headerOffset - 10; // 多扣 10px 留白
-
-                // 使用 window.scrollTo 精確滾動到用戶位置
-                window.scrollTo({
-                  top: Math.max(0, targetScrollY),
-                  behavior: 'smooth',
-                });
-                logger.debug(
-                  '✅ 自動滾動到用戶排名:',
-                  userRank,
-                  '目標位置:',
-                  targetScrollY,
-                  'Status Bar 高度:',
-                  statusBarHeight,
-                  'Header 高度:',
-                  headerOffset
-                );
-                // 標記已滾動，並重置觸發器
-                hasAutoScrolledRef.current = true;
-                if (forceScrollTrigger > 0) {
-                  setForceScrollTrigger(0);
-                }
-              }
-            });
-          });
-        }, 300); // 稍微延遲以等待列表渲染
-
-        return () => clearTimeout(scrollTimer);
-      } else {
-        // 用戶不在顯示的數據中（例如排名太後面），標記為已處理
-        hasAutoScrolledRef.current = true;
-        if (forceScrollTrigger > 0) {
-          setForceScrollTrigger(0);
-        }
-        logger.debug('✅ 用戶不在顯示的數據中，無需滾動');
-      }
-    }
-  }, [loading, ladderData, userRank, userData, currentPage, forceScrollTrigger]); // ✅ 加入 forceScrollTrigger
+  // 🛑 已移除：舊的滾動 useEffect，改用新的 forceScrollTrigger 監聽機制
+  // useEffect(() => { ... }, [...]);
 
   // ✅ 新增：載入點讚狀態
   useEffect(() => {
@@ -832,7 +873,7 @@ const Ladder = () => {
     const rankBadge = getRankBadge(currentRank);
 
     // ✅ 修改：點擊浮動排名框跳轉到用戶位置
-    const handleFloatingRankClick = (e) => {
+    const handleFloatingRankClick = e => {
       e.preventDefault();
       e.stopPropagation();
       // 不再使用 navigate，而是直接執行跳轉邏輯
@@ -937,7 +978,15 @@ const Ladder = () => {
         </div>
       </div>
     );
-  }, [userData, userRank, ladderData.length, loading, getAgeGroupLabel, t, jumpToCurrentUser]); // ✅ 加入 jumpToCurrentUser
+  }, [
+    userData,
+    userRank,
+    ladderData.length,
+    loading,
+    getAgeGroupLabel,
+    t,
+    jumpToCurrentUser,
+  ]); // ✅ 加入 jumpToCurrentUser
 
   // const getUserRankDisplay = () => {
   //   if (!userData) {
