@@ -37,6 +37,7 @@ import {
   getRPGClassIcon,
   getRPGClassName,
 } from './utils/rpgClassCalculator';
+import SaveSuccessModal from './components/UserInfo/SaveSuccessModal'; // ✅ Phase 1.9.2 新增
 
 import './userinfo.css';
 import { useTranslation } from 'react-i18next';
@@ -765,6 +766,19 @@ async function compressImage(
 }
 
 function UserInfo({ testData, onLogout, clearTestData }) {
+  // ✅ Phase 1.9.3 新增：職業選項常數
+  const JOB_OPTIONS = [
+    { value: 'engineering', label: '工程師 (軟體/硬體)' },
+    { value: 'medical', label: '醫療人員 (醫護/藥師)' },
+    { value: 'coach', label: '健身教練' },
+    { value: 'student', label: '學生' },
+    { value: 'police_military', label: '軍警消人員' },
+    { value: 'business', label: '商業/金融/法務' },
+    { value: 'freelance', label: '自由業/設計/藝術' },
+    { value: 'service', label: '服務業' },
+    { value: 'other', label: '其他' },
+  ];
+
   const {
     userData,
     setUserData,
@@ -872,6 +886,9 @@ function UserInfo({ testData, onLogout, clearTestData }) {
     show: false,
     message: '',
   });
+
+  // ✅ Phase 1.9.2 新增：儲存成功 Modal 狀態
+  const [showSaveSuccess, setShowSaveSuccess] = useState(false);
 
   // 新增：檢查天梯提交限制
   const checkLadderSubmissionLimit = useCallback(() => {
@@ -1726,6 +1743,8 @@ function UserInfo({ testData, onLogout, clearTestData }) {
         weight: Number(userData.weight) || 0,
         age: Number(userData.age) || 0,
         gender: userData.gender,
+        // ✅ Phase 1.9.3 新增：職業分類欄位
+        job_category: userData.job_category || '',
         // 排行榜資訊（選填）
         country: userData.country || '',
         region: userData.region || '',
@@ -2066,18 +2085,15 @@ function UserInfo({ testData, onLogout, clearTestData }) {
       averageScore: averageScore,
     };
     saveHistory(record);
-    setModalState({
-      isOpen: true,
-      title: t('userInfo.modal.resultSaveSuccessTitle'),
-      message: t('userInfo.modal.resultSaveSuccessMessage'),
-      type: 'success',
-    });
+    // ✅ Phase 1.9.2 修正：改用新的 SaveSuccessModal
+    setShowSaveSuccess(true);
+  }, [userData.scores, averageScore, saveHistory]);
 
-    // 2秒後自動關閉成功對話框
-    setTimeout(() => {
-      setModalState(prev => ({ ...prev, isOpen: false }));
-    }, 2000);
-  }, [userData.scores, averageScore, saveHistory, setModalState]);
+  // ✅ Phase 1.9.2 新增：導航至歷史紀錄頁面
+  const handleNavigateToHistory = useCallback(() => {
+    setShowSaveSuccess(false);
+    navigate('/history');
+  }, [navigate]);
 
   const handleNavigation = useCallback(
     async path => {
@@ -2133,8 +2149,9 @@ function UserInfo({ testData, onLogout, clearTestData }) {
       if (name === 'gender') {
         // 性別欄位保持字符串
         processedValue = value;
-      } else if (['profession', 'country', 'region'].includes(name)) {
-        // 職業、國家、行政區欄位保持字符串
+      } else if (['job_category', 'country', 'region'].includes(name)) {
+        // ✅ Phase 1.9.3 修正：將 profession 改為 job_category
+        // 職業分類、國家、行政區欄位保持字符串
         processedValue = value;
       } else if (['weeklyTrainingHours', 'trainingYears'].includes(name)) {
         // 訓練相關數字欄位
@@ -2350,6 +2367,13 @@ function UserInfo({ testData, onLogout, clearTestData }) {
           classInfo={rpgClassModalState.classInfo}
         />
       )}
+
+      {/* ✅ Phase 1.9.2 新增：儲存成功 Modal */}
+      <SaveSuccessModal
+        isOpen={showSaveSuccess}
+        onClose={() => setShowSaveSuccess(false)}
+        onNavigate={handleNavigateToHistory}
+      />
 
       {/* 移除儀式感動畫粒子效果 */}
 
@@ -2623,19 +2647,33 @@ function UserInfo({ testData, onLogout, clearTestData }) {
 
                   <div className="form-row">
                     <div className="form-group">
-                      <label htmlFor="profession" className="form-label">
+                      <label htmlFor="job_category" className="form-label">
                         {t('userInfo.training.profession')}
                       </label>
-                      <input
-                        id="profession"
-                        name="profession"
-                        type="text"
-                        value={userData?.profession || ''}
+                      <select
+                        id="job_category"
+                        name="job_category"
+                        value={userData?.job_category || ''}
                         onChange={handleInputChange}
-                        placeholder={t('userInfo.placeholders.profession')}
                         className="form-input"
-                        maxLength="100"
-                      />
+                      >
+                        <option value="">請選擇您的職業分類</option>
+                        {JOB_OPTIONS.map(option => (
+                          <option key={option.value} value={option.value}>
+                            {option.label}
+                          </option>
+                        ))}
+                      </select>
+                      <p
+                        className="field-hint"
+                        style={{
+                          marginTop: '4px',
+                          fontSize: '12px',
+                          color: '#718096',
+                        }}
+                      >
+                        💡 選擇職業可參與未來的「職業分組天梯」
+                      </p>
                     </div>
 
                     <div className="form-group">
