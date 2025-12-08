@@ -41,9 +41,11 @@ body {
 */
 
 /* ✅ 新增：鍵盤開啟時，防止頁面內容被底部元素遮擋（原生應用） */
-html[data-keyboard-visible="true"] {
+html[data-keyboard-visible='true'] {
   /* 可以添加其他全局樣式調整 */
   /* 例如：調整頁面底部 padding */
+  /* placeholder: 預留給未來的鍵盤處理邏輯 */
+  display: block; /* 避免空規則集警告 */
 }
 
 /* ✅ 已移除：鍵盤開啟時的覆蓋層隱藏規則 */
@@ -160,16 +162,19 @@ code {
   min-height: 100%;
   display: flex;
   flex-direction: column;
+  /* ✅ 修改：將背景色改為白色，與 BottomNavBar 融合 */
+  background-color: #ffffff; /* 純白色，與導航列一致 */
+  width: 100%;
 }
 
-/* 為固定廣告預留空間的頁面 - 考慮安全區域 */
+/* ✅ 修正父容器：移除 padding，讓它佔滿全螢幕，不要擠壓內容 */
 .app-container.page-with-fixed-ad {
-  padding-bottom: calc(120px + var(--safe-area-inset-bottom));
+  padding-bottom: 0 !important; /* 🔴 關鍵修改：移除父層 padding */
 }
 
 @media (max-width: 768px) {
   .app-container.page-with-fixed-ad {
-    padding-bottom: calc(114px + var(--safe-area-inset-bottom));
+    padding-bottom: 0 !important; /* 🔴 關鍵修改：移除父層 padding */
   }
 }
 
@@ -178,6 +183,70 @@ code {
   /* ✅ 確保內容區域正確填充可用空間 */
   height: 100%;
   overflow-y: auto;
+  /* 🔴 關鍵修復：為底部導航列預留空間，防止內容被遮擋或露出青色背景 */
+  /* BottomNavBar 高度：calc(64px + env(safe-area-inset-bottom, 0px)) */
+  /* 添加額外緩衝空間（16px），確保內容完全可見 */
+  padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px));
+  /* 確保白色內容卡片能延伸到底部 */
+  min-height: 100%;
+  /* 確保背景色為透明，讓內容決定背景 */
+  background-color: transparent;
+}
+
+/* 🔴 額外修復：確保有底部導航列的頁面內容容器有足夠的 padding */
+/* 針對使用 BottomNavBar 的頁面 */
+.app-container:has(+ .bottom-nav-bar) .main-content,
+.app-container .main-content:has(+ .bottom-nav-bar) {
+  padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px));
+}
+
+/* ✅ 修正子容器：當父容器有 page-with-fixed-ad 時，增加底部 padding */
+/* 讓內容可以捲動到廣告/導航列後方 */
+.app-container.page-with-fixed-ad .main-content {
+  /* 原本的 80px (BottomNavBar) + 額外廣告高度 (50px) + 緩衝 (10px) */
+  padding-bottom: calc(140px + env(safe-area-inset-bottom, 0px));
+}
+
+@media (max-width: 768px) {
+  .app-container.page-with-fixed-ad .main-content {
+    padding-bottom: calc(136px + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+/* 手機版調整 */
+@media (max-width: 768px) {
+  .main-content {
+    padding-bottom: calc(76px + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+/* 🔴 額外修復：確保白色內容卡片延伸到底部 */
+/* 針對有白色背景的頁面容器（通用容器類別） */
+/* 注意：這些規則適用於沒有特定 padding-bottom 設定的容器 */
+.page-content,
+.content-container,
+.scroll-container {
+  /* 確保最小高度足夠，能延伸到底部 */
+  min-height: calc(
+    100vh - 80px - env(safe-area-inset-top, 0px) -
+      env(safe-area-inset-bottom, 0px)
+  );
+  /* 添加底部 padding，確保內容不被遮擋 */
+  /* 注意：如果容器已有 padding-bottom，此規則會增加額外的 padding */
+  padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px));
+}
+
+/* 手機版調整 */
+@media (max-width: 768px) {
+  .page-content,
+  .content-container,
+  .scroll-container {
+    min-height: calc(
+      100vh - 76px - env(safe-area-inset-top, 0px) -
+        env(safe-area-inset-bottom, 0px)
+    );
+    padding-bottom: calc(76px + env(safe-area-inset-bottom, 0px));
+  }
 }
 
 /* 已移除頁尾隱私權政策連結，相關樣式清理 */

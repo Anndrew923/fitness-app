@@ -14,6 +14,9 @@
         <item name="android:windowLightStatusBar">true</item>
         <item name="android:navigationBarColor">#FFFFFF</item>
         <item name="android:windowLightNavigationBar">true</item>
+        
+        <!-- ✅ 修改：將視窗背景色改為白色，與 BottomNavBar 融合 -->
+        <item name="android:windowBackground">#FFFFFF</item>
     </style>
 
     <!-- ✅ 關鍵修復：畫框式佈局 - 強制內容適應系統視窗 -->
@@ -45,6 +48,9 @@
         
         <!-- ✅ Level 1-8: 禁止沉浸式模式（確保系統列固定） -->
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+        
+        <!-- ✅ 修改：將視窗背景色改為白色，與 BottomNavBar 融合 -->
+        <item name="android:windowBackground">#FFFFFF</item>
     </style>
 
 
@@ -54,5 +60,7 @@
         <!-- ✅ 啟動畫面也應用畫框式佈局 -->
         <item name="android:fitsSystemWindows">true</item>
         <item name="android:windowLayoutInDisplayCutoutMode">never</item>
+        <!-- ✅ 修改：將啟動畫面背景色改為白色，與 BottomNavBar 融合 -->
+        <item name="android:windowBackground">#FFFFFF</item>
     </style>
 </resources>
