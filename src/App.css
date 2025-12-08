@@ -35,9 +35,9 @@ body {
 /* ✅ 移除：Status Bar 和 Navigation Bar 白色背景覆蓋層 */
 /* 不再需要 CSS 覆蓋層，因為：
    1. styles.xml 已設定 android:statusBarColor 和 android:navigationBarColor
-   2. StatusBar.setBackgroundColor() 已設定原生狀態列為白色背景
-   3. StatusBar.setOverlaysWebView({ overlay: false }) 會自動預留空間
-   4. android:fitsSystemWindows="true" 確保內容不會重疊
+   2. MainActivity.java 已設定狀態列和導航列為白色背景
+   3. android:fitsSystemWindows="true" 會自動預留空間，確保內容不會重疊
+   4. 完全由原生層級控制系統 UI，無需 JS/CSS 干預
 */
 
 /* ✅ 新增：鍵盤開啟時，防止頁面內容被底部元素遮擋（原生應用） */

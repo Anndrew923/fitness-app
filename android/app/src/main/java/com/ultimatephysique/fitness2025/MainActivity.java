@@ -30,23 +30,49 @@ public class MainActivity extends BridgeActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         
-        // 啟用邊緣到邊緣顯示（Edge-to-Edge）
-        WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
+        // 🔴 關鍵修正：強制設為 true (代表「適應系統視窗」，即畫框模式)
+        // 這會覆蓋 XML 和 Capacitor 預設的全螢幕行為
+        // 必須在 super.onCreate() 之後立即設定，確保優先級最高
+        WindowCompat.setDecorFitsSystemWindows(getWindow(), true);
+        Log.d(TAG, "✅ setDecorFitsSystemWindows(true) - 畫框模式已啟用");
         
-        // 設定狀態列和導覽列樣式
+        // 設定狀態列和導覽列樣式（與 styles.xml 保持一致）
         WindowInsetsControllerCompat windowInsetsController = 
             WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView());
         
         if (windowInsetsController != null) {
+            // ✅ 確保圖標為深色（白色背景上顯示黑色圖標）
             windowInsetsController.setAppearanceLightStatusBars(true);
             windowInsetsController.setAppearanceLightNavigationBars(true);
         }
         
+        // ✅ 確保狀態列和導航列為白色（與 styles.xml 保持一致）
         getWindow().setStatusBarColor(android.graphics.Color.WHITE);
         getWindow().setNavigationBarColor(android.graphics.Color.WHITE);
         
         // ✅ 關鍵改進：等待 WebView 完全準備好後再注入
         setupWebViewReadyListener();
+    }
+    
+    @Override
+    public void onResume() {
+        super.onResume();
+        
+        // 🔴 關鍵修正：在 onResume 中再次強制設定，防止被其他代碼覆蓋
+        // 這確保即使 Capacitor 或其他組件在生命週期中修改了設定，也會被強制恢復
+        WindowCompat.setDecorFitsSystemWindows(getWindow(), true);
+        Log.d(TAG, "✅ onResume: setDecorFitsSystemWindows(true) - 畫框模式已重新啟用");
+        
+        // 再次確保狀態列和導航列設定
+        getWindow().setStatusBarColor(android.graphics.Color.WHITE);
+        getWindow().setNavigationBarColor(android.graphics.Color.WHITE);
+        
+        WindowInsetsControllerCompat windowInsetsController = 
+            WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView());
+        if (windowInsetsController != null) {
+            windowInsetsController.setAppearanceLightStatusBars(true);
+            windowInsetsController.setAppearanceLightNavigationBars(true);
+        }
     }
     
     /**
