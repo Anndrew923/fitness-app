@@ -1,11 +1,14 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { App } from '@capacitor/app';
 import { Capacitor } from '@capacitor/core';
+import { Toast } from '@capacitor/toast';
 
 const useAndroidBackButton = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  // ✅ Phase 1.9.6 新增：記錄上次按下返回鍵的時間
+  const lastBackPressTime = useRef(0);
 
   useEffect(() => {
     // 只在原生平台（Android/iOS）上啟用
@@ -17,7 +20,7 @@ const useAndroidBackButton = () => {
 
     const setupListener = async () => {
       try {
-        backButtonListener = await App.addListener('backButton', () => {
+        backButtonListener = await App.addListener('backButton', async () => {
           const currentPath = location.pathname;
 
           // ✅ Phase 1.9.5 整合：沒有底部導覽列的頁面，返回首頁
@@ -36,7 +39,7 @@ const useAndroidBackButton = () => {
             return;
           }
 
-          // ✅ 定義底部導航的主頁面 (Tab Pages)，在這些頁面按返回鍵會退出 App
+          // ✅ 定義底部導航的主頁面 (Tab Pages)
           const mainPages = [
             '/',
             '/user-info',
@@ -50,8 +53,28 @@ const useAndroidBackButton = () => {
             // 如果是子頁面 (如 /settings, /strength, /cardio 等)，則返回上一頁
             navigate(-1);
           } else {
-            // 如果是主頁面，則退出 App
-            App.exitApp();
+            // ✅ Phase 1.9.6 新增：主頁面雙擊退出機制
+            const now = Date.now();
+            const timeDiff = now - lastBackPressTime.current;
+
+            if (timeDiff < 2000) {
+              // 情境 B：兩秒內連按，真的退出 App
+              App.exitApp();
+            } else {
+              // 情境 A：超過兩秒，顯示提示並更新時間戳
+              lastBackPressTime.current = now;
+
+              try {
+                await Toast.show({
+                  text: '再按一次退出應用程式',
+                  duration: 'short',
+                  position: 'bottom',
+                });
+              } catch (toastError) {
+                // 如果 Toast 顯示失敗，使用 fallback（不影響功能）
+                console.warn('Toast 顯示失敗:', toastError);
+              }
+            }
           }
         });
       } catch (error) {
@@ -72,4 +95,3 @@ const useAndroidBackButton = () => {
 };
 
 export default useAndroidBackButton;
-
