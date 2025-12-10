@@ -415,55 +415,56 @@
 }
 
 .publish-btn {
-  /* Force Gradient & Color */
+  /* Gradient & Color */
   background: linear-gradient(135deg, #81d8d0 0%, #4a7c7a 100%) !important;
   color: white !important;
   
-  /* Force Shape & Size */
+  /* Compact Shape */
   border: none !important;
-  border-radius: 50px !important; /* Force Pill shape */
-  padding: 8px 24px !important;
+  border-radius: 50px !important;
+  padding: 6px 16px !important; /* Reduced padding (was 8px 24px) */
+  
+  /* Sizing - Crucial for fixing truncation */
+  width: auto !important;      /* Let content dictate width */
+  min-width: 60px !important;  /* Minimum touch area */
+  height: auto !important;
   
   /* Typography */
-  font-size: 15px !important;
-  font-weight: 700 !important;
+  font-size: 14px !important;  /* Slightly smaller (was 15px) */
+  font-weight: 600 !important;
   letter-spacing: 0.5px !important;
+  line-height: 1.5 !important; /* Ensure vertical centering */
   
-  /* Effects */
-  cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 4px 15px rgba(129, 216, 208, 0.4) !important;
-  position: relative;
-  overflow: hidden;
-  
-  /* Flex centering for icon if added later */
+  /* Layout */
   display: flex !important;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  flex-shrink: 0 !important;   /* Prevent being squashed by flexbox */
+  margin-right: 2px;           /* Safety margin from the edge */
+  
+  /* Effects */
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(129, 216, 208, 0.4) !important;
+  position: relative;
+  overflow: visible !important; /* Allow shadow to spill out, prevent content clipping */
   
   /* Keep existing properties */
-  flex-shrink: 0;
   white-space: nowrap;
   box-sizing: border-box;
 }
 
 /* Hover State */
 .publish-btn:hover:not(:disabled) {
-  transform: translateY(-2px) scale(1.02);
-  box-shadow: 0 6px 20px rgba(129, 216, 208, 0.6) !important;
-  filter: brightness(1.1);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(129, 216, 208, 0.5) !important;
+  filter: brightness(1.05);
 }
 
-/* Active State */
-.publish-btn:active:not(:disabled) {
-  transform: translateY(1px) scale(0.98);
-}
-
-/* IMPROVED Disabled State - No more ugly gray */
+/* Disabled State */
 .publish-btn:disabled {
   background: linear-gradient(135deg, #81d8d0 0%, #4a7c7a 100%) !important;
-  opacity: 0.5 !important; /* Just fade it out, keep the color */
+  opacity: 0.5 !important;
   cursor: not-allowed;
   box-shadow: none !important;
   transform: none !important;
