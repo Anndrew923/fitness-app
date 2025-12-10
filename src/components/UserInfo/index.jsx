@@ -7,16 +7,9 @@ import React, {
   memo,
 } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useUser } from './UserContext';
-import {
-  RadarChart,
-  PolarGrid,
-  PolarAngleAxis,
-  PolarRadiusAxis,
-  Radar,
-} from 'recharts';
-import { auth, db } from './firebase';
-import { storage } from './firebase';
+import { useUser } from '../../UserContext';
+import { auth, db } from '../../firebase';
+import { storage } from '../../firebase';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import {
   collection,
@@ -29,22 +22,26 @@ import {
   setDoc,
 } from 'firebase/firestore';
 import PropTypes from 'prop-types';
-import { calculateLadderScore, generateNickname } from './utils';
-import logger from './utils/logger';
-import { useIntersectionObserver } from './hooks/useIntersectionObserver';
+import { calculateLadderScore, generateNickname } from '../../utils';
+import logger from '../../utils/logger';
+import { useIntersectionObserver } from '../../hooks/useIntersectionObserver';
 import {
   getRPGClass,
   getRPGClassIcon,
   getRPGClassName,
-} from './utils/rpgClassCalculator';
-import SaveSuccessModal from './components/UserInfo/SaveSuccessModal'; // ✅ Phase 1.9.2 新增
+} from '../../utils/rpgClassCalculator';
+import SaveSuccessModal from './SaveSuccessModal';
+import AvatarSection from './AvatarSection';
+import RadarChartSection from './RadarChartSection/RadarChartSection';
 
 import './userinfo.css';
 import { useTranslation } from 'react-i18next';
 
 // 開發環境下載入調試工具
 if (process.env.NODE_ENV === 'development') {
-  import('./utils/firebaseDebug');
+  import('../../utils/firebaseDebug.js').catch(() => {
+    // 忽略導入錯誤，不影響主應用
+  });
 }
 
 const DEFAULT_SCORES = {
@@ -56,113 +53,6 @@ const DEFAULT_SCORES = {
 };
 
 const GENDER_OPTIONS = ['male', 'female'];
-
-// 自定義軸標籤組件 - 使用 React.memo 優化性能
-const CustomAxisTick = memo(
-  ({ payload, x, y, radarChartData, t }) => {
-    const data = radarChartData.find(item => item.name === payload.value);
-
-    // 計算調整後的位置 - 使用相對偏移而不是固定像素值
-    let adjustedX = x;
-    let adjustedY = y;
-
-    // 計算從中心到當前點的距離，用於相對偏移
-    const distance = Math.sqrt(x * x + y * y);
-    const angle = Math.atan2(y, x);
-
-    // 力量標籤特殊處理：移到正上方
-    if (payload.value === t('userInfo.radarLabels.strength')) {
-      adjustedX = x;
-      adjustedY = y - distance * 0.12;
-    } else if (payload.value === t('userInfo.radarLabels.explosivePower')) {
-      adjustedX = x + Math.cos(angle) * (distance * 0.03);
-      adjustedY = y + Math.sin(angle) * (distance * 0.06);
-    } else if (payload.value === t('userInfo.radarLabels.ffmi')) {
-      adjustedX = x + Math.cos(angle) * (distance * -0.2);
-      adjustedY = y + Math.sin(angle) * (distance * 0.06);
-    } else if (payload.value === t('userInfo.radarLabels.cardio')) {
-      adjustedX = x + Math.cos(angle) * (distance * 0.01);
-      adjustedY = y + Math.sin(angle) * (distance * 0.06);
-    } else if (payload.value === t('userInfo.radarLabels.muscle')) {
-      adjustedX = x + Math.cos(angle) * (distance * -0.05);
-      adjustedY = y + Math.sin(angle) * (distance * 0.06);
-    } else {
-      adjustedX = x + Math.cos(angle) * (distance * 0.1);
-      adjustedY = y + Math.sin(angle) * (distance * 0.1);
-    }
-
-    return (
-      <g transform={`translate(${adjustedX},${adjustedY})`}>
-        {/* 外圈光暈 - 使用外部定義的 filter */}
-        <circle
-          cx={0}
-          cy={0}
-          r={16}
-          fill="rgba(129, 216, 208, 0.1)"
-          filter="url(#glow)"
-        />
-        {/* 主圓圈 */}
-        <circle
-          cx={0}
-          cy={0}
-          r={14}
-          fill="rgba(255, 255, 255, 0.95)"
-          stroke="rgba(129, 216, 208, 0.4)"
-          strokeWidth={2}
-          filter="drop-shadow(0 2px 4px rgba(129, 216, 208, 0.2))"
-        />
-        {/* 圖標 - 垂直排列上方 */}
-        <text
-          x={0}
-          y={-8}
-          textAnchor="middle"
-          fill="#4a5568"
-          fontSize="16"
-          fontWeight="600"
-          dominantBaseline="middle"
-          filter="drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1))"
-        >
-          {data?.icon}
-        </text>
-        {/* 標籤文字 - 垂直排列下方 */}
-        <text
-          x={0}
-          y={12}
-          textAnchor="middle"
-          fill="#2d3748"
-          fontSize="13"
-          fontWeight="700"
-          dominantBaseline="middle"
-          filter="drop-shadow(0 1px 3px rgba(255, 255, 255, 0.9))"
-        >
-          {payload.value}
-        </text>
-      </g>
-    );
-  },
-  (prevProps, nextProps) => {
-    // 自定義比較函數，只在必要時重新渲染
-    return (
-      prevProps.payload.value === nextProps.payload.value &&
-      Math.abs(prevProps.x - nextProps.x) < 0.1 &&
-      Math.abs(prevProps.y - nextProps.y) < 0.1 &&
-      prevProps.radarChartData === nextProps.radarChartData &&
-      prevProps.t === nextProps.t
-    );
-  }
-);
-
-CustomAxisTick.displayName = 'CustomAxisTick';
-
-CustomAxisTick.propTypes = {
-  payload: PropTypes.shape({
-    value: PropTypes.string.isRequired,
-  }).isRequired,
-  x: PropTypes.number.isRequired,
-  y: PropTypes.number.isRequired,
-  radarChartData: PropTypes.array.isRequired,
-  t: PropTypes.func.isRequired,
-};
 
 // 新增：對話框組件
 const Modal = ({
@@ -701,70 +591,6 @@ SubmitConfirmModal.propTypes = {
 
 // 移除儀式感動畫系統
 
-// 新增：極致品質圖片壓縮工具
-async function compressImage(
-  file,
-  maxSize = 300 * 1024,
-  maxWidth = 192,
-  maxHeight = 192
-) {
-  return new Promise((resolve, reject) => {
-    const img = new window.Image();
-    const reader = new FileReader();
-    reader.onload = e => {
-      img.src = e.target.result;
-    };
-    img.onload = () => {
-      const canvas = document.createElement('canvas');
-      let width = img.width;
-      let height = img.height;
-
-      // 計算最佳尺寸，保持長寬比
-      if (width > maxWidth || height > maxHeight) {
-        const ratio = Math.min(maxWidth / width, maxHeight / height);
-        width = Math.round(width * ratio);
-        height = Math.round(height * ratio);
-      }
-
-      canvas.width = width;
-      canvas.height = height;
-      const ctx = canvas.getContext('2d', { alpha: false });
-
-      // 啟用最高品質圖像渲染
-      ctx.imageSmoothingEnabled = true;
-      ctx.imageSmoothingQuality = 'high';
-
-      // 使用白色背景（針對透明圖片）
-      ctx.fillStyle = '#FFFFFF';
-      ctx.fillRect(0, 0, width, height);
-
-      // 繪製圖像
-      ctx.drawImage(img, 0, 0, width, height);
-      canvas.toBlob(
-        blob => {
-          if (blob.size > maxSize) {
-            // 再壓縮一次，仍保持極高品質
-            canvas.toBlob(
-              blob2 => {
-                resolve(blob2);
-              },
-              'image/jpeg',
-              0.93
-            );
-          } else {
-            resolve(blob);
-          }
-        },
-        'image/jpeg',
-        0.98
-      );
-    };
-    img.onerror = reject;
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
-}
-
 function UserInfo({ testData, onLogout, clearTestData }) {
   // ✅ Phase 1.9.3 新增：職業選項常數
   const JOB_OPTIONS = [
@@ -798,7 +624,6 @@ function UserInfo({ testData, onLogout, clearTestData }) {
   const navigate = useNavigate();
   const location = useLocation();
   const radarSectionRef = useRef(null);
-  const radarContainerRef = useRef(null);
   const testsSectionRef = useRef(null);
   const formSectionRef = useRef(null);
   const nicknameTimeoutRef = useRef(null); // 新增：暱稱輸入防抖定時器
@@ -812,42 +637,6 @@ function UserInfo({ testData, onLogout, clearTestData }) {
   const lastScrollTimeRef = useRef(0);
   const isScrollingRef = useRef(false);
   const idleCallbackIdRef = useRef(null); // ✅ 修復 2: 保存 idle callback ID 用於清理
-  // ✅ 修復 1: 使用穩定的 ref 追蹤雷達圖是否已渲染，防止消失
-  const radarChartRenderedRef = useRef(false);
-  // ✅ 修復 4: 使用固定尺寸替代 ResponsiveContainer，減少重新計算
-  const [chartDimensions, setChartDimensions] = useState({
-    width: 750,
-    height: 400,
-  });
-
-  // ✅ 修復：暫時移除 Intersection Observer，避免干擾雷達圖顯示
-  // 保留 intersectionRef 用於 ref 附加，但不使用 isRadarVisible
-  const { elementRef: intersectionRef } = useIntersectionObserver(
-    {
-      threshold: 0.1,
-      rootMargin: '100px',
-    },
-    []
-  );
-
-  // ✅ 將 intersectionRef 附加到 radarContainerRef（使用回調 ref）
-  const setRadarContainerRef = useCallback(
-    node => {
-      radarContainerRef.current = node;
-      if (intersectionRef) {
-        intersectionRef.current = node;
-      }
-      // ✅ 修復 4: 當容器設置後，立即計算圖表尺寸
-      if (node) {
-        requestAnimationFrame(() => {
-          const width = Math.min(750, node.offsetWidth - 80);
-          const height = Math.min(400, window.innerHeight * 0.5);
-          setChartDimensions({ width, height });
-        });
-      }
-    },
-    [intersectionRef]
-  );
 
   // 新增：對話框狀態
   const [modalState, setModalState] = useState({
@@ -1204,64 +993,6 @@ function UserInfo({ testData, onLogout, clearTestData }) {
     auth.currentUser,
   ]);
 
-  // ✅ 改進：確保雷達圖數據始終有值，添加錯誤處理
-  const radarChartData = useMemo(() => {
-    try {
-      const scores = userData?.scores || DEFAULT_SCORES;
-      const data = [
-        {
-          name: t('userInfo.radarLabels.strength'),
-          value: scores.strength ? Number(scores.strength).toFixed(2) * 1 : 0,
-          icon: '💪',
-        },
-        {
-          name: t('userInfo.radarLabels.explosivePower'),
-          value: scores.explosivePower
-            ? Number(scores.explosivePower).toFixed(2) * 1
-            : 0,
-          icon: '⚡',
-        },
-        {
-          name: t('userInfo.radarLabels.cardio'),
-          value: scores.cardio ? Number(scores.cardio).toFixed(2) * 1 : 0,
-          icon: '❤️',
-        },
-        {
-          name: t('userInfo.radarLabels.muscle'),
-          value: scores.muscleMass
-            ? Number(scores.muscleMass).toFixed(2) * 1
-            : 0,
-          icon: '🥩',
-        },
-        {
-          name: t('userInfo.radarLabels.ffmi'),
-          value: scores.bodyFat ? Number(scores.bodyFat).toFixed(2) * 1 : 0,
-          icon: '📊',
-        },
-      ];
-      // ✅ 修復 7: 確保數據有效，防止過濾後為空導致雷達圖消失
-      const filtered = data.filter(
-        item => item.value !== null && item.value !== undefined
-      );
-      // ✅ 如果過濾後為空，返回原始數據（至少保證有數據顯示）
-      return filtered.length > 0 ? filtered : data;
-    } catch (error) {
-      console.error('雷達圖數據計算錯誤:', error);
-      // 返回默認數據
-      return [
-        { name: t('userInfo.radarLabels.strength'), value: 0, icon: '💪' },
-        {
-          name: t('userInfo.radarLabels.explosivePower'),
-          value: 0,
-          icon: '⚡',
-        },
-        { name: t('userInfo.radarLabels.cardio'), value: 0, icon: '❤️' },
-        { name: t('userInfo.radarLabels.muscle'), value: 0, icon: '🥩' },
-        { name: t('userInfo.radarLabels.ffmi'), value: 0, icon: '📊' },
-      ];
-    }
-  }, [userData?.scores, t]);
-
   const isGuest = useMemo(() => {
     return sessionStorage.getItem('guestMode') === 'true';
   }, []);
@@ -1329,14 +1060,7 @@ function UserInfo({ testData, onLogout, clearTestData }) {
         if (!isScrollingRef.current) {
           isScrollingRef.current = true;
           setPerformanceMode('scrolling');
-          // ✅ 滾動時優化 DOM
-          if (radarContainerRef.current) {
-            radarContainerRef.current.classList.add('scrolling');
-            radarContainerRef.current.style.setProperty(
-              '--performance-mode',
-              'scrolling'
-            );
-          }
+          // ✅ 滾動時優化 DOM（雷達圖性能優化現在在 RadarChartSection 組件中處理）
         }
 
         lastScrollTimeRef.current = now;
@@ -1361,13 +1085,7 @@ function UserInfo({ testData, onLogout, clearTestData }) {
           if (window.requestIdleCallback) {
             idleCallbackIdRef.current = requestIdleCallback(
               () => {
-                if (radarContainerRef.current) {
-                  radarContainerRef.current.classList.remove('scrolling');
-                  radarContainerRef.current.style.setProperty(
-                    '--performance-mode',
-                    'normal'
-                  );
-                }
+                // ✅ 雷達圖性能優化現在在 RadarChartSection 組件中處理
                 setPerformanceMode('normal');
                 idleCallbackIdRef.current = null; // ✅ 清理引用
               },
@@ -1375,13 +1093,7 @@ function UserInfo({ testData, onLogout, clearTestData }) {
             );
           } else {
             setTimeout(() => {
-              if (radarContainerRef.current) {
-                radarContainerRef.current.classList.remove('scrolling');
-                radarContainerRef.current.style.setProperty(
-                  '--performance-mode',
-                  'normal'
-                );
-              }
+              // ✅ 雷達圖性能優化現在在 RadarChartSection 組件中處理
               setPerformanceMode('normal');
             }, 200);
           }
@@ -1440,58 +1152,6 @@ function UserInfo({ testData, onLogout, clearTestData }) {
   //     });
   //   }
   // }, [isRadarVisible, performanceMode]);
-
-  // ✅ 修復 4: 計算圖表尺寸（只在必要時更新），替代 ResponsiveContainer
-  useEffect(() => {
-    const updateChartDimensions = () => {
-      const container = radarContainerRef.current;
-      if (container) {
-        const width = Math.min(750, container.offsetWidth - 80); // 減去 padding
-        const height = Math.min(400, window.innerHeight * 0.5);
-        setChartDimensions(prev => {
-          // ✅ 只在尺寸真正改變時更新，避免不必要的重新渲染
-          if (prev.width !== width || prev.height !== height) {
-            return { width, height };
-          }
-          return prev;
-        });
-      }
-    };
-
-    // ✅ 等待容器渲染後再計算尺寸
-    const checkAndUpdate = () => {
-      if (radarContainerRef.current) {
-        updateChartDimensions();
-      } else {
-        // ✅ 如果容器還沒渲染，使用 requestAnimationFrame 等待
-        requestAnimationFrame(() => {
-          requestAnimationFrame(() => {
-            if (radarContainerRef.current) {
-              updateChartDimensions();
-            }
-          });
-        });
-      }
-    };
-
-    // ✅ 初始化時檢查並更新尺寸
-    checkAndUpdate();
-
-    // ✅ 只在窗口大小變化時更新，使用防抖
-    let resizeTimeout;
-    const handleResize = () => {
-      clearTimeout(resizeTimeout);
-      resizeTimeout = setTimeout(() => {
-        requestAnimationFrame(updateChartDimensions);
-      }, 300);
-    };
-
-    window.addEventListener('resize', handleResize);
-    return () => {
-      window.removeEventListener('resize', handleResize);
-      clearTimeout(resizeTimeout);
-    };
-  }, []); // ✅ 只在組件掛載時設置一次
 
   // ✅ 新增：檢查頁面是否準備好顯示
   useEffect(() => {
@@ -2190,34 +1850,17 @@ function UserInfo({ testData, onLogout, clearTestData }) {
     [setUserData, userData.weight, t]
   );
 
-  // 新增：頭像上傳處理
-  const handleAvatarChange = async e => {
+  // 新增：頭像上傳處理 - 接收已壓縮的 blob
+  const handleAvatarChange = async blob => {
     setAvatarError(null);
-    const file = e.target.files[0];
-    if (!file) return;
-    if (!file.type.startsWith('image/')) {
-      setAvatarError('請選擇圖片檔案');
-      return;
-    }
-    if (file.size > 7 * 1024 * 1024) {
-      setAvatarError('圖片大小請勿超過 7MB');
-      return;
-    }
     setAvatarUploading(true);
     try {
-      // 壓縮圖片 - 極致品質設定
-      const compressed = await compressImage(file, 2000 * 1024, 512, 512);
-      if (compressed.size > 2500 * 1024) {
-        setAvatarError('壓縮後圖片仍超過 2.5MB，請選擇更小的圖片');
-        setAvatarUploading(false);
-        return;
-      }
       // 上傳到 Storage
       const userId = auth.currentUser?.uid;
       if (!userId) throw new Error('未登入，無法上傳頭像');
 
       // 添加更詳細的錯誤處理和調試信息
-      logger.debug('🔧 開始上傳頭像:', { userId, fileSize: compressed.size });
+      logger.debug('🔧 開始上傳頭像:', { userId, fileSize: blob.size });
 
       const avatarRef = ref(storage, `avatars/${userId}/avatar.jpg`);
       const metadata = {
@@ -2228,7 +1871,7 @@ function UserInfo({ testData, onLogout, clearTestData }) {
         },
       };
 
-      await uploadBytes(avatarRef, compressed, metadata);
+      await uploadBytes(avatarRef, blob, metadata);
       logger.debug('✅ 頭像上傳成功');
 
       const url = await getDownloadURL(avatarRef);
@@ -2351,14 +1994,6 @@ function UserInfo({ testData, onLogout, clearTestData }) {
         actionText={modalState.actionText}
       />
 
-      {/* 提交確認對話框 */}
-      <SubmitConfirmModal
-        isOpen={submitConfirmModal.isOpen}
-        onConfirm={confirmSubmitToLadder}
-        onCancel={cancelSubmit}
-        remainingCount={submitConfirmModal.remainingCount}
-      />
-
       {/* ✅ Phase 1.8 修正：職業描述 Modal - 使用條件渲染確保完全移除 DOM */}
       {rpgClassModalState.isOpen && (
         <RPGClassModal
@@ -2381,48 +2016,15 @@ function UserInfo({ testData, onLogout, clearTestData }) {
 
       {error && <p className="error-message">{error}</p>}
 
-      {/* 頭像區域 - 美化設計 */}
-      <div className="avatar-section">
-        <div className="avatar-container">
-          <img
-            src={
-              isGuest
-                ? '/guest-avatar.svg'
-                : userData?.avatarUrl || '/default-avatar.svg'
-            }
-            alt={t('community.ui.avatarAlt')}
-            className="user-avatar"
-            loading="lazy"
-            onError={e => {
-              e.target.src = '/default-avatar.svg';
-            }}
-          />
-        </div>
-
-        <div className="avatar-actions-container">
-          {!isGuest && (
-            <label className="avatar-upload-label">
-              {avatarUploading
-                ? t('userInfo.avatar.uploading')
-                : t('userInfo.avatar.change')}
-              <input
-                type="file"
-                accept="image/*"
-                style={{ display: 'none' }}
-                onChange={handleAvatarChange}
-                disabled={avatarUploading}
-              />
-            </label>
-          )}
-          {isGuest && (
-            <div className="guest-avatar-note">
-              <span>訪客模式</span>
-            </div>
-          )}
-        </div>
-
-        {avatarError && <div className="avatar-error">{avatarError}</div>}
-      </div>
+      {/* 頭像區域 - 使用 AvatarSection 組件 */}
+      <AvatarSection
+        avatarUrl={isGuest ? '/guest-avatar.svg' : userData?.avatarUrl}
+        isGuest={isGuest}
+        isUploading={avatarUploading}
+        onImageSelected={handleAvatarChange}
+        onError={setAvatarError}
+        t={t}
+      />
 
       {/* 只保留 currentUser 狀態區塊，移除載入提示 */}
       {(currentUser || isGuest) && (
@@ -2863,340 +2465,187 @@ function UserInfo({ testData, onLogout, clearTestData }) {
       )}
 
       {/* 雷達圖區域 */}
-      <div id="radar-section" className="radar-section" ref={radarSectionRef}>
-        <div className="radar-card">
-          {/* 裝飾性角落元素 */}
-          <div className="corner-decoration top-left"></div>
-          <div className="corner-decoration top-right"></div>
-          <div className="corner-decoration bottom-left"></div>
-          <div className="corner-decoration bottom-right"></div>
+      <div id="radar-section" ref={radarSectionRef}>
+        <RadarChartSection
+          scores={userData?.scores}
+          loading={isLoading || loading}
+          t={t}
+        />
+      </div>
 
-          <h2 className="radar-title">{t('userInfo.radarOverview')}</h2>
-          {/* ✅ 修復：增強條件邏輯，確保雷達圖穩定顯示 */}
-          {/* ✅ 修復：將 SVG defs 移到外部，避免重複 ID 導致顏色和格式問題 */}
-          <svg style={{ position: 'absolute', width: 0, height: 0 }}>
-            <defs>
-              <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
-                <feGaussianBlur stdDeviation="3" result="coloredBlur" />
-                <feMerge>
-                  <feMergeNode in="coloredBlur" />
-                  <feMergeNode in="SourceGraphic" />
-                </feMerge>
-              </filter>
-              <linearGradient
-                id="tiffanyGradient"
-                x1="0%"
-                y1="0%"
-                x2="100%"
-                y2="100%"
-              >
-                <stop offset="0%" stopColor="#81D8D0" stopOpacity={0.9} />
-                <stop offset="50%" stopColor="#5F9EA0" stopOpacity={0.7} />
-                <stop offset="100%" stopColor="#81D8D0" stopOpacity={0.6} />
-              </linearGradient>
-            </defs>
-          </svg>
-          {(() => {
-            // ✅ 防禦性檢查：確保 radarChartData 是有效的數組
-            const hasValidData =
-              radarChartData &&
-              Array.isArray(radarChartData) &&
-              radarChartData.length > 0;
-
-            // ✅ 優先級 1: 如果已渲染過且有有效數據，保持顯示（穩定性最高）
-            if (radarChartRenderedRef.current && hasValidData) {
-              return (
+      {/* 分數顯示區域 */}
+      {!loading && (
+        <div className="score-section">
+          {/* 平均分數 */}
+          {averageScore > 0 && (
+            <div className="average-score-display">
+              <p className="average-score">
+                ⭐ {t('userInfo.powerTitle')}{' '}
+                <span className="score-value-large">{averageScore}</span>
+              </p>
+              {/* ✅ Phase 1.9.1 緊急修復：RPG 職業標籤 - 恢復層級設定 */}
+              {rpgClassInfo && rpgClassInfo.class !== 'UNKNOWN' && (
                 <div
-                  className="radar-chart-container"
-                  ref={setRadarContainerRef}
+                  className="rpg-class-badge"
+                  onClick={e => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleRpgClassClick();
+                  }}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    marginTop: '12px',
+                    padding: '8px 16px',
+                    background:
+                      'linear-gradient(135deg, rgba(129, 216, 208, 0.2) 0%, rgba(95, 158, 160, 0.2) 100%)',
+                    borderRadius: '20px',
+                    border: '2px solid rgba(129, 216, 208, 0.4)',
+                    // ✅ Phase 1.9.1 緊急修復：恢復層級設定，確保按鈕浮在隱形遮擋層之上
+                    position: 'relative',
+                    zIndex: 50,
+                    fontSize: '16px',
+                    fontWeight: 'bold',
+                    color: '#2d3748',
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease',
+                    pointerEvents: 'auto',
+                    userSelect: 'none',
+                  }}
+                  onMouseEnter={e => {
+                    e.currentTarget.style.background =
+                      'linear-gradient(135deg, rgba(129, 216, 208, 0.3) 0%, rgba(95, 158, 160, 0.3) 100%)';
+                    e.currentTarget.style.transform = 'scale(1.05)';
+                    e.currentTarget.style.boxShadow =
+                      '0 4px 12px rgba(129, 216, 208, 0.3)';
+                  }}
+                  onMouseLeave={e => {
+                    e.currentTarget.style.background =
+                      'linear-gradient(135deg, rgba(129, 216, 208, 0.2) 0%, rgba(95, 158, 160, 0.2) 100%)';
+                    e.currentTarget.style.transform = 'scale(1)';
+                    e.currentTarget.style.boxShadow = 'none';
+                  }}
                 >
-                  <RadarChart
-                    width={chartDimensions.width}
-                    height={chartDimensions.height}
-                    data={radarChartData}
-                  >
-                    <PolarGrid
-                      gridType="polygon"
-                      stroke="rgba(129, 216, 208, 0.25)"
-                      strokeWidth={2}
-                      strokeDasharray="4 4"
-                    />
-                    <PolarAngleAxis
-                      dataKey="name"
-                      tick={
-                        <CustomAxisTick radarChartData={radarChartData} t={t} />
-                      }
-                      axisLine={false}
-                    />
-                    <PolarRadiusAxis
-                      angle={90}
-                      domain={[0, 100]}
-                      tickCount={5}
-                      tick={{
-                        fontSize: 12,
-                        fill: '#2d3748',
-                        fontWeight: 600,
-                      }}
-                      axisLine={false}
-                    />
-                    <Radar
-                      name={t('userInfo.yourPerformance')}
-                      dataKey="value"
-                      stroke="#81D8D0"
-                      fill="url(#tiffanyGradient)"
-                      fillOpacity={0.8}
-                      strokeWidth={4}
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </RadarChart>
+                  <span style={{ fontSize: '20px' }}>{rpgClassInfo.icon}</span>
+                  <span>{rpgClassInfo.name}</span>
                 </div>
-              );
-            }
-
-            // ✅ 優先級 2: 如果有有效數據，立即渲染（首次渲染或數據更新）
-            if (hasValidData) {
-              // ✅ 立即標記為已渲染，避免條件競爭
-              radarChartRenderedRef.current = true;
-              return (
-                <div
-                  className="radar-chart-container"
-                  ref={setRadarContainerRef}
-                >
-                  <RadarChart
-                    width={chartDimensions.width}
-                    height={chartDimensions.height}
-                    data={radarChartData}
-                  >
-                    <PolarGrid
-                      gridType="polygon"
-                      stroke="rgba(129, 216, 208, 0.25)"
-                      strokeWidth={2}
-                      strokeDasharray="4 4"
-                    />
-                    <PolarAngleAxis
-                      dataKey="name"
-                      tick={
-                        <CustomAxisTick radarChartData={radarChartData} t={t} />
-                      }
-                      axisLine={false}
-                    />
-                    <PolarRadiusAxis
-                      angle={90}
-                      domain={[0, 100]}
-                      tickCount={5}
-                      tick={{
-                        fontSize: 12,
-                        fill: '#2d3748',
-                        fontWeight: 600,
-                      }}
-                      axisLine={false}
-                    />
-                    <Radar
-                      name={t('userInfo.yourPerformance')}
-                      dataKey="value"
-                      stroke="#81D8D0"
-                      fill="url(#tiffanyGradient)"
-                      fillOpacity={0.8}
-                      strokeWidth={4}
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </RadarChart>
-                </div>
-              );
-            }
-
-            // ✅ 優先級 3: 數據未準備好時顯示載入狀態（提供用戶反饋）
-            return (
-              <div className="loading-container">
-                <div className="loading-spinner"></div>
-                <p>正在載入數據...</p>
-              </div>
-            );
-          })()}
-
-          {/* 分數顯示區域 */}
-          {!loading && (
-            <div className="score-section">
-              {/* 平均分數 */}
-              {averageScore > 0 && (
-                <div className="average-score-display">
-                  <p className="average-score">
-                    ⭐ {t('userInfo.powerTitle')}{' '}
-                    <span className="score-value-large">{averageScore}</span>
+              )}
+              {completionStatus.isFullyCompleted && (
+                <div className="ladder-info">
+                  <p className="ladder-rank">
+                    🏆 {t('userInfo.ladder.rankLabel')}:{' '}
+                    <span className="rank-value">{userRank || '未上榜'}</span>
                   </p>
-                  {/* ✅ Phase 1.9.1 緊急修復：RPG 職業標籤 - 恢復層級設定 */}
-                  {rpgClassInfo && rpgClassInfo.class !== 'UNKNOWN' && (
-                    <div
-                      className="rpg-class-badge"
-                      onClick={e => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        handleRpgClassClick();
-                      }}
-                      style={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '8px',
-                        marginTop: '12px',
-                        padding: '8px 16px',
-                        background:
-                          'linear-gradient(135deg, rgba(129, 216, 208, 0.2) 0%, rgba(95, 158, 160, 0.2) 100%)',
-                        borderRadius: '20px',
-                        border: '2px solid rgba(129, 216, 208, 0.4)',
-                        // ✅ Phase 1.9.1 緊急修復：恢復層級設定，確保按鈕浮在隱形遮擋層之上
-                        position: 'relative',
-                        zIndex: 50,
-                        fontSize: '16px',
-                        fontWeight: 'bold',
-                        color: '#2d3748',
-                        cursor: 'pointer',
-                        transition: 'all 0.3s ease',
-                        pointerEvents: 'auto',
-                        userSelect: 'none',
-                      }}
-                      onMouseEnter={e => {
-                        e.currentTarget.style.background =
-                          'linear-gradient(135deg, rgba(129, 216, 208, 0.3) 0%, rgba(95, 158, 160, 0.3) 100%)';
-                        e.currentTarget.style.transform = 'scale(1.05)';
-                        e.currentTarget.style.boxShadow =
-                          '0 4px 12px rgba(129, 216, 208, 0.3)';
-                      }}
-                      onMouseLeave={e => {
-                        e.currentTarget.style.background =
-                          'linear-gradient(135deg, rgba(129, 216, 208, 0.2) 0%, rgba(95, 158, 160, 0.2) 100%)';
-                        e.currentTarget.style.transform = 'scale(1)';
-                        e.currentTarget.style.boxShadow = 'none';
-                      }}
-                    >
-                      <span style={{ fontSize: '20px' }}>
-                        {rpgClassInfo.icon}
+                  {submittedLadderScore > 0 && (
+                    <p className="submitted-score">
+                      {t('userInfo.ladder.submittedScore')}:{' '}
+                      <span className="score-value">
+                        {submittedLadderScore}
                       </span>
-                      <span>{rpgClassInfo.name}</span>
-                    </div>
+                    </p>
                   )}
-                  {completionStatus.isFullyCompleted && (
-                    <div className="ladder-info">
-                      <p className="ladder-rank">
-                        🏆 {t('userInfo.ladder.rankLabel')}:{' '}
-                        <span className="rank-value">
-                          {userRank || '未上榜'}
+                  {currentLadderScore > 0 &&
+                    currentLadderScore !== submittedLadderScore && (
+                      <p className="current-score">
+                        {t('userInfo.ladder.currentScore')}:{' '}
+                        <span className="score-value">
+                          {currentLadderScore}
+                        </span>
+                        <span className="score-note">
+                          {t('userInfo.ladder.needsSubmit')}
                         </span>
                       </p>
-                      {submittedLadderScore > 0 && (
-                        <p className="submitted-score">
-                          {t('userInfo.ladder.submittedScore')}:{' '}
-                          <span className="score-value">
-                            {submittedLadderScore}
-                          </span>
-                        </p>
-                      )}
-                      {currentLadderScore > 0 &&
-                        currentLadderScore !== submittedLadderScore && (
-                          <p className="current-score">
-                            {t('userInfo.ladder.currentScore')}:{' '}
-                            <span className="score-value">
-                              {currentLadderScore}
-                            </span>
-                            <span className="score-note">
-                              {t('userInfo.ladder.needsSubmit')}
-                            </span>
-                          </p>
-                        )}
-                    </div>
-                  )}
+                    )}
                 </div>
               )}
+            </div>
+          )}
 
-              {/* 按鈕區域 */}
-              <div className="action-buttons-section">
-                {/* 儲存評測結果按鈕 */}
-                {averageScore > 0 && (
-                  <button
-                    onClick={handleSaveResults}
-                    className="action-btn save-results-btn"
-                    disabled={loading}
-                  >
-                    <span className="btn-icon">💾</span>
-                    <span className="btn-text">
-                      {t('userInfo.saveResults')}
-                    </span>
-                  </button>
-                )}
+          {/* 按鈕區域 */}
+          <div className="action-buttons-section">
+            {/* 儲存評測結果按鈕 */}
+            {averageScore > 0 && (
+              <button
+                onClick={handleSaveResults}
+                className="action-btn save-results-btn"
+                disabled={loading}
+              >
+                <span className="btn-icon">💾</span>
+                <span className="btn-text">{t('userInfo.saveResults')}</span>
+              </button>
+            )}
 
-                {/* 提交到天梯按鈕 */}
-                {completionStatus.isFullyCompleted && (
-                  <button
-                    onClick={handleSubmitToLadder}
-                    className="action-btn submit-ladder-btn"
-                    disabled={loading}
-                  >
-                    <span className="btn-icon">🏆</span>
-                    <span className="btn-text">
-                      {submittedLadderScore > 0
-                        ? t('userInfo.updateLadderScore')
-                        : t('userInfo.submitToLadder')}
-                    </span>
-                  </button>
-                )}
+            {/* 提交到天梯按鈕 */}
+            {completionStatus.isFullyCompleted && (
+              <button
+                onClick={handleSubmitToLadder}
+                className="action-btn submit-ladder-btn"
+                disabled={loading}
+              >
+                <span className="btn-icon">🏆</span>
+                <span className="btn-text">
+                  {submittedLadderScore > 0
+                    ? t('userInfo.updateLadderScore')
+                    : t('userInfo.submitToLadder')}
+                </span>
+              </button>
+            )}
 
-                {/* ✅ 新增：獲得榮譽認證按鈕 */}
-                {submittedLadderScore > 0 && (
-                  <button
-                    onClick={() => navigate('/verification')}
-                    className="action-btn verification-btn"
-                    disabled={loading}
-                  >
-                    <span className="btn-icon">🏅</span>
-                    <span className="btn-text">
-                      {t('userInfo.getVerification')}
-                    </span>
-                  </button>
-                )}
+            {/* ✅ 新增：獲得榮譽認證按鈕 */}
+            {submittedLadderScore > 0 && (
+              <button
+                onClick={() => navigate('/verification')}
+                className="action-btn verification-btn"
+                disabled={loading}
+              >
+                <span className="btn-icon">🏅</span>
+                <span className="btn-text">
+                  {t('userInfo.getVerification')}
+                </span>
+              </button>
+            )}
+          </div>
+
+          {/* 天梯限制資訊 */}
+          {completionStatus.isFullyCompleted && (
+            <div className="ladder-limits-info">
+              <div className="limit-info-item">
+                <span className="limit-icon">🔄</span>
+                <span className="limit-text">
+                  {t('userInfo.limits.remainingUpdates', {
+                    count:
+                      3 - (ladderSubmissionState.dailySubmissionCount || 0),
+                  })}
+                </span>
               </div>
-
-              {/* 天梯限制資訊 */}
-              {completionStatus.isFullyCompleted && (
-                <div className="ladder-limits-info">
-                  <div className="limit-info-item">
-                    <span className="limit-icon">🔄</span>
-                    <span className="limit-text">
-                      {t('userInfo.limits.remainingUpdates', {
-                        count:
-                          3 - (ladderSubmissionState.dailySubmissionCount || 0),
-                      })}
-                    </span>
-                  </div>
-                  <div className="limit-info-item">
-                    <span className="limit-icon">⏰</span>
-                    <span className="limit-text">
-                      {t('userInfo.limits.nextResetTime')}
-                    </span>
-                  </div>
-                  <div className="limit-info-item">
-                    <span className="limit-icon">ℹ️</span>
-                    <span className="limit-text">
-                      {t('userInfo.limits.limitInfo')}
-                    </span>
-                  </div>
-                </div>
-              )}
-
-              {/* 天梯排名說明 */}
-              <div className="ladder-info-card">
-                <p className="ladder-info-text">
-                  {completionStatus.isFullyCompleted
-                    ? t('userInfo.ladder.ctaCompleted')
-                    : t('userInfo.ladder.ctaNotCompleted', {
-                        count: completionStatus.completedCount,
-                      })}
-                </p>
+              <div className="limit-info-item">
+                <span className="limit-icon">⏰</span>
+                <span className="limit-text">
+                  {t('userInfo.limits.nextResetTime')}
+                </span>
+              </div>
+              <div className="limit-info-item">
+                <span className="limit-icon">ℹ️</span>
+                <span className="limit-text">
+                  {t('userInfo.limits.limitInfo')}
+                </span>
               </div>
             </div>
           )}
+
+          {/* 天梯排名說明 */}
+          <div className="ladder-info-card">
+            <p className="ladder-info-text">
+              {completionStatus.isFullyCompleted
+                ? t('userInfo.ladder.ctaCompleted')
+                : t('userInfo.ladder.ctaNotCompleted', {
+                    count: completionStatus.completedCount,
+                  })}
+            </p>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* 提交確認對話框 */}
       {submitConfirmModal.isOpen && (

@@ -19,7 +19,7 @@ import useAndroidBackButton from './hooks/useAndroidBackButton'; // ✅ Phase 1.
 const WelcomeSplash = React.lazy(() => import('./WelcomeSplash'));
 const LandingPage = React.lazy(() => import('./LandingPage'));
 const Welcome = React.lazy(() => import('./Welcome'));
-const UserInfo = React.lazy(() => import('./UserInfo'));
+const UserInfo = React.lazy(() => import('./components/UserInfo/index'));
 const Strength = React.lazy(() => import('./Strength'));
 const Cardio = React.lazy(() => import('./Cardio'));
 const Power = React.lazy(() => import('./Power'));
@@ -873,7 +873,7 @@ function AppContent() {
           () => {
             // 預載入最常用的頁面
             Promise.all([
-              import('./UserInfo'),
+              import('./components/UserInfo/index'),
               import('./components/Ladder'),
               import('./components/Community'),
             ]).catch(error => {
@@ -886,7 +886,7 @@ function AppContent() {
         // 降級方案：使用 setTimeout
         setTimeout(() => {
           Promise.all([
-            import('./UserInfo'),
+            import('./components/UserInfo/index'),
             import('./components/Ladder'),
             import('./components/Community'),
           ]).catch(error => {

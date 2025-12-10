@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useUser } from '../UserContext';
 import BottomNavBar from '../components/BottomNavBar';
-import '../userinfo.css'; // 重用樣式
+import '../components/UserInfo/userinfo.css'; // 重用樣式
 
 function SkillTreePage() {
   const { t } = useTranslation();
