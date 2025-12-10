@@ -1435,7 +1435,23 @@ const Community = () => {
             {/* 發布動態區域 */}
             <div className="post-composer">
               <div className="composer-header">
-                <div className="user-avatar">
+                <div 
+                  className="user-avatar"
+                  style={{ 
+                    width: '40px', 
+                    height: '40px', 
+                    minWidth: '40px',
+                    maxWidth: '40px',
+                    minHeight: '40px',
+                    maxHeight: '40px',
+                    flexBasis: '40px',
+                    borderRadius: '50%',
+                    overflow: 'hidden',
+                    border: '2px solid var(--tiffany-primary)',
+                    flexShrink: 0,
+                    boxSizing: 'border-box'
+                  }}
+                >
                   <img
                     src={(() => {
                       const isGuest =
@@ -1448,6 +1464,14 @@ const Community = () => {
                     loading="lazy"
                     onError={e => {
                       e.target.src = '/default-avatar.svg';
+                    }}
+                    style={{ 
+                      width: '100%', 
+                      height: '100%', 
+                      objectFit: 'cover',
+                      minWidth: '0',
+                      minHeight: '0',
+                      display: 'block'
                     }}
                   />
                 </div>
@@ -1897,21 +1921,42 @@ const PostCard = React.memo(
         {/* 用戶資訊 */}
         <div className="post-header">
           <div className="post-user">
-            <img
-              src={post.userAvatarUrl || '/default-avatar.svg'}
-              alt={t('community.ui.avatarAlt')}
+            <div
               className="user-avatar"
-              loading="lazy" // 新增：懶載入
-              onLoad={() => setImageLoaded(true)} // 新增：圖片載入完成
-              onError={e => {
-                e.target.src = '/default-avatar.svg';
-                setImageLoaded(true);
+              style={{ 
+                width: '40px', 
+                height: '40px', 
+                minWidth: '40px',
+                maxWidth: '40px',
+                minHeight: '40px',
+                maxHeight: '40px',
+                flexBasis: '40px',
+                borderRadius: '50%',
+                overflow: 'hidden',
+                border: '2px solid var(--tiffany-primary)',
+                flexShrink: 0,
+                boxSizing: 'border-box'
               }}
-              style={{
-                opacity: imageLoaded ? 1 : 0.5, // 新增：載入時的視覺效果
-                transition: 'opacity 0.3s ease',
-              }}
-            />
+            >
+              <img
+                src={post.userAvatarUrl || '/default-avatar.svg'}
+                alt={t('community.ui.avatarAlt')}
+                loading="lazy"
+                onLoad={() => setImageLoaded(true)}
+                onError={e => {
+                  e.target.src = '/default-avatar.svg';
+                  setImageLoaded(true);
+                }}
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                  display: 'block',
+                  opacity: imageLoaded ? 1 : 0.5,
+                  transition: 'opacity 0.3s ease',
+                }}
+              />
+            </div>
             <div className="user-info">
               <div className="user-name">
                 {post.userNickname}
@@ -1985,14 +2030,37 @@ const PostCard = React.memo(
                     <div key={comment.id} className="comment-item">
                       <div className="comment-header">
                         <div className="comment-user-info">
-                          <img
-                            src={comment.userAvatarUrl || '/guest-avatar.svg'}
-                            alt={t('community.ui.avatarAlt')}
+                          <div
                             className="comment-avatar"
-                            onError={e => {
-                              e.target.src = '/guest-avatar.svg';
+                            style={{ 
+                              width: '40px', 
+                              height: '40px', 
+                              minWidth: '40px',
+                              maxWidth: '40px',
+                              minHeight: '40px',
+                              maxHeight: '40px',
+                              flexBasis: '40px',
+                              borderRadius: '50%',
+                              overflow: 'hidden',
+                              border: '2px solid var(--tiffany-primary)',
+                              flexShrink: 0,
+                              boxSizing: 'border-box'
                             }}
-                          />
+                          >
+                            <img
+                              src={comment.userAvatarUrl || '/guest-avatar.svg'}
+                              alt={t('community.ui.avatarAlt')}
+                              onError={e => {
+                                e.target.src = '/guest-avatar.svg';
+                              }}
+                              style={{
+                                width: '100%',
+                                height: '100%',
+                                objectFit: 'cover',
+                                display: 'block'
+                              }}
+                            />
+                          </div>
                           <div className="comment-text-info">
                             <div className="comment-name">
                               {comment.userNickname}

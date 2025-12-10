@@ -159,16 +159,16 @@
   overflow: hidden;
 }
 
-.user-avatar {
-  width: 50px;
-  height: 50px;
+.composer-header .user-avatar {
+  width: 40px !important;
+  height: 40px !important;
   border-radius: 50%;
   overflow: hidden;
   flex-shrink: 0;
   border: 2px solid var(--tiffany-primary);
 }
 
-.user-avatar img {
+.composer-header .user-avatar img {
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -393,8 +393,8 @@
 }
 
 .post-user .user-avatar {
-  width: 40px;
-  height: 40px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   object-fit: cover;
   border: 2px solid var(--tiffany-primary);
@@ -746,7 +746,7 @@
     box-sizing: border-box;
   }
 
-  .user-avatar {
+  .composer-header .user-avatar {
     align-self: center;
   }
 

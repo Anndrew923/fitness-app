@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
+import './Modals.css';
 
 const SubmitConfirmModal = ({
   isOpen,

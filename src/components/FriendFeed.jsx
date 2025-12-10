@@ -960,7 +960,19 @@ const FriendFeed = () => {
         {/* 發布動態區域 */}
         <div className="post-composer">
           <div className="composer-header">
-            <div className="user-avatar">
+            <div
+              className="user-avatar"
+              style={{
+                width: '40px',
+                height: '40px',
+                minWidth: '40px',
+                flexBasis: '40px',
+                borderRadius: '50%',
+                overflow: 'hidden',
+                border: '2px solid var(--tiffany-primary)',
+                flexShrink: 0,
+              }}
+            >
               <img
                 src={(() => {
                   const isGuest =
@@ -973,6 +985,14 @@ const FriendFeed = () => {
                 loading="lazy"
                 onError={e => {
                   e.target.src = '/default-avatar.svg';
+                }}
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                  minWidth: '0',
+                  minHeight: '0',
+                  display: 'block',
                 }}
               />
             </div>
@@ -1062,7 +1082,19 @@ const FriendFeed = () => {
       {/* 發布動態區域 */}
       <div className="post-composer">
         <div className="composer-header">
-          <div className="user-avatar">
+          <div
+            className="user-avatar"
+            style={{
+              width: '40px',
+              height: '40px',
+              minWidth: '40px',
+              flexBasis: '40px',
+              borderRadius: '50%',
+              overflow: 'hidden',
+              border: '2px solid var(--tiffany-primary)',
+              flexShrink: 0,
+            }}
+          >
             <img
               src={(() => {
                 const isGuest = sessionStorage.getItem('guestMode') === 'true';
@@ -1074,6 +1106,14 @@ const FriendFeed = () => {
               loading="lazy"
               onError={e => {
                 e.target.src = '/default-avatar.svg';
+              }}
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                minWidth: '0',
+                minHeight: '0',
+                display: 'block',
               }}
             />
           </div>

@@ -350,7 +350,7 @@
   overflow: hidden;
 }
 
-.user-avatar {
+.post-composer .user-avatar {
   width: 40px;
   height: 40px;
   border-radius: 50%;
@@ -358,7 +358,7 @@
   flex-shrink: 0;
 }
 
-.user-avatar img {
+.post-composer .user-avatar img {
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -415,66 +415,58 @@
 }
 
 .publish-btn {
-  background: linear-gradient(
-    135deg,
-    var(--metal-gray-primary) 0%,
-    var(--metal-gray-secondary) 100%
-  );
-  color: var(--background-white);
-  border: none;
-  border-radius: 8px;
-  padding: 10px 20px;
-  font-size: 14px;
-  font-weight: 600;
+  /* Force Gradient & Color */
+  background: linear-gradient(135deg, #81d8d0 0%, #4a7c7a 100%) !important;
+  color: white !important;
+  
+  /* Force Shape & Size */
+  border: none !important;
+  border-radius: 50px !important; /* Force Pill shape */
+  padding: 8px 24px !important;
+  
+  /* Typography */
+  font-size: 15px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.5px !important;
+  
+  /* Effects */
   cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 8px var(--metal-shadow),
-    inset 0 1px 0 rgba(255, 255, 255, 0.2);
-  border: 1px solid var(--metal-highlight);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 15px rgba(129, 216, 208, 0.4) !important;
   position: relative;
   overflow: hidden;
+  
+  /* Flex centering for icon if added later */
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  
+  /* Keep existing properties */
   flex-shrink: 0;
   white-space: nowrap;
   box-sizing: border-box;
 }
 
-.publish-btn::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.2),
-    transparent
-  );
-  transition: left 0.5s;
-}
-
+/* Hover State */
 .publish-btn:hover:not(:disabled) {
-  background: linear-gradient(
-    135deg,
-    var(--metal-gray-secondary) 0%,
-    var(--metal-gray-primary) 100%
-  );
-  transform: translateY(-2px);
-  box-shadow: 0 4px 16px var(--metal-shadow),
-    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 6px 20px rgba(129, 216, 208, 0.6) !important;
+  filter: brightness(1.1);
 }
 
-.publish-btn:hover:not(:disabled)::before {
-  left: 100%;
+/* Active State */
+.publish-btn:active:not(:disabled) {
+  transform: translateY(1px) scale(0.98);
 }
 
+/* IMPROVED Disabled State - No more ugly gray */
 .publish-btn:disabled {
-  background: var(--border-color);
-  color: var(--text-light);
+  background: linear-gradient(135deg, #81d8d0 0%, #4a7c7a 100%) !important;
+  opacity: 0.5 !important; /* Just fade it out, keep the color */
   cursor: not-allowed;
-  transform: none;
-  box-shadow: none;
+  box-shadow: none !important;
+  transform: none !important;
 }
 
 /* 動態列表 */
@@ -564,8 +556,10 @@
 }
 
 .post-user .user-avatar {
-  width: 36px;
-  height: 36px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
 }
 
 .user-info {
@@ -922,7 +916,7 @@
   }
 
   .publish-btn {
-    padding: 8px 16px;
+    padding: 8px 20px; /* 稍微調整以適應 pill 形狀 */
     font-size: 13px;
   }
 
@@ -1083,9 +1077,9 @@
   flex: 1;
 }
 
-.friend-avatar,
-.request-avatar,
-.user-avatar {
+.community-page .friend-avatar,
+.community-page .request-avatar,
+.community-page .user-avatar {
   width: 40px;
   height: 40px;
   border-radius: 50%;
@@ -1295,11 +1289,13 @@
     padding: 8px;
   }
 
-  .friend-avatar,
-  .request-avatar,
-  .user-avatar {
-    width: 36px;
-    height: 36px;
+  .community-page .friend-avatar,
+  .community-page .request-avatar,
+  .community-page .user-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
   }
 
   .search-container {
@@ -1334,7 +1330,7 @@
   }
 
   .publish-btn {
-    padding: 8px 14px;
+    padding: 8px 16px; /* 稍微調整以適應 pill 形狀 */
     font-size: 12px;
   }
 

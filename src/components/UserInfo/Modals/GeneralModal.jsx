@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
 import logger from '../../../utils/logger';
+import './Modals.css';
 
 const GeneralModal = ({
   isOpen,
