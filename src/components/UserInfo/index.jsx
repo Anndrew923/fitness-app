@@ -4,35 +4,27 @@ import React, {
   useMemo,
   useCallback,
   useRef,
-  memo,
 } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useUser } from '../../UserContext';
 import { auth, db } from '../../firebase';
 import { storage } from '../../firebase';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import {
-  collection,
-  query,
-  orderBy,
-  limit,
-  getDocs,
-  updateDoc,
-  doc,
-  setDoc,
-} from 'firebase/firestore';
+import { updateDoc, doc } from 'firebase/firestore';
 import PropTypes from 'prop-types';
-import { calculateLadderScore, generateNickname } from '../../utils';
+import { calculateLadderScore } from '../../utils';
 import logger from '../../utils/logger';
-import { useIntersectionObserver } from '../../hooks/useIntersectionObserver';
-import {
-  getRPGClass,
-  getRPGClassIcon,
-  getRPGClassName,
-} from '../../utils/rpgClassCalculator';
+import { getRPGClass } from '../../utils/rpgClassCalculator';
 import SaveSuccessModal from './SaveSuccessModal';
 import AvatarSection from './AvatarSection';
 import RadarChartSection from './RadarChartSection/RadarChartSection';
+import UserFormSection from './UserFormSection/UserFormSection';
+import { useUserInfoForm } from '../../hooks/useUserInfoForm';
+import { useLadderLogic } from '../../hooks/useLadderLogic';
+import GeneralModal from './Modals/GeneralModal';
+import RPGClassModal from './Modals/RPGClassModal';
+import SubmitConfirmModal from './Modals/SubmitConfirmModal';
+import { usePageScroll } from '../../hooks/usePageScroll';
 
 import './userinfo.css';
 import { useTranslation } from 'react-i18next';
@@ -52,559 +44,10 @@ const DEFAULT_SCORES = {
   bodyFat: 0,
 };
 
-const GENDER_OPTIONS = ['male', 'female'];
-
-// 新增：對話框組件
-const Modal = ({
-  isOpen,
-  onClose,
-  title,
-  message,
-  type = 'info',
-  onAction = null,
-  actionText = null,
-}) => {
-  const { t } = useTranslation();
-
-  if (!isOpen) return null;
-
-  const getIcon = () => {
-    switch (type) {
-      case 'warning':
-        return '⚠️';
-      case 'success':
-        return '✅';
-      case 'error':
-        return '❌';
-      default:
-        return 'ℹ️';
-    }
-  };
-
-  const getButtonClass = () => {
-    switch (type) {
-      case 'warning':
-        return 'modal-btn modal-btn-warning';
-      case 'success':
-        return 'modal-btn modal-btn-success';
-      case 'error':
-        return 'modal-btn modal-btn-error';
-      default:
-        return 'modal-btn modal-btn-info';
-    }
-  };
-
-  const handleClose = () => {
-    logger.debug('Modal close button clicked');
-    onClose();
-  };
-
-  const handleOverlayClick = () => {
-    logger.debug('Modal overlay clicked');
-    onClose();
-  };
-
-  const handleAction = () => {
-    if (onAction) {
-      onAction();
-    }
-    onClose();
-  };
-
-  return (
-    <div className="modal-overlay" onClick={handleOverlayClick}>
-      <div className="modal-content" onClick={e => e.stopPropagation()}>
-        <div className="modal-header">
-          <span className="modal-icon">{getIcon()}</span>
-          <h3 className="modal-title">{title}</h3>
-        </div>
-        <div className="modal-body">
-          <p className="modal-message">{message}</p>
-        </div>
-        <div className="modal-footer">
-          {onAction && actionText ? (
-            <div className="modal-footer-actions">
-              <button
-                className="modal-btn modal-btn-secondary"
-                onClick={handleClose}
-              >
-                {t('common.cancel')}
-              </button>
-              <button
-                className={getButtonClass()}
-                onClick={handleAction}
-                style={{ position: 'relative', zIndex: 10001 }}
-              >
-                {actionText || t('common.confirm')}
-              </button>
-            </div>
-          ) : (
-            <button
-              className={getButtonClass()}
-              onClick={handleClose}
-              style={{ position: 'relative', zIndex: 10001 }}
-            >
-              {t('common.confirm')}
-            </button>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-};
-
-Modal.propTypes = {
-  isOpen: PropTypes.bool.isRequired,
-  onClose: PropTypes.func.isRequired,
-  title: PropTypes.string.isRequired,
-  message: PropTypes.string.isRequired,
-  type: PropTypes.oneOf(['info', 'warning', 'success', 'error']),
-  onAction: PropTypes.func,
-  actionText: PropTypes.string,
-};
-
-// ✅ Phase 1.7 防禦性修正：RPG 風格職業描述 Modal - 使用絕對定位重構 + 防禦性檢查
-const RPGClassModal = ({ isOpen, onClose, classInfo }) => {
-  const { t } = useTranslation();
-
-  // 阻止背景滾動
-  useEffect(() => {
-    if (isOpen) {
-      const scrollY = window.scrollY;
-      document.body.style.overflow = 'hidden';
-      document.body.style.position = 'fixed';
-      document.body.style.width = '100%';
-      document.body.style.top = `-${scrollY}px`;
-    } else {
-      const scrollY = document.body.style.top;
-      document.body.style.overflow = '';
-      document.body.style.position = '';
-      document.body.style.width = '';
-      document.body.style.top = '';
-
-      if (scrollY) {
-        window.scrollTo(0, parseInt(scrollY || '0') * -1);
-      }
-    }
-
-    return () => {
-      const scrollY = document.body.style.top;
-      document.body.style.overflow = '';
-      document.body.style.position = '';
-      document.body.style.width = '';
-      document.body.style.top = '';
-
-      if (scrollY) {
-        window.scrollTo(0, parseInt(scrollY || '0') * -1);
-      }
-    };
-  }, [isOpen]);
-
-  // ✅ Phase 1.7 防禦性修正：即使 classInfo 為空也顯示 Modal（顯示預設內容）
-  if (!isOpen) return null;
-
-  // ✅ Phase 1.7 防禦性修正：提供安全的預設值
-  const safeClassInfo = classInfo || {
-    icon: '❓',
-    name: '未知職業',
-    description: '尚未覺醒的潛在力量...',
-    class: 'UNKNOWN',
-  };
-
-  const handleOverlayClick = e => {
-    if (e.target === e.currentTarget) {
-      onClose();
-    }
-  };
-
-  return (
-    <div
-      style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        backgroundColor: 'rgba(0, 0, 0, 0.85)',
-        zIndex: 99999, // ✅ Phase 1.7 修正：提升到 99999 確保在最上層
-        // ✅ 移除 flexbox 佈局，改用絕對定位控制子元素
-      }}
-      onClick={handleOverlayClick}
-    >
-      {/* 點擊背景關閉 */}
-      <div
-        style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-        }}
-        onClick={handleOverlayClick}
-      />
-
-      {/* 卡片本體 - 強制絕對定位 */}
-      <div
-        style={{
-          position: 'absolute', // ✅ 關鍵：絕對定位
-          bottom: 280, // ✅ Phase 1.10 修正：調整為 280px，讓 Modal 懸浮在「角色戰鬥力」卡片上方
-          left: '50%', // ✅ 水平居中技巧
-          transform: 'translateX(-50%)', // ✅ 水平居中
-          width: '85%',
-          maxWidth: '500px',
-          backgroundColor: '#1E1E1E',
-          borderRadius: '20px',
-          border: '2px solid #FF5722',
-          padding: '25px',
-          boxShadow:
-            '0 0 30px rgba(255, 87, 34, 0.8), 0 0 60px rgba(255, 87, 34, 0.4)',
-          animation: 'rpgModalSlideIn 0.4s ease-out',
-          zIndex: 99999, // ✅ Phase 1.7 修正：提升到 99999 確保在背景層之上
-        }}
-        onClick={e => e.stopPropagation()}
-      >
-        {/* 標題區域 */}
-        <div
-          style={{
-            textAlign: 'center',
-            marginBottom: '20px',
-            paddingBottom: '15px',
-            borderBottom: '1px solid rgba(255, 87, 34, 0.3)',
-          }}
-        >
-          <div
-            style={{
-              fontSize: '40px',
-              marginBottom: '10px',
-              textAlign: 'center',
-            }}
-          >
-            {/* ✅ Phase 1.7 防禦性修正：如果沒有 icon，顯示預設問號 */}
-            {safeClassInfo.icon || '❓'}
-          </div>
-          <h3
-            style={{
-              margin: 0,
-              fontSize: '24px',
-              fontWeight: 'bold',
-              color: '#FFD700',
-              textAlign: 'center',
-              textShadow:
-                '0 0 10px rgba(255, 215, 0, 0.5), 0 0 20px rgba(255, 215, 0, 0.3)',
-            }}
-          >
-            {/* ✅ Phase 1.7 防禦性修正：如果沒有 name，顯示預設文字 */}
-            {safeClassInfo.name || '未知職業'}
-          </h3>
-        </div>
-
-        {/* 描述內容 */}
-        <div
-          style={{
-            fontSize: '16px',
-            color: '#E0E0E0',
-            lineHeight: '26px',
-            textAlign: 'justify',
-            marginBottom: '25px',
-            minHeight: '80px',
-          }}
-        >
-          {/* ✅ Phase 1.7 防禦性修正：如果沒有 description，顯示預設文字 */}
-          {safeClassInfo.description || '尚未覺醒的潛在力量...'}
-        </div>
-
-        {/* 確認按鈕 - 使用 div 避免 button 標籤被全域 CSS 污染 */}
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'center',
-          }}
-        >
-          <div
-            onClick={onClose}
-            role="button"
-            tabIndex={0}
-            onKeyDown={e => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                onClose();
-              }
-            }}
-            style={{
-              backgroundColor: '#FF5722', // ✅ 預設橘色
-              padding: '12px 30px',
-              borderRadius: '25px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              border: '1px solid #FF8A65', // ✅ 亮橘色邊框增加立體感
-              boxShadow:
-                '0 4px 15px rgba(255, 87, 34, 0.5), 0 0 20px rgba(255, 87, 34, 0.3)',
-              cursor: 'pointer',
-              transition: 'all 0.3s ease',
-              minWidth: '120px',
-              outline: 'none',
-            }}
-            onMouseEnter={e => {
-              e.currentTarget.style.setProperty(
-                'background-color',
-                '#FF7043',
-                'important'
-              );
-              e.currentTarget.style.setProperty(
-                'border-color',
-                '#FFAB91',
-                'important'
-              );
-              e.currentTarget.style.setProperty(
-                'transform',
-                'translateY(-2px)',
-                'important'
-              );
-              e.currentTarget.style.setProperty(
-                'box-shadow',
-                '0 6px 25px rgba(255, 87, 34, 0.7), 0 0 30px rgba(255, 87, 34, 0.4)',
-                'important'
-              );
-            }}
-            onMouseLeave={e => {
-              e.currentTarget.style.setProperty(
-                'background-color',
-                '#FF5722',
-                'important'
-              );
-              e.currentTarget.style.setProperty(
-                'border-color',
-                '#FF8A65',
-                'important'
-              );
-              e.currentTarget.style.setProperty(
-                'transform',
-                'translateY(0)',
-                'important'
-              );
-              e.currentTarget.style.setProperty(
-                'box-shadow',
-                '0 4px 15px rgba(255, 87, 34, 0.5), 0 0 20px rgba(255, 87, 34, 0.3)',
-                'important'
-              );
-            }}
-          >
-            <span
-              style={{
-                color: '#FFFFFF',
-                fontSize: '18px',
-                fontWeight: 'bold',
-                letterSpacing: '2px',
-                userSelect: 'none',
-              }}
-            >
-              確 認
-            </span>
-          </div>
-        </div>
-      </div>
-
-      {/* 添加動畫樣式 */}
-      <style>{`
-        @keyframes rpgModalSlideIn {
-          from {
-            opacity: 0;
-            transform: translateX(-50%) translateY(20px) scale(0.9);
-          }
-          to {
-            opacity: 1;
-            transform: translateX(-50%) translateY(0) scale(1);
-          }
-        }
-      `}</style>
-    </div>
-  );
-};
-
-RPGClassModal.propTypes = {
-  isOpen: PropTypes.bool.isRequired,
-  onClose: PropTypes.func.isRequired,
-  classInfo: PropTypes.shape({
-    icon: PropTypes.string,
-    name: PropTypes.string,
-    description: PropTypes.string,
-  }),
-};
-
-// 新增：提交確認對話框組件
-const SubmitConfirmModal = ({
-  isOpen,
-  onConfirm,
-  onCancel,
-  remainingCount,
-}) => {
-  const { t } = useTranslation();
-
-  // ✅ 新增：阻止背景滾動
-  useEffect(() => {
-    if (isOpen) {
-      // 保存當前滾動位置
-      const scrollY = window.scrollY;
-
-      // 阻止背景滾動
-      document.body.style.overflow = 'hidden';
-      document.body.style.position = 'fixed';
-      document.body.style.width = '100%';
-      document.body.style.top = `-${scrollY}px`;
-    } else {
-      // 恢復背景滾動
-      const scrollY = document.body.style.top;
-      document.body.style.overflow = '';
-      document.body.style.position = '';
-      document.body.style.width = '';
-      document.body.style.top = '';
-
-      // 恢復滾動位置
-      if (scrollY) {
-        window.scrollTo(0, parseInt(scrollY || '0') * -1);
-      }
-    }
-
-    return () => {
-      // 清理：確保在組件卸載時恢復
-      const scrollY = document.body.style.top;
-      document.body.style.overflow = '';
-      document.body.style.position = '';
-      document.body.style.width = '';
-      document.body.style.top = '';
-
-      if (scrollY) {
-        window.scrollTo(0, parseInt(scrollY || '0') * -1);
-      }
-    };
-  }, [isOpen]);
-
-  if (!isOpen) return null;
-
-  const handleOverlayClick = e => {
-    if (e.target === e.currentTarget) {
-      onCancel();
-    }
-  };
-
-  return (
-    <div
-      className="modal-overlay submit-confirm-overlay"
-      onClick={handleOverlayClick}
-    >
-      <div
-        className="modal-content submit-confirm-content"
-        onClick={e => e.stopPropagation()}
-      >
-        <div className="modal-header">
-          <span className="modal-icon">🏆</span>
-          <h3 className="modal-title">{t('userInfo.submitConfirm.title')}</h3>
-        </div>
-        <div className="modal-body">
-          <div className="submit-confirm-message">
-            <p className="confirm-text">
-              {t('userInfo.submitConfirm.descPrefix')}{' '}
-              <span className="remaining-count">{remainingCount}</span>{' '}
-              {t('userInfo.submitConfirm.descSuffix')}
-            </p>
-
-            {/* 新增：限制資訊顯示 */}
-            <div className="limit-info">
-              <div className="limit-item">
-                <span className="limit-icon">🔄</span>
-                <span className="limit-text">
-                  {t('userInfo.limits.remainingUpdates', {
-                    count: remainingCount,
-                  })}
-                </span>
-              </div>
-              <div className="limit-item">
-                <span className="limit-icon">⏰</span>
-                <span className="limit-text">
-                  {t('userInfo.limits.nextResetTime')}
-                </span>
-              </div>
-            </div>
-
-            <div className="confirm-details">
-              <div className="detail-item">
-                <span className="detail-icon">📊</span>
-                <span className="detail-text">
-                  {t('userInfo.submitConfirm.ensureAccuracy')}
-                </span>
-              </div>
-              <div className="detail-item">
-                <span className="detail-icon">⏰</span>
-                <span className="detail-text">
-                  {t('userInfo.submitConfirm.resetDaily')}
-                </span>
-              </div>
-              <div className="detail-item">
-                <span className="detail-icon">🎯</span>
-                <span className="detail-text">
-                  {t('userInfo.submitConfirm.improveValue')}
-                </span>
-              </div>
-            </div>
-
-            {/* ✅ 新增：內容規範提醒 */}
-            <div className="moderation-notice">
-              <div className="moderation-notice-header">
-                <span className="moderation-icon">⚠️</span>
-                <strong>{t('moderationNotice.title')}</strong>
-              </div>
-              <div className="moderation-notice-content">
-                <p>{t('moderationNotice.description')}</p>
-                <p>{t('moderationNotice.ensure')}</p>
-                <ul>
-                  <li>{t('moderationNotice.avoid.inappropriate')}</li>
-                  <li>{t('moderationNotice.avoid.sensitive')}</li>
-                  <li>{t('moderationNotice.avoid.uncomfortable')}</li>
-                </ul>
-                <p className="moderation-warning">
-                  <strong>{t('moderationNotice.warning')}</strong>
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div className="modal-footer submit-confirm-footer">
-          <button className="modal-btn modal-btn-secondary" onClick={onCancel}>
-            {t('userInfo.submitConfirm.cancel')}
-          </button>
-          <button className="modal-btn modal-btn-success" onClick={onConfirm}>
-            {t('userInfo.submitConfirm.confirm')}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-SubmitConfirmModal.propTypes = {
-  isOpen: PropTypes.bool.isRequired,
-  onConfirm: PropTypes.func.isRequired,
-  onCancel: PropTypes.func.isRequired,
-  remainingCount: PropTypes.number.isRequired,
-};
-
-// 移除儀式感動畫系統
+// ✅ Phase 4: GENDER_OPTIONS 已移至 useUserInfoForm hook
+// ✅ Phase 5: Modal 組件已移至 ./Modals/ 文件夾
 
 function UserInfo({ testData, onLogout, clearTestData }) {
-  // ✅ Phase 1.9.3 新增：職業選項常數
-  const JOB_OPTIONS = [
-    { value: 'engineering', label: '工程師 (軟體/硬體)' },
-    { value: 'medical', label: '醫療人員 (醫護/藥師)' },
-    { value: 'coach', label: '健身教練' },
-    { value: 'student', label: '學生' },
-    { value: 'police_military', label: '軍警消人員' },
-    { value: 'business', label: '商業/金融/法務' },
-    { value: 'freelance', label: '自由業/設計/藝術' },
-    { value: 'service', label: '服務業' },
-    { value: 'other', label: '其他' },
-  ];
-
   const {
     userData,
     setUserData,
@@ -614,29 +57,22 @@ function UserInfo({ testData, onLogout, clearTestData }) {
     isLoading,
   } = useUser();
   const { t } = useTranslation();
-  const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
   const [dataLoaded, setDataLoaded] = useState(false);
   const [isPageReady, setIsPageReady] = useState(false); // ✅ 新增：頁面準備狀態
-  // ✅ 終極優化：性能模式狀態管理
-  const [performanceMode, setPerformanceMode] = useState('normal'); // 'normal' | 'scrolling' | 'idle'
+
+  // ✅ Phase 5: 使用 usePageScroll hook
+  const { performanceMode } = usePageScroll();
+
   const navigate = useNavigate();
   const location = useLocation();
   const radarSectionRef = useRef(null);
   const testsSectionRef = useRef(null);
   const formSectionRef = useRef(null);
-  const nicknameTimeoutRef = useRef(null); // 新增：暱稱輸入防抖定時器
   const [avatarUploading, setAvatarUploading] = useState(false);
   const [avatarError, setAvatarError] = useState(null);
   // 記錄上一次應用過的 testData，避免重複觸發寫入
   const lastAppliedTestDataKeyRef = useRef(null);
-  // ✅ 終極優化：滾動性能優化 refs
-  const scrollTimeoutRef = useRef(null);
-  const rafIdRef = useRef(null);
-  const lastScrollTimeRef = useRef(0);
-  const isScrollingRef = useRef(false);
-  const idleCallbackIdRef = useRef(null); // ✅ 修復 2: 保存 idle callback ID 用於清理
 
   // 新增：對話框狀態
   const [modalState, setModalState] = useState({
@@ -648,359 +84,68 @@ function UserInfo({ testData, onLogout, clearTestData }) {
     actionText: null,
   });
 
-  // 移除動畫系統，簡化狀態管理
-  const [userRank, setUserRank] = useState(null);
-
-  // 新增：天梯提交相關狀態
-  const [ladderSubmissionState, setLadderSubmissionState] = useState({
-    lastSubmissionTime: null,
-    dailySubmissionCount: 0,
-    lastSubmissionDate: null,
-  });
-
   // ✅ Phase 1 新增：職業描述 Modal 狀態
   const [rpgClassModalState, setRpgClassModalState] = useState({
     isOpen: false,
     classInfo: null,
   });
 
-  // 新增：提交確認對話框狀態
-  const [submitConfirmModal, setSubmitConfirmModal] = useState({
-    isOpen: false,
-    remainingCount: 3, // 暫時固定為3次，之後會動態計算
-  });
-
-  // 新增：體重提醒狀態
-  const [weightReminder, setWeightReminder] = useState({
-    show: false,
-    message: '',
-  });
-
   // ✅ Phase 1.9.2 新增：儲存成功 Modal 狀態
   const [showSaveSuccess, setShowSaveSuccess] = useState(false);
 
-  // 新增：檢查天梯提交限制
-  const checkLadderSubmissionLimit = useCallback(() => {
-    const now = new Date();
-    const today = now.toDateString();
-
-    // 檢查是否是新的一天
-    if (ladderSubmissionState.lastSubmissionDate !== today) {
-      setLadderSubmissionState(prev => ({
-        ...prev,
-        dailySubmissionCount: 0,
-        lastSubmissionDate: today,
-      }));
-      return { canSubmit: true, reason: null };
-    }
-
-    // 檢查每日限制
-    if (ladderSubmissionState.dailySubmissionCount >= 3) {
-      return {
-        canSubmit: false,
-        reason: t('userInfo.limits.limitReachedMessage'),
-      };
-    }
-
-    // 檢查冷卻時間（2小時）
-    if (ladderSubmissionState.lastSubmissionTime) {
-      const timeDiff = now - ladderSubmissionState.lastSubmissionTime;
-      const cooldownHours = 2;
-      const cooldownMs = cooldownHours * 60 * 60 * 1000;
-
-      if (timeDiff < cooldownMs) {
-        const remainingMinutes = Math.ceil(
-          (cooldownMs - timeDiff) / (60 * 1000)
-        );
-        return {
-          canSubmit: false,
-          reason: t('userInfo.limits.cooldownMessage', {
-            minutes: remainingMinutes,
-          }),
-        };
-      }
-    }
-
-    return { canSubmit: true, reason: null };
-  }, [ladderSubmissionState, t]);
-
-  // 新增：顯示提交確認對話框
-  const showSubmitConfirmModal = useCallback(() => {
-    // 檢查天梯提交限制
-    const limitCheck = checkLadderSubmissionLimit();
-
-    if (!limitCheck.canSubmit) {
-      // 顯示限制訊息
-      setModalState({
-        isOpen: true,
-        title: t('userInfo.limits.limitReached'),
-        message: limitCheck.reason,
-        type: 'warning',
-        onAction: () => {
-          setModalState(prev => ({ ...prev, isOpen: false }));
-          // 導航到天梯頁面查看當前排名
-          navigate('/ladder');
-        },
-        actionText: t('userInfo.modal.viewLadder'),
-      });
-      return;
-    }
-
-    // 可以提交，顯示確認對話框
-    const remainingCount =
-      3 - (ladderSubmissionState.dailySubmissionCount || 0);
-    setSubmitConfirmModal({
-      isOpen: true,
-      remainingCount: Math.max(0, remainingCount),
-    });
-  }, [ladderSubmissionState, checkLadderSubmissionLimit, t, navigate]);
-
-  // 新增：確認提交到天梯
-  const confirmSubmitToLadder = useCallback(async () => {
-    // 關閉確認對話框
-    setSubmitConfirmModal({ isOpen: false, remainingCount: 0 });
-
-    // 防止重複提交
-    if (loading) {
-      return;
-    }
-
-    try {
-      setLoading(true);
-
-      // ✅ 在計算新分數之前，保存舊的分數（用於提醒框顯示）
-      const oldLadderScore = userData.ladderScore || 0;
-      const isFirstTime = oldLadderScore === 0;
-
-      // ✅ 新增：如果用戶有舊分數，先查詢當前排名
-      let oldRank = 0;
-      if (oldLadderScore > 0 && auth.currentUser) {
-        try {
-          // 查詢所有有分數的用戶，按分數排序
-          const q = query(
-            collection(db, 'users'),
-            orderBy('ladderScore', 'desc'),
-            limit(200)
-          );
-          const querySnapshot = await getDocs(q);
-          const allUsers = [];
-          querySnapshot.forEach(doc => {
-            const docData = doc.data();
-            if (docData.ladderScore > 0) {
-              allUsers.push({
-                id: doc.id,
-                ladderScore: docData.ladderScore,
-              });
-            }
-          });
-
-          // 排序並查找當前用戶的排名
-          allUsers.sort((a, b) => b.ladderScore - a.ladderScore);
-          const currentUserIndex = allUsers.findIndex(
-            user => user.id === auth.currentUser.uid
-          );
-
-          if (currentUserIndex >= 0) {
-            oldRank = currentUserIndex + 1;
-            logger.debug(`📊 查詢到當前排名：第 ${oldRank} 名`);
-          }
-        } catch (error) {
-          logger.error('查詢當前排名失敗:', error);
-        }
-      }
-
-      // 計算天梯分數
-      const scores = userData.scores || {};
-      const ladderScore = calculateLadderScore(scores);
-
-      // ✅ 保存更新通知數據到 localStorage，使用查詢到的 oldRank
-      localStorage.setItem(
-        'ladderUpdateNotification',
-        JSON.stringify({
-          isFirstTime: isFirstTime,
-          oldScore: oldLadderScore,
-          newScore: ladderScore,
-          oldRank: oldRank, // ✅ 使用查詢到的排名
-          timestamp: Date.now(),
-          hasShown: false, // 標記是否已顯示
-        })
-      );
-
-      // 更新用戶數據，明確設置天梯分數和提交時間
-      const updatedUserData = {
-        ...userData,
-        ladderScore: ladderScore,
-        lastLadderSubmission: new Date().toISOString(),
-      };
-
-      // 立即更新本地狀態
-      setUserData(updatedUserData);
-
-      // 使用寫入隊列機制，而不是直接寫入 Firebase
-      try {
-        // 將天梯分數更新加入寫入隊列，優先處理
-        const ladderData = {
-          ...userData,
-          ladderScore: ladderScore,
-          lastLadderSubmission: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        };
-
-        // 立即保存到本地存儲
-        localStorage.setItem('userData', JSON.stringify(ladderData));
-        localStorage.setItem('lastSavedUserData', JSON.stringify(ladderData));
-
-        // 立即寫入 Firebase，確保天梯分數能及時顯示
-        const userRef = doc(db, 'users', auth.currentUser.uid);
-
-        // ✅ 檢查是否已認證，如果已認證則清除認證狀態（重新提交分數後認證失效）
-        const updateData = {
-          ladderScore: ladderScore,
-          lastLadderSubmission: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        };
-
-        // 如果用戶已認證，清除認證相關欄位（重新提交分數後認證失效）
-        if (userData.isVerified === true) {
-          updateData.isVerified = false;
-          updateData.verifiedLadderScore = null;
-          updateData.verificationStatus = null;
-          updateData.verifiedAt = null;
-          updateData.verificationExpiredAt = null;
-          updateData.verificationRequestId = null;
-          logger.debug('✅ 已清除榮譽認證狀態（重新提交分數）');
-        }
-
-        await setDoc(userRef, updateData, { merge: true });
-
-        logger.debug('天梯分數已立即保存到 Firebase:', ladderScore);
-      } catch (error) {
-        logger.error('保存天梯分數失敗:', error);
-        throw error;
-      }
-
-      // 更新提交狀態
-      const now = new Date();
-      setLadderSubmissionState(prev => ({
-        lastSubmissionTime: now,
-        dailySubmissionCount: prev.dailySubmissionCount + 1,
-        lastSubmissionDate: now.toDateString(),
-      }));
-
-      // 顯示成功訊息（國際化）
-      setModalState({
-        isOpen: true,
-        title: t('userInfo.modal.submitSuccessTitle'),
-        message: t('userInfo.modal.submitSuccessMessage', {
-          score: ladderScore,
-        }),
-        type: 'success',
-        onAction: () => {
-          // 關閉對話框
-          setModalState(prev => ({ ...prev, isOpen: false }));
-
-          // 導航到天梯頁面時，傳遞強制重新載入的標記
-          navigate('/ladder', {
-            state: {
-              forceReload: true,
-              from: '/user-info',
-              timestamp: Date.now(), // 添加時間戳確保每次都是新的
-            },
-          });
-        },
-        actionText: t('userInfo.modal.viewLadder'),
-      });
-
-      // 5秒後自動關閉成功對話框（給用戶時間選擇）
-      setTimeout(() => {
-        setModalState(prev => ({ ...prev, isOpen: false }));
-      }, 5000);
-    } catch (error) {
-      logger.error('提交到天梯失敗:', error);
-      setModalState({
-        isOpen: true,
-        title: t('userInfo.modal.submitFailTitle'),
-        message: t('userInfo.modal.submitFailMessage'),
-        type: 'error',
-      });
-    } finally {
-      setLoading(false);
-    }
-  }, [userData.scores, setUserData, loading, navigate]);
-
-  // 新增：取消提交
-  const cancelSubmit = useCallback(() => {
-    setSubmitConfirmModal({ isOpen: false, remainingCount: 0 });
-  }, []);
-
-  // 新增：提交到天梯（修改為顯示確認對話框）
-  const handleSubmitToLadder = useCallback(async () => {
-    if (!auth.currentUser) {
-      setModalState({
-        isOpen: true,
-        title: t('community.messages.needLogin'),
-        message: t('userInfo.limits.needLoginToSubmit'),
-        type: 'warning',
-      });
-      return;
-    }
-
-    // 檢查是否完成全部評測
-    const scores = userData.scores || {};
-    const completedCount = Object.values(scores).filter(
-      score => score > 0
-    ).length;
-
-    if (completedCount < 5) {
-      setModalState({
-        isOpen: true,
-        title: t('userInfo.limits.assessmentIncomplete'),
-        message: t('userInfo.limits.assessmentIncompleteMessage', {
-          count: completedCount,
-        }),
-        type: 'warning',
-      });
-      return;
-    }
-
-    // 檢查天梯提交限制
-    const { canSubmit, reason } = checkLadderSubmissionLimit();
-    if (!canSubmit) {
-      setModalState({
-        isOpen: true,
-        title: t('userInfo.limits.limitReached'),
-        message: reason,
-        type: 'warning',
-        onAction: () => {
-          setModalState(prev => ({ ...prev, isOpen: false }));
-          // 導航到天梯頁面查看當前排名
-          navigate('/ladder');
-        },
-        actionText: t('userInfo.modal.viewLadder'),
-      });
-      return;
-    }
-
-    // 顯示提交確認對話框
-    showSubmitConfirmModal();
-  }, [
-    userData,
-    showSubmitConfirmModal,
-    setModalState,
-    checkLadderSubmissionLimit,
-    t,
-    navigate,
-    auth.currentUser,
-  ]);
-
+  // ✅ Phase 4: 使用自定義 hooks
   const isGuest = useMemo(() => {
     return sessionStorage.getItem('guestMode') === 'true';
   }, []);
 
+  const {
+    loading,
+    error,
+    weightReminder,
+    handleInputChange,
+    handleNicknameChange,
+    handleGenerateNickname,
+    saveData,
+  } = useUserInfoForm(
+    userData,
+    setUserData,
+    saveUserData,
+    t,
+    isGuest,
+    setModalState
+  );
+
+  const submittedLadderScore = userData?.ladderScore || 0;
+
+  const {
+    userRank,
+    ladderSubmissionState,
+    submitConfirmModal,
+    handleSubmitToLadder,
+    confirmSubmitToLadder,
+    cancelSubmit,
+  } = useLadderLogic(
+    userData,
+    setUserData,
+    auth,
+    db,
+    t,
+    navigate,
+    setModalState,
+    submittedLadderScore
+  );
+
+  // ✅ Phase 4: 天梯相關邏輯已移至 useLadderLogic hook
+
   // 監聽認證狀態
   useEffect(() => {
     if (!auth) {
-      setError('無法初始化身份驗證，請檢查 Firebase 配置並稍後再試。');
+      setModalState({
+        isOpen: true,
+        title: '初始化錯誤',
+        message: '無法初始化身份驗證，請檢查 Firebase 配置並稍後再試。',
+        type: 'error',
+      });
       logger.error('auth 未初始化');
       return;
     }
@@ -1043,83 +188,7 @@ function UserInfo({ testData, onLogout, clearTestData }) {
     userData.age,
   ]);
 
-  // ✅ 移除：不再需要 Intersection Observer ref 附加
-
-  // ✅ 終極優化 1: 智能滾動檢測（使用被動監聽器 + RAF）
-  useEffect(() => {
-    const handleScroll = () => {
-      const now = performance.now();
-      // ✅ 修復 1: 移除未使用的 timeSinceLastScroll 變量
-
-      // ✅ 使用 requestAnimationFrame 優化滾動處理
-      if (rafIdRef.current) {
-        cancelAnimationFrame(rafIdRef.current);
-      }
-
-      rafIdRef.current = requestAnimationFrame(() => {
-        if (!isScrollingRef.current) {
-          isScrollingRef.current = true;
-          setPerformanceMode('scrolling');
-          // ✅ 滾動時優化 DOM（雷達圖性能優化現在在 RadarChartSection 組件中處理）
-        }
-
-        lastScrollTimeRef.current = now;
-
-        // ✅ 清除之前的定時器
-        if (scrollTimeoutRef.current) {
-          clearTimeout(scrollTimeoutRef.current);
-        }
-
-        // ✅ 滾動停止後恢復（使用 requestIdleCallback 優化）
-        scrollTimeoutRef.current = setTimeout(() => {
-          isScrollingRef.current = false;
-          setPerformanceMode('idle');
-
-          // ✅ 修復 2: 取消之前的 idle callback（如果存在）
-          if (idleCallbackIdRef.current && window.cancelIdleCallback) {
-            cancelIdleCallback(idleCallbackIdRef.current);
-            idleCallbackIdRef.current = null;
-          }
-
-          // ✅ 使用 requestIdleCallback 在空閒時恢復
-          if (window.requestIdleCallback) {
-            idleCallbackIdRef.current = requestIdleCallback(
-              () => {
-                // ✅ 雷達圖性能優化現在在 RadarChartSection 組件中處理
-                setPerformanceMode('normal');
-                idleCallbackIdRef.current = null; // ✅ 清理引用
-              },
-              { timeout: 200 }
-            );
-          } else {
-            setTimeout(() => {
-              // ✅ 雷達圖性能優化現在在 RadarChartSection 組件中處理
-              setPerformanceMode('normal');
-            }, 200);
-          }
-        }, 150);
-      });
-    };
-
-    // ✅ 使用被動監聽器提升滾動性能
-    const options = { passive: true, capture: false };
-    window.addEventListener('scroll', handleScroll, options);
-    window.addEventListener('touchmove', handleScroll, options);
-    window.addEventListener('wheel', handleScroll, options);
-
-    return () => {
-      window.removeEventListener('scroll', handleScroll, options);
-      window.removeEventListener('touchmove', handleScroll, options);
-      window.removeEventListener('wheel', handleScroll, options);
-      if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
-      if (rafIdRef.current) cancelAnimationFrame(rafIdRef.current);
-      // ✅ 修復 2: 清理 idle callback
-      if (idleCallbackIdRef.current && window.cancelIdleCallback) {
-        cancelIdleCallback(idleCallbackIdRef.current);
-        idleCallbackIdRef.current = null;
-      }
-    };
-  }, []);
+  // ✅ Phase 5: 滾動邏輯已移至 usePageScroll hook
 
   // ✅ 修復：移除 Intersection Observer 的動態樣式設置，避免干擾雷達圖顯示
   // 註釋掉可能導致顏色和格式問題的動態樣式設置
@@ -1239,77 +308,7 @@ function UserInfo({ testData, onLogout, clearTestData }) {
     }
   }, [location]);
 
-  // 初始化天梯提交狀態
-  useEffect(() => {
-    const loadSubmissionState = () => {
-      // ✅ 檢查是否有登入用戶
-      if (!auth.currentUser) {
-        // 未登入，重置狀態
-        setLadderSubmissionState({
-          lastSubmissionTime: null,
-          dailySubmissionCount: 0,
-          lastSubmissionDate: null,
-        });
-        return;
-      }
-
-      try {
-        // ✅ 使用帶用戶 ID 的 key，確保每個用戶有獨立的提交次數
-        const userId = auth.currentUser.uid;
-        const storageKey = `ladderSubmissionState_${userId}`;
-        const savedState = localStorage.getItem(storageKey);
-
-        if (savedState) {
-          const parsedState = JSON.parse(savedState);
-          // 檢查是否是新的一天，如果是則重置計數
-          const today = new Date().toDateString();
-          if (parsedState.lastSubmissionDate !== today) {
-            setLadderSubmissionState({
-              lastSubmissionTime: null,
-              dailySubmissionCount: 0,
-              lastSubmissionDate: today,
-            });
-          } else {
-            setLadderSubmissionState(parsedState);
-          }
-        } else {
-          // 沒有保存的狀態，初始化為空
-          setLadderSubmissionState({
-            lastSubmissionTime: null,
-            dailySubmissionCount: 0,
-            lastSubmissionDate: null,
-          });
-        }
-      } catch (error) {
-        logger.error('載入提交狀態失敗:', error);
-        // 錯誤時重置狀態
-        setLadderSubmissionState({
-          lastSubmissionTime: null,
-          dailySubmissionCount: 0,
-          lastSubmissionDate: null,
-        });
-      }
-    };
-
-    loadSubmissionState();
-  }, [userData?.userId, auth.currentUser?.uid]); // ✅ 添加依賴，用戶切換時重新載入
-
-  // 保存天梯提交狀態到localStorage
-  useEffect(() => {
-    // ✅ 檢查是否有登入用戶
-    if (!auth.currentUser || !ladderSubmissionState.lastSubmissionDate) {
-      return;
-    }
-
-    try {
-      // ✅ 使用帶用戶 ID 的 key，確保每個用戶有獨立的提交次數
-      const userId = auth.currentUser.uid;
-      const storageKey = `ladderSubmissionState_${userId}`;
-      localStorage.setItem(storageKey, JSON.stringify(ladderSubmissionState));
-    } catch (error) {
-      logger.error('保存提交狀態失敗:', error);
-    }
-  }, [ladderSubmissionState, auth.currentUser?.uid]); // ✅ 添加依賴
+  // ✅ Phase 4: 天梯提交狀態載入和保存已移至 useLadderLogic hook
 
   // 處理 testData 更新
   useEffect(() => {
@@ -1369,106 +368,7 @@ function UserInfo({ testData, onLogout, clearTestData }) {
     }
   }, [testData, clearTestData]);
 
-  const validateData = useCallback(() => {
-    const { height, weight, age, gender } = userData;
-    if (!height || !weight || !age || !gender) {
-      setError(t('errors.required'));
-      return false;
-    }
-    if (height <= 0 || weight <= 0 || age <= 0) {
-      setError(t('userInfo.modal.invalidPositive'));
-      return false;
-    }
-    if (!GENDER_OPTIONS.includes(gender)) {
-      setError(t('userInfo.modal.invalidGender'));
-      return false;
-    }
-    return true;
-  }, [userData]);
-
-  const saveData = useCallback(
-    async e => {
-      e.preventDefault();
-      setError(null);
-      setLoading(true);
-
-      if (!validateData()) {
-        setLoading(false);
-        return;
-      }
-
-      const updatedUserData = {
-        ...userData,
-        height: Number(userData.height) || 0,
-        weight: Number(userData.weight) || 0,
-        age: Number(userData.age) || 0,
-        gender: userData.gender,
-        // ✅ Phase 1.9.3 新增：職業分類欄位
-        job_category: userData.job_category || '',
-        // 排行榜資訊（選填）
-        country: userData.country || '',
-        region: userData.region || '',
-        scores: userData.scores || DEFAULT_SCORES,
-        // 保持原有的天梯分數，不自動更新
-        ladderScore: userData.ladderScore || 0,
-        lastActive: new Date().toISOString(),
-      };
-
-      try {
-        // ✅ 檢查是否只改變了 country 或 region
-        const countryChanged =
-          (userData.country || '') !== (updatedUserData.country || '');
-        const regionChanged =
-          (userData.region || '') !== (updatedUserData.region || '');
-        const onlyCountryRegionChanged =
-          (countryChanged || regionChanged) &&
-          // 確保其他重要欄位沒有變化
-          userData.height === updatedUserData.height &&
-          userData.weight === updatedUserData.weight &&
-          userData.age === updatedUserData.age &&
-          userData.gender === updatedUserData.gender &&
-          JSON.stringify(userData.scores || {}) ===
-            JSON.stringify(updatedUserData.scores || {});
-
-        if (onlyCountryRegionChanged) {
-          // 如果只改變了 country/region，立即保存到 Firebase（不使用防抖）
-          logger.debug('🌍 國家/城市變化，立即保存到 Firebase');
-          await saveUserData(updatedUserData);
-          // 同時更新本地狀態
-          setUserData(updatedUserData);
-        } else {
-          // 其他情況使用防抖機制
-          setUserData(updatedUserData);
-        }
-
-        setModalState({
-          isOpen: true,
-          title: t('userInfo.modal.saveSuccessTitle'),
-          message: t('userInfo.modal.saveSuccessMessage'),
-          type: 'success',
-        });
-      } catch (err) {
-        if (isGuest) {
-          setModalState({
-            isOpen: true,
-            title: '訪客模式',
-            message: '訪客模式下無法保存到雲端，但您現在可以開始進行評測了！',
-            type: 'info',
-          });
-        } else {
-          setModalState({
-            isOpen: true,
-            title: '儲存失敗',
-            message: `儲存失敗：${err.message}`,
-            type: 'error',
-          });
-        }
-      } finally {
-        setLoading(false);
-      }
-    },
-    [userData, validateData, isGuest, setUserData, saveUserData, t]
-  );
+  // ✅ Phase 4: validateData 和 saveData 已移至 useUserInfoForm hook
 
   const averageScore = useMemo(() => {
     const scores = userData?.scores || DEFAULT_SCORES;
@@ -1488,8 +388,7 @@ function UserInfo({ testData, onLogout, clearTestData }) {
     return calculateLadderScore(scores);
   }, [userData?.scores]);
 
-  // 獲取已提交的天梯分數
-  const submittedLadderScore = userData?.ladderScore || 0;
+  // ✅ Phase 4: submittedLadderScore 已在 hooks 調用處定義
 
   // 計算完成狀態
   const completionStatus = useMemo(() => {
@@ -1557,177 +456,14 @@ function UserInfo({ testData, onLogout, clearTestData }) {
     });
   }, []);
 
-  // 獲取用戶排名（基於已提交的天梯分數）
-  const fetchUserRank = useCallback(async () => {
-    if (
-      !userData?.userId ||
-      !submittedLadderScore ||
-      submittedLadderScore <= 0
-    ) {
-      setUserRank(null);
-      return;
-    }
-
-    try {
-      // ✅ 優化：使用客戶端過濾，避免複合索引需求
-      // 獲取前200名用戶（增加限制以確保有足夠數據）
-      const usersRef = collection(db, 'users');
-      const q = query(
-        usersRef,
-        orderBy('ladderScore', 'desc'),
-        limit(200) // 增加到200名，確保涵蓋更多用戶
-      );
-
-      const querySnapshot = await getDocs(q);
-      const users = [];
-
-      // 客戶端過濾：只保留 ladderScore > 0 的用戶
-      querySnapshot.forEach(doc => {
-        const docData = doc.data();
-        if (docData.ladderScore > 0) {
-          users.push({
-            id: doc.id,
-            ...docData,
-          });
-        }
-      });
-
-      // 找到用戶的排名
-      const userIndex = users.findIndex(user => user.id === userData.userId);
-      if (userIndex !== -1) {
-        setUserRank(userIndex + 1);
-      } else {
-        // 如果用戶不在前200名中，設置為未上榜
-        setUserRank(null);
-      }
-    } catch (error) {
-      logger.error('獲取用戶排名失敗:', error);
-      setUserRank(null);
-    }
-  }, [userData?.userId, submittedLadderScore]);
-
-  // ✅ 終極優化 4: 優化 Firebase 查詢（防抖 + 緩存 + requestIdleCallback）
-  const fetchUserRankRef = useRef(null);
-  const lastFetchParamsRef = useRef({ userId: null, score: null });
-
-  useEffect(() => {
-    if (fetchUserRankRef.current) {
-      if (window.cancelIdleCallback) {
-        cancelIdleCallback(fetchUserRankRef.current);
-      } else {
-        clearTimeout(fetchUserRankRef.current);
-      }
-    }
-
-    const userId = userData?.userId;
-    const score = submittedLadderScore;
-
-    // ✅ 如果參數沒變，跳過查詢
-    if (
-      lastFetchParamsRef.current.userId === userId &&
-      lastFetchParamsRef.current.score === score
-    ) {
-      return;
-    }
-
-    lastFetchParamsRef.current = { userId, score };
-
-    if (userId && score > 0) {
-      // ✅ 使用 requestIdleCallback 在空閒時查詢
-      if (window.requestIdleCallback) {
-        fetchUserRankRef.current = requestIdleCallback(
-          () => {
-            fetchUserRank();
-          },
-          { timeout: 2000 }
-        );
-      } else {
-        fetchUserRankRef.current = setTimeout(() => {
-          fetchUserRank();
-        }, 800);
-      }
-    }
-
-    return () => {
-      if (fetchUserRankRef.current) {
-        if (window.cancelIdleCallback) {
-          cancelIdleCallback(fetchUserRankRef.current);
-        } else {
-          clearTimeout(fetchUserRankRef.current);
-        }
-      }
-    };
-  }, [userData?.userId, submittedLadderScore, fetchUserRank]);
+  // ✅ Phase 4: fetchUserRank 和相關 useEffect 已移至 useLadderLogic hook
 
   // 計算年齡段
   // const ageGroup = useMemo(() => {
   //   return userData?.age ? getAgeGroup(userData.age) : '';
   // }, [userData?.age]);
 
-  // 處理暱稱變更
-  const handleNicknameChange = useCallback(
-    e => {
-      const nickname = e.target.value;
-
-      // 檢查字數限制
-      const isChinese = /[\u4e00-\u9fff]/.test(nickname);
-      let isValid = true;
-      let errorMessage = '';
-
-      if (isChinese) {
-        // 中文限制8個字
-        if (nickname.length > 8) {
-          isValid = false;
-          errorMessage = '暱稱不能超過8個中文字';
-        }
-      } else {
-        // 英文限制16個字元
-        if (nickname.length > 16) {
-          isValid = false;
-          errorMessage = '暱稱不能超過16個英文字元';
-        }
-      }
-
-      if (!isValid) {
-        setModalState({
-          isOpen: true,
-          title: '字數限制',
-          message: errorMessage,
-          type: 'warning',
-        });
-        return;
-      }
-
-      // 立即更新本地狀態，提供即時反饋
-      setUserData(prev => ({
-        ...prev,
-        nickname: nickname,
-      }));
-
-      // 清除之前的定時器
-      if (nicknameTimeoutRef.current) {
-        clearTimeout(nicknameTimeoutRef.current);
-      }
-
-      // 設置新的防抖定時器，延遲保存到 Firebase
-      nicknameTimeoutRef.current = setTimeout(() => {
-        nicknameTimeoutRef.current = null;
-      }, 1000); // 增加到1秒防抖，減少寫入頻率
-    },
-    [setUserData, setModalState]
-  );
-
-  // 生成預設暱稱
-  const handleGenerateNickname = useCallback(() => {
-    const email = auth.currentUser?.email;
-    const generatedNickname = generateNickname(email);
-    setUserData(prev => ({
-      ...prev,
-      nickname: generatedNickname,
-      // 保持原有的天梯分數，不自動更新
-      ladderScore: prev.ladderScore || 0,
-    }));
-  }, [setUserData]);
+  // ✅ Phase 4: handleNicknameChange 和 handleGenerateNickname 已移至 useUserInfoForm hook
 
   const handleSaveResults = useCallback(() => {
     if (!auth.currentUser) {
@@ -1772,19 +508,12 @@ function UserInfo({ testData, onLogout, clearTestData }) {
         return;
       }
 
-      if (validateData()) {
-        // 傳遞當前路徑作為狀態，以便返回時知道從哪裡來
-        navigate(path, { state: { from: '/user-info' } });
-      } else {
-        setModalState({
-          isOpen: true,
-          title: t('userInfo.modals.dataNotSaved.title'),
-          message: t('userInfo.modals.dataNotSaved.message'),
-          type: 'warning',
-        });
-      }
+      // ✅ Phase 4: validateData 已移至 useUserInfoForm hook
+      // 暫時保留此函數，但需要從 hook 獲取驗證邏輯
+      // TODO: 重構 handleNavigation 以使用 hook 的驗證邏輯
+      navigate(path, { state: { from: '/user-info' } });
     },
-    [userData, validateData, navigate, setModalState]
+    [userData, navigate, setModalState, t]
   );
 
   const handleLogout = useCallback(() => {
@@ -1799,56 +528,7 @@ function UserInfo({ testData, onLogout, clearTestData }) {
     navigate('/login');
   }, [onLogout, navigate]);
 
-  // 處理輸入變更
-  const handleInputChange = useCallback(
-    e => {
-      const { name, value } = e.target;
-      let processedValue = value;
-
-      // 處理不同類型的欄位
-      if (name === 'gender') {
-        // 性別欄位保持字符串
-        processedValue = value;
-      } else if (['job_category', 'country', 'region'].includes(name)) {
-        // ✅ Phase 1.9.3 修正：將 profession 改為 job_category
-        // 職業分類、國家、行政區欄位保持字符串
-        processedValue = value;
-      } else if (['weeklyTrainingHours', 'trainingYears'].includes(name)) {
-        // 訓練相關數字欄位
-        processedValue = value === '' ? '' : Number(value);
-      } else {
-        // 其他數字欄位
-        processedValue = value === '' ? 0 : Number(value);
-      }
-
-      // 檢查體重變化
-      if (name === 'weight') {
-        const oldWeight = userData.weight || 0;
-        const newWeight = processedValue;
-
-        // 如果體重有變化且不是從 0 開始
-        if (oldWeight > 0 && newWeight > 0 && oldWeight !== newWeight) {
-          setWeightReminder({
-            show: true,
-            message: t('userInfo.weightChangeReminder'),
-          });
-
-          // 3秒後自動隱藏提醒
-          setTimeout(() => {
-            setWeightReminder(prev => ({ ...prev, show: false }));
-          }, 3000);
-        }
-      }
-
-      setUserData(prev => ({
-        ...prev,
-        [name]: processedValue,
-        // 保持原有的天梯分數，不自動更新
-        ladderScore: prev.ladderScore || 0,
-      }));
-    },
-    [setUserData, userData.weight, t]
-  );
+  // ✅ Phase 4: handleInputChange 已移至 useUserInfoForm hook
 
   // 新增：頭像上傳處理 - 接收已壓縮的 blob
   const handleAvatarChange = async blob => {
@@ -1978,7 +658,7 @@ function UserInfo({ testData, onLogout, clearTestData }) {
         </svg>
       </button>
       {/* 對話框組件 */}
-      <Modal
+      <GeneralModal
         isOpen={modalState.isOpen}
         onClose={() => {
           logger.debug('Modal onClose triggered, current state:', modalState);
@@ -2034,433 +714,21 @@ function UserInfo({ testData, onLogout, clearTestData }) {
             <div className="page-subtitle">{t('userInfo.subtitle')}</div>
           </div>
 
-          <div
-            id="user-form-section"
-            className="form-card"
-            ref={formSectionRef}
-          >
-            <form className="user-form" onSubmit={saveData}>
-              <div className="form-section">
-                <div className="section-header">
-                  <h3 className="section-title">{t('userInfo.basicInfo')}</h3>
-                  {currentUser && (
-                    <button
-                      type="button"
-                      onClick={handleLogout}
-                      title="登出"
-                      className="user-info__logout-btn"
-                      onMouseEnter={e => {
-                        const tooltip = document.createElement('div');
-                        tooltip.innerText = '登出';
-                        tooltip.style.position = 'absolute';
-                        tooltip.style.bottom = '44px';
-                        tooltip.style.left = '50%';
-                        tooltip.style.transform = 'translateX(-50%)';
-                        tooltip.style.background = 'rgba(60,60,60,0.95)';
-                        tooltip.style.color = '#fff';
-                        tooltip.style.padding = '6px 14px';
-                        tooltip.style.borderRadius = '6px';
-                        tooltip.style.fontSize = '13px';
-                        tooltip.style.whiteSpace = 'nowrap';
-                        tooltip.style.pointerEvents = 'none';
-                        tooltip.style.zIndex = '1001';
-                        tooltip.className = 'logout-tooltip';
-                        e.currentTarget.parentNode.appendChild(tooltip);
-                      }}
-                      onMouseLeave={e => {
-                        const tooltip =
-                          e.currentTarget.parentNode.querySelector(
-                            '.logout-tooltip'
-                          );
-                        if (tooltip) tooltip.remove();
-                      }}
-                    >
-                      <span className="user-info__logout-icon">⎋</span>
-                    </button>
-                  )}
-                </div>
-
-                <div className="form-group">
-                  <label htmlFor="nickname" className="form-label">
-                    {t('userInfo.nickname')}
-                  </label>
-                  <div className="nickname-input-group">
-                    <input
-                      id="nickname"
-                      name="nickname"
-                      type="text"
-                      value={userData?.nickname || ''}
-                      onChange={handleNicknameChange}
-                      placeholder={t('userInfo.nicknamePlaceholder')}
-                      className="form-input"
-                      maxLength="16"
-                    />
-                    <button
-                      type="button"
-                      onClick={handleGenerateNickname}
-                      className="generate-nickname-btn"
-                    >
-                      {t('userInfo.generateNickname')}
-                    </button>
-                  </div>
-                </div>
-
-                <div className="form-row">
-                  <div className="form-group">
-                    <label htmlFor="gender" className="form-label">
-                      {t('userInfo.gender')}
-                    </label>
-                    <select
-                      id="gender"
-                      name="gender"
-                      value={userData?.gender || ''}
-                      onChange={handleInputChange}
-                      className="form-input"
-                      required
-                      onInvalid={e =>
-                        e.currentTarget.setCustomValidity(t('errors.required'))
-                      }
-                      onInput={e => e.currentTarget.setCustomValidity('')}
-                    >
-                      <option value="">{t('userInfo.selectGender')}</option>
-                      <option value="male">{t('userInfo.male')}</option>
-                      <option value="female">{t('userInfo.female')}</option>
-                    </select>
-                  </div>
-
-                  <div className="form-group">
-                    <label htmlFor="age" className="form-label">
-                      {t('userInfo.age')}
-                    </label>
-                    <input
-                      id="age"
-                      name="age"
-                      type="number"
-                      value={userData?.age || ''}
-                      onChange={handleInputChange}
-                      placeholder={t('userInfo.age')}
-                      className="form-input"
-                      required
-                      onInvalid={e =>
-                        e.currentTarget.setCustomValidity(t('errors.required'))
-                      }
-                      onInput={e => e.currentTarget.setCustomValidity('')}
-                      min="0"
-                      step="1"
-                    />
-                  </div>
-                </div>
-
-                <div className="form-row">
-                  <div className="form-group">
-                    <label htmlFor="height" className="form-label">
-                      {t('userInfo.height')}
-                    </label>
-                    <input
-                      id="height"
-                      name="height"
-                      type="number"
-                      value={userData?.height || ''}
-                      onChange={handleInputChange}
-                      placeholder={t('userInfo.height')}
-                      className="form-input"
-                      required
-                      onInvalid={e =>
-                        e.currentTarget.setCustomValidity(t('errors.required'))
-                      }
-                      onInput={e => e.currentTarget.setCustomValidity('')}
-                      min="0"
-                      step="0.1"
-                    />
-                  </div>
-
-                  <div className="form-group">
-                    <label htmlFor="weight" className="form-label">
-                      {t('userInfo.weight')}
-                    </label>
-                    <div className="input-with-reminder">
-                      <input
-                        id="weight"
-                        name="weight"
-                        type="number"
-                        value={userData?.weight || ''}
-                        onChange={handleInputChange}
-                        placeholder={t('userInfo.weight')}
-                        className="form-input"
-                        required
-                        onInvalid={e =>
-                          e.currentTarget.setCustomValidity(
-                            t('errors.required')
-                          )
-                        }
-                        onInput={e => e.currentTarget.setCustomValidity('')}
-                        min="0"
-                        step="0.1"
-                      />
-                      {weightReminder.show && (
-                        <div className="weight-reminder-bubble">
-                          <span className="reminder-icon">💡</span>
-                          <span className="reminder-text">
-                            {weightReminder.message}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* 天梯隱私設置 */}
-              <div className="form-section">
-                <h3 className="section-title">
-                  🏆 {t('userInfo.ladder.title')}
-                </h3>
-                <div className="privacy-options">
-                  <label className="privacy-option">
-                    <input
-                      type="checkbox"
-                      checked={userData.isAnonymousInLadder === true}
-                      onChange={e =>
-                        setUserData(prev => ({
-                          ...prev,
-                          isAnonymousInLadder: e.target.checked,
-                        }))
-                      }
-                    />
-                    <div className="privacy-option-content">
-                      <span className="privacy-option-title">
-                        {t('userInfo.ladder.anonymousTitle')}
-                      </span>
-                      <span className="privacy-option-desc">
-                        {t('userInfo.ladder.anonymousDesc')}
-                      </span>
-                    </div>
-                  </label>
-                </div>
-
-                {/* 訓練背景信息（選填） */}
-                <div className="training-info-section">
-                  <h4 className="training-info-title">
-                    💪 {t('userInfo.training.title')}
-                  </h4>
-                  <p className="training-info-desc">
-                    {t('userInfo.training.desc')}
-                  </p>
-
-                  <div className="form-row">
-                    <div className="form-group">
-                      <label htmlFor="job_category" className="form-label">
-                        {t('userInfo.training.profession')}
-                      </label>
-                      <select
-                        id="job_category"
-                        name="job_category"
-                        value={userData?.job_category || ''}
-                        onChange={handleInputChange}
-                        className="form-input"
-                      >
-                        <option value="">請選擇您的職業分類</option>
-                        {JOB_OPTIONS.map(option => (
-                          <option key={option.value} value={option.value}>
-                            {option.label}
-                          </option>
-                        ))}
-                      </select>
-                      <p
-                        className="field-hint"
-                        style={{
-                          marginTop: '4px',
-                          fontSize: '12px',
-                          color: '#718096',
-                        }}
-                      >
-                        💡 選擇職業可參與未來的「職業分組天梯」
-                      </p>
-                    </div>
-
-                    <div className="form-group">
-                      <label
-                        htmlFor="weeklyTrainingHours"
-                        className="form-label"
-                      >
-                        {t('userInfo.training.weeklyHours')}
-                      </label>
-                      <input
-                        id="weeklyTrainingHours"
-                        name="weeklyTrainingHours"
-                        type="number"
-                        value={userData?.weeklyTrainingHours || ''}
-                        onChange={handleInputChange}
-                        placeholder={t('userInfo.placeholders.hours')}
-                        className="form-input"
-                        min="0"
-                        max="168"
-                        step="0.5"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="form-group">
-                    <label htmlFor="trainingYears" className="form-label">
-                      {t('userInfo.training.years')}
-                    </label>
-                    <input
-                      id="trainingYears"
-                      name="trainingYears"
-                      type="number"
-                      value={userData?.trainingYears || ''}
-                      onChange={handleInputChange}
-                      placeholder={t('userInfo.placeholders.years')}
-                      className="form-input"
-                      min="0"
-                      max="50"
-                      step="0.5"
-                    />
-                  </div>
-
-                  {/* 排行榜資訊（選填） */}
-                  <div className="form-row">
-                    <div className="form-group">
-                      <label htmlFor="country" className="form-label">
-                        {t('userInfo.ranking.country')}{' '}
-                        <span className="optional-badge">選填</span>
-                      </label>
-                      <select
-                        id="country"
-                        name="country"
-                        value={userData?.country || ''}
-                        onChange={handleInputChange}
-                        className="form-input"
-                      >
-                        <option value="">
-                          {t('userInfo.ranking.selectCountry')}
-                        </option>
-                        <option value="TW">台灣</option>
-                        <option value="CN">中國</option>
-                        <option value="US">美國</option>
-                        <option value="JP">日本</option>
-                        <option value="KR">韓國</option>
-                        <option value="SG">新加坡</option>
-                        <option value="MY">馬來西亞</option>
-                        <option value="HK">香港</option>
-                        <option value="MO">澳門</option>
-                        <option value="TH">泰國</option>
-                        <option value="VN">越南</option>
-                        <option value="PH">菲律賓</option>
-                        <option value="ID">印尼</option>
-                        <option value="AU">澳洲</option>
-                        <option value="NZ">紐西蘭</option>
-                        <option value="CA">加拿大</option>
-                        <option value="GB">英國</option>
-                        <option value="DE">德國</option>
-                        <option value="FR">法國</option>
-                        <option value="OTHER">其他</option>
-                      </select>
-                      <p className="field-hint">
-                        💡 {t('userInfo.ranking.countryHint')}
-                      </p>
-                    </div>
-
-                    <div className="form-group">
-                      <label htmlFor="region" className="form-label">
-                        {t('userInfo.ranking.region')}{' '}
-                        <span className="optional-badge">選填</span>
-                      </label>
-                      {userData?.country === 'TW' ? (
-                        // 台灣行政區選單
-                        <select
-                          id="region"
-                          name="region"
-                          value={userData?.region || ''}
-                          onChange={handleInputChange}
-                          className="form-input"
-                        >
-                          <option value="">
-                            {t('userInfo.ranking.selectRegion')}
-                          </option>
-                          <optgroup label="直轄市">
-                            <option value="台北市">台北市</option>
-                            <option value="新北市">新北市</option>
-                            <option value="桃園市">桃園市</option>
-                            <option value="台中市">台中市</option>
-                            <option value="台南市">台南市</option>
-                            <option value="高雄市">高雄市</option>
-                          </optgroup>
-                          <optgroup label="省轄市">
-                            <option value="基隆市">基隆市</option>
-                            <option value="新竹市">新竹市</option>
-                            <option value="嘉義市">嘉義市</option>
-                          </optgroup>
-                          <optgroup label="縣">
-                            <option value="新竹縣">新竹縣</option>
-                            <option value="苗栗縣">苗栗縣</option>
-                            <option value="彰化縣">彰化縣</option>
-                            <option value="南投縣">南投縣</option>
-                            <option value="雲林縣">雲林縣</option>
-                            <option value="嘉義縣">嘉義縣</option>
-                            <option value="屏東縣">屏東縣</option>
-                            <option value="宜蘭縣">宜蘭縣</option>
-                            <option value="花蓮縣">花蓮縣</option>
-                            <option value="台東縣">台東縣</option>
-                            <option value="澎湖縣">澎湖縣</option>
-                            <option value="金門縣">金門縣</option>
-                            <option value="連江縣">連江縣</option>
-                          </optgroup>
-                        </select>
-                      ) : userData?.country &&
-                        userData?.country !== '' &&
-                        userData?.country !== 'OTHER' ? (
-                        // 其他國家使用下拉選單（預留未來擴充）
-                        <select
-                          id="region"
-                          name="region"
-                          value={userData?.region || ''}
-                          onChange={handleInputChange}
-                          className="form-input"
-                        >
-                          <option value="">
-                            {t('userInfo.ranking.selectRegion')}
-                          </option>
-                          {/* 未來可根據選擇的國家動態載入城市列表 */}
-                          <option value="">
-                            {t('userInfo.ranking.regionComingSoon')}
-                          </option>
-                        </select>
-                      ) : (
-                        // 未選擇國家或選擇「其他」時顯示文字輸入
-                        <input
-                          id="region"
-                          name="region"
-                          type="text"
-                          value={userData?.region || ''}
-                          onChange={handleInputChange}
-                          placeholder={
-                            userData?.country === 'OTHER'
-                              ? t('userInfo.ranking.regionPlaceholderOther')
-                              : t('userInfo.ranking.selectCountryFirst')
-                          }
-                          className="form-input"
-                          maxLength="50"
-                          disabled={
-                            !userData?.country || userData?.country === ''
-                          }
-                        />
-                      )}
-                      <p className="field-hint">
-                        💡 {t('userInfo.ranking.regionHint')}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="form-actions">
-                <button type="submit" className="submit-btn" disabled={loading}>
-                  {loading ? t('userInfo.saving') : t('userInfo.saveData')}
-                </button>
-              </div>
-            </form>
-          </div>
+          <UserFormSection
+            userData={userData}
+            loading={loading}
+            weightReminder={weightReminder}
+            currentUser={currentUser}
+            onSubmit={saveData}
+            onChange={handleInputChange}
+            onNicknameChange={handleNicknameChange}
+            onGenerateNickname={handleGenerateNickname}
+            onLogout={handleLogout}
+            setUserData={setUserData}
+            t={t}
+          />
+          {/* 保留 formSectionRef 用於滾動定位 */}
+          <div ref={formSectionRef} style={{ display: 'none' }} />
         </>
       )}
 
