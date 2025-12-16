@@ -1082,76 +1082,126 @@
   z-index: 1;
 }
 
-.action-toolbar-btn {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-  padding: 12px 16px;
-  min-width: 80px;
-  /* 核心改變：白底 + 微透 */
-  background: rgba(255, 255, 255, 0.95);
-  border: 1px solid rgba(255, 255, 255, 1);
-  border-radius: 12px;
-  cursor: pointer;
-  /* 文字與陰影 */
-  color: #2c3e50; /* 深藍灰文字，閱讀性最高 */
-  font-weight: 600;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); /* 輕柔的陰影，讓按鈕浮起來 */
+/* ✅ 修復 CSS 特异性：使用更高特异性的選擇器 + !important 確保覆蓋全局樣式 */
+.user-info-container .action-toolbar .action-toolbar-btn,
+.user-info-container .action-toolbar button.action-toolbar-btn,
+.action-toolbar .action-toolbar-btn {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  padding: 12px 16px !important;
+  min-width: 80px !important;
+  /* 核心改變：白底 + 微透 - 使用 !important 強制覆蓋 */
+  background: rgba(255, 255, 255, 0.95) !important;
+  background-color: rgba(255, 255, 255, 0.95) !important;
+  border: 1px solid rgba(255, 255, 255, 1) !important;
+  border-color: rgba(255, 255, 255, 1) !important;
+  border-radius: 12px !important;
+  cursor: pointer !important;
+  /* 文字與陰影 - 深藍灰文字，閱讀性最高 */
+  color: #2c3e50 !important;
+  font-weight: 600 !important;
+  font-size: 14px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
   /* 互動感 */
-  transition: all 0.2s ease;
+  transition: all 0.2s ease !important;
+  /* 確保沒有繼承全局按鈕樣式 */
+  text-decoration: none !important;
+  outline: none !important;
 }
 
-.action-toolbar-btn:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
-  background: rgba(255, 255, 255, 1);
+.user-info-container .action-toolbar .action-toolbar-btn:hover:not(:disabled),
+.user-info-container
+  .action-toolbar
+  button.action-toolbar-btn:hover:not(:disabled),
+.action-toolbar .action-toolbar-btn:hover:not(:disabled) {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12) !important;
+  background: rgba(255, 255, 255, 1) !important;
+  background-color: rgba(255, 255, 255, 1) !important;
+  color: #2c3e50 !important;
 }
 
-.action-toolbar-btn:active:not(:disabled) {
-  transform: scale(0.98);
-  background: #f0f2f5;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+.user-info-container .action-toolbar .action-toolbar-btn:active:not(:disabled),
+.user-info-container
+  .action-toolbar
+  button.action-toolbar-btn:active:not(:disabled),
+.action-toolbar .action-toolbar-btn:active:not(:disabled) {
+  transform: scale(0.98) !important;
+  background: #f0f2f5 !important;
+  background-color: #f0f2f5 !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05) !important;
+  color: #2c3e50 !important;
 }
 
-.action-toolbar-btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
+.user-info-container .action-toolbar .action-toolbar-btn:disabled,
+.user-info-container .action-toolbar button.action-toolbar-btn:disabled,
+.action-toolbar .action-toolbar-btn:disabled {
+  opacity: 0.6 !important;
+  cursor: not-allowed !important;
+  background: rgba(255, 255, 255, 0.95) !important;
+  background-color: rgba(255, 255, 255, 0.95) !important;
+  color: #2c3e50 !important;
 }
 
-.action-toolbar-icon {
-  font-size: 24px;
-  transition: transform 0.2s ease;
+.user-info-container .action-toolbar .action-toolbar-icon,
+.action-toolbar .action-toolbar-icon {
+  font-size: 24px !important;
+  transition: transform 0.2s ease !important;
+  display: inline-block !important;
 }
 
-.action-toolbar-btn:hover:not(:disabled) .action-toolbar-icon {
-  transform: scale(1.1);
+.user-info-container
+  .action-toolbar
+  .action-toolbar-btn:hover:not(:disabled)
+  .action-toolbar-icon,
+.action-toolbar .action-toolbar-btn:hover:not(:disabled) .action-toolbar-icon {
+  transform: scale(1.1) !important;
 }
 
-/* 儲存按鈕 - 科技藍 */
-.action-toolbar-btn:nth-child(1) .action-toolbar-icon {
-  filter: drop-shadow(0 2px 4px rgba(74, 144, 226, 0.3));
-  text-shadow: 0 0 8px rgba(74, 144, 226, 0.4);
+/* 儲存按鈕 - 科技藍 (#4A90E2) */
+.user-info-container
+  .action-toolbar
+  .action-toolbar-btn:nth-child(1)
+  .action-toolbar-icon,
+.action-toolbar .action-toolbar-btn:nth-child(1) .action-toolbar-icon {
+  filter: drop-shadow(0 2px 4px rgba(74, 144, 226, 0.3)) !important;
+  text-shadow: 0 0 8px rgba(74, 144, 226, 0.4) !important;
+  /* 如果圖標支持顏色，使用 color */
+  color: #4a90e2 !important;
 }
 
-/* 更新排行榜 - 榮耀橘/金 */
-.action-toolbar-btn:nth-child(2) .action-toolbar-icon {
-  filter: drop-shadow(0 2px 4px rgba(245, 166, 35, 0.3));
-  text-shadow: 0 0 8px rgba(245, 166, 35, 0.4);
+/* 更新排行榜 - 榮耀橘/金 (#F5A623) */
+.user-info-container
+  .action-toolbar
+  .action-toolbar-btn:nth-child(2)
+  .action-toolbar-icon,
+.action-toolbar .action-toolbar-btn:nth-child(2) .action-toolbar-icon {
+  filter: drop-shadow(0 2px 4px rgba(245, 166, 35, 0.3)) !important;
+  text-shadow: 0 0 8px rgba(245, 166, 35, 0.4) !important;
+  color: #f5a623 !important;
 }
 
-/* 榮譽認證 - 尊爵綠 */
-.action-toolbar-btn:nth-child(3) .action-toolbar-icon {
-  filter: drop-shadow(0 2px 4px rgba(46, 204, 113, 0.3));
-  text-shadow: 0 0 8px rgba(46, 204, 113, 0.4);
+/* 榮譽認證 - 尊爵綠 (#2ECC71) */
+.user-info-container
+  .action-toolbar
+  .action-toolbar-btn:nth-child(3)
+  .action-toolbar-icon,
+.action-toolbar .action-toolbar-btn:nth-child(3) .action-toolbar-icon {
+  filter: drop-shadow(0 2px 4px rgba(46, 204, 113, 0.3)) !important;
+  text-shadow: 0 0 8px rgba(46, 204, 113, 0.4) !important;
+  color: #2ecc71 !important;
 }
 
-.action-toolbar-label {
-  font-size: 12px;
-  font-weight: 600;
-  color: #2c3e50;
-  text-align: center;
-  line-height: 1.2;
+.user-info-container .action-toolbar .action-toolbar-label,
+.action-toolbar .action-toolbar-label {
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  color: #2c3e50 !important;
+  text-align: center !important;
+  line-height: 1.2 !important;
 }
 
 /* 響應式設計 */
@@ -1165,16 +1215,20 @@
     padding: 0 12px;
   }
 
-  .action-toolbar-btn {
-    padding: 10px 12px;
-    min-width: 70px;
+  .user-info-container .action-toolbar .action-toolbar-btn,
+  .user-info-container .action-toolbar button.action-toolbar-btn,
+  .action-toolbar .action-toolbar-btn {
+    padding: 10px 12px !important;
+    min-width: 70px !important;
   }
 
-  .action-toolbar-icon {
-    font-size: 20px;
+  .user-info-container .action-toolbar .action-toolbar-icon,
+  .action-toolbar .action-toolbar-icon {
+    font-size: 20px !important;
   }
 
-  .action-toolbar-label {
-    font-size: 11px;
+  .user-info-container .action-toolbar .action-toolbar-label,
+  .action-toolbar .action-toolbar-label {
+    font-size: 11px !important;
   }
 }
