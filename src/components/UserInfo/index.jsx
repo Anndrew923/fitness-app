@@ -25,6 +25,9 @@ import GeneralModal from './Modals/GeneralModal';
 import RPGClassModal from './Modals/RPGClassModal';
 import SubmitConfirmModal from './Modals/SubmitConfirmModal';
 import { usePageScroll } from '../../hooks/usePageScroll';
+import LadderStatusCard from '../Ladder/LadderStatusCard';
+import { getDefaultMetric } from '../../config/rankingSystem';
+import { useLadderData } from '../../hooks/useLadderData';
 
 import './userinfo.css';
 import { useTranslation } from 'react-i18next';
@@ -405,6 +408,13 @@ function UserInfo({ testData, onLogout, clearTestData }) {
     };
   }, [userData?.scores]);
 
+  // ✅ UP-LADDER-EVO: 使用新的通用天梯數據 Hook
+  const defaultMetric = getDefaultMetric();
+  const { userRank: ladderUserRank } = useLadderData({
+    metricId: 'total',
+    enabled: completionStatus.isFullyCompleted && !!userData?.ladderScore,
+  });
+
   // ✅ Phase 1 新增：計算 RPG 職業
   const rpgClassInfo = useMemo(() => {
     if (!userData?.scores) {
@@ -696,17 +706,106 @@ function UserInfo({ testData, onLogout, clearTestData }) {
 
       {error && <p className="error-message">{error}</p>}
 
-      {/* 頭像區域 - 使用 AvatarSection 組件 */}
-      <AvatarSection
-        avatarUrl={isGuest ? '/guest-avatar.svg' : userData?.avatarUrl}
-        isGuest={isGuest}
-        isUploading={avatarUploading}
-        onImageSelected={handleAvatarChange}
-        onError={setAvatarError}
-        t={t}
-      />
+      {/* ✅ UP-LADDER-EVO: 頂部身份區 */}
+      <div className="user-info-identity">
+        {/* 頭像 */}
+        <AvatarSection
+          avatarUrl={isGuest ? '/guest-avatar.svg' : userData?.avatarUrl}
+          isGuest={isGuest}
+          isUploading={avatarUploading}
+          onImageSelected={handleAvatarChange}
+          onError={setAvatarError}
+          t={t}
+        />
 
-      {/* 只保留 currentUser 狀態區塊，移除載入提示 */}
+        {/* 名字 */}
+        <h2 className="user-info-name">
+          {userData?.nickname || userData?.email?.split('@')[0] || '用戶'}
+        </h2>
+
+        {/* 職業標籤 */}
+        {rpgClassInfo && rpgClassInfo.class !== 'UNKNOWN' && (
+          <div className="rpg-class-badge-inline" onClick={handleRpgClassClick}>
+            <span className="rpg-class-badge-icon">{rpgClassInfo.icon}</span>
+            <span className="rpg-class-badge-name">{rpgClassInfo.name}</span>
+          </div>
+        )}
+      </div>
+
+      {/* ✅ UP-LADDER-EVO: 戰力資訊條 */}
+      {completionStatus.isFullyCompleted && userData?.ladderScore > 0 && (
+        <div className="ladder-status-wrapper">
+          <LadderStatusCard
+            userData={userData}
+            rank={ladderUserRank || userRank}
+            metricConfig={defaultMetric}
+            variant="compact"
+            onNavigate={() => navigate('/ladder')}
+          />
+        </div>
+      )}
+
+      {/* ✅ UP-LADDER-EVO: 核心視覺 - 雷達圖 */}
+      <div id="radar-section" ref={radarSectionRef}>
+        <RadarChartSection
+          scores={userData?.scores}
+          loading={isLoading || loading}
+          t={t}
+        />
+      </div>
+
+      {/* ✅ UP-LADDER-EVO: 操作工具列 - 圖標按鈕組 */}
+      <div className="action-toolbar">
+        {averageScore > 0 && (
+          <button
+            onClick={handleSaveResults}
+            className="action-toolbar-btn"
+            disabled={loading}
+            title={t('userInfo.saveResults')}
+          >
+            <span className="action-toolbar-icon">💾</span>
+            <span className="action-toolbar-label">
+              {t('userInfo.saveResults')}
+            </span>
+          </button>
+        )}
+
+        {completionStatus.isFullyCompleted && (
+          <button
+            onClick={handleSubmitToLadder}
+            className="action-toolbar-btn"
+            disabled={loading}
+            title={
+              submittedLadderScore > 0
+                ? t('userInfo.updateLadderScore')
+                : t('userInfo.submitToLadder')
+            }
+          >
+            <span className="action-toolbar-icon">🏆</span>
+            <span className="action-toolbar-label">
+              {submittedLadderScore > 0
+                ? t('userInfo.updateLadderScore')
+                : t('userInfo.submitToLadder')}
+            </span>
+          </button>
+        )}
+
+        {submittedLadderScore > 0 && (
+          <button
+            onClick={() => navigate('/verification')}
+            className="action-toolbar-btn"
+            disabled={loading}
+            title={t('userInfo.getVerification')}
+          >
+            <span className="action-toolbar-icon">🏅</span>
+            <span className="action-toolbar-label">
+              {t('userInfo.getVerification')}
+            </span>
+          </button>
+        )}
+      </div>
+
+      {/* 保留 UserFormSection */}
       {(currentUser || isGuest) && (
         <>
           <div className="page-header">
@@ -730,189 +829,6 @@ function UserInfo({ testData, onLogout, clearTestData }) {
           {/* 保留 formSectionRef 用於滾動定位 */}
           <div ref={formSectionRef} style={{ display: 'none' }} />
         </>
-      )}
-
-      {/* 雷達圖區域 */}
-      <div id="radar-section" ref={radarSectionRef}>
-        <RadarChartSection
-          scores={userData?.scores}
-          loading={isLoading || loading}
-          t={t}
-        />
-      </div>
-
-      {/* 分數顯示區域 */}
-      {!loading && (
-        <div className="score-section">
-          {/* 平均分數 */}
-          {averageScore > 0 && (
-            <div className="average-score-display">
-              <p className="average-score">
-                ⭐ {t('userInfo.powerTitle')}{' '}
-                <span className="score-value-large">{averageScore}</span>
-              </p>
-              {/* ✅ Phase 1.9.1 緊急修復：RPG 職業標籤 - 恢復層級設定 */}
-              {rpgClassInfo && rpgClassInfo.class !== 'UNKNOWN' && (
-                <div
-                  className="rpg-class-badge"
-                  onClick={e => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    handleRpgClassClick();
-                  }}
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    marginTop: '12px',
-                    padding: '8px 16px',
-                    background:
-                      'linear-gradient(135deg, rgba(129, 216, 208, 0.2) 0%, rgba(95, 158, 160, 0.2) 100%)',
-                    borderRadius: '20px',
-                    border: '2px solid rgba(129, 216, 208, 0.4)',
-                    // ✅ Phase 1.9.1 緊急修復：恢復層級設定，確保按鈕浮在隱形遮擋層之上
-                    position: 'relative',
-                    zIndex: 50,
-                    fontSize: '16px',
-                    fontWeight: 'bold',
-                    color: '#2d3748',
-                    cursor: 'pointer',
-                    transition: 'all 0.3s ease',
-                    pointerEvents: 'auto',
-                    userSelect: 'none',
-                  }}
-                  onMouseEnter={e => {
-                    e.currentTarget.style.background =
-                      'linear-gradient(135deg, rgba(129, 216, 208, 0.3) 0%, rgba(95, 158, 160, 0.3) 100%)';
-                    e.currentTarget.style.transform = 'scale(1.05)';
-                    e.currentTarget.style.boxShadow =
-                      '0 4px 12px rgba(129, 216, 208, 0.3)';
-                  }}
-                  onMouseLeave={e => {
-                    e.currentTarget.style.background =
-                      'linear-gradient(135deg, rgba(129, 216, 208, 0.2) 0%, rgba(95, 158, 160, 0.2) 100%)';
-                    e.currentTarget.style.transform = 'scale(1)';
-                    e.currentTarget.style.boxShadow = 'none';
-                  }}
-                >
-                  <span style={{ fontSize: '20px' }}>{rpgClassInfo.icon}</span>
-                  <span>{rpgClassInfo.name}</span>
-                </div>
-              )}
-              {completionStatus.isFullyCompleted && (
-                <div className="ladder-info">
-                  <p className="ladder-rank">
-                    🏆 {t('userInfo.ladder.rankLabel')}:{' '}
-                    <span className="rank-value">{userRank || '未上榜'}</span>
-                  </p>
-                  {submittedLadderScore > 0 && (
-                    <p className="submitted-score">
-                      {t('userInfo.ladder.submittedScore')}:{' '}
-                      <span className="score-value">
-                        {submittedLadderScore}
-                      </span>
-                    </p>
-                  )}
-                  {currentLadderScore > 0 &&
-                    currentLadderScore !== submittedLadderScore && (
-                      <p className="current-score">
-                        {t('userInfo.ladder.currentScore')}:{' '}
-                        <span className="score-value">
-                          {currentLadderScore}
-                        </span>
-                        <span className="score-note">
-                          {t('userInfo.ladder.needsSubmit')}
-                        </span>
-                      </p>
-                    )}
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* 按鈕區域 */}
-          <div className="action-buttons-section">
-            {/* 儲存評測結果按鈕 */}
-            {averageScore > 0 && (
-              <button
-                onClick={handleSaveResults}
-                className="action-btn save-results-btn"
-                disabled={loading}
-              >
-                <span className="btn-icon">💾</span>
-                <span className="btn-text">{t('userInfo.saveResults')}</span>
-              </button>
-            )}
-
-            {/* 提交到天梯按鈕 */}
-            {completionStatus.isFullyCompleted && (
-              <button
-                onClick={handleSubmitToLadder}
-                className="action-btn submit-ladder-btn"
-                disabled={loading}
-              >
-                <span className="btn-icon">🏆</span>
-                <span className="btn-text">
-                  {submittedLadderScore > 0
-                    ? t('userInfo.updateLadderScore')
-                    : t('userInfo.submitToLadder')}
-                </span>
-              </button>
-            )}
-
-            {/* ✅ 新增：獲得榮譽認證按鈕 */}
-            {submittedLadderScore > 0 && (
-              <button
-                onClick={() => navigate('/verification')}
-                className="action-btn verification-btn"
-                disabled={loading}
-              >
-                <span className="btn-icon">🏅</span>
-                <span className="btn-text">
-                  {t('userInfo.getVerification')}
-                </span>
-              </button>
-            )}
-          </div>
-
-          {/* 天梯限制資訊 */}
-          {completionStatus.isFullyCompleted && (
-            <div className="ladder-limits-info">
-              <div className="limit-info-item">
-                <span className="limit-icon">🔄</span>
-                <span className="limit-text">
-                  {t('userInfo.limits.remainingUpdates', {
-                    count:
-                      3 - (ladderSubmissionState.dailySubmissionCount || 0),
-                  })}
-                </span>
-              </div>
-              <div className="limit-info-item">
-                <span className="limit-icon">⏰</span>
-                <span className="limit-text">
-                  {t('userInfo.limits.nextResetTime')}
-                </span>
-              </div>
-              <div className="limit-info-item">
-                <span className="limit-icon">ℹ️</span>
-                <span className="limit-text">
-                  {t('userInfo.limits.limitInfo')}
-                </span>
-              </div>
-            </div>
-          )}
-
-          {/* 天梯排名說明 */}
-          <div className="ladder-info-card">
-            <p className="ladder-info-text">
-              {completionStatus.isFullyCompleted
-                ? t('userInfo.ladder.ctaCompleted')
-                : t('userInfo.ladder.ctaNotCompleted', {
-                    count: completionStatus.completedCount,
-                  })}
-            </p>
-          </div>
-        </div>
       )}
 
       {/* 提交確認對話框 */}

@@ -1,0 +1,143 @@
+/* LadderStatusCard 組件樣式 */
+
+/* 精簡模式 (Compact) - 深色玻璃擬態儀器風格 */
+.ladder-status-card--compact {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 16px;
+  background: rgba(20, 30, 40, 0.75);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 24px;
+  border: 1px solid rgba(255, 215, 0, 0.3);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 215, 0, 0.1);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin: 8px 0;
+  position: relative;
+  z-index: 1;
+}
+
+.ladder-status-card--compact:hover {
+  background: rgba(20, 30, 40, 0.85);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 215, 0, 0.15);
+  border-color: rgba(255, 215, 0, 0.4);
+}
+
+.ladder-status-card__content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #ffd700;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5), 0 0 8px rgba(255, 215, 0, 0.3);
+}
+
+.ladder-status-card__icon {
+  font-size: 16px;
+  filter: drop-shadow(0 0 4px rgba(255, 215, 0, 0.5));
+}
+
+.ladder-status-card__divider {
+  color: rgba(255, 215, 0, 0.5);
+  margin: 0 4px;
+}
+
+/* 預設模式 (Default) */
+.ladder-status-card--default {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.95) 0%,
+    rgba(255, 255, 255, 0.9) 100%
+  );
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(129, 216, 208, 0.2);
+}
+
+.ladder-status-card__header {
+  margin-bottom: 16px;
+}
+
+.ladder-status-card__title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #2d3748;
+  margin: 0;
+}
+
+.ladder-status-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ladder-status-card__rank,
+.ladder-status-card__score {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.ladder-status-card__rank-label,
+.ladder-status-card__score-label {
+  font-size: 14px;
+  color: #718096;
+  font-weight: 500;
+}
+
+.ladder-status-card__rank-value,
+.ladder-status-card__score-value {
+  font-size: 20px;
+  font-weight: 700;
+  color: #ff6b35;
+}
+
+.ladder-status-card__action {
+  margin-top: 16px;
+  width: 100%;
+  padding: 10px;
+  background: linear-gradient(135deg, #81d8d0 0%, #5f9ea0 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.ladder-status-card__action:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(129, 216, 208, 0.4);
+}
+
+/* 響應式設計 */
+@media (max-width: 768px) {
+  .ladder-status-card--compact {
+    padding: 6px 12px;
+    font-size: 13px;
+  }
+
+  .ladder-status-card__content {
+    font-size: 13px;
+  }
+
+  .ladder-status-card--default {
+    padding: 16px;
+  }
+
+  .ladder-status-card__title {
+    font-size: 16px;
+  }
+
+  .ladder-status-card__rank-value,
+  .ladder-status-card__score-value {
+    font-size: 18px;
+  }
+}

@@ -1015,3 +1015,166 @@
     height: 18px !important;
   }
 }
+
+/* ✅ UP-LADDER-EVO: 新佈局樣式 */
+
+/* 身份區 */
+.user-info-identity {
+  text-align: center;
+  margin-bottom: 20px;
+  position: relative;
+  z-index: 1;
+}
+
+.user-info-name {
+  font-size: 24px;
+  font-weight: 700;
+  color: white;
+  margin: 12px 0 8px 0;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* 職業標籤（內聯） - 實體質感 */
+.rpg-class-badge-inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  padding: 6px 14px;
+  background: #1a1f2e;
+  border-radius: 8px;
+  border: none;
+  font-size: 14px;
+  font-weight: 600;
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.rpg-class-badge-inline:hover {
+  background: #252b3d;
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.rpg-class-badge-icon {
+  font-size: 18px;
+}
+
+/* 戰力資訊條容器 */
+.ladder-status-wrapper {
+  display: flex;
+  justify-content: center;
+  margin: 16px 0;
+  position: relative;
+  z-index: 1;
+}
+
+/* 操作工具列 - 白底高對比風格 */
+.action-toolbar {
+  display: flex;
+  flex-direction: column; /* 垂直堆疊 */
+  gap: 12px;
+  margin-top: 24px;
+  padding: 0 16px;
+  position: relative;
+  z-index: 1;
+}
+
+.action-toolbar-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 16px;
+  min-width: 80px;
+  /* 核心改變：白底 + 微透 */
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(255, 255, 255, 1);
+  border-radius: 12px;
+  cursor: pointer;
+  /* 文字與陰影 */
+  color: #2c3e50; /* 深藍灰文字，閱讀性最高 */
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); /* 輕柔的陰影，讓按鈕浮起來 */
+  /* 互動感 */
+  transition: all 0.2s ease;
+}
+
+.action-toolbar-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  background: rgba(255, 255, 255, 1);
+}
+
+.action-toolbar-btn:active:not(:disabled) {
+  transform: scale(0.98);
+  background: #f0f2f5;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.action-toolbar-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.action-toolbar-icon {
+  font-size: 24px;
+  transition: transform 0.2s ease;
+}
+
+.action-toolbar-btn:hover:not(:disabled) .action-toolbar-icon {
+  transform: scale(1.1);
+}
+
+/* 儲存按鈕 - 科技藍 */
+.action-toolbar-btn:nth-child(1) .action-toolbar-icon {
+  filter: drop-shadow(0 2px 4px rgba(74, 144, 226, 0.3));
+  text-shadow: 0 0 8px rgba(74, 144, 226, 0.4);
+}
+
+/* 更新排行榜 - 榮耀橘/金 */
+.action-toolbar-btn:nth-child(2) .action-toolbar-icon {
+  filter: drop-shadow(0 2px 4px rgba(245, 166, 35, 0.3));
+  text-shadow: 0 0 8px rgba(245, 166, 35, 0.4);
+}
+
+/* 榮譽認證 - 尊爵綠 */
+.action-toolbar-btn:nth-child(3) .action-toolbar-icon {
+  filter: drop-shadow(0 2px 4px rgba(46, 204, 113, 0.3));
+  text-shadow: 0 0 8px rgba(46, 204, 113, 0.4);
+}
+
+.action-toolbar-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #2c3e50;
+  text-align: center;
+  line-height: 1.2;
+}
+
+/* 響應式設計 */
+@media (max-width: 768px) {
+  .user-info-name {
+    font-size: 20px;
+  }
+
+  .action-toolbar {
+    gap: 8px;
+    padding: 0 12px;
+  }
+
+  .action-toolbar-btn {
+    padding: 10px 12px;
+    min-width: 70px;
+  }
+
+  .action-toolbar-icon {
+    font-size: 20px;
+  }
+
+  .action-toolbar-label {
+    font-size: 11px;
+  }
+}
