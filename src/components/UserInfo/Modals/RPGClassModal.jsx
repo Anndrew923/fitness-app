@@ -84,10 +84,10 @@ const RPGClassModal = ({ isOpen, onClose, classInfo }) => {
       {/* 卡片本體 - 強制絕對定位 */}
       <div
         style={{
-          position: 'absolute',
-          bottom: 280,
+          position: 'fixed', // ✅ 置頂組：改為 fixed 定位
+          top: '18%', // ✅ 置頂組：往上移動到 18%（大頭貼下方，覆蓋「狂戰士」標籤區域）
           left: '50%',
-          transform: 'translateX(-50%)',
+          transform: 'translateX(-50%)', // 水平居中
           width: '85%',
           maxWidth: '500px',
           backgroundColor: '#1E1E1E',
@@ -98,6 +98,7 @@ const RPGClassModal = ({ isOpen, onClose, classInfo }) => {
             '0 0 30px rgba(255, 87, 34, 0.8), 0 0 60px rgba(255, 87, 34, 0.4)',
           animation: 'rpgModalSlideIn 0.4s ease-out',
           zIndex: 99999,
+          bottom: 'auto', // ✅ 重置底部定位
         }}
         onClick={e => e.stopPropagation()}
       >
@@ -268,4 +269,3 @@ RPGClassModal.propTypes = {
 };
 
 export default RPGClassModal;
-

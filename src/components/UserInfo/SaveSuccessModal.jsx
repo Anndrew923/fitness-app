@@ -23,7 +23,8 @@ const SaveSuccessModal = ({ isOpen, onClose, onNavigate }) => {
         <div style={styles.content}>
           <p style={styles.quote}>「今天的汗水，是明天的傳說。」</p>
           <p style={styles.text}>
-            您的修練數據已成功寫入歷史卷軸。<br />
+            您的修練數據已成功寫入歷史卷軸。
+            <br />
             隨時前往「成就」頁面，見證您的變強之路。
           </p>
         </div>
@@ -61,14 +62,14 @@ const SaveSuccessModal = ({ isOpen, onClose, onNavigate }) => {
 
       {/* 動畫樣式 */}
       <style>{`
-        @keyframes slideUp {
+        @keyframes slideDown {
           from {
             opacity: 0;
-            transform: translateY(20px) scale(0.95);
+            transform: translateX(-50%) translateY(-20px) scale(0.95); /* ✅ 置頂組：動畫從上方滑入（向下移動） */
           }
           to {
             opacity: 1;
-            transform: translateY(0) scale(1);
+            transform: translateX(-50%) translateY(0) scale(1); /* ✅ 置頂組：動畫結束狀態包含 translateX(-50%) */
           }
         }
       `}</style>
@@ -88,19 +89,25 @@ const styles = {
     zIndex: 10002, // 比一般 Modal 高一點
     display: 'flex',
     justifyContent: 'center',
-    alignItems: 'flex-end', // 靠下對齊
-    paddingBottom: '280px', // ✅ 關鍵：與其他 Modal 一致，懸浮於橘色卡片上方
+    alignItems: 'flex-start', // ✅ 置頂組：改為 flex-start，配合頂部定位
+    paddingTop: '18%', // ✅ 置頂組：往上移動到 18%
+    paddingBottom: 0,
   },
   container: {
-    width: '85%',
-    maxWidth: '380px',
+    width: '90%', // ✅ UI 優化：留 5% 間距在兩側
+    maxWidth: '340px', // ✅ UI 優化：限制最大寬度，避免在大螢幕上過寬
     backgroundColor: '#1E1E1E', // 深色背景
-    borderRadius: '20px',
+    borderRadius: '16px', // ✅ UI 優化：現代化圓角
     border: '2px solid #48BB78', // 綠色邊框代表成功
-    padding: '25px',
-    boxShadow: '0 0 30px rgba(72, 187, 120, 0.4), 0 0 60px rgba(72, 187, 120, 0.2)',
-    animation: 'slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
-    position: 'relative',
+    padding: '24px 20px', // ✅ UI 優化：調整內邊距
+    boxShadow: '0 8px 24px rgba(0, 0, 0, 0.15)', // ✅ UI 優化：更精緻的陰影效果
+    animation: 'slideDown 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+    position: 'fixed', // ✅ 置頂組：保持 fixed 定位
+    top: '18%', // ✅ 置頂組：往上移動到 18%（大頭貼下方，覆蓋「狂戰士」標籤區域）
+    bottom: 'auto', // ✅ 置頂組：重置底部定位
+    left: '50%',
+    transform: 'translateX(-50%)', // ✅ 水平居中
+    margin: 0, // ✅ 重置 margin
   },
   header: {
     textAlign: 'center',
@@ -170,4 +177,3 @@ SaveSuccessModal.propTypes = {
 };
 
 export default SaveSuccessModal;
-

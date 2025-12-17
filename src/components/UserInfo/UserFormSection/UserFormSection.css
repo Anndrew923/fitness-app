@@ -26,14 +26,16 @@
 
 .section-title {
   font-size: 26px;
-  font-weight: 700;
-  color: white;
+  font-weight: 700 !important; /* ✅ UI 優化：確保字重 */
+  color: #2c3e50 !important; /* ✅ UI 優化：深藍灰色，高對比度，避免白色文字在白色卡片上不可見 */
   margin: 0;
   display: flex;
   align-items: center;
   gap: 8px;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  text-shadow: none; /* ✅ UI 優化：移除文字陰影，因為現在是深色文字 */
   line-height: 1.2;
+  border-bottom: 1px solid #eee !important; /* ✅ UI 優化：添加細分隔線增加清晰度 */
+  padding-bottom: 8px !important; /* ✅ UI 優化：分隔線下方留空間 */
 }
 
 /* 登出按鈕 - BEM命名 */

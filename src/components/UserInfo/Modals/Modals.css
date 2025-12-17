@@ -1,37 +1,46 @@
 /* Modal 通用樣式 */
 .modal-overlay {
-  position: fixed;
+  position: fixed !important;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
   background-color: rgba(0, 0, 0, 0.5);
   display: flex;
-  align-items: center;
+  align-items: flex-end !important; /* ✅ 置底組：改為 flex-end，配合底部定位 */
   justify-content: center;
   z-index: 10000;
   padding: 20px;
+  padding-bottom: 100px !important; /* ✅ 置底組：往下移動到底部 100px */
+  padding-top: 0 !important;
 }
 
 .modal-content {
   background: white;
-  border-radius: 16px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-  max-width: 400px;
-  width: 100%;
+  border-radius: 16px !important; /* ✅ UI 優化：現代化圓角 */
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15) !important; /* ✅ UI 優化：更精緻的陰影效果 */
+  max-width: 340px !important; /* ✅ UI 優化：限制最大寬度，避免在大螢幕上過寬 */
+  width: 90% !important; /* ✅ UI 優化：留 5% 間距在兩側，避免觸及螢幕邊緣 */
   max-height: 80vh;
   overflow: hidden;
   animation: modalSlideIn 0.3s ease-out;
+  position: fixed !important; /* ✅ 置底組：強制固定定位 */
+  bottom: 100px !important; /* ✅ 置底組：往下移動到底部 100px（靠近視窗底部邊緣，位於操作按鈕區上方） */
+  top: auto !important; /* ✅ 置底組：重置 top */
+  left: 50% !important;
+  transform: translateX(-50%) !important; /* ✅ 水平居中 */
+  margin: 0 !important;
+  /* 注意：不在此處設置 padding，由內部元素 (.modal-header, .modal-body, .modal-footer) 控制內邊距 */
 }
 
 @keyframes modalSlideIn {
   from {
     opacity: 0;
-    transform: translateY(-20px) scale(0.95);
+    transform: translateX(-50%) translateY(20px) scale(0.95); /* ✅ 置底組：動畫從下方滑入，包含 translateX(-50%) */
   }
   to {
     opacity: 1;
-    transform: translateY(0) scale(1);
+    transform: translateX(-50%) translateY(0) scale(1); /* ✅ 置底組：動畫結束狀態包含 translateX(-50%) */
   }
 }
 
@@ -158,9 +167,10 @@
   bottom: 0;
   display: flex;
   flex-direction: column;
-  justify-content: flex-end;
+  justify-content: flex-start !important; /* ✅ 置頂組：改為 flex-start */
   align-items: center;
   background-color: rgba(0, 0, 0, 0.6);
+  padding-top: 18% !important; /* ✅ 置頂組：往上移動到 18% */
   padding-bottom: 0 !important;
   overscroll-behavior: contain;
   touch-action: none;
@@ -169,7 +179,7 @@
 .submit-confirm-content {
   width: 90%;
   max-width: 400px;
-  margin: 0 auto 280px auto;
+  margin: 0 !important; /* ✅ 置頂組：移除 margin，使用固定定位 */
   background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
   border: 2px solid #4a5568;
   border-radius: 20px;
@@ -178,7 +188,11 @@
   max-height: 60vh;
   display: flex;
   flex-direction: column;
-  position: relative;
+  position: fixed !important; /* ✅ 置頂組：強制固定定位 */
+  top: 18% !important; /* ✅ 置頂組：往上移動到 18%（大頭貼下方，覆蓋「狂戰士」標籤區域） */
+  bottom: auto !important; /* ✅ 置頂組：重置底部定位 */
+  left: 50% !important;
+  transform: translateX(-50%) !important; /* ✅ 水平居中 */
   animation: confirmModalSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   overflow: hidden;
 }
@@ -367,19 +381,20 @@
 @keyframes confirmModalSlideUp {
   from {
     opacity: 0;
-    transform: translateY(20px) scale(0.95);
+    transform: translateX(-50%) translateY(-20px) scale(0.95); /* ✅ 置頂組：動畫從上方滑入（向下移動） */
   }
   to {
     opacity: 1;
-    transform: translateY(0) scale(1);
+    transform: translateX(-50%) translateY(0) scale(1); /* ✅ 置頂組：動畫結束狀態包含 translateX(-50%) */
   }
 }
 
 /* 響應式設計 */
 @media (max-width: 480px) {
   .modal-content {
-    margin: 20px;
-    max-width: none;
+    margin: 0 !important; /* ✅ UI 優化：保持無 margin，使用 width 控制間距 */
+    max-width: 340px !important; /* ✅ UI 優化：保持最大寬度限制 */
+    width: 90% !important; /* ✅ UI 優化：小螢幕上保持 90% 寬度 */
   }
 
   .modal-header {
@@ -408,7 +423,7 @@
   }
 
   .submit-confirm-content {
-    margin-bottom: 260px;
+    margin: 0 !important; /* ✅ 置頂組：移除 margin-bottom */
     width: 88%;
   }
 
@@ -505,4 +520,3 @@
     background: linear-gradient(135deg, #2d3748, #1a202c);
   }
 }
-
