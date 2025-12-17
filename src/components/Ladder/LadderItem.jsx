@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
 import { formatScore } from '../../utils.js';
-import './Ladder.css';
+import './LadderItem.css';
 
 /**
  * LadderItem - Single row component for ladder list

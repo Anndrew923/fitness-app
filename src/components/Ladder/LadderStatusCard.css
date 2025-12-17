@@ -1,143 +1,134 @@
-/* LadderStatusCard 組件樣式 */
+/* LadderStatusCard Component Styles */
+/* Note: Floating rank card uses shared ladder__* classes from LadderItem.css */
 
-/* 精簡模式 (Compact) - 深色玻璃擬態儀器風格 */
-.ladder-status-card--compact {
-  display: inline-flex;
-  align-items: center;
-  padding: 8px 16px;
-  background: rgba(20, 30, 40, 0.75);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-radius: 24px;
-  border: 1px solid rgba(255, 215, 0, 0.3);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4),
-    inset 0 1px 0 rgba(255, 215, 0, 0.1);
-  cursor: pointer;
+.ladder-status-card {
+  background: linear-gradient(135deg, #ff6b35 0%, #f7931e 50%, #ffd700 100%);
+  border-radius: 12px;
+  padding: 16px;
+  margin: 12px 0;
+  box-shadow: 0 4px 16px rgba(255, 107, 53, 0.3);
   transition: all 0.3s ease;
-  margin: 8px 0;
-  position: relative;
-  z-index: 1;
 }
 
-.ladder-status-card--compact:hover {
-  background: rgba(20, 30, 40, 0.85);
+.ladder-status-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.5),
-    inset 0 1px 0 rgba(255, 215, 0, 0.15);
-  border-color: rgba(255, 215, 0, 0.4);
+  box-shadow: 0 6px 20px rgba(255, 107, 53, 0.4);
 }
 
 .ladder-status-card__content {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 14px;
-  font-weight: 600;
-  color: #ffd700;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5), 0 0 8px rgba(255, 215, 0, 0.3);
+  gap: 16px;
+  color: white;
 }
 
-.ladder-status-card__icon {
-  font-size: 16px;
-  filter: drop-shadow(0 0 4px rgba(255, 215, 0, 0.5));
-}
-
-.ladder-status-card__divider {
-  color: rgba(255, 215, 0, 0.5);
-  margin: 0 4px;
-}
-
-/* 預設模式 (Default) */
-.ladder-status-card--default {
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.95) 0%,
-    rgba(255, 255, 255, 0.9) 100%
-  );
-  border-radius: 16px;
-  padding: 20px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  border: 1px solid rgba(129, 216, 208, 0.2);
-}
-
-.ladder-status-card__header {
-  margin-bottom: 16px;
-}
-
-.ladder-status-card__title {
-  font-size: 18px;
-  font-weight: 700;
-  color: #2d3748;
-  margin: 0;
-}
-
-.ladder-status-card__body {
+.ladder-status-card__rank {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  align-items: center;
+  min-width: 50px;
 }
 
-.ladder-status-card__rank,
+.ladder-status-card__rank-number {
+  font-size: 24px;
+  font-weight: 700;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.ladder-status-card__rank-badge {
+  font-size: 20px;
+  margin-top: 4px;
+}
+
+.ladder-status-card__info {
+  flex: 1;
+}
+
+.ladder-status-card__label {
+  font-size: 12px;
+  opacity: 0.9;
+  margin-bottom: 4px;
+}
+
 .ladder-status-card__score {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  align-items: baseline;
+  gap: 4px;
 }
 
-.ladder-status-card__rank-label,
-.ladder-status-card__score-label {
-  font-size: 14px;
-  color: #718096;
-  font-weight: 500;
-}
-
-.ladder-status-card__rank-value,
 .ladder-status-card__score-value {
   font-size: 20px;
   font-weight: 700;
-  color: #ff6b35;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
-.ladder-status-card__action {
-  margin-top: 16px;
+.ladder-status-card__score-label {
+  font-size: 12px;
+  opacity: 0.9;
+}
+
+/* Floating Rank Display (used in Ladder.jsx) */
+.floating-rank-display {
+  position: fixed;
+  bottom: calc(64px + 20px + env(safe-area-inset-bottom, 0px));
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 100;
+  display: flex;
+  justify-content: center;
   width: 100%;
-  padding: 10px;
-  background: linear-gradient(135deg, #81d8d0 0%, #5f9ea0 100%);
-  color: white;
-  border: none;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
+  max-width: 800px;
+  padding: 0 20px;
+  box-sizing: border-box;
+  transition: transform 0.2s ease;
+}
+
+.floating-rank-display:active {
+  transform: translateY(0) translateX(-50%);
+}
+
+.floating-rank-card {
+  background: white;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15), 0 4px 15px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  border: 1px solid #e0e0e0;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.floating-rank-card::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+  border-radius: 2px;
+}
+
+.floating-rank-display:hover .floating-rank-card {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.2), 0 6px 20px rgba(0, 0, 0, 0.15);
   transition: all 0.3s ease;
 }
 
-.ladder-status-card__action:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(129, 216, 208, 0.4);
-}
-
-/* 響應式設計 */
+/* Mobile Responsive */
 @media (max-width: 768px) {
-  .ladder-status-card--compact {
-    padding: 6px 12px;
-    font-size: 13px;
+  .floating-rank-display {
+    bottom: calc(64px + 10px + env(safe-area-inset-bottom, 0px));
+    padding: 0 16px;
   }
 
-  .ladder-status-card__content {
-    font-size: 13px;
-  }
-
-  .ladder-status-card--default {
-    padding: 16px;
-  }
-
-  .ladder-status-card__title {
-    font-size: 16px;
-  }
-
-  .ladder-status-card__rank-value,
-  .ladder-status-card__score-value {
-    font-size: 18px;
+  .floating-rank-card {
+    padding: 12px;
+    gap: 12px;
   }
 }

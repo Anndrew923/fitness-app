@@ -1,4 +1,10 @@
-import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
+import React, {
+  useState,
+  useEffect,
+  useMemo,
+  useRef,
+  useCallback,
+} from 'react';
 import { useUser } from '../UserContext';
 import { useLocation } from 'react-router-dom';
 import { auth } from '../firebase';
@@ -11,6 +17,8 @@ import { useDopamineFeedback } from '../hooks/useDopamineFeedback';
 import LadderList from './Ladder/LadderList';
 import LadderFilters from './Ladder/LadderFilters';
 import './Ladder/Ladder.css';
+import './Ladder/LadderItem.css'; // For shared styles used in floating-rank-card
+import './Ladder/LadderStatusCard.css'; // For floating-rank-display styles
 
 const Ladder = () => {
   const { userData } = useUser();
@@ -65,58 +73,55 @@ const Ladder = () => {
   );
 
   // Check and show notification
-  const checkAndShowNotification = useCallback(
-    (newRank) => {
-      try {
-        const savedNotification = localStorage.getItem(
-          'ladderUpdateNotification'
-        );
-        if (!savedNotification) return;
+  const checkAndShowNotification = useCallback(newRank => {
+    try {
+      const savedNotification = localStorage.getItem(
+        'ladderUpdateNotification'
+      );
+      if (!savedNotification) return;
 
-        const notification = JSON.parse(savedNotification);
-        if (notification.hasShown) return;
+      const notification = JSON.parse(savedNotification);
+      if (notification.hasShown) return;
 
-        const timeDiff = Date.now() - notification.timestamp;
-        if (timeDiff > 5 * 60 * 1000) {
-          localStorage.removeItem('ladderUpdateNotification');
-          return;
-        }
-
-        notification.newRank = newRank;
-        notification.oldRank = notification.oldRank || 0;
-
-        const scoreImproved = notification.newScore > notification.oldScore;
-        const rankImproved =
-          notification.oldRank > 0 && notification.newRank < notification.oldRank;
-
-        if (notification.isFirstTime) {
-          notification.type = 'first-time';
-        } else if (scoreImproved || rankImproved) {
-          notification.type = 'improved';
-        } else {
-          notification.type = 'declined';
-        }
-
-        setNotificationData(notification);
-        setShowNotification(true);
-
-        notification.hasShown = true;
-        localStorage.setItem(
-          'ladderUpdateNotification',
-          JSON.stringify(notification)
-        );
-      } catch (error) {
-        logger.error('檢查提醒框失敗:', error);
+      const timeDiff = Date.now() - notification.timestamp;
+      if (timeDiff > 5 * 60 * 1000) {
+        localStorage.removeItem('ladderUpdateNotification');
+        return;
       }
-    },
-    []
-  );
+
+      notification.newRank = newRank;
+      notification.oldRank = notification.oldRank || 0;
+
+      const scoreImproved = notification.newScore > notification.oldScore;
+      const rankImproved =
+        notification.oldRank > 0 && notification.newRank < notification.oldRank;
+
+      if (notification.isFirstTime) {
+        notification.type = 'first-time';
+      } else if (scoreImproved || rankImproved) {
+        notification.type = 'improved';
+      } else {
+        notification.type = 'declined';
+      }
+
+      setNotificationData(notification);
+      setShowNotification(true);
+
+      notification.hasShown = true;
+      localStorage.setItem(
+        'ladderUpdateNotification',
+        JSON.stringify(notification)
+      );
+    } catch (error) {
+      logger.error('檢查提醒框失敗:', error);
+    }
+  }, []);
 
   // Execute chain scroll
-  const executeChainScroll = useCallback((targetId) => {
+  const executeChainScroll = useCallback(targetId => {
     if (!targetId) return;
 
-    const doScroll = (behavior) => {
+    const doScroll = behavior => {
       const el = document.querySelector(`[data-user-id="${targetId}"]`);
       if (el) {
         el.scrollIntoView({ behavior, block: 'center' });
@@ -145,7 +150,7 @@ const Ladder = () => {
 
     if (targetPage !== currentPage) {
       setCurrentPage(targetPage);
-      setForceScrollTrigger((prev) => prev + 1);
+      setForceScrollTrigger(prev => prev + 1);
     } else {
       executeChainScroll(targetId);
     }
@@ -181,7 +186,8 @@ const Ladder = () => {
       userRank > 0
     ) {
       const userInDisplay = ladderData.some(
-        (user) => user.id === userData?.userId || user.id === auth.currentUser?.uid
+        user =>
+          user.id === userData?.userId || user.id === auth.currentUser?.uid
       );
 
       if (userInDisplay) {
@@ -216,7 +222,7 @@ const Ladder = () => {
   }, [location.state, userData, refresh]);
 
   // Get rank badge
-  const getRankBadge = (rank) => {
+  const getRankBadge = rank => {
     if (rank === 1) return '🥇';
     if (rank === 2) return '🥈';
     if (rank === 3) return '🥉';
@@ -227,8 +233,8 @@ const Ladder = () => {
 
   // Get age group label
   const getAgeGroupLabel = useCallback(
-    (ageGroup) => {
-      const group = ageGroups.find((g) => g.value === ageGroup);
+    ageGroup => {
+      const group = ageGroups.find(g => g.value === ageGroup);
       return group ? group.label : ageGroup;
     },
     [ageGroups]
@@ -259,7 +265,7 @@ const Ladder = () => {
       <div
         className="floating-rank-display"
         data-rank={currentRank}
-        onClick={(e) => {
+        onClick={e => {
           e.preventDefault();
           e.stopPropagation();
           jumpToCurrentUser();
@@ -347,7 +353,7 @@ const Ladder = () => {
 
   // Pagination
   const goToPage = useCallback(
-    (page) => {
+    page => {
       const targetPage = Math.max(1, Math.min(page, totalPages));
       setCurrentPage(targetPage);
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -356,7 +362,7 @@ const Ladder = () => {
   );
 
   const handlePageSelect = useCallback(
-    (e) => {
+    e => {
       const selectedPage = parseInt(e.target.value, 10);
       if (selectedPage && selectedPage >= 1 && selectedPage <= totalPages) {
         goToPage(selectedPage);
@@ -389,7 +395,7 @@ const Ladder = () => {
               notificationData.type ||
               (notificationData.isFirstTime ? 'first-time' : 'declined')
             }`}
-            onClick={(e) => e.stopPropagation()}
+            onClick={e => e.stopPropagation()}
           >
             <button
               className="ladder-notification__close"
@@ -454,11 +460,13 @@ const Ladder = () => {
                       <span className="ladder-notification__stat-new">
                         {formatScore(notificationData.newScore)}
                       </span>
-                      {notificationData.newScore > notificationData.oldScore && (
+                      {notificationData.newScore >
+                        notificationData.oldScore && (
                         <span className="ladder-notification__stat-improvement">
                           (+
                           {formatScore(
-                            notificationData.newScore - notificationData.oldScore
+                            notificationData.newScore -
+                              notificationData.oldScore
                           )}
                           )
                         </span>
@@ -524,7 +532,8 @@ const Ladder = () => {
                       <span className="ladder-notification__stat-new">
                         {formatScore(notificationData.newScore)}
                       </span>
-                      {notificationData.newScore < notificationData.oldScore && (
+                      {notificationData.newScore <
+                        notificationData.oldScore && (
                         <span className="ladder-notification__stat-decline">
                           (-
                           {formatScore(
@@ -641,13 +650,11 @@ const Ladder = () => {
               className="ladder__pagination-select"
               aria-label={t('ladder.pagination.selectPage')}
             >
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map(
-                (page) => (
-                  <option key={page} value={page}>
-                    {t('ladder.pagination.page', { page })}
-                  </option>
-                )
-              )}
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                <option key={page} value={page}>
+                  {t('ladder.pagination.page', { page })}
+                </option>
+              ))}
             </select>
             <span className="ladder__pagination-total">
               / {t('ladder.pagination.total', { total: totalPages })}

@@ -1,0 +1,459 @@
+/* LadderItem Component Styles */
+
+.ladder__item {
+  display: flex;
+  align-items: center;
+  padding: 12px;
+  border-bottom: 1px solid #f0f0f0;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.ladder__item:nth-child(1) {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 215, 0, 0.1) 0%,
+    rgba(255, 215, 0, 0.05) 100%
+  );
+  border-left: 4px solid #ffd700;
+}
+
+.ladder__item:nth-child(2) {
+  background: linear-gradient(
+    135deg,
+    rgba(192, 192, 192, 0.1) 0%,
+    rgba(192, 192, 192, 0.05) 100%
+  );
+  border-left: 4px solid #c0c0c0;
+}
+
+.ladder__item:nth-child(3) {
+  background: linear-gradient(
+    135deg,
+    rgba(205, 127, 50, 0.1) 0%,
+    rgba(205, 127, 50, 0.05) 100%
+  );
+  border-left: 4px solid #cd7f32;
+}
+
+.ladder__item--current-user {
+  position: relative;
+}
+
+.ladder__item:hover {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 107, 53, 0.1) 0%,
+    rgba(247, 147, 30, 0.1) 50%,
+    rgba(255, 215, 0, 0.1) 100%
+  );
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(255, 107, 53, 0.2);
+  transition: all 0.3s ease;
+}
+
+.ladder__item:last-child {
+  border-bottom: none;
+}
+
+.ladder__item.clickable {
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.ladder__item.clickable:hover {
+  background: linear-gradient(
+    135deg,
+    rgba(129, 216, 208, 0.1) 0%,
+    rgba(95, 158, 160, 0.1) 100%
+  );
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(129, 216, 208, 0.2);
+}
+
+/* Rank Styles */
+.ladder__rank {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-right: 12px;
+  min-width: 36px;
+}
+
+.ladder__rank-number {
+  font-size: 16px;
+  font-weight: 700;
+  color: #d32f2f; /* 火焰紅色 */
+}
+
+.ladder__item:nth-child(1) .ladder__rank-number {
+  color: #ffd700; /* 金色 */
+  text-shadow: 0 2px 4px rgba(255, 215, 0, 0.5);
+  font-size: 22px;
+}
+
+.ladder__item:nth-child(2) .ladder__rank-number {
+  color: #c0c0c0; /* 銀色 */
+  text-shadow: 0 2px 4px rgba(192, 192, 192, 0.5);
+  font-size: 20px;
+}
+
+.ladder__item:nth-child(3) .ladder__rank-number {
+  color: #cd7f32; /* 銅色 */
+  text-shadow: 0 2px 4px rgba(205, 127, 50, 0.5);
+  font-size: 20px;
+}
+
+.ladder__rank-badge {
+  font-size: 16px;
+  margin-top: 2px;
+}
+
+/* User Styles */
+.ladder__user {
+  display: flex;
+  align-items: center;
+  flex: 1;
+}
+
+.ladder__avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  margin-right: 10px;
+  overflow: hidden;
+}
+
+.ladder__avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.ladder__avatar-placeholder {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    135deg,
+    #ff6b35 0%,
+    #f7931e 50%,
+    #ffd700 100%
+  ); /* 火焰漸層 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.ladder__avatar-placeholder.anonymous {
+  background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+  font-size: 18px;
+  font-family: 'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji',
+    'Android Emoji', 'EmojiSymbols', 'EmojiOne Mozilla', 'Twemoji Mozilla',
+    'Segoe UI Symbol', Arial, sans-serif;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: 'liga' 1, 'kern' 1;
+}
+
+.ladder__user-info {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.ladder__user-name {
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  white-space: nowrap;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 2px;
+  position: relative;
+  font-size: 13px;
+  max-width: 100%;
+}
+
+.ladder__user-name.anonymous {
+  color: #6c757d;
+  font-style: italic;
+}
+
+.ladder__verification-badge {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 6px;
+  font-size: 13px;
+  line-height: 1;
+  vertical-align: middle;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* 當前用戶的火焰邊框效果 */
+.ladder__user-name.current-user-flame {
+  color: #333 !important;
+  padding: 4px 8px;
+  border-radius: 6px;
+  position: relative;
+  display: inline-block;
+  font-weight: 700;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  z-index: 2;
+}
+
+.ladder__user-name.current-user-flame::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: linear-gradient(45deg, #ff6b35, #f7931e, #ffd700, #ff6b35);
+  background-size: 400% 400%;
+  border-radius: 8px;
+  z-index: -1;
+  animation: flameBorder 3s ease-in-out infinite;
+  filter: blur(1px);
+  pointer-events: none;
+}
+
+.ladder__user-name.current-user-flame::after {
+  content: '🔥';
+  position: absolute;
+  right: -20px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 14px;
+  animation: flameFloat 2s ease-in-out infinite;
+  z-index: 3;
+  pointer-events: none;
+}
+
+@keyframes flameBorder {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+@keyframes flameFloat {
+  0%,
+  100% {
+    transform: translateY(-50%) scale(1);
+    opacity: 0.8;
+  }
+  50% {
+    transform: translateY(-50%) scale(1.2);
+    opacity: 1;
+  }
+}
+
+.ladder__user-details {
+  font-size: 12px;
+  color: #666;
+}
+
+.last-update {
+  font-size: 11px;
+  color: #999;
+  font-style: italic;
+}
+
+/* Score Section */
+.ladder__score-section {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 100px;
+  flex-shrink: 0;
+}
+
+.ladder__score {
+  text-align: right;
+  min-width: 70px;
+  flex-shrink: 0;
+}
+
+.ladder__score-value {
+  font-size: 18px;
+  font-weight: 700;
+  color: #ff6b35; /* 火焰紅色 */
+}
+
+.ladder__score-label {
+  font-size: 11px;
+  color: #666;
+  margin-left: 2px;
+}
+
+/* Like Button */
+.ladder__like-btn {
+  display: flex !important;
+  width: auto !important;
+  max-width: none !important;
+  margin: 0 !important;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px !important;
+  background: transparent !important;
+  border: none !important;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  opacity: 0.5;
+  border-radius: 8px !important;
+  flex-shrink: 0;
+  overflow: visible;
+  font-size: inherit !important;
+  font-weight: normal !important;
+  box-shadow: none !important;
+}
+
+.ladder__like-btn--placeholder {
+  cursor: default;
+  pointer-events: none;
+}
+
+.ladder__like-btn.liked {
+  opacity: 1;
+  background: transparent !important;
+  transform: scale(1.05);
+}
+
+.ladder__like-btn:hover:not(:disabled):not(.ladder__like-btn--placeholder) {
+  opacity: 0.8;
+  background: transparent !important;
+  transform: scale(1.1);
+}
+
+.ladder__like-btn.liked:hover:not(:disabled) {
+  background: transparent !important;
+  transform: scale(1.15);
+}
+
+.ladder__like-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.ladder__like-icon {
+  font-size: 24px;
+  line-height: 1;
+  height: auto;
+  min-height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease;
+  overflow: visible;
+  padding: 2px 0;
+}
+
+.ladder__like-btn:hover:not(:disabled):not(.ladder__like-btn--placeholder)
+  .ladder__like-icon {
+  transform: scale(1.2);
+}
+
+.ladder__like-btn.liked .ladder__like-icon {
+  filter: drop-shadow(0 2px 4px rgba(255, 107, 53, 0.3));
+}
+
+.ladder__like-count {
+  font-size: 12px;
+  font-weight: 600;
+  color: #666;
+  line-height: 1.2;
+  min-height: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.3s ease;
+  white-space: nowrap;
+  overflow: visible;
+}
+
+.ladder__like-btn.liked .ladder__like-count {
+  color: #ff6b35;
+  font-weight: 700;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .ladder__item {
+    padding: 10px;
+  }
+
+  .ladder__rank {
+    margin-right: 10px;
+    min-width: 28px;
+  }
+
+  .ladder__rank-number {
+    font-size: 14px;
+  }
+
+  .ladder__avatar {
+    width: 28px;
+    height: 28px;
+    margin-right: 6px;
+  }
+
+  .ladder__score {
+    min-width: 50px;
+  }
+
+  .ladder__score-value {
+    font-size: 14px;
+  }
+
+  .ladder__user-name {
+    font-size: 12px;
+  }
+
+  .ladder__verification-badge {
+    font-size: 12px;
+  }
+
+  .ladder__score-section {
+    gap: 8px;
+    min-width: 80px;
+  }
+
+  .ladder__like-btn {
+    padding: 3px 6px;
+  }
+
+  .ladder__like-icon {
+    font-size: 20px;
+    min-height: 24px;
+    padding: 1px 0;
+  }
+
+  .ladder__like-count {
+    font-size: 11px;
+    min-height: 13px;
+  }
+
+  .ladder__user-name.current-user-flame {
+    padding: 2px 4px;
+    font-size: 11px;
+  }
+
+  .ladder__user-name.current-user-flame::after {
+    right: -14px;
+    font-size: 10px;
+  }
+}

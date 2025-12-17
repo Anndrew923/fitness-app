@@ -738,8 +738,6 @@ function UserInfo({ testData, onLogout, clearTestData }) {
           <LadderStatusCard
             userData={userData}
             rank={ladderUserRank || userRank}
-            metricConfig={defaultMetric}
-            variant="compact"
             onNavigate={() => navigate('/ladder')}
           />
         </div>

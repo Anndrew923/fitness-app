@@ -1,0 +1,80 @@
+/* LadderFilters Component Styles */
+
+.ladder__filters {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+.ladder__filter-container {
+  position: relative;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 16px;
+  padding: 2px;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  transition: all 0.3s ease;
+}
+
+.ladder__filter-container:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.ladder__filter-select {
+  padding: 6px 10px;
+  border: none;
+  border-radius: 14px;
+  background: transparent;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  color: #333;
+  min-width: 90px;
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ff6b35' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 6px center;
+  background-size: 10px;
+  transition: all 0.3s ease;
+  text-align: center;
+}
+
+.ladder__filter-select:hover {
+  background-color: rgba(255, 107, 53, 0.1);
+  color: #ff6b35;
+}
+
+.ladder__filter-select:focus {
+  outline: none;
+  background-color: rgba(255, 107, 53, 0.15);
+  color: #ff6b35;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .ladder__filters {
+    flex-direction: row;
+    gap: 4px;
+    width: 100%;
+    justify-content: center;
+    margin-bottom: 12px;
+  }
+
+  .ladder__filter-container {
+    width: auto;
+    flex: 1;
+    max-width: 110px;
+  }
+
+  .ladder__filter-select {
+    min-width: unset;
+    width: 100%;
+    font-size: 10px;
+    padding: 5px 6px;
+  }
+}

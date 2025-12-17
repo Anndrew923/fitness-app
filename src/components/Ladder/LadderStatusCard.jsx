@@ -2,13 +2,13 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
 import { formatScore } from '../../utils.js';
-import './Ladder.css';
+import './LadderStatusCard.css';
 
 /**
  * LadderStatusCard - Standalone card for embedding in UserInfo.jsx
  * Displays user's rank and score
  */
-const LadderStatusCard = ({ userData, rank, onOpenLadder }) => {
+const LadderStatusCard = ({ userData, rank, onOpenLadder, onNavigate }) => {
   const { t } = useTranslation();
 
   if (!userData || !userData.ladderScore || userData.ladderScore === 0) {
@@ -26,11 +26,14 @@ const LadderStatusCard = ({ userData, rank, onOpenLadder }) => {
 
   const rankBadge = getRankBadge(rank);
 
+  // Support both onOpenLadder and onNavigate for backward compatibility
+  const handleClick = onNavigate || onOpenLadder;
+
   return (
     <div
       className="ladder-status-card"
-      onClick={onOpenLadder}
-      style={{ cursor: 'pointer' }}
+      onClick={handleClick}
+      style={{ cursor: handleClick ? 'pointer' : 'default' }}
     >
       <div className="ladder-status-card__content">
         <div className="ladder-status-card__rank">
@@ -61,7 +64,8 @@ const LadderStatusCard = ({ userData, rank, onOpenLadder }) => {
 LadderStatusCard.propTypes = {
   userData: PropTypes.object,
   rank: PropTypes.number,
-  onOpenLadder: PropTypes.func,
+  onOpenLadder: PropTypes.func, // Legacy prop name
+  onNavigate: PropTypes.func, // New prop name for navigation
 };
 
 export default LadderStatusCard;

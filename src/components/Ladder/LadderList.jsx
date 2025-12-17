@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
 import LadderItem from './LadderItem';
-import './Ladder.css';
+import './LadderList.css';
 
 /**
  * LadderList - Scrollable container with pull-to-refresh support
