@@ -1,0 +1,227 @@
+import React from 'react';
+import PropTypes from 'prop-types';
+import { useTranslation } from 'react-i18next';
+import { formatScore } from '../../utils.js';
+import './Ladder.css';
+
+/**
+ * LadderItem - Single row component for ladder list
+ * Optimized with React.memo to prevent unnecessary re-renders
+ */
+const LadderItem = React.memo(
+  ({
+    user,
+    rank,
+    isCurrentUser,
+    onUserClick,
+    onToggleLike,
+    isLiked,
+    isLikeProcessing,
+  }) => {
+    const { t } = useTranslation();
+
+    const getRankBadge = rank => {
+      if (rank === 1) return '🥇';
+      if (rank === 2) return '🥈';
+      if (rank === 3) return '🥉';
+      if (rank <= 10) return '🏆';
+      if (rank <= 50) return '⭐';
+      return '';
+    };
+
+    const getAgeGroupLabel = ageGroup => {
+      if (!ageGroup) return t('ladder.ageGroups.unknown');
+      return t(`ladder.ageGroups.${ageGroup}`) || ageGroup;
+    };
+
+    const formatLastUpdate = timestamp => {
+      if (!timestamp) return '未知';
+      const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+      const now = new Date();
+      const diffMs = now - date;
+      const diffMins = Math.floor(diffMs / (1000 * 60));
+      const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+      const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+      if (diffMins < 1) return '剛剛';
+      if (diffMins < 60) return `${diffMins}分鐘前`;
+      if (diffHours < 24) return `${diffHours}小時前`;
+      if (diffDays < 7) return `${diffDays}天前`;
+      return date.toLocaleDateString('zh-TW');
+    };
+
+    const handleLikeClick = e => {
+      e.stopPropagation();
+      if (!isLikeProcessing && onToggleLike) {
+        onToggleLike(user.id, e);
+      }
+    };
+
+    return (
+      <div
+        data-user-id={user.id}
+        className={`ladder__item ${
+          isCurrentUser ? 'ladder__item--current-user' : ''
+        } ${!user.isAnonymous ? 'clickable' : ''}`}
+        style={{
+          ...(isCurrentUser
+            ? {
+                background:
+                  'linear-gradient(135deg, rgba(255, 107, 53, 0.1) 0%, rgba(247, 147, 30, 0.1) 100%)',
+                borderLeft: '4px solid #ff6b35',
+                fontWeight: '600',
+              }
+            : {}),
+        }}
+        onClick={!user.isAnonymous ? e => onUserClick?.(user, e) : undefined}
+        title={!user.isAnonymous ? t('ladder.tooltips.viewTraining') : ''}
+      >
+        <div className="ladder__rank">
+          <span
+            className={`ladder__rank-number ${
+              isCurrentUser ? 'rank-changing' : ''
+            }`}
+          >
+            {rank}
+          </span>
+          <span className="ladder__rank-badge">{getRankBadge(rank)}</span>
+        </div>
+
+        <div className="ladder__user">
+          <div className="ladder__avatar">
+            {user.avatarUrl &&
+            user.avatarUrl.trim() !== '' &&
+            !user.isAnonymous ? (
+              <img
+                src={user.avatarUrl}
+                alt="avatar"
+                loading="lazy"
+                onError={e => {
+                  e.target.style.display = 'none';
+                  const placeholder = e.target.nextSibling;
+                  if (placeholder) {
+                    placeholder.style.display = 'flex';
+                  }
+                }}
+              />
+            ) : null}
+            <div
+              className={`ladder__avatar-placeholder ${
+                user.isAnonymous ? 'anonymous' : ''
+              }`}
+              style={{
+                display:
+                  user.avatarUrl &&
+                  user.avatarUrl.trim() !== '' &&
+                  !user.isAnonymous
+                    ? 'none'
+                    : 'flex',
+              }}
+            >
+              {user.isAnonymous
+                ? '👤'
+                : user.displayName.charAt(0).toUpperCase()}
+            </div>
+          </div>
+
+          <div className="ladder__user-info">
+            <div
+              className={`ladder__user-name ${
+                user.isAnonymous ? 'anonymous' : ''
+              } ${isCurrentUser ? 'current-user-flame' : ''}`}
+            >
+              {user.displayName}
+              {user.isVerified && (
+                <span className="ladder__verification-badge" title="榮譽認證">
+                  🏅
+                </span>
+              )}
+              {user.isAnonymous && ' 🔒'}
+            </div>
+            <div className="ladder__user-details">
+              {user.isAnonymous ? (
+                '匿名用戶'
+              ) : (
+                <>
+                  {getAgeGroupLabel(user.ageGroup)} •{' '}
+                  {user.gender === 'male'
+                    ? t('userInfo.male')
+                    : t('userInfo.female')}
+                  {(user.lastLadderSubmission || user.lastActive) && (
+                    <>
+                      <br />
+                      <span className="last-update">
+                        {t('ladder.labels.updatedAt')}{' '}
+                        {formatLastUpdate(
+                          user.lastLadderSubmission || user.lastActive
+                        )}
+                      </span>
+                    </>
+                  )}
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+
+        <div className="ladder__score-section">
+          <div className="ladder__score">
+            <span className="ladder__score-value">
+              {formatScore(user.ladderScore)}
+            </span>
+            <span className="ladder__score-label">
+              {t('community.ui.pointsUnit')}
+            </span>
+          </div>
+
+          {user.isAnonymous ? (
+            <div className="ladder__like-btn ladder__like-btn--placeholder">
+              <span className="ladder__like-icon">👍</span>
+              <span className="ladder__like-count">
+                {user.ladderLikeCount || 0}
+              </span>
+            </div>
+          ) : (
+            <button
+              className={`ladder__like-btn ${isLiked ? 'liked' : ''}`}
+              onClick={handleLikeClick}
+              disabled={isLikeProcessing}
+              title={isLiked ? t('ladder.unlike') : t('ladder.like')}
+            >
+              <span className="ladder__like-icon">👍</span>
+              <span className="ladder__like-count">
+                {user.ladderLikeCount || 0}
+              </span>
+            </button>
+          )}
+        </div>
+      </div>
+    );
+  },
+  (prevProps, nextProps) => {
+    // Custom comparison for React.memo
+    return (
+      prevProps.user.id === nextProps.user.id &&
+      prevProps.rank === nextProps.rank &&
+      prevProps.isCurrentUser === nextProps.isCurrentUser &&
+      prevProps.user.ladderScore === nextProps.user.ladderScore &&
+      prevProps.user.ladderLikeCount === nextProps.user.ladderLikeCount &&
+      prevProps.isLiked === nextProps.isLiked &&
+      prevProps.isLikeProcessing === nextProps.isLikeProcessing
+    );
+  }
+);
+
+LadderItem.displayName = 'LadderItem';
+
+LadderItem.propTypes = {
+  user: PropTypes.object.isRequired,
+  rank: PropTypes.number.isRequired,
+  isCurrentUser: PropTypes.bool,
+  onUserClick: PropTypes.func,
+  onToggleLike: PropTypes.func,
+  isLiked: PropTypes.bool,
+  isLikeProcessing: PropTypes.bool,
+};
+
+export default LadderItem;
