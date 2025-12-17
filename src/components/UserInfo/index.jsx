@@ -29,7 +29,11 @@ import LadderStatusCard from '../Ladder/LadderStatusCard';
 import { getDefaultMetric } from '../../config/rankingSystem';
 import { useLadderData } from '../../hooks/useLadderData';
 
-import './userinfo.css';
+import './userinfo.css'; // Core layout
+import './UserRadar.css';
+import './UserForm.css';
+import './UserModals.css';
+import './UserHeader.css';
 import { useTranslation } from 'react-i18next';
 
 // 開發環境下載入調試工具

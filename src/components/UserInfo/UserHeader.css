@@ -1,0 +1,149 @@
+/* 基本資料標題區域 */
+.section-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+  position: relative;
+  width: 100%;
+  padding-right: 36px; /* 為登出按鈕留空間 */
+}
+
+.section-title {
+  font-size: 26px;
+  font-weight: 700;
+  color: white;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  line-height: 1.2;
+}
+
+/* 登出按鈕 - BEM命名 */
+.user-info__logout-btn {
+  position: absolute !important;
+  right: 0 !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  width: 32px !important;
+  height: 32px !important;
+  border-radius: 50% !important;
+  background: linear-gradient(135deg, #ff6f61 0%, #ff8a80 100%) !important;
+  color: white !important;
+  border: 2px solid white !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-weight: bold !important;
+  font-size: 14px !important;
+  cursor: pointer !important;
+  transition: all 0.3s ease !important;
+  box-shadow: 0 4px 12px rgba(255, 111, 97, 0.3) !important;
+  flex-shrink: 0 !important;
+  z-index: 10 !important;
+}
+
+.user-info__logout-btn:hover {
+  transform: scale(1.1) !important;
+  box-shadow: 0 6px 16px rgba(255, 111, 97, 0.4) !important;
+}
+
+.user-info__logout-icon {
+  font-size: 14px !important;
+  font-weight: bold !important;
+}
+
+/* 設定按鈕 - 右上角 */
+.user-info__settings-btn {
+  position: fixed !important;
+  /* ✅ 修正：優先使用 CSS 變量，後備使用 env()，確保在不同設備上正確響應 */
+  top: calc(
+    15px + var(--safe-area-inset-top, env(safe-area-inset-top, 0px))
+  ) !important;
+  right: 15px !important;
+  width: 44px !important;
+  height: 44px !important;
+  border-radius: 50% !important;
+  background: rgba(255, 255, 255, 0.95) !important;
+  color: #667eea !important;
+  border: 2px solid rgba(102, 126, 234, 0.3) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  transition: all 0.3s ease !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+  z-index: 999 !important; /* 確保在 Modal 之下，Modal 通常是 1000+ */
+  backdrop-filter: blur(10px) !important;
+}
+
+.user-info__settings-btn:hover {
+  background: rgba(255, 255, 255, 1) !important;
+  transform: scale(1.1) !important;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2) !important;
+  border-color: #667eea !important;
+}
+
+.user-info__settings-btn:active {
+  transform: scale(0.95) !important;
+}
+
+.user-info__settings-btn svg {
+  width: 20px !important;
+  height: 20px !important;
+}
+
+/* 響應式調整 */
+@media (max-width: 768px) {
+  .section-header {
+    flex-direction: row;
+    gap: 10px;
+    align-items: center;
+    padding-right: 6px;
+  }
+
+  .user-info__logout-btn {
+    width: 28px !important;
+    height: 28px !important;
+    margin-left: auto !important;
+  }
+
+  .user-info__logout-icon {
+    font-size: 12px !important;
+  }
+
+  .user-info__settings-btn {
+    /* ✅ 修正：移動版也考慮 Status Bar 高度，使用 CSS 變量優先 */
+    top: calc(
+      10px + var(--safe-area-inset-top, env(safe-area-inset-top, 0px))
+    ) !important;
+    right: 10px !important;
+    width: 40px !important;
+    height: 40px !important;
+  }
+
+  .user-info__settings-btn svg {
+    width: 18px !important;
+    height: 18px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .section-header {
+    flex-direction: row;
+    gap: 10px;
+    align-items: center;
+    padding-right: 6px;
+  }
+
+  .user-info__logout-btn {
+    width: 28px !important;
+    height: 28px !important;
+    margin-left: auto !important;
+  }
+
+  .user-info__logout-icon {
+    font-size: 12px !important;
+  }
+}
