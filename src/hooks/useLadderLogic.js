@@ -10,6 +10,11 @@ import {
 } from 'firebase/firestore';
 import { calculateLadderScore } from '../utils';
 import logger from '../utils/logger';
+import {
+  applyLimitBreak,
+  calculateStatsAggregates,
+  generateFilterTags,
+} from '../utils/ladderUtils';
 
 export const useLadderLogic = (
   userData,
@@ -191,14 +196,38 @@ export const useLadderLogic = (
       }
 
       const scores = userData.scores || {};
-      const ladderScore = calculateLadderScore(scores);
+      const rawCalculatedScore = calculateLadderScore(scores);
+
+      // ✅ Step A: Calculate stats aggregates from testInputs
+      const testInputs = userData.testInputs || {};
+      const strengthInputs = testInputs.strength || {};
+      const powerInputs = testInputs.power || {};
+
+      // Extract exercise data for stats calculation
+      const exerciseScores = {
+        benchPress: strengthInputs.benchPress?.max || 0,
+        squat: strengthInputs.squat?.max || 0,
+        deadlift: strengthInputs.deadlift?.max || 0,
+        pullUp: strengthInputs.latPulldown?.max || 0, // Using latPulldown as pull-up proxy
+        overheadPress: strengthInputs.shoulderPress?.max || 0,
+        sprint: powerInputs.sprint || 0,
+        verticalJump: powerInputs.verticalJump || 0,
+        broadJump: powerInputs.standingLongJump || 0,
+      };
+
+      const stats = calculateStatsAggregates(exerciseScores);
+      const filters = generateFilterTags(userData);
+
+      // ✅ Apply Limit Break: Cap unverified users at 100
+      const isVerified = userData.isVerified === true;
+      const finalScore = applyLimitBreak(rawCalculatedScore, isVerified);
 
       localStorage.setItem(
         'ladderUpdateNotification',
         JSON.stringify({
           isFirstTime: isFirstTime,
           oldScore: oldLadderScore,
-          newScore: ladderScore,
+          newScore: finalScore,
           oldRank: oldRank,
           timestamp: Date.now(),
           hasShown: false,
@@ -207,7 +236,7 @@ export const useLadderLogic = (
 
       const updatedUserData = {
         ...userData,
-        ladderScore: ladderScore,
+        ladderScore: finalScore,
         lastLadderSubmission: new Date().toISOString(),
       };
 
@@ -216,7 +245,7 @@ export const useLadderLogic = (
       try {
         const ladderData = {
           ...userData,
-          ladderScore: ladderScore,
+          ladderScore: finalScore,
           lastLadderSubmission: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
         };
@@ -226,8 +255,23 @@ export const useLadderLogic = (
 
         const userRef = doc(db, 'users', auth.currentUser.uid);
 
+        // ✅ Step B: Merge all calculated data into updateData
         const updateData = {
-          ladderScore: ladderScore,
+          // CRITICAL: Use finalScore (capped) for ranking
+          ladderScore: finalScore,
+          // Keep original score for internal reference
+          rawScore: rawCalculatedScore,
+          // Stats aggregates
+          stats_sbdTotal: stats.sbdTotal,
+          stats_bigFiveTotal: stats.bigFiveTotal,
+          stats_explosiveAvg: stats.explosiveAvg,
+          // Filter tags
+          filter_is1000lbClub: stats.is1000lbClub,
+          filter_ageGroup: filters.filter_ageGroup,
+          filter_weightClass: filters.filter_weightClass,
+          filter_region_city: filters.filter_region_city,
+          filter_region_district: filters.filter_region_district,
+          // Metadata
           lastLadderSubmission: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
         };
@@ -244,7 +288,12 @@ export const useLadderLogic = (
 
         await setDoc(userRef, updateData, { merge: true });
 
-        logger.debug('天梯分數已立即保存到 Firebase:', ladderScore);
+        logger.debug('✅ 天梯數據已保存到 Firebase:', {
+          ladderScore: finalScore,
+          rawScore: rawCalculatedScore,
+          stats,
+          filters,
+        });
       } catch (error) {
         logger.error('保存天梯分數失敗:', error);
         throw error;
@@ -261,7 +310,7 @@ export const useLadderLogic = (
         isOpen: true,
         title: t('userInfo.modal.submitSuccessTitle'),
         message: t('userInfo.modal.submitSuccessMessage', {
-          score: ladderScore,
+          score: finalScore,
         }),
         type: 'success',
         onAction: () => {
@@ -289,15 +338,7 @@ export const useLadderLogic = (
         type: 'error',
       });
     }
-  }, [
-    userData,
-    setUserData,
-    auth,
-    db,
-    t,
-    navigate,
-    onShowModal,
-  ]);
+  }, [userData, setUserData, auth, db, t, navigate, onShowModal]);
 
   const cancelSubmit = useCallback(() => {
     setSubmitConfirmModal({ isOpen: false, remainingCount: 0 });
@@ -371,11 +412,7 @@ export const useLadderLogic = (
 
     try {
       const usersRef = collection(db, 'users');
-      const q = query(
-        usersRef,
-        orderBy('ladderScore', 'desc'),
-        limit(200)
-      );
+      const q = query(usersRef, orderBy('ladderScore', 'desc'), limit(200));
 
       const querySnapshot = await getDocs(q);
       const users = [];
@@ -462,4 +499,3 @@ export const useLadderLogic = (
     cancelSubmit,
   };
 };
-

@@ -1,67 +1,189 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
+import {
+  collection,
+  query,
+  where,
+  getCountFromServer,
+} from 'firebase/firestore';
+import { db, auth } from '../../firebase';
 import { formatScore } from '../../utils.js';
-import { useUserRank } from '../../hooks/useUserRank';
 import './LadderStatusCard.css';
+import logger from '../../utils/logger';
+
+// Cache configuration (matching useUserRank hook)
+const CACHE_TTL = 300000; // 5 minutes
+const CACHE_KEY_PREFIX = 'ladder_rank_cache_';
 
 /**
- * LadderStatusCard - Modern Dashboard Widget
- * Displays user's rank and score with a professional, scalable design
+ * LadderStatusCard - Black & Gold Premium Design
+ * ✅ Fixed: Uses Lazy Initialization to prevent stuck loading state on remount
  *
- * ✅ Self-Fetching: If rank prop is not provided, automatically fetches user's rank
- * using efficient Firestore aggregation query.
- *
- * @param {Object} userData - User data containing ladderScore
- * @param {number} rank - User's rank (0 or null means unranked). If not provided, will be fetched automatically.
- * @param {Function} onNavigate - Navigation handler
- * @param {Function} onOpenLadder - Legacy navigation handler (for backward compatibility)
- * @param {string} title - Card title (default: "全服排名") - For future expansion (Job Rank, Region Rank)
+ * @param {Object} userData - User data containing ladderScore, userId
+ * @param {number} rank - User's rank (if provided, skips fetch)
+ * @param {Function} onNavigate - Navigation handler (optional)
+ * @param {Function} onOpenLadder - Legacy navigation handler (optional)
+ * @param {string} title - Card title (optional)
  */
 const LadderStatusCard = ({
   userData,
-  rank: rankProp,
+  rank: propRank,
   onNavigate,
   onOpenLadder,
   title,
 }) => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
 
-  // ✅ Self-Fetching: Use hook to fetch rank if prop is not provided
-  const { rank: fetchedRank, loading: rankLoading } = useUserRank(
-    userData?.ladderScore,
-    rankProp
-  );
+  // Helper to read cache synchronously during initialization
+  const getInitialState = () => {
+    // 1. Priority: Props (if provided, use immediately)
+    if (propRank !== null && propRank !== undefined) {
+      logger.debug('⚡ [LadderCard] Using prop rank:', propRank);
+      return { displayRank: propRank, loading: false };
+    }
 
-  // Use prop if provided, otherwise use fetched rank
-  const rank =
-    rankProp !== null && rankProp !== undefined ? rankProp : fetchedRank;
+    // 2. Guard: No user data or score
+    if (!userData || !userData.ladderScore || userData.ladderScore <= 0) {
+      return { displayRank: 0, loading: false };
+    }
+
+    // 3. Try Cache (synchronous read for instant render)
+    const userId = userData.userId || userData.id || auth.currentUser?.uid;
+    if (userId) {
+      try {
+        const cacheKey = `${CACHE_KEY_PREFIX}${userId}`;
+        const cachedData = sessionStorage.getItem(cacheKey);
+        if (cachedData) {
+          const parsed = JSON.parse(cachedData);
+          const age = Date.now() - parsed.timestamp;
+          const isFresh = age < CACHE_TTL;
+          const isScoreSame = parsed.score === userData.ladderScore;
+
+          if (isFresh && isScoreSame) {
+            logger.debug('⚡ [LadderCard] Immediate Cache Hit:', parsed.rank);
+            return { displayRank: parsed.rank, loading: false };
+          } else {
+            // Cache stale or score changed, remove it
+            sessionStorage.removeItem(cacheKey);
+          }
+        }
+      } catch (e) {
+        logger.warn('⚠️ [LadderCard] Cache read error:', e);
+      }
+    }
+
+    // 4. Default: Need to fetch
+    return { displayRank: null, loading: true };
+  };
+
+  // ✅ Lazy Initialization: Check cache synchronously during state init
+  const [{ displayRank, loading }, setState] = useState(getInitialState);
+
+  // Effect for fetching (only if needed)
+  useEffect(() => {
+    // If we already have data (from Lazy Init or props), skip fetch
+    if (!loading && displayRank !== null) {
+      return;
+    }
+
+    // If prop provided, use it
+    if (propRank !== null && propRank !== undefined) {
+      setState({ displayRank: propRank, loading: false });
+      return;
+    }
+
+    // Safety check: No user data or invalid score
+    if (!userData || !userData.ladderScore || userData.ladderScore <= 0) {
+      if (loading) {
+        setState({ displayRank: 0, loading: false });
+      }
+      return;
+    }
+
+    const userId = userData.userId || userData.id || auth.currentUser?.uid;
+    const currentScore = userData.ladderScore;
+    const cacheKey = `${CACHE_KEY_PREFIX}${userId}`;
+
+    if (!userId) {
+      setState({ displayRank: 0, loading: false });
+      return;
+    }
+
+    let isMounted = true;
+
+    const fetchRank = async () => {
+      try {
+        logger.debug('🔍 [LadderCard] Fetching from Firestore...', {
+          userId,
+          currentScore,
+        });
+
+        const usersRef = collection(db, 'users');
+        const q = query(usersRef, where('ladderScore', '>', currentScore));
+        const snapshot = await getCountFromServer(q);
+        const myRank = snapshot.data().count + 1;
+
+        if (isMounted) {
+          setState({ displayRank: myRank, loading: false });
+
+          // Update Cache
+          try {
+            sessionStorage.setItem(
+              cacheKey,
+              JSON.stringify({
+                rank: myRank,
+                score: currentScore,
+                timestamp: Date.now(),
+              })
+            );
+            logger.debug('💾 [LadderCard] Cache updated:', myRank);
+          } catch (e) {
+            logger.warn('⚠️ [LadderCard] Cache write error:', e);
+          }
+        }
+      } catch (error) {
+        logger.error('❌ [LadderCard] Rank fetch failed:', error);
+        if (isMounted) {
+          setState({ displayRank: 0, loading: false });
+        }
+      }
+    };
+
+    fetchRank();
+
+    return () => {
+      isMounted = false;
+    };
+    // ✅ Dependencies: Only re-run when these change (not loading/displayRank to avoid loops)
+  }, [userData?.ladderScore, userData?.userId, propRank]);
 
   // Support both onNavigate and onOpenLadder for backward compatibility
-  const handleClick = onNavigate || onOpenLadder;
+  const handleClick = onNavigate || onOpenLadder || (() => navigate('/ladder'));
+
+  // Determine final rank to display
+  const finalRank =
+    propRank !== null && propRank !== undefined ? propRank : displayRank;
 
   // Determine if user is ranked
-  // ✅ rank === 0, null, or undefined means unranked
-  // ✅ ladderScore === 0 also means unranked
   const hasValidScore = userData?.ladderScore && userData.ladderScore > 0;
   const isRanked =
-    hasValidScore && rank !== null && rank !== undefined && rank > 0;
+    hasValidScore &&
+    finalRank !== null &&
+    finalRank !== undefined &&
+    finalRank > 0;
 
-  // ✅ Show loading ONLY if:
-  // 1. No rank prop provided (need to fetch)
-  // 2. Hook is actually loading
-  // 3. No cached rank available (if cached, it should be instant)
-  const isLoading =
-    (rankProp === null || rankProp === undefined) &&
-    rankLoading &&
-    rank === null;
+  // Show loading only if explicitly loading AND no rank yet
+  const isLoading = loading && (finalRank === null || finalRank === undefined);
 
   // Get rank badge icon (only for top 3)
   const getRankBadge = rank => {
     if (rank === 1) return '🥇';
     if (rank === 2) return '🥈';
     if (rank === 3) return '🥉';
-    return null; // No icon for others
+    return null;
   };
 
   // Get rank class for special styling
@@ -72,8 +194,8 @@ const LadderStatusCard = ({
     return '';
   };
 
-  const rankBadge = isRanked ? getRankBadge(rank) : null;
-  const rankClass = isRanked ? getRankClass(rank) : 'rank-unranked';
+  const rankBadge = isRanked ? getRankBadge(finalRank) : null;
+  const rankClass = isRanked ? getRankClass(finalRank) : 'rank-unranked';
 
   // Display title (default to translation key)
   const displayTitle = title || t('ladder.myRank');
@@ -112,7 +234,9 @@ const LadderStatusCard = ({
                   {rankBadge}
                 </span>
               )}
-              <span className="ladder-status-card__rank-value">{rank}</span>
+              <span className="ladder-status-card__rank-value">
+                {finalRank}
+              </span>
             </>
           ) : (
             <span className="ladder-status-card__rank-unranked">—</span>
