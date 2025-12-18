@@ -1,40 +1,41 @@
-/* LadderStatusCard - Modern Dashboard Widget Styles */
-/* ✅ Professional, Scalable Design with Glassmorphism & Gradient Borders */
+/* LadderStatusCard - Black & Gold Premium Design */
+/* ✅ "Dark Knight" Theme: Premium VIP Membership Card Style */
 
 .ladder-status-card {
   display: flex;
   align-items: center;
-  gap: 16px;
-  padding: 16px 20px;
+  gap: 20px;
+  padding: 18px 24px;
   margin: 12px 0;
-  background: rgba(255, 255, 255, 0.95);
+  background: linear-gradient(135deg, #1a1a1a 0%, #000000 100%);
   border-radius: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12),
-    0 4px 16px rgba(129, 216, 208, 0.1);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  border: 2px solid #d4af37;
+  box-shadow: 0 8px 32px rgba(212, 175, 55, 0.3), 0 4px 16px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
 }
 
-/* Glassmorphism effect overlay */
+/* Premium shine effect */
 .ladder-status-card::before {
   content: '';
   position: absolute;
   top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
   background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.1) 0%,
-    rgba(255, 255, 255, 0.05) 50%,
-    transparent 100%
+    90deg,
+    transparent,
+    rgba(212, 175, 55, 0.1),
+    transparent
   );
-  pointer-events: none;
-  border-radius: 16px;
+  transition: left 0.5s ease;
+}
+
+.ladder-status-card.clickable:hover::before {
+  left: 100%;
 }
 
 /* Clickable state */
@@ -44,138 +45,134 @@
 
 .ladder-status-card.clickable:hover {
   transform: translateY(-2px);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15),
-    0 6px 20px rgba(129, 216, 208, 0.15);
-  border-color: rgba(129, 216, 208, 0.4);
+  border-color: #ffd700;
+  box-shadow: 0 12px 40px rgba(212, 175, 55, 0.4), 0 6px 20px rgba(0, 0, 0, 0.6),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
 }
 
 .ladder-status-card.clickable:active {
   transform: translateY(0);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1), 0 2px 8px rgba(129, 216, 208, 0.1);
+  box-shadow: 0 4px 16px rgba(212, 175, 55, 0.2), 0 2px 8px rgba(0, 0, 0, 0.4);
 }
 
 .ladder-status-card.clickable:focus {
   outline: none;
-  box-shadow: 0 0 0 3px rgba(129, 216, 208, 0.2), 0 8px 32px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.3),
+    0 8px 32px rgba(212, 175, 55, 0.3);
 }
 
-/* Left: Rank Section (Icon + Number) */
+/* Left: Rank Section */
 .ladder-status-card__rank-section {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
-  min-width: 60px;
-  gap: 4px;
+  min-width: 100px;
+  gap: 8px;
   position: relative;
   z-index: 1;
 }
 
-.ladder-status-card__rank-icon {
-  font-size: 32px;
+.ladder-status-card__rank-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #d4af37;
+  text-transform: uppercase;
+  letter-spacing: 1px;
   line-height: 1;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
-  transition: transform 0.3s ease;
-}
-
-.ladder-status-card.clickable:hover .ladder-status-card__rank-icon {
-  transform: scale(1.1);
 }
 
 .ladder-status-card__rank-number {
-  font-size: 24px;
-  font-weight: 800;
-  color: #2d3748;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
   line-height: 1;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-  transition: all 0.3s ease;
 }
 
-/* Middle: Info Section (Label + Score) */
-.ladder-status-card__info-section {
+.ladder-status-card__rank-badge {
+  font-size: 28px;
+  line-height: 1;
+  filter: drop-shadow(0 2px 8px rgba(212, 175, 55, 0.5));
+}
+
+.ladder-status-card__rank-value {
+  font-size: 36px;
+  font-weight: 900;
+  background: linear-gradient(135deg, #ffffff 0%, #ffd700 50%, #ffffff 100%);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+  line-height: 1;
+  animation: goldShimmer 3s ease-in-out infinite;
+}
+
+@keyframes goldShimmer {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+.ladder-status-card__rank-unranked {
+  font-size: 36px;
+  font-weight: 700;
+  color: #666666;
+  line-height: 1;
+}
+
+/* Right: Score Section */
+.ladder-status-card__score-section {
   flex: 1;
   display: flex;
   flex-direction: column;
+  align-items: flex-start;
   gap: 6px;
   position: relative;
   z-index: 1;
 }
 
-.ladder-status-card__label {
-  font-size: 13px;
-  font-weight: 600;
-  color: #718096;
+.ladder-status-card__score-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: #999999;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  line-height: 1.2;
+  line-height: 1;
 }
 
-.ladder-status-card__score {
+.ladder-status-card__score-value-wrapper {
   display: flex;
   align-items: baseline;
   gap: 6px;
-  line-height: 1.2;
+  line-height: 1;
 }
 
 .ladder-status-card__score-value {
-  font-size: 22px;
+  font-size: 20px;
   font-weight: 700;
-  color: #2d3748;
+  color: #ffffff;
   line-height: 1;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
 }
 
 .ladder-status-card__score-unit {
   font-size: 14px;
   font-weight: 500;
-  color: #718096;
+  color: #cccccc;
   line-height: 1;
 }
 
 .ladder-status-card__unranked-message {
   font-size: 14px;
   font-weight: 500;
-  color: #a0aec0;
+  color: #888888;
   font-style: italic;
   line-height: 1.2;
-}
-
-/* Loading States */
-.ladder-status-card__loading-dots {
-  display: inline-block;
-  color: #cbd5e0;
-  font-size: 20px;
-  font-weight: 700;
-  animation: loadingDots 1.4s ease-in-out infinite;
-  letter-spacing: 2px;
-}
-
-@keyframes loadingDots {
-  0%,
-  80%,
-  100% {
-    opacity: 0.3;
-  }
-  40% {
-    opacity: 1;
-  }
-}
-
-.ladder-status-card__loading-skeleton {
-  display: inline-block;
-  color: #cbd5e0;
-  font-size: 14px;
-  font-weight: 500;
-  animation: loadingPulse 1.5s ease-in-out infinite;
-}
-
-@keyframes loadingPulse {
-  0%,
-  100% {
-    opacity: 0.4;
-  }
-  50% {
-    opacity: 0.8;
-  }
 }
 
 /* Right: Navigation Arrow */
@@ -185,7 +182,7 @@
   justify-content: center;
   width: 32px;
   height: 32px;
-  color: #cbd5e0;
+  color: #d4af37;
   transition: all 0.3s ease;
   position: relative;
   z-index: 1;
@@ -193,20 +190,15 @@
 }
 
 .ladder-status-card.clickable:hover .ladder-status-card__arrow {
-  color: #81d8d0;
+  color: #ffd700;
   transform: translateX(4px);
 }
 
 /* Special Rank Styles - Top 3 */
 .ladder-status-card.rank-gold {
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.98) 0%,
-    rgba(255, 248, 220, 0.95) 100%
-  );
-  border: 2px solid rgba(255, 215, 0, 0.4);
-  box-shadow: 0 8px 32px rgba(255, 215, 0, 0.2),
-    0 4px 16px rgba(255, 215, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  border-color: #ffd700;
+  box-shadow: 0 8px 32px rgba(255, 215, 0, 0.4), 0 4px 16px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 215, 0, 0.2);
 }
 
 .ladder-status-card.rank-gold::after {
@@ -220,21 +212,22 @@
   border-radius: 16px 16px 0 0;
 }
 
-.ladder-status-card.rank-gold .ladder-status-card__rank-number {
+.ladder-status-card.rank-gold .ladder-status-card__rank-label {
   color: #ffd700;
-  text-shadow: 0 2px 8px rgba(255, 215, 0, 0.4);
-  font-size: 28px;
+}
+
+.ladder-status-card.rank-gold .ladder-status-card__rank-value {
+  background: linear-gradient(135deg, #ffd700 0%, #ffffff 50%, #ffd700 100%);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .ladder-status-card.rank-silver {
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.98) 0%,
-    rgba(248, 248, 252, 0.95) 100%
-  );
-  border: 2px solid rgba(192, 192, 192, 0.4);
-  box-shadow: 0 8px 32px rgba(192, 192, 192, 0.2),
-    0 4px 16px rgba(192, 192, 192, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  border-color: #c0c0c0;
+  box-shadow: 0 8px 32px rgba(192, 192, 192, 0.3), 0 4px 16px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(192, 192, 192, 0.2);
 }
 
 .ladder-status-card.rank-silver::after {
@@ -248,21 +241,22 @@
   border-radius: 16px 16px 0 0;
 }
 
-.ladder-status-card.rank-silver .ladder-status-card__rank-number {
+.ladder-status-card.rank-silver .ladder-status-card__rank-label {
   color: #c0c0c0;
-  text-shadow: 0 2px 8px rgba(192, 192, 192, 0.4);
-  font-size: 26px;
+}
+
+.ladder-status-card.rank-silver .ladder-status-card__rank-value {
+  background: linear-gradient(135deg, #c0c0c0 0%, #ffffff 50%, #c0c0c0 100%);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .ladder-status-card.rank-bronze {
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.98) 0%,
-    rgba(255, 245, 238, 0.95) 100%
-  );
-  border: 2px solid rgba(205, 127, 50, 0.4);
-  box-shadow: 0 8px 32px rgba(205, 127, 50, 0.2),
-    0 4px 16px rgba(205, 127, 50, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  border-color: #cd7f32;
+  box-shadow: 0 8px 32px rgba(205, 127, 50, 0.3), 0 4px 16px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(205, 127, 50, 0.2);
 }
 
 .ladder-status-card.rank-bronze::after {
@@ -276,33 +270,62 @@
   border-radius: 16px 16px 0 0;
 }
 
-.ladder-status-card.rank-bronze .ladder-status-card__rank-number {
+.ladder-status-card.rank-bronze .ladder-status-card__rank-label {
   color: #cd7f32;
-  text-shadow: 0 2px 8px rgba(205, 127, 50, 0.4);
-  font-size: 26px;
+}
+
+.ladder-status-card.rank-bronze .ladder-status-card__rank-value {
+  background: linear-gradient(135deg, #cd7f32 0%, #ffffff 50%, #cd7f32 100%);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 /* Unranked State */
 .ladder-status-card.rank-unranked {
-  background: rgba(255, 255, 255, 0.85);
-  border: 1px solid rgba(160, 174, 192, 0.3);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-  opacity: 0.9;
+  border-color: #666666;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  opacity: 0.85;
 }
 
-.ladder-status-card.rank-unranked .ladder-status-card__rank-icon {
-  opacity: 0.6;
-}
-
-.ladder-status-card.rank-unranked .ladder-status-card__rank-number {
-  color: #a0aec0;
-  font-size: 20px;
+.ladder-status-card.rank-unranked .ladder-status-card__rank-label {
+  color: #888888;
 }
 
 .ladder-status-card.rank-unranked.clickable:hover {
   opacity: 1;
-  border-color: rgba(160, 174, 192, 0.5);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+  border-color: #d4af37;
+  box-shadow: 0 6px 20px rgba(212, 175, 55, 0.2);
+}
+
+/* Loading States - Dark Mode Skeleton Loader */
+.skeleton-loader {
+  background: linear-gradient(90deg, #2a2a2a 25%, #1a1a1a 50%, #2a2a2a 75%);
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s infinite;
+  border-radius: 4px;
+  color: transparent;
+  display: inline-block;
+}
+
+.ladder-status-card__loading-dots {
+  width: 50px;
+  height: 36px;
+}
+
+.ladder-status-card__loading-skeleton {
+  width: 100px;
+  height: 22px;
+}
+
+@keyframes skeleton-loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
 }
 
 /* Floating Rank Display (used in Ladder.jsx) - Keep existing styles */
@@ -361,38 +384,33 @@
 /* Responsive Design */
 @media (max-width: 768px) {
   .ladder-status-card {
-    padding: 14px 16px;
-    gap: 12px;
+    padding: 14px 18px;
+    gap: 16px;
     border-radius: 14px;
   }
 
   .ladder-status-card__rank-section {
-    min-width: 50px;
+    min-width: 80px;
   }
 
-  .ladder-status-card__rank-icon {
+  .ladder-status-card__rank-label {
+    font-size: 11px;
+  }
+
+  .ladder-status-card__rank-value {
     font-size: 28px;
   }
 
-  .ladder-status-card__rank-number {
-    font-size: 20px;
-  }
-
-  .ladder-status-card.rank-gold .ladder-status-card__rank-number {
+  .ladder-status-card__rank-badge {
     font-size: 24px;
   }
 
-  .ladder-status-card.rank-silver .ladder-status-card__rank-number,
-  .ladder-status-card.rank-bronze .ladder-status-card__rank-number {
-    font-size: 22px;
-  }
-
-  .ladder-status-card__label {
-    font-size: 12px;
+  .ladder-status-card__score-label {
+    font-size: 11px;
   }
 
   .ladder-status-card__score-value {
-    font-size: 20px;
+    font-size: 18px;
   }
 
   .ladder-status-card__score-unit {
@@ -405,8 +423,8 @@
   }
 
   .ladder-status-card__arrow svg {
-    width: 18px;
-    height: 18px;
+    width: 20px;
+    height: 20px;
   }
 
   .floating-rank-display {
@@ -422,24 +440,24 @@
 
 @media (max-width: 480px) {
   .ladder-status-card {
-    padding: 12px 14px;
-    gap: 10px;
+    padding: 12px 16px;
+    gap: 12px;
   }
 
   .ladder-status-card__rank-section {
-    min-width: 45px;
+    min-width: 70px;
   }
 
-  .ladder-status-card__rank-icon {
+  .ladder-status-card__rank-value {
     font-size: 24px;
   }
 
-  .ladder-status-card__rank-number {
-    font-size: 18px;
+  .ladder-status-card__rank-badge {
+    font-size: 20px;
   }
 
   .ladder-status-card__score-value {
-    font-size: 18px;
+    font-size: 16px;
   }
 
   .ladder-status-card__arrow {
@@ -448,16 +466,17 @@
   }
 
   .ladder-status-card__arrow svg {
-    width: 16px;
-    height: 16px;
+    width: 18px;
+    height: 18px;
   }
 }
 
 /* Accessibility */
 @media (prefers-reduced-motion: reduce) {
   .ladder-status-card,
-  .ladder-status-card__rank-icon,
-  .ladder-status-card__arrow {
+  .ladder-status-card__arrow,
+  .ladder-status-card__rank-value {
+    animation: none;
     transition: none;
   }
 

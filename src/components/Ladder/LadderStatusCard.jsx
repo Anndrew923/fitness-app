@@ -46,18 +46,22 @@ const LadderStatusCard = ({
   const hasValidScore = userData?.ladderScore && userData.ladderScore > 0;
   const isRanked =
     hasValidScore && rank !== null && rank !== undefined && rank > 0;
-  // ✅ Show loading only when fetching (rankProp not provided)
-  const isLoading =
-    rankLoading && (rankProp === null || rankProp === undefined);
 
-  // Get rank badge icon
+  // ✅ Show loading ONLY if:
+  // 1. No rank prop provided (need to fetch)
+  // 2. Hook is actually loading
+  // 3. No cached rank available (if cached, it should be instant)
+  const isLoading =
+    (rankProp === null || rankProp === undefined) &&
+    rankLoading &&
+    rank === null;
+
+  // Get rank badge icon (only for top 3)
   const getRankBadge = rank => {
     if (rank === 1) return '🥇';
     if (rank === 2) return '🥈';
     if (rank === 3) return '🥉';
-    if (rank <= 10) return '🏆';
-    if (rank <= 50) return '⭐';
-    return '🛡️';
+    return null; // No icon for others
   };
 
   // Get rank class for special styling
@@ -68,7 +72,7 @@ const LadderStatusCard = ({
     return '';
   };
 
-  const rankBadge = isRanked ? getRankBadge(rank) : '📊';
+  const rankBadge = isRanked ? getRankBadge(rank) : null;
   const rankClass = isRanked ? getRankClass(rank) : 'rank-unranked';
 
   // Display title (default to translation key)
@@ -93,31 +97,40 @@ const LadderStatusCard = ({
           : undefined
       }
     >
-      {/* Left: Rank Icon + Number */}
+      {/* Left: Rank Section */}
       <div className="ladder-status-card__rank-section">
-        <div className="ladder-status-card__rank-icon">{rankBadge}</div>
+        <div className="ladder-status-card__rank-label">我的排名</div>
         <div className="ladder-status-card__rank-number">
           {isLoading ? (
-            <span className="ladder-status-card__loading-dots">...</span>
+            <span className="ladder-status-card__loading-dots skeleton-loader">
+              &nbsp;
+            </span>
           ) : isRanked ? (
-            rank
+            <>
+              {rankBadge && (
+                <span className="ladder-status-card__rank-badge">
+                  {rankBadge}
+                </span>
+              )}
+              <span className="ladder-status-card__rank-value">{rank}</span>
+            </>
           ) : (
-            '—'
+            <span className="ladder-status-card__rank-unranked">—</span>
           )}
         </div>
       </div>
 
-      {/* Middle: Label + Score */}
-      <div className="ladder-status-card__info-section">
-        <div className="ladder-status-card__label">{displayTitle}</div>
+      {/* Right: Score Section */}
+      <div className="ladder-status-card__score-section">
+        <div className="ladder-status-card__score-label">戰鬥力</div>
         {isLoading ? (
-          <div className="ladder-status-card__score">
-            <span className="ladder-status-card__loading-skeleton">
-              載入中...
+          <div className="ladder-status-card__score-value-wrapper">
+            <span className="ladder-status-card__loading-skeleton skeleton-loader">
+              &nbsp;
             </span>
           </div>
         ) : hasValidScore && isRanked ? (
-          <div className="ladder-status-card__score">
+          <div className="ladder-status-card__score-value-wrapper">
             <span className="ladder-status-card__score-value">
               {formatScore(userData.ladderScore)}
             </span>
@@ -136,12 +149,12 @@ const LadderStatusCard = ({
       {handleClick && (
         <div className="ladder-status-card__arrow">
           <svg
-            width="20"
-            height="20"
+            width="24"
+            height="24"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
-            strokeWidth="2"
+            strokeWidth="2.5"
             strokeLinecap="round"
             strokeLinejoin="round"
           >
