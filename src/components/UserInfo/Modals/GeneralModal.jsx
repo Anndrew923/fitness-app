@@ -48,9 +48,13 @@ const GeneralModal = ({
     onClose();
   };
 
-  const handleOverlayClick = () => {
-    logger.debug('Modal overlay clicked');
-    onClose();
+  const handleOverlayClick = e => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.target === e.currentTarget) {
+      logger.debug('Modal overlay clicked');
+      onClose();
+    }
   };
 
   const handleAction = () => {
@@ -61,8 +65,11 @@ const GeneralModal = ({
   };
 
   return (
-    <div className="modal-overlay" onClick={handleOverlayClick}>
-      <div className="modal-content" onClick={e => e.stopPropagation()}>
+    <div className="submit-confirm-overlay" onClick={handleOverlayClick}>
+      <div
+        className="submit-confirm-content"
+        onClick={e => e.stopPropagation()}
+      >
         <div className="modal-header">
           <span className="modal-icon">{getIcon()}</span>
           <h3 className="modal-title">{title}</h3>
@@ -113,4 +120,3 @@ GeneralModal.propTypes = {
 };
 
 export default GeneralModal;
-

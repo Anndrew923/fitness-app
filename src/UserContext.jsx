@@ -8,24 +8,37 @@ import {
   useState,
   useMemo,
 } from 'react';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 import { db, auth } from './firebase';
 import PropTypes from 'prop-types';
 import { getAgeGroup, validateAndCleanUserData } from './utils';
 import firebaseWriteMonitor from './utils/firebaseMonitor';
 import logger from './utils/logger';
+import { handleDailyLogin } from './utils/activityTracker';
 
 const UserContext = createContext();
 
 // ✅ Phase 1 新增：職業分類選項
 export const JOB_CATEGORIES = {
-  engineering: { id: 'engineering', name: '工程師', nameEn: 'Software/Hardware Engineer' },
+  engineering: {
+    id: 'engineering',
+    name: '工程師',
+    nameEn: 'Software/Hardware Engineer',
+  },
   medical: { id: 'medical', name: '醫療人員', nameEn: 'Doctor/Nurse' },
   coach: { id: 'coach', name: '健身教練', nameEn: 'Personal Trainer' },
   student: { id: 'student', name: '學生', nameEn: 'Student' },
-  police_military: { id: 'police_military', name: '軍警消', nameEn: 'Military/Police' },
+  police_military: {
+    id: 'police_military',
+    name: '軍警消',
+    nameEn: 'Military/Police',
+  },
   business: { id: 'business', name: '商業/金融', nameEn: 'Business/Finance' },
-  freelance: { id: 'freelance', name: '自由業/設計', nameEn: 'Freelancer/Design' },
+  freelance: {
+    id: 'freelance',
+    name: '自由業/設計',
+    nameEn: 'Freelancer/Design',
+  },
   other: { id: 'other', name: '其他', nameEn: 'Other' },
 };
 
@@ -59,6 +72,10 @@ const initialState = {
   // 天梯隱私設置
   isAnonymousInLadder: false, // 是否匿名參與天梯（預設不匿名）
   lastActive: new Date().toISOString(),
+  // ✅ Daily Login Tracker fields
+  lastLoginDate: null, // Last login date (YYYY-MM-DD)
+  stats_loginStreak: 0, // Current consecutive login streak
+  stats_totalLoginDays: 0, // Total cumulative login days (for Discipline Rank)
   // 排行榜資訊（選填）
   country: '', // 國家（選填）
   region: '', // 行政區/大區（選填）
@@ -154,6 +171,10 @@ export function UserProvider({ children }) {
           lastLadderSubmission: firebaseData.lastLadderSubmission || null,
           // 確保最後活動時間被正確讀取
           lastActive: firebaseData.lastActive || null,
+          // ✅ Daily Login Tracker: Ensure login stats are read correctly
+          lastLoginDate: firebaseData.lastLoginDate || null,
+          stats_loginStreak: Number(firebaseData.stats_loginStreak) || 0,
+          stats_totalLoginDays: Number(firebaseData.stats_totalLoginDays) || 0,
           // 確保排行榜資訊被正確讀取
           country: firebaseData.country || '',
           region: firebaseData.region || '',
@@ -170,6 +191,45 @@ export function UserProvider({ children }) {
           if (process.env.NODE_ENV === 'development') {
             logger.debug('用戶資料載入成功');
           }
+
+          // ✅ Daily Login Tracker: Check and update login stats
+          try {
+            const loginUpdates = handleDailyLogin(mergedData);
+            if (loginUpdates) {
+              logger.debug(
+                '📅 [ActivityTracker] Login stats updated:',
+                loginUpdates
+              );
+
+              // Update Firestore immediately
+              const updateData = {
+                lastLoginDate: loginUpdates.lastLoginDate,
+                stats_loginStreak: loginUpdates.stats_loginStreak,
+                stats_totalLoginDays: loginUpdates.stats_totalLoginDays,
+                updatedAt: new Date().toISOString(),
+              };
+
+              await updateDoc(userRef, updateData);
+
+              // Update local state with new login stats
+              const updatedData = {
+                ...mergedData,
+                ...updateData,
+              };
+              dispatch({ type: 'SET_USER_DATA', payload: updatedData });
+              localStorage.setItem('userData', JSON.stringify(updatedData));
+
+              logger.debug(
+                '✅ [ActivityTracker] Login stats saved to Firestore'
+              );
+            }
+          } catch (error) {
+            logger.error(
+              '❌ [ActivityTracker] Failed to update login stats:',
+              error
+            );
+            // Don't fail the entire load process if login tracking fails
+          }
         }
         setIsLoading(false);
         return true;
@@ -177,6 +237,17 @@ export function UserProvider({ children }) {
         logger.debug('用戶文檔不存在，創建新的');
         // 如果用戶文檔不存在，創建一個新的
         const newUserData = { ...initialState, userId: currentUser.uid };
+
+        // ✅ Daily Login Tracker: Initialize login stats for new user
+        const loginUpdates = handleDailyLogin(newUserData);
+        if (loginUpdates) {
+          Object.assign(newUserData, loginUpdates);
+          logger.debug(
+            '📅 [ActivityTracker] Initializing login stats for new user:',
+            loginUpdates
+          );
+        }
+
         await setDoc(userRef, newUserData);
 
         if (isMountedRef.current) {

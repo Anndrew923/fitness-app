@@ -151,8 +151,7 @@
 }
 
 /* 提交確認對話框樣式 */
-/* ✅ Phase 1.10 修正：提交確認對話框樣式 - 懸浮在橘色卡片上方 */
-/* ✅ 關鍵：保留 margin-bottom 邏輯 */
+/* ✅ Hotfix: 居中顯示，覆蓋雷達圖區域以提升可見性 */
 .submit-confirm-overlay {
   z-index: 10001;
   position: fixed;
@@ -160,13 +159,13 @@
   left: 0;
   right: 0;
   bottom: 0;
-  /* ✅ 改為 Flex 佈局，內容靠下對齊 */
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  align-items: center;
+  /* ✅ Hotfix: 強制居中對齊，覆蓋雷達圖區域 */
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  align-items: center !important;
   background-color: rgba(0, 0, 0, 0.6); /* 稍微加深背景讓卡片更突出 */
-  padding-bottom: 0 !important;
+  padding: 20px;
   /* 防止背景滾動 */
   overscroll-behavior: contain;
   touch-action: none;
@@ -175,8 +174,15 @@
 .submit-confirm-content {
   width: 90%; /* 手機版寬度 */
   max-width: 400px;
-  /* ✅ 關鍵：底部留白，讓它懸浮在橘色卡片上方 (與 RPG Modal 位置一致) */
-  margin: 0 auto 280px auto;
+  /* ✅ Hotfix: 強制居中 - 重置所有定位屬性 */
+  margin: 0 !important; /* 移除所有 margin，包括 auto */
+  position: relative !important; /* 禁用絕對定位 */
+  top: auto !important;
+  bottom: auto !important;
+  left: auto !important;
+  right: auto !important;
+  align-self: center !important; /* Flex 子元素居中 */
+  transform: translateY(-20%) !important; /* 視覺光學中心，向上偏移 */
 
   background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
   border: 2px solid #4a5568;
@@ -188,9 +194,10 @@
   max-height: 60vh; /* 限制最大高度，內容多時內部滾動 */
   display: flex;
   flex-direction: column;
-  position: relative;
   animation: confirmModalSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1); /* 優化動畫曲線 */
   overflow: hidden;
+  /* ✅ 確保 transform 在動畫後保持 */
+  will-change: transform, opacity;
 }
 
 /* ✅ 標題顏色修正 - 白色 */
@@ -435,10 +442,15 @@
     font-size: 14px;
   }
 
-  /* ✅ 響應式微調 - 保留 margin-bottom 邏輯 */
+  /* ✅ 響應式微調 - 強制居中顯示 */
   .submit-confirm-content {
-    margin-bottom: 260px; /* 手機版稍微調整高度 */
+    margin: 0 !important; /* 強制移除 margin */
+    transform: translateY(-15%) !important; /* 手機版稍微減少向上偏移 */
     width: 88%;
+    position: relative !important;
+    top: auto !important;
+    bottom: auto !important;
+    align-self: center !important;
   }
 
   .submit-confirm-content .submit-confirm-footer {
@@ -505,15 +517,15 @@
 }
 
 /* 動畫效果 */
-/* ✅ Phase 1.10 修正：優化動畫 - 從下方浮現 */
+/* ✅ Hotfix: 優化動畫 - 從中心浮現（配合居中位置） */
 @keyframes confirmModalSlideUp {
   from {
     opacity: 0;
-    transform: translateY(20px) scale(0.95);
+    transform: translateY(-20%) scale(0.95) !important;
   }
   to {
     opacity: 1;
-    transform: translateY(0) scale(1);
+    transform: translateY(-20%) scale(1) !important;
   }
 }
 

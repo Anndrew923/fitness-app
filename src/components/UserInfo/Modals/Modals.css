@@ -157,7 +157,11 @@
   box-shadow: 0 4px 12px rgba(113, 128, 150, 0.3);
 }
 
-/* Submit Confirm Modal 樣式 */
+/* =========================================
+   🚀 NUCLEAR FIX: Force Center Submit Modal
+   ========================================= */
+
+/* 1. Overlay: Just a dark background, no flex alignment duties */
 .submit-confirm-overlay {
   z-index: 10001;
   position: fixed;
@@ -165,36 +169,45 @@
   left: 0;
   right: 0;
   bottom: 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start !important; /* ✅ 置頂組：改為 flex-start */
-  align-items: center;
   background-color: rgba(0, 0, 0, 0.6);
-  padding-top: 18% !important; /* ✅ 置頂組：往上移動到 18% */
-  padding-bottom: 0 !important;
+  display: block !important; /* Reset Flex behavior */
+  padding: 0 !important;
   overscroll-behavior: contain;
   touch-action: none;
 }
 
+/* 2. Content: Absolute Center Positioning */
 .submit-confirm-content {
+  /* Break out of flow */
+  position: fixed !important;
+  margin: 0 !important;
+
+  /* Force Center Coordinates */
+  top: 50% !important;
+  left: 50% !important;
+  /* -60% Y moves it slightly up to cover the Radar Chart visually */
+  transform: translate(-50%, -60%) !important;
+
+  /* Reset conflicting props */
+  bottom: auto !important;
+  right: auto !important;
+  align-self: auto !important;
+
+  /* Sizing & Style */
   width: 90%;
   max-width: 400px;
-  margin: 0 !important; /* ✅ 置頂組：移除 margin，使用固定定位 */
+  max-height: 70vh;
   background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
   border: 2px solid #4a5568;
   border-radius: 20px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
-  height: auto;
-  max-height: 60vh;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
   display: flex;
   flex-direction: column;
-  position: fixed !important; /* ✅ 置頂組：強制固定定位 */
-  top: 18% !important; /* ✅ 置頂組：往上移動到 18%（大頭貼下方，覆蓋「狂戰士」標籤區域） */
-  bottom: auto !important; /* ✅ 置頂組：重置底部定位 */
-  left: 50% !important;
-  transform: translateX(-50%) !important; /* ✅ 水平居中 */
-  animation: confirmModalSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   overflow: hidden;
+  will-change: transform, opacity;
+
+  /* New Animation */
+  animation: confirmModalPopCenter 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
 }
 
 .submit-confirm-content .modal-header {
@@ -378,14 +391,15 @@
   text-align: left;
 }
 
-@keyframes confirmModalSlideUp {
+/* 3. Animation: Pop from center */
+@keyframes confirmModalPopCenter {
   from {
     opacity: 0;
-    transform: translateX(-50%) translateY(-20px) scale(0.95); /* ✅ 置頂組：動畫從上方滑入（向下移動） */
+    transform: translate(-50%, -50%) scale(0.8);
   }
   to {
     opacity: 1;
-    transform: translateX(-50%) translateY(0) scale(1); /* ✅ 置頂組：動畫結束狀態包含 translateX(-50%) */
+    transform: translate(-50%, -60%) scale(1);
   }
 }
 
@@ -422,13 +436,29 @@
     font-size: 14px;
   }
 
+  /* 4. Mobile Adjustments */
   .submit-confirm-content {
-    margin: 0 !important; /* ✅ 置頂組：移除 margin-bottom */
-    width: 88%;
+    width: 92% !important;
+    max-width: 360px !important;
+    /* On mobile, center it perfectly (-50%) or slightly up (-55%) */
+    transform: translate(-50%, -55%) !important;
   }
 
+  @keyframes confirmModalPopCenter {
+    from {
+      opacity: 0;
+      transform: translate(-50%, -45%) scale(0.8);
+    }
+    to {
+      opacity: 1;
+      transform: translate(-50%, -55%) scale(1);
+    }
+  }
+
+  /* Ensure footer buttons fit */
   .submit-confirm-content .submit-confirm-footer {
     flex-direction: row;
+    padding: 12px 16px;
   }
 
   .confirm-text {

@@ -47,18 +47,17 @@ const SubmitConfirmModal = ({
   if (!isOpen) return null;
 
   const handleOverlayClick = e => {
+    e.preventDefault();
+    e.stopPropagation();
     if (e.target === e.currentTarget) {
       onCancel();
     }
   };
 
   return (
-    <div
-      className="modal-overlay submit-confirm-overlay"
-      onClick={handleOverlayClick}
-    >
+    <div className="submit-confirm-overlay" onClick={handleOverlayClick}>
       <div
-        className="modal-content submit-confirm-content"
+        className="submit-confirm-content"
         onClick={e => e.stopPropagation()}
       >
         <div className="modal-header">
@@ -154,4 +153,3 @@ SubmitConfirmModal.propTypes = {
 };
 
 export default SubmitConfirmModal;
-
