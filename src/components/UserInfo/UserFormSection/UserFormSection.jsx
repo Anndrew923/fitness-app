@@ -1,6 +1,9 @@
 import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
-import { getDistrictsByCity, getAllCities } from '../../../utils/taiwanDistricts';
+import {
+  getDistrictsByCity,
+  getAllCities,
+} from '../../../utils/taiwanDistricts';
 import './UserFormSection.css';
 
 // 職業選項常數
@@ -39,9 +42,9 @@ const UserFormSection = ({
   }, [userData?.city, userData?.region, userData?.country]);
 
   // Handle city change with cascading logic
-  const handleCityChange = (e) => {
+  const handleCityChange = e => {
     const newCity = e.target.value;
-    
+
     // Create a synthetic event for city
     const cityEvent = {
       target: {
@@ -49,10 +52,10 @@ const UserFormSection = ({
         value: newCity,
       },
     };
-    
+
     // Update city
     onChange(cityEvent);
-    
+
     // Reset district when city changes
     if (newCity !== (userData?.city || userData?.region || '')) {
       const districtEvent = {
@@ -100,9 +103,7 @@ const UserFormSection = ({
                 }}
                 onMouseLeave={e => {
                   const tooltip =
-                    e.currentTarget.parentNode.querySelector(
-                      '.logout-tooltip'
-                    );
+                    e.currentTarget.parentNode.querySelector('.logout-tooltip');
                   if (tooltip) tooltip.remove();
                 }}
               >
@@ -241,9 +242,7 @@ const UserFormSection = ({
 
         {/* 天梯隱私設置 */}
         <div className="form-section">
-          <h3 className="section-title">
-            🏆 {t('userInfo.ladder.title')}
-          </h3>
+          <h3 className="section-title">🏆 {t('userInfo.ladder.title')}</h3>
           <div className="privacy-options">
             <label className="privacy-option">
               <input
@@ -272,9 +271,7 @@ const UserFormSection = ({
             <h4 className="training-info-title">
               💪 {t('userInfo.training.title')}
             </h4>
-            <p className="training-info-desc">
-              {t('userInfo.training.desc')}
-            </p>
+            <p className="training-info-desc">{t('userInfo.training.desc')}</p>
 
             <div className="form-row">
               <div className="form-group">
@@ -308,10 +305,7 @@ const UserFormSection = ({
               </div>
 
               <div className="form-group">
-                <label
-                  htmlFor="weeklyTrainingHours"
-                  className="form-label"
-                >
+                <label htmlFor="weeklyTrainingHours" className="form-label">
                   {t('userInfo.training.weeklyHours')}
                 </label>
                 <input
@@ -357,7 +351,7 @@ const UserFormSection = ({
                 id="country"
                 name="country"
                 value={userData?.country || ''}
-                onChange={(e) => {
+                onChange={e => {
                   onChange(e);
                   // Reset city and district when country changes
                   if (e.target.value !== 'TW') {
@@ -373,9 +367,7 @@ const UserFormSection = ({
                 }}
                 className="form-input"
               >
-                <option value="">
-                  {t('userInfo.ranking.selectCountry')}
-                </option>
+                <option value="">{t('userInfo.ranking.selectCountry')}</option>
                 <option value="TW">台灣</option>
                 <option value="CN">中國</option>
                 <option value="US">美國</option>
@@ -405,7 +397,6 @@ const UserFormSection = ({
             {/* Location Selectors Row (for Taiwan: City + District) */}
             {userData?.country === 'TW' && (
               <div className="form-row">
-
                 {/* City Selector (for Taiwan) */}
                 <div className="form-group">
                   <label htmlFor="city" className="form-label">
@@ -448,9 +439,7 @@ const UserFormSection = ({
                       <option value="連江縣">連江縣</option>
                     </optgroup>
                   </select>
-                  <p className="field-hint">
-                    💡 選擇城市後可進一步選擇行政區
-                  </p>
+                  <p className="field-hint">💡 選擇城市後可進一步選擇行政區</p>
                 </div>
 
                 {/* District Selector (for Taiwan, cascading from City) */}
@@ -481,69 +470,66 @@ const UserFormSection = ({
               </div>
             )}
 
-              {/* Region Selector (for non-Taiwan countries) */}
-              {userData?.country &&
-                userData?.country !== '' &&
-                userData?.country !== 'TW' &&
-                userData?.country !== 'OTHER' && (
-                  <div className="form-group">
-                    <label htmlFor="region" className="form-label">
-                      {t('userInfo.ranking.region')}{' '}
-                      <span className="optional-badge">選填</span>
-                    </label>
-                    <select
-                      id="region"
-                      name="region"
-                      value={userData?.region || ''}
-                      onChange={onChange}
-                      className="form-input"
-                    >
-                      <option value="">
-                        {t('userInfo.ranking.selectRegion')}
-                      </option>
-                      {/* 未來可根據選擇的國家動態載入城市列表 */}
-                      <option value="">
-                        {t('userInfo.ranking.regionComingSoon')}
-                      </option>
-                    </select>
-                    <p className="field-hint">
-                      💡 {t('userInfo.ranking.regionHint')}
-                    </p>
-                  </div>
-                )}
-
-              {/* Text Input for OTHER country or no country selected */}
-              {(!userData?.country ||
-                userData?.country === '' ||
-                userData?.country === 'OTHER') && (
+            {/* Region Selector (for non-Taiwan countries) */}
+            {userData?.country &&
+              userData?.country !== '' &&
+              userData?.country !== 'TW' &&
+              userData?.country !== 'OTHER' && (
                 <div className="form-group">
                   <label htmlFor="region" className="form-label">
                     {t('userInfo.ranking.region')}{' '}
                     <span className="optional-badge">選填</span>
                   </label>
-                  <input
+                  <select
                     id="region"
                     name="region"
-                    type="text"
                     value={userData?.region || ''}
                     onChange={onChange}
-                    placeholder={
-                      userData?.country === 'OTHER'
-                        ? t('userInfo.ranking.regionPlaceholderOther')
-                        : t('userInfo.ranking.selectCountryFirst')
-                    }
                     className="form-input"
-                    maxLength="50"
-                    disabled={
-                      !userData?.country || userData?.country === ''
-                    }
-                  />
+                  >
+                    <option value="">
+                      {t('userInfo.ranking.selectRegion')}
+                    </option>
+                    {/* 未來可根據選擇的國家動態載入城市列表 */}
+                    <option value="">
+                      {t('userInfo.ranking.regionComingSoon')}
+                    </option>
+                  </select>
                   <p className="field-hint">
                     💡 {t('userInfo.ranking.regionHint')}
                   </p>
                 </div>
               )}
-            </div>
+
+            {/* Text Input for OTHER country or no country selected */}
+            {(!userData?.country ||
+              userData?.country === '' ||
+              userData?.country === 'OTHER') && (
+              <div className="form-group">
+                <label htmlFor="region" className="form-label">
+                  {t('userInfo.ranking.region')}{' '}
+                  <span className="optional-badge">選填</span>
+                </label>
+                <input
+                  id="region"
+                  name="region"
+                  type="text"
+                  value={userData?.region || ''}
+                  onChange={onChange}
+                  placeholder={
+                    userData?.country === 'OTHER'
+                      ? t('userInfo.ranking.regionPlaceholderOther')
+                      : t('userInfo.ranking.selectCountryFirst')
+                  }
+                  className="form-input"
+                  maxLength="50"
+                  disabled={!userData?.country || userData?.country === ''}
+                />
+                <p className="field-hint">
+                  💡 {t('userInfo.ranking.regionHint')}
+                </p>
+              </div>
+            )}
           </div>
         </div>
 
@@ -575,4 +561,3 @@ UserFormSection.propTypes = {
 };
 
 export default UserFormSection;
-
