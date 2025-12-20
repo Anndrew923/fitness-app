@@ -92,8 +92,11 @@ export const calculateStatsAggregates = scores => {
  * @returns {string} returns.filter_ageGroup - Age group (e.g., "20-29", "30-39")
  * @returns {string} returns.filter_weightClass - Weight class (e.g., "60-70kg", "70-80kg")
  * @returns {string} returns.filter_heightClass - Height class (e.g., "170-179cm", "180-189cm")
+ * @param {Object} userData.testInputs - Test inputs object
+ * @param {number} userData.testInputs.ffmi.bodyFat - Body fat percentage (raw number, e.g., 15)
  * @returns {string} returns.filter_region_city - City name
  * @returns {string} returns.filter_region_district - District name (empty if not provided)
+ * @returns {string} returns.filter_bodyFatClass - Body fat class (e.g., "10-15%", "15-20%")
  */
 export const generateFilterTags = userData => {
   if (!userData || typeof userData !== 'object') {
@@ -103,6 +106,7 @@ export const generateFilterTags = userData => {
       filter_heightClass: '',
       filter_region_city: '',
       filter_region_district: '',
+      filter_bodyFatClass: '',
     };
   }
 
@@ -192,11 +196,31 @@ export const generateFilterTags = userData => {
   const filter_region_city = String(userData.city || '').trim();
   const filter_region_district = String(userData.district || '').trim();
 
+  // Generate body fat class filter from testInputs
+  let filter_bodyFatClass = '';
+  const bodyFat = Number(userData.testInputs?.ffmi?.bodyFat) || 0;
+  if (bodyFat > 0) {
+    if (bodyFat < 10) {
+      filter_bodyFatClass = 'under-10%';
+    } else if (bodyFat < 15) {
+      filter_bodyFatClass = '10-15%';
+    } else if (bodyFat < 20) {
+      filter_bodyFatClass = '15-20%';
+    } else if (bodyFat < 25) {
+      filter_bodyFatClass = '20-25%';
+    } else if (bodyFat < 30) {
+      filter_bodyFatClass = '25-30%';
+    } else {
+      filter_bodyFatClass = '30%+';
+    }
+  }
+
   return {
     filter_ageGroup,
     filter_weightClass,
     filter_heightClass,
     filter_region_city,
     filter_region_district,
+    filter_bodyFatClass,
   };
 };

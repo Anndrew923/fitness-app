@@ -18,6 +18,7 @@ const LadderList = ({
   likeProcessing,
   onRefresh,
   loading,
+  displayMode,
 }) => {
   const { t } = useTranslation();
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -126,6 +127,7 @@ const LadderList = ({
               onToggleLike={onToggleLike}
               isLiked={likedUsers?.has(user.id)}
               isLikeProcessing={likeProcessing?.has(user.id)}
+              displayMode={displayMode}
             />
           );
         })
@@ -144,6 +146,7 @@ LadderList.propTypes = {
   likeProcessing: PropTypes.instanceOf(Set),
   onRefresh: PropTypes.func,
   loading: PropTypes.bool,
+  displayMode: PropTypes.string,
 };
 
 export default LadderList;

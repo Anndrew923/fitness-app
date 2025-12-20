@@ -1,0 +1,85 @@
+/* LadderDivisionSelector Component Styles */
+
+.ladder-division-selector {
+  display: flex;
+  gap: 12px;
+  padding: 10px 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+.ladder-division-selector::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
+.ladder-division-card {
+  flex-shrink: 0;
+  min-width: 120px;
+  padding: 12px 16px;
+  background: #1a202c;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  user-select: none;
+}
+
+.ladder-division-card:hover {
+  background: #2d3748;
+  border-color: rgba(212, 175, 55, 0.3);
+  transform: translateY(-2px);
+}
+
+.ladder-division-card--active {
+  background: #2d3748;
+  border: 2px solid #d4af37;
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
+}
+
+.ladder-division-card__label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #ffffff;
+  margin-bottom: 4px;
+  white-space: nowrap;
+}
+
+.ladder-division-card__desc {
+  font-size: 11px;
+  color: #a0aec0;
+  white-space: nowrap;
+}
+
+.ladder-division-card--active .ladder-division-card__label {
+  color: #d4af37;
+}
+
+.ladder-division-card--active .ladder-division-card__desc {
+  color: #e2d8a8;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .ladder-division-selector {
+    gap: 8px;
+    padding: 8px 0;
+  }
+
+  .ladder-division-card {
+    min-width: 100px;
+    padding: 10px 12px;
+  }
+
+  .ladder-division-card__label {
+    font-size: 12px;
+  }
+
+  .ladder-division-card__desc {
+    font-size: 10px;
+  }
+}
+

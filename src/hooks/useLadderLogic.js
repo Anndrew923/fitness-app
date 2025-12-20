@@ -218,6 +218,9 @@ export const useLadderLogic = (
       const stats = calculateStatsAggregates(exerciseScores);
       const filters = generateFilterTags(userData);
 
+      // ✅ Extract body fat from testInputs
+      const bodyFat = Number(userData.testInputs?.ffmi?.bodyFat) || 0;
+
       // ✅ Apply Limit Break: Cap unverified users at 100
       const isVerified = userData.isVerified === true;
       const finalScore = applyLimitBreak(rawCalculatedScore, isVerified);
@@ -267,6 +270,8 @@ export const useLadderLogic = (
           stats_explosiveAvg: stats.explosiveAvg,
           // ✅ Height stats (for direct sorting: "Who is the tallest?")
           stats_height: Number(userData.height) || 0,
+          // ✅ Body fat stats (from testInputs, not scores)
+          stats_bodyFat: bodyFat,
           // Filter tags
           filter_is1000lbClub: stats.is1000lbClub,
           filter_ageGroup: filters.filter_ageGroup,
@@ -274,6 +279,7 @@ export const useLadderLogic = (
           filter_heightClass: filters.filter_heightClass,
           filter_region_city: filters.filter_region_city,
           filter_region_district: filters.filter_region_district,
+          filter_bodyFatClass: filters.filter_bodyFatClass,
           // Metadata
           lastLadderSubmission: new Date().toISOString(),
           updatedAt: new Date().toISOString(),

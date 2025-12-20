@@ -34,6 +34,7 @@ const Ladder = () => {
     error,
     selectedAgeGroup,
     selectedTab,
+    selectedDivision,
     currentPage,
     totalPages,
     totalUsers,
@@ -42,6 +43,7 @@ const Ladder = () => {
     likeProcessing,
     setSelectedAgeGroup,
     setSelectedTab,
+    setSelectedDivision,
     setCurrentPage,
     refresh,
     toggleLike,
@@ -602,8 +604,10 @@ const Ladder = () => {
         <LadderFilters
           selectedAgeGroup={selectedAgeGroup}
           selectedTab={selectedTab}
+          selectedDivision={selectedDivision}
           onAgeGroupChange={setSelectedAgeGroup}
           onTabChange={setSelectedTab}
+          onDivisionChange={setSelectedDivision}
           ageGroups={ageGroups}
         />
 
@@ -629,6 +633,7 @@ const Ladder = () => {
         likeProcessing={likeProcessing}
         onRefresh={handleRefresh}
         loading={loading}
+        displayMode={selectedDivision}
       />
 
       {/* Pagination */}

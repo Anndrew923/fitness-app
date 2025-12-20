@@ -21,6 +21,7 @@ export const useLadder = () => {
   const [error, setError] = useState(null);
   const [selectedAgeGroup, setSelectedAgeGroup] = useState('all');
   const [selectedTab, setSelectedTab] = useState('total');
+  const [selectedDivision, setSelectedDivision] = useState('ladderScore');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalUsers, setTotalUsers] = useState(0);
   const [displayStartRank, setDisplayStartRank] = useState(1);
@@ -38,9 +39,12 @@ export const useLadder = () => {
   /**
    * Build dynamic query based on filters
    * Future expansion: supports job, region filters
+   * Note: We always query by ladderScore for Firestore index compatibility,
+   * then sort client-side by selectedDivision
    */
   const buildQuery = useCallback((filters = {}) => {
-    // Base query: orderBy ladderScore
+    // Base query: always orderBy ladderScore (has index)
+    // Client-side sorting will handle selectedDivision
     let q = query(collection(db, 'users'), orderBy('ladderScore', 'desc'));
 
     // Future expansion: if (filters.job) ...
@@ -66,7 +70,10 @@ export const useLadder = () => {
     const loadParams = {
       selectedAgeGroup,
       selectedTab,
+      selectedDivision,
       userLadderScore: userData?.ladderScore || 0,
+      userCity: userData?.city || '',
+      userDistrict: userData?.district || '',
     };
 
     // Check if params changed, skip if same (unless force reload)
@@ -93,7 +100,11 @@ export const useLadder = () => {
     try {
       logger.debug('🚀 開始載入天梯數據...', loadParams);
 
-      const q = buildQuery({ ageGroup: selectedAgeGroup, tab: selectedTab });
+      const q = buildQuery({ 
+        ageGroup: selectedAgeGroup, 
+        tab: selectedTab,
+        sortBy: selectedDivision,
+      });
       const querySnapshot = await safeGetDocs(q, {
         maxRetries: 3,
         retryDelay: 1000,
@@ -140,6 +151,8 @@ export const useLadder = () => {
             trainingYears: docData.trainingYears || 0,
             country: docData.country || '',
             region: docData.region || '',
+            city: docData.city || '',
+            district: docData.district || '',
             ladderLikeCount: docData.ladderLikeCount || 0,
             ladderLikes: docData.ladderLikes || [],
             isVerified: docData.isVerified === true,
@@ -182,8 +195,54 @@ export const useLadder = () => {
         );
       }
 
-      // Re-sort
-      data.sort((a, b) => b.ladderScore - a.ladderScore);
+      // Client-side filtering: Local District
+      if (selectedDivision === 'local_district') {
+        const beforeFilterCount = data.length;
+        const currentUserCity = userData?.city || '';
+        const currentUserDistrict = userData?.district || '';
+        
+        if (!currentUserCity || !currentUserDistrict) {
+          // User hasn't set location, return empty list
+          logger.debug('📍 用戶未設定地區，返回空列表');
+          data = [];
+        } else {
+          data = data.filter(user => {
+            const userCity = user.city || '';
+            const userDistrict = user.district || '';
+            return userCity === currentUserCity && userDistrict === currentUserDistrict;
+          });
+          logger.debug(
+            `📍 地區過濾 (${currentUserCity} ${currentUserDistrict})：${beforeFilterCount} → ${data.length} 名用戶`
+          );
+        }
+      }
+
+      // Re-sort based on selected division
+      // For local_district, always sort by ladderScore (descending)
+      const sortField = selectedDivision === 'local_district' ? 'ladderScore' : selectedDivision;
+      data.sort((a, b) => {
+        const aValue = a[sortField];
+        const bValue = b[sortField];
+        
+        // Special case: Body Fat (lower is better)
+        if (sortField === 'stats_bodyFat') {
+          // Handle missing data: push to bottom (undefined, null, or invalid)
+          const aHasData = aValue !== undefined && aValue !== null && !isNaN(aValue);
+          const bHasData = bValue !== undefined && bValue !== null && !isNaN(bValue);
+          
+          if (!aHasData && !bHasData) return 0; // Both missing, keep order
+          if (!aHasData) return 1; // a missing, push to bottom
+          if (!bHasData) return -1; // b missing, push to bottom
+          
+          // Both have data: sort ascending (lower is better)
+          return aValue - bValue;
+        }
+        
+        // Default: Higher is better (descending)
+        const aVal = aValue || 0;
+        const bVal = bValue || 0;
+        return bVal - aVal;
+      });
 
       // Calculate user rank and pagination
       let displayData = [];
@@ -251,6 +310,7 @@ export const useLadder = () => {
   }, [
     selectedAgeGroup,
     selectedTab,
+    selectedDivision,
     userData,
     currentPage,
     ladderData.length,
@@ -420,7 +480,7 @@ export const useLadder = () => {
       hasInitialPageSetRef.current = false;
       hasDataRef.current = false;
     }
-  }, [selectedAgeGroup, selectedTab, userData]);
+  }, [selectedAgeGroup, selectedTab, selectedDivision, userData]);
 
   useEffect(() => {
     if (userData) {
@@ -440,6 +500,7 @@ export const useLadder = () => {
     error,
     selectedAgeGroup,
     selectedTab,
+    selectedDivision,
     currentPage,
     totalPages,
     totalUsers,
@@ -450,6 +511,7 @@ export const useLadder = () => {
     // Actions
     setSelectedAgeGroup,
     setSelectedTab,
+    setSelectedDivision,
     setCurrentPage,
     refresh,
     loadMore,

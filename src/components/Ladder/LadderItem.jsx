@@ -17,6 +17,7 @@ const LadderItem = React.memo(
     onToggleLike,
     isLiked,
     isLikeProcessing,
+    displayMode = 'ladderScore',
   }) => {
     const { t } = useTranslation();
 
@@ -56,6 +57,53 @@ const LadderItem = React.memo(
         onToggleLike(user.id, e);
       }
     };
+
+    // Get display value, unit, and label based on displayMode
+    const getDisplayMetrics = () => {
+      switch (displayMode) {
+        case 'stats_totalLoginDays':
+          return {
+            value: user.stats_totalLoginDays || 0,
+            unit: '天',
+            label: '累計天數',
+            icon: '🔥',
+            formatValue: val => Math.floor(val).toLocaleString('zh-TW'),
+          };
+        case 'stats_sbdTotal':
+          return {
+            value: user.stats_sbdTotal || 0,
+            unit: 'kg',
+            label: user.weight ? `BW: ${user.weight}kg` : 'SBD 總和',
+            formatValue: val => Number(val).toFixed(1),
+          };
+        case 'stats_bodyFat':
+          return {
+            value: user.stats_bodyFat || 0,
+            unit: '%',
+            label: '體脂率',
+            icon: '💧',
+            formatValue: val => Number(val).toFixed(1),
+          };
+        case 'local_district':
+          // Local district uses ladderScore for display
+          return {
+            value: user.ladderScore || 0,
+            unit: t('community.ui.pointsUnit'),
+            label: '戰鬥力',
+            formatValue: val => formatScore(val),
+          };
+        case 'ladderScore':
+        default:
+          return {
+            value: user.ladderScore || 0,
+            unit: t('community.ui.pointsUnit'),
+            label: '戰鬥力',
+            formatValue: val => formatScore(val),
+          };
+      }
+    };
+
+    const displayMetrics = getDisplayMetrics();
 
     return (
       <div
@@ -167,10 +215,16 @@ const LadderItem = React.memo(
         <div className="ladder__score-section">
           <div className="ladder__score">
             <span className="ladder__score-value">
-              {formatScore(user.ladderScore)}
+              {displayMetrics.icon && (
+                <span className="ladder__score-icon">{displayMetrics.icon}</span>
+              )}
+              {displayMetrics.formatValue(displayMetrics.value)}
             </span>
             <span className="ladder__score-label">
-              {t('community.ui.pointsUnit')}
+              {displayMetrics.unit}
+            </span>
+            <span className="ladder__score-sublabel">
+              {displayMetrics.label}
             </span>
           </div>
 
@@ -200,14 +254,18 @@ const LadderItem = React.memo(
   },
   (prevProps, nextProps) => {
     // Custom comparison for React.memo
+    const prevValue = prevProps.user[prevProps.displayMode || 'ladderScore'] || 0;
+    const nextValue = nextProps.user[nextProps.displayMode || 'ladderScore'] || 0;
+    
     return (
       prevProps.user.id === nextProps.user.id &&
       prevProps.rank === nextProps.rank &&
       prevProps.isCurrentUser === nextProps.isCurrentUser &&
-      prevProps.user.ladderScore === nextProps.user.ladderScore &&
+      prevValue === nextValue &&
       prevProps.user.ladderLikeCount === nextProps.user.ladderLikeCount &&
       prevProps.isLiked === nextProps.isLiked &&
-      prevProps.isLikeProcessing === nextProps.isLikeProcessing
+      prevProps.isLikeProcessing === nextProps.isLikeProcessing &&
+      prevProps.displayMode === nextProps.displayMode
     );
   }
 );
@@ -222,6 +280,7 @@ LadderItem.propTypes = {
   onToggleLike: PropTypes.func,
   isLiked: PropTypes.bool,
   isLikeProcessing: PropTypes.bool,
+  displayMode: PropTypes.string,
 };
 
 export default LadderItem;
