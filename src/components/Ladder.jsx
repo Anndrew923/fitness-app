@@ -38,7 +38,7 @@ const Ladder = () => {
   const [selectedUserForCard, setSelectedUserForCard] = useState(null);
   const [showNotification, setShowNotification] = useState(false);
   const [notificationData, setNotificationData] = useState(null);
-  const [forceScrollTrigger, setForceScrollTrigger] = useState(0);
+  const [scrollTrigger, setScrollTrigger] = useState(0);
 
   // Use the new useLadder hook (AFTER filter states are defined)
   const {
@@ -132,44 +132,22 @@ const Ladder = () => {
     }
   }, []);
 
-  // Execute chain scroll
-  const executeChainScroll = useCallback(targetId => {
-    if (!targetId) return;
-
-    const doScroll = behavior => {
-      const el = document.querySelector(`[data-user-id="${targetId}"]`);
-      if (el) {
-        el.scrollIntoView({ behavior, block: 'center' });
-        logger.debug('✅ [Ladder] 執行定位鎖定');
-      }
-    };
-
-    requestAnimationFrame(() => doScroll('auto'));
-    setTimeout(() => doScroll('smooth'), 100);
-    setTimeout(() => doScroll('smooth'), 300);
-    setTimeout(() => doScroll('smooth'), 600);
-    setTimeout(() => {
-      doScroll('smooth');
-      logger.debug('✅ [Ladder] 2000ms 終極鎖定執行');
-    }, 2000);
-  }, []);
-
-  // Jump to current user
+  // Jump to current user (with scroll trigger signal)
   const jumpToCurrentUser = useCallback(() => {
     if (!userData?.userId && !auth.currentUser?.uid) return;
     if (userRank === 0) return;
 
-    const targetId = userData?.userId || auth.currentUser?.uid;
     const usersPerPage = 50;
     const targetPage = Math.ceil(userRank / usersPerPage);
 
     if (targetPage !== currentPage) {
       setCurrentPage(targetPage);
-      setForceScrollTrigger(prev => prev + 1);
+      // The page change will trigger a reload, which will handle the scroll naturally.
     } else {
-      executeChainScroll(targetId);
+      // SAME PAGE? Fire the trigger!
+      setScrollTrigger(prev => prev + 1);
     }
-  }, [userRank, currentPage, userData, setCurrentPage, executeChainScroll]);
+  }, [userRank, currentPage, userData, setCurrentPage]);
 
   // Disable browser scroll restoration
   useEffect(() => {
@@ -189,37 +167,6 @@ const Ladder = () => {
       checkAndShowNotification(userRank);
     }
   }, [userRank, checkAndShowNotification]);
-
-  // Handle scroll trigger
-  useEffect(() => {
-    const targetId = userData?.userId || auth.currentUser?.uid;
-    if (
-      forceScrollTrigger > 0 &&
-      !loading &&
-      ladderData.length > 0 &&
-      targetId &&
-      userRank > 0
-    ) {
-      const userInDisplay = ladderData.some(
-        user =>
-          user.id === userData?.userId || user.id === auth.currentUser?.uid
-      );
-
-      if (userInDisplay) {
-        executeChainScroll(targetId);
-        setForceScrollTrigger(0);
-      } else {
-        setForceScrollTrigger(0);
-      }
-    }
-  }, [
-    forceScrollTrigger,
-    loading,
-    ladderData,
-    userRank,
-    userData,
-    executeChainScroll,
-  ]);
 
   // Handle route state force reload
   useEffect(() => {
@@ -261,6 +208,138 @@ const Ladder = () => {
     localStorage.removeItem('ladderUpdateNotification');
   }, []);
 
+  // Helper function to get display metrics for floating bar (same logic as LadderItem)
+  const getFloatingBarMetrics = useCallback(() => {
+    if (!userData)
+      return { value: 0, unit: '', label: '', formatValue: val => val };
+
+    switch (selectedDivision) {
+      case 'stats_totalLoginDays':
+        return {
+          value: userData.stats_totalLoginDays || 0,
+          unit: '天',
+          label: '累計天數',
+          formatValue: val => Math.floor(val).toLocaleString('zh-TW'),
+        };
+      case 'stats_sbdTotal':
+        if (filterProject === 'squat' && userData.stats_squat) {
+          return {
+            value: userData.stats_squat || 0,
+            unit: 'kg',
+            label: '深蹲',
+            formatValue: val => Number(val).toFixed(1),
+          };
+        } else if (filterProject === 'bench' && userData.stats_bench) {
+          return {
+            value: userData.stats_bench || 0,
+            unit: 'kg',
+            label: '臥推',
+            formatValue: val => Number(val).toFixed(1),
+          };
+        } else if (filterProject === 'deadlift' && userData.stats_deadlift) {
+          return {
+            value: userData.stats_deadlift || 0,
+            unit: 'kg',
+            label: '硬舉',
+            formatValue: val => Number(val).toFixed(1),
+          };
+        }
+        return {
+          value: userData.stats_sbdTotal || 0,
+          unit: 'kg',
+          label: 'SBD 總和',
+          formatValue: val => Number(val).toFixed(1),
+        };
+      case 'stats_bodyFat':
+        return {
+          value: userData.stats_bodyFat || 0,
+          unit: '%',
+          label: '體脂率',
+          formatValue: val => Number(val).toFixed(1),
+        };
+      case 'local_district':
+        return {
+          value: userData.ladderScore || 0,
+          unit: t('community.ui.pointsUnit'),
+          label: '戰鬥力',
+          formatValue: val => formatScore(val),
+        };
+      case 'stats_cooper':
+        if (filterProject === '5k') {
+          const format5KTime = val => {
+            if (!val || val === 0) return '0:00';
+            const minutes = Math.floor(val / 60);
+            const seconds = Math.floor(val % 60);
+            return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+          };
+          return {
+            value: userData.stats_5k || 0,
+            unit: 'mins',
+            label: '5K Run',
+            formatValue: format5KTime,
+          };
+        }
+        return {
+          value: userData.stats_cooper || 0,
+          unit: 'km',
+          label: 'Cooper Test',
+          formatValue: val => (Number(val) / 1000).toFixed(2),
+        };
+      case 'stats_vertical':
+        if (filterProject === 'broad') {
+          return {
+            value: userData.stats_broad || 0,
+            unit: 'cm',
+            label: '立定跳遠',
+            formatValue: val => Number(val).toFixed(1),
+          };
+        } else if (filterProject === 'sprint') {
+          return {
+            value: userData.stats_100m || 0,
+            unit: 's',
+            label: '100m 衝刺',
+            formatValue: val => Number(val).toFixed(2),
+          };
+        }
+        return {
+          value: userData.stats_vertical || 0,
+          unit: 'cm',
+          label: '垂直跳躍',
+          formatValue: val => Number(val).toFixed(1),
+        };
+      case 'stats_ffmi':
+        if (filterProject === 'smm') {
+          return {
+            value: userData.stats_smm || 0,
+            unit: 'kg',
+            label: '肌肉量 (SMM)',
+            formatValue: val => Number(val).toFixed(1),
+          };
+        } else if (filterProject === 'armSize') {
+          return {
+            value: userData.stats_armSize || 0,
+            unit: 'cm',
+            label: '臂圍',
+            formatValue: val => Number(val).toFixed(1),
+          };
+        }
+        return {
+          value: userData.stats_ffmi || 0,
+          unit: '',
+          label: 'FFMI',
+          formatValue: val => Number(val).toFixed(2),
+        };
+      case 'ladderScore':
+      default:
+        return {
+          value: userData.ladderScore || 0,
+          unit: t('community.ui.pointsUnit'),
+          label: '戰鬥力',
+          formatValue: val => formatScore(val),
+        };
+    }
+  }, [userData, selectedDivision, filterProject, t]);
+
   // Floating rank display
   const floatingRankDisplay = useMemo(() => {
     if (!userData || !userData.ladderScore || userData.ladderScore === 0) {
@@ -275,6 +354,7 @@ const Ladder = () => {
 
     const currentRank = userRank;
     const rankBadge = getRankBadge(currentRank);
+    const metrics = getFloatingBarMetrics();
 
     return (
       <div
@@ -342,16 +422,21 @@ const Ladder = () => {
 
           <div className="ladder__score">
             <span className="ladder__score-value">
-              {formatScore(userData.ladderScore)}
+              {metrics.formatValue(metrics.value)}
             </span>
-            <span className="ladder__score-label">
-              {t('community.ui.pointsUnit')}
-            </span>
+            <span className="ladder__score-label">{metrics.unit}</span>
           </div>
         </div>
       </div>
     );
-  }, [userData, userRank, getAgeGroupLabel, t, jumpToCurrentUser]);
+  }, [
+    userData,
+    userRank,
+    getAgeGroupLabel,
+    t,
+    jumpToCurrentUser,
+    getFloatingBarMetrics,
+  ]);
 
   // Handle user click
   const handleUserClick = (user, event) => {
@@ -657,6 +742,7 @@ const Ladder = () => {
         loading={loading}
         displayMode={selectedDivision}
         filterProject={filterProject}
+        scrollTrigger={scrollTrigger}
       />
 
       {/* Pagination */}

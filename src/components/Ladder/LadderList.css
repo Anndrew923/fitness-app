@@ -7,6 +7,21 @@
   box-shadow: 0 3px 16px rgba(255, 107, 53, 0.15);
   border: 1px solid rgba(255, 107, 53, 0.1);
   position: relative;
+  transition: opacity 0.3s ease-in-out;
+}
+
+/* The "Curtain" Technique: Hide list while positioning */
+.ladder__list--positioning {
+  opacity: 0;
+  /* Keep layout space - don't use display: none or visibility: hidden */
+  /* This ensures scroll height is calculated correctly */
+  pointer-events: none; /* Prevent interaction while positioning */
+}
+
+/* Reveal list after positioning is complete */
+.ladder__list--visible {
+  opacity: 1;
+  pointer-events: auto; /* Re-enable interaction */
 }
 
 .ladder__pull-refresh {

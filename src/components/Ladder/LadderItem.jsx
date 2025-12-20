@@ -204,6 +204,7 @@ const LadderItem = React.memo(
 
     return (
       <div
+        id={`user-row-${user.id}`}
         data-user-id={user.id}
         className={`ladder__item ${
           isCurrentUser ? 'ladder__item--current-user' : ''

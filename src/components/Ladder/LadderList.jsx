@@ -21,6 +21,7 @@ const LadderList = ({
   loading,
   displayMode,
   filterProject,
+  scrollTrigger,
 }) => {
   const { t } = useTranslation();
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -30,6 +31,19 @@ const LadderList = ({
   const isPulling = useRef(false);
 
   const PULL_THRESHOLD = 80; // Distance to trigger refresh
+
+  // Manual scroll to user (only when scrollTrigger changes - user clicks bottom bar)
+  useEffect(() => {
+    if (scrollTrigger > 0 && currentUserId) {
+      const element = document.getElementById(`user-row-${currentUserId}`);
+      if (element) {
+        // smoothly scroll to the user
+        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      } else {
+        console.warn("User row not found in DOM");
+      }
+    }
+  }, [scrollTrigger, currentUserId]);
 
   useEffect(() => {
     const handleTouchStart = e => {
@@ -83,7 +97,10 @@ const LadderList = ({
   }, [pullDistance, onRefresh]);
 
   return (
-    <div className="ladder__list" ref={listRef}>
+    <div 
+      className="ladder__list"
+      ref={listRef}
+    >
       {/* Pull-to-refresh indicator */}
       {pullDistance > 0 && (
         <div
@@ -117,18 +134,23 @@ const LadderList = ({
           const isCurrentUser = user.id === currentUserId;
 
           return (
-            <LadderItem
+            <div
+              id={`user-row-${user.id}`}
               key={user.id}
-              user={user}
-              rank={actualRank}
-              isCurrentUser={isCurrentUser}
-              onUserClick={onUserClick}
-              onToggleLike={onToggleLike}
-              isLiked={likedUsers?.has(user.id)}
-              isLikeProcessing={likeProcessing?.has(user.id)}
-              displayMode={displayMode}
-              filterProject={filterProject}
-            />
+              style={{ minHeight: '60px' }}
+            >
+              <LadderItem
+                user={user}
+                rank={actualRank}
+                isCurrentUser={isCurrentUser}
+                onUserClick={onUserClick}
+                onToggleLike={onToggleLike}
+                isLiked={likedUsers?.has(user.id)}
+                isLikeProcessing={likeProcessing?.has(user.id)}
+                displayMode={displayMode}
+                filterProject={filterProject}
+              />
+            </div>
           );
         })
       )}
@@ -148,6 +170,7 @@ LadderList.propTypes = {
   loading: PropTypes.bool,
   displayMode: PropTypes.string,
   filterProject: PropTypes.string,
+  scrollTrigger: PropTypes.number,
 };
 
 export default LadderList;

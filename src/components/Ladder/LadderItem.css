@@ -7,6 +7,8 @@
   border-bottom: 1px solid #f0f0f0;
   transition: all 0.3s ease;
   position: relative;
+  min-height: 60px; /* Prevent layout shift */
+  box-sizing: border-box;
 }
 
 .ladder__item:nth-child(1) {
@@ -119,20 +121,34 @@
 .ladder__avatar {
   width: 36px;
   height: 36px;
+  min-width: 36px;
+  min-height: 36px;
   border-radius: 50%;
   margin-right: 10px;
   overflow: hidden;
+  position: relative;
+  flex-shrink: 0;
+  aspect-ratio: 1 / 1;
 }
 
 .ladder__avatar img {
   width: 100%;
   height: 100%;
+  min-width: 36px;
+  min-height: 36px;
   object-fit: cover;
+  display: block;
+  aspect-ratio: 1 / 1;
 }
 
 .ladder__avatar-placeholder {
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
+  min-width: 36px;
+  min-height: 36px;
   background: linear-gradient(
     135deg,
     #ff6b35 0%,
@@ -145,6 +161,7 @@
   color: white;
   font-weight: 600;
   font-size: 16px;
+  aspect-ratio: 1 / 1;
 }
 
 .ladder__avatar-placeholder.anonymous {
@@ -429,7 +446,19 @@
   .ladder__avatar {
     width: 28px;
     height: 28px;
+    min-width: 28px;
+    min-height: 28px;
     margin-right: 6px;
+  }
+
+  .ladder__avatar img {
+    min-width: 28px;
+    min-height: 28px;
+  }
+
+  .ladder__avatar-placeholder {
+    min-width: 28px;
+    min-height: 28px;
   }
 
   .ladder__score {
