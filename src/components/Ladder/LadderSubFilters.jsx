@@ -31,7 +31,40 @@ const LadderSubFilters = ({
     { value: 'other', label: '其他' },
   ];
 
-  const showLiftFilter = currentDivision === 'stats_sbdTotal';
+  // Determine which project filter to show based on division
+  const getProjectOptions = () => {
+    switch (currentDivision) {
+      case 'stats_sbdTotal':
+        return [
+          { value: 'total', label: '總和' },
+          { value: 'squat', label: '深蹲' },
+          { value: 'bench', label: '臥推' },
+          { value: 'deadlift', label: '硬舉' },
+        ];
+      case 'stats_cooper':
+        return [
+          { value: 'cooper', label: 'Cooper Test' },
+          { value: '5k', label: '5K Run' },
+        ];
+      case 'stats_vertical':
+        return [
+          { value: 'vertical', label: '垂直跳躍' },
+          { value: 'broad', label: '立定跳遠' },
+          { value: 'sprint', label: '100m 衝刺' },
+        ];
+      case 'stats_ffmi':
+        return [
+          { value: 'ffmi', label: 'FFMI' },
+          { value: 'smm', label: '肌肉量 (SMM)' },
+          { value: 'armSize', label: '臂圍' },
+        ];
+      default:
+        return [];
+    }
+  };
+
+  const projectOptions = getProjectOptions();
+  const showProjectFilter = projectOptions.length > 0;
 
   return (
     <div className="ladder-sub-filters">
@@ -100,7 +133,7 @@ const LadderSubFilters = ({
         </select>
       </div>
 
-      {showLiftFilter && (
+      {showProjectFilter && (
         <div className="ladder-sub-filter-group">
           <label className="ladder-sub-filter-label">項目</label>
           <select
@@ -108,10 +141,11 @@ const LadderSubFilters = ({
             onChange={e => onProjectChange(e.target.value)}
             className="ladder-sub-filter-select"
           >
-            <option value="total">總和</option>
-            <option value="squat">深蹲</option>
-            <option value="bench">臥推</option>
-            <option value="deadlift">硬舉</option>
+            {projectOptions.map(option => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
           </select>
         </div>
       )}

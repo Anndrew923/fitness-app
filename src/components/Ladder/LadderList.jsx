@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
 import LadderItem from './LadderItem';
+import LadderEmptyState from './LadderEmptyState';
 import './LadderList.css';
 
 /**
@@ -109,10 +110,7 @@ const LadderList = ({
           <p>{t('ladder.loading')}</p>
         </div>
       ) : ladderData.length === 0 ? (
-        <div className="ladder__empty">
-          <p>{t('ladder.empty.title')}</p>
-          <p>{t('ladder.empty.subtitle')}</p>
-        </div>
+        <LadderEmptyState division={displayMode} />
       ) : (
         ladderData.map((user, index) => {
           const actualRank = displayStartRank + index;

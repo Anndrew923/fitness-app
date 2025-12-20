@@ -117,6 +117,78 @@ const LadderItem = React.memo(
             label: '戰鬥力',
             formatValue: val => formatScore(val),
           };
+        case 'stats_cooper':
+          // Endurance: Check project filter
+          if (filterProject === '5k') {
+            // Format 5K time: convert seconds to minutes:seconds
+            const format5KTime = val => {
+              if (!val || val === 0) return '0:00';
+              const minutes = Math.floor(val / 60);
+              const seconds = Math.floor(val % 60);
+              return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            };
+            return {
+              value: user.stats_5k || 0,
+              unit: 'mins',
+              label: '5K Run',
+              formatValue: format5KTime,
+            };
+          }
+          // Default: Cooper Test (distance in meters, convert to km)
+          return {
+            value: user.stats_cooper || 0,
+            unit: 'km',
+            label: 'Cooper Test',
+            formatValue: val => (Number(val) / 1000).toFixed(2),
+          };
+        case 'stats_vertical':
+          // Power: Check project filter
+          if (filterProject === 'broad') {
+            return {
+              value: user.stats_broad || 0,
+              unit: 'cm',
+              label: '立定跳遠',
+              formatValue: val => Number(val).toFixed(1),
+            };
+          } else if (filterProject === 'sprint') {
+            return {
+              value: user.stats_100m || 0,
+              unit: 's',
+              label: '100m 衝刺',
+              formatValue: val => Number(val).toFixed(2),
+            };
+          }
+          // Default: Vertical Jump
+          return {
+            value: user.stats_vertical || 0,
+            unit: 'cm',
+            label: '垂直跳躍',
+            formatValue: val => Number(val).toFixed(1),
+          };
+        case 'stats_ffmi':
+          // Hypertrophy: Check project filter
+          if (filterProject === 'smm') {
+            return {
+              value: user.stats_smm || 0,
+              unit: 'kg',
+              label: '肌肉量 (SMM)',
+              formatValue: val => Number(val).toFixed(1),
+            };
+          } else if (filterProject === 'armSize') {
+            return {
+              value: user.stats_armSize || 0,
+              unit: 'cm',
+              label: '臂圍',
+              formatValue: val => Number(val).toFixed(1),
+            };
+          }
+          // Default: FFMI
+          return {
+            value: user.stats_ffmi || 0,
+            unit: '',
+            label: 'FFMI',
+            formatValue: val => Number(val).toFixed(2),
+          };
         case 'ladderScore':
         default:
           return {

@@ -615,13 +615,8 @@ const Ladder = () => {
         <h2>{t('ladder.title')}</h2>
 
         <LadderFilters
-          selectedAgeGroup={selectedAgeGroup}
-          selectedTab={selectedTab}
           selectedDivision={selectedDivision}
-          onAgeGroupChange={setSelectedAgeGroup}
-          onTabChange={setSelectedTab}
           onDivisionChange={setSelectedDivision}
-          ageGroups={ageGroups}
         />
 
         <LadderSubFilters

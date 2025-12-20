@@ -202,6 +202,9 @@ export const useLadderLogic = (
       const testInputs = userData.testInputs || {};
       const strengthInputs = testInputs.strength || {};
       const powerInputs = testInputs.power || {};
+      const cardioInputs = testInputs.cardio || {};
+      const ffmiInputs = testInputs.ffmi || {};
+      const muscleInputs = testInputs.muscle || {};
 
       // Extract exercise data for stats calculation
       const exerciseScores = {
@@ -219,12 +222,59 @@ export const useLadderLogic = (
       const filters = generateFilterTags(userData);
 
       // ✅ Extract body fat from testInputs
-      const bodyFat = Number(userData.testInputs?.ffmi?.bodyFat) || 0;
+      const bodyFat = Number(ffmiInputs.bodyFat) || 0;
 
       // ✅ Extract individual SBD lifts for ranking
       const stats_squat = Number(strengthInputs.squat?.max) || 0;
       const stats_bench = Number(strengthInputs.benchPress?.max) || 0;
       const stats_deadlift = Number(strengthInputs.deadlift?.max) || 0;
+
+      // ✅ Extract Endurance stats
+      const stats_cooper = Number(cardioInputs.distance) || 0; // Distance in meters
+      const stats_5k =
+        Number(cardioInputs.time5k) || Number(cardioInputs.fiveKTime) || 0; // Time in seconds
+
+      // ✅ Extract Power stats (from testInputs.power)
+      const stats_vertical = Number(powerInputs.verticalJump) || 0; // Height in cm
+      const stats_broad = Number(powerInputs.standingLongJump) || 0; // Distance in cm
+      const stats_100m = Number(powerInputs.sprint) || 0; // Time in seconds (Ascending sort)
+
+      // ✅ Extract Hypertrophy stats
+      // SMM: from testInputs.muscle.smm
+      const stats_smm = Number(muscleInputs.smm) || 0; // Skeletal Muscle Mass in kg
+
+      // FFMI: Calculate from weight, height, and bodyFat
+      let stats_ffmi = 0;
+      if (userData.weight && userData.height && ffmiInputs.bodyFat) {
+        const weight = Number(userData.weight);
+        const heightInMeters = Number(userData.height) / 100;
+        const bodyFatValue = Number(ffmiInputs.bodyFat) / 100;
+
+        if (
+          weight > 0 &&
+          heightInMeters > 0 &&
+          bodyFatValue >= 0 &&
+          bodyFatValue <= 1
+        ) {
+          const fatFreeMass = weight * (1 - bodyFatValue);
+          const rawFfmi = fatFreeMass / (heightInMeters * heightInMeters);
+          // Apply height adjustment (same as FFMI.jsx)
+          const adjustedFfmi =
+            heightInMeters > 1.8
+              ? rawFfmi + 6.0 * (heightInMeters - 1.8)
+              : rawFfmi;
+          stats_ffmi = adjustedFfmi;
+        }
+      }
+
+      // Arm Size: Check multiple possible sources
+      const stats_armSize =
+        Number(ffmiInputs.armSize) ||
+        Number(ffmiInputs.arm) ||
+        Number(testInputs.bodyStats?.arm) ||
+        Number(testInputs.bodyStats?.bicep) ||
+        Number(userData.armSize) ||
+        0; // Arm circumference in cm
 
       // ✅ Apply Limit Break: Cap unverified users at 100
       const isVerified = userData.isVerified === true;
@@ -281,6 +331,17 @@ export const useLadderLogic = (
           stats_squat: stats_squat,
           stats_bench: stats_bench,
           stats_deadlift: stats_deadlift,
+          // ✅ Endurance stats
+          stats_cooper: stats_cooper,
+          stats_5k: stats_5k,
+          // ✅ Power stats
+          stats_vertical: stats_vertical,
+          stats_broad: stats_broad,
+          stats_100m: stats_100m,
+          // ✅ Hypertrophy stats
+          stats_ffmi: stats_ffmi,
+          stats_smm: stats_smm,
+          stats_armSize: stats_armSize,
           // Filter tags
           filter_is1000lbClub: stats.is1000lbClub,
           filter_ageGroup: filters.filter_ageGroup,

@@ -16,8 +16,8 @@ import { useTranslation } from 'react-i18next';
  * @param {string} options.filterAge - Age group filter ('all', 'under-20', '20-29', etc.)
  * @param {string} options.filterWeight - Weight class filter ('all', 'under-50kg', '50-60kg', etc.)
  * @param {string} options.filterJob - Job category filter ('all', 'engineering', 'medical', etc.)
- * @param {string} options.filterProject - Lift project filter ('total', 'squat', 'bench', 'deadlift')
- * @param {string} options.selectedDivision - Current division selection
+ * @param {string} options.filterProject - Lift project filter ('total', 'squat', 'bench', 'deadlift', etc.)
+ * @returns {string} selectedDivision - Current division selection (managed internally by hook)
  */
 export const useLadder = (options = {}) => {
   const { 
@@ -277,10 +277,9 @@ export const useLadder = (options = {}) => {
 
       // Re-sort based on selected division and project filter
       // For local_district, always sort by ladderScore (descending)
-      // For stats_sbdTotal with project filter, sort by specific lift
       let sortField = selectedDivision === 'local_district' ? 'ladderScore' : selectedDivision;
       
-      // Override sort field if in SBD division and project filter is set
+      // Override sort field based on division and project filter
       if (selectedDivision === 'stats_sbdTotal' && filterProject !== 'total') {
         if (filterProject === 'squat') {
           sortField = 'stats_squat';
@@ -289,23 +288,65 @@ export const useLadder = (options = {}) => {
         } else if (filterProject === 'deadlift') {
           sortField = 'stats_deadlift';
         }
+      } else if (selectedDivision === 'stats_cooper') {
+        if (filterProject === '5k') {
+          sortField = 'stats_5k';
+        } else {
+          sortField = 'stats_cooper';
+        }
+      } else if (selectedDivision === 'stats_vertical') {
+        if (filterProject === 'broad') {
+          sortField = 'stats_broad';
+        } else if (filterProject === 'sprint') {
+          sortField = 'stats_100m';
+        } else {
+          sortField = 'stats_vertical';
+        }
+      } else if (selectedDivision === 'stats_ffmi') {
+        if (filterProject === 'smm') {
+          sortField = 'stats_smm';
+        } else if (filterProject === 'armSize') {
+          sortField = 'stats_armSize';
+        } else {
+          sortField = 'stats_ffmi';
+        }
       }
       data.sort((a, b) => {
         const aValue = a[sortField];
         const bValue = b[sortField];
         
-        // Special case: Body Fat (lower is better)
+        // Special cases: Lower is better (ascending) - Time-based metrics
+        if (sortField === 'stats_5k' || sortField === 'stats_100m') {
+          // Helper function: Check if value is valid (not 0, null, undefined, NaN, or empty string)
+          const isValidTime = (val) => {
+            if (val === null || val === undefined || val === '') return false;
+            const numVal = Number(val);
+            return !isNaN(numVal) && numVal > 0;
+          };
+          
+          // Treat invalid values as Infinity (will sort to bottom)
+          const aNum = isValidTime(aValue) ? Number(aValue) : Infinity;
+          const bNum = isValidTime(bValue) ? Number(bValue) : Infinity;
+          
+          // Sort ascending (lower is better), Infinity values go to bottom
+          return aNum - bNum;
+        }
+        
+        // Special case: Body Fat (lower is better, but 0% is INVALID - physiologically impossible)
         if (sortField === 'stats_bodyFat') {
-          // Handle missing data: push to bottom (undefined, null, or invalid)
-          const aHasData = aValue !== undefined && aValue !== null && !isNaN(aValue);
-          const bHasData = bValue !== undefined && bValue !== null && !isNaN(bValue);
+          // Helper function: Check if value is valid (must be strictly > 0)
+          const isValidBodyFat = (val) => {
+            if (val === null || val === undefined || val === '') return false;
+            const numVal = Number(val);
+            return !isNaN(numVal) && numVal > 0;
+          };
           
-          if (!aHasData && !bHasData) return 0; // Both missing, keep order
-          if (!aHasData) return 1; // a missing, push to bottom
-          if (!bHasData) return -1; // b missing, push to bottom
+          // Treat invalid values (including 0) as Infinity (will sort to bottom)
+          const aNum = isValidBodyFat(aValue) ? Number(aValue) : Infinity;
+          const bNum = isValidBodyFat(bValue) ? Number(bValue) : Infinity;
           
-          // Both have data: sort ascending (lower is better)
-          return aValue - bValue;
+          // Sort ascending (lower is better), Infinity values go to bottom
+          return aNum - bNum;
         }
         
         // Default: Higher is better (descending)

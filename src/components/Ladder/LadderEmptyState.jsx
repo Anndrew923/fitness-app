@@ -1,0 +1,112 @@
+import React from 'react';
+import PropTypes from 'prop-types';
+import { useNavigate } from 'react-router-dom';
+import './LadderEmptyState.css';
+
+const LadderEmptyState = ({ division }) => {
+  const navigate = useNavigate();
+
+  const getEmptyStateConfig = () => {
+    switch (division) {
+      case 'stats_sbdTotal':
+        return {
+          icon: '💪',
+          title: '虛位以待',
+          description: '還沒有大力士來挑戰。你是全服最強壯的人嗎？',
+          buttonText: '成為第一名',
+          link: '/strength',
+        };
+      case 'stats_ffmi':
+        return {
+          icon: '💪',
+          title: '虛位以待',
+          description: '尋找肌肉巨獸中... 快來秀出你的維度！',
+          buttonText: '成為第一名',
+          link: '/body-fat',
+        };
+      case 'stats_cooper':
+        return {
+          icon: '🫁',
+          title: '虛位以待',
+          description: '跑道空蕩蕩的。去跑一場，讓大家看看你的背影！',
+          buttonText: '成為第一名',
+          link: '/cardio',
+        };
+      case 'stats_vertical':
+        return {
+          icon: '⚡',
+          title: '虛位以待',
+          description: '爆發力排行榜等待第一位挑戰者！展現你的跳躍力！',
+          buttonText: '成為第一名',
+          link: '/explosive-power',
+        };
+      case 'stats_bodyFat':
+        return {
+          icon: '🔥',
+          title: '虛位以待',
+          description: '極致體脂排行榜等待第一位挑戰者！展現你的自律！',
+          buttonText: '成為第一名',
+          link: '/body-fat',
+        };
+      case 'stats_totalLoginDays':
+        return {
+          icon: '📅',
+          title: '虛位以待',
+          description: '自律狂人排行榜等待第一位挑戰者！開始你的連續登入之旅！',
+          buttonText: '開始登入',
+          link: '/user-info',
+        };
+      case 'local_district':
+        return {
+          icon: '📍',
+          title: '虛位以待',
+          description: '你的地區還沒有其他挑戰者。成為本地第一人！',
+          buttonText: '成為第一名',
+          link: '/user-info',
+        };
+      default:
+        return {
+          icon: '🏆',
+          title: '虛位以待',
+          description: '目前尚無數據，快來搶佔第一名！',
+          buttonText: '成為第一名',
+          link: '/user-info',
+        };
+    }
+  };
+
+  const config = getEmptyStateConfig();
+
+  const handleButtonClick = () => {
+    navigate(config.link);
+  };
+
+  return (
+    <div className="ladder-empty-state">
+      <div className="ladder-empty-state__icon">{config.icon}</div>
+      <h3 className="ladder-empty-state__title">{config.title}</h3>
+      <p className="ladder-empty-state__description">{config.description}</p>
+      <button
+        className="ladder-empty-state__button"
+        onClick={handleButtonClick}
+        style={{
+          background: 'linear-gradient(to right, #111827 0%, #000000 100%)',
+          backgroundImage: 'linear-gradient(to right, #111827 0%, #000000 100%)',
+          color: '#fbbf24',
+          border: '1px solid #f59e0b',
+          borderColor: '#f59e0b',
+          boxShadow: '0 4px 12px rgba(245, 158, 11, 0.3), 0 0 8px rgba(245, 158, 11, 0.2)',
+        }}
+      >
+        {config.buttonText}
+      </button>
+    </div>
+  );
+};
+
+LadderEmptyState.propTypes = {
+  division: PropTypes.string.isRequired,
+};
+
+export default LadderEmptyState;
+
