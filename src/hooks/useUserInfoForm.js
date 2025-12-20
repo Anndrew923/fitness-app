@@ -66,19 +66,26 @@ export const useUserInfoForm = (
         job_category: userData.job_category || '',
         country: userData.country || '',
         region: userData.region || '',
+        // ✅ Phase 2: Add city and district fields for Taiwan location-based rankings
+        city: userData.city || '',
+        district: userData.district || '',
         scores: userData.scores || DEFAULT_SCORES,
         ladderScore: userData.ladderScore || 0,
         lastActive: new Date().toISOString(),
       };
 
       try {
-        // ✅ 檢查是否只改變了 country 或 region
+        // ✅ 檢查是否只改變了 location fields (country, region, city, district)
         const countryChanged =
           (userData.country || '') !== (updatedUserData.country || '');
         const regionChanged =
           (userData.region || '') !== (updatedUserData.region || '');
-        const onlyCountryRegionChanged =
-          (countryChanged || regionChanged) &&
+        const cityChanged =
+          (userData.city || '') !== (updatedUserData.city || '');
+        const districtChanged =
+          (userData.district || '') !== (updatedUserData.district || '');
+        const onlyLocationChanged =
+          (countryChanged || regionChanged || cityChanged || districtChanged) &&
           userData.height === updatedUserData.height &&
           userData.weight === updatedUserData.weight &&
           userData.age === updatedUserData.age &&
@@ -86,8 +93,15 @@ export const useUserInfoForm = (
           JSON.stringify(userData.scores || {}) ===
             JSON.stringify(updatedUserData.scores || {});
 
-        if (onlyCountryRegionChanged) {
-          logger.debug('🌍 國家/城市變化，立即保存到 Firebase');
+        if (onlyLocationChanged) {
+          logger.debug(
+            '🌍 位置資訊變化（國家/城市/行政區），立即保存到 Firebase',
+            {
+              country: updatedUserData.country,
+              city: updatedUserData.city,
+              district: updatedUserData.district,
+            }
+          );
           await saveUserData(updatedUserData);
           setUserData(updatedUserData);
         } else {
@@ -235,4 +249,3 @@ export const useUserInfoForm = (
     saveData,
   };
 };
-

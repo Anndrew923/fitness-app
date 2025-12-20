@@ -85,11 +85,13 @@ export const calculateStatsAggregates = scores => {
  * @param {Object} userData - User data object
  * @param {string|Date} userData.birthDate - Birth date (ISO string or Date)
  * @param {number} userData.weight - Weight in kg
+ * @param {number} userData.height - Height in cm
  * @param {string} userData.city - City name
  * @param {string} userData.district - District/area name (optional)
  * @returns {Object} Filter tags object
  * @returns {string} returns.filter_ageGroup - Age group (e.g., "20-29", "30-39")
  * @returns {string} returns.filter_weightClass - Weight class (e.g., "60-70kg", "70-80kg")
+ * @returns {string} returns.filter_heightClass - Height class (e.g., "170-179cm", "180-189cm")
  * @returns {string} returns.filter_region_city - City name
  * @returns {string} returns.filter_region_district - District name (empty if not provided)
  */
@@ -98,6 +100,7 @@ export const generateFilterTags = userData => {
     return {
       filter_ageGroup: '',
       filter_weightClass: '',
+      filter_heightClass: '',
       filter_region_city: '',
       filter_region_district: '',
     };
@@ -167,6 +170,24 @@ export const generateFilterTags = userData => {
     }
   }
 
+  // Generate height class filter (format: "170-179cm", "180-189cm", etc.)
+  // Using 10cm increments for height classification
+  let filter_heightClass = '';
+  const height = Number(userData.height) || 0;
+  if (height > 0) {
+    // Round down to nearest 10cm for lower bound
+    const lowerBound = Math.floor(height / 10) * 10;
+    const upperBound = lowerBound + 9;
+
+    if (height < 150) {
+      filter_heightClass = 'under-150cm';
+    } else if (height < 200) {
+      filter_heightClass = `${lowerBound}-${upperBound}cm`;
+    } else {
+      filter_heightClass = '200cm+';
+    }
+  }
+
   // Extract region filters
   const filter_region_city = String(userData.city || '').trim();
   const filter_region_district = String(userData.district || '').trim();
@@ -174,6 +195,7 @@ export const generateFilterTags = userData => {
   return {
     filter_ageGroup,
     filter_weightClass,
+    filter_heightClass,
     filter_region_city,
     filter_region_district,
   };

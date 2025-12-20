@@ -265,10 +265,13 @@ export const useLadderLogic = (
           stats_sbdTotal: stats.sbdTotal,
           stats_bigFiveTotal: stats.bigFiveTotal,
           stats_explosiveAvg: stats.explosiveAvg,
+          // ✅ Height stats (for direct sorting: "Who is the tallest?")
+          stats_height: Number(userData.height) || 0,
           // Filter tags
           filter_is1000lbClub: stats.is1000lbClub,
           filter_ageGroup: filters.filter_ageGroup,
           filter_weightClass: filters.filter_weightClass,
+          filter_heightClass: filters.filter_heightClass,
           filter_region_city: filters.filter_region_city,
           filter_region_district: filters.filter_region_district,
           // Metadata
