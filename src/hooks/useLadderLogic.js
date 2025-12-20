@@ -221,6 +221,11 @@ export const useLadderLogic = (
       // ✅ Extract body fat from testInputs
       const bodyFat = Number(userData.testInputs?.ffmi?.bodyFat) || 0;
 
+      // ✅ Extract individual SBD lifts for ranking
+      const stats_squat = Number(strengthInputs.squat?.max) || 0;
+      const stats_bench = Number(strengthInputs.benchPress?.max) || 0;
+      const stats_deadlift = Number(strengthInputs.deadlift?.max) || 0;
+
       // ✅ Apply Limit Break: Cap unverified users at 100
       const isVerified = userData.isVerified === true;
       const finalScore = applyLimitBreak(rawCalculatedScore, isVerified);
@@ -272,6 +277,10 @@ export const useLadderLogic = (
           stats_height: Number(userData.height) || 0,
           // ✅ Body fat stats (from testInputs, not scores)
           stats_bodyFat: bodyFat,
+          // ✅ Individual SBD lifts for project filtering
+          stats_squat: stats_squat,
+          stats_bench: stats_bench,
+          stats_deadlift: stats_deadlift,
           // Filter tags
           filter_is1000lbClub: stats.is1000lbClub,
           filter_ageGroup: filters.filter_ageGroup,
@@ -280,6 +289,7 @@ export const useLadderLogic = (
           filter_region_city: filters.filter_region_city,
           filter_region_district: filters.filter_region_district,
           filter_bodyFatClass: filters.filter_bodyFatClass,
+          filter_job: filters.filter_job,
           // Metadata
           lastLadderSubmission: new Date().toISOString(),
           updatedAt: new Date().toISOString(),

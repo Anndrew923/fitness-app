@@ -11,8 +11,22 @@ import { useTranslation } from 'react-i18next';
 /**
  * Custom hook for Ladder data management
  * Handles all Firestore interactions, pagination, and state
+ * @param {Object} options - Optional filter options
+ * @param {string} options.filterGender - Gender filter ('all', 'male', 'female')
+ * @param {string} options.filterAge - Age group filter ('all', 'under-20', '20-29', etc.)
+ * @param {string} options.filterWeight - Weight class filter ('all', 'under-50kg', '50-60kg', etc.)
+ * @param {string} options.filterJob - Job category filter ('all', 'engineering', 'medical', etc.)
+ * @param {string} options.filterProject - Lift project filter ('total', 'squat', 'bench', 'deadlift')
+ * @param {string} options.selectedDivision - Current division selection
  */
-export const useLadder = () => {
+export const useLadder = (options = {}) => {
+  const { 
+    filterGender = 'all', 
+    filterAge = 'all', 
+    filterWeight = 'all',
+    filterJob = 'all',
+    filterProject = 'total',
+  } = options;
   const { userData } = useUser();
   const { t } = useTranslation();
   const [ladderData, setLadderData] = useState([]);
@@ -71,6 +85,11 @@ export const useLadder = () => {
       selectedAgeGroup,
       selectedTab,
       selectedDivision,
+      filterGender,
+      filterAge,
+      filterWeight,
+      filterJob,
+      filterProject,
       userLadderScore: userData?.ladderScore || 0,
       userCity: userData?.city || '',
       userDistrict: userData?.district || '',
@@ -217,9 +236,60 @@ export const useLadder = () => {
         }
       }
 
-      // Re-sort based on selected division
+      // Client-side filtering: Gender
+      if (filterGender !== 'all') {
+        const beforeFilterCount = data.length;
+        data = data.filter(user => user.gender === filterGender);
+        logger.debug(
+          `👤 性別過濾 (${filterGender})：${beforeFilterCount} → ${data.length} 名用戶`
+        );
+      }
+
+      // Client-side filtering: Age Group
+      if (filterAge !== 'all') {
+        const beforeFilterCount = data.length;
+        data = data.filter(user => {
+          // Check both filter_ageGroup (from backend) and ageGroup (client-side calculated)
+          return user.filter_ageGroup === filterAge || user.ageGroup === filterAge;
+        });
+        logger.debug(
+          `📅 年齡過濾 (${filterAge})：${beforeFilterCount} → ${data.length} 名用戶`
+        );
+      }
+
+      // Client-side filtering: Weight Class
+      if (filterWeight !== 'all') {
+        const beforeFilterCount = data.length;
+        data = data.filter(user => user.filter_weightClass === filterWeight);
+        logger.debug(
+          `⚖️ 體重過濾 (${filterWeight})：${beforeFilterCount} → ${data.length} 名用戶`
+        );
+      }
+
+      // Client-side filtering: Job Category
+      if (filterJob !== 'all') {
+        const beforeFilterCount = data.length;
+        data = data.filter(user => user.filter_job === filterJob || user.job_category === filterJob);
+        logger.debug(
+          `💼 職業過濾 (${filterJob})：${beforeFilterCount} → ${data.length} 名用戶`
+        );
+      }
+
+      // Re-sort based on selected division and project filter
       // For local_district, always sort by ladderScore (descending)
-      const sortField = selectedDivision === 'local_district' ? 'ladderScore' : selectedDivision;
+      // For stats_sbdTotal with project filter, sort by specific lift
+      let sortField = selectedDivision === 'local_district' ? 'ladderScore' : selectedDivision;
+      
+      // Override sort field if in SBD division and project filter is set
+      if (selectedDivision === 'stats_sbdTotal' && filterProject !== 'total') {
+        if (filterProject === 'squat') {
+          sortField = 'stats_squat';
+        } else if (filterProject === 'bench') {
+          sortField = 'stats_bench';
+        } else if (filterProject === 'deadlift') {
+          sortField = 'stats_deadlift';
+        }
+      }
       data.sort((a, b) => {
         const aValue = a[sortField];
         const bValue = b[sortField];
@@ -311,6 +381,11 @@ export const useLadder = () => {
     selectedAgeGroup,
     selectedTab,
     selectedDivision,
+    filterGender,
+    filterAge,
+    filterWeight,
+    filterJob,
+    filterProject,
     userData,
     currentPage,
     ladderData.length,
@@ -480,7 +555,7 @@ export const useLadder = () => {
       hasInitialPageSetRef.current = false;
       hasDataRef.current = false;
     }
-  }, [selectedAgeGroup, selectedTab, selectedDivision, userData]);
+  }, [selectedAgeGroup, selectedTab, selectedDivision, filterGender, filterAge, filterWeight, filterJob, filterProject, userData]);
 
   useEffect(() => {
     if (userData) {

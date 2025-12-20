@@ -107,6 +107,7 @@ export const generateFilterTags = userData => {
       filter_region_city: '',
       filter_region_district: '',
       filter_bodyFatClass: '',
+      filter_job: '',
     };
   }
 
@@ -215,6 +216,9 @@ export const generateFilterTags = userData => {
     }
   }
 
+  // Extract job category filter
+  const filter_job = String(userData.job_category || '').trim();
+
   return {
     filter_ageGroup,
     filter_weightClass,
@@ -222,5 +226,6 @@ export const generateFilterTags = userData => {
     filter_region_city,
     filter_region_district,
     filter_bodyFatClass,
+    filter_job,
   };
 };

@@ -1,0 +1,86 @@
+/* LadderSubFilters Component Styles */
+
+.ladder-sub-filters {
+  display: flex;
+  gap: 12px;
+  padding: 12px 0;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.ladder-sub-filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 100px;
+}
+
+.ladder-sub-filter-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #a0aec0;
+  text-align: center;
+}
+
+.ladder-sub-filter-select {
+  padding: 8px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  background: #1a202c;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23d4af37' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  background-size: 12px;
+  padding-right: 32px;
+}
+
+.ladder-sub-filter-select:hover {
+  border-color: rgba(212, 175, 55, 0.3);
+  background-color: #2d3748;
+}
+
+.ladder-sub-filter-select:focus {
+  outline: none;
+  border-color: #d4af37;
+  background-color: #2d3748;
+  box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.2);
+}
+
+.ladder-sub-filter-select option {
+  background: #1a202c;
+  color: #ffffff;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .ladder-sub-filters {
+    gap: 8px;
+    padding: 8px 0;
+  }
+
+  .ladder-sub-filter-group {
+    flex: 1;
+    min-width: 90px;
+    max-width: 120px;
+  }
+
+  .ladder-sub-filter-label {
+    font-size: 10px;
+  }
+
+  .ladder-sub-filter-select {
+    padding: 6px 10px;
+    padding-right: 28px;
+    font-size: 11px;
+    background-size: 10px;
+  }
+}
+

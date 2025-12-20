@@ -18,6 +18,7 @@ const LadderItem = React.memo(
     isLiked,
     isLikeProcessing,
     displayMode = 'ladderScore',
+    filterProject = 'total',
   }) => {
     const { t } = useTranslation();
 
@@ -70,6 +71,30 @@ const LadderItem = React.memo(
             formatValue: val => Math.floor(val).toLocaleString('zh-TW'),
           };
         case 'stats_sbdTotal':
+          // Check if filtering by specific lift
+          if (filterProject === 'squat' && user.stats_squat) {
+            return {
+              value: user.stats_squat || 0,
+              unit: 'kg',
+              label: '深蹲',
+              formatValue: val => Number(val).toFixed(1),
+            };
+          } else if (filterProject === 'bench' && user.stats_bench) {
+            return {
+              value: user.stats_bench || 0,
+              unit: 'kg',
+              label: '臥推',
+              formatValue: val => Number(val).toFixed(1),
+            };
+          } else if (filterProject === 'deadlift' && user.stats_deadlift) {
+            return {
+              value: user.stats_deadlift || 0,
+              unit: 'kg',
+              label: '硬舉',
+              formatValue: val => Number(val).toFixed(1),
+            };
+          }
+          // Default: show total
           return {
             value: user.stats_sbdTotal || 0,
             unit: 'kg',
@@ -281,6 +306,7 @@ LadderItem.propTypes = {
   isLiked: PropTypes.bool,
   isLikeProcessing: PropTypes.bool,
   displayMode: PropTypes.string,
+  filterProject: PropTypes.string,
 };
 
 export default LadderItem;

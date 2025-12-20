@@ -16,6 +16,7 @@ import { useLadder } from '../hooks/useLadder';
 import { useDopamineFeedback } from '../hooks/useDopamineFeedback';
 import LadderList from './Ladder/LadderList';
 import LadderFilters from './Ladder/LadderFilters';
+import LadderSubFilters from './Ladder/LadderSubFilters';
 import './Ladder/Ladder.css';
 import './Ladder/LadderItem.css'; // For shared styles used in floating-rank-card
 import './Ladder/LadderStatusCard.css'; // For floating-rank-display styles
@@ -26,7 +27,20 @@ const Ladder = () => {
   const { t } = useTranslation();
   const { triggerVibrate, triggerRankUp } = useDopamineFeedback();
 
-  // Use the new useLadder hook
+  // Define filter states FIRST (before useLadder)
+  const [filterGender, setFilterGender] = useState('all');
+  const [filterAge, setFilterAge] = useState('all');
+  const [filterWeight, setFilterWeight] = useState('all');
+  const [filterJob, setFilterJob] = useState('all');
+  const [filterProject, setFilterProject] = useState('total');
+  const [showUserContext, setShowUserContext] = useState(false);
+  const [showUserCard, setShowUserCard] = useState(false);
+  const [selectedUserForCard, setSelectedUserForCard] = useState(null);
+  const [showNotification, setShowNotification] = useState(false);
+  const [notificationData, setNotificationData] = useState(null);
+  const [forceScrollTrigger, setForceScrollTrigger] = useState(0);
+
+  // Use the new useLadder hook (AFTER filter states are defined)
   const {
     ladderData,
     userRank,
@@ -47,14 +61,13 @@ const Ladder = () => {
     setCurrentPage,
     refresh,
     toggleLike,
-  } = useLadder();
-
-  const [showUserContext, setShowUserContext] = useState(false);
-  const [showUserCard, setShowUserCard] = useState(false);
-  const [selectedUserForCard, setSelectedUserForCard] = useState(null);
-  const [showNotification, setShowNotification] = useState(false);
-  const [notificationData, setNotificationData] = useState(null);
-  const [forceScrollTrigger, setForceScrollTrigger] = useState(0);
+  } = useLadder({
+    filterGender,
+    filterAge,
+    filterWeight,
+    filterJob,
+    filterProject,
+  });
 
   const lastConditionCheckRef = useRef(null);
   const forceReloadProcessedRef = useRef(null);
@@ -611,6 +624,20 @@ const Ladder = () => {
           ageGroups={ageGroups}
         />
 
+        <LadderSubFilters
+          filterGender={filterGender}
+          filterAge={filterAge}
+          filterWeight={filterWeight}
+          filterJob={filterJob}
+          filterProject={filterProject}
+          currentDivision={selectedDivision}
+          onGenderChange={setFilterGender}
+          onAgeChange={setFilterAge}
+          onWeightChange={setFilterWeight}
+          onJobChange={setFilterJob}
+          onProjectChange={setFilterProject}
+        />
+
         {userRank > 50 && (
           <button
             className="ladder__context-btn"
@@ -634,6 +661,7 @@ const Ladder = () => {
         onRefresh={handleRefresh}
         loading={loading}
         displayMode={selectedDivision}
+        filterProject={filterProject}
       />
 
       {/* Pagination */}

@@ -19,6 +19,7 @@ const LadderList = ({
   onRefresh,
   loading,
   displayMode,
+  filterProject,
 }) => {
   const { t } = useTranslation();
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -128,6 +129,7 @@ const LadderList = ({
               isLiked={likedUsers?.has(user.id)}
               isLikeProcessing={likeProcessing?.has(user.id)}
               displayMode={displayMode}
+              filterProject={filterProject}
             />
           );
         })
@@ -147,6 +149,7 @@ LadderList.propTypes = {
   onRefresh: PropTypes.func,
   loading: PropTypes.bool,
   displayMode: PropTypes.string,
+  filterProject: PropTypes.string,
 };
 
 export default LadderList;
