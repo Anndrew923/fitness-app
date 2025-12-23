@@ -33,12 +33,55 @@ const LadderList = ({
   const PULL_THRESHOLD = 80; // Distance to trigger refresh
 
   // Manual scroll to user (only when scrollTrigger changes - user clicks bottom bar)
+  // Uses manual coordinate calculation for precise centering (bypasses scrollIntoView quirks)
+  // Finds the actual scrollable container (.main-content) instead of window
   useEffect(() => {
     if (scrollTrigger > 0 && currentUserId) {
       const element = document.getElementById(`user-row-${currentUserId}`);
+      
       if (element) {
-        // smoothly scroll to the user
-        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        // 1. Find the nearest scrollable parent (The "Drawer")
+        // (Looks for the closest ancestor with overflow-y: auto/scroll)
+        let container = element.parentElement;
+        while (
+          container &&
+          container !== document.body &&
+          window.getComputedStyle(container).overflowY !== 'auto' &&
+          window.getComputedStyle(container).overflowY !== 'scroll'
+        ) {
+          container = container.parentElement;
+        }
+        // Fallback to window if no container found (safety)
+        if (!container || container === document.body) {
+          container = window;
+        }
+
+        // 2. Calculate coordinates relative to the CONTAINER
+        // Logic: CurrentScroll + DistanceFromContainerTop - HalfContainerHeight + HalfElementHeight
+        if (container !== window) {
+          const containerRect = container.getBoundingClientRect();
+          const elementRect = element.getBoundingClientRect();
+          const relativeTop = elementRect.top - containerRect.top; // Distance from visible container top
+          const targetScrollTop =
+            container.scrollTop +
+            relativeTop -
+            container.clientHeight / 2 +
+            elementRect.height / 2;
+
+          container.scrollTo({
+            top: targetScrollTop,
+            behavior: 'smooth',
+          });
+        } else {
+          // Fallback logic for Window (just in case)
+          const elementTop =
+            element.getBoundingClientRect().top + window.pageYOffset;
+          const targetY =
+            elementTop -
+            window.innerHeight / 2 +
+            element.offsetHeight / 2;
+          window.scrollTo({ top: targetY, behavior: 'smooth' });
+        }
       } else {
         console.warn("User row not found in DOM");
       }
@@ -47,7 +90,8 @@ const LadderList = ({
 
   useEffect(() => {
     const handleTouchStart = e => {
-      if (listRef.current && listRef.current.scrollTop === 0) {
+      // Check global window scroll instead of element scroll (since element has overflow: hidden)
+      if (window.scrollY === 0) {
         touchStartY.current = e.touches[0].clientY;
         isPulling.current = true;
       }
@@ -59,7 +103,8 @@ const LadderList = ({
       const currentY = e.touches[0].clientY;
       const distance = currentY - touchStartY.current;
 
-      if (distance > 0 && listRef.current?.scrollTop === 0) {
+      // Check global window scroll instead of element scroll
+      if (distance > 0 && window.scrollY === 0) {
         e.preventDefault();
         const pullDistance = Math.min(distance, PULL_THRESHOLD * 1.5);
         setPullDistance(pullDistance);

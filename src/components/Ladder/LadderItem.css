@@ -5,9 +5,10 @@
   align-items: center;
   padding: 12px;
   border-bottom: 1px solid #f0f0f0;
-  transition: all 0.3s ease;
+  transition: background-color 0.2s, transform 0.2s;
   position: relative;
   min-height: 60px; /* Prevent layout shift */
+  height: auto; /* Allow content to determine height, but min-height ensures stability */
   box-sizing: border-box;
 }
 
@@ -123,12 +124,16 @@
   height: 36px;
   min-width: 36px;
   min-height: 36px;
+  max-width: 36px;
+  max-height: 36px;
   border-radius: 50%;
   margin-right: 10px;
   overflow: hidden;
   position: relative;
   flex-shrink: 0;
   aspect-ratio: 1 / 1;
+  background-color: #e5e7eb; /* Skeleton background - ensures box exists before image loads */
+  box-sizing: border-box;
 }
 
 .ladder__avatar img {
@@ -136,9 +141,12 @@
   height: 100%;
   min-width: 36px;
   min-height: 36px;
+  max-width: 36px;
+  max-height: 36px;
   object-fit: cover;
   display: block;
   aspect-ratio: 1 / 1;
+  box-sizing: border-box;
 }
 
 .ladder__avatar-placeholder {
@@ -149,6 +157,8 @@
   height: 100%;
   min-width: 36px;
   min-height: 36px;
+  max-width: 36px;
+  max-height: 36px;
   background: linear-gradient(
     135deg,
     #ff6b35 0%,
@@ -162,6 +172,7 @@
   font-weight: 600;
   font-size: 16px;
   aspect-ratio: 1 / 1;
+  box-sizing: border-box;
 }
 
 .ladder__avatar-placeholder.anonymous {
@@ -443,23 +454,31 @@
     font-size: 14px;
   }
 
-  .ladder__avatar {
+  /* Avatar dimensions removed - JS inline style (40px) is the single source of truth */
+  /* .ladder__avatar {
     width: 28px;
     height: 28px;
     min-width: 28px;
     min-height: 28px;
+    max-width: 28px;
+    max-height: 28px;
     margin-right: 6px;
+    background-color: #e5e7eb;
   }
 
   .ladder__avatar img {
     min-width: 28px;
     min-height: 28px;
+    max-width: 28px;
+    max-height: 28px;
   }
 
   .ladder__avatar-placeholder {
     min-width: 28px;
     min-height: 28px;
-  }
+    max-width: 28px;
+    max-height: 28px;
+  } */
 
   .ladder__score {
     min-width: 50px;

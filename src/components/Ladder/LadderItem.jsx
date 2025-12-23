@@ -234,7 +234,34 @@ const LadderItem = React.memo(
         </div>
 
         <div className="ladder__user">
-          <div className="ladder__avatar">
+          <div
+            className="ladder__avatar"
+            style={{
+              // 1. STRICT Box Model
+              boxSizing: 'border-box',
+
+              // 2. THE IRONCLAD FLEX LOCK (The most important part)
+              // flex-grow: 0 (Don't grow)
+              // flex-shrink: 0 (NEVER shrink)
+              // flex-basis: 40px (Always start at 40px)
+              flex: '0 0 40px',
+
+              // 3. Explicit Dimensions (Redundant but necessary for safety)
+              width: '40px',
+              height: '40px',
+
+              // 4. Perfect Circle Styling
+              borderRadius: '50%',
+              overflow: 'hidden',
+
+              // 5. Placeholder & Layout Styling
+              backgroundColor: '#e0e0e0',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginRight: '12px', // Add spacing between avatar and name
+            }}
+          >
             {user.avatarUrl &&
             user.avatarUrl.trim() !== '' &&
             !user.isAnonymous ? (
@@ -242,6 +269,12 @@ const LadderItem = React.memo(
                 src={user.avatarUrl}
                 alt="avatar"
                 loading="lazy"
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                  display: 'block',
+                }}
                 onError={e => {
                   e.target.style.display = 'none';
                   const placeholder = e.target.nextSibling;
@@ -256,12 +289,16 @@ const LadderItem = React.memo(
                 user.isAnonymous ? 'anonymous' : ''
               }`}
               style={{
+                width: '100%',
+                height: '100%',
                 display:
                   user.avatarUrl &&
                   user.avatarUrl.trim() !== '' &&
                   !user.isAnonymous
                     ? 'none'
                     : 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
               }}
             >
               {user.isAnonymous
@@ -314,13 +351,13 @@ const LadderItem = React.memo(
           <div className="ladder__score">
             <span className="ladder__score-value">
               {displayMetrics.icon && (
-                <span className="ladder__score-icon">{displayMetrics.icon}</span>
+                <span className="ladder__score-icon">
+                  {displayMetrics.icon}
+                </span>
               )}
               {displayMetrics.formatValue(displayMetrics.value)}
             </span>
-            <span className="ladder__score-label">
-              {displayMetrics.unit}
-            </span>
+            <span className="ladder__score-label">{displayMetrics.unit}</span>
             <span className="ladder__score-sublabel">
               {displayMetrics.label}
             </span>
@@ -352,9 +389,11 @@ const LadderItem = React.memo(
   },
   (prevProps, nextProps) => {
     // Custom comparison for React.memo
-    const prevValue = prevProps.user[prevProps.displayMode || 'ladderScore'] || 0;
-    const nextValue = nextProps.user[nextProps.displayMode || 'ladderScore'] || 0;
-    
+    const prevValue =
+      prevProps.user[prevProps.displayMode || 'ladderScore'] || 0;
+    const nextValue =
+      nextProps.user[nextProps.displayMode || 'ladderScore'] || 0;
+
     return (
       prevProps.user.id === nextProps.user.id &&
       prevProps.rank === nextProps.rank &&
