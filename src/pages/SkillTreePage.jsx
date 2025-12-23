@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import { useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useUser } from '../UserContext';
@@ -29,42 +29,75 @@ function SkillTreePage() {
   );
 
   return (
-    <div className="user-info-container">
+    <div
+      style={{
+        minHeight: '100dvh',
+        height: '100dvh',
+        background: 'linear-gradient(135deg, #81d8d0 0%, #5f9ea0 100%)',
+        backgroundAttachment: 'fixed',
+        backgroundSize: 'cover',
+        paddingBottom: 'calc(100px + env(safe-area-inset-bottom, 0px))',
+        boxSizing: 'border-box',
+        overflowY: 'auto',
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        width: '100%',
+        zIndex: 1,
+        padding: '10px 15px',
+        paddingTop: '10px',
+      }}
+    >
       {/* 標題區域 */}
       <div
         style={{
           textAlign: 'center',
           padding: '20px 15px',
           marginBottom: '20px',
+          position: 'relative',
+          zIndex: 2,
         }}
       >
         <h1
           style={{
             fontSize: '28px',
             fontWeight: 'bold',
-            color: '#2d3748',
+            color: 'white',
             margin: '0 0 8px 0',
+            textShadow:
+              '0 2px 8px rgba(0, 0, 0, 0.3), 0 1px 3px rgba(0, 0, 0, 0.2)',
           }}
         >
-          🔮 {t('skillTree.title') || '天賦技能樹'}
+          <span
+            style={{
+              textShadow:
+                '0 2px 8px rgba(0, 0, 0, 0.3), 0 1px 3px rgba(0, 0, 0, 0.2)',
+            }}
+          >
+            🔮
+          </span>{' '}
+          {t('skillTree.title')}
         </h1>
         <p
           style={{
             fontSize: '14px',
-            color: 'rgba(45, 55, 72, 0.7)',
+            color: 'rgba(255, 255, 255, 0.9)',
             margin: 0,
+            textShadow: '0 1px 3px rgba(0, 0, 0, 0.2)',
           }}
         >
-          {t('skillTree.description') ||
-            '完成各項評測，解鎖你的戰鬥潛能'}
+          {t('skillTree.description')}
         </p>
       </div>
 
       {/* 評測頁面導航 */}
-      <div className="test-buttons-section">
-        <h3 className="section-title">
-          {t('userInfo.startTests') || '開始評測'}
-        </h3>
+      <div
+        className="test-buttons-section"
+        style={{ position: 'relative', zIndex: 2 }}
+      >
+        <h3 className="section-title">{t('skillTree.startTests')}</h3>
         <div className="test-buttons-grid">
           <button
             onClick={() => handleNavigation('/strength')}
@@ -110,4 +143,3 @@ function SkillTreePage() {
 }
 
 export default SkillTreePage;
-

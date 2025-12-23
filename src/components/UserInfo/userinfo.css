@@ -32,6 +32,40 @@
   contain: layout style paint;
 }
 
+/* ✅ 技能樹頁面特定樣式：修復底部白色間隙 */
+.user-info-container.skill-tree-page {
+  min-height: 100dvh; /* 使用動態視口高度，確保覆蓋全屏 */
+  background: linear-gradient(135deg, #81d8d0 0%, #5f9ea0 100%);
+  background-attachment: fixed; /* 確保背景固定，不會出現白色間隙 */
+}
+
+.user-info-container.skill-tree-page::before {
+  content: '';
+  position: fixed; /* 改為 fixed，確保覆蓋整個視口 */
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(
+      circle at 20% 80%,
+      rgba(129, 216, 208, 0.3) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 80% 20%,
+      rgba(95, 158, 160, 0.3) 0%,
+      transparent 50%
+    );
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* 確保技能樹頁面內容顯示在背景之上 */
+.user-info-container.skill-tree-page > * {
+  position: relative;
+  z-index: 1;
+}
+
 .user-info-container::before {
   content: '';
   position: absolute;

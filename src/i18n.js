@@ -1959,6 +1959,13 @@ const zhTW = {
         clearFail: '清除失敗',
       },
     },
+
+    // 技能樹頁面
+    skillTree: {
+      title: '天賦技能樹',
+      description: '分析肉體數值，覺醒潛在天賦。',
+      startTests: '開始評測',
+    },
   },
 };
 
@@ -4011,6 +4018,13 @@ const enUS = {
         shownInvitesInfo: 'All invitations shown in console',
         clearFail: 'Failed to clear',
       },
+    },
+
+    // Skill Tree Page
+    skillTree: {
+      title: 'Skill Tree',
+      description: 'Analyze physical attributes. Awaken your potential.',
+      startTests: 'Start Assessment',
     },
   },
 };
