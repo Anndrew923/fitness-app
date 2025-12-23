@@ -226,7 +226,40 @@ const LadderItem = React.memo(
     };
 
     const displayMetrics = getDisplayMetrics();
-    const is1000lbClub = !user.isAnonymous && user.stats_sbdTotal >= 453.6;
+
+    // Modular badge system - returns array of active badges sorted by priority
+    const getBadges = user => {
+      const badges = [];
+
+      // Priority 1: Verification (Highest Priority - always closest to name)
+      if (!user.isAnonymous && user.isVerified) {
+        badges.push({
+          id: 'verified',
+          icon: '🏅',
+          text: '已認證',
+          className: 'badge-verified',
+          title: '榮譽認證',
+        });
+      }
+
+      // Priority 2: 1000lb Club
+      if (!user.isAnonymous && user.stats_sbdTotal >= 453.6) {
+        badges.push({
+          id: '1k',
+          icon: '🏆',
+          text: '1000lb',
+          shortText: '1K',
+          className: 'badge-1000lb',
+          title: '1000lb Club',
+        });
+      }
+
+      // Future badges can be added here with priority order
+
+      return badges;
+    };
+
+    const badges = getBadges(user);
 
     return (
       <div
@@ -339,18 +372,35 @@ const LadderItem = React.memo(
                 user.isAnonymous ? 'anonymous' : ''
               } ${isCurrentUser ? 'current-user-flame' : ''}`}
             >
-              {user.displayName}
-              {user.isVerified && (
-                <span className="ladder__verification-badge" title="榮譽認證">
-                  🏅
+              <div className="ladder__user-name-container">
+                <span className="ladder__user-name-text">
+                  {user.displayName}
+                  {user.isAnonymous && ' 🔒'}
                 </span>
-              )}
-              {is1000lbClub && (
-                <span className="badge-1000lb" title="1000lb Club">
-                  🏆 1000lb
-                </span>
-              )}
-              {user.isAnonymous && ' 🔒'}
+                {badges.length > 0 && (
+                  <div className="ladder__badges">
+                    {badges.map(badge => (
+                      <span
+                        key={badge.id}
+                        className={badge.className}
+                        title={badge.title}
+                      >
+                        <span className="badge-icon">{badge.icon}</span>
+                        {badge.id === '1k' ? (
+                          <>
+                            <span className="badge-label">{badge.text}</span>
+                            <span className="badge-short-label">
+                              {badge.shortText}
+                            </span>
+                          </>
+                        ) : (
+                          <span className="badge-label">{badge.text}</span>
+                        )}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
             <div className="ladder__user-details">
               {user.isAnonymous ? (
