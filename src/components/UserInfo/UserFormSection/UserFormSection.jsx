@@ -1,9 +1,7 @@
-import React, { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import PropTypes from 'prop-types';
-import {
-  getDistrictsByCity,
-  getAllCities,
-} from '../../../utils/taiwanDistricts';
+import { getDistrictsByCity } from '../../../utils/taiwanDistricts';
+import CustomDropdown from './CustomDropdown';
 import './UserFormSection.css';
 
 // 職業選項常數
@@ -41,6 +39,58 @@ const UserFormSection = ({
     return [];
   }, [userData?.city, userData?.region, userData?.country]);
 
+  // Prepare city options for CustomDropdown (with optgroups)
+  const cityOptions = useMemo(
+    () => [
+      {
+        group: '直轄市',
+        options: [
+          { value: '台北市', label: '台北市' },
+          { value: '新北市', label: '新北市' },
+          { value: '桃園市', label: '桃園市' },
+          { value: '台中市', label: '台中市' },
+          { value: '台南市', label: '台南市' },
+          { value: '高雄市', label: '高雄市' },
+        ],
+      },
+      {
+        group: '省轄市',
+        options: [
+          { value: '基隆市', label: '基隆市' },
+          { value: '新竹市', label: '新竹市' },
+          { value: '嘉義市', label: '嘉義市' },
+        ],
+      },
+      {
+        group: '縣',
+        options: [
+          { value: '新竹縣', label: '新竹縣' },
+          { value: '苗栗縣', label: '苗栗縣' },
+          { value: '彰化縣', label: '彰化縣' },
+          { value: '南投縣', label: '南投縣' },
+          { value: '雲林縣', label: '雲林縣' },
+          { value: '嘉義縣', label: '嘉義縣' },
+          { value: '屏東縣', label: '屏東縣' },
+          { value: '宜蘭縣', label: '宜蘭縣' },
+          { value: '花蓮縣', label: '花蓮縣' },
+          { value: '台東縣', label: '台東縣' },
+          { value: '澎湖縣', label: '澎湖縣' },
+          { value: '金門縣', label: '金門縣' },
+          { value: '連江縣', label: '連江縣' },
+        ],
+      },
+    ],
+    []
+  );
+
+  // Prepare district options for CustomDropdown (simple array)
+  const districtOptions = useMemo(() => {
+    return availableDistricts.map(district => ({
+      value: district,
+      label: district,
+    }));
+  }, [availableDistricts]);
+
   // Handle city change with cascading logic
   const handleCityChange = e => {
     const newCity = e.target.value;
@@ -70,6 +120,52 @@ const UserFormSection = ({
 
   // Get current city value (support both city and region for backward compatibility)
   const currentCity = userData?.city || userData?.region || '';
+
+  // 跟踪哪个下拉菜单打开（用于z-index管理）
+  const [openDropdown, setOpenDropdown] = useState(null);
+
+  // 准备国家选项
+  const countryOptions = useMemo(
+    () => [
+      { value: 'TW', label: '台灣' },
+      { value: 'CN', label: '中國' },
+      { value: 'US', label: '美國' },
+      { value: 'JP', label: '日本' },
+      { value: 'KR', label: '韓國' },
+      { value: 'SG', label: '新加坡' },
+      { value: 'MY', label: '馬來西亞' },
+      { value: 'HK', label: '香港' },
+      { value: 'MO', label: '澳門' },
+      { value: 'TH', label: '泰國' },
+      { value: 'VN', label: '越南' },
+      { value: 'PH', label: '菲律賓' },
+      { value: 'ID', label: '印尼' },
+      { value: 'AU', label: '澳洲' },
+      { value: 'NZ', label: '紐西蘭' },
+      { value: 'CA', label: '加拿大' },
+      { value: 'GB', label: '英國' },
+      { value: 'DE', label: '德國' },
+      { value: 'FR', label: '法國' },
+      { value: 'OTHER', label: '其他' },
+    ],
+    []
+  );
+
+  // 处理国家变更（保持级联逻辑）
+  const handleCountryChange = e => {
+    onChange(e);
+    // Reset city and district when country changes
+    if (e.target.value !== 'TW') {
+      const cityEvent = {
+        target: { name: 'city', value: '' },
+      };
+      const districtEvent = {
+        target: { name: 'district', value: '' },
+      };
+      onChange(cityEvent);
+      onChange(districtEvent);
+    }
+  };
 
   return (
     <div id="user-form-section" className="form-card">
@@ -342,53 +438,26 @@ const UserFormSection = ({
             </div>
 
             {/* 排行榜資訊（選填） */}
-            <div className="form-group">
+            <div
+              className={`form-group ${
+                openDropdown === 'country' ? 'dropdown-active' : ''
+              }`}
+            >
               <label htmlFor="country" className="form-label">
                 {t('userInfo.ranking.country')}{' '}
                 <span className="optional-badge">選填</span>
               </label>
-              <select
-                id="country"
+              <CustomDropdown
                 name="country"
                 value={userData?.country || ''}
-                onChange={e => {
-                  onChange(e);
-                  // Reset city and district when country changes
-                  if (e.target.value !== 'TW') {
-                    const cityEvent = {
-                      target: { name: 'city', value: '' },
-                    };
-                    const districtEvent = {
-                      target: { name: 'district', value: '' },
-                    };
-                    onChange(cityEvent);
-                    onChange(districtEvent);
-                  }
-                }}
+                options={countryOptions}
+                placeholder={t('userInfo.ranking.selectCountry')}
+                onChange={handleCountryChange}
                 className="form-input"
-              >
-                <option value="">{t('userInfo.ranking.selectCountry')}</option>
-                <option value="TW">台灣</option>
-                <option value="CN">中國</option>
-                <option value="US">美國</option>
-                <option value="JP">日本</option>
-                <option value="KR">韓國</option>
-                <option value="SG">新加坡</option>
-                <option value="MY">馬來西亞</option>
-                <option value="HK">香港</option>
-                <option value="MO">澳門</option>
-                <option value="TH">泰國</option>
-                <option value="VN">越南</option>
-                <option value="PH">菲律賓</option>
-                <option value="ID">印尼</option>
-                <option value="AU">澳洲</option>
-                <option value="NZ">紐西蘭</option>
-                <option value="CA">加拿大</option>
-                <option value="GB">英國</option>
-                <option value="DE">德國</option>
-                <option value="FR">法國</option>
-                <option value="OTHER">其他</option>
-              </select>
+                onOpenChange={isOpen =>
+                  setOpenDropdown(isOpen ? 'country' : null)
+                }
+              />
               <p className="field-hint">
                 💡 {t('userInfo.ranking.countryHint')}
               </p>
@@ -398,70 +467,49 @@ const UserFormSection = ({
             {userData?.country === 'TW' && (
               <div className="form-row">
                 {/* City Selector (for Taiwan) */}
-                <div className="form-group">
+                <div
+                  className={`form-group ${
+                    openDropdown === 'city' ? 'dropdown-active' : ''
+                  }`}
+                >
                   <label htmlFor="city" className="form-label">
                     城市 <span className="optional-badge">選填</span>
                   </label>
-                  <select
-                    id="city"
+                  <CustomDropdown
                     name="city"
                     value={currentCity}
+                    options={cityOptions}
+                    placeholder="請選擇城市"
                     onChange={handleCityChange}
                     className="form-input"
-                  >
-                    <option value="">請選擇城市</option>
-                    <optgroup label="直轄市">
-                      <option value="台北市">台北市</option>
-                      <option value="新北市">新北市</option>
-                      <option value="桃園市">桃園市</option>
-                      <option value="台中市">台中市</option>
-                      <option value="台南市">台南市</option>
-                      <option value="高雄市">高雄市</option>
-                    </optgroup>
-                    <optgroup label="省轄市">
-                      <option value="基隆市">基隆市</option>
-                      <option value="新竹市">新竹市</option>
-                      <option value="嘉義市">嘉義市</option>
-                    </optgroup>
-                    <optgroup label="縣">
-                      <option value="新竹縣">新竹縣</option>
-                      <option value="苗栗縣">苗栗縣</option>
-                      <option value="彰化縣">彰化縣</option>
-                      <option value="南投縣">南投縣</option>
-                      <option value="雲林縣">雲林縣</option>
-                      <option value="嘉義縣">嘉義縣</option>
-                      <option value="屏東縣">屏東縣</option>
-                      <option value="宜蘭縣">宜蘭縣</option>
-                      <option value="花蓮縣">花蓮縣</option>
-                      <option value="台東縣">台東縣</option>
-                      <option value="澎湖縣">澎湖縣</option>
-                      <option value="金門縣">金門縣</option>
-                      <option value="連江縣">連江縣</option>
-                    </optgroup>
-                  </select>
+                    onOpenChange={isOpen =>
+                      setOpenDropdown(isOpen ? 'city' : null)
+                    }
+                  />
                   <p className="field-hint">💡 選擇城市後可進一步選擇行政區</p>
                 </div>
 
                 {/* District Selector (for Taiwan, cascading from City) */}
                 {currentCity && availableDistricts.length > 0 && (
-                  <div className="form-group">
+                  <div
+                    className={`form-group ${
+                      openDropdown === 'district' ? 'dropdown-active' : ''
+                    }`}
+                  >
                     <label htmlFor="district" className="form-label">
                       行政區 <span className="optional-badge">選填</span>
                     </label>
-                    <select
-                      id="district"
+                    <CustomDropdown
                       name="district"
                       value={userData?.district || ''}
+                      options={districtOptions}
+                      placeholder="請選擇行政區"
                       onChange={onChange}
                       className="form-input"
-                    >
-                      <option value="">請選擇行政區</option>
-                      {availableDistricts.map(district => (
-                        <option key={district} value={district}>
-                          {district}
-                        </option>
-                      ))}
-                    </select>
+                      onOpenChange={isOpen =>
+                        setOpenDropdown(isOpen ? 'district' : null)
+                      }
+                    />
                     <p className="field-hint">
                       💡 選擇行政區可參與「地區分組天梯」排名
                     </p>

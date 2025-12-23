@@ -205,7 +205,8 @@ export const useUserInfoForm = (
       // 處理不同類型的欄位
       if (name === 'gender') {
         processedValue = value;
-      } else if (['job_category', 'country', 'region'].includes(name)) {
+      } else if (['job_category', 'country', 'region', 'city', 'district'].includes(name)) {
+        // ✅ 修復：確保 city 和 district 字段被正確處理為字符串
         processedValue = value;
       } else if (['weeklyTrainingHours', 'trainingYears'].includes(name)) {
         processedValue = value === '' ? '' : Number(value);

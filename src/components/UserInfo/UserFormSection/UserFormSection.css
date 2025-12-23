@@ -2,17 +2,21 @@
 .form-card {
   background: rgba(255, 255, 255, 0.95);
   border-radius: 20px;
-  padding: 20px;
+  padding: 20px 20px 80px 20px; /* ✅ 調整：底部padding從20px增加到80px，確保下拉列表不被裁剪 */
   margin-bottom: 20px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.2);
   position: relative;
   z-index: 1;
+  /* ✅ 修復：確保下拉列表不會被卡片裁剪 */
+  overflow: visible;
 }
 
 .form-section {
   margin-bottom: 15px;
+  /* ✅ 修復：確保下拉列表不會被section裁剪 */
+  overflow: visible;
 }
 
 .section-header {
@@ -74,12 +78,31 @@
 
 .form-group {
   margin-bottom: 10px;
+  /* ✅ 修復：確保下拉列表不會被父容器裁剪 */
+  position: relative;
+  overflow: visible;
+  /* ✅ 修復：默認z-index較低 */
+  z-index: 1;
+}
+
+/* ✅ 修復：當下拉菜單打開時，提高z-index */
+.form-group.dropdown-active {
+  z-index: 1005;
+}
+
+/* ✅ 現代瀏覽器支持：使用:has選擇器（如果支持） */
+@supports selector(:has(*)) {
+  .form-group:has(.custom-dropdown.custom-dropdown--open) {
+    z-index: 1005;
+  }
 }
 
 .form-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px;
+  /* ✅ 修復：確保下拉列表不會被父容器裁剪 */
+  overflow: visible;
 }
 
 .form-label {
@@ -103,6 +126,80 @@
   transition: all 0.3s ease;
   backdrop-filter: blur(10px);
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+/* ✅ 修復：行政區下拉菜單溢出問題 */
+/* Select元素樣式 */
+select.form-input {
+  position: relative;
+  z-index: 1001;
+  background: white;
+  /* 確保在移動設備上正確顯示 */
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  /* 確保下拉列表可以正確顯示 */
+  overflow: visible;
+}
+
+/* 確保select元素的下拉選項列表正確顯示 */
+select.form-input option {
+  padding: 8px 12px;
+  background: white;
+  color: #2d3748;
+}
+
+/* ✅ 新增：當select獲得焦點時，確保下拉列表正確顯示 */
+select.form-input:focus {
+  z-index: 1002;
+  /* 確保下拉列表在焦點時正確顯示 */
+  position: relative;
+}
+
+/* ✅ 新增：使用 size 屬性創建固定高度的滾動列表（當需要時） */
+/* 注意：這會將下拉菜單改為固定高度的滾動列表 */
+select.form-input[size] {
+  max-height: 250px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  padding: 4px 0;
+  display: block;
+}
+
+select.form-input[size] option {
+  padding: 8px 12px;
+  border-radius: 4px;
+  margin: 2px 4px;
+}
+
+select.form-input[size] option:hover {
+  background: #f0f0f0;
+}
+
+/* 移動設備優化：確保select元素在觸摸時正確響應 */
+@media (max-width: 768px) {
+  select.form-input {
+    /* 確保觸摸目標足夠大 */
+    min-height: 44px;
+    /* 確保z-index足夠高，避免被其他元素遮擋 */
+    z-index: 1001;
+  }
+
+  select.form-input[size] {
+    max-height: 200px;
+  }
+
+  /* 確保在移動設備上，下拉列表不會被裁剪 */
+  .form-group {
+    overflow: visible;
+  }
+
+  .form-row {
+    overflow: visible;
+  }
 }
 
 .form-input:focus {

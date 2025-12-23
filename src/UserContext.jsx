@@ -323,6 +323,8 @@ export function UserProvider({ children }) {
           region: data.region || '',
           // ✅ Phase 1 新增：確保新欄位被保存
           city: data.city || '',
+          // ✅ 修復：確保 district 字段被保存到 Firebase
+          district: data.district || '',
           job_category: data.job_category || '',
           gym_name: data.gym_name || '',
           rpg_class: data.rpg_class || '',
