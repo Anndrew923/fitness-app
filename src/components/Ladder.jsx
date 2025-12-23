@@ -222,25 +222,50 @@ const Ladder = () => {
           formatValue: val => Math.floor(val).toLocaleString('zh-TW'),
         };
       case 'stats_sbdTotal':
-        if (filterProject === 'squat' && userData.stats_squat) {
+        if (filterProject === 'total_five') {
+          const fiveItemTotal =
+            (userData.stats_sbdTotal || 0) +
+            (userData.stats_ohp || 0) +
+            (userData.stats_latPull || 0);
+          return {
+            value: fiveItemTotal,
+            unit: 'kg',
+            label: '五項總和',
+            formatValue: val => Number(val).toFixed(1),
+          };
+        } else if (filterProject === 'squat') {
           return {
             value: userData.stats_squat || 0,
             unit: 'kg',
             label: '深蹲',
             formatValue: val => Number(val).toFixed(1),
           };
-        } else if (filterProject === 'bench' && userData.stats_bench) {
+        } else if (filterProject === 'bench') {
           return {
             value: userData.stats_bench || 0,
             unit: 'kg',
             label: '臥推',
             formatValue: val => Number(val).toFixed(1),
           };
-        } else if (filterProject === 'deadlift' && userData.stats_deadlift) {
+        } else if (filterProject === 'deadlift') {
           return {
             value: userData.stats_deadlift || 0,
             unit: 'kg',
             label: '硬舉',
+            formatValue: val => Number(val).toFixed(1),
+          };
+        } else if (filterProject === 'ohp') {
+          return {
+            value: userData.stats_ohp || 0,
+            unit: 'kg',
+            label: '站姿肩推',
+            formatValue: val => Number(val).toFixed(1),
+          };
+        } else if (filterProject === 'latPull') {
+          return {
+            value: userData.stats_latPull || 0,
+            unit: 'kg',
+            label: '滑輪下拉',
             formatValue: val => Number(val).toFixed(1),
           };
         }
@@ -471,17 +496,6 @@ const Ladder = () => {
     [totalPages, goToPage]
   );
 
-  if (loading && ladderData.length === 0) {
-    return (
-      <div className="ladder">
-        <div className="ladder__loading">
-          <div className="ladder__loading-spinner"></div>
-          <p>{t('ladder.loading')}</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="ladder">
       {/* Notification */}
@@ -696,6 +710,7 @@ const Ladder = () => {
       {/* Floating rank display */}
       {floatingRankDisplay}
 
+      {/* Header and Filters - Always visible, maintain state */}
       <div className="ladder__header">
         <h2>{t('ladder.title')}</h2>
 
@@ -730,61 +745,75 @@ const Ladder = () => {
         )}
       </div>
 
-      <LadderList
-        ladderData={ladderData}
-        displayStartRank={displayStartRank}
-        currentUserId={userData?.userId || auth.currentUser?.uid}
-        onUserClick={handleUserClick}
-        onToggleLike={toggleLike}
-        likedUsers={likedUsers}
-        likeProcessing={likeProcessing}
-        onRefresh={handleRefresh}
-        loading={loading}
-        displayMode={selectedDivision}
-        filterProject={filterProject}
-        scrollTrigger={scrollTrigger}
-      />
-
-      {/* Pagination */}
-      {totalPages >= 1 && totalUsers > 0 && (
-        <div className="ladder__pagination">
-          <button
-            onClick={() => goToPage(currentPage - 1)}
-            disabled={currentPage === 1}
-            className="ladder__pagination-btn ladder__pagination-btn--prev"
-            aria-label={t('history.pagination.prev')}
-          >
-            <span className="ladder__pagination-arrow">←</span>
-          </button>
-
-          <div className="ladder__pagination-select-wrapper">
-            <select
-              value={currentPage}
-              onChange={handlePageSelect}
-              className="ladder__pagination-select"
-              aria-label={t('ladder.pagination.selectPage')}
-            >
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-                <option key={page} value={page}>
-                  {t('ladder.pagination.page', { page })}
-                </option>
-              ))}
-            </select>
-            <span className="ladder__pagination-total">
-              / {t('ladder.pagination.total', { total: totalPages })}
-            </span>
+      {/* Content area - Only this section shows loading state */}
+      <div className="ladder-content-area">
+        {loading && ladderData.length === 0 ? (
+          <div className="ladder__loading">
+            <div className="ladder__loading-spinner"></div>
+            <p>{t('ladder.loading')}</p>
           </div>
+        ) : (
+          <>
+            <LadderList
+              ladderData={ladderData}
+              displayStartRank={displayStartRank}
+              currentUserId={userData?.userId || auth.currentUser?.uid}
+              onUserClick={handleUserClick}
+              onToggleLike={toggleLike}
+              likedUsers={likedUsers}
+              likeProcessing={likeProcessing}
+              onRefresh={handleRefresh}
+              loading={loading}
+              displayMode={selectedDivision}
+              filterProject={filterProject}
+              scrollTrigger={scrollTrigger}
+            />
 
-          <button
-            onClick={() => goToPage(currentPage + 1)}
-            disabled={currentPage === totalPages}
-            className="ladder__pagination-btn ladder__pagination-btn--next"
-            aria-label={t('history.pagination.next')}
-          >
-            <span className="ladder__pagination-arrow">→</span>
-          </button>
-        </div>
-      )}
+            {/* Pagination */}
+            {totalPages >= 1 && totalUsers > 0 && (
+              <div className="ladder__pagination">
+                <button
+                  onClick={() => goToPage(currentPage - 1)}
+                  disabled={currentPage === 1}
+                  className="ladder__pagination-btn ladder__pagination-btn--prev"
+                  aria-label={t('history.pagination.prev')}
+                >
+                  <span className="ladder__pagination-arrow">←</span>
+                </button>
+
+                <div className="ladder__pagination-select-wrapper">
+                  <select
+                    value={currentPage}
+                    onChange={handlePageSelect}
+                    className="ladder__pagination-select"
+                    aria-label={t('ladder.pagination.selectPage')}
+                  >
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                      page => (
+                        <option key={page} value={page}>
+                          {t('ladder.pagination.page', { page })}
+                        </option>
+                      )
+                    )}
+                  </select>
+                  <span className="ladder__pagination-total">
+                    / {t('ladder.pagination.total', { total: totalPages })}
+                  </span>
+                </div>
+
+                <button
+                  onClick={() => goToPage(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                  className="ladder__pagination-btn ladder__pagination-btn--next"
+                  aria-label={t('history.pagination.next')}
+                >
+                  <span className="ladder__pagination-arrow">→</span>
+                </button>
+              </div>
+            )}
+          </>
+        )}
+      </div>
 
       <div className="ladder__footer">
         {selectedTab === 'weekly' && (

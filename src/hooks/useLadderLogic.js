@@ -228,6 +228,8 @@ export const useLadderLogic = (
       const stats_squat = Number(strengthInputs.squat?.max) || 0;
       const stats_bench = Number(strengthInputs.benchPress?.max) || 0;
       const stats_deadlift = Number(strengthInputs.deadlift?.max) || 0;
+      const stats_ohp = Number(strengthInputs.shoulderPress?.max) || 0;
+      const stats_latPull = Number(strengthInputs.latPulldown?.max) || 0;
 
       // ✅ Extract Endurance stats
       const stats_cooper = Number(cardioInputs.distance) || 0; // Distance in meters
@@ -331,6 +333,8 @@ export const useLadderLogic = (
           stats_squat: stats_squat,
           stats_bench: stats_bench,
           stats_deadlift: stats_deadlift,
+          stats_ohp: stats_ohp,
+          stats_latPull: stats_latPull,
           // ✅ Endurance stats
           stats_cooper: stats_cooper,
           stats_5k: stats_5k,

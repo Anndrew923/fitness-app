@@ -36,10 +36,13 @@ const LadderSubFilters = ({
     switch (currentDivision) {
       case 'stats_sbdTotal':
         return [
-          { value: 'total', label: '總和' },
+          { value: 'total_five', label: '五項總和' },
+          { value: 'total', label: 'SBD 總和' },
           { value: 'squat', label: '深蹲' },
           { value: 'bench', label: '臥推' },
           { value: 'deadlift', label: '硬舉' },
+          { value: 'ohp', label: '站姿肩推' },
+          { value: 'latPull', label: '滑輪下拉' },
         ];
       case 'stats_cooper':
         return [
@@ -168,4 +171,3 @@ LadderSubFilters.propTypes = {
 };
 
 export default LadderSubFilters;
-

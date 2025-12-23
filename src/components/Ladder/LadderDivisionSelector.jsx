@@ -14,7 +14,7 @@ const DIVISION_OPTIONS = [
     desc: '累積登入',
   },
   {
-    label: '💪 三項總和',
+    label: '💪 肌力表現',
     value: 'stats_sbdTotal',
     desc: 'SBD 總和',
   },

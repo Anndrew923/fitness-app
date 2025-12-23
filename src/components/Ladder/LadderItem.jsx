@@ -72,25 +72,50 @@ const LadderItem = React.memo(
           };
         case 'stats_sbdTotal':
           // Check if filtering by specific lift
-          if (filterProject === 'squat' && user.stats_squat) {
+          if (filterProject === 'total_five') {
+            const fiveItemTotal =
+              (user.stats_sbdTotal || 0) +
+              (user.stats_ohp || 0) +
+              (user.stats_latPull || 0);
+            return {
+              value: fiveItemTotal,
+              unit: 'kg',
+              label: '五項總和',
+              formatValue: val => Number(val).toFixed(1),
+            };
+          } else if (filterProject === 'squat') {
             return {
               value: user.stats_squat || 0,
               unit: 'kg',
               label: '深蹲',
               formatValue: val => Number(val).toFixed(1),
             };
-          } else if (filterProject === 'bench' && user.stats_bench) {
+          } else if (filterProject === 'bench') {
             return {
               value: user.stats_bench || 0,
               unit: 'kg',
               label: '臥推',
               formatValue: val => Number(val).toFixed(1),
             };
-          } else if (filterProject === 'deadlift' && user.stats_deadlift) {
+          } else if (filterProject === 'deadlift') {
             return {
               value: user.stats_deadlift || 0,
               unit: 'kg',
               label: '硬舉',
+              formatValue: val => Number(val).toFixed(1),
+            };
+          } else if (filterProject === 'ohp') {
+            return {
+              value: user.stats_ohp || 0,
+              unit: 'kg',
+              label: '站姿肩推',
+              formatValue: val => Number(val).toFixed(1),
+            };
+          } else if (filterProject === 'latPull') {
+            return {
+              value: user.stats_latPull || 0,
+              unit: 'kg',
+              label: '滑輪下拉',
               formatValue: val => Number(val).toFixed(1),
             };
           }
@@ -201,6 +226,7 @@ const LadderItem = React.memo(
     };
 
     const displayMetrics = getDisplayMetrics();
+    const is1000lbClub = !user.isAnonymous && user.stats_sbdTotal >= 453.6;
 
     return (
       <div
@@ -317,6 +343,11 @@ const LadderItem = React.memo(
               {user.isVerified && (
                 <span className="ladder__verification-badge" title="榮譽認證">
                   🏅
+                </span>
+              )}
+              {is1000lbClub && (
+                <span className="badge-1000lb" title="1000lb Club">
+                  🏆 1000lb
                 </span>
               )}
               {user.isAnonymous && ' 🔒'}

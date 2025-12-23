@@ -281,12 +281,19 @@ export const useLadder = (options = {}) => {
       
       // Override sort field based on division and project filter
       if (selectedDivision === 'stats_sbdTotal' && filterProject !== 'total') {
-        if (filterProject === 'squat') {
+        if (filterProject === 'total_five') {
+          // Special case: Calculate five-item total for sorting
+          sortField = 'total_five';
+        } else if (filterProject === 'squat') {
           sortField = 'stats_squat';
         } else if (filterProject === 'bench') {
           sortField = 'stats_bench';
         } else if (filterProject === 'deadlift') {
           sortField = 'stats_deadlift';
+        } else if (filterProject === 'ohp') {
+          sortField = 'stats_ohp';
+        } else if (filterProject === 'latPull') {
+          sortField = 'stats_latPull';
         }
       } else if (selectedDivision === 'stats_cooper') {
         if (filterProject === '5k') {
@@ -312,8 +319,15 @@ export const useLadder = (options = {}) => {
         }
       }
       data.sort((a, b) => {
-        const aValue = a[sortField];
-        const bValue = b[sortField];
+        // Special case: Calculate five-item total for sorting
+        let aValue, bValue;
+        if (sortField === 'total_five') {
+          aValue = (a.stats_sbdTotal || 0) + (a.stats_ohp || 0) + (a.stats_latPull || 0);
+          bValue = (b.stats_sbdTotal || 0) + (b.stats_ohp || 0) + (b.stats_latPull || 0);
+        } else {
+          aValue = a[sortField];
+          bValue = b[sortField];
+        }
         
         // Special cases: Lower is better (ascending) - Time-based metrics
         if (sortField === 'stats_5k' || sortField === 'stats_100m') {
