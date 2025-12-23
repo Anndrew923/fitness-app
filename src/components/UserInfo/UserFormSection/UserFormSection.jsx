@@ -168,152 +168,132 @@ const UserFormSection = ({
   };
 
   return (
-    <div id="user-form-section" className="form-card">
-      <form className="user-form" onSubmit={onSubmit}>
-        <div className="form-section">
-          <div className="section-header">
-            <h3 className="section-title">{t('userInfo.basicInfo')}</h3>
-            {currentUser && (
-              <button
-                type="button"
-                onClick={onLogout}
-                title="登出"
-                className="user-info__logout-btn"
-                onMouseEnter={e => {
-                  const tooltip = document.createElement('div');
-                  tooltip.innerText = '登出';
-                  tooltip.style.position = 'absolute';
-                  tooltip.style.bottom = '44px';
-                  tooltip.style.left = '50%';
-                  tooltip.style.transform = 'translateX(-50%)';
-                  tooltip.style.background = 'rgba(60,60,60,0.95)';
-                  tooltip.style.color = '#fff';
-                  tooltip.style.padding = '6px 14px';
-                  tooltip.style.borderRadius = '6px';
-                  tooltip.style.fontSize = '13px';
-                  tooltip.style.whiteSpace = 'nowrap';
-                  tooltip.style.pointerEvents = 'none';
-                  tooltip.style.zIndex = '1001';
-                  tooltip.className = 'logout-tooltip';
-                  e.currentTarget.parentNode.appendChild(tooltip);
-                }}
-                onMouseLeave={e => {
-                  const tooltip =
-                    e.currentTarget.parentNode.querySelector('.logout-tooltip');
-                  if (tooltip) tooltip.remove();
-                }}
-              >
-                <span className="user-info__logout-icon">⎋</span>
-              </button>
-            )}
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="nickname" className="form-label">
-              {t('userInfo.nickname')}
-            </label>
-            <div className="nickname-input-group">
-              <input
-                id="nickname"
-                name="nickname"
-                type="text"
-                value={userData?.nickname || ''}
-                onChange={onNicknameChange}
-                placeholder={t('userInfo.nicknamePlaceholder')}
-                className="form-input"
-                maxLength="16"
-              />
-              <button
-                type="button"
-                onClick={onGenerateNickname}
-                className="generate-nickname-btn"
-              >
-                {t('userInfo.generateNickname')}
-              </button>
-            </div>
-          </div>
-
-          <div className="form-row">
-            <div className="form-group">
-              <label htmlFor="gender" className="form-label">
-                {t('userInfo.gender')}
-              </label>
-              <select
-                id="gender"
-                name="gender"
-                value={userData?.gender || ''}
-                onChange={onChange}
-                className="form-input"
-                required
-                onInvalid={e =>
-                  e.currentTarget.setCustomValidity(t('errors.required'))
-                }
-                onInput={e => e.currentTarget.setCustomValidity('')}
-              >
-                <option value="">{t('userInfo.selectGender')}</option>
-                <option value="male">{t('userInfo.male')}</option>
-                <option value="female">{t('userInfo.female')}</option>
-              </select>
+    <>
+      <div id="user-form-section" className="form-card">
+        <form className="user-form" onSubmit={onSubmit}>
+          <div className="form-section">
+            <div className="section-header">
+              <h3 className="section-title">{t('userInfo.basicInfo')}</h3>
+              {currentUser && (
+                <button
+                  type="button"
+                  onClick={onLogout}
+                  title="登出"
+                  className="user-info__logout-btn"
+                  onMouseEnter={e => {
+                    const tooltip = document.createElement('div');
+                    tooltip.innerText = '登出';
+                    tooltip.style.position = 'absolute';
+                    tooltip.style.bottom = '44px';
+                    tooltip.style.left = '50%';
+                    tooltip.style.transform = 'translateX(-50%)';
+                    tooltip.style.background = 'rgba(60,60,60,0.95)';
+                    tooltip.style.color = '#fff';
+                    tooltip.style.padding = '6px 14px';
+                    tooltip.style.borderRadius = '6px';
+                    tooltip.style.fontSize = '13px';
+                    tooltip.style.whiteSpace = 'nowrap';
+                    tooltip.style.pointerEvents = 'none';
+                    tooltip.style.zIndex = '1001';
+                    tooltip.className = 'logout-tooltip';
+                    e.currentTarget.parentNode.appendChild(tooltip);
+                  }}
+                  onMouseLeave={e => {
+                    const tooltip =
+                      e.currentTarget.parentNode.querySelector(
+                        '.logout-tooltip'
+                      );
+                    if (tooltip) tooltip.remove();
+                  }}
+                >
+                  <span className="user-info__logout-icon">⎋</span>
+                </button>
+              )}
             </div>
 
             <div className="form-group">
-              <label htmlFor="age" className="form-label">
-                {t('userInfo.age')}
+              <label htmlFor="nickname" className="form-label">
+                {t('userInfo.nickname')}
               </label>
-              <input
-                id="age"
-                name="age"
-                type="number"
-                value={userData?.age || ''}
-                onChange={onChange}
-                placeholder={t('userInfo.age')}
-                className="form-input"
-                required
-                onInvalid={e =>
-                  e.currentTarget.setCustomValidity(t('errors.required'))
-                }
-                onInput={e => e.currentTarget.setCustomValidity('')}
-                min="0"
-                step="1"
-              />
-            </div>
-          </div>
-
-          <div className="form-row">
-            <div className="form-group">
-              <label htmlFor="height" className="form-label">
-                {t('userInfo.height')}
-              </label>
-              <input
-                id="height"
-                name="height"
-                type="number"
-                value={userData?.height || ''}
-                onChange={onChange}
-                placeholder={t('userInfo.height')}
-                className="form-input"
-                required
-                onInvalid={e =>
-                  e.currentTarget.setCustomValidity(t('errors.required'))
-                }
-                onInput={e => e.currentTarget.setCustomValidity('')}
-                min="0"
-                step="0.1"
-              />
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="weight" className="form-label">
-                {t('userInfo.weight')}
-              </label>
-              <div className="input-with-reminder">
+              <div className="nickname-input-group">
                 <input
-                  id="weight"
-                  name="weight"
-                  type="number"
-                  value={userData?.weight || ''}
+                  id="nickname"
+                  name="nickname"
+                  type="text"
+                  value={userData?.nickname || ''}
+                  onChange={onNicknameChange}
+                  placeholder={t('userInfo.nicknamePlaceholder')}
+                  className="form-input"
+                  maxLength="16"
+                />
+                <button
+                  type="button"
+                  onClick={onGenerateNickname}
+                  className="generate-nickname-btn"
+                >
+                  {t('userInfo.generateNickname')}
+                </button>
+              </div>
+            </div>
+
+            <div className="form-row">
+              <div className="form-group">
+                <label htmlFor="gender" className="form-label">
+                  {t('userInfo.gender')}
+                </label>
+                <select
+                  id="gender"
+                  name="gender"
+                  value={userData?.gender || ''}
                   onChange={onChange}
-                  placeholder={t('userInfo.weight')}
+                  className="form-input"
+                  required
+                  onInvalid={e =>
+                    e.currentTarget.setCustomValidity(t('errors.required'))
+                  }
+                  onInput={e => e.currentTarget.setCustomValidity('')}
+                >
+                  <option value="">{t('userInfo.selectGender')}</option>
+                  <option value="male">{t('userInfo.male')}</option>
+                  <option value="female">{t('userInfo.female')}</option>
+                </select>
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="age" className="form-label">
+                  {t('userInfo.age')}
+                </label>
+                <input
+                  id="age"
+                  name="age"
+                  type="number"
+                  value={userData?.age || ''}
+                  onChange={onChange}
+                  placeholder={t('userInfo.age')}
+                  className="form-input"
+                  required
+                  onInvalid={e =>
+                    e.currentTarget.setCustomValidity(t('errors.required'))
+                  }
+                  onInput={e => e.currentTarget.setCustomValidity('')}
+                  min="0"
+                  step="1"
+                />
+              </div>
+            </div>
+
+            <div className="form-row">
+              <div className="form-group">
+                <label htmlFor="height" className="form-label">
+                  {t('userInfo.height')}
+                </label>
+                <input
+                  id="height"
+                  name="height"
+                  type="number"
+                  value={userData?.height || ''}
+                  onChange={onChange}
+                  placeholder={t('userInfo.height')}
                   className="form-input"
                   required
                   onInvalid={e =>
@@ -323,271 +303,305 @@ const UserFormSection = ({
                   min="0"
                   step="0.1"
                 />
-                {weightReminder.show && (
-                  <div className="weight-reminder-bubble">
-                    <span className="reminder-icon">💡</span>
-                    <span className="reminder-text">
-                      {weightReminder.message}
-                    </span>
-                  </div>
-                )}
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="weight" className="form-label">
+                  {t('userInfo.weight')}
+                </label>
+                <div className="input-with-reminder">
+                  <input
+                    id="weight"
+                    name="weight"
+                    type="number"
+                    value={userData?.weight || ''}
+                    onChange={onChange}
+                    placeholder={t('userInfo.weight')}
+                    className="form-input"
+                    required
+                    onInvalid={e =>
+                      e.currentTarget.setCustomValidity(t('errors.required'))
+                    }
+                    onInput={e => e.currentTarget.setCustomValidity('')}
+                    min="0"
+                    step="0.1"
+                  />
+                  {weightReminder.show && (
+                    <div className="weight-reminder-bubble">
+                      <span className="reminder-icon">💡</span>
+                      <span className="reminder-text">
+                        {weightReminder.message}
+                      </span>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>
-        </div>
 
-        {/* 天梯隱私設置 */}
-        <div className="form-section">
-          <h3 className="section-title">🏆 {t('userInfo.ladder.title')}</h3>
-          <div className="privacy-options">
-            <label className="privacy-option">
-              <input
-                type="checkbox"
-                checked={userData.isAnonymousInLadder === true}
-                onChange={e =>
-                  setUserData(prev => ({
-                    ...prev,
-                    isAnonymousInLadder: e.target.checked,
-                  }))
-                }
-              />
-              <div className="privacy-option-content">
-                <span className="privacy-option-title">
-                  {t('userInfo.ladder.anonymousTitle')}
-                </span>
-                <span className="privacy-option-desc">
-                  {t('userInfo.ladder.anonymousDesc')}
-                </span>
+          {/* 天梯隱私設置 */}
+          <div className="form-section">
+            <h3 className="section-title">🏆 {t('userInfo.ladder.title')}</h3>
+            <div className="privacy-options">
+              <label className="privacy-option">
+                <input
+                  type="checkbox"
+                  checked={userData.isAnonymousInLadder === true}
+                  onChange={e =>
+                    setUserData(prev => ({
+                      ...prev,
+                      isAnonymousInLadder: e.target.checked,
+                    }))
+                  }
+                />
+                <div className="privacy-option-content">
+                  <span className="privacy-option-title">
+                    {t('userInfo.ladder.anonymousTitle')}
+                  </span>
+                  <span className="privacy-option-desc">
+                    {t('userInfo.ladder.anonymousDesc')}
+                  </span>
+                </div>
+              </label>
+            </div>
+
+            {/* 訓練背景信息（選填） */}
+            <div className="training-info-section">
+              <h4 className="training-info-title">
+                💪 {t('userInfo.training.title')}
+              </h4>
+              <p className="training-info-desc">
+                {t('userInfo.training.desc')}
+              </p>
+
+              <div className="form-row">
+                <div className="form-group">
+                  <label htmlFor="job_category" className="form-label">
+                    {t('userInfo.training.profession')}
+                  </label>
+                  <select
+                    id="job_category"
+                    name="job_category"
+                    value={userData?.job_category || ''}
+                    onChange={onChange}
+                    className="form-input"
+                  >
+                    <option value="">請選擇您的職業分類</option>
+                    {JOB_OPTIONS.map(option => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                  <p
+                    className="field-hint"
+                    style={{
+                      marginTop: '4px',
+                      fontSize: '12px',
+                      color: '#718096',
+                    }}
+                  >
+                    💡 選擇職業可參與未來的「職業分組天梯」
+                  </p>
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="weeklyTrainingHours" className="form-label">
+                    {t('userInfo.training.weeklyHours')}
+                  </label>
+                  <input
+                    id="weeklyTrainingHours"
+                    name="weeklyTrainingHours"
+                    type="number"
+                    value={userData?.weeklyTrainingHours || ''}
+                    onChange={onChange}
+                    placeholder={t('userInfo.placeholders.hours')}
+                    className="form-input"
+                    min="0"
+                    max="168"
+                    step="0.5"
+                  />
+                </div>
               </div>
-            </label>
-          </div>
-
-          {/* 訓練背景信息（選填） */}
-          <div className="training-info-section">
-            <h4 className="training-info-title">
-              💪 {t('userInfo.training.title')}
-            </h4>
-            <p className="training-info-desc">{t('userInfo.training.desc')}</p>
-
-            <div className="form-row">
-              <div className="form-group">
-                <label htmlFor="job_category" className="form-label">
-                  {t('userInfo.training.profession')}
-                </label>
-                <select
-                  id="job_category"
-                  name="job_category"
-                  value={userData?.job_category || ''}
-                  onChange={onChange}
-                  className="form-input"
-                >
-                  <option value="">請選擇您的職業分類</option>
-                  {JOB_OPTIONS.map(option => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-                <p
-                  className="field-hint"
-                  style={{
-                    marginTop: '4px',
-                    fontSize: '12px',
-                    color: '#718096',
-                  }}
-                >
-                  💡 選擇職業可參與未來的「職業分組天梯」
-                </p>
-              </div>
 
               <div className="form-group">
-                <label htmlFor="weeklyTrainingHours" className="form-label">
-                  {t('userInfo.training.weeklyHours')}
+                <label htmlFor="trainingYears" className="form-label">
+                  {t('userInfo.training.years')}
                 </label>
                 <input
-                  id="weeklyTrainingHours"
-                  name="weeklyTrainingHours"
+                  id="trainingYears"
+                  name="trainingYears"
                   type="number"
-                  value={userData?.weeklyTrainingHours || ''}
+                  value={userData?.trainingYears || ''}
                   onChange={onChange}
-                  placeholder={t('userInfo.placeholders.hours')}
+                  placeholder={t('userInfo.placeholders.years')}
                   className="form-input"
                   min="0"
-                  max="168"
+                  max="50"
                   step="0.5"
                 />
               </div>
-            </div>
 
-            <div className="form-group">
-              <label htmlFor="trainingYears" className="form-label">
-                {t('userInfo.training.years')}
-              </label>
-              <input
-                id="trainingYears"
-                name="trainingYears"
-                type="number"
-                value={userData?.trainingYears || ''}
-                onChange={onChange}
-                placeholder={t('userInfo.placeholders.years')}
-                className="form-input"
-                min="0"
-                max="50"
-                step="0.5"
-              />
-            </div>
+              {/* 排行榜資訊（選填） */}
+              <div
+                className={`form-group ${
+                  openDropdown === 'country' ? 'dropdown-active' : ''
+                }`}
+              >
+                <label htmlFor="country" className="form-label">
+                  {t('userInfo.ranking.country')}{' '}
+                  <span className="optional-badge">選填</span>
+                </label>
+                <CustomDropdown
+                  name="country"
+                  value={userData?.country || ''}
+                  options={countryOptions}
+                  placeholder={t('userInfo.ranking.selectCountry')}
+                  onChange={handleCountryChange}
+                  className="form-input"
+                  onOpenChange={isOpen =>
+                    setOpenDropdown(isOpen ? 'country' : null)
+                  }
+                />
+                <p className="field-hint">
+                  💡 {t('userInfo.ranking.countryHint')}
+                </p>
+              </div>
 
-            {/* 排行榜資訊（選填） */}
-            <div
-              className={`form-group ${
-                openDropdown === 'country' ? 'dropdown-active' : ''
-              }`}
-            >
-              <label htmlFor="country" className="form-label">
-                {t('userInfo.ranking.country')}{' '}
-                <span className="optional-badge">選填</span>
-              </label>
-              <CustomDropdown
-                name="country"
-                value={userData?.country || ''}
-                options={countryOptions}
-                placeholder={t('userInfo.ranking.selectCountry')}
-                onChange={handleCountryChange}
-                className="form-input"
-                onOpenChange={isOpen =>
-                  setOpenDropdown(isOpen ? 'country' : null)
-                }
-              />
-              <p className="field-hint">
-                💡 {t('userInfo.ranking.countryHint')}
-              </p>
-            </div>
-
-            {/* Location Selectors Row (for Taiwan: City + District) */}
-            {userData?.country === 'TW' && (
-              <div className="form-row">
-                {/* City Selector (for Taiwan) */}
-                <div
-                  className={`form-group ${
-                    openDropdown === 'city' ? 'dropdown-active' : ''
-                  }`}
-                >
-                  <label htmlFor="city" className="form-label">
-                    城市 <span className="optional-badge">選填</span>
-                  </label>
-                  <CustomDropdown
-                    name="city"
-                    value={currentCity}
-                    options={cityOptions}
-                    placeholder="請選擇城市"
-                    onChange={handleCityChange}
-                    className="form-input"
-                    onOpenChange={isOpen =>
-                      setOpenDropdown(isOpen ? 'city' : null)
-                    }
-                  />
-                  <p className="field-hint">💡 選擇城市後可進一步選擇行政區</p>
-                </div>
-
-                {/* District Selector (for Taiwan, cascading from City) */}
-                {currentCity && availableDistricts.length > 0 && (
+              {/* Location Selectors Row (for Taiwan: City + District) */}
+              {userData?.country === 'TW' && (
+                <div className="form-row">
+                  {/* City Selector (for Taiwan) */}
                   <div
                     className={`form-group ${
-                      openDropdown === 'district' ? 'dropdown-active' : ''
+                      openDropdown === 'city' ? 'dropdown-active' : ''
                     }`}
                   >
-                    <label htmlFor="district" className="form-label">
-                      行政區 <span className="optional-badge">選填</span>
+                    <label htmlFor="city" className="form-label">
+                      城市 <span className="optional-badge">選填</span>
                     </label>
                     <CustomDropdown
-                      name="district"
-                      value={userData?.district || ''}
-                      options={districtOptions}
-                      placeholder="請選擇行政區"
-                      onChange={onChange}
+                      name="city"
+                      value={currentCity}
+                      options={cityOptions}
+                      placeholder="請選擇城市"
+                      onChange={handleCityChange}
                       className="form-input"
                       onOpenChange={isOpen =>
-                        setOpenDropdown(isOpen ? 'district' : null)
+                        setOpenDropdown(isOpen ? 'city' : null)
                       }
                     />
                     <p className="field-hint">
-                      💡 選擇行政區可參與「地區分組天梯」排名
+                      💡 選擇城市後可進一步選擇行政區
+                    </p>
+                  </div>
+
+                  {/* District Selector (for Taiwan, cascading from City) */}
+                  {currentCity && availableDistricts.length > 0 && (
+                    <div
+                      className={`form-group ${
+                        openDropdown === 'district' ? 'dropdown-active' : ''
+                      }`}
+                    >
+                      <label htmlFor="district" className="form-label">
+                        行政區 <span className="optional-badge">選填</span>
+                      </label>
+                      <CustomDropdown
+                        name="district"
+                        value={userData?.district || ''}
+                        options={districtOptions}
+                        placeholder="請選擇行政區"
+                        onChange={onChange}
+                        className="form-input"
+                        onOpenChange={isOpen =>
+                          setOpenDropdown(isOpen ? 'district' : null)
+                        }
+                      />
+                      <p className="field-hint">
+                        💡 選擇行政區可參與「地區分組天梯」排名
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Region Selector (for non-Taiwan countries) */}
+              {userData?.country &&
+                userData?.country !== '' &&
+                userData?.country !== 'TW' &&
+                userData?.country !== 'OTHER' && (
+                  <div className="form-group">
+                    <label htmlFor="region" className="form-label">
+                      {t('userInfo.ranking.region')}{' '}
+                      <span className="optional-badge">選填</span>
+                    </label>
+                    <select
+                      id="region"
+                      name="region"
+                      value={userData?.region || ''}
+                      onChange={onChange}
+                      className="form-input"
+                    >
+                      <option value="">
+                        {t('userInfo.ranking.selectRegion')}
+                      </option>
+                      {/* 未來可根據選擇的國家動態載入城市列表 */}
+                      <option value="">
+                        {t('userInfo.ranking.regionComingSoon')}
+                      </option>
+                    </select>
+                    <p className="field-hint">
+                      💡 {t('userInfo.ranking.regionHint')}
                     </p>
                   </div>
                 )}
-              </div>
-            )}
 
-            {/* Region Selector (for non-Taiwan countries) */}
-            {userData?.country &&
-              userData?.country !== '' &&
-              userData?.country !== 'TW' &&
-              userData?.country !== 'OTHER' && (
+              {/* Text Input for OTHER country or no country selected */}
+              {(!userData?.country ||
+                userData?.country === '' ||
+                userData?.country === 'OTHER') && (
                 <div className="form-group">
                   <label htmlFor="region" className="form-label">
                     {t('userInfo.ranking.region')}{' '}
                     <span className="optional-badge">選填</span>
                   </label>
-                  <select
+                  <input
                     id="region"
                     name="region"
+                    type="text"
                     value={userData?.region || ''}
                     onChange={onChange}
+                    placeholder={
+                      userData?.country === 'OTHER'
+                        ? t('userInfo.ranking.regionPlaceholderOther')
+                        : t('userInfo.ranking.selectCountryFirst')
+                    }
                     className="form-input"
-                  >
-                    <option value="">
-                      {t('userInfo.ranking.selectRegion')}
-                    </option>
-                    {/* 未來可根據選擇的國家動態載入城市列表 */}
-                    <option value="">
-                      {t('userInfo.ranking.regionComingSoon')}
-                    </option>
-                  </select>
+                    maxLength="50"
+                    disabled={!userData?.country || userData?.country === ''}
+                  />
                   <p className="field-hint">
                     💡 {t('userInfo.ranking.regionHint')}
                   </p>
                 </div>
               )}
-
-            {/* Text Input for OTHER country or no country selected */}
-            {(!userData?.country ||
-              userData?.country === '' ||
-              userData?.country === 'OTHER') && (
-              <div className="form-group">
-                <label htmlFor="region" className="form-label">
-                  {t('userInfo.ranking.region')}{' '}
-                  <span className="optional-badge">選填</span>
-                </label>
-                <input
-                  id="region"
-                  name="region"
-                  type="text"
-                  value={userData?.region || ''}
-                  onChange={onChange}
-                  placeholder={
-                    userData?.country === 'OTHER'
-                      ? t('userInfo.ranking.regionPlaceholderOther')
-                      : t('userInfo.ranking.selectCountryFirst')
-                  }
-                  className="form-input"
-                  maxLength="50"
-                  disabled={!userData?.country || userData?.country === ''}
-                />
-                <p className="field-hint">
-                  💡 {t('userInfo.ranking.regionHint')}
-                </p>
-              </div>
-            )}
+            </div>
           </div>
-        </div>
 
-        <div className="form-actions">
-          <button type="submit" className="submit-btn" disabled={loading}>
-            {loading ? t('userInfo.saving') : t('userInfo.saveData')}
-          </button>
-        </div>
-      </form>
-    </div>
+          <div className="form-actions">
+            <button type="submit" className="submit-btn" disabled={loading}>
+              {loading ? t('userInfo.saving') : t('userInfo.saveData')}
+            </button>
+          </div>
+        </form>
+      </div>
+
+      {/* ✅ 修復：物理spacer元素，強制頁面延長60px，為下拉菜單提供綠色背景空間 */}
+      <div
+        className="bottom-spacer"
+        style={{ height: '60px', width: '100%', clear: 'both' }}
+      />
+    </>
   );
 };
 

@@ -1,20 +1,27 @@
 /* 表單卡片 */
 .form-card {
+  /* ✅ 調整：恢復原始半透明背景樣式 */
   background: rgba(255, 255, 255, 0.95);
   border-radius: 20px;
-  padding: 20px 20px 80px 20px; /* ✅ 調整：底部padding從20px增加到80px，確保下拉列表不被裁剪 */
+  /* ✅ 修復：恢復正常內部padding */
+  padding: 20px;
+  /* ✅ 修復：恢復標準margin */
   margin-bottom: 20px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.2);
+  /* ✅ 修復：創建定位上下文，z-index設為1（白色背景層級） */
   position: relative;
   z-index: 1;
-  /* ✅ 修復：確保下拉列表不會被卡片裁剪 */
+  /* ✅ 修復：確保下拉列表可以視覺上逃離卡片 */
   overflow: visible;
 }
 
 .form-section {
   margin-bottom: 15px;
+  /* ✅ 修復：創建堆疊上下文，使整個表單區域高於卡片背景和footer */
+  position: relative;
+  z-index: 50; /* 高於卡片背景(z-index: 1)和footer */
   /* ✅ 修復：確保下拉列表不會被section裁剪 */
   overflow: visible;
 }
@@ -85,22 +92,20 @@
   z-index: 1;
 }
 
-/* ✅ 修復：當下拉菜單打開時，提高z-index */
-.form-group.dropdown-active {
-  z-index: 1005;
-}
-
-/* ✅ 現代瀏覽器支持：使用:has選擇器（如果支持） */
-@supports selector(:has(*)) {
-  .form-group:has(.custom-dropdown.custom-dropdown--open) {
-    z-index: 1005;
-  }
+/* ✅ 修復：當下拉菜單活動時，此組成為section內最高的元素 */
+.form-group.dropdown-active,
+.form-group:has(.custom-dropdown.custom-dropdown--open) {
+  position: relative; /* 確保它是定位的 */
+  z-index: 100 !important; /* 在section內最高，覆蓋按鈕和底部區域 */
 }
 
 .form-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px;
+  /* ✅ 修復：讓子元素的z-index可以冒泡，或繼承section的高z-index */
+  position: relative;
+  z-index: auto;
   /* ✅ 修復：確保下拉列表不會被父容器裁剪 */
   overflow: visible;
 }
@@ -400,6 +405,9 @@ select.form-input[size] option:hover {
 .form-actions {
   text-align: center;
   margin-top: 20px;
+  /* ✅ 修復：確保按鈕容器保持在低層級，低於form-section */
+  position: relative;
+  z-index: 10; /* 低於section */
 }
 
 .submit-btn {

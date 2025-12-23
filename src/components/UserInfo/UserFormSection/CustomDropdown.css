@@ -62,7 +62,8 @@
   max-height: 250px;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  z-index: 1000;
+  /* ✅ 修復：強制下拉列表到最高層級，比form-group更高 */
+  z-index: 10000 !important;
   /* 確保寬度匹配觸發器 */
   width: 100%;
   min-width: 100%;
