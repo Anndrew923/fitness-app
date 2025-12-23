@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { createPortal } from 'react-dom';
 import PropTypes from 'prop-types';
 import './PrivacyPolicyModal.css';
 import { useTranslation } from 'react-i18next';
@@ -18,7 +19,7 @@ function PrivacyPolicyModal({ isOpen, onClose, onAccept }) {
     setCurrentLanguage(lang);
   };
 
-  return (
+  return createPortal(
     <div className="privacy-modal-overlay" onClick={onClose}>
       <div className="privacy-modal" onClick={e => e.stopPropagation()}>
         <div className="privacy-modal-header">
@@ -209,7 +210,8 @@ function PrivacyPolicyModal({ isOpen, onClose, onAccept }) {
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
 

@@ -501,3 +501,23 @@ select.form-input[size] option:hover {
     font-size: 12px !important;
   }
 }
+
+/* SCOPED STYLE: Only affects the Save Success popup - Now using Portal */
+.save-success-overlay {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  background: rgba(0, 0, 0, 0.7) !important;
+  display: flex !important;
+  align-items: center !important; /* Center Vertically */
+  justify-content: center !important; /* Center Horizontally */
+  z-index: 10002 !important;
+  padding: 0 !important;
+}
+
+.save-success-content {
+  position: relative !important;
+  margin: 0 !important;
+}

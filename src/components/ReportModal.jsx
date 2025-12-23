@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
 import ReportSystem from '../utils/reportSystem';
@@ -77,7 +78,7 @@ function ReportModal({ isOpen, onClose, reportedUser }) {
 
   if (!isOpen) return null;
 
-  return (
+  return createPortal(
     <div className="report-modal-overlay" onClick={handleClose}>
       <div className="report-modal" onClick={e => e.stopPropagation()}>
         <div className="report-modal-header">
@@ -175,7 +176,8 @@ function ReportModal({ isOpen, onClose, reportedUser }) {
           </form>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
 

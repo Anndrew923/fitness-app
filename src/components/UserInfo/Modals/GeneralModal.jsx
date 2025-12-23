@@ -1,4 +1,5 @@
 import React from 'react';
+import { createPortal } from 'react-dom';
 import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
 import logger from '../../../utils/logger';
@@ -64,10 +65,10 @@ const GeneralModal = ({
     onClose();
   };
 
-  return (
-    <div className="submit-confirm-overlay" onClick={handleOverlayClick}>
+  return createPortal(
+    <div className="modal-overlay" onClick={handleOverlayClick}>
       <div
-        className="submit-confirm-content"
+        className="modal-content"
         onClick={e => e.stopPropagation()}
       >
         <div className="modal-header">
@@ -89,7 +90,6 @@ const GeneralModal = ({
               <button
                 className={getButtonClass()}
                 onClick={handleAction}
-                style={{ position: 'relative', zIndex: 10001 }}
               >
                 {actionText || t('common.confirm')}
               </button>
@@ -98,14 +98,14 @@ const GeneralModal = ({
             <button
               className={getButtonClass()}
               onClick={handleClose}
-              style={{ position: 'relative', zIndex: 10001 }}
             >
               {t('common.confirm')}
             </button>
           )}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 

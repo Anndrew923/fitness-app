@@ -1,4 +1,4 @@
-// import React from 'react';
+import { createPortal } from 'react-dom';
 import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
 
@@ -6,7 +6,7 @@ function GuestModal({ open, onClose, onRegister }) {
   const { t } = useTranslation();
 
   if (!open) return null;
-  return (
+  return createPortal(
     <div
       style={{
         position: 'fixed',
@@ -73,7 +73,8 @@ function GuestModal({ open, onClose, onRegister }) {
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
 

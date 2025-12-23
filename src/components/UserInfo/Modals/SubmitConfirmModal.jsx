@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
 import './Modals.css';
@@ -54,7 +55,7 @@ const SubmitConfirmModal = ({
     }
   };
 
-  return (
+  return createPortal(
     <div className="submit-confirm-overlay" onClick={handleOverlayClick}>
       <div
         className="submit-confirm-content"
@@ -141,7 +142,8 @@ const SubmitConfirmModal = ({
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 

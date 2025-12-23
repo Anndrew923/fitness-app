@@ -1,46 +1,39 @@
-/* Modal 通用樣式 */
+/* Modal 通用樣式 - 使用 Portal 居中顯示 */
 .modal-overlay {
   position: fixed !important;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: flex-end !important; /* ✅ 置底組：改為 flex-end，配合底部定位 */
-  justify-content: center;
-  z-index: 10000;
-  padding: 20px;
-  padding-bottom: 100px !important; /* ✅ 置底組：往下移動到底部 100px */
-  padding-top: 0 !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  background-color: rgba(0, 0, 0, 0.5) !important;
+  display: flex !important;
+  align-items: center !important; /* Center Vertically */
+  justify-content: center !important; /* Center Horizontally */
+  z-index: 10000 !important;
+  padding: 0 !important;
 }
 
 .modal-content {
   background: white;
-  border-radius: 16px !important; /* ✅ UI 優化：現代化圓角 */
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15) !important; /* ✅ UI 優化：更精緻的陰影效果 */
-  max-width: 340px !important; /* ✅ UI 優化：限制最大寬度，避免在大螢幕上過寬 */
-  width: 90% !important; /* ✅ UI 優化：留 5% 間距在兩側，避免觸及螢幕邊緣 */
+  border-radius: 16px !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15) !important;
+  max-width: 340px !important;
+  width: 90% !important;
   max-height: 80vh;
   overflow: hidden;
   animation: modalSlideIn 0.3s ease-out;
-  position: fixed !important; /* ✅ 置底組：強制固定定位 */
-  bottom: 100px !important; /* ✅ 置底組：往下移動到底部 100px（靠近視窗底部邊緣，位於操作按鈕區上方） */
-  top: auto !important; /* ✅ 置底組：重置 top */
-  left: 50% !important;
-  transform: translateX(-50%) !important; /* ✅ 水平居中 */
+  position: relative !important;
   margin: 0 !important;
-  /* 注意：不在此處設置 padding，由內部元素 (.modal-header, .modal-body, .modal-footer) 控制內邊距 */
 }
 
 @keyframes modalSlideIn {
   from {
     opacity: 0;
-    transform: translateX(-50%) translateY(20px) scale(0.95); /* ✅ 置底組：動畫從下方滑入，包含 translateX(-50%) */
+    transform: translateY(20px) scale(0.95);
   }
   to {
     opacity: 1;
-    transform: translateX(-50%) translateY(0) scale(1); /* ✅ 置底組：動畫結束狀態包含 translateX(-50%) */
+    transform: translateY(0) scale(1);
   }
 }
 
@@ -161,37 +154,27 @@
    🚀 NUCLEAR FIX: Force Center Submit Modal
    ========================================= */
 
-/* 1. Overlay: Just a dark background, no flex alignment duties */
+/* 1. Overlay: Centered with Flexbox */
 .submit-confirm-overlay {
-  z-index: 10001;
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.6);
-  display: block !important; /* Reset Flex behavior */
+  z-index: 10001 !important;
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  background-color: rgba(0, 0, 0, 0.6) !important;
+  display: flex !important;
+  align-items: center !important; /* Center Vertically */
+  justify-content: center !important; /* Center Horizontally */
   padding: 0 !important;
   overscroll-behavior: contain;
   touch-action: none;
 }
 
-/* 2. Content: Absolute Center Positioning */
+/* 2. Content: Relative positioning within flex container */
 .submit-confirm-content {
-  /* Break out of flow */
-  position: fixed !important;
+  position: relative !important;
   margin: 0 !important;
-
-  /* Force Center Coordinates */
-  top: 50% !important;
-  left: 50% !important;
-  /* -60% Y moves it slightly up to cover the Radar Chart visually */
-  transform: translate(-50%, -60%) !important;
-
-  /* Reset conflicting props */
-  bottom: auto !important;
-  right: auto !important;
-  align-self: auto !important;
 
   /* Sizing & Style */
   width: 90%;
@@ -395,11 +378,11 @@
 @keyframes confirmModalPopCenter {
   from {
     opacity: 0;
-    transform: translate(-50%, -50%) scale(0.8);
+    transform: translateY(20px) scale(0.8);
   }
   to {
     opacity: 1;
-    transform: translate(-50%, -60%) scale(1);
+    transform: translateY(0) scale(1);
   }
 }
 
@@ -440,18 +423,16 @@
   .submit-confirm-content {
     width: 92% !important;
     max-width: 360px !important;
-    /* On mobile, center it perfectly (-50%) or slightly up (-55%) */
-    transform: translate(-50%, -55%) !important;
   }
 
   @keyframes confirmModalPopCenter {
     from {
       opacity: 0;
-      transform: translate(-50%, -45%) scale(0.8);
+      transform: translateY(20px) scale(0.8);
     }
     to {
       opacity: 1;
-      transform: translate(-50%, -55%) scale(1);
+      transform: translateY(0) scale(1);
     }
   }
 

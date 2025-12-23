@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
 import './Modals.css';
@@ -56,38 +57,26 @@ const RPGClassModal = ({ isOpen, onClose, classInfo }) => {
     }
   };
 
-  return (
+  return createPortal(
     <div
       style={{
         position: 'fixed',
         top: 0,
         left: 0,
-        right: 0,
-        bottom: 0,
+        width: '100vw',
+        height: '100vh',
         backgroundColor: 'rgba(0, 0, 0, 0.85)',
         zIndex: 99999,
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
       }}
       onClick={handleOverlayClick}
     >
-      {/* 點擊背景關閉 */}
+      {/* 卡片本體 */}
       <div
         style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-        }}
-        onClick={handleOverlayClick}
-      />
-
-      {/* 卡片本體 - 強制絕對定位 */}
-      <div
-        style={{
-          position: 'fixed', // ✅ 置頂組：改為 fixed 定位
-          top: '18%', // ✅ 置頂組：往上移動到 18%（大頭貼下方，覆蓋「狂戰士」標籤區域）
-          left: '50%',
-          transform: 'translateX(-50%)', // 水平居中
+          position: 'relative',
           width: '85%',
           maxWidth: '500px',
           backgroundColor: '#1E1E1E',
@@ -97,8 +86,6 @@ const RPGClassModal = ({ isOpen, onClose, classInfo }) => {
           boxShadow:
             '0 0 30px rgba(255, 87, 34, 0.8), 0 0 60px rgba(255, 87, 34, 0.4)',
           animation: 'rpgModalSlideIn 0.4s ease-out',
-          zIndex: 99999,
-          bottom: 'auto', // ✅ 重置底部定位
         }}
         onClick={e => e.stopPropagation()}
       >
@@ -246,15 +233,16 @@ const RPGClassModal = ({ isOpen, onClose, classInfo }) => {
         @keyframes rpgModalSlideIn {
           from {
             opacity: 0;
-            transform: translateX(-50%) translateY(20px) scale(0.9);
+            transform: translateY(20px) scale(0.9);
           }
           to {
             opacity: 1;
-            transform: translateX(-50%) translateY(0) scale(1);
+            transform: translateY(0) scale(1);
           }
         }
       `}</style>
-    </div>
+    </div>,
+    document.body
   );
 };
 
