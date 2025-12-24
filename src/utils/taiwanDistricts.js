@@ -1,7 +1,49 @@
 /**
  * Taiwan Administrative Divisions Data
  * Maps Cities to their Districts for cascading location selectors
+ * Supports bilingual display (Chinese/English)
  */
+
+// City name translations
+const CITY_TRANSLATIONS = {
+  台北市: 'Taipei City',
+  新北市: 'New Taipei City',
+  桃園市: 'Taoyuan City',
+  台中市: 'Taichung City',
+  台南市: 'Tainan City',
+  高雄市: 'Kaohsiung City',
+  基隆市: 'Keelung City',
+  新竹市: 'Hsinchu City',
+  嘉義市: 'Chiayi City',
+  新竹縣: 'Hsinchu County',
+  苗栗縣: 'Miaoli County',
+  彰化縣: 'Changhua County',
+  南投縣: 'Nantou County',
+  雲林縣: 'Yunlin County',
+  嘉義縣: 'Chiayi County',
+  屏東縣: 'Pingtung County',
+  宜蘭縣: 'Yilan County',
+  花蓮縣: 'Hualien County',
+  台東縣: 'Taitung County',
+  澎湖縣: 'Penghu County',
+  金門縣: 'Kinmen County',
+  連江縣: 'Lienchiang County',
+};
+
+// District name translations (common patterns)
+const DISTRICT_TRANSLATIONS = {
+  區: 'Dist.',
+  市: 'City',
+  鎮: 'Town',
+  鄉: 'Township',
+};
+
+// Group translations
+const GROUP_TRANSLATIONS = {
+  直轄市: 'Special Municipality',
+  省轄市: 'Provincial City',
+  縣: 'County',
+};
 
 export const TAIWAN_CITIES_DISTRICTS = {
   台北市: [
@@ -393,6 +435,44 @@ export const TAIWAN_CITIES_DISTRICTS = {
 };
 
 /**
+ * Get English name for a city
+ * @param {string} city - City name in Chinese
+ * @returns {string} City name in English
+ */
+export const getCityNameEn = city => {
+  return CITY_TRANSLATIONS[city] || city;
+};
+
+/**
+ * Get English name for a district (simplified translation)
+ * @param {string} district - District name in Chinese
+ * @returns {string} District name in English
+ */
+export const getDistrictNameEn = district => {
+  // Simple translation: replace common suffixes
+  let enName = district;
+  if (district.endsWith('區')) {
+    enName = district.replace('區', ' Dist.');
+  } else if (district.endsWith('市')) {
+    enName = district.replace('市', ' City');
+  } else if (district.endsWith('鎮')) {
+    enName = district.replace('鎮', ' Town');
+  } else if (district.endsWith('鄉')) {
+    enName = district.replace('鄉', ' Township');
+  }
+  return enName;
+};
+
+/**
+ * Get group name in English
+ * @param {string} group - Group name in Chinese
+ * @returns {string} Group name in English
+ */
+export const getGroupNameEn = group => {
+  return GROUP_TRANSLATIONS[group] || group;
+};
+
+/**
  * Get districts for a given city
  * @param {string} city - City name (e.g., "台北市")
  * @returns {string[]} Array of district names
@@ -402,11 +482,39 @@ export const getDistrictsByCity = city => {
 };
 
 /**
+ * Get districts for a given city with bilingual support
+ * @param {string} city - City name (e.g., "台北市")
+ * @param {string} language - Language code ('zh-TW' or 'en-US')
+ * @returns {Array<{name: string, nameEn: string, value: string}>} Array of district objects
+ */
+export const getDistrictsByCityBilingual = (city, language = 'zh-TW') => {
+  const districts = getDistrictsByCity(city);
+  return districts.map(district => ({
+    name: district,
+    nameEn: getDistrictNameEn(district),
+    value: district,
+  }));
+};
+
+/**
  * Get all city names
  * @returns {string[]} Array of city names
  */
 export const getAllCities = () => {
   return Object.keys(TAIWAN_CITIES_DISTRICTS);
+};
+
+/**
+ * Get all cities with bilingual support
+ * @param {string} language - Language code ('zh-TW' or 'en-US')
+ * @returns {Array<{name: string, nameEn: string, value: string}>} Array of city objects
+ */
+export const getAllCitiesBilingual = (language = 'zh-TW') => {
+  return Object.keys(TAIWAN_CITIES_DISTRICTS).map(city => ({
+    name: city,
+    nameEn: getCityNameEn(city),
+    value: city,
+  }));
 };
 
 /**

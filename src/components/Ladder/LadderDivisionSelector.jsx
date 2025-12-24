@@ -1,51 +1,54 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { useTranslation } from 'react-i18next';
 import './LadderDivisionSelector.css';
 
-const DIVISION_OPTIONS = [
-  {
-    label: '👑 全服戰力',
-    value: 'ladderScore',
-    desc: '綜合評分',
-  },
-  {
-    label: '📅 自律狂人',
-    value: 'stats_totalLoginDays',
-    desc: '累積登入',
-  },
-  {
-    label: '💪 肌力表現',
-    value: 'stats_sbdTotal',
-    desc: 'SBD 總和',
-  },
-  {
-    label: '🔥 極致體脂',
-    value: 'stats_bodyFat',
-    desc: '低體脂排行',
-  },
-  {
-    label: '📍 我的賽區',
-    value: 'local_district',
-    desc: '地區排名',
-  },
-  {
-    label: '🫁 心肺耐力',
-    value: 'stats_cooper',
-    desc: 'Cooper Test',
-  },
-  {
-    label: '⚡ 爆發力',
-    value: 'stats_vertical',
-    desc: '垂直跳躍',
-  },
-  {
-    label: '💪 肌肉巨獸',
-    value: 'stats_ffmi',
-    desc: 'FFMI 評分',
-  },
-];
-
 const LadderDivisionSelector = ({ currentFilter, onFilterChange }) => {
+  const { t } = useTranslation();
+
+  const DIVISION_OPTIONS = [
+    {
+      label: '👑 ' + t('ladder.zones.all'),
+      value: 'ladderScore',
+      desc: t('ladder.filter.filter'),
+    },
+    {
+      label: '📅 ' + t('ladder.filters.weekly'),
+      value: 'stats_totalLoginDays',
+      desc: t('ladder.zones.district'),
+    },
+    {
+      label: '💪 ' + t('tests.strength'),
+      value: 'stats_sbdTotal',
+      desc: 'SBD',
+    },
+    {
+      label: '🔥 ' + t('tests.bodyFat'),
+      value: 'stats_bodyFat',
+      desc: t('tests.bodyFat'),
+    },
+    {
+      label: '📍 ' + t('ladder.filter.zone'),
+      value: 'local_district',
+      desc: t('ladder.zones.district'),
+    },
+    {
+      label: '🫁 ' + t('tests.cardio'),
+      value: 'stats_cooper',
+      desc: 'Cooper Test',
+    },
+    {
+      label: '⚡ ' + t('tests.explosivePower'),
+      value: 'stats_vertical',
+      desc: t('tests.explosivePower'),
+    },
+    {
+      label: '💪 ' + t('tests.muscleMass'),
+      value: 'stats_ffmi',
+      desc: 'FFMI',
+    },
+  ];
+
   return (
     <div className="ladder-division-selector">
       {DIVISION_OPTIONS.map(option => (
@@ -70,4 +73,3 @@ LadderDivisionSelector.propTypes = {
 };
 
 export default LadderDivisionSelector;
-

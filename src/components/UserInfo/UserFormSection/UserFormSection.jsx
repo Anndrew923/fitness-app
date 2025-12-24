@@ -1,6 +1,14 @@
 import { useMemo, useState } from 'react';
 import PropTypes from 'prop-types';
-import { getDistrictsByCity } from '../../../utils/taiwanDistricts';
+import { useTranslation } from 'react-i18next';
+import {
+  getDistrictsByCity,
+  getDistrictsByCityBilingual,
+  getAllCitiesBilingual,
+  getCityNameEn,
+  getGroupNameEn,
+  getDistrictNameEn,
+} from '../../../utils/taiwanDistricts';
 import CustomDropdown from './CustomDropdown';
 import './UserFormSection.css';
 
@@ -30,6 +38,10 @@ const UserFormSection = ({
   setUserData,
   t,
 }) => {
+  const { i18n } = useTranslation();
+  const currentLanguage = i18n.language || 'zh-TW';
+  const isEnglish = currentLanguage === 'en-US';
+
   // Get available districts based on selected city
   const availableDistricts = useMemo(() => {
     const city = userData?.city || userData?.region || '';
@@ -39,57 +51,56 @@ const UserFormSection = ({
     return [];
   }, [userData?.city, userData?.region, userData?.country]);
 
-  // Prepare city options for CustomDropdown (with optgroups)
-  const cityOptions = useMemo(
-    () => [
+  // Prepare city options for CustomDropdown (with optgroups) - bilingual
+  const cityOptions = useMemo(() => {
+    const groups = [
       {
         group: '直轄市',
-        options: [
-          { value: '台北市', label: '台北市' },
-          { value: '新北市', label: '新北市' },
-          { value: '桃園市', label: '桃園市' },
-          { value: '台中市', label: '台中市' },
-          { value: '台南市', label: '台南市' },
-          { value: '高雄市', label: '高雄市' },
-        ],
+        groupEn: 'Special Municipality',
+        cities: ['台北市', '新北市', '桃園市', '台中市', '台南市', '高雄市'],
       },
       {
         group: '省轄市',
-        options: [
-          { value: '基隆市', label: '基隆市' },
-          { value: '新竹市', label: '新竹市' },
-          { value: '嘉義市', label: '嘉義市' },
-        ],
+        groupEn: 'Provincial City',
+        cities: ['基隆市', '新竹市', '嘉義市'],
       },
       {
         group: '縣',
-        options: [
-          { value: '新竹縣', label: '新竹縣' },
-          { value: '苗栗縣', label: '苗栗縣' },
-          { value: '彰化縣', label: '彰化縣' },
-          { value: '南投縣', label: '南投縣' },
-          { value: '雲林縣', label: '雲林縣' },
-          { value: '嘉義縣', label: '嘉義縣' },
-          { value: '屏東縣', label: '屏東縣' },
-          { value: '宜蘭縣', label: '宜蘭縣' },
-          { value: '花蓮縣', label: '花蓮縣' },
-          { value: '台東縣', label: '台東縣' },
-          { value: '澎湖縣', label: '澎湖縣' },
-          { value: '金門縣', label: '金門縣' },
-          { value: '連江縣', label: '連江縣' },
+        groupEn: 'County',
+        cities: [
+          '新竹縣',
+          '苗栗縣',
+          '彰化縣',
+          '南投縣',
+          '雲林縣',
+          '嘉義縣',
+          '屏東縣',
+          '宜蘭縣',
+          '花蓮縣',
+          '台東縣',
+          '澎湖縣',
+          '金門縣',
+          '連江縣',
         ],
       },
-    ],
-    []
-  );
+    ];
 
-  // Prepare district options for CustomDropdown (simple array)
+    return groups.map(({ group, groupEn, cities }) => ({
+      group: isEnglish ? groupEn : group,
+      options: cities.map(city => ({
+        value: city,
+        label: isEnglish ? getCityNameEn(city) : city,
+      })),
+    }));
+  }, [isEnglish]);
+
+  // Prepare district options for CustomDropdown (simple array) - bilingual
   const districtOptions = useMemo(() => {
     return availableDistricts.map(district => ({
       value: district,
-      label: district,
+      label: isEnglish ? getDistrictNameEn(district) : district,
     }));
-  }, [availableDistricts]);
+  }, [availableDistricts, isEnglish]);
 
   // Handle city change with cascading logic
   const handleCityChange = e => {
@@ -478,13 +489,14 @@ const UserFormSection = ({
                     }`}
                   >
                     <label htmlFor="city" className="form-label">
-                      城市 <span className="optional-badge">選填</span>
+                      {t('userInfo.ranking.city')}{' '}
+                      <span className="optional-badge">{t('common.optional')}</span>
                     </label>
                     <CustomDropdown
                       name="city"
                       value={currentCity}
                       options={cityOptions}
-                      placeholder="請選擇城市"
+                      placeholder={t('userInfo.ranking.selectCity')}
                       onChange={handleCityChange}
                       className="form-input"
                       onOpenChange={isOpen =>
@@ -492,7 +504,7 @@ const UserFormSection = ({
                       }
                     />
                     <p className="field-hint">
-                      💡 選擇城市後可進一步選擇行政區
+                      💡 {t('userInfo.ranking.cityHint')}
                     </p>
                   </div>
 
@@ -504,13 +516,14 @@ const UserFormSection = ({
                       }`}
                     >
                       <label htmlFor="district" className="form-label">
-                        行政區 <span className="optional-badge">選填</span>
+                        {t('userInfo.ranking.region')}{' '}
+                        <span className="optional-badge">{t('common.optional')}</span>
                       </label>
                       <CustomDropdown
                         name="district"
                         value={userData?.district || ''}
                         options={districtOptions}
-                        placeholder="請選擇行政區"
+                        placeholder={t('form.selectDistrict')}
                         onChange={onChange}
                         className="form-input"
                         onOpenChange={isOpen =>
@@ -518,7 +531,7 @@ const UserFormSection = ({
                         }
                       />
                       <p className="field-hint">
-                        💡 選擇行政區可參與「地區分組天梯」排名
+                        💡 {t('ladder.zones.district')}
                       </p>
                     </div>
                   )}

@@ -16,19 +16,20 @@ const LadderSubFilters = ({
   onJobChange,
   onProjectChange,
 }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const isEnglish = i18n.language === 'en-US';
 
   const JOB_OPTIONS = [
-    { value: 'all', label: '全部' },
-    { value: 'engineering', label: '工程師' },
-    { value: 'medical', label: '醫療人員' },
-    { value: 'coach', label: '健身教練' },
-    { value: 'student', label: '學生' },
-    { value: 'police_military', label: '軍警消' },
-    { value: 'business', label: '商業/金融' },
-    { value: 'freelance', label: '自由業/設計' },
-    { value: 'service', label: '服務業' },
-    { value: 'other', label: '其他' },
+    { value: 'all', label: t('common.all') },
+    { value: 'engineering', label: t('userInfo.profession.engineering') },
+    { value: 'medical', label: t('userInfo.profession.medical') },
+    { value: 'coach', label: t('userInfo.profession.coach') },
+    { value: 'student', label: t('userInfo.profession.student') },
+    { value: 'police_military', label: t('userInfo.profession.police_military') },
+    { value: 'business', label: t('userInfo.profession.business') },
+    { value: 'freelance', label: t('userInfo.profession.freelance') },
+    { value: 'service', label: t('userInfo.profession.service') },
+    { value: 'other', label: t('userInfo.profession.other') },
   ];
 
   // Determine which project filter to show based on division
@@ -72,26 +73,26 @@ const LadderSubFilters = ({
   return (
     <div className="ladder-sub-filters">
       <div className="ladder-sub-filter-group">
-        <label className="ladder-sub-filter-label">性別</label>
+        <label className="ladder-sub-filter-label">{t('userInfo.gender')}</label>
         <select
           value={filterGender}
           onChange={e => onGenderChange(e.target.value)}
           className="ladder-sub-filter-select"
         >
-          <option value="all">全部</option>
+          <option value="all">{t('common.all')}</option>
           <option value="male">{t('userInfo.male')}</option>
           <option value="female">{t('userInfo.female')}</option>
         </select>
       </div>
 
       <div className="ladder-sub-filter-group">
-        <label className="ladder-sub-filter-label">年齡</label>
+        <label className="ladder-sub-filter-label">{t('common.ageLabel')}</label>
         <select
           value={filterAge}
           onChange={e => onAgeChange(e.target.value)}
           className="ladder-sub-filter-select"
         >
-          <option value="all">全部</option>
+          <option value="all">{t('common.all')}</option>
           <option value="under-20">&lt; 20</option>
           <option value="20-29">20-29</option>
           <option value="30-39">30-39</option>
@@ -103,13 +104,13 @@ const LadderSubFilters = ({
       </div>
 
       <div className="ladder-sub-filter-group">
-        <label className="ladder-sub-filter-label">體重</label>
+        <label className="ladder-sub-filter-label">{t('userInfo.weight')}</label>
         <select
           value={filterWeight}
           onChange={e => onWeightChange(e.target.value)}
           className="ladder-sub-filter-select"
         >
-          <option value="all">全部</option>
+          <option value="all">{t('common.all')}</option>
           <option value="under-50kg">&lt; 50kg</option>
           <option value="50-60kg">50-60kg</option>
           <option value="60-70kg">60-70kg</option>
@@ -122,7 +123,7 @@ const LadderSubFilters = ({
       </div>
 
       <div className="ladder-sub-filter-group">
-        <label className="ladder-sub-filter-label">職業</label>
+        <label className="ladder-sub-filter-label">{t('userInfo.ranking.profession')}</label>
         <select
           value={filterJob}
           onChange={e => onJobChange(e.target.value)}
@@ -138,7 +139,7 @@ const LadderSubFilters = ({
 
       {showProjectFilter && (
         <div className="ladder-sub-filter-group">
-          <label className="ladder-sub-filter-label">項目</label>
+          <label className="ladder-sub-filter-label">{t('ladder.filter.filter')}</label>
           <select
             value={filterProject}
             onChange={e => onProjectChange(e.target.value)}
