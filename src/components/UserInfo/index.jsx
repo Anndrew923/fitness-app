@@ -731,7 +731,11 @@ function UserInfo({ testData, onLogout, clearTestData }) {
         {rpgClassInfo && rpgClassInfo.class !== 'UNKNOWN' && (
           <div className="rpg-class-badge-inline" onClick={handleRpgClassClick}>
             <span className="rpg-class-badge-icon">{rpgClassInfo.icon}</span>
-            <span className="rpg-class-badge-name">{rpgClassInfo.name}</span>
+            <span className="rpg-class-badge-name">
+              {t(
+                `userInfo.classDescription.${rpgClassInfo.class.toLowerCase()}.title`
+              )}
+            </span>
           </div>
         )}
       </div>

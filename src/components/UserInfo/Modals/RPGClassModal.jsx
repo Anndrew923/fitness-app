@@ -118,7 +118,9 @@ const RPGClassModal = ({ isOpen, onClose, classInfo }) => {
                 '0 0 10px rgba(255, 215, 0, 0.5), 0 0 20px rgba(255, 215, 0, 0.3)',
             }}
           >
-            {safeClassInfo.name || '未知職業'}
+            {safeClassInfo.class && safeClassInfo.class !== 'UNKNOWN'
+              ? t(`userInfo.classDescription.${safeClassInfo.class.toLowerCase()}.title`)
+              : t('userInfo.classDescription.unknown.title', '未知職業')}
           </h3>
         </div>
 
@@ -133,7 +135,9 @@ const RPGClassModal = ({ isOpen, onClose, classInfo }) => {
             minHeight: '80px',
           }}
         >
-          {safeClassInfo.description || '尚未覺醒的潛在力量...'}
+          {safeClassInfo.class && safeClassInfo.class !== 'UNKNOWN'
+            ? t(`userInfo.classDescription.${safeClassInfo.class.toLowerCase()}.desc`)
+            : t('userInfo.classDescription.unknown.desc', '尚未覺醒的潛在力量...')}
         </div>
 
         {/* 確認按鈕 */}

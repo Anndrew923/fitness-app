@@ -37,13 +37,13 @@ const LadderSubFilters = ({
     switch (currentDivision) {
       case 'stats_sbdTotal':
         return [
-          { value: 'total_five', label: '五項總和' },
-          { value: 'total', label: 'SBD 總和' },
-          { value: 'squat', label: '深蹲' },
-          { value: 'bench', label: '臥推' },
-          { value: 'deadlift', label: '硬舉' },
-          { value: 'ohp', label: '站姿肩推' },
-          { value: 'latPull', label: '滑輪下拉' },
+          { value: 'total_five', label: t('ladder.filter.totalFive', '五項總和') },
+          { value: 'total', label: t('tests.strengthLabels.maxStrength', 'SBD 總和') },
+          { value: 'squat', label: t('tests.strengthExercises.squat') },
+          { value: 'bench', label: t('tests.strengthExercises.benchPress') },
+          { value: 'deadlift', label: t('tests.strengthExercises.deadlift') },
+          { value: 'ohp', label: t('tests.strengthExercises.shoulderPress') },
+          { value: 'latPull', label: t('tests.strengthExercises.latPulldown') },
         ];
       case 'stats_cooper':
         return [
@@ -52,15 +52,15 @@ const LadderSubFilters = ({
         ];
       case 'stats_vertical':
         return [
-          { value: 'vertical', label: '垂直跳躍' },
-          { value: 'broad', label: '立定跳遠' },
-          { value: 'sprint', label: '100m 衝刺' },
+          { value: 'vertical', label: t('tests.powerLabels.verticalJump') },
+          { value: 'broad', label: t('tests.powerLabels.standingLongJump') },
+          { value: 'sprint', label: t('tests.powerLabels.sprint') },
         ];
       case 'stats_ffmi':
         return [
           { value: 'ffmi', label: 'FFMI' },
-          { value: 'smm', label: '肌肉量 (SMM)' },
-          { value: 'armSize', label: '臂圍' },
+          { value: 'smm', label: t('tests.muscleLabels.smm', '肌肉量 (SMM)') },
+          { value: 'armSize', label: t('tests.muscleLabels.armSize', '臂圍') },
         ];
       default:
         return [];

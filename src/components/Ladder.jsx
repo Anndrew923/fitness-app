@@ -217,8 +217,8 @@ const Ladder = () => {
       case 'stats_totalLoginDays':
         return {
           value: userData.stats_totalLoginDays || 0,
-          unit: '天',
-          label: '累計天數',
+          unit: t('common.day', '天'),
+          label: t('ladder.filter.totalLoginDays'),
           formatValue: val => Math.floor(val).toLocaleString('zh-TW'),
         };
       case 'stats_sbdTotal':
@@ -230,63 +230,63 @@ const Ladder = () => {
           return {
             value: fiveItemTotal,
             unit: 'kg',
-            label: '五項總和',
+            label: t('ladder.filter.totalFive'),
             formatValue: val => Number(val).toFixed(1),
           };
         } else if (filterProject === 'squat') {
           return {
             value: userData.stats_squat || 0,
             unit: 'kg',
-            label: '深蹲',
+            label: t('tests.strengthExercises.squat'),
             formatValue: val => Number(val).toFixed(1),
           };
         } else if (filterProject === 'bench') {
           return {
             value: userData.stats_bench || 0,
             unit: 'kg',
-            label: '臥推',
+            label: t('tests.strengthExercises.benchPress'),
             formatValue: val => Number(val).toFixed(1),
           };
         } else if (filterProject === 'deadlift') {
           return {
             value: userData.stats_deadlift || 0,
             unit: 'kg',
-            label: '硬舉',
+            label: t('tests.strengthExercises.deadlift'),
             formatValue: val => Number(val).toFixed(1),
           };
         } else if (filterProject === 'ohp') {
           return {
             value: userData.stats_ohp || 0,
             unit: 'kg',
-            label: '站姿肩推',
+            label: t('tests.strengthExercises.shoulderPress'),
             formatValue: val => Number(val).toFixed(1),
           };
         } else if (filterProject === 'latPull') {
           return {
             value: userData.stats_latPull || 0,
             unit: 'kg',
-            label: '滑輪下拉',
+            label: t('tests.strengthExercises.latPulldown'),
             formatValue: val => Number(val).toFixed(1),
           };
         }
         return {
           value: userData.stats_sbdTotal || 0,
           unit: 'kg',
-          label: 'SBD 總和',
+          label: t('tests.strengthLabels.maxStrength', 'SBD 總和'),
           formatValue: val => Number(val).toFixed(1),
         };
       case 'stats_bodyFat':
         return {
           value: userData.stats_bodyFat || 0,
           unit: '%',
-          label: '體脂率',
+          label: t('tests.ffmiLabels.bodyFatPercent', '體脂率'),
           formatValue: val => Number(val).toFixed(1),
         };
       case 'local_district':
         return {
           value: userData.ladderScore || 0,
           unit: t('community.ui.pointsUnit'),
-          label: '戰鬥力',
+          label: t('userInfo.profileCard.combatPower', '戰鬥力'),
           formatValue: val => formatScore(val),
         };
       case 'stats_cooper':
@@ -315,21 +315,21 @@ const Ladder = () => {
           return {
             value: userData.stats_broad || 0,
             unit: 'cm',
-            label: '立定跳遠',
+            label: t('tests.powerLabels.standingLongJump'),
             formatValue: val => Number(val).toFixed(1),
           };
         } else if (filterProject === 'sprint') {
           return {
             value: userData.stats_100m || 0,
             unit: 's',
-            label: '100m 衝刺',
+            label: t('tests.powerLabels.sprint'),
             formatValue: val => Number(val).toFixed(2),
           };
         }
         return {
           value: userData.stats_vertical || 0,
           unit: 'cm',
-          label: '垂直跳躍',
+          label: t('tests.powerLabels.verticalJump'),
           formatValue: val => Number(val).toFixed(1),
         };
       case 'stats_ffmi':
@@ -359,7 +359,7 @@ const Ladder = () => {
         return {
           value: userData.ladderScore || 0,
           unit: t('community.ui.pointsUnit'),
-          label: '戰鬥力',
+          label: t('userInfo.profileCard.combatPower', '戰鬥力'),
           formatValue: val => formatScore(val),
         };
     }
@@ -440,7 +440,7 @@ const Ladder = () => {
                   ? t('userInfo.male')
                   : t('userInfo.female')}
                 <br />
-                <span className="last-update">我的排名</span>
+                <span className="last-update">{t('userInfo.profileCard.myRank')}</span>
               </div>
             </div>
           </div>

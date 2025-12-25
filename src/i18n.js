@@ -1,7 +1,7 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
-import zhTW from './locales/zh-TW';
-import enUS from './locales/en-US';
+import zhTW from './locales/zh-TW/index';
+import enUS from './locales/en-US/index';
 
 // 取得初始語言：localStorage > 瀏覽器 > 預設 zh-TW
 function getInitialLanguage() {

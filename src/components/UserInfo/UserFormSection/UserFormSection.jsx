@@ -461,7 +461,7 @@ const UserFormSection = ({
               >
                 <label htmlFor="country" className="form-label">
                   {t('userInfo.ranking.country')}{' '}
-                  <span className="optional-badge">選填</span>
+                  <span className="optional-badge">{t('userInfo.ranking.optional')}</span>
                 </label>
                 <CustomDropdown
                   name="country"
@@ -523,7 +523,7 @@ const UserFormSection = ({
                         name="district"
                         value={userData?.district || ''}
                         options={districtOptions}
-                        placeholder={t('form.selectDistrict')}
+                        placeholder={t('userInfo.ranking.selectDistrict')}
                         onChange={onChange}
                         className="form-input"
                         onOpenChange={isOpen =>

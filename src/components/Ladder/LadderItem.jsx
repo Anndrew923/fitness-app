@@ -80,42 +80,42 @@ const LadderItem = React.memo(
             return {
               value: fiveItemTotal,
               unit: 'kg',
-              label: '五項總和',
+              label: t('ladder.filter.totalFive'),
               formatValue: val => Number(val).toFixed(1),
             };
           } else if (filterProject === 'squat') {
             return {
               value: user.stats_squat || 0,
               unit: 'kg',
-              label: '深蹲',
+              label: t('tests.strengthExercises.squat'),
               formatValue: val => Number(val).toFixed(1),
             };
           } else if (filterProject === 'bench') {
             return {
               value: user.stats_bench || 0,
               unit: 'kg',
-              label: '臥推',
+              label: t('tests.strengthExercises.benchPress'),
               formatValue: val => Number(val).toFixed(1),
             };
           } else if (filterProject === 'deadlift') {
             return {
               value: user.stats_deadlift || 0,
               unit: 'kg',
-              label: '硬舉',
+              label: t('tests.strengthExercises.deadlift'),
               formatValue: val => Number(val).toFixed(1),
             };
           } else if (filterProject === 'ohp') {
             return {
               value: user.stats_ohp || 0,
               unit: 'kg',
-              label: '站姿肩推',
+              label: t('tests.strengthExercises.shoulderPress'),
               formatValue: val => Number(val).toFixed(1),
             };
           } else if (filterProject === 'latPull') {
             return {
               value: user.stats_latPull || 0,
               unit: 'kg',
-              label: '滑輪下拉',
+              label: t('tests.strengthExercises.latPulldown'),
               formatValue: val => Number(val).toFixed(1),
             };
           }
@@ -123,7 +123,7 @@ const LadderItem = React.memo(
           return {
             value: user.stats_sbdTotal || 0,
             unit: 'kg',
-            label: user.weight ? `BW: ${user.weight}kg` : 'SBD 總和',
+            label: user.weight ? `BW: ${user.weight}kg` : t('tests.strengthLabels.maxStrength', 'SBD 總和'),
             formatValue: val => Number(val).toFixed(1),
           };
         case 'stats_bodyFat':
@@ -139,7 +139,7 @@ const LadderItem = React.memo(
           return {
             value: user.ladderScore || 0,
             unit: t('community.ui.pointsUnit'),
-            label: '戰鬥力',
+            label: t('userInfo.profileCard.combatPower', '戰鬥力'),
             formatValue: val => formatScore(val),
           };
         case 'stats_cooper':
@@ -172,14 +172,14 @@ const LadderItem = React.memo(
             return {
               value: user.stats_broad || 0,
               unit: 'cm',
-              label: '立定跳遠',
+              label: t('tests.powerLabels.standingLongJump'),
               formatValue: val => Number(val).toFixed(1),
             };
           } else if (filterProject === 'sprint') {
             return {
               value: user.stats_100m || 0,
               unit: 's',
-              label: '100m 衝刺',
+              label: t('tests.powerLabels.sprint'),
               formatValue: val => Number(val).toFixed(2),
             };
           }
@@ -187,7 +187,7 @@ const LadderItem = React.memo(
           return {
             value: user.stats_vertical || 0,
             unit: 'cm',
-            label: '垂直跳躍',
+            label: t('tests.powerLabels.verticalJump'),
             formatValue: val => Number(val).toFixed(1),
           };
         case 'stats_ffmi':
@@ -219,7 +219,7 @@ const LadderItem = React.memo(
           return {
             value: user.ladderScore || 0,
             unit: t('community.ui.pointsUnit'),
-            label: '戰鬥力',
+            label: t('userInfo.profileCard.combatPower', '戰鬥力'),
             formatValue: val => formatScore(val),
           };
       }

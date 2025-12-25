@@ -221,7 +221,7 @@ const LadderStatusCard = ({
     >
       {/* Left: Rank Section */}
       <div className="ladder-status-card__rank-section">
-        <div className="ladder-status-card__rank-label">我的排名</div>
+        <div className="ladder-status-card__rank-label">{t('userInfo.profileCard.myRank')}</div>
         <div className="ladder-status-card__rank-number">
           {isLoading ? (
             <span className="ladder-status-card__loading-dots skeleton-loader">
@@ -246,7 +246,7 @@ const LadderStatusCard = ({
 
       {/* Right: Score Section */}
       <div className="ladder-status-card__score-section">
-        <div className="ladder-status-card__score-label">戰鬥力</div>
+        <div className="ladder-status-card__score-label">{t('userInfo.profileCard.combatPower')}</div>
         {isLoading ? (
           <div className="ladder-status-card__score-value-wrapper">
             <span className="ladder-status-card__loading-skeleton skeleton-loader">
