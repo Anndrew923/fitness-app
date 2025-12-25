@@ -337,21 +337,21 @@ const Ladder = () => {
           return {
             value: userData.stats_smm || 0,
             unit: 'kg',
-            label: '肌肉量 (SMM)',
+            label: t('tests.muscleLabels.smm'),
             formatValue: val => Number(val).toFixed(1),
           };
         } else if (filterProject === 'armSize') {
           return {
             value: userData.stats_armSize || 0,
             unit: 'cm',
-            label: '臂圍',
+            label: t('tests.muscleLabels.armSize'),
             formatValue: val => Number(val).toFixed(1),
           };
         }
         return {
           value: userData.stats_ffmi || 0,
           unit: '',
-          label: 'FFMI',
+          label: t('tests.ffmiLabels.ffmi'),
           formatValue: val => Number(val).toFixed(2),
         };
       case 'ladderScore':

@@ -355,6 +355,10 @@ export const useLadderLogic = (
           filter_region_district: filters.filter_region_district,
           filter_bodyFatClass: filters.filter_bodyFatClass,
           filter_job: filters.filter_job,
+          // ✅ Location fields for district ladder filtering
+          city: userData.city || '',
+          district: userData.district || '',
+          country: userData.country || '',
           // Metadata
           lastLadderSubmission: new Date().toISOString(),
           updatedAt: new Date().toISOString(),

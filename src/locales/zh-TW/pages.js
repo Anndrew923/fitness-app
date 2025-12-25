@@ -304,6 +304,8 @@ export default {
       business: '商業/金融/法務',
       freelance: '自由業/設計/藝術',
       service: '服務業',
+      professional_athlete: '職業運動員',
+      artist_performer: '藝人/表演工作者',
       other: '其他',
     },
     countries: {

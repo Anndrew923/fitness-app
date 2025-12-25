@@ -180,8 +180,10 @@ export default {
       chartName: 'Name',
       sectionTitle: 'Data explanation',
       smmShort: 'SMM',
+      smm: 'Muscle Mass (SMM)',
       smPercentShort: 'SM%',
       smPercentScore: 'SM% score',
+      armSize: 'Arm Size',
       muscleExplanation: {
         title: 'Assessment Metrics Explanation',
         weightTitle: 'Skeletal Muscle Mass Weight',

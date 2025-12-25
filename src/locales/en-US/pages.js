@@ -311,6 +311,8 @@ export default {
       business: 'Business/Finance/Legal',
       freelance: 'Freelance/Design/Arts',
       service: 'Service Industry',
+      professional_athlete: 'Professional Athlete',
+      artist_performer: 'Artist/Performer',
       other: 'Other',
     },
     countries: {

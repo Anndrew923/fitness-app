@@ -29,6 +29,8 @@ const LadderSubFilters = ({
     { value: 'business', label: t('userInfo.profession.business') },
     { value: 'freelance', label: t('userInfo.profession.freelance') },
     { value: 'service', label: t('userInfo.profession.service') },
+    { value: 'professional_athlete', label: t('userInfo.profession.professional_athlete') },
+    { value: 'artist_performer', label: t('userInfo.profession.artist_performer') },
     { value: 'other', label: t('userInfo.profession.other') },
   ];
 
@@ -58,9 +60,9 @@ const LadderSubFilters = ({
         ];
       case 'stats_ffmi':
         return [
-          { value: 'ffmi', label: 'FFMI' },
-          { value: 'smm', label: t('tests.muscleLabels.smm', '肌肉量 (SMM)') },
-          { value: 'armSize', label: t('tests.muscleLabels.armSize', '臂圍') },
+          { value: 'ffmi', label: t('tests.ffmiLabels.ffmi') },
+          { value: 'smm', label: t('tests.muscleLabels.smm') },
+          { value: 'armSize', label: t('tests.muscleLabels.armSize') },
         ];
       default:
         return [];

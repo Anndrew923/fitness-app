@@ -201,8 +201,10 @@ export default {
       chartName: '名稱',
       sectionTitle: '數據說明',
       smmShort: 'SMM',
+      smm: '肌肉量 (SMM)',
       smPercentShort: 'SM%',
       smPercentScore: 'SM% 分數',
+      armSize: '臂圍',
       muscleExplanation: {
         title: '評測指標說明',
         weightTitle: '骨骼肌肉量重量',

@@ -3,10 +3,7 @@ import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
 import {
   getDistrictsByCity,
-  getDistrictsByCityBilingual,
-  getAllCitiesBilingual,
   getCityNameEn,
-  getGroupNameEn,
   getDistrictNameEn,
 } from '../../../utils/taiwanDistricts';
 import CustomDropdown from './CustomDropdown';
@@ -22,6 +19,8 @@ const JOB_OPTIONS = [
   { value: 'business' },
   { value: 'freelance' },
   { value: 'service' },
+  { value: 'professional_athlete' },
+  { value: 'artist_performer' },
   { value: 'other' },
 ];
 
@@ -83,24 +82,8 @@ const UserFormSection = ({
   const currentLanguage = i18n.language || 'zh-TW';
   const isEnglish = currentLanguage === 'en-US';
 
-  // Helper: 获取职业显示文本（处理存储的中文值或 key）
-  const getProfessionDisplay = (value) => {
-    if (!value) return '';
-    // 如果已经是 key，直接翻译
-    if (JOB_OPTIONS.some(opt => opt.value === value)) {
-      return t(`userInfo.profession.${value}`, value);
-    }
-    // 如果是中文值，先映射到 key 再翻译
-    const key = PROFESSION_REVERSE_MAP[value];
-    if (key) {
-      return t(`userInfo.profession.${key}`, value);
-    }
-    // 如果都不匹配，返回原值
-    return value;
-  };
-
   // Helper: 获取国家显示文本（处理存储的中文值或 key）
-  const getCountryDisplay = (value) => {
+  const getCountryDisplay = value => {
     if (!value) return '';
     // 如果已经是 key（在 COUNTRY_REVERSE_MAP 的值中），直接翻译
     const isKey = Object.values(COUNTRY_REVERSE_MAP).includes(value);
@@ -117,14 +100,14 @@ const UserFormSection = ({
   };
 
   // Helper: 获取城市显示文本（处理存储的中文值）
-  const getCityDisplay = (value) => {
+  const getCityDisplay = value => {
     if (!value) return '';
     // 使用 getCityNameEn 进行翻译，或返回原值
     return isEnglish ? getCityNameEn(value) : value;
   };
 
   // Helper: 获取地区显示文本（处理存储的中文值）
-  const getDistrictDisplay = (value) => {
+  const getDistrictDisplay = value => {
     if (!value) return '';
     // 尝试直接翻译（如果 key 存在）
     const translationKey = `userInfo.districts.${value}`;
@@ -212,6 +195,11 @@ const UserFormSection = ({
   // Handle city change with cascading logic
   const handleCityChange = e => {
     const newCity = e.target.value;
+    const currentCityValue = userData?.city || userData?.region || '';
+
+    // ✅ 修复：只在城市真正改变时重置地区（避免初始化时错误重置）
+    // 只有当新城市与当前城市不同，且新城市不为空时才重置地区
+    const shouldResetDistrict = newCity && newCity !== currentCityValue;
 
     // Create a synthetic event for city
     const cityEvent = {
@@ -224,8 +212,8 @@ const UserFormSection = ({
     // Update city
     onChange(cityEvent);
 
-    // Reset district when city changes
-    if (newCity !== (userData?.city || userData?.region || '')) {
+    // Reset district only when city actually changes (not on initial load)
+    if (shouldResetDistrict) {
       const districtEvent = {
         target: {
           name: 'district',
@@ -244,31 +232,32 @@ const UserFormSection = ({
 
   // 准备国家选项 (使用 i18n)
   const countryOptions = useMemo(
-    () => [
-      { value: 'TW' },
-      { value: 'CN' },
-      { value: 'US' },
-      { value: 'JP' },
-      { value: 'KR' },
-      { value: 'SG' },
-      { value: 'MY' },
-      { value: 'HK' },
-      { value: 'MO' },
-      { value: 'TH' },
-      { value: 'VN' },
-      { value: 'PH' },
-      { value: 'ID' },
-      { value: 'AU' },
-      { value: 'NZ' },
-      { value: 'CA' },
-      { value: 'GB' },
-      { value: 'DE' },
-      { value: 'FR' },
-      { value: 'OTHER' },
-    ].map(option => ({
-      ...option,
-      label: t(`userInfo.countries.${option.value}`, option.value),
-    })),
+    () =>
+      [
+        { value: 'TW' },
+        { value: 'CN' },
+        { value: 'US' },
+        { value: 'JP' },
+        { value: 'KR' },
+        { value: 'SG' },
+        { value: 'MY' },
+        { value: 'HK' },
+        { value: 'MO' },
+        { value: 'TH' },
+        { value: 'VN' },
+        { value: 'PH' },
+        { value: 'ID' },
+        { value: 'AU' },
+        { value: 'NZ' },
+        { value: 'CA' },
+        { value: 'GB' },
+        { value: 'DE' },
+        { value: 'FR' },
+        { value: 'OTHER' },
+      ].map(option => ({
+        ...option,
+        label: t(`userInfo.countries.${option.value}`, option.value),
+      })),
     [t]
   );
 
@@ -505,7 +494,8 @@ const UserFormSection = ({
                     name="job_category"
                     value={
                       // 如果存储的是中文，映射到 key；否则使用原值（可能是 key 或空）
-                      userData?.job_category && PROFESSION_REVERSE_MAP[userData.job_category]
+                      userData?.job_category &&
+                      PROFESSION_REVERSE_MAP[userData.job_category]
                         ? PROFESSION_REVERSE_MAP[userData.job_category]
                         : userData?.job_category || ''
                     }
@@ -521,7 +511,12 @@ const UserFormSection = ({
                     }}
                     className="form-input"
                   >
-                    <option value="">{t('userInfo.training.selectProfession', '請選擇您的職業分類')}</option>
+                    <option value="">
+                      {t(
+                        'userInfo.training.selectProfession',
+                        '請選擇您的職業分類'
+                      )}
+                    </option>
                     {JOB_OPTIONS.map(option => (
                       <option key={option.value} value={option.value}>
                         {t(`userInfo.profession.${option.value}`, option.value)}
@@ -536,7 +531,11 @@ const UserFormSection = ({
                       color: '#718096',
                     }}
                   >
-                    💡 {t('userInfo.training.professionHint', '選擇職業可參與未來的「職業分組天梯」')}
+                    💡{' '}
+                    {t(
+                      'userInfo.training.professionHint',
+                      '選擇職業可參與未來的「職業分組天梯」'
+                    )}
                   </p>
                 </div>
 
@@ -585,7 +584,9 @@ const UserFormSection = ({
               >
                 <label htmlFor="country" className="form-label">
                   {t('userInfo.ranking.country')}{' '}
-                  <span className="optional-badge">{t('userInfo.ranking.optional')}</span>
+                  <span className="optional-badge">
+                    {t('userInfo.ranking.optional')}
+                  </span>
                 </label>
                 <CustomDropdown
                   name="country"
@@ -629,7 +630,9 @@ const UserFormSection = ({
                   >
                     <label htmlFor="city" className="form-label">
                       {t('userInfo.ranking.city')}{' '}
-                      <span className="optional-badge">{t('common.optional')}</span>
+                      <span className="optional-badge">
+                        {t('common.optional')}
+                      </span>
                     </label>
                     <CustomDropdown
                       name="city"
@@ -657,7 +660,9 @@ const UserFormSection = ({
                     >
                       <label htmlFor="district" className="form-label">
                         {t('userInfo.ranking.region')}{' '}
-                        <span className="optional-badge">{t('common.optional')}</span>
+                        <span className="optional-badge">
+                          {t('common.optional')}
+                        </span>
                       </label>
                       <CustomDropdown
                         name="district"
@@ -687,7 +692,9 @@ const UserFormSection = ({
                   <div className="form-group">
                     <label htmlFor="region" className="form-label">
                       {t('userInfo.ranking.region')}{' '}
-                      <span className="optional-badge">{t('userInfo.ranking.optional')}</span>
+                      <span className="optional-badge">
+                        {t('userInfo.ranking.optional')}
+                      </span>
                     </label>
                     <select
                       id="region"
@@ -717,7 +724,9 @@ const UserFormSection = ({
                 <div className="form-group">
                   <label htmlFor="region" className="form-label">
                     {t('userInfo.ranking.region')}{' '}
-                    <span className="optional-badge">{t('userInfo.ranking.optional')}</span>
+                    <span className="optional-badge">
+                      {t('userInfo.ranking.optional')}
+                    </span>
                   </label>
                   <input
                     id="region"
