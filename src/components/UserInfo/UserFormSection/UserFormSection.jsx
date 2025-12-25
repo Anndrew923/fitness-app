@@ -12,18 +12,59 @@ import {
 import CustomDropdown from './CustomDropdown';
 import './UserFormSection.css';
 
-// 職業選項常數
+// 職業選項常數 (values only, labels will be translated)
 const JOB_OPTIONS = [
-  { value: 'engineering', label: '工程師 (軟體/硬體)' },
-  { value: 'medical', label: '醫療人員 (醫護/藥師)' },
-  { value: 'coach', label: '健身教練' },
-  { value: 'student', label: '學生' },
-  { value: 'police_military', label: '軍警消人員' },
-  { value: 'business', label: '商業/金融/法務' },
-  { value: 'freelance', label: '自由業/設計/藝術' },
-  { value: 'service', label: '服務業' },
-  { value: 'other', label: '其他' },
+  { value: 'engineering' },
+  { value: 'medical' },
+  { value: 'coach' },
+  { value: 'student' },
+  { value: 'police_military' },
+  { value: 'business' },
+  { value: 'freelance' },
+  { value: 'service' },
+  { value: 'other' },
 ];
+
+// 反向映射：中文值 -> 翻译 key（用于处理数据库中存储的中文值）
+const PROFESSION_REVERSE_MAP = {
+  '工程師 (軟體/硬體)': 'engineering',
+  工程師: 'engineering',
+  '醫療人員 (醫護/藥師)': 'medical',
+  醫療人員: 'medical',
+  健身教練: 'coach',
+  學生: 'student',
+  軍警消人員: 'police_military',
+  軍警消: 'police_military',
+  '商業/金融/法務': 'business',
+  '商業/金融': 'business',
+  '自由業/設計/藝術': 'freelance',
+  '自由業/設計': 'freelance',
+  服務業: 'service',
+  其他: 'other',
+};
+
+const COUNTRY_REVERSE_MAP = {
+  台灣: 'TW',
+  中國: 'CN',
+  美國: 'US',
+  日本: 'JP',
+  韓國: 'KR',
+  新加坡: 'SG',
+  馬來西亞: 'MY',
+  香港: 'HK',
+  澳門: 'MO',
+  泰國: 'TH',
+  越南: 'VN',
+  菲律賓: 'PH',
+  印尼: 'ID',
+  澳洲: 'AU',
+  紐西蘭: 'NZ',
+  加拿大: 'CA',
+  英國: 'GB',
+  德國: 'DE',
+  法國: 'FR',
+  其他: 'OTHER',
+};
 
 const UserFormSection = ({
   userData,
@@ -41,6 +82,60 @@ const UserFormSection = ({
   const { i18n } = useTranslation();
   const currentLanguage = i18n.language || 'zh-TW';
   const isEnglish = currentLanguage === 'en-US';
+
+  // Helper: 获取职业显示文本（处理存储的中文值或 key）
+  const getProfessionDisplay = (value) => {
+    if (!value) return '';
+    // 如果已经是 key，直接翻译
+    if (JOB_OPTIONS.some(opt => opt.value === value)) {
+      return t(`userInfo.profession.${value}`, value);
+    }
+    // 如果是中文值，先映射到 key 再翻译
+    const key = PROFESSION_REVERSE_MAP[value];
+    if (key) {
+      return t(`userInfo.profession.${key}`, value);
+    }
+    // 如果都不匹配，返回原值
+    return value;
+  };
+
+  // Helper: 获取国家显示文本（处理存储的中文值或 key）
+  const getCountryDisplay = (value) => {
+    if (!value) return '';
+    // 如果已经是 key（在 COUNTRY_REVERSE_MAP 的值中），直接翻译
+    const isKey = Object.values(COUNTRY_REVERSE_MAP).includes(value);
+    if (isKey) {
+      return t(`userInfo.countries.${value}`, value);
+    }
+    // 如果是中文值，先映射到 key 再翻译
+    const key = COUNTRY_REVERSE_MAP[value];
+    if (key) {
+      return t(`userInfo.countries.${key}`, value);
+    }
+    // 如果都不匹配，返回原值
+    return value;
+  };
+
+  // Helper: 获取城市显示文本（处理存储的中文值）
+  const getCityDisplay = (value) => {
+    if (!value) return '';
+    // 使用 getCityNameEn 进行翻译，或返回原值
+    return isEnglish ? getCityNameEn(value) : value;
+  };
+
+  // Helper: 获取地区显示文本（处理存储的中文值）
+  const getDistrictDisplay = (value) => {
+    if (!value) return '';
+    // 尝试直接翻译（如果 key 存在）
+    const translationKey = `userInfo.districts.${value}`;
+    const translated = t(translationKey);
+    // 如果翻译存在（不等于 key），使用翻译
+    if (translated !== translationKey) {
+      return translated;
+    }
+    // 否则使用 getDistrictNameEn 或原值
+    return isEnglish ? getDistrictNameEn(value) : value;
+  };
 
   // Get available districts based on selected city
   const availableDistricts = useMemo(() => {
@@ -94,13 +189,25 @@ const UserFormSection = ({
     }));
   }, [isEnglish]);
 
-  // Prepare district options for CustomDropdown (simple array) - bilingual
+  // Prepare district options for CustomDropdown (simple array) - bilingual with i18n
   const districtOptions = useMemo(() => {
-    return availableDistricts.map(district => ({
-      value: district,
-      label: isEnglish ? getDistrictNameEn(district) : district,
-    }));
-  }, [availableDistricts, isEnglish]);
+    return availableDistricts.map(district => {
+      // Try to get translation, if key doesn't exist, t() returns the key itself
+      const translationKey = `userInfo.districts.${district}`;
+      const translatedLabel = t(translationKey);
+      // If translation exists (not equal to the key), use it; otherwise fallback
+      const label =
+        translatedLabel !== translationKey
+          ? translatedLabel
+          : isEnglish
+          ? getDistrictNameEn(district)
+          : district;
+      return {
+        value: district,
+        label,
+      };
+    });
+  }, [availableDistricts, isEnglish, t]);
 
   // Handle city change with cascading logic
   const handleCityChange = e => {
@@ -135,31 +242,34 @@ const UserFormSection = ({
   // 跟踪哪个下拉菜单打开（用于z-index管理）
   const [openDropdown, setOpenDropdown] = useState(null);
 
-  // 准备国家选项
+  // 准备国家选项 (使用 i18n)
   const countryOptions = useMemo(
     () => [
-      { value: 'TW', label: '台灣' },
-      { value: 'CN', label: '中國' },
-      { value: 'US', label: '美國' },
-      { value: 'JP', label: '日本' },
-      { value: 'KR', label: '韓國' },
-      { value: 'SG', label: '新加坡' },
-      { value: 'MY', label: '馬來西亞' },
-      { value: 'HK', label: '香港' },
-      { value: 'MO', label: '澳門' },
-      { value: 'TH', label: '泰國' },
-      { value: 'VN', label: '越南' },
-      { value: 'PH', label: '菲律賓' },
-      { value: 'ID', label: '印尼' },
-      { value: 'AU', label: '澳洲' },
-      { value: 'NZ', label: '紐西蘭' },
-      { value: 'CA', label: '加拿大' },
-      { value: 'GB', label: '英國' },
-      { value: 'DE', label: '德國' },
-      { value: 'FR', label: '法國' },
-      { value: 'OTHER', label: '其他' },
-    ],
-    []
+      { value: 'TW' },
+      { value: 'CN' },
+      { value: 'US' },
+      { value: 'JP' },
+      { value: 'KR' },
+      { value: 'SG' },
+      { value: 'MY' },
+      { value: 'HK' },
+      { value: 'MO' },
+      { value: 'TH' },
+      { value: 'VN' },
+      { value: 'PH' },
+      { value: 'ID' },
+      { value: 'AU' },
+      { value: 'NZ' },
+      { value: 'CA' },
+      { value: 'GB' },
+      { value: 'DE' },
+      { value: 'FR' },
+      { value: 'OTHER' },
+    ].map(option => ({
+      ...option,
+      label: t(`userInfo.countries.${option.value}`, option.value),
+    })),
+    [t]
   );
 
   // 处理国家变更（保持级联逻辑）
@@ -393,14 +503,28 @@ const UserFormSection = ({
                   <select
                     id="job_category"
                     name="job_category"
-                    value={userData?.job_category || ''}
-                    onChange={onChange}
+                    value={
+                      // 如果存储的是中文，映射到 key；否则使用原值（可能是 key 或空）
+                      userData?.job_category && PROFESSION_REVERSE_MAP[userData.job_category]
+                        ? PROFESSION_REVERSE_MAP[userData.job_category]
+                        : userData?.job_category || ''
+                    }
+                    onChange={e => {
+                      // 确保保存的是 key，不是中文
+                      const syntheticEvent = {
+                        target: {
+                          name: e.target.name,
+                          value: e.target.value, // 已经是 key
+                        },
+                      };
+                      onChange(syntheticEvent);
+                    }}
                     className="form-input"
                   >
-                    <option value="">請選擇您的職業分類</option>
+                    <option value="">{t('userInfo.training.selectProfession', '請選擇您的職業分類')}</option>
                     {JOB_OPTIONS.map(option => (
                       <option key={option.value} value={option.value}>
-                        {option.label}
+                        {t(`userInfo.profession.${option.value}`, option.value)}
                       </option>
                     ))}
                   </select>
@@ -412,7 +536,7 @@ const UserFormSection = ({
                       color: '#718096',
                     }}
                   >
-                    💡 選擇職業可參與未來的「職業分組天梯」
+                    💡 {t('userInfo.training.professionHint', '選擇職業可參與未來的「職業分組天梯」')}
                   </p>
                 </div>
 
@@ -465,10 +589,25 @@ const UserFormSection = ({
                 </label>
                 <CustomDropdown
                   name="country"
-                  value={userData?.country || ''}
+                  value={
+                    // 如果存储的是中文，映射到 key；否则使用原值
+                    userData?.country && COUNTRY_REVERSE_MAP[userData.country]
+                      ? COUNTRY_REVERSE_MAP[userData.country]
+                      : userData?.country || ''
+                  }
                   options={countryOptions}
                   placeholder={t('userInfo.ranking.selectCountry')}
-                  onChange={handleCountryChange}
+                  onChange={e => {
+                    // 确保保存的是 key
+                    const syntheticEvent = {
+                      target: {
+                        name: e.target.name,
+                        value: e.target.value, // 已经是 key
+                      },
+                    };
+                    handleCountryChange(syntheticEvent);
+                  }}
+                  getDisplayText={getCountryDisplay}
                   className="form-input"
                   onOpenChange={isOpen =>
                     setOpenDropdown(isOpen ? 'country' : null)
@@ -498,6 +637,7 @@ const UserFormSection = ({
                       options={cityOptions}
                       placeholder={t('userInfo.ranking.selectCity')}
                       onChange={handleCityChange}
+                      getDisplayText={getCityDisplay}
                       className="form-input"
                       onOpenChange={isOpen =>
                         setOpenDropdown(isOpen ? 'city' : null)
@@ -525,6 +665,7 @@ const UserFormSection = ({
                         options={districtOptions}
                         placeholder={t('userInfo.ranking.selectDistrict')}
                         onChange={onChange}
+                        getDisplayText={getDistrictDisplay}
                         className="form-input"
                         onOpenChange={isOpen =>
                           setOpenDropdown(isOpen ? 'district' : null)
@@ -546,7 +687,7 @@ const UserFormSection = ({
                   <div className="form-group">
                     <label htmlFor="region" className="form-label">
                       {t('userInfo.ranking.region')}{' '}
-                      <span className="optional-badge">選填</span>
+                      <span className="optional-badge">{t('userInfo.ranking.optional')}</span>
                     </label>
                     <select
                       id="region"
@@ -576,7 +717,7 @@ const UserFormSection = ({
                 <div className="form-group">
                   <label htmlFor="region" className="form-label">
                     {t('userInfo.ranking.region')}{' '}
-                    <span className="optional-badge">選填</span>
+                    <span className="optional-badge">{t('userInfo.ranking.optional')}</span>
                   </label>
                   <input
                     id="region"

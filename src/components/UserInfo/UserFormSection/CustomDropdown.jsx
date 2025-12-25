@@ -11,6 +11,7 @@ const CustomDropdown = ({
   className = '',
   disabled = false,
   onOpenChange,
+  getDisplayText: customGetDisplayText, // 可选的显示文本函数
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
@@ -57,6 +58,11 @@ const CustomDropdown = ({
   // 獲取顯示文本
   const getDisplayText = () => {
     if (!value) return placeholder || '請選擇';
+
+    // 如果提供了自定义显示函数，使用它
+    if (customGetDisplayText) {
+      return customGetDisplayText(value);
+    }
 
     // 處理簡單選項（字符串數組）
     if (Array.isArray(options) && options.length > 0) {
@@ -214,6 +220,7 @@ CustomDropdown.propTypes = {
   className: PropTypes.string,
   disabled: PropTypes.bool,
   onOpenChange: PropTypes.func,
+  getDisplayText: PropTypes.func, // 可选的显示文本函数
 };
 
 export default CustomDropdown;
