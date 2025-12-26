@@ -252,8 +252,27 @@ export const useLadder = (options = {}) => {
       if (filterAge !== 'all') {
         const beforeFilterCount = data.length;
         data = data.filter(user => {
-          // Check both filter_ageGroup (from backend) and ageGroup (client-side calculated)
-          return user.filter_ageGroup === filterAge || user.ageGroup === filterAge;
+          const age = Number(user.age) || 0;
+          if (age === 0) return false;
+          
+          switch (filterAge) {
+            case 'under-20':
+              return age < 20;
+            case '20-29':
+              return age >= 20 && age <= 29;
+            case '30-39':
+              return age >= 30 && age <= 39;
+            case '40-49':
+              return age >= 40 && age <= 49;
+            case '50-59':
+              return age >= 50 && age <= 59;
+            case '60-69':
+              return age >= 60 && age <= 69;
+            case '70+':
+              return age >= 70;
+            default:
+              return true;
+          }
         });
         logger.debug(
           `📅 年齡過濾 (${filterAge})：${beforeFilterCount} → ${data.length} 名用戶`
