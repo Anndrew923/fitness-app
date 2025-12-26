@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
 import {
@@ -192,36 +192,41 @@ const UserFormSection = ({
     });
   }, [availableDistricts, isEnglish, t]);
 
+  // ✅ Fix: 使用 useEffect 響應式處理地區重置，解決 Race Condition
+  useEffect(() => {
+    // Only validate if we have both a user selection and a loaded list of options
+    if (
+      userData?.country === 'TW' &&
+      userData?.district &&
+      availableDistricts.length > 0
+    ) {
+      // Check match
+      const isDistrictValid = availableDistricts.includes(userData.district);
+
+      // ✅ FIX: Double check against 'region' field too, just in case
+      const isRegionMatch =
+        userData.region && availableDistricts.includes(userData.region);
+
+      // Only reset if BOTH are invalid
+      if (!isDistrictValid && !isRegionMatch) {
+        console.warn('Resetting invalid district:', userData.district);
+        onChange({
+          target: { name: 'district', value: '' },
+        });
+      }
+    }
+  }, [
+    userData?.country,
+    userData?.district,
+    userData?.region,
+    availableDistricts,
+    onChange,
+  ]);
+
   // Handle city change with cascading logic
   const handleCityChange = e => {
-    const newCity = e.target.value;
-    const currentCityValue = userData?.city || userData?.region || '';
-
-    // ✅ 修复：只在城市真正改变时重置地区（避免初始化时错误重置）
-    // 只有当新城市与当前城市不同，且新城市不为空时才重置地区
-    const shouldResetDistrict = newCity && newCity !== currentCityValue;
-
-    // Create a synthetic event for city
-    const cityEvent = {
-      target: {
-        name: 'city',
-        value: newCity,
-      },
-    };
-
-    // Update city
-    onChange(cityEvent);
-
-    // Reset district only when city actually changes (not on initial load)
-    if (shouldResetDistrict) {
-      const districtEvent = {
-        target: {
-          name: 'district',
-          value: '',
-        },
-      };
-      onChange(districtEvent);
-    }
+    // ✅ Fix: 只更新城市，重置邏輯交由 useEffect 處理
+    onChange(e);
   };
 
   // Get current city value (support both city and region for backward compatibility)
@@ -666,7 +671,15 @@ const UserFormSection = ({
                       </label>
                       <CustomDropdown
                         name="district"
-                        value={userData?.district || ''}
+                        // ✅ FIX: Only use userData.region if it is actually a valid district option.
+                        // This prevents "Taipei City" (stored in region) from appearing in the district field.
+                        value={
+                          userData?.district ||
+                          (availableDistricts.includes(userData?.region)
+                            ? userData?.region
+                            : '') ||
+                          ''
+                        }
                         options={districtOptions}
                         placeholder={t('userInfo.ranking.selectDistrict')}
                         onChange={onChange}

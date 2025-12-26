@@ -93,6 +93,11 @@ export const useUserInfoForm = (
           JSON.stringify(userData.scores || {}) ===
             JSON.stringify(updatedUserData.scores || {});
 
+        // ✅ FIX: Always save to Firebase when the user clicks Save
+        await saveUserData(updatedUserData);
+        setUserData(updatedUserData);
+
+        // (Optional) Keep the logger if you want, but ensure saveUserData is called.
         if (onlyLocationChanged) {
           logger.debug(
             '🌍 位置資訊變化（國家/城市/行政區），立即保存到 Firebase',
@@ -102,10 +107,6 @@ export const useUserInfoForm = (
               district: updatedUserData.district,
             }
           );
-          await saveUserData(updatedUserData);
-          setUserData(updatedUserData);
-        } else {
-          setUserData(updatedUserData);
         }
 
         onShowModal({
@@ -205,7 +206,9 @@ export const useUserInfoForm = (
       // 處理不同類型的欄位
       if (name === 'gender') {
         processedValue = value;
-      } else if (['job_category', 'country', 'region', 'city', 'district'].includes(name)) {
+      } else if (
+        ['job_category', 'country', 'region', 'city', 'district'].includes(name)
+      ) {
         // ✅ 修復：確保 city 和 district 字段被正確處理為字符串
         processedValue = value;
       } else if (['weeklyTrainingHours', 'trainingYears'].includes(name)) {
