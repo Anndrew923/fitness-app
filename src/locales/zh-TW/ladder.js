@@ -115,6 +115,7 @@ export default {
       filter: '篩選',
       totalFive: '五項總和',
       totalLoginDays: '累計天數',
+      height: '身高 (cm)',
     },
   },
   ladderCard: {

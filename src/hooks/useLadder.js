@@ -14,6 +14,7 @@ import { useTranslation } from 'react-i18next';
  * @param {Object} options - Optional filter options
  * @param {string} options.filterGender - Gender filter ('all', 'male', 'female')
  * @param {string} options.filterAge - Age group filter ('all', 'under-20', '20-29', etc.)
+ * @param {string} options.filterHeight - Height filter ('all', '<160', '160-170', '170-180', '180-190', '>190')
  * @param {string} options.filterWeight - Weight class filter ('all', 'under-50kg', '50-60kg', etc.)
  * @param {string} options.filterJob - Job category filter ('all', 'engineering', 'medical', etc.)
  * @param {string} options.filterProject - Lift project filter ('total', 'squat', 'bench', 'deadlift', etc.)
@@ -23,6 +24,7 @@ export const useLadder = (options = {}) => {
   const { 
     filterGender = 'all', 
     filterAge = 'all', 
+    filterHeight = 'all',
     filterWeight = 'all',
     filterJob = 'all',
     filterProject = 'total',
@@ -87,6 +89,7 @@ export const useLadder = (options = {}) => {
       selectedDivision,
       filterGender,
       filterAge,
+      filterHeight,
       filterWeight,
       filterJob,
       filterProject,
@@ -254,6 +257,33 @@ export const useLadder = (options = {}) => {
         });
         logger.debug(
           `📅 年齡過濾 (${filterAge})：${beforeFilterCount} → ${data.length} 名用戶`
+        );
+      }
+
+      // Client-side filtering: Height
+      if (filterHeight !== 'all') {
+        const beforeFilterCount = data.length;
+        data = data.filter(user => {
+          const height = Number(user.height) || 0;
+          if (height === 0) return false;
+          
+          switch (filterHeight) {
+            case '<160':
+              return height < 160;
+            case '160-170':
+              return height >= 160 && height <= 170;
+            case '170-180':
+              return height >= 170 && height <= 180;
+            case '180-190':
+              return height >= 180 && height <= 190;
+            case '>190':
+              return height > 190;
+            default:
+              return true;
+          }
+        });
+        logger.debug(
+          `📏 身高過濾 (${filterHeight})：${beforeFilterCount} → ${data.length} 名用戶`
         );
       }
 
@@ -610,7 +640,7 @@ export const useLadder = (options = {}) => {
       hasInitialPageSetRef.current = false;
       hasDataRef.current = false;
     }
-  }, [selectedAgeGroup, selectedTab, selectedDivision, filterGender, filterAge, filterWeight, filterJob, filterProject, userData]);
+  }, [selectedAgeGroup, selectedTab, selectedDivision, filterGender, filterAge, filterHeight, filterWeight, filterJob, filterProject, userData]);
 
   useEffect(() => {
     if (userData) {

@@ -6,18 +6,29 @@ import './LadderSubFilters.css';
 const LadderSubFilters = ({
   filterGender,
   filterAge,
+  filterHeight,
   filterWeight,
   filterJob,
   filterProject,
   currentDivision,
   onGenderChange,
   onAgeChange,
+  onHeightChange,
   onWeightChange,
   onJobChange,
   onProjectChange,
 }) => {
   const { t, i18n } = useTranslation();
   const isEnglish = i18n.language === 'en-US';
+
+  const heightOptions = [
+    { value: 'all', label: t('common.all') },
+    { value: '<160', label: '< 160 cm' },
+    { value: '160-170', label: '160 - 170 cm' },
+    { value: '170-180', label: '170 - 180 cm' },
+    { value: '180-190', label: '180 - 190 cm' },
+    { value: '>190', label: '> 190 cm' },
+  ];
 
   const JOB_OPTIONS = [
     { value: 'all', label: t('common.all') },
@@ -106,6 +117,21 @@ const LadderSubFilters = ({
       </div>
 
       <div className="ladder-sub-filter-group">
+        <label className="ladder-sub-filter-label">{t('ladder.filter.height')}</label>
+        <select
+          value={filterHeight || 'all'}
+          onChange={e => onHeightChange(e.target.value)}
+          className="ladder-sub-filter-select"
+        >
+          {heightOptions.map(option => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div className="ladder-sub-filter-group">
         <label className="ladder-sub-filter-label">{t('userInfo.weight')}</label>
         <select
           value={filterWeight}
@@ -162,12 +188,14 @@ const LadderSubFilters = ({
 LadderSubFilters.propTypes = {
   filterGender: PropTypes.string.isRequired,
   filterAge: PropTypes.string.isRequired,
+  filterHeight: PropTypes.string,
   filterWeight: PropTypes.string.isRequired,
   filterJob: PropTypes.string.isRequired,
   filterProject: PropTypes.string.isRequired,
   currentDivision: PropTypes.string.isRequired,
   onGenderChange: PropTypes.func.isRequired,
   onAgeChange: PropTypes.func.isRequired,
+  onHeightChange: PropTypes.func.isRequired,
   onWeightChange: PropTypes.func.isRequired,
   onJobChange: PropTypes.func.isRequired,
   onProjectChange: PropTypes.func.isRequired,

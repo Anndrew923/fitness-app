@@ -117,6 +117,7 @@ export default {
       filter: 'Filter',
       totalFive: 'Five Total',
       totalLoginDays: 'Total Login Days',
+      height: 'Height (cm)',
     },
   },
   ladderCard: {

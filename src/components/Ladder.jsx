@@ -30,6 +30,7 @@ const Ladder = () => {
   // Define filter states FIRST (before useLadder)
   const [filterGender, setFilterGender] = useState('all');
   const [filterAge, setFilterAge] = useState('all');
+  const [filterHeight, setFilterHeight] = useState('all');
   const [filterWeight, setFilterWeight] = useState('all');
   const [filterJob, setFilterJob] = useState('all');
   const [filterProject, setFilterProject] = useState('total');
@@ -64,6 +65,7 @@ const Ladder = () => {
   } = useLadder({
     filterGender,
     filterAge,
+    filterHeight,
     filterWeight,
     filterJob,
     filterProject,
@@ -722,12 +724,14 @@ const Ladder = () => {
         <LadderSubFilters
           filterGender={filterGender}
           filterAge={filterAge}
+          filterHeight={filterHeight}
           filterWeight={filterWeight}
           filterJob={filterJob}
           filterProject={filterProject}
           currentDivision={selectedDivision}
           onGenderChange={setFilterGender}
           onAgeChange={setFilterAge}
+          onHeightChange={setFilterHeight}
           onWeightChange={setFilterWeight}
           onJobChange={setFilterJob}
           onProjectChange={setFilterProject}
