@@ -1,75 +1,77 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import './LadderEmptyState.css';
 
 const LadderEmptyState = ({ division }) => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const getEmptyStateConfig = () => {
     switch (division) {
       case 'stats_sbdTotal':
         return {
           icon: '💪',
-          title: '虛位以待',
-          description: '還沒有大力士來挑戰。你是全服最強壯的人嗎？',
-          buttonText: '成為第一名',
+          title: t('ladder.empty.title', 'Position Vacant'),
+          description: t('ladder.empty.desc.strength', '還沒有大力士來挑戰。你是全服最強壯的人嗎？'),
+          buttonText: t('ladder.empty.button', '成為第一名'),
           link: '/strength',
         };
       case 'stats_ffmi':
         return {
           icon: '💪',
-          title: '虛位以待',
-          description: '尋找肌肉巨獸中... 快來秀出你的維度！',
-          buttonText: '成為第一名',
+          title: t('ladder.empty.title', 'Position Vacant'),
+          description: t('ladder.empty.desc.muscle', '尋找肌肉巨獸中... 快來秀出你的維度！'),
+          buttonText: t('ladder.empty.button', '成為第一名'),
           link: '/body-fat',
         };
       case 'stats_cooper':
         return {
           icon: '🫁',
-          title: '虛位以待',
-          description: '跑道空蕩蕩的。去跑一場，讓大家看看你的背影！',
-          buttonText: '成為第一名',
+          title: t('ladder.empty.title', 'Position Vacant'),
+          description: t('ladder.empty.desc.cardio', '跑道空蕩蕩的。去跑一場，讓大家看看你的背影！'),
+          buttonText: t('ladder.empty.button', '成為第一名'),
           link: '/cardio',
         };
       case 'stats_vertical':
         return {
           icon: '⚡',
-          title: '虛位以待',
-          description: '爆發力排行榜等待第一位挑戰者！展現你的跳躍力！',
-          buttonText: '成為第一名',
+          title: t('ladder.empty.title', 'Position Vacant'),
+          description: t('ladder.empty.desc.power', '爆發力排行榜等待第一位挑戰者！展現你的跳躍力！'),
+          buttonText: t('ladder.empty.button', '成為第一名'),
           link: '/explosive-power',
         };
       case 'stats_bodyFat':
         return {
           icon: '🔥',
-          title: '虛位以待',
-          description: '極致體脂排行榜等待第一位挑戰者！展現你的自律！',
-          buttonText: '成為第一名',
+          title: t('ladder.empty.title', 'Position Vacant'),
+          description: t('ladder.empty.desc.bodyFat', '極致體脂排行榜等待第一位挑戰者！展現你的自律！'),
+          buttonText: t('ladder.empty.button', '成為第一名'),
           link: '/body-fat',
         };
       case 'stats_totalLoginDays':
         return {
           icon: '📅',
-          title: '虛位以待',
-          description: '自律狂人排行榜等待第一位挑戰者！開始你的連續登入之旅！',
-          buttonText: '開始登入',
+          title: t('ladder.empty.title', 'Position Vacant'),
+          description: t('ladder.empty.desc.login', '自律狂人排行榜等待第一位挑戰者！開始你的連續登入之旅！'),
+          buttonText: t('ladder.empty.buttonLogin', '開始登入'),
           link: '/user-info',
         };
       case 'local_district':
         return {
           icon: '📍',
-          title: '虛位以待',
-          description: '你的地區還沒有其他挑戰者。成為本地第一人！',
-          buttonText: '成為第一名',
+          title: t('ladder.empty.title', 'Position Vacant'),
+          description: t('ladder.empty.desc.local', '你的地區還沒有其他挑戰者。成為本地第一人！'),
+          buttonText: t('ladder.empty.button', '成為第一名'),
           link: '/user-info',
         };
       default:
         return {
           icon: '🏆',
-          title: '虛位以待',
-          description: '目前尚無數據，快來搶佔第一名！',
-          buttonText: '成為第一名',
+          title: t('ladder.empty.title', 'Position Vacant'),
+          description: t('ladder.empty.desc.default', '目前尚無數據，快來搶佔第一名！'),
+          buttonText: t('ladder.empty.button', '成為第一名'),
           link: '/user-info',
         };
     }

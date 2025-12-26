@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useUser } from '../UserContext';
 import { auth } from '../firebase';
 import { getRPGClassIcon, getRPGClassName } from '../utils/rpgClassCalculator';
+import { getCityNameEn } from '../utils/taiwanDistricts';
 import {
   RadarChart,
   PolarGrid,
@@ -15,11 +16,45 @@ import {
 import ReportModal from './ReportModal';
 import './LadderUserCard.css';
 
+// 定義職業反向映射表（中文 -> Key）
+const PROFESSION_REVERSE_MAP = {
+  '工程師 (軟體/硬體)': 'engineering',
+  工程師: 'engineering',
+  '醫療人員 (醫護/藥師)': 'medical',
+  醫療人員: 'medical',
+  健身教練: 'coach',
+  運動教練: 'coach',
+  學生: 'student',
+  軍警消人員: 'police_military',
+  軍警消: 'police_military',
+  '商業/金融/法務': 'business',
+  '商業/金融': 'business',
+  '自由業/設計/藝術': 'freelance',
+  '自由業/設計': 'freelance',
+  服務業: 'service',
+  專業運動員: 'professional_athlete',
+  '藝術/表演': 'artist_performer',
+  其他: 'other',
+};
+
+// 定義 RPG 職業反向映射表（中文 -> Key）
+const RPG_CLASS_REVERSE_MAP = {
+  覺醒者: 'AWAKENED',
+  未覺醒: 'UNKNOWN',
+  狂戰士: 'BERSERKER',
+  刺客: 'ASSASSIN',
+  遊俠: 'RANGER',
+  騎士: 'PALADIN',
+  武鬥家: 'FIGHTER',
+  魔導士: 'MAGE',
+};
+
 function LadderUserCard({ user, isOpen, onClose }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { userData } = useUser();
   const currentUserId = auth.currentUser?.uid;
   const [showReportModal, setShowReportModal] = useState(false);
+  const isEnglish = i18n.language === 'en-US';
 
   // 獲取年齡組標籤（與 Ladder.jsx 相同）
   const getAgeGroupLabel = useCallback(
@@ -28,6 +63,47 @@ function LadderUserCard({ user, isOpen, onClose }) {
       return t(`ladder.ageGroups.${ageGroup}`) || ageGroup;
     },
     [t]
+  );
+
+  // 獲取職業顯示文本（處理舊數據的中文值）
+  const getDisplayProfession = useCallback(
+    profession => {
+      if (!profession) return '';
+      // 1. 嘗試反向映射（中文 -> Key）
+      const key = PROFESSION_REVERSE_MAP[profession] || profession;
+      // 2. 翻譯 Key
+      const professionKey = `userInfo.profession.${key}`;
+      const translated = t(professionKey, profession);
+      // 3. 如果翻譯結果等於 key 本身（表示翻譯不存在），則顯示原值
+      return translated === professionKey ? profession : translated;
+    },
+    [t]
+  );
+
+  // 獲取 RPG 職業 Key（處理舊數據的中文值）
+  const getRPGClassKey = useCallback(rpgClass => {
+    if (!rpgClass) return null;
+    // 如果已經是 key 格式（大寫），直接返回
+    if (rpgClass === rpgClass.toUpperCase() && rpgClass !== 'UNKNOWN') {
+      return rpgClass;
+    }
+    // 如果是中文，映射到 key
+    return RPG_CLASS_REVERSE_MAP[rpgClass] || rpgClass;
+  }, []);
+
+  // 獲取 RPG 職業顯示文本（處理舊數據的中文值）
+  const getDisplayRPGClass = useCallback(
+    rpgClass => {
+      if (!rpgClass || rpgClass === 'UNKNOWN') return '';
+      // 1. 獲取正確的 key
+      const key = getRPGClassKey(rpgClass);
+      // 2. 使用 i18n 翻譯，如果翻譯不存在則使用 getRPGClassName 的結果作為預設值
+      const classKey = `userInfo.rpgClass.${key}`;
+      const translated = t(classKey, getRPGClassName(key));
+      // 3. 如果翻譯結果等於 key 本身（表示翻譯不存在），使用 getRPGClassName 的結果
+      return translated === classKey ? getRPGClassName(key) : translated;
+    },
+    [t, getRPGClassKey]
   );
 
   // ✅ 新增：處理 body 滾動鎖定，防止背景頁面滾動
@@ -265,30 +341,23 @@ function LadderUserCard({ user, isOpen, onClose }) {
                   <span className="detail-label">{t('ladderCard.location')}：</span>
                   <span className="detail-value">
                     {(() => {
-                      // 國家代碼到名稱的映射
-                      const countryNames = {
-                        TW: '台灣',
-                        CN: '中國',
-                        US: '美國',
-                        JP: '日本',
-                        KR: '韓國',
-                        SG: '新加坡',
-                        MY: '馬來西亞',
-                        HK: '香港',
-                        MO: '澳門',
-                        TH: '泰國',
-                        VN: '越南',
-                        PH: '菲律賓',
-                        ID: '印尼',
-                        AU: '澳洲',
-                        NZ: '紐西蘭',
-                        CA: '加拿大',
-                        GB: '英國',
-                        DE: '德國',
-                        FR: '法國',
-                      };
-                      const countryName = countryNames[user.country] || user.country;
-                      return countryName + (user.region ? ` • ${user.region}` : '');
+                      // 1. 翻譯國家名稱
+                      const countryKey = `userInfo.countries.${user.country}`;
+                      const countryName = t(countryKey, user.country);
+
+                      // 2. 翻譯城市/地區名稱
+                      let cityName = user.city || user.region || '';
+                      
+                      // 如果是英文模式且城市名稱存在，嘗試翻譯
+                      if (isEnglish && cityName) {
+                        const enName = getCityNameEn(cityName);
+                        // 如果 getCityNameEn 返回了翻譯（不等於原值），使用翻譯
+                        if (enName && enName !== cityName) {
+                          cityName = enName;
+                        }
+                      }
+
+                      return `${countryName}${cityName ? ` • ${cityName}` : ''}`;
                     })()}
                   </span>
                 </div>
@@ -296,9 +365,15 @@ function LadderUserCard({ user, isOpen, onClose }) {
               {/* ✅ Phase 1 新增：戰鬥風格欄位 */}
               {user.rpg_class && user.rpg_class !== 'UNKNOWN' && (
                 <div className="detail-item">
-                  <span className="detail-label">戰鬥風格：</span>
+                  <span className="detail-label">{t('userInfo.combatStyle', '戰鬥風格')}：</span>
                   <span className="detail-value">
-                    {getRPGClassIcon(user.rpg_class)} {getRPGClassName(user.rpg_class)}
+                    {(() => {
+                      // 處理舊數據：獲取正確的 key 用於圖標，然後獲取翻譯後的名稱
+                      const rpgClassKey = getRPGClassKey(user.rpg_class);
+                      const icon = getRPGClassIcon(rpgClassKey);
+                      const name = getDisplayRPGClass(user.rpg_class);
+                      return `${icon} ${name}`;
+                    })()}
                   </span>
                 </div>
               )}
@@ -316,7 +391,9 @@ function LadderUserCard({ user, isOpen, onClose }) {
                   <div className="training-item">
                     <span className="training-icon">💼</span>
                     <span className="training-label">{t('ladderCard.profession')}：</span>
-                    <span className="training-value">{user.profession}</span>
+                    <span className="training-value">
+                      {getDisplayProfession(user.profession)}
+                    </span>
                   </div>
                 )}
                 {user.weeklyTrainingHours && (

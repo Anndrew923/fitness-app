@@ -151,7 +151,7 @@ const LadderSubFilters = ({
       </div>
 
       <div className="ladder-sub-filter-group">
-        <label className="ladder-sub-filter-label">{t('userInfo.ranking.profession')}</label>
+        <label className="ladder-sub-filter-label">{t('userInfo.training.profession', '職業')}</label>
         <select
           value={filterJob}
           onChange={e => onJobChange(e.target.value)}
