@@ -33,7 +33,7 @@ const LadderDivisionSelector = ({ currentFilter, onFilterChange }) => {
       desc: t('ladder.zones.district'),
     },
     {
-      label: '🫁 ' + t('tests.cardio'),
+      label: '💓 ' + t('tests.cardio'),
       value: 'stats_cooper',
       desc: 'Cooper Test',
     },

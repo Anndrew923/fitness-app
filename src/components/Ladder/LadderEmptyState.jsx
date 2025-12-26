@@ -28,7 +28,7 @@ const LadderEmptyState = ({ division }) => {
         };
       case 'stats_cooper':
         return {
-          icon: '🫁',
+          icon: '💓',
           title: t('ladder.empty.title', 'Position Vacant'),
           description: t('ladder.empty.desc.cardio', '跑道空蕩蕩的。去跑一場，讓大家看看你的背影！'),
           buttonText: t('ladder.empty.button', '成為第一名'),
