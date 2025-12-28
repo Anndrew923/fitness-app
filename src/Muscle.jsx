@@ -448,7 +448,7 @@ function Muscle({ onComplete }) {
                       title="點擊解鎖真實實力"
                     >
                       <span>🔒</span>
-                      <span>解鎖極限</span>
+                      <span className="flex-shrink-0 whitespace-normal">{t('actions.unlock_limit')}</span>
                     </button>
                   )}
                 </strong>
@@ -466,7 +466,7 @@ function Muscle({ onComplete }) {
                 title="點擊解鎖真實實力"
               >
                 <span>🔒</span>
-                <span>解鎖極限</span>
+                <span className="flex-shrink-0 whitespace-normal">{t('actions.unlock_limit')}</span>
               </button>
             )}
           </p>
@@ -483,7 +483,7 @@ function Muscle({ onComplete }) {
                 title="點擊解鎖真實實力"
               >
                 <span>🔒</span>
-                <span>解鎖極限</span>
+                <span className="flex-shrink-0 whitespace-normal">{t('actions.unlock_limit')}</span>
               </button>
             )}
           </p>
@@ -497,7 +497,7 @@ function Muscle({ onComplete }) {
                 title="點擊解鎖真實實力"
               >
                 <span>🔒</span>
-                <span>解鎖極限</span>
+                <span className="flex-shrink-0 whitespace-normal">{t('actions.unlock_limit')}</span>
               </button>
             )}
           </p>

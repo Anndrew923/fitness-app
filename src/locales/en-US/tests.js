@@ -20,39 +20,26 @@ export default {
     },
     strengthStandards: {
       tabTitle: 'Standards Guide',
-      intro:
-        'Our assessment standards are derived from more than 134 million lifting records contributed by Strength Level users. They include both male and female standards and apply to key lifts such as bench press, squat, deadlift, and overhead press.',
-      sourceLabel: 'Source: ',
       scoreLevelsTitle: 'Score Levels',
-      scoreTableTitle: 'Score Guide',
+    },
+    strength_rpg: {
       levels: {
-        beginner: 'Beginner - building exercise habits',
-        novice: 'Novice - recreational lifter',
-        intermediate: 'Intermediate - visible training progress',
-        advanced: 'Advanced - near professional level',
-        elite: 'Elite - weightlifting/powerlifting athlete',
+        novice: 'Novice Adventurer',
+        guardian: 'Guardian',
+        vanguard: 'Vanguard',
+        knight: 'Honor Knight',
+        sovereign: 'Strength Sovereign',
       },
-      guide: {
-        rangeBelow40: 'Below 40',
-        items: {
-          '90_100':
-            'Professional weightlifters/powerlifters and strongman level; e.g., Hafthor Bjornsson, Larry Wheels, Arnold, John Cena',
-          '80_90':
-            'Professional athlete level; pro fighters/football players; e.g., Dwayne Johnson, GSP (UFC champion)',
-          '70_80':
-            'National team level and elite ball sports athletes; e.g., Shohei Ohtani, LeBron James, Jason Statham',
-          '60_70':
-            'Top recreational athletes; e.g., Hugh Jackman, Chris Hemsworth, Henry Cavill',
-          '50_60': 'Intermediate recreational athlete',
-          '40_50': 'Getting on track',
-          below40: 'Beginner',
-        },
-      },
-      table: {
-        range: 'Score Range',
-        description: 'Description',
+      feedback: {
+        legend: '🔥 Legend Arrives! You\'ve broken the limits and entered the Demigod realm. Verify now to etch your name in history!',
+        apex: '👑 Apex Overlord! Is this the limit of mortals? Your strength is undeniable. A true King.',
+        elite: '⚔️ Awe-Inspiring! You have reached elite athlete status. A respected powerhouse.',
+        steel: '🛡️ Steel Body! Your results are visible. You have surpassed the majority.',
+        growth: '⚡️ Awakening! You hold the key to strength. Keep pushing!',
+        potential: '🌱 Potential! A great journey begins now. Every lift is an investment.',
       },
     },
+    standards_desc: 'This system uses the internationally recognized DOTS coefficient (Relative Strength) and the McCulloch age correction model. These standards are widely used in international Powerlifting competitions to scientifically eliminate differences in body weight, gender, and age, accurately evaluating your true strength level under the same conditions.',
     strengthComments: {
       male: {
         gte90:

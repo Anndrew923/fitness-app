@@ -2,12 +2,14 @@ import React, { useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import PropTypes from 'prop-types';
+import { useTranslation } from 'react-i18next';
 import './HonorUnlockModal.css';
 
 const CERTIFICATION_ROUTE = '/verification';
 
 const HonorUnlockModal = ({ isOpen, onClose }) => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   // 阻止背景滾動
   useEffect(() => {
@@ -62,7 +64,7 @@ const HonorUnlockModal = ({ isOpen, onClose }) => {
         <button
           onClick={onClose}
           className="honor-modal-close-btn"
-          aria-label="關閉"
+          aria-label={t('common.close')}
           style={{
             background: 'transparent',
             border: 'none',
@@ -108,20 +110,19 @@ const HonorUnlockModal = ({ isOpen, onClose }) => {
         </div>
 
         {/* 標題與文案 */}
-        <h3 className="honor-modal-title">
-          ⚡️ 突破極限！<br />見證傳奇時刻
-        </h3>
+        <h3 
+          className="honor-modal-title"
+          dangerouslySetInnerHTML={{ __html: t('honorModal.title') }}
+        />
 
         <div className="honor-modal-body">
           <p className="honor-modal-message">
-            <span className="honor-modal-congrats">恭喜！</span> 您的表現已超越標準評分系統的上限（100分）。這不僅是數字，更是頂尖實力的證明！
+            <span dangerouslySetInnerHTML={{ __html: t('honorModal.desc_highlight') }} />
           </p>
-          <p className="honor-modal-info">
-            為了維護這份榮耀的公信力，我們誠摯邀請您完成「榮譽認證」。<br />
-            <span className="honor-modal-highlight">
-              解鎖束縛，讓世界看見您真實的巔峰數據！
-            </span>
-          </p>
+          <p 
+            className="honor-modal-info"
+            dangerouslySetInnerHTML={{ __html: t('honorModal.desc_normal') }}
+          />
         </div>
 
         {/* 按鈕區域 */}
@@ -153,7 +154,7 @@ const HonorUnlockModal = ({ isOpen, onClose }) => {
               <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"></path>
               <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"></path>
             </svg>
-            🔥 前往解鎖榮耀
+            🔥 {t('honorModal.cta_unlock')}
             <svg
               className="honor-modal-arrow"
               width="16"
@@ -172,7 +173,7 @@ const HonorUnlockModal = ({ isOpen, onClose }) => {
 
           <button
             type="button"
-            className="honor-modal-secondary-btn"
+            className="honor-modal-secondary-btn h-auto min-h-[44px] whitespace-normal leading-tight py-2"
             onClick={onClose}
             style={{
               backgroundColor: 'rgba(38, 38, 38, 1)',
@@ -180,7 +181,7 @@ const HonorUnlockModal = ({ isOpen, onClose }) => {
               border: '1px solid rgba(255, 255, 255, 0.1)',
             }}
           >
-            暫時隱藏實力，稍後再說
+            {t('honorModal.cta_later')}
           </button>
         </div>
       </div>

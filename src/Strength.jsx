@@ -11,7 +11,6 @@ import {
   Tooltip,
   LabelList,
 } from 'recharts';
-import * as standards from './standards';
 import PropTypes from 'prop-types';
 import { calculateStrengthScore } from './utils/strength/scoring';
 import { calculateOneRepMax } from './utils/strength/calculations';
@@ -275,16 +274,16 @@ function Strength({ onComplete }) {
   const getStrengthFeedback = score => {
     const scoreNum = parseFloat(score);
     if (scoreNum >= 100)
-      return '🔥 傳奇降臨！您的力量已突破系統極限，踏入半神領域。請務必進行榮譽認證，將您的名字刻在殿堂之上！';
+      return t('tests.strength_rpg.feedback.legend');
     if (scoreNum >= 90)
-      return '👑 頂點霸主！這就是凡人的極限嗎？您的力量足以撼動山河，是當之無愧的王者。';
+      return t('tests.strength_rpg.feedback.apex');
     if (scoreNum >= 80)
-      return '⚔️ 令人敬畏！您已達到精英運動員的水準，在任何健身房都是備受尊敬的強者。';
+      return t('tests.strength_rpg.feedback.elite');
     if (scoreNum >= 60)
-      return '🛡️ 鋼鐵之軀！訓練痕跡清晰可見，您的力量已經超越了絕大多數的普通人。';
+      return t('tests.strength_rpg.feedback.steel');
     if (scoreNum >= 40)
-      return '⚡️ 漸入佳境！肌肉正在甦醒，您已經掌握了力量的鑰匙，繼續保持！';
-    return '🌱 潛力無限！偉大的旅程始於足下，每一次舉起都是對未來的投資。';
+      return t('tests.strength_rpg.feedback.growth');
+    return t('tests.strength_rpg.feedback.potential');
   };
 
   const radarData = useMemo(
@@ -434,11 +433,11 @@ function Strength({ onComplete }) {
   };
 
   const SCORE_LEVELS = [
-    { score: 20, label: '初心冒險者', color: '#FF6B6B' },
-    { score: 40, label: '堅毅衛士', color: '#FFA726' },
-    { score: 60, label: '戰場先鋒', color: '#FFEE58' },
-    { score: 80, label: '榮耀騎士', color: '#66BB6A' },
-    { score: 100, label: '力量主宰', color: '#42A5F5' },
+    { score: 20, label: t('tests.strength_rpg.levels.novice'), color: '#FF6B6B' },
+    { score: 40, label: t('tests.strength_rpg.levels.guardian'), color: '#FFA726' },
+    { score: 60, label: t('tests.strength_rpg.levels.vanguard'), color: '#FFEE58' },
+    { score: 80, label: t('tests.strength_rpg.levels.knight'), color: '#66BB6A' },
+    { score: 100, label: t('tests.strength_rpg.levels.sovereign'), color: '#42A5F5' },
   ];
 
   // 運動項目配置
@@ -617,8 +616,9 @@ function Strength({ onComplete }) {
                             color: '#facc15',
                             fontWeight: 500,
                           }}
+                          className="flex-shrink-0 whitespace-normal"
                         >
-                          解鎖極限
+                          {t('actions.unlock_limit')}
                         </span>
                       </button>
                     )}
@@ -821,8 +821,9 @@ function Strength({ onComplete }) {
                                 color: '#facc15',
                                 fontWeight: 500,
                               }}
+                              className="flex-shrink-0 whitespace-normal"
                             >
-                              解鎖極限
+                              {t('actions.unlock_limit')}
                             </span>
                           </button>
                         )}
@@ -890,8 +891,9 @@ function Strength({ onComplete }) {
                               color: '#facc15',
                               fontWeight: 500,
                             }}
+                            className="flex-shrink-0 whitespace-normal"
                           >
-                            解鎖極限
+                            {t('actions.unlock_limit')}
                           </span>
                         </button>
                       ) : null;
@@ -912,9 +914,7 @@ function Strength({ onComplete }) {
         <div className="standards-tab">
           <div className="standards-content">
             <p>
-              本系統採用國際通用的 DOTS 係數 (Relative Strength) 與 McCulloch
-              年齡修正模型。此標準廣泛應用於國際力量舉 (Powerlifting)
-              競賽，能科學地消除體重、性別與年齡差異，精準評估您在相同條件下的真實力量水平。
+              {t('tests.standards_desc')}
             </p>
           </div>
 

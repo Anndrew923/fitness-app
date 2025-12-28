@@ -99,5 +99,15 @@ export default {
     reload: '重新載入頁面',
     detailsDev: '錯誤詳情 (開發模式)',
   },
+  honorModal: {
+    title: '⚡️ 突破極限！<br/>見證傳奇時刻',
+    desc_highlight: '恭喜！您的表現已超越標準評分系統的上限（100分）。這不僅是數字，更是頂尖實力的證明！',
+    desc_normal: '為了維護這份榮耀的公信力，我們誠摯邀請您完成「榮譽認證」。<br/>解鎖束縛，讓世界看見您真實的巔峰數據！',
+    cta_unlock: '前往解鎖榮耀',
+    cta_later: '暫時隱藏實力，稍後再說',
+  },
+  actions: {
+    unlock_limit: '解鎖極限',
+  },
 };
 

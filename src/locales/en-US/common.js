@@ -103,5 +103,15 @@ export default {
     reload: 'Reload page',
     detailsDev: 'Error details (development)',
   },
+  honorModal: {
+    title: '⚡️ Break Limits!<br/>Witness the Legend',
+    desc_highlight: 'Congratulations! Your performance has exceeded the standard limit (100). This is proof of your elite strength!',
+    desc_normal: 'To maintain credibility, we invite you to complete the \'Honor Certification\'.<br/>Unlock your true peak data now!',
+    cta_unlock: 'Unlock Glory',
+    cta_later: 'Hide Power for Now',
+  },
+  actions: {
+    unlock_limit: 'Unlock Limit',
+  },
 };
 
