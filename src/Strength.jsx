@@ -189,8 +189,9 @@ function Strength({ onComplete }) {
 
       // 使用新的計算邏輯
       const exerciseType = exerciseTypeMap[type];
-      const genderValue = gender === 'male' || gender === '男性' ? 'male' : 'female';
-      
+      const genderValue =
+        gender === 'male' || gender === '男性' ? 'male' : 'female';
+
       const finalScore = calculateStrengthScore(
         exerciseType,
         weightNum,
@@ -206,9 +207,8 @@ function Strength({ onComplete }) {
       }
 
       // 計算 1RM
-      const liftWeight = exerciseType === 'Pull-ups' 
-        ? userWeight + weightNum 
-        : weightNum;
+      const liftWeight =
+        exerciseType === 'Pull-ups' ? userWeight + weightNum : weightNum;
       const oneRepMax = calculateOneRepMax(liftWeight, repsNum);
 
       // 榮譽鎖邏輯
@@ -272,19 +272,19 @@ function Strength({ onComplete }) {
     calculateMaxStrength,
   ]);
 
-  const getAverageScoreComment = (score, gender) => {
-    const isMale =
-      gender === '男性' || (gender && gender.toLowerCase() === 'male');
-    const ns = isMale
-      ? 'tests.strengthComments.male'
-      : 'tests.strengthComments.female';
-    if (score >= 90) return t(`${ns}.gte90`);
-    if (score >= 80) return t(`${ns}.gte80`);
-    if (score >= 70) return t(`${ns}.gte70`);
-    if (score >= 60) return t(`${ns}.gte60`);
-    if (score >= 50) return t(`${ns}.gte50`);
-    if (score >= 40) return t(`${ns}.gte40`);
-    return t(`${ns}.below40`);
+  const getStrengthFeedback = score => {
+    const scoreNum = parseFloat(score);
+    if (scoreNum >= 100)
+      return '🔥 傳奇降臨！您的力量已突破系統極限，踏入半神領域。請務必進行榮譽認證，將您的名字刻在殿堂之上！';
+    if (scoreNum >= 90)
+      return '👑 頂點霸主！這就是凡人的極限嗎？您的力量足以撼動山河，是當之無愧的王者。';
+    if (scoreNum >= 80)
+      return '⚔️ 令人敬畏！您已達到精英運動員的水準，在任何健身房都是備受尊敬的強者。';
+    if (scoreNum >= 60)
+      return '🛡️ 鋼鐵之軀！訓練痕跡清晰可見，您的力量已經超越了絕大多數的普通人。';
+    if (scoreNum >= 40)
+      return '⚡️ 漸入佳境！肌肉正在甦醒，您已經掌握了力量的鑰匙，繼續保持！';
+    return '🌱 潛力無限！偉大的旅程始於足下，每一次舉起都是對未來的投資。';
   };
 
   const radarData = useMemo(
@@ -316,7 +316,8 @@ function Strength({ onComplete }) {
       {
         name: t('tests.strengthExercises.shoulderPress'),
         value: Math.min(parseFloat(shoulderPress.score) || 0, 100),
-        rawValue: shoulderPress.rawScore || parseFloat(shoulderPress.score) || 0,
+        rawValue:
+          shoulderPress.rawScore || parseFloat(shoulderPress.score) || 0,
         isCapped: shoulderPress.isCapped || false,
       },
     ],
@@ -432,63 +433,12 @@ function Strength({ onComplete }) {
     }
   };
 
-  const scoreTableData = [
-    {
-      range: '90~100',
-      description: t('tests.strengthStandards.guide.items.90_100'),
-    },
-    {
-      range: '80~90',
-      description: t('tests.strengthStandards.guide.items.80_90'),
-    },
-    {
-      range: '70~80',
-      description: t('tests.strengthStandards.guide.items.70_80'),
-    },
-    {
-      range: '60~70',
-      description: t('tests.strengthStandards.guide.items.60_70'),
-    },
-    {
-      range: '50~60',
-      description: t('tests.strengthStandards.guide.items.50_60'),
-    },
-    {
-      range: '40~50',
-      description: t('tests.strengthStandards.guide.items.40_50'),
-    },
-    {
-      range: t('tests.strengthStandards.guide.rangeBelow40'),
-      description: t('tests.strengthStandards.guide.items.below40'),
-    },
-  ];
-
-  const scoreLevels = [
-    {
-      level: t('tests.strengthStandards.levels.beginner'),
-      score: 20,
-      color: '#FF6B6B',
-    },
-    {
-      level: t('tests.strengthStandards.levels.novice'),
-      score: 40,
-      color: '#FFA726',
-    },
-    {
-      level: t('tests.strengthStandards.levels.intermediate'),
-      score: 60,
-      color: '#FFEE58',
-    },
-    {
-      level: t('tests.strengthStandards.levels.advanced'),
-      score: 80,
-      color: '#66BB6A',
-    },
-    {
-      level: t('tests.strengthStandards.levels.elite'),
-      score: 100,
-      color: '#42A5F5',
-    },
+  const SCORE_LEVELS = [
+    { score: 20, label: '初心冒險者', color: '#FF6B6B' },
+    { score: 40, label: '堅毅衛士', color: '#FFA726' },
+    { score: 60, label: '戰場先鋒', color: '#FFEE58' },
+    { score: 80, label: '榮耀騎士', color: '#66BB6A' },
+    { score: 100, label: '力量主宰', color: '#42A5F5' },
   ];
 
   // 運動項目配置
@@ -615,11 +565,17 @@ function Strength({ onComplete }) {
                   <div className="score-display">
                     <p style={{ margin: 0 }}>
                       {t('tests.score')}: {state.score}
-                      {state.rawScore && state.rawScore > 100 && !state.isCapped && (
-                        <span className="verified-badge" title="已認證顯示真實分數">
-                          {' '}✓
-                        </span>
-                      )}
+                      {state.rawScore &&
+                        state.rawScore > 100 &&
+                        !state.isCapped && (
+                          <span
+                            className="verified-badge"
+                            title="已認證顯示真實分數"
+                          >
+                            {' '}
+                            ✓
+                          </span>
+                        )}
                     </p>
                     {state.isCapped && (
                       <button
@@ -640,18 +596,28 @@ function Strength({ onComplete }) {
                           marginRight: 'auto',
                           transition: 'all 0.3s ease',
                         }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.background = 'rgba(0, 0, 0, 0.8)';
-                          e.currentTarget.style.borderColor = 'rgba(234, 179, 8, 0.8)';
+                        onMouseEnter={e => {
+                          e.currentTarget.style.background =
+                            'rgba(0, 0, 0, 0.8)';
+                          e.currentTarget.style.borderColor =
+                            'rgba(234, 179, 8, 0.8)';
                         }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.background = 'rgba(0, 0, 0, 0.6)';
-                          e.currentTarget.style.borderColor = 'rgba(234, 179, 8, 0.5)';
+                        onMouseLeave={e => {
+                          e.currentTarget.style.background =
+                            'rgba(0, 0, 0, 0.6)';
+                          e.currentTarget.style.borderColor =
+                            'rgba(234, 179, 8, 0.5)';
                         }}
                         title="點擊解鎖真實實力"
                       >
                         <span style={{ fontSize: '0.875rem' }}>🔒</span>
-                        <span style={{ fontSize: '0.75rem', color: '#facc15', fontWeight: 500 }}>
+                        <span
+                          style={{
+                            fontSize: '0.75rem',
+                            color: '#facc15',
+                            fontWeight: 500,
+                          }}
+                        >
                           解鎖極限
                         </span>
                       </button>
@@ -744,7 +710,7 @@ function Strength({ onComplete }) {
                       <LabelList
                         dataKey="rawValue"
                         position="top"
-                        formatter={(value) => {
+                        formatter={value => {
                           if (value > 100) {
                             return value.toFixed(1);
                           }
@@ -796,14 +762,27 @@ function Strength({ onComplete }) {
                   {exercises.map(exercise => (
                     <div key={exercise.key} className="score-item">
                       <span className="score-label">{exercise.name}</span>
-                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px' }}>
+                      <div
+                        style={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'flex-end',
+                          gap: '4px',
+                        }}
+                      >
                         <span className="score-value">
                           {exercise.state.score || t('community.ui.noScore')}
-                          {exercise.state.rawScore && exercise.state.rawScore > 100 && !exercise.state.isCapped && (
-                            <span className="verified-badge" title="已認證顯示真實分數">
-                              {' '}✓
-                            </span>
-                          )}
+                          {exercise.state.rawScore &&
+                            exercise.state.rawScore > 100 &&
+                            !exercise.state.isCapped && (
+                              <span
+                                className="verified-badge"
+                                title="已認證顯示真實分數"
+                              >
+                                {' '}
+                                ✓
+                              </span>
+                            )}
                         </span>
                         {exercise.state.isCapped && (
                           <button
@@ -821,18 +800,28 @@ function Strength({ onComplete }) {
                               cursor: 'pointer',
                               transition: 'all 0.3s ease',
                             }}
-                            onMouseEnter={(e) => {
-                              e.currentTarget.style.background = 'rgba(0, 0, 0, 0.8)';
-                              e.currentTarget.style.borderColor = 'rgba(234, 179, 8, 0.8)';
+                            onMouseEnter={e => {
+                              e.currentTarget.style.background =
+                                'rgba(0, 0, 0, 0.8)';
+                              e.currentTarget.style.borderColor =
+                                'rgba(234, 179, 8, 0.8)';
                             }}
-                            onMouseLeave={(e) => {
-                              e.currentTarget.style.background = 'rgba(0, 0, 0, 0.6)';
-                              e.currentTarget.style.borderColor = 'rgba(234, 179, 8, 0.5)';
+                            onMouseLeave={e => {
+                              e.currentTarget.style.background =
+                                'rgba(0, 0, 0, 0.6)';
+                              e.currentTarget.style.borderColor =
+                                'rgba(234, 179, 8, 0.5)';
                             }}
                             title="點擊解鎖真實實力"
                           >
                             <span style={{ fontSize: '0.875rem' }}>🔒</span>
-                            <span style={{ fontSize: '0.75rem', color: '#facc15', fontWeight: 500 }}>
+                            <span
+                              style={{
+                                fontSize: '0.75rem',
+                                color: '#facc15',
+                                fontWeight: 500,
+                              }}
+                            >
                               解鎖極限
                             </span>
                           </button>
@@ -842,18 +831,28 @@ function Strength({ onComplete }) {
                   ))}
                 </div>
                 <div className="average-score-display">
-                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+                  <div
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      gap: '8px',
+                    }}
+                  >
                     <p className="average-score" style={{ margin: 0 }}>
                       {t('tests.averageScore')}: {averageScore}
                     </p>
                     {(() => {
                       // 檢查是否有任何單項被鎖定
-                      const hasCappedScore = exercises.some(ex => ex.state.isCapped);
+                      const hasCappedScore = exercises.some(
+                        ex => ex.state.isCapped
+                      );
                       // 檢查平均分是否超過 100 且未認證
                       const avgScoreNum = parseFloat(averageScore);
                       const isVerified = userData.isVerified === true;
-                      const shouldShowUnlock = (avgScoreNum > 100 && !isVerified) || hasCappedScore;
-                      
+                      const shouldShowUnlock =
+                        (avgScoreNum > 100 && !isVerified) || hasCappedScore;
+
                       return shouldShowUnlock ? (
                         <button
                           onClick={() => setIsUnlockModalOpen(true)}
@@ -870,18 +869,28 @@ function Strength({ onComplete }) {
                             cursor: 'pointer',
                             transition: 'all 0.3s ease',
                           }}
-                          onMouseEnter={(e) => {
-                            e.currentTarget.style.background = 'rgba(0, 0, 0, 0.8)';
-                            e.currentTarget.style.borderColor = 'rgba(234, 179, 8, 0.8)';
+                          onMouseEnter={e => {
+                            e.currentTarget.style.background =
+                              'rgba(0, 0, 0, 0.8)';
+                            e.currentTarget.style.borderColor =
+                              'rgba(234, 179, 8, 0.8)';
                           }}
-                          onMouseLeave={(e) => {
-                            e.currentTarget.style.background = 'rgba(0, 0, 0, 0.6)';
-                            e.currentTarget.style.borderColor = 'rgba(234, 179, 8, 0.5)';
+                          onMouseLeave={e => {
+                            e.currentTarget.style.background =
+                              'rgba(0, 0, 0, 0.6)';
+                            e.currentTarget.style.borderColor =
+                              'rgba(234, 179, 8, 0.5)';
                           }}
                           title="點擊解鎖真實實力"
                         >
                           <span style={{ fontSize: '0.875rem' }}>🔒</span>
-                          <span style={{ fontSize: '0.75rem', color: '#facc15', fontWeight: 500 }}>
+                          <span
+                            style={{
+                              fontSize: '0.75rem',
+                              color: '#facc15',
+                              fontWeight: 500,
+                            }}
+                          >
                             解鎖極限
                           </span>
                         </button>
@@ -889,7 +898,7 @@ function Strength({ onComplete }) {
                     })()}
                   </div>
                   <p className="average-comment">
-                    {getAverageScoreComment(averageScore, gender)}
+                    {getStrengthFeedback(averageScore)}
                   </p>
                 </div>
               </div>
@@ -902,16 +911,20 @@ function Strength({ onComplete }) {
       {currentTab === 'standards' && (
         <div className="standards-tab">
           <div className="standards-content">
-            <p>本系統採用國際通用的 DOTS 係數 (Relative Strength) 與 McCulloch 年齡修正模型。此標準廣泛應用於國際力量舉 (Powerlifting) 競賽，能科學地消除體重、性別與年齡差異，精準評估您在相同條件下的真實力量水平。</p>
+            <p>
+              本系統採用國際通用的 DOTS 係數 (Relative Strength) 與 McCulloch
+              年齡修正模型。此標準廣泛應用於國際力量舉 (Powerlifting)
+              競賽，能科學地消除體重、性別與年齡差異，精準評估您在相同條件下的真實力量水平。
+            </p>
           </div>
 
           <div className="score-levels-table">
             <h3>{t('tests.strengthStandards.scoreLevelsTitle')}</h3>
             <div className="levels-container">
-              {scoreLevels.map((item, index) => (
+              {SCORE_LEVELS.map((item, index) => (
                 <div key={index} className="level-item">
                   <div className="level-header">
-                    <span className="level-name">{item.level}</span>
+                    <span className="level-name">{item.label}</span>
                     <span className="level-score">{item.score}</span>
                   </div>
                   <div className="level-bar-container">
@@ -926,26 +939,6 @@ function Strength({ onComplete }) {
                 </div>
               ))}
             </div>
-          </div>
-
-          <div className="score-table">
-            <h3>{t('tests.strengthStandards.scoreTableTitle')}</h3>
-            <table className="table">
-              <thead>
-                <tr>
-                  <th>{t('tests.strengthStandards.table.range')}</th>
-                  <th>{t('tests.strengthStandards.table.description')}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {scoreTableData.map((row, index) => (
-                  <tr key={index}>
-                    <td>{row.range}</td>
-                    <td>{row.description}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
           </div>
         </div>
       )}
