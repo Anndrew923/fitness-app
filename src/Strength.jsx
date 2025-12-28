@@ -8,9 +8,13 @@ import {
   PolarRadiusAxis,
   Radar,
   ResponsiveContainer,
+  Tooltip,
+  LabelList,
 } from 'recharts';
 import * as standards from './standards';
 import PropTypes from 'prop-types';
+import { calculateStrengthScore } from './utils/strength/scoring';
+import { calculateOneRepMax } from './utils/strength/calculations';
 
 import './Strength.css';
 import { useTranslation } from 'react-i18next';
@@ -29,30 +33,40 @@ function Strength({ onComplete }) {
     reps: userData.testInputs?.strength?.benchPress?.reps || '',
     max: userData.testInputs?.strength?.benchPress?.max || null,
     score: userData.testInputs?.strength?.benchPress?.score || null,
+    rawScore: userData.testInputs?.strength?.benchPress?.rawScore || null,
+    isCapped: userData.testInputs?.strength?.benchPress?.isCapped || false,
   });
   const [squat, setSquat] = useState({
     weight: userData.testInputs?.strength?.squat?.weight || '',
     reps: userData.testInputs?.strength?.squat?.reps || '',
     max: userData.testInputs?.strength?.squat?.max || null,
     score: userData.testInputs?.strength?.squat?.score || null,
+    rawScore: userData.testInputs?.strength?.squat?.rawScore || null,
+    isCapped: userData.testInputs?.strength?.squat?.isCapped || false,
   });
   const [deadlift, setDeadlift] = useState({
     weight: userData.testInputs?.strength?.deadlift?.weight || '',
     reps: userData.testInputs?.strength?.deadlift?.reps || '',
     max: userData.testInputs?.strength?.deadlift?.max || null,
     score: userData.testInputs?.strength?.deadlift?.score || null,
+    rawScore: userData.testInputs?.strength?.deadlift?.rawScore || null,
+    isCapped: userData.testInputs?.strength?.deadlift?.isCapped || false,
   });
   const [latPulldown, setLatPulldown] = useState({
     weight: userData.testInputs?.strength?.latPulldown?.weight || '',
     reps: userData.testInputs?.strength?.latPulldown?.reps || '',
     max: userData.testInputs?.strength?.latPulldown?.max || null,
     score: userData.testInputs?.strength?.latPulldown?.score || null,
+    rawScore: userData.testInputs?.strength?.latPulldown?.rawScore || null,
+    isCapped: userData.testInputs?.strength?.latPulldown?.isCapped || false,
   });
   const [shoulderPress, setShoulderPress] = useState({
     weight: userData.testInputs?.strength?.shoulderPress?.weight || '',
     reps: userData.testInputs?.strength?.shoulderPress?.reps || '',
     max: userData.testInputs?.strength?.shoulderPress?.max || null,
     score: userData.testInputs?.strength?.shoulderPress?.score || null,
+    rawScore: userData.testInputs?.strength?.shoulderPress?.rawScore || null,
+    isCapped: userData.testInputs?.strength?.shoulderPress?.isCapped || false,
   });
   // const [isExpanded, setIsExpanded] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -70,30 +84,40 @@ function Strength({ onComplete }) {
           reps: benchPress.reps,
           max: benchPress.max,
           score: benchPress.score,
+          rawScore: benchPress.rawScore,
+          isCapped: benchPress.isCapped,
         },
         squat: {
           weight: squat.weight,
           reps: squat.reps,
           max: squat.max,
           score: squat.score,
+          rawScore: squat.rawScore,
+          isCapped: squat.isCapped,
         },
         deadlift: {
           weight: deadlift.weight,
           reps: deadlift.reps,
           max: deadlift.max,
           score: deadlift.score,
+          rawScore: deadlift.rawScore,
+          isCapped: deadlift.isCapped,
         },
         latPulldown: {
           weight: latPulldown.weight,
           reps: latPulldown.reps,
           max: latPulldown.max,
           score: latPulldown.score,
+          rawScore: latPulldown.rawScore,
+          isCapped: latPulldown.isCapped,
         },
         shoulderPress: {
           weight: shoulderPress.weight,
           reps: shoulderPress.reps,
           max: shoulderPress.max,
           score: shoulderPress.score,
+          rawScore: shoulderPress.rawScore,
+          isCapped: shoulderPress.isCapped,
         },
       },
     };
@@ -136,68 +160,14 @@ function Strength({ onComplete }) {
     flushTestInputs,
   ]);
 
-  const calculateScore = (value, standard) => {
-    const { Beginner, Novice, Intermediate, Advanced, Elite } = standard;
-    if (value < Beginner) return 0;
-    if (value >= Elite) return 100;
-    if (value >= Advanced)
-      return 80 + ((100 - 80) * (value - Advanced)) / (Elite - Advanced);
-    if (value >= Intermediate)
-      return (
-        60 + ((80 - 60) * (value - Intermediate)) / (Advanced - Intermediate)
-      );
-    if (value >= Novice)
-      return 40 + ((60 - 40) * (value - Novice)) / (Intermediate - Novice);
-    if (value >= Beginner)
-      return 20 + ((40 - 20) * (value - Beginner)) / (Novice - Beginner);
-    return 0;
+  // 動作類型映射
+  const exerciseTypeMap = {
+    benchPress: 'Bench Press',
+    squat: 'Squat',
+    deadlift: 'Deadlift',
+    latPulldown: 'Lat Pulldown',
+    shoulderPress: 'Overhead Press',
   };
-
-  const standardMap = useMemo(() => {
-    const isMale = gender === 'male' || gender === '男性';
-    return {
-      benchPress: {
-        bodyweight: isMale
-          ? standards.bodyweightStandardsMaleBenchPress
-          : standards.bodyweightStandardsFemaleBenchPress,
-        age: isMale
-          ? standards.ageStandardsMaleBenchPress
-          : standards.ageStandardsFemaleBenchPress,
-      },
-      squat: {
-        bodyweight: isMale
-          ? standards.bodyweightStandardsMaleSquat
-          : standards.bodyweightStandardsFemaleSquat,
-        age: isMale
-          ? standards.ageStandardsMaleSquat
-          : standards.ageStandardsFemaleSquat,
-      },
-      deadlift: {
-        bodyweight: isMale
-          ? standards.bodyweightStandardsMaleDeadlift
-          : standards.bodyweightStandardsFemaleDeadlift,
-        age: isMale
-          ? standards.ageStandardsMaleDeadlift
-          : standards.ageStandardsFemaleDeadlift,
-      },
-      latPulldown: {
-        bodyweight: isMale
-          ? standards.bodyweightStandardsMaleLatPulldown
-          : standards.bodyweightStandardsFemaleLatPulldown,
-        age: isMale
-          ? standards.ageStandardsMaleLatPulldown
-          : standards.ageStandardsFemaleLatPulldown,
-      },
-      shoulderPress: {
-        bodyweight: isMale
-          ? standards.bodyweightStandardsMaleShoulderPress
-          : standards.bodyweightStandardsFemaleShoulderPress,
-        age: isMale
-          ? standards.ageStandardsMaleShoulderPress
-          : standards.ageStandardsFemaleShoulderPress,
-      },
-    };
-  }, [gender]);
 
   const calculateMaxStrength = useCallback(
     (weight, reps, setState, type) => {
@@ -214,31 +184,56 @@ function Strength({ onComplete }) {
         setState(prev => ({ ...prev, reps: '' }));
         return;
       }
-      const valueToCompare = weightNum / (1.0278 - 0.0278 * repsNum);
-      const standardsForType = standardMap[type];
-      const weightKeys = Object.keys(standardsForType.bodyweight).map(Number);
-      const ageKeys = Object.keys(standardsForType.age).map(Number);
-      const closestWeight = weightKeys.reduce((prev, curr) =>
-        Math.abs(curr - userWeight) < Math.abs(prev - userWeight) ? curr : prev
+
+      // 使用新的計算邏輯
+      const exerciseType = exerciseTypeMap[type];
+      const genderValue = gender === 'male' || gender === '男性' ? 'male' : 'female';
+      
+      const finalScore = calculateStrengthScore(
+        exerciseType,
+        weightNum,
+        repsNum,
+        userWeight,
+        genderValue,
+        userAge
       );
-      const closestAge = ageKeys.reduce((prev, curr) =>
-        Math.abs(curr - userAge) < Math.abs(prev - userAge) ? curr : prev
-      );
-      const bodyweightStandard = standardsForType.bodyweight[closestWeight];
-      const ageStandard = standardsForType.age[closestAge];
-      const scoreByBodyweight = calculateScore(
-        valueToCompare,
-        bodyweightStandard
-      );
-      const scoreByAge = calculateScore(valueToCompare, ageStandard);
-      const finalScore = ((scoreByBodyweight + scoreByAge) / 2).toFixed(2);
+
+      if (finalScore === null) {
+        alert(t('tests.strengthErrors.invalidExercise'));
+        return;
+      }
+
+      // 計算 1RM
+      const liftWeight = exerciseType === 'Pull-ups' 
+        ? userWeight + weightNum 
+        : weightNum;
+      const oneRepMax = calculateOneRepMax(liftWeight, repsNum);
+
+      // 榮譽鎖邏輯
+      const isVerified = userData.isVerified === true;
+      let displayScore = finalScore;
+      let isCapped = false;
+
+      if (finalScore > 100) {
+        if (isVerified) {
+          // VIP/已認證：顯示真實分數
+          displayScore = finalScore;
+        } else {
+          // 未認證：強制鎖在 100 分
+          displayScore = 100;
+          isCapped = true;
+        }
+      }
+
       setState(prev => ({
         ...prev,
-        max: valueToCompare.toFixed(2),
-        score: finalScore,
+        max: oneRepMax.toFixed(2),
+        score: displayScore.toFixed(2),
+        rawScore: finalScore,
+        isCapped: isCapped,
       }));
     },
-    [standardMap, userData.weight, age]
+    [userData.weight, userData.isVerified, age, gender, t]
   );
 
   // 自動計算已有數據的分數（在 calculateMaxStrength 定義之後）
@@ -294,31 +289,51 @@ function Strength({ onComplete }) {
     () => [
       {
         name: t('tests.strengthExercises.benchPress'),
-        value: parseFloat(benchPress.score) || 0,
+        value: Math.min(parseFloat(benchPress.score) || 0, 100), // 視覺封頂在 100
+        rawValue: benchPress.rawScore || parseFloat(benchPress.score) || 0, // 真實分數用於標籤
+        isCapped: benchPress.isCapped || false,
       },
       {
         name: t('tests.strengthExercises.squat'),
-        value: parseFloat(squat.score) || 0,
+        value: Math.min(parseFloat(squat.score) || 0, 100),
+        rawValue: squat.rawScore || parseFloat(squat.score) || 0,
+        isCapped: squat.isCapped || false,
       },
       {
         name: t('tests.strengthExercises.deadlift'),
-        value: parseFloat(deadlift.score) || 0,
+        value: Math.min(parseFloat(deadlift.score) || 0, 100),
+        rawValue: deadlift.rawScore || parseFloat(deadlift.score) || 0,
+        isCapped: deadlift.isCapped || false,
       },
       {
         name: t('tests.strengthExercises.latPulldown'),
-        value: parseFloat(latPulldown.score) || 0,
+        value: Math.min(parseFloat(latPulldown.score) || 0, 100),
+        rawValue: latPulldown.rawScore || parseFloat(latPulldown.score) || 0,
+        isCapped: latPulldown.isCapped || false,
       },
       {
         name: t('tests.strengthExercises.shoulderPress'),
-        value: parseFloat(shoulderPress.score) || 0,
+        value: Math.min(parseFloat(shoulderPress.score) || 0, 100),
+        rawValue: shoulderPress.rawScore || parseFloat(shoulderPress.score) || 0,
+        isCapped: shoulderPress.isCapped || false,
       },
     ],
     [
       benchPress.score,
+      benchPress.rawScore,
+      benchPress.isCapped,
       squat.score,
+      squat.rawScore,
+      squat.isCapped,
       deadlift.score,
+      deadlift.rawScore,
+      deadlift.isCapped,
       latPulldown.score,
+      latPulldown.rawScore,
+      latPulldown.isCapped,
       shoulderPress.score,
+      shoulderPress.rawScore,
+      shoulderPress.isCapped,
       t,
     ]
   );
@@ -681,6 +696,26 @@ function Strength({ onComplete }) {
                       strokeWidth={4}
                       strokeLinecap="round"
                       strokeLinejoin="round"
+                    >
+                      <LabelList
+                        dataKey="rawValue"
+                        position="top"
+                        formatter={(value) => {
+                          if (value > 100) {
+                            return value.toFixed(1);
+                          }
+                          return null;
+                        }}
+                      />
+                    </Radar>
+                    <Tooltip
+                      formatter={(value, name, props) => {
+                        const rawValue = props.payload.rawValue;
+                        if (rawValue && rawValue > 100) {
+                          return [`真實分數: ${rawValue.toFixed(1)}`, name];
+                        }
+                        return [value.toFixed(1), name];
+                      }}
                     />
                     <defs>
                       <linearGradient
@@ -719,6 +754,16 @@ function Strength({ onComplete }) {
                       <span className="score-label">{exercise.name}</span>
                       <span className="score-value">
                         {exercise.state.score || t('community.ui.noScore')}
+                        {exercise.state.isCapped && (
+                          <span className="capped-indicator" title="認證後可解鎖真實分數">
+                            🔒
+                          </span>
+                        )}
+                        {exercise.state.rawScore && exercise.state.rawScore > 100 && !exercise.state.isCapped && (
+                          <span className="verified-badge" title="已認證顯示真實分數">
+                            ✓
+                          </span>
+                        )}
                       </span>
                     </div>
                   ))}
@@ -741,18 +786,7 @@ function Strength({ onComplete }) {
       {currentTab === 'standards' && (
         <div className="standards-tab">
           <div className="standards-content">
-            <p>{t('tests.strengthStandards.intro')}</p>
-            <p className="source-link">
-              {t('tests.strengthStandards.sourceLabel')}
-              <a
-                href="https://strengthlevel.com/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-600 hover:underline"
-              >
-                https://strengthlevel.com/
-              </a>
-            </p>
+            <p>本系統採用國際通用的 DOTS 係數 (Relative Strength) 與 McCulloch 年齡修正模型。此標準廣泛應用於國際力量舉 (Powerlifting) 競賽，能科學地消除體重、性別與年齡差異，精準評估您在相同條件下的真實力量水平。</p>
           </div>
 
           <div className="score-levels-table">

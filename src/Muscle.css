@@ -605,3 +605,90 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* 榮譽鎖按鈕樣式 - 精緻徽章風格 - 強制覆蓋全局樣式 */
+.honor-lock-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  margin-left: 8px !important;
+  padding: 6px 14px !important;
+  background-color: rgba(0, 0, 0, 0.6) !important;
+  background-image: none !important;
+  border: 1px solid rgba(234, 179, 8, 0.5) !important;
+  border-radius: 9999px !important;
+  cursor: pointer !important;
+  font-size: 0.75rem !important;
+  font-weight: 500 !important;
+  color: #fcd34d !important;
+  line-height: 1.2 !important;
+  transition: all 0.3s ease !important;
+  position: relative !important;
+  animation: honorLockPulse 2s ease-in-out infinite !important;
+  box-shadow: 0 0 8px rgba(234, 179, 8, 0.2) !important;
+  letter-spacing: 0.5px !important;
+  white-space: nowrap !important;
+  width: fit-content !important;
+  min-width: auto !important;
+  max-width: none !important;
+  flex-shrink: 0 !important;
+  align-self: center !important;
+}
+
+.honor-lock-btn span:first-child {
+  font-size: 0.875rem !important;
+  display: inline-flex !important;
+  align-items: center !important;
+}
+
+.honor-lock-btn span:last-child {
+  font-size: 0.75rem !important;
+}
+
+.honor-lock-btn:hover {
+  background-color: rgba(234, 179, 8, 0.1) !important;
+  background-image: none !important;
+  border-color: rgba(234, 179, 8, 0.8) !important;
+  color: #fbbf24 !important;
+  box-shadow: 0 0 15px rgba(234, 179, 8, 0.3) !important;
+  transform: translateY(-1px) !important;
+}
+
+.honor-lock-btn:active {
+  transform: translateY(0) !important;
+  box-shadow: 0 0 10px rgba(234, 179, 8, 0.25) !important;
+}
+
+/* 呼吸動畫 - 讓鎖頭看起來在召喚用戶 */
+@keyframes honorLockPulse {
+  0%,
+  100% {
+    opacity: 1;
+    box-shadow: 0 0 8px rgba(234, 179, 8, 0.2);
+  }
+  50% {
+    opacity: 0.9;
+    box-shadow: 0 0 12px rgba(234, 179, 8, 0.4);
+  }
+}
+
+/* 確保按鈕在各種文本環境中都能正常顯示 - 強制覆蓋 */
+.result-text .honor-lock-btn,
+.score-text .honor-lock-btn,
+.your-score .honor-lock-btn,
+.result-text .honor-lock-btn *,
+.score-text .honor-lock-btn *,
+.your-score .honor-lock-btn * {
+  vertical-align: middle !important;
+  width: fit-content !important;
+  flex-shrink: 0 !important;
+}
+
+/* 防止父容器拉伸鎖頭按鈕 - 使用更兼容的方式 */
+strong .honor-lock-btn,
+.result-text .honor-lock-btn,
+.score-text .honor-lock-btn {
+  align-self: center !important;
+  flex-shrink: 0 !important;
+}

@@ -15,6 +15,7 @@ import {
 import PropTypes from 'prop-types';
 import './Muscle.css';
 import { useTranslation } from 'react-i18next';
+import HonorUnlockModal from './components/shared/modals/HonorUnlockModal';
 
 function Muscle({ onComplete }) {
   const { userData, setUserData } = useUser();
@@ -28,8 +29,12 @@ function Muscle({ onComplete }) {
     smPercent: null,
     smPercentScore: null,
     finalScore: null,
+    isSmmCapped: false,
+    isSmPercentCapped: false,
+    isFinalScoreCapped: false,
   });
   const [submitting, setSubmitting] = useState(false);
+  const [isUnlockModalOpen, setIsUnlockModalOpen] = useState(false);
 
   useEffect(() => {
     if (smm) {
@@ -116,6 +121,21 @@ function Muscle({ onComplete }) {
     return rawScore;
   };
 
+  // 🔒 榮譽鎖機制：超過 100 分需認證才能顯示真實數值
+  const applyHonorLock = (score, isVerified) => {
+    if (score > 100) {
+      if (isVerified) {
+        // 已認證：顯示真實分數
+        return { displayScore: score, isCapped: false };
+      } else {
+        // 未認證：強制鎖在 100
+        return { displayScore: 100, isCapped: true };
+      }
+    }
+    // 未超過 100 分，無需鎖定
+    return { displayScore: score, isCapped: false };
+  };
+
   const calculateMuscleScore = () => {
     if (!weight || !smm || !age || !gender) {
       alert(t('tests.muscleErrors.missingPrerequisites'));
@@ -155,10 +175,26 @@ function Muscle({ onComplete }) {
     
     // 🚀 僅對 SMM (骨骼肌重量) 應用 1.25 倍放大係數
     // SM% (骨骼肌率) 保持原始分數，不應用係數
-    const smmScore = Math.round(smmRawScore * 1.25);
+    const smmScoreRaw = Math.round(smmRawScore * 1.25);
     
-    const finalScore = ((smmScore + smPercentScore) / 2).toFixed(2);
-    setResult({ smmScore, smPercent, smPercentScore, finalScore });
+    // 🔒 應用榮譽鎖機制
+    const isVerified = userData.isVerified === true;
+    const smmLocked = applyHonorLock(smmScoreRaw, isVerified);
+    const smPercentLocked = applyHonorLock(smPercentScore, isVerified);
+    
+    // 計算最終分數（使用顯示分數）
+    const finalScoreRaw = (smmLocked.displayScore + smPercentLocked.displayScore) / 2;
+    const finalScoreLocked = applyHonorLock(finalScoreRaw, isVerified);
+    
+    setResult({
+      smmScore: smmLocked.displayScore,
+      smPercent,
+      smPercentScore: smPercentLocked.displayScore,
+      finalScore: finalScoreLocked.displayScore.toFixed(2),
+      isSmmCapped: smmLocked.isCapped,
+      isSmPercentCapped: smPercentLocked.isCapped,
+      isFinalScoreCapped: finalScoreLocked.isCapped,
+    });
   };
 
   const handleSubmit = async () => {
@@ -404,6 +440,17 @@ function Muscle({ onComplete }) {
                 <strong>
                   {t('tests.muscleLabels.scoringReference.yourScore')}:{' '}
                   {result.finalScore}分
+                  {result.isFinalScoreCapped && (
+                    <button
+                      type="button"
+                      className="honor-lock-btn"
+                      onClick={() => setIsUnlockModalOpen(true)}
+                      title="點擊解鎖真實實力"
+                    >
+                      <span>🔒</span>
+                      <span>解鎖極限</span>
+                    </button>
+                  )}
                 </strong>
               </p>
             </div>
@@ -411,15 +458,48 @@ function Muscle({ onComplete }) {
 
           <p className="result-text">
             {t('tests.muscleLabels.smmShort')}: {result.smmScore}
+            {result.isSmmCapped && (
+              <button
+                type="button"
+                className="honor-lock-btn"
+                onClick={() => setIsUnlockModalOpen(true)}
+                title="點擊解鎖真實實力"
+              >
+                <span>🔒</span>
+                <span>解鎖極限</span>
+              </button>
+            )}
           </p>
           <p className="result-text">
             {t('tests.muscleLabels.smPercentShort')}: {result.smPercent}%
           </p>
           <p className="result-text">
             {t('tests.muscleLabels.smPercentScore')}: {result.smPercentScore}
+            {result.isSmPercentCapped && (
+              <button
+                type="button"
+                className="honor-lock-btn"
+                onClick={() => setIsUnlockModalOpen(true)}
+                title="點擊解鎖真實實力"
+              >
+                <span>🔒</span>
+                <span>解鎖極限</span>
+              </button>
+            )}
           </p>
           <p className="score-text final-score">
             {t('tests.muscleLabels.finalScore')}: {result.finalScore}
+            {result.isFinalScoreCapped && (
+              <button
+                type="button"
+                className="honor-lock-btn"
+                onClick={() => setIsUnlockModalOpen(true)}
+                title="點擊解鎖真實實力"
+              >
+                <span>🔒</span>
+                <span>解鎖極限</span>
+              </button>
+            )}
           </p>
         </div>
       )}
@@ -505,6 +585,11 @@ function Muscle({ onComplete }) {
           {submitting ? t('common.submitting') : t('common.submitAndReturn')}
         </button>
       </div>
+
+      <HonorUnlockModal
+        isOpen={isUnlockModalOpen}
+        onClose={() => setIsUnlockModalOpen(false)}
+      />
     </div>
   );
 }
