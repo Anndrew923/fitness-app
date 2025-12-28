@@ -6,7 +6,7 @@ export default {
     strengthLabels: {
       weightKg: '重量 (kg)',
       reps: '次數',
-      maxStrength: '三項總合',
+      maxStrength: '最大力量',
       score: '分數',
       distribution: '力量分佈圖',
     },

@@ -18,6 +18,7 @@ import { calculateOneRepMax } from './utils/strength/calculations';
 
 import './Strength.css';
 import { useTranslation } from 'react-i18next';
+import HonorUnlockModal from './components/shared/modals/HonorUnlockModal';
 
 function Strength({ onComplete }) {
   const { userData, setUserData } = useUser();
@@ -70,6 +71,7 @@ function Strength({ onComplete }) {
   });
   // const [isExpanded, setIsExpanded] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [isUnlockModalOpen, setIsUnlockModalOpen] = useState(false);
 
   // 將 useRef 移到組件頂層
   const timeoutRef = useRef(null);
@@ -610,9 +612,51 @@ function Strength({ onComplete }) {
                   {t('tests.strengthLabels.maxStrength')}: {state.max} kg
                 </p>
                 {state.score && (
-                  <p className="score-display">
-                    {t('tests.score')}: {state.score}
-                  </p>
+                  <div className="score-display">
+                    <p style={{ margin: 0 }}>
+                      {t('tests.score')}: {state.score}
+                      {state.rawScore && state.rawScore > 100 && !state.isCapped && (
+                        <span className="verified-badge" title="已認證顯示真實分數">
+                          {' '}✓
+                        </span>
+                      )}
+                    </p>
+                    {state.isCapped && (
+                      <button
+                        onClick={() => setIsUnlockModalOpen(true)}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '8px',
+                          padding: '4px 12px',
+                          borderRadius: '9999px',
+                          width: 'fit-content',
+                          background: 'rgba(0, 0, 0, 0.6)',
+                          border: '1px solid rgba(234, 179, 8, 0.5)',
+                          cursor: 'pointer',
+                          marginTop: '8px',
+                          marginLeft: 'auto',
+                          marginRight: 'auto',
+                          transition: 'all 0.3s ease',
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.background = 'rgba(0, 0, 0, 0.8)';
+                          e.currentTarget.style.borderColor = 'rgba(234, 179, 8, 0.8)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.background = 'rgba(0, 0, 0, 0.6)';
+                          e.currentTarget.style.borderColor = 'rgba(234, 179, 8, 0.5)';
+                        }}
+                        title="點擊解鎖真實實力"
+                      >
+                        <span style={{ fontSize: '0.875rem' }}>🔒</span>
+                        <span style={{ fontSize: '0.75rem', color: '#facc15', fontWeight: 500 }}>
+                          解鎖極限
+                        </span>
+                      </button>
+                    )}
+                  </div>
                 )}
               </div>
             )}
@@ -752,26 +796,98 @@ function Strength({ onComplete }) {
                   {exercises.map(exercise => (
                     <div key={exercise.key} className="score-item">
                       <span className="score-label">{exercise.name}</span>
-                      <span className="score-value">
-                        {exercise.state.score || t('community.ui.noScore')}
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px' }}>
+                        <span className="score-value">
+                          {exercise.state.score || t('community.ui.noScore')}
+                          {exercise.state.rawScore && exercise.state.rawScore > 100 && !exercise.state.isCapped && (
+                            <span className="verified-badge" title="已認證顯示真實分數">
+                              {' '}✓
+                            </span>
+                          )}
+                        </span>
                         {exercise.state.isCapped && (
-                          <span className="capped-indicator" title="認證後可解鎖真實分數">
-                            🔒
-                          </span>
+                          <button
+                            onClick={() => setIsUnlockModalOpen(true)}
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              gap: '8px',
+                              padding: '4px 12px',
+                              borderRadius: '9999px',
+                              width: 'fit-content',
+                              background: 'rgba(0, 0, 0, 0.6)',
+                              border: '1px solid rgba(234, 179, 8, 0.5)',
+                              cursor: 'pointer',
+                              transition: 'all 0.3s ease',
+                            }}
+                            onMouseEnter={(e) => {
+                              e.currentTarget.style.background = 'rgba(0, 0, 0, 0.8)';
+                              e.currentTarget.style.borderColor = 'rgba(234, 179, 8, 0.8)';
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.background = 'rgba(0, 0, 0, 0.6)';
+                              e.currentTarget.style.borderColor = 'rgba(234, 179, 8, 0.5)';
+                            }}
+                            title="點擊解鎖真實實力"
+                          >
+                            <span style={{ fontSize: '0.875rem' }}>🔒</span>
+                            <span style={{ fontSize: '0.75rem', color: '#facc15', fontWeight: 500 }}>
+                              解鎖極限
+                            </span>
+                          </button>
                         )}
-                        {exercise.state.rawScore && exercise.state.rawScore > 100 && !exercise.state.isCapped && (
-                          <span className="verified-badge" title="已認證顯示真實分數">
-                            ✓
-                          </span>
-                        )}
-                      </span>
+                      </div>
                     </div>
                   ))}
                 </div>
                 <div className="average-score-display">
-                  <p className="average-score">
-                    {t('tests.averageScore')}: {averageScore}
-                  </p>
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+                    <p className="average-score" style={{ margin: 0 }}>
+                      {t('tests.averageScore')}: {averageScore}
+                    </p>
+                    {(() => {
+                      // 檢查是否有任何單項被鎖定
+                      const hasCappedScore = exercises.some(ex => ex.state.isCapped);
+                      // 檢查平均分是否超過 100 且未認證
+                      const avgScoreNum = parseFloat(averageScore);
+                      const isVerified = userData.isVerified === true;
+                      const shouldShowUnlock = (avgScoreNum > 100 && !isVerified) || hasCappedScore;
+                      
+                      return shouldShowUnlock ? (
+                        <button
+                          onClick={() => setIsUnlockModalOpen(true)}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '8px',
+                            padding: '4px 12px',
+                            borderRadius: '9999px',
+                            width: 'fit-content',
+                            background: 'rgba(0, 0, 0, 0.6)',
+                            border: '1px solid rgba(234, 179, 8, 0.5)',
+                            cursor: 'pointer',
+                            transition: 'all 0.3s ease',
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.background = 'rgba(0, 0, 0, 0.8)';
+                            e.currentTarget.style.borderColor = 'rgba(234, 179, 8, 0.8)';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.background = 'rgba(0, 0, 0, 0.6)';
+                            e.currentTarget.style.borderColor = 'rgba(234, 179, 8, 0.5)';
+                          }}
+                          title="點擊解鎖真實實力"
+                        >
+                          <span style={{ fontSize: '0.875rem' }}>🔒</span>
+                          <span style={{ fontSize: '0.75rem', color: '#facc15', fontWeight: 500 }}>
+                            解鎖極限
+                          </span>
+                        </button>
+                      ) : null;
+                    })()}
+                  </div>
                   <p className="average-comment">
                     {getAverageScoreComment(averageScore, gender)}
                   </p>
@@ -849,6 +965,11 @@ function Strength({ onComplete }) {
             : t('errors.required')}
         </button>
       </div>
+
+      <HonorUnlockModal
+        isOpen={isUnlockModalOpen}
+        onClose={() => setIsUnlockModalOpen(false)}
+      />
     </div>
   );
 }

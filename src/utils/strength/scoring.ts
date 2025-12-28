@@ -12,14 +12,18 @@ import {
 /**
  * 菁英錨點常數 (Elite Anchors)
  * 各動作對應的 "100分 DOTS 門檻"
+ * 
+ * ⚠️ 調整說明：原基準值過於嚴格（對應世界級精英水平），
+ * 已調整為 Advanced 級別（約 80-85 分水平），使中等水平用戶能獲得 60-70 分，
+ * 更符合激勵用戶的產品目標。
  */
 export const ANCHOR_DOTS = {
-  'Deadlift': 190,
-  'Squat': 175,
-  'Bench Press': 115,
-  'Lat Pulldown': 110,
-  'Overhead Press': 75,
-  'Pull-ups': 110
+  'Deadlift': 150,    // 原 190，調整為 0.79 倍
+  'Squat': 140,       // 原 175，調整為 0.80 倍
+  'Bench Press': 90,  // 原 115，調整為 0.78 倍
+  'Lat Pulldown': 88, // 原 110，調整為 0.80 倍
+  'Overhead Press': 60, // 原 75，調整為 0.80 倍
+  'Pull-ups': 88      // 原 110，調整為 0.80 倍
 } as const;
 
 export type ExerciseType = keyof typeof ANCHOR_DOTS;
