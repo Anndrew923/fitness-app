@@ -56,27 +56,64 @@ function Muscle({ onComplete }) {
   };
 
   const calculateScoreFromStandard = (value, standard) => {
-    // 讓分數平滑，線性插值，允許小數點一位
-    if (value >= standard[100]) return 100;
-    if (value <= standard[0]) return 0;
-    // 找到分數區間
-    let lower = 0;
-    let upper = 100;
-    for (let i = 10; i <= 100; i += 10) {
-      if (value < standard[i]) {
-        upper = i;
-        lower = i - 10;
-        break;
+    // 🛡️ 安全檢查：防止 standard 為 undefined 導致崩潰
+    if (!standard) return 0;
+
+    // 📊 計算原始分數 (RawScore: 0-100+)
+    let rawScore = 0;
+
+    // 🔥 Limit Break: 移除 100 分封頂，改採斜率延伸
+    if (value >= standard[100]) {
+      // 1. 計算最後一個區間 (PR90 到 PR100) 的斜率
+      // 斜率 = 分數差(10) / 數值差
+      // 注意：需防止分母為 0 (雖然標準數據中 PR100 通常 > PR90)
+      const valueDiff = standard[100] - standard[90];
+      const slope = valueDiff > 0 ? 10 / valueDiff : 0;
+      
+      // 2. 計算超出的數值
+      const extraValue = value - standard[100];
+      
+      // 3. 基礎線性延伸分數
+      let extendedScore = 100 + extraValue * slope;
+
+      // 4. 軟上限 (Soft Cap): 超過 120 分後，收益減半，防止數值無限膨脹
+      if (extendedScore > 120) {
+        extendedScore = 120 + (extendedScore - 120) * 0.5;
+      }
+
+      rawScore = parseFloat(extendedScore.toFixed(2));
+    } else {
+      // --- 以下保持原有的中間區間計算邏輯 ---
+      if (value <= standard[0]) {
+        rawScore = 0;
+      } else {
+        // 找到分數區間
+        let lower = 0;
+        let upper = 100;
+        for (let i = 10; i <= 100; i += 10) {
+          if (value < standard[i]) {
+            upper = i;
+            lower = i - 10;
+            break;
+          }
+        }
+        
+        // 線性插值
+        const lowerValue = standard[lower];
+        const upperValue = standard[upper];
+        if (upperValue === lowerValue) {
+          rawScore = upper;
+        } else {
+          rawScore =
+            lower +
+            ((value - lowerValue) / (upperValue - lowerValue)) * (upper - lower);
+          rawScore = Math.round(rawScore * 100) / 100;
+        }
       }
     }
-    // 線性插值
-    const lowerValue = standard[lower];
-    const upperValue = standard[upper];
-    if (upperValue === lowerValue) return upper;
-    const score =
-      lower +
-      ((value - lowerValue) / (upperValue - lowerValue)) * (upper - lower);
-    return Math.round(score * 100) / 100;
+
+    // 返回原始分數 (Raw Score)，不應用任何係數
+    return rawScore;
   };
 
   const calculateMuscleScore = () => {
@@ -108,12 +145,18 @@ function Muscle({ onComplete }) {
       alert(t('tests.muscleErrors.standardsNotFound'));
       return;
     }
-    const smmScore = calculateScoreFromStandard(smmNum, smmStandard, 'SMM');
+    // 計算原始分數
+    const smmRawScore = calculateScoreFromStandard(smmNum, smmStandard, 'SMM');
     const smPercentScore = calculateScoreFromStandard(
       parseFloat(smPercent),
       smPercentStandard,
       'SM%'
     );
+    
+    // 🚀 僅對 SMM (骨骼肌重量) 應用 1.25 倍放大係數
+    // SM% (骨骼肌率) 保持原始分數，不應用係數
+    const smmScore = Math.round(smmRawScore * 1.25);
+    
     const finalScore = ((smmScore + smPercentScore) / 2).toFixed(2);
     setResult({ smmScore, smPercent, smPercentScore, finalScore });
   };
@@ -399,7 +442,7 @@ function Muscle({ onComplete }) {
                   }}
                 />
                 <YAxis
-                  domain={[0, 100]}
+                  domain={[0, 'dataMax']}
                   label={{
                     value: t('tests.muscleLabels.chartScore'),
                     angle: -90,
@@ -433,7 +476,7 @@ function Muscle({ onComplete }) {
                   }}
                 />
                 <YAxis
-                  domain={[0, 100]}
+                  domain={[0, 'dataMax']}
                   label={{
                     value: t('tests.muscleLabels.chartScore'),
                     angle: -90,

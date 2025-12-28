@@ -58,24 +58,32 @@ function FFMI({ onComplete }) {
     let newFfmiScore;
     if (isMale) {
       const baseFfmi = 18.5;
-      const maxFfmi = 28;
+      const maxFfmi = 25; // ✅ 修改：將男性 100 分標準設為自然極限 25
       if (adjustedFfmi <= 0) newFfmiScore = 0;
       else if (adjustedFfmi <= baseFfmi)
         newFfmiScore = (adjustedFfmi / baseFfmi) * 60;
       else if (adjustedFfmi < maxFfmi)
         newFfmiScore =
           60 + ((adjustedFfmi - baseFfmi) / (maxFfmi - baseFfmi)) * 40;
-      else newFfmiScore = 100;
+      else {
+        // 🔥 Limit Break
+        // 超過 25 後，每多 1 點 FFMI + 5 分
+        newFfmiScore = 100 + (adjustedFfmi - maxFfmi) * 5;
+      }
     } else {
       const baseFfmi = 15.5;
-      const maxFfmi = 22;
+      const maxFfmi = 21; // ✅ 修改：將女性 100 分標準設為 21 (兼顧挑戰性與多巴胺)
       if (adjustedFfmi <= 0) newFfmiScore = 0;
       else if (adjustedFfmi <= baseFfmi)
         newFfmiScore = (adjustedFfmi / baseFfmi) * 60;
       else if (adjustedFfmi < maxFfmi)
         newFfmiScore =
           60 + ((adjustedFfmi - baseFfmi) / (maxFfmi - baseFfmi)) * 40;
-      else newFfmiScore = 100;
+      else {
+        // 🔥 Limit Break
+        // 超過 21 後，每多 1 點 FFMI + 5 分
+        newFfmiScore = 100 + (adjustedFfmi - maxFfmi) * 5;
+      }
     }
     setFfmiScore(newFfmiScore.toFixed(2));
 
