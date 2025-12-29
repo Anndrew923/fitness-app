@@ -1,6 +1,7 @@
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { generateNickname } from '../utils';
-import { auth } from '../firebase';
+import { auth, db } from '../firebase';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import logger from '../utils/logger';
 
 const GENDER_OPTIONS = ['male', 'female'];
@@ -11,7 +12,8 @@ export const useUserInfoForm = (
   saveUserData,
   t,
   isGuest,
-  onShowModal
+  onShowModal,
+  navigate
 ) => {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -20,6 +22,25 @@ export const useUserInfoForm = (
     message: '',
   });
   const nicknameTimeoutRef = useRef(null);
+  const previousWeightRef = useRef(null); // 記錄保存前的體重（來自 API/首次載入）
+  const isInitializedRef = useRef(false); // 標記是否已初始化
+
+  // ✅ 鎖定初始值：只在組件掛載或 API 資料首次載入時設定一次
+  // 禁止隨動：當用戶在 input 欄位輸入數字時，不要更新 previousWeightRef
+  useEffect(() => {
+    const currentWeight = Number(userData.weight) || 0;
+    
+    // 只在首次初始化時設定（previousWeightRef 為 null 且 currentWeight > 0）
+    // 一旦初始化後，就不再隨 userData.weight 變化而更新
+    if (!isInitializedRef.current && currentWeight > 0) {
+      previousWeightRef.current = currentWeight;
+      isInitializedRef.current = true;
+      
+      if (process.env.NODE_ENV === 'development') {
+        logger.debug('previousWeightRef 初始化:', currentWeight);
+      }
+    }
+  }, [userData.weight]);
 
   const validateData = useCallback(() => {
     const { height, weight, age, gender } = userData;
@@ -57,10 +78,27 @@ export const useUserInfoForm = (
         bodyFat: 0,
       };
 
+      // ✅ 比較時機：在 handleSave 中，拿 formData.weight (新) 與 previousWeightRef.current (舊) 進行比較
+      // previousWeightRef 記錄的是上次保存成功後的體重（或首次載入的體重）
+      const oldWeight = previousWeightRef.current !== null 
+        ? Number(previousWeightRef.current) || 0
+        : Number(userData.weight) || 0;
+      const newWeight = Number(userData.weight) || 0;
+      
+      // ✅ 調試日誌：檢查體重比較
+      if (process.env.NODE_ENV === 'development') {
+        logger.debug('體重比較:', { 
+          oldWeight, 
+          newWeight, 
+          previousWeightRef: previousWeightRef.current,
+          changed: Math.abs(oldWeight - newWeight) > 0.01 
+        });
+      }
+
       const updatedUserData = {
         ...userData,
         height: Number(userData.height) || 0,
-        weight: Number(userData.weight) || 0,
+        weight: newWeight,
         age: Number(userData.age) || 0,
         gender: userData.gender,
         job_category: userData.job_category || '',
@@ -109,12 +147,80 @@ export const useUserInfoForm = (
           );
         }
 
-        onShowModal({
-          isOpen: true,
-          title: t('userInfo.modal.saveSuccessTitle'),
-          message: t('userInfo.modal.saveSuccessMessage'),
-          type: 'success',
-        });
+        // ✅ 檢測體重變更並顯示引導提示
+        // 確保型別一致，使用嚴格比較
+        const weightChanged = 
+          oldWeight > 0 && 
+          newWeight > 0 && 
+          Math.abs(oldWeight - newWeight) > 0.01; // 允許小數點誤差
+        
+        // ✅ 更新時機：只有在 saveUserData 成功之後，才把 previousWeightRef.current 更新為新體重
+        // 這樣下次保存時，previousWeightRef 就是這次保存的體重值
+        previousWeightRef.current = newWeight;
+        
+        if (process.env.NODE_ENV === 'development') {
+          logger.debug('保存成功，更新 previousWeightRef:', newWeight);
+        }
+        
+        // ✅ 確保在保存成功後才顯示提示
+        if (weightChanged) {
+          // ✅ 寫入體重變更通知到 Firestore
+          try {
+            const currentUser = auth.currentUser;
+            if (currentUser && currentUser.uid) {
+              const oldWeightStr = oldWeight.toFixed(1);
+              const newWeightStr = newWeight.toFixed(1);
+              // 使用字符串模板構建消息，確保兼容性
+              const messageTemplate = t('notifications.weightUpdateMessage');
+              const message = messageTemplate
+                .replace('{{oldWeight}}', oldWeightStr)
+                .replace('{{newWeight}}', newWeightStr);
+              
+              await addDoc(collection(db, 'notifications'), {
+                userId: currentUser.uid,
+                title: t('notifications.weightUpdateTitle'),
+                message: message,
+                type: 'system',
+                read: false,
+                createdAt: serverTimestamp(),
+                targetPath: '/skill-tree', // 點擊通知可跳轉到工具頁
+              });
+            }
+          } catch (notificationError) {
+            // 通知寫入失敗不影響主流程，僅記錄錯誤
+            console.error('寫入體重變更通知失敗:', notificationError);
+          }
+
+          // 顯示體重變更引導 Modal
+          // 使用 setTimeout 確保 Modal 在狀態更新後顯示
+          setTimeout(() => {
+            onShowModal({
+              isOpen: true,
+              title: '體重已更新！',
+              message: `體重已從 ${oldWeight.toFixed(1)}kg 更新為 ${newWeight.toFixed(1)}kg。建議您前往重新評測，以確保天梯排名精準。`,
+              type: 'info',
+              actionText: '前往工具頁',
+              onAction: () => {
+                // 導航到工具頁面（skill-tree）
+                if (navigate) {
+                  navigate('/skill-tree');
+                } else {
+                  window.location.href = '/skill-tree';
+                }
+              },
+            });
+          }, 100);
+        } else {
+          // 正常保存成功提示
+          setTimeout(() => {
+            onShowModal({
+              isOpen: true,
+              title: t('userInfo.modal.saveSuccessTitle'),
+              message: t('userInfo.modal.saveSuccessMessage'),
+              type: 'success',
+            });
+          }, 100);
+        }
       } catch (err) {
         if (isGuest) {
           onShowModal({

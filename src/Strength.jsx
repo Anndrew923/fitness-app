@@ -371,9 +371,19 @@ function Strength({ onComplete }) {
         strength: parseFloat(averageScore),
       };
 
+      // 儲存評測時的體重快照
+      const updatedTestInputs = {
+        ...userData.testInputs,
+        strength: {
+          ...buildUpdatedTestInputs().strength,
+          bodyWeight: parseFloat(userData.weight), // 儲存評測時的體重快照
+        },
+      };
+
       setUserData(prev => ({
         ...prev,
         scores: updatedScores,
+        testInputs: updatedTestInputs,
         // 保持原有的天梯分數，不自動更新
         ladderScore: prev.ladderScore || 0,
       }));

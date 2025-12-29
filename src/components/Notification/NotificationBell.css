@@ -1,50 +1,84 @@
+/* ✅ 最終修復：容器使用固定尺寸，與 Settings 按鈕完全一致 */
 .notification-bell-container {
-  position: relative;
-  display: inline-block;
+  width: 44px !important; /* ✅ 固定尺寸 */
+  height: 44px !important; /* ✅ 固定尺寸 */
+  position: relative !important; /* ✅ 為紅點定位錨點 */
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin: 0 !important; /* ✅ 無 margin */
+  padding: 0 !important;
+  line-height: 1 !important;
 }
 
+/* ✅ 最終修復：按鈕填滿固定容器 */
 .notification-bell-btn {
-  position: relative;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  padding: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  transition: all 0.3s ease;
+  /* ✅ 填滿容器 */
+  width: 100% !important;
+  height: 100% !important;
+
+  /* 內部布局 - 居中圖標 */
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  /* 重置所有可能影響對齊的屬性 */
+  position: relative !important;
+  margin: 0 !important; /* ✅ 確保完美貼合容器 */
+  padding: 0 !important;
+  border: 2px solid rgba(102, 126, 234, 0.3) !important;
+  border-radius: 50% !important;
+  box-sizing: border-box !important; /* ✅ 確保 border 包含在尺寸內 */
+  line-height: 1 !important;
+
+  /* 樣式 */
+  background: rgba(255, 255, 255, 0.95) !important;
+  color: #667eea !important;
+  cursor: pointer !important;
+  transition: all 0.3s ease !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+  backdrop-filter: blur(10px) !important;
 }
 
 .notification-bell-btn:hover {
-  background: rgba(255, 255, 255, 0.1);
-  transform: scale(1.1);
+  background: rgba(255, 255, 255, 1) !important;
+  transform: scale(1.1) !important;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2) !important;
+  border-color: #667eea !important;
 }
 
-.notification-bell-icon {
-  font-size: 24px;
-  line-height: 1;
+.notification-bell-btn:active {
+  transform: scale(0.95) !important;
 }
 
+/* ✅ 強制 SVG 圖標尺寸和顯示方式一致 */
+.notification-bell-btn svg {
+  width: 24px !important;
+  height: 24px !important;
+  display: block !important; /* ✅ 移除隱式 line-height 間隙 */
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* ✅ 紅點位於右上角邊緣內 */
 .notification-badge {
-  position: absolute;
-  top: 4px;
-  right: 4px;
-  background: #ff4444;
-  color: white;
-  border-radius: 10px;
-  padding: 2px 6px;
-  font-size: 11px;
-  font-weight: bold;
-  min-width: 18px;
-  height: 18px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 2px solid white;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  position: absolute !important;
+  top: 0 !important;
+  right: 0 !important;
+  background: #ff4444 !important;
+  color: white !important;
+  border-radius: 10px !important;
+  padding: 2px 6px !important;
+  font-size: 11px !important;
+  font-weight: bold !important;
+  min-width: 18px !important;
+  height: 18px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border: 2px solid white !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2) !important;
+  transform: translate(25%, -25%) !important; /* 確保在邊緣內 */
 }
 
 .notification-dropdown {
@@ -55,43 +89,46 @@
   max-width: calc(100vw - 32px);
   max-height: 500px;
   background: white;
-  border-radius: 12px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  border-radius: 16px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.05);
   z-index: 1000;
   display: flex;
   flex-direction: column;
   overflow: hidden;
 }
 
+/* ✅ 彈窗標頭 - 使用精確樣式隔離 */
 .notification-dropdown-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 16px;
-  border-bottom: 1px solid #e5e7eb;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  padding: 16px !important;
+  border-bottom: 1px solid #f3f4f6 !important;
+  background: white !important;
 }
 
 .notification-dropdown-title {
-  margin: 0;
-  font-size: 18px;
-  font-weight: 600;
+  margin: 0 !important;
+  font-size: 18px !important;
+  font-weight: 700 !important;
+  color: #1f2937 !important;
 }
 
+/* ✅ 文字按鈕樣式 - 不使用背景色 */
 .notification-mark-all-read {
-  background: rgba(255, 255, 255, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  color: white;
-  padding: 4px 12px;
-  border-radius: 6px;
-  font-size: 12px;
-  cursor: pointer;
-  transition: all 0.2s ease;
+  background: transparent !important;
+  border: none !important;
+  color: #14b8a6 !important;
+  padding: 0 !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  cursor: pointer !important;
+  transition: color 0.2s ease !important;
 }
 
 .notification-mark-all-read:hover {
-  background: rgba(255, 255, 255, 0.3);
+  background: transparent !important;
+  color: #0d9488 !important;
 }
 
 .notification-list {
@@ -99,12 +136,32 @@
   max-height: 400px;
 }
 
-.notification-loading,
-.notification-empty {
+.notification-loading {
   padding: 32px 16px;
   text-align: center;
   color: #6b7280;
   font-size: 14px;
+}
+
+.notification-empty {
+  padding: 48px 16px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  color: #9ca3af;
+}
+
+.notification-empty-icon {
+  color: #d1d5db;
+  opacity: 0.6;
+}
+
+.notification-empty p {
+  margin: 0;
+  font-size: 14px;
+  color: #6b7280;
 }
 
 .notification-item {
@@ -119,9 +176,10 @@
   background-color: #f9fafb;
 }
 
+/* ✅ 未讀項目 - 使用細條或背景微調 */
 .notification-item.unread {
-  background-color: #eff6ff;
-  border-left: 3px solid #3b82f6;
+  background-color: rgba(239, 246, 255, 0.5) !important;
+  border-left: 4px solid #14b8a6 !important;
 }
 
 .notification-item-content {
@@ -161,24 +219,40 @@
 }
 
 .notification-item-time {
-  font-size: 11px;
-  color: #9ca3af;
-  margin-top: 4px;
+  font-size: 12px !important;
+  color: #9ca3af !important;
+  margin-top: 4px !important;
 }
 
 /* 移動端適配 */
 @media (max-width: 768px) {
+  /* ✅ 移動端容器也使用固定尺寸 */
+  .notification-bell-container {
+    width: 40px !important;
+    height: 40px !important;
+  }
+
+  .notification-bell-btn {
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  .notification-bell-btn svg {
+    width: 18px !important;
+    height: 18px !important;
+  }
+
   .notification-dropdown {
     width: 280px;
     max-height: 400px;
   }
 
   .notification-dropdown-header {
-    padding: 12px;
+    padding: 12px !important;
   }
 
   .notification-dropdown-title {
-    font-size: 16px;
+    font-size: 16px !important;
   }
 
   .notification-item {
@@ -203,4 +277,3 @@
 .notification-list::-webkit-scrollbar-thumb:hover {
   background: #a8a8a8;
 }
-

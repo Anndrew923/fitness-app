@@ -199,7 +199,7 @@ export const preAdDisplayCheck = (pageName, pageContent) => {
 
   // 技能樹頁面特殊處理 - 有豐富的評測選項和說明，符合 AdMob 政策
   if (pageName === 'skill-tree') {
-    logger.debug(`📄 技能樹頁面 [${pageName}] 內容豐富，顯示廣告`);
+    // logger.debug(`📄 技能樹頁面 [${pageName}] 內容豐富，顯示廣告`); // 已移除頻繁日誌
     return true;
   }
 

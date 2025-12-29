@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import {
   collection,
   query,
@@ -10,37 +11,46 @@ import {
   doc,
   getDocs,
   limit,
+  addDoc,
+  serverTimestamp,
 } from 'firebase/firestore';
 import { db, auth } from '../../firebase';
 import './NotificationBell.css';
 
 const NotificationBell = () => {
   const navigate = useNavigate();
+  const { t, i18n } = useTranslation();
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const dropdownRef = useRef(null);
   const unsubscribeRef = useRef(null);
+  const welcomeNotificationCreatedRef = useRef(false);
 
   // 監聽通知
   useEffect(() => {
-    const currentUserId = auth.currentUser?.uid;
-    if (!currentUserId) {
+    const currentUser = auth.currentUser;
+    const currentUserId = currentUser?.uid;
+    
+    if (!currentUser || !currentUserId) {
       setLoading(false);
       return;
     }
 
-    const notificationsRef = collection(db, 'users', currentUserId, 'notifications');
+    // ✅ 使用根集合 notifications，必須加上 where('userId', '==', currentUserId)
+    // 規則要求：match /notifications/{id} 且 resource.data.userId == request.auth.uid
+    const notificationsRef = collection(db, 'notifications');
     const q = query(
       notificationsRef,
+      where('userId', '==', currentUserId), // 👈 必須加上這行，規則才會通過
       orderBy('createdAt', 'desc'),
       limit(50)
     );
 
     unsubscribeRef.current = onSnapshot(
       q,
-      snapshot => {
+      async snapshot => {
         const notificationList = [];
         let unread = 0;
 
@@ -58,6 +68,28 @@ const NotificationBell = () => {
         setNotifications(notificationList);
         setUnreadCount(unread);
         setLoading(false);
+
+        // ✅ 自動生成歡迎通知：如果通知列表為空且尚未創建過歡迎通知
+        if (
+          notificationList.length === 0 &&
+          !welcomeNotificationCreatedRef.current &&
+          currentUserId
+        ) {
+          try {
+            welcomeNotificationCreatedRef.current = true;
+            await addDoc(collection(db, 'notifications'), {
+              userId: currentUserId,
+              title: t('notifications.welcome.title'),
+              message: t('notifications.welcome.message'),
+              type: 'system',
+              read: false,
+              createdAt: serverTimestamp(),
+            });
+          } catch (error) {
+            console.error('創建歡迎通知失敗:', error);
+            welcomeNotificationCreatedRef.current = false; // 失敗時重置，允許重試
+          }
+        }
       },
       error => {
         console.error('監聽通知失敗:', error);
@@ -94,13 +126,8 @@ const NotificationBell = () => {
     if (!currentUserId) return;
 
     try {
-      const notificationRef = doc(
-        db,
-        'users',
-        currentUserId,
-        'notifications',
-        notificationId
-      );
+      // ✅ 使用根集合 notifications
+      const notificationRef = doc(db, 'notifications', notificationId);
       await updateDoc(notificationRef, {
         read: true,
         readAt: new Date().toISOString(),
@@ -120,9 +147,10 @@ const NotificationBell = () => {
     // 關閉下拉選單
     setIsDropdownOpen(false);
 
-    // 如果有目標路徑，導航到該頁面
-    if (notification.targetPath) {
-      navigate(notification.targetPath);
+    // 如果有目標路徑，導航到該頁面（支援 targetPath 或 link）
+    const targetPath = notification.targetPath || notification.link;
+    if (targetPath) {
+      navigate(targetPath);
     }
   };
 
@@ -134,13 +162,8 @@ const NotificationBell = () => {
     try {
       const unreadNotifications = notifications.filter(n => !n.read);
       const updatePromises = unreadNotifications.map(notification => {
-        const notificationRef = doc(
-          db,
-          'users',
-          currentUserId,
-          'notifications',
-          notification.id
-        );
+        // ✅ 使用根集合 notifications
+        const notificationRef = doc(db, 'notifications', notification.id);
         return updateDoc(notificationRef, {
           read: true,
           readAt: new Date().toISOString(),
@@ -153,7 +176,7 @@ const NotificationBell = () => {
     }
   };
 
-  // 格式化時間
+  // 格式化時間 - 使用 i18n locale
   const formatTime = timestamp => {
     if (!timestamp) return '';
     
@@ -175,12 +198,16 @@ const NotificationBell = () => {
     const hours = Math.floor(diff / 3600000);
     const days = Math.floor(diff / 86400000);
 
-    if (minutes < 1) return '剛剛';
-    if (minutes < 60) return `${minutes}分鐘前`;
-    if (hours < 24) return `${hours}小時前`;
-    if (days < 7) return `${days}天前`;
+    // 使用 i18n 的當前語言
+    const currentLocale = i18n.language || 'zh-TW';
+    const isZh = currentLocale.startsWith('zh');
     
-    return date.toLocaleDateString('zh-TW', {
+    if (minutes < 1) return isZh ? '剛剛' : 'Just now';
+    if (minutes < 60) return isZh ? `${minutes}分鐘前` : `${minutes}m ago`;
+    if (hours < 24) return isZh ? `${hours}小時前` : `${hours}h ago`;
+    if (days < 7) return isZh ? `${days}天前` : `${days}d ago`;
+    
+    return date.toLocaleDateString(currentLocale, {
       month: 'short',
       day: 'numeric',
     });
@@ -191,15 +218,57 @@ const NotificationBell = () => {
   }
 
   return (
-    <div className="notification-bell-container" ref={dropdownRef}>
+    <div
+      className="notification-bell-container"
+      ref={dropdownRef}
+      style={{
+        width: '40px', // ✅ Hardcoded Size
+        height: '40px', // ✅ Hardcoded Size
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        margin: 0,
+        padding: 0,
+        position: 'relative',
+        background: 'rgba(255, 255, 255, 0.95)', // ✅ Match visual style
+        borderRadius: '50%',
+        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+        border: '2px solid rgba(102, 126, 234, 0.3)',
+      }}
+    >
       <button
         type="button"
         className="notification-bell-btn"
         onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-        aria-label="通知"
-        title="通知"
+        aria-label={t('notifications.title')}
+        title={t('notifications.title')}
+        style={{
+          width: '100%',
+          height: '100%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          margin: 0,
+          padding: 0,
+          background: 'transparent', // ✅ 透明，容器已有背景
+          border: 'none', // ✅ 无边框，容器已有边框
+          borderRadius: '50%',
+          cursor: 'pointer',
+        }}
       >
-        <span className="notification-bell-icon">🔔</span>
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
+          <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+        </svg>
         {unreadCount > 0 && (
           <span className="notification-badge">{unreadCount > 99 ? '99+' : unreadCount}</span>
         )}
@@ -208,23 +277,40 @@ const NotificationBell = () => {
       {isDropdownOpen && (
         <div className="notification-dropdown">
           <div className="notification-dropdown-header">
-            <h3 className="notification-dropdown-title">通知</h3>
+            <h3 className="notification-dropdown-title">{t('notifications.title')}</h3>
             {unreadCount > 0 && (
               <button
                 type="button"
                 className="notification-mark-all-read"
                 onClick={markAllAsRead}
               >
-                全部標記為已讀
+                {t('notifications.markAllRead')}
               </button>
             )}
           </div>
 
           <div className="notification-list">
             {loading ? (
-              <div className="notification-loading">載入中...</div>
+              <div className="notification-loading">{t('common.loading')}</div>
             ) : notifications.length === 0 ? (
-              <div className="notification-empty">暫無通知</div>
+              <div className="notification-empty">
+                <svg
+                  width="48"
+                  height="48"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="notification-empty-icon"
+                >
+                  <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
+                  <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+                  <line x1="18" y1="6" x2="6" y2="18" strokeWidth="2" />
+                </svg>
+                <p>{t('notifications.empty')}</p>
+              </div>
             ) : (
               notifications.map(notification => (
                 <div
@@ -234,7 +320,7 @@ const NotificationBell = () => {
                 >
                   <div className="notification-item-content">
                     <div className="notification-item-header">
-                      <h4 className="notification-item-title">{notification.title || '通知'}</h4>
+                      <h4 className="notification-item-title">{notification.title || t('notifications.title')}</h4>
                       {!notification.read && (
                         <span className="notification-item-unread-dot"></span>
                       )}

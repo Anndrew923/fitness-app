@@ -109,5 +109,16 @@ export default {
   actions: {
     unlock_limit: '解鎖極限',
   },
+  notifications: {
+    title: '通知中心',
+    empty: '目前沒有新通知',
+    markAllRead: '全部標記為已讀',
+    welcome: {
+      title: '歡迎來到 Upcore!',
+      message: '通知系統運作正常。',
+    },
+    weightUpdateTitle: '體重已更新',
+    weightUpdateMessage: '您的體重已更新為 {{newWeight}}kg（原為 {{oldWeight}}kg），請重新評測以維持排名精準度。',
+  },
 };
 

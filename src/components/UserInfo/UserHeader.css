@@ -54,32 +54,60 @@
   font-weight: bold !important;
 }
 
-/* 右上角按鈕組 */
+/* ✅ 右上角按鈕組 - 使用 Grid 確保完美對齊 */
 .user-info__top-actions {
+  /* Positioning */
   position: fixed !important;
   /* ✅ 修正：優先使用 CSS 變量，後備使用 env()，確保在不同設備上正確響應 */
   top: calc(
     15px + var(--safe-area-inset-top, env(safe-area-inset-top, 0px))
   ) !important;
   right: 15px !important;
-  display: flex !important;
-  align-items: center !important;
-  gap: 12px !important;
   z-index: 999 !important; /* 確保在 Modal 之下，Modal 通常是 1000+ */
+
+  /* ✅ CRITICAL: 使用 Grid 實現完美對齊 */
+  display: grid !important;
+  grid-template-columns: 44px 44px !important; /* ✅ 強制明確的列，匹配按鈕尺寸 */
+  gap: 16px !important;
+  align-items: center !important;
+  justify-content: end !important; /* ✅ 將整個 grid 對齊到右側 */
+
+  /* ✅ 重置布局干擾 */
+  line-height: 0 !important;
 }
 
-/* 設定按鈕 - 右上角 */
+/* ✅ 強制幾何相等：與 Notification Bell 按鈕完全相同的尺寸和布局 */
 .user-info__settings-btn {
-  position: relative !important;
+  /* 強制尺寸相等 */
   width: 44px !important;
   height: 44px !important;
-  border-radius: 50% !important;
-  background: rgba(255, 255, 255, 0.95) !important;
-  color: #667eea !important;
-  border: 2px solid rgba(102, 126, 234, 0.3) !important;
+  min-width: 44px !important;
+  min-height: 44px !important;
+  max-width: 44px !important;
+  max-height: 44px !important;
+
+  /* 內部布局 - 居中圖標 */
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
+
+  /* 重置所有可能影響對齊的屬性 */
+  position: relative !important;
+  margin: 0 !important;
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  padding: 0 !important;
+  border: 2px solid rgba(102, 126, 234, 0.3) !important;
+  border-radius: 50% !important;
+  box-sizing: border-box !important; /* ✅ 確保 border 包含在尺寸內 */
+  line-height: 1 !important; /* ✅ 防止 line-height 影響對齊 */
+  vertical-align: middle !important;
+
+  /* 樣式 */
+  background: rgba(255, 255, 255, 0.95) !important;
+  color: #667eea !important;
   cursor: pointer !important;
   transition: all 0.3s ease !important;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
@@ -97,9 +125,13 @@
   transform: scale(0.95) !important;
 }
 
+/* ✅ 強制 SVG 圖標尺寸和顯示方式一致 */
 .user-info__settings-btn svg {
-  width: 20px !important;
-  height: 20px !important;
+  width: 24px !important;
+  height: 24px !important;
+  display: block !important; /* ✅ 移除隱式 line-height 間隙 */
+  margin: 0 !important;
+  padding: 0 !important;
 }
 
 /* 響應式調整 */
@@ -127,7 +159,13 @@
       10px + var(--safe-area-inset-top, env(safe-area-inset-top, 0px))
     ) !important;
     right: 10px !important;
-    gap: 8px !important;
+    gap: 12px !important;
+    /* ✅ CRITICAL: 移動端也使用 Grid，確保對齊 */
+    display: grid !important;
+    grid-template-columns: 40px 40px !important; /* ✅ 移動端按鈕尺寸為 40px */
+    align-items: center !important;
+    justify-content: end !important;
+    line-height: 0 !important;
   }
 
   .user-info__settings-btn {

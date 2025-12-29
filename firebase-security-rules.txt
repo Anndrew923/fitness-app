@@ -74,6 +74,14 @@ service cloud.firestore {
       allow update: if signedIn()
         && onlyMutate(['reportCount', 'nicknameHidden', 'avatarHidden', 'moderationStatus', 'moderationTime'])
         && request.resource.data.userId == resource.data.userId; // 確保不能修改 userId
+
+      // ✅ 新增：notifications 子集合 - 僅本人可讀寫自己的通知
+      match /notifications/{notificationId} {
+        allow read: if signedIn() && isOwner(userId);
+        allow create: if signedIn() && isOwner(userId);
+        allow update: if signedIn() && isOwner(userId);
+        allow delete: if signedIn() && isOwner(userId);
+      }
     }
 
     // friendInvitations：僅參與雙方可讀；from 可建；參與雙方可改狀態

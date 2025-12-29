@@ -168,7 +168,7 @@ const checkPageContent = pageName => {
 
   // 5. 技能樹頁面 - 有豐富的評測選項和說明
   if (pageName === 'skill-tree') {
-    logger.debug(`📄 技能樹頁面 [${pageName}] 內容豐富，顯示廣告`);
+    // logger.debug(`📄 技能樹頁面 [${pageName}] 內容豐富，顯示廣告`); // 已移除頻繁日誌
     return true; // 技能樹頁面有足夠內容，顯示廣告
   }
 

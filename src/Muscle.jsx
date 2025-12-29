@@ -223,8 +223,19 @@ function Muscle({ onComplete }) {
         scores: updatedScores,
       };
 
+      // 儲存評測時的體重快照
+      const updatedTestInputs = {
+        ...userData.testInputs,
+        muscle: {
+          ...userData.testInputs?.muscle,
+          smm: parseFloat(smm),
+          weight: parseFloat(weight), // 儲存評測時的體重快照
+        },
+      };
+
       setUserData({
         ...updatedUserData,
+        testInputs: updatedTestInputs,
         // 保持原有的天梯分數，不自動更新
         ladderScore: userData.ladderScore || 0,
       });

@@ -113,5 +113,16 @@ export default {
   actions: {
     unlock_limit: 'Unlock Limit',
   },
+  notifications: {
+    title: 'Notifications',
+    empty: 'No new notifications',
+    markAllRead: 'Mark all as read',
+    welcome: {
+      title: 'Welcome to Upcore!',
+      message: 'Notification system is online.',
+    },
+    weightUpdateTitle: 'Weight Updated',
+    weightUpdateMessage: 'Your weight has been updated to {{newWeight}}kg (previously {{oldWeight}}kg). Please retake assessments to maintain ranking accuracy.',
+  },
 };
 

@@ -128,7 +128,8 @@ function UserInfo({ testData, onLogout, clearTestData }) {
     saveUserData,
     t,
     isGuest,
-    setModalState
+    setModalState,
+    navigate
   );
 
   const submittedLadderScore = userData?.ladderScore || 0;
@@ -668,18 +669,61 @@ function UserInfo({ testData, onLogout, clearTestData }) {
       style={{ opacity: 1 }}
     >
       {/* 右上角按鈕組 */}
-      <div className="user-info__top-actions">
-        <NotificationBell />
+      <div
+        className="user-info__top-actions"
+        style={{
+          position: 'fixed',
+          top: 'calc(15px + env(safe-area-inset-top))',
+          right: '15px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'flex-end',
+          gap: '12px', // ✅ Consistent gap
+          zIndex: 999,
+          height: 'auto',
+          lineHeight: 0,
+        }}
+      >
+        {/* ✅ 1. WRAP the Bell in a 44px container to match the button */}
+        <div
+          style={{
+            width: '44px',
+            height: '44px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            margin: 0,
+            padding: 0,
+          }}
+        >
+          <NotificationBell />
+        </div>
+
+        {/* ✅ 2. UPDATE Settings Button to 44px (was 40px) */}
         <button
           type="button"
           onClick={() => navigate('/settings')}
           className="user-info__settings-btn"
           aria-label={t('navbar.settings')}
           title={t('navbar.settings')}
+          style={{
+            width: '44px', // ✅ CHANGED: 40px -> 44px
+            height: '44px', // ✅ CHANGED: 40px -> 44px
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            margin: 0,
+            padding: 0,
+            background: 'rgba(255, 255, 255, 0.95)',
+            borderRadius: '50%',
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+            border: '2px solid rgba(102, 126, 234, 0.3)',
+            cursor: 'pointer',
+          }}
         >
           <svg
-            width="20"
-            height="20"
+            width="24" // ✅ CHANGED: 20 -> 24 (Scale icon slightly for 44px btn)
+            height="24"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
