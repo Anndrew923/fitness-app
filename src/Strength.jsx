@@ -14,7 +14,7 @@ import {
 import PropTypes from 'prop-types';
 import { calculateStrengthScore } from './utils/strength/scoring';
 import { calculateOneRepMax } from './utils/strength/calculations';
-import { SCORE_LEVELS } from '../standards';
+import { SCORE_LEVELS } from './standards';
 
 import './Strength.css';
 import { useTranslation } from 'react-i18next';
