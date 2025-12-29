@@ -14,40 +14,11 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 import ReportModal from './ReportModal';
+import {
+  PROFESSION_REVERSE_MAP,
+  RPG_CLASS_REVERSE_MAP,
+} from '../utils/professionMaps';
 import './LadderUserCard.css';
-
-// 定義職業反向映射表（中文 -> Key）
-const PROFESSION_REVERSE_MAP = {
-  '工程師 (軟體/硬體)': 'engineering',
-  工程師: 'engineering',
-  '醫療人員 (醫護/藥師)': 'medical',
-  醫療人員: 'medical',
-  健身教練: 'coach',
-  運動教練: 'coach',
-  學生: 'student',
-  軍警消人員: 'police_military',
-  軍警消: 'police_military',
-  '商業/金融/法務': 'business',
-  '商業/金融': 'business',
-  '自由業/設計/藝術': 'freelance',
-  '自由業/設計': 'freelance',
-  服務業: 'service',
-  專業運動員: 'professional_athlete',
-  '藝術/表演': 'artist_performer',
-  其他: 'other',
-};
-
-// 定義 RPG 職業反向映射表（中文 -> Key）
-const RPG_CLASS_REVERSE_MAP = {
-  覺醒者: 'AWAKENED',
-  未覺醒: 'UNKNOWN',
-  狂戰士: 'BERSERKER',
-  刺客: 'ASSASSIN',
-  遊俠: 'RANGER',
-  騎士: 'PALADIN',
-  武鬥家: 'FIGHTER',
-  魔導士: 'MAGE',
-};
 
 function LadderUserCard({ user, isOpen, onClose }) {
   const { t, i18n } = useTranslation();

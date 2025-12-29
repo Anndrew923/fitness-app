@@ -7,6 +7,7 @@ import {
   getDistrictNameEn,
 } from '../../../utils/taiwanDistricts';
 import CustomDropdown from './CustomDropdown';
+import { PROFESSION_REVERSE_MAP } from '../../../utils/professionMaps';
 
 // 常數定義
 const JOB_OPTIONS = [
@@ -22,23 +23,6 @@ const JOB_OPTIONS = [
   { value: 'artist_performer' },
   { value: 'other' },
 ];
-
-const PROFESSION_REVERSE_MAP = {
-  '工程師 (軟體/硬體)': 'engineering',
-  工程師: 'engineering',
-  '醫療人員 (醫護/藥師)': 'medical',
-  醫療人員: 'medical',
-  健身教練: 'coach',
-  學生: 'student',
-  軍警消人員: 'police_military',
-  軍警消: 'police_military',
-  '商業/金融/法務': 'business',
-  '商業/金融': 'business',
-  '自由業/設計/藝術': 'freelance',
-  '自由業/設計': 'freelance',
-  服務業: 'service',
-  其他: 'other',
-};
 
 const COUNTRY_REVERSE_MAP = {
   台灣: 'TW',
