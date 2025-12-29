@@ -9,9 +9,14 @@ import {
   getCountFromServer,
 } from 'firebase/firestore';
 import { db, auth } from '../../firebase';
-import { formatScore } from '../../utils.js';
-import './LadderStatusCard.css';
 import logger from '../../utils/logger';
+import './LadderStatusCard.css';
+
+// 直接定义 formatScore 函数，避免从 utils.js 导入可能造成的循环依赖
+const formatScore = score => {
+  if (!score && score !== 0) return '0.00';
+  return Number(score).toFixed(2);
+};
 
 // Cache configuration (matching useUserRank hook)
 const CACHE_TTL = 300000; // 5 minutes
