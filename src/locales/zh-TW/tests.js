@@ -289,6 +289,37 @@ export default {
     testComplete: '評測完成',
     score: '分數',
     averageScore: '平均分數',
+    armSize: '臂圍評測',
+    armSizeTitle: '純粹臂圍評測',
+    armSizeSafetyNote: '💪 請在充血狀態下測量曲臂臂圍，確保數據準確',
+    armSizeLabels: {
+      armSize: '臂圍',
+      armSizePlaceholder: '輸入臂圍 (cm)',
+      bodyFat: '體脂率',
+      measurementHint: '充血狀態 / 曲臂測量',
+      levelTitle: '等級進度',
+    },
+    armSize_rpg: {
+      levels: {
+        potentialNewcomer: '潛力新人',
+        regularTrainee: '規律訓練者',
+        veteranWarrior: '資深戰士',
+        mythicalPhysique: '神話肉體',
+        absoluteSupreme: '絕對至尊',
+      },
+      feedback: {
+        potentialNewcomer: '🌱 潛力無限！偉大的旅程始於足下，每一次訓練都是對未來的投資。',
+        regularTrainee: '⚡️ 漸入佳境！肌肉正在甦醒，您已經掌握了力量的鑰匙，繼續保持！',
+        veteranWarrior: '🛡️ 鋼鐵之軀！訓練痕跡清晰可見，您的臂圍已經超越了絕大多數的普通人。',
+        mythicalPhysique: '👑 頂點霸主！這就是凡人的極限嗎？您的臂圍足以撼動山河，是當之無愧的王者。',
+        absoluteSupreme: '🔥 傳奇降臨！您的臂圍已突破系統極限，踏入半神領域。請務必進行榮譽認證，將您的名字刻在殿堂之上！',
+      },
+    },
+    armSizeErrors: {
+      needCalculate: '請先輸入臂圍數據！',
+      updateFail: '更新角色數據失敗，請稍後再試！',
+    },
+    verifiedBadge: '已認證顯示真實分數',
   },
   skillTree: {
     title: '天賦技能樹',

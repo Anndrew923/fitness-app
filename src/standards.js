@@ -538,3 +538,12 @@ export const SCORE_LEVELS = [
   { score: 80, label: 'strength_rpg.levels.knight' },
   { score: 100, label: 'strength_rpg.levels.sovereign' },
 ];
+
+// RPG Level Definitions for Arm Size (PAS)
+export const ARM_SIZE_LEVELS = [
+  { score: 60, key: 'potentialNewcomer' },
+  { score: 80, key: 'regularTrainee' },
+  { score: 90, key: 'veteranWarrior' },
+  { score: 100, key: 'mythicalPhysique' },
+  { score: 100, key: 'absoluteSupreme' }, // 100+ uses the same threshold
+];

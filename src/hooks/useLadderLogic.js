@@ -270,7 +270,11 @@ export const useLadderLogic = (
       }
 
       // Arm Size: Check multiple possible sources
+      // 修复：优先从 testInputs.armSize 读取（PAS 臂围评测数据）
+      const armSizeInputs = testInputs.armSize || {};
       const stats_armSize =
+        Number(armSizeInputs.arm) ||
+        Number(armSizeInputs.armSize) ||
         Number(ffmiInputs.armSize) ||
         Number(ffmiInputs.arm) ||
         Number(testInputs.bodyStats?.arm) ||

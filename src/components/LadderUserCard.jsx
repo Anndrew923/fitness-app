@@ -121,40 +121,43 @@ function LadderUserCard({ user, isOpen, onClose }) {
   const isCurrentUser = user.id === currentUserId;
 
   // 生成雷達圖數據
+  // 注意：只顯示核心5項屬性，明確過濾掉 armSize 等其他分數
   const radarChartData = useMemo(() => {
-    const scores = user.scores || {
-      strength: 0,
-      explosivePower: 0,
-      cardio: 0,
-      muscleMass: 0,
-      bodyFat: 0,
+    const allScores = user.scores || {};
+    // 明確只讀取核心5項，忽略 armSize 等其他分數
+    const coreScores = {
+      strength: allScores.strength || 0,
+      explosivePower: allScores.explosivePower || 0,
+      cardio: allScores.cardio || 0,
+      muscleMass: allScores.muscleMass || 0,
+      bodyFat: allScores.bodyFat || 0,
     };
     return [
       {
         name: t('userInfo.radarLabels.strength'),
-        value: scores.strength ? Number(scores.strength).toFixed(2) * 1 : 0,
+        value: coreScores.strength ? Number(coreScores.strength).toFixed(2) * 1 : 0,
         icon: '💪',
       },
       {
         name: t('userInfo.radarLabels.explosivePower'),
-        value: scores.explosivePower
-          ? Number(scores.explosivePower).toFixed(2) * 1
+        value: coreScores.explosivePower
+          ? Number(coreScores.explosivePower).toFixed(2) * 1
           : 0,
         icon: '⚡',
       },
       {
         name: t('userInfo.radarLabels.cardio'),
-        value: scores.cardio ? Number(scores.cardio).toFixed(2) * 1 : 0,
+        value: coreScores.cardio ? Number(coreScores.cardio).toFixed(2) * 1 : 0,
         icon: '❤️',
       },
       {
         name: t('userInfo.radarLabels.muscle'),
-        value: scores.muscleMass ? Number(scores.muscleMass).toFixed(2) * 1 : 0,
+        value: coreScores.muscleMass ? Number(coreScores.muscleMass).toFixed(2) * 1 : 0,
         icon: '🥩',
       },
       {
         name: t('userInfo.radarLabels.ffmi'),
-        value: scores.bodyFat ? Number(scores.bodyFat).toFixed(2) * 1 : 0,
+        value: coreScores.bodyFat ? Number(coreScores.bodyFat).toFixed(2) * 1 : 0,
         icon: '📊',
       },
     ];

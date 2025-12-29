@@ -26,6 +26,7 @@ const Cardio = React.lazy(() => import('./Cardio'));
 const Power = React.lazy(() => import('./Power'));
 const Muscle = React.lazy(() => import('./Muscle'));
 const FFMI = React.lazy(() => import('./FFMI'));
+const ArmSize = React.lazy(() => import('./pages/tools/ArmSize'));
 
 const Login = React.lazy(() => import('./Login'));
 const History = React.lazy(() => import('./History'));
@@ -349,6 +350,7 @@ function AppContent() {
       '/explosive-power',
       '/muscle-mass',
       '/body-fat',
+      '/arm-size',
       '/settings', // 允許訪客進入設定頁面
     ];
     if (
@@ -483,6 +485,19 @@ function AppContent() {
                   <ProtectedRoute
                     element={
                       <FFMI
+                        onComplete={handleTestComplete}
+                        clearTestData={clearTestData}
+                      />
+                    }
+                  />
+                }
+              />
+              <Route
+                path="/arm-size"
+                element={
+                  <ProtectedRoute
+                    element={
+                      <ArmSize
                         onComplete={handleTestComplete}
                         clearTestData={clearTestData}
                       />

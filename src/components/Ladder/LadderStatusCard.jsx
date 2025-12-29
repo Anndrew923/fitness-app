@@ -50,8 +50,18 @@ const LadderStatusCard = ({
       return { displayRank: propRank, loading: false };
     }
 
-    // 2. Guard: No user data or score
-    if (!userData || !userData.ladderScore || userData.ladderScore <= 0) {
+    // 2. Guard: No user data
+    // 修复：即使 ladderScore 为 0 或不存在，也允许显示（显示"未分級"）
+    if (!userData) {
+      return { displayRank: 0, loading: false };
+    }
+    
+    // 如果 ladderScore 不存在或无效，仍然显示但标记为未分級
+    const safeScore = userData.ladderScore !== undefined && !isNaN(userData.ladderScore) 
+      ? Number(userData.ladderScore) 
+      : 0;
+    
+    if (safeScore <= 0) {
       return { displayRank: 0, loading: false };
     }
 
@@ -100,8 +110,21 @@ const LadderStatusCard = ({
       return;
     }
 
-    // Safety check: No user data or invalid score
-    if (!userData || !userData.ladderScore || userData.ladderScore <= 0) {
+    // Safety check: No user data
+    // 修复：即使 ladderScore 为 0 或不存在，也允许显示
+    if (!userData) {
+      if (loading) {
+        setState({ displayRank: 0, loading: false });
+      }
+      return;
+    }
+    
+    // 安全获取 ladderScore，处理 NaN 情况
+    const safeScore = userData.ladderScore !== undefined && !isNaN(userData.ladderScore)
+      ? Number(userData.ladderScore)
+      : 0;
+    
+    if (safeScore <= 0) {
       if (loading) {
         setState({ displayRank: 0, loading: false });
       }
@@ -109,7 +132,10 @@ const LadderStatusCard = ({
     }
 
     const userId = userData.userId || userData.id || auth.currentUser?.uid;
-    const currentScore = userData.ladderScore;
+    // 修复：使用安全的分数值，防止 NaN
+    const currentScore = userData.ladderScore !== undefined && !isNaN(userData.ladderScore)
+      ? Number(userData.ladderScore)
+      : 0;
     const cacheKey = `${CACHE_KEY_PREFIX}${userId}`;
 
     if (!userId) {
@@ -173,7 +199,11 @@ const LadderStatusCard = ({
     propRank !== null && propRank !== undefined ? propRank : displayRank;
 
   // Determine if user is ranked
-  const hasValidScore = userData?.ladderScore && userData.ladderScore > 0;
+  // 修复：安全处理 ladderScore，防止 NaN
+  const safeLadderScore = userData?.ladderScore !== undefined && !isNaN(userData.ladderScore)
+    ? Number(userData.ladderScore)
+    : 0;
+  const hasValidScore = safeLadderScore > 0;
   const isRanked =
     hasValidScore &&
     finalRank !== null &&
@@ -261,7 +291,7 @@ const LadderStatusCard = ({
         ) : hasValidScore && isRanked ? (
           <div className="ladder-status-card__score-value-wrapper">
             <span className="ladder-status-card__score-value">
-              {formatScore(userData.ladderScore)}
+              {formatScore(safeLadderScore)}
             </span>
             <span className="ladder-status-card__score-unit">
               {t('community.ui.pointsUnit')}

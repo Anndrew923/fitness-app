@@ -406,9 +406,18 @@ function UserInfo({ testData, onLogout, clearTestData }) {
   // ✅ Phase 4: submittedLadderScore 已在 hooks 調用處定義
 
   // 計算完成狀態
+  // 修复：只計算核心5項，明確過濾掉 armSize 等其他分數
   const completionStatus = useMemo(() => {
     const scores = userData?.scores || DEFAULT_SCORES;
-    const completedCount = Object.values(scores).filter(
+    // 明確只檢查核心5項，忽略 armSize 等其他分數
+    const coreScores = {
+      strength: scores.strength || 0,
+      explosivePower: scores.explosivePower || 0,
+      cardio: scores.cardio || 0,
+      muscleMass: scores.muscleMass || 0,
+      bodyFat: scores.bodyFat || 0,
+    };
+    const completedCount = Object.values(coreScores).filter(
       score => score > 0
     ).length;
     const isFullyCompleted = completedCount === 5;
@@ -749,7 +758,8 @@ function UserInfo({ testData, onLogout, clearTestData }) {
       </div>
 
       {/* ✅ UP-LADDER-EVO: 戰力資訊條 */}
-      {completionStatus.isFullyCompleted && userData?.ladderScore > 0 && (
+      {/* 修复：即使 ladderScore 为 0 也显示卡片，让用户知道状态 */}
+      {completionStatus.isFullyCompleted && (
         <div className="ladder-status-wrapper">
           <Suspense
             fallback={

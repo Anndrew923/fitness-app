@@ -15,21 +15,46 @@ export const getAgeGroup = age => {
 };
 
 // 計算天梯總分
+// 修复：明確只讀取核心5項，忽略 armSize 等其他分數，並處理 NaN 情況
 export const calculateLadderScore = scores => {
-  const { strength, explosivePower, cardio, muscleMass, bodyFat } = scores;
+  if (!scores || typeof scores !== 'object') {
+    return 0;
+  }
+
+  // 明確只讀取核心5項，忽略 armSize 等其他分數
+  const strength = Number(scores.strength) || 0;
+  const explosivePower = Number(scores.explosivePower) || 0;
+  const cardio = Number(scores.cardio) || 0;
+  const muscleMass = Number(scores.muscleMass) || 0;
+  const bodyFat = Number(scores.bodyFat) || 0;
+
   const scoreValues = [strength, explosivePower, cardio, muscleMass, bodyFat];
 
-  // 檢查是否完成全部5個評測項目
-  const completedCount = scoreValues.filter(score => score > 0).length;
+  // 檢查是否完成全部5個評測項目（過濾掉 NaN 和 0）
+  const completedCount = scoreValues.filter(
+    score => !isNaN(score) && score > 0
+  ).length;
 
   // 如果沒有完成全部5個項目，返回0（無法參與天梯排名）
   if (completedCount < 5) {
     return 0;
   }
 
-  // 完成全部5個項目後，計算平均分數
-  const total = scoreValues.reduce((sum, score) => sum + Number(score), 0);
-  return Math.round((total / 5) * 100) / 100; // 保留兩位小數
+  // 完成全部5個項目後，計算平均分數（確保所有值都是有效數字）
+  const validScores = scoreValues.filter(score => !isNaN(score));
+  if (validScores.length !== 5) {
+    return 0; // 如果有任何無效值，返回 0
+  }
+
+  const total = validScores.reduce((sum, score) => sum + Number(score), 0);
+  const average = total / 5;
+
+  // 確保結果是有效數字
+  if (isNaN(average) || !isFinite(average)) {
+    return 0;
+  }
+
+  return Math.round(average * 100) / 100; // 保留兩位小數
 };
 
 // 格式化分數顯示

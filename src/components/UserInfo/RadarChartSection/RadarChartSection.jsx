@@ -131,42 +131,53 @@ const RadarChartSection = ({ scores, loading, t }) => {
   });
 
   // 計算雷達圖數據
+  // 注意：只顯示核心5項屬性，明確過濾掉 armSize 等其他分數
   const radarChartData = useMemo(() => {
     try {
+      // 明確只讀取核心5項，忽略 armSize 等其他分數
       const scoreData = scores || DEFAULT_SCORES;
+      const coreScores = {
+        strength: scoreData.strength,
+        explosivePower: scoreData.explosivePower,
+        cardio: scoreData.cardio,
+        muscleMass: scoreData.muscleMass,
+        bodyFat: scoreData.bodyFat,
+      };
+      
       const data = [
         {
           name: t('userInfo.radarLabels.strength'),
-          value: scoreData.strength ? Number(scoreData.strength).toFixed(2) * 1 : 0,
+          value: coreScores.strength ? Number(coreScores.strength).toFixed(2) * 1 : 0,
           icon: '💪',
         },
         {
           name: t('userInfo.radarLabels.explosivePower'),
-          value: scoreData.explosivePower
-            ? Number(scoreData.explosivePower).toFixed(2) * 1
+          value: coreScores.explosivePower
+            ? Number(coreScores.explosivePower).toFixed(2) * 1
             : 0,
           icon: '⚡',
         },
         {
           name: t('userInfo.radarLabels.cardio'),
-          value: scoreData.cardio ? Number(scoreData.cardio).toFixed(2) * 1 : 0,
+          value: coreScores.cardio ? Number(coreScores.cardio).toFixed(2) * 1 : 0,
           icon: '❤️',
         },
         {
           name: t('userInfo.radarLabels.muscle'),
-          value: scoreData.muscleMass
-            ? Number(scoreData.muscleMass).toFixed(2) * 1
+          value: coreScores.muscleMass
+            ? Number(coreScores.muscleMass).toFixed(2) * 1
             : 0,
           icon: '🥩',
         },
         {
           name: t('userInfo.radarLabels.ffmi'),
-          value: scoreData.bodyFat ? Number(scoreData.bodyFat).toFixed(2) * 1 : 0,
+          value: coreScores.bodyFat ? Number(coreScores.bodyFat).toFixed(2) * 1 : 0,
           icon: '📊',
         },
       ];
+      // 確保只返回核心5項，過濾掉任何異常值
       const filtered = data.filter(
-        item => item.value !== null && item.value !== undefined
+        item => item.value !== null && item.value !== undefined && !isNaN(item.value)
       );
       return filtered.length > 0 ? filtered : data;
     } catch (error) {

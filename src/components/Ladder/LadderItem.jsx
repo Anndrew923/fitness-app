@@ -214,6 +214,26 @@ const LadderItem = React.memo(
             label: t('tests.ffmiLabels.ffmi'),
             formatValue: val => Number(val).toFixed(2),
           };
+        case 'armSize':
+          // PAS 臂围：显示主分数 + 副信息（臂围 cm / 体脂 %）
+          const armSizeScore = user.scores?.armSize || 0;
+          const armSizeInputs = user.testInputs?.armSize;
+          const armSizeValue = armSizeInputs?.arm || armSizeInputs?.armSize || 0;
+          const bodyFatValue = armSizeInputs?.bodyFat || 0;
+          
+          return {
+            value: armSizeScore,
+            unit: t('community.ui.pointsUnit'),
+            label: armSizeInputs 
+              ? `${Number(armSizeValue).toFixed(1)} cm / ${Number(bodyFatValue).toFixed(1)}%`
+              : 'N/A',
+            formatValue: val => formatScore(val),
+            // 添加副信息显示标志
+            showSubInfo: true,
+            subInfo: armSizeInputs 
+              ? `${Number(armSizeValue).toFixed(1)} cm / ${Number(bodyFatValue).toFixed(1)}%`
+              : null,
+          };
         case 'ladderScore':
         default:
           return {
@@ -440,7 +460,7 @@ const LadderItem = React.memo(
             </span>
             <span className="ladder__score-label">{displayMetrics.unit}</span>
             <span className="ladder__score-sublabel">
-              {displayMetrics.label}
+              {displayMetrics.subInfo || displayMetrics.label}
             </span>
           </div>
 

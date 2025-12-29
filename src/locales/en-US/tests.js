@@ -308,6 +308,37 @@ export default {
     testComplete: 'Test Complete',
     score: 'Score',
     averageScore: 'Average Score',
+    armSize: 'Arm Size',
+    armSizeTitle: 'Pure Arm Size',
+    armSizeSafetyNote: '💪 Please measure flexed arm size in a pumped state for accurate data',
+    armSizeLabels: {
+      armSize: 'Arm Size',
+      armSizePlaceholder: 'Enter arm size (cm)',
+      bodyFat: 'Body Fat',
+      measurementHint: 'Pumped state / Flexed measurement',
+      levelTitle: 'Level Progress',
+    },
+    armSize_rpg: {
+      levels: {
+        potentialNewcomer: 'Potential Newcomer',
+        regularTrainee: 'Regular Trainee',
+        veteranWarrior: 'Veteran Warrior',
+        mythicalPhysique: 'Mythical Physique',
+        absoluteSupreme: 'Absolute Supreme',
+      },
+      feedback: {
+        potentialNewcomer: '🌱 Potential! A great journey begins now. Every training session is an investment.',
+        regularTrainee: '⚡️ Awakening! You hold the key to strength. Keep pushing!',
+        veteranWarrior: '🛡️ Steel Body! Your results are visible. You have surpassed the majority.',
+        mythicalPhysique: '👑 Apex Overlord! Is this the limit of mortals? Your arm size is undeniable. A true King.',
+        absoluteSupreme: '🔥 Legend Arrives! You\'ve broken the limits and entered the Demigod realm. Verify now to etch your name in history!',
+      },
+    },
+    armSizeErrors: {
+      needCalculate: 'Please enter arm size data first!',
+      updateFail: 'Failed to save character data. Please try again later',
+    },
+    verifiedBadge: 'Verified - showing real score',
   },
   skillTree: {
     title: 'Skill Tree',

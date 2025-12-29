@@ -366,6 +366,9 @@ export const useLadder = (options = {}) => {
         } else {
           sortField = 'stats_ffmi';
         }
+      } else if (selectedDivision === 'armSize') {
+        // PAS 臂围：按照 scores.armSize 排序
+        sortField = 'armSize';
       }
       data.sort((a, b) => {
         // Special case: Calculate five-item total for sorting
@@ -373,6 +376,10 @@ export const useLadder = (options = {}) => {
         if (sortField === 'total_five') {
           aValue = (a.stats_sbdTotal || 0) + (a.stats_ohp || 0) + (a.stats_latPull || 0);
           bValue = (b.stats_sbdTotal || 0) + (b.stats_ohp || 0) + (b.stats_latPull || 0);
+        } else if (sortField === 'armSize') {
+          // PAS 臂围：从 scores.armSize 读取
+          aValue = a.scores?.armSize || 0;
+          bValue = b.scores?.armSize || 0;
         } else {
           aValue = a[sortField];
           bValue = b[sortField];

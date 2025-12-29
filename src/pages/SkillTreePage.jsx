@@ -36,7 +36,7 @@ function SkillTreePage() {
         background: 'linear-gradient(135deg, #81d8d0 0%, #5f9ea0 100%)',
         backgroundAttachment: 'fixed',
         backgroundSize: 'cover',
-        paddingBottom: 'calc(100px + env(safe-area-inset-bottom, 0px))',
+        paddingBottom: 'calc(150px + env(safe-area-inset-bottom, 0px))',
         boxSizing: 'border-box',
         overflowY: 'auto',
         position: 'fixed',
@@ -134,8 +134,18 @@ function SkillTreePage() {
             <span className="test-icon">📊</span>
             <span className="test-label">{t('tests.bodyFat')}</span>
           </button>
+          <button
+            onClick={() => handleNavigation('/arm-size')}
+            className="test-btn arm-size-btn"
+          >
+            <span className="test-icon">🦾</span>
+            <span className="test-label">{t('tests.armSize')}</span>
+          </button>
         </div>
       </div>
+
+      {/* Spacer for scrolling - 确保最后一个按钮能完整显示在 Navbar 上方 */}
+      <div style={{ height: '150px', width: '100%' }} />
 
       <BottomNavBar />
     </div>

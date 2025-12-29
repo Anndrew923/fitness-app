@@ -47,6 +47,11 @@ const LadderDivisionSelector = ({ currentFilter, onFilterChange }) => {
       value: 'stats_ffmi',
       desc: 'FFMI',
     },
+    {
+      label: '🦾 ' + t('tests.armSize'),
+      value: 'armSize',
+      desc: 'PAS 臂圍',
+    },
   ];
 
   return (
