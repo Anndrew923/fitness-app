@@ -5,6 +5,8 @@ import * as standards from './standards';
 import PropTypes from 'prop-types';
 import './Power.css';
 import { useTranslation } from 'react-i18next';
+import BottomNavBar from './components/BottomNavBar';
+import AdBanner from './components/AdBanner';
 
 function Power({ onComplete }) {
   const { userData, setUserData } = useUser();
@@ -399,6 +401,18 @@ function Power({ onComplete }) {
           {submitting ? t('common.submitting') : t('common.submitAndReturn')}
         </button>
       </div>
+
+      {/* 廣告區塊 (置中顯示) */}
+      {result.finalScore !== null && (
+        <div className="ad-section" style={{ margin: '20px 0', textAlign: 'center' }}>
+          <AdBanner position="inline" isFixed={false} showAd={true} />
+        </div>
+      )}
+
+      {/* Spacer for Ad + Navbar scrolling - 确保按钮完全可见且可点击 */}
+      <div style={{ height: '160px', width: '100%' }} />
+
+      <BottomNavBar />
     </div>
   );
 }

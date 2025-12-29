@@ -183,6 +183,70 @@ class AdminSystem {
   }
 
   /**
+   * 將 exercise 名稱映射到 scores key（處理 snake_case 到 camelCase）
+   * @param {string} exercise - Exercise 名稱（可能是中文、英文或 key）
+   * @returns {string} scores key（camelCase）
+   */
+  static mapExerciseToScoreKey(exercise) {
+    if (!exercise || typeof exercise !== 'string') {
+      return null;
+    }
+
+    // 如果已經是 camelCase key，直接返回
+    const camelCaseKeys = [
+      'armSize',
+      'benchPress',
+      'squat',
+      'deadlift',
+      'latPulldown',
+      'shoulderPress',
+      'strength',
+      'explosivePower',
+      'cardio',
+      'muscleMass',
+      'bodyFat',
+    ];
+
+    if (camelCaseKeys.includes(exercise)) {
+      return exercise;
+    }
+
+    // 處理 snake_case 轉 camelCase
+    if (exercise.includes('_')) {
+      return exercise
+        .split('_')
+        .map((word, index) => {
+          if (index === 0) {
+            return word;
+          }
+          return word.charAt(0).toUpperCase() + word.slice(1);
+        })
+        .join('');
+    }
+
+    // 常見映射表（中文名稱或英文名稱到 key）
+    const exerciseMap = {
+      // 中文映射
+      臂圍: 'armSize',
+      臥推: 'benchPress',
+      深蹲: 'squat',
+      硬舉: 'deadlift',
+      划船: 'latPulldown',
+      肩推: 'shoulderPress',
+      // 英文映射
+      'arm size': 'armSize',
+      'arm_size': 'armSize',
+      'bench press': 'benchPress',
+      'bench_press': 'benchPress',
+      // 如果無法映射，嘗試直接使用（可能是已經正確的 key）
+      default: exercise,
+    };
+
+    const normalizedExercise = exercise.toLowerCase().trim();
+    return exerciseMap[normalizedExercise] || exerciseMap[exercise] || exercise;
+  }
+
+  /**
    * 審核認證申請（通過）
    * @param {string} requestId - 申請 ID
    * @param {string} notes - 審核備註（可選）
@@ -242,20 +306,72 @@ class AdminSystem {
         updatedAt: new Date().toISOString(),
       });
 
-      // 更新用戶認證狀態
-      const now = new Date();
-      const expiredAt = new Date(now);
-      expiredAt.setFullYear(expiredAt.getFullYear() + 1); // 一年後過期
+      // ✅ 自動更新分數：從 targetData 讀取並更新 scores
+      let scoreUpdated = false;
+      let updatedExerciseKey = null;
+      let updatedScore = null;
 
-      await updateDoc(userRef, {
-        isVerified: true,
-        verifiedLadderScore: currentLadderScore,
-        verificationStatus: 'approved',
-        verifiedAt: now.toISOString(),
-        verificationExpiredAt: expiredAt.toISOString(),
-        verificationRequestId: requestId,
-        updatedAt: now.toISOString(),
-      });
+      if (requestData.targetData && requestData.targetData.exercise && requestData.targetData.score !== undefined) {
+        try {
+          const exerciseKey = this.mapExerciseToScoreKey(requestData.targetData.exercise);
+          const targetScore = Number(requestData.targetData.score);
+
+          if (exerciseKey && !isNaN(targetScore) && targetScore > 0) {
+            // 確保 scores 對象存在
+            const currentScores = userData.scores || {};
+            
+            // 更新 scores
+            const updatedScores = {
+              ...currentScores,
+              [exerciseKey]: targetScore,
+            };
+
+            // 原子更新：同時更新認證狀態和分數
+            const now = new Date();
+            const expiredAt = new Date(now);
+            expiredAt.setFullYear(expiredAt.getFullYear() + 1);
+
+            await updateDoc(userRef, {
+              isVerified: true,
+              verifiedLadderScore: currentLadderScore,
+              verificationStatus: 'approved',
+              verifiedAt: now.toISOString(),
+              verificationExpiredAt: expiredAt.toISOString(),
+              verificationRequestId: requestId,
+              scores: updatedScores,
+              updatedAt: now.toISOString(),
+            });
+
+            scoreUpdated = true;
+            updatedExerciseKey = exerciseKey;
+            updatedScore = targetScore;
+
+            console.log(`✅ 分數已自動更新: scores.${exerciseKey} = ${targetScore}`);
+          } else {
+            console.warn('⚠️ targetData 格式無效，跳過分數更新:', requestData.targetData);
+          }
+        } catch (scoreError) {
+          console.error('❌ 更新分數失敗:', scoreError);
+          // 繼續執行，不影響認證流程
+        }
+      }
+
+      // 如果沒有 targetData 或更新失敗，只更新認證狀態
+      if (!scoreUpdated) {
+        const now = new Date();
+        const expiredAt = new Date(now);
+        expiredAt.setFullYear(expiredAt.getFullYear() + 1);
+
+        await updateDoc(userRef, {
+          isVerified: true,
+          verifiedLadderScore: currentLadderScore,
+          verificationStatus: 'approved',
+          verifiedAt: now.toISOString(),
+          verificationExpiredAt: expiredAt.toISOString(),
+          verificationRequestId: requestId,
+          updatedAt: now.toISOString(),
+        });
+      }
 
       // 記錄管理員操作
       await this.logAdminAction({
@@ -265,6 +381,9 @@ class AdminSystem {
           requestId: requestId,
           ladderScore: currentLadderScore,
           notes: notes,
+          scoreUpdated: scoreUpdated,
+          updatedExercise: updatedExerciseKey,
+          updatedScore: updatedScore,
         },
       });
 

@@ -389,6 +389,18 @@
   box-shadow: none;
 }
 
+/* 广告区域样式 */
+.ad-section {
+  margin: 20px 0;
+  text-align: center;
+  padding: 0 0.8rem;
+}
+
+.ad-section .ad-banner {
+  margin: 0 auto;
+  max-width: 100%;
+}
+
 /* 响应式设计 */
 @media (max-width: 768px) {
   .arm-size-container {

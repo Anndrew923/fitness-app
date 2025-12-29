@@ -16,6 +16,8 @@ import PropTypes from 'prop-types';
 import './Muscle.css';
 import { useTranslation } from 'react-i18next';
 import HonorUnlockModal from './components/shared/modals/HonorUnlockModal';
+import BottomNavBar from './components/BottomNavBar';
+import AdBanner from './components/AdBanner';
 
 function Muscle({ onComplete }) {
   const { userData, setUserData } = useUser();
@@ -590,6 +592,18 @@ function Muscle({ onComplete }) {
         isOpen={isUnlockModalOpen}
         onClose={() => setIsUnlockModalOpen(false)}
       />
+
+      {/* 廣告區塊 (置中顯示) */}
+      {result.finalScore !== null && (
+        <div className="ad-section" style={{ margin: '20px 0', textAlign: 'center' }}>
+          <AdBanner position="inline" isFixed={false} showAd={true} />
+        </div>
+      )}
+
+      {/* Spacer for Ad + Navbar scrolling - 确保按钮完全可见且可点击 */}
+      <div style={{ height: '160px', width: '100%' }} />
+
+      <BottomNavBar />
     </div>
   );
 }

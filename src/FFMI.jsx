@@ -4,6 +4,8 @@ import { useUser } from './UserContext';
 import PropTypes from 'prop-types';
 import './FFMI.css';
 import { useTranslation } from 'react-i18next';
+import BottomNavBar from './components/BottomNavBar';
+import AdBanner from './components/AdBanner';
 
 function FFMI({ onComplete }) {
   const { userData, setUserData } = useUser();
@@ -299,6 +301,18 @@ function FFMI({ onComplete }) {
       >
         {submitting ? t('common.submitting') : t('common.submitAndReturn')}
       </button>
+
+      {/* 廣告區塊 (置中顯示) */}
+      {ffmiScore !== null && (
+        <div className="ad-section" style={{ margin: '20px 0', textAlign: 'center' }}>
+          <AdBanner position="inline" isFixed={false} showAd={true} />
+        </div>
+      )}
+
+      {/* Spacer for Ad + Navbar scrolling - 确保按钮完全可见且可点击 */}
+      <div style={{ height: '160px', width: '100%' }} />
+
+      <BottomNavBar />
     </div>
   );
 }

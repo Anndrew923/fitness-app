@@ -303,21 +303,50 @@ const AdBanner = ({
         </div>
       ) : (
         // Web 版 AdMob：使用 adsbygoogle.js
-        <ins
-          ref={adRef}
-          className="adsbygoogle"
-          style={{ display: 'block' }}
-          data-ad-client={appId} // AdMob 應用程式 ID
-          data-ad-slot={
-            // ✅ 修正：Web 版本也需要使用測試廣告 ID（測試模式或開發環境時）
-            // 注意：APP_PENDING_ADMOB_REVIEW 的情況已在 useEffect 開始處 return，不會執行到這裡
-            isDevelopment || isTestMode
-              ? 'ca-app-pub-3940256099942544/6300978111' // 測試 ID
-              : finalAdUnitId
-          } // AdMob 廣告單元 ID
-          data-ad-format="auto"
-          data-full-width-responsive="true"
-        />
+        // 修复：在开发模式或待审核状态下，显示占位符而不是尝试加载真实广告
+        (isDevelopment || isTestMode || APP_PENDING_ADMOB_REVIEW || !adLoaded) ? (
+          <div
+            ref={adRef}
+            className="ad-banner-placeholder"
+            style={{
+              width: '100%',
+              maxWidth: '320px',
+              height: '50px',
+              backgroundColor: '#e0e0e0',
+              color: '#666',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              margin: '0 auto',
+              border: '1px dashed #999',
+              borderRadius: '4px',
+              fontSize: '12px',
+              fontWeight: 500,
+            }}
+          >
+            {isDevelopment
+              ? '[DEV] AdMob Banner Area'
+              : APP_PENDING_ADMOB_REVIEW
+              ? '[TEST] AdMob Banner Area'
+              : 'AdMob Banner Area'}
+          </div>
+        ) : (
+          <ins
+            ref={adRef}
+            className="adsbygoogle"
+            style={{ display: 'block' }}
+            data-ad-client={appId} // AdMob 應用程式 ID
+            data-ad-slot={
+              // ✅ 修正：Web 版本也需要使用測試廣告 ID（測試模式或開發環境時）
+              // 注意：APP_PENDING_ADMOB_REVIEW 的情況已在 useEffect 開始處 return，不會執行到這裡
+              isDevelopment || isTestMode
+                ? 'ca-app-pub-3940256099942544/6300978111' // 測試 ID
+                : finalAdUnitId
+            } // AdMob 廣告單元 ID
+            data-ad-format="auto"
+            data-full-width-responsive="true"
+          />
+        )
       )}
     </div>
   );

@@ -19,6 +19,8 @@ import { SCORE_LEVELS } from './standards';
 import './Strength.css';
 import { useTranslation } from 'react-i18next';
 import HonorUnlockModal from './components/shared/modals/HonorUnlockModal';
+import BottomNavBar from './components/BottomNavBar';
+import AdBanner from './components/AdBanner';
 
 function Strength({ onComplete }) {
   const { userData, setUserData } = useUser();
@@ -1010,6 +1012,18 @@ function Strength({ onComplete }) {
         }}
         data={unlockModalData}
       />
+
+      {/* 廣告區塊 (置中顯示) */}
+      {averageScore !== null && (
+        <div className="ad-section" style={{ margin: '20px 0', textAlign: 'center' }}>
+          <AdBanner position="inline" isFixed={false} showAd={true} />
+        </div>
+      )}
+
+      {/* Spacer for Ad + Navbar scrolling - 确保按钮完全可见且可点击 */}
+      <div style={{ height: '160px', width: '100%' }} />
+
+      <BottomNavBar />
     </div>
   );
 }

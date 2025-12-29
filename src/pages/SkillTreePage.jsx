@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useUser } from '../UserContext';
 import BottomNavBar from '../components/BottomNavBar';
+import AdBanner from '../components/AdBanner';
 import '../components/UserInfo/userinfo.css'; // 重用樣式
 
 function SkillTreePage() {
@@ -36,7 +37,7 @@ function SkillTreePage() {
         background: 'linear-gradient(135deg, #81d8d0 0%, #5f9ea0 100%)',
         backgroundAttachment: 'fixed',
         backgroundSize: 'cover',
-        paddingBottom: 'calc(150px + env(safe-area-inset-bottom, 0px))',
+        paddingBottom: 'calc(120px + env(safe-area-inset-bottom, 0px))', // Navbar (60px) + Ad (60px) = 120px
         boxSizing: 'border-box',
         overflowY: 'auto',
         position: 'fixed',
@@ -144,8 +145,23 @@ function SkillTreePage() {
         </div>
       </div>
 
-      {/* Spacer for scrolling - 确保最后一个按钮能完整显示在 Navbar 上方 */}
-      <div style={{ height: '150px', width: '100%' }} />
+      {/* ⚠️ 安全墊片：確保最後一個按鈕滑到底時，離廣告有距離 */}
+      {/* 計算：Navbar Height (60px) + Ad Height (60px) + Safety Buffer (30px) = 150px */}
+      <div style={{ height: '160px', width: '100%' }} />
+
+      {/* 廣告組件 (層級 Z-Index 需低於 Navbar 但高於背景) */}
+      <div
+        style={{
+          position: 'fixed',
+          bottom: '60px', // BottomNavBar 高度約 60px
+          width: '100%',
+          zIndex: 90, // 低於 BottomNavBar (通常 z-index 100+)
+          left: 0,
+          right: 0,
+        }}
+      >
+        <AdBanner position="bottom" isFixed={true} showAd={true} />
+      </div>
 
       <BottomNavBar />
     </div>

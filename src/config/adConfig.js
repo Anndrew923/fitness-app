@@ -27,11 +27,12 @@ export const adConfig = {
 
   // 評測頁面 - 只在有評測結果時顯示廣告
   testPages: {
-    strength: { showTop: false, showBottom: true }, // 有評測結果時顯示
-    cardio: { showTop: false, showBottom: true },
-    'explosive-power': { showTop: false, showBottom: true },
-    'muscle-mass': { showTop: false, showBottom: true },
-    'body-fat': { showTop: false, showBottom: true },
+    strength: { showTop: false, showBottom: false }, // 使用手動放置的 inline 廣告，不顯示全局底部廣告
+    cardio: { showTop: false, showBottom: false }, // 使用手動放置的 inline 廣告，不顯示全局底部廣告
+    'explosive-power': { showTop: false, showBottom: false }, // 使用手動放置的 inline 廣告，不顯示全局底部廣告
+    'muscle-mass': { showTop: false, showBottom: false }, // 使用手動放置的 inline 廣告，不顯示全局底部廣告
+    'body-fat': { showTop: false, showBottom: false }, // 使用手動放置的 inline 廣告，不顯示全局底部廣告
+    'arm-size': { showTop: false, showBottom: false }, // PAS 臂圍評測 - 使用手動放置的 inline 廣告，不顯示全局底部廣告
   },
 
   // 其他頁面
@@ -50,6 +51,7 @@ export const adConfig = {
     settings: { showTop: false, showBottom: false }, // 設定頁面不顯示廣告
     community: { showTop: false, showBottom: true }, // 社群頁面內容豐富，可以顯示廣告
     'training-tools': { showTop: false, showBottom: true }, // 工具頁面顯示底部廣告
+    'skill-tree': { showTop: false, showBottom: true }, // 技能樹頁面顯示底部廣告
   },
 
   // 廣告顯示頻率控制
@@ -110,8 +112,11 @@ export const getAdUnitId = (position = 'bottom') => {
 // 檢查是否應該顯示廣告
 export const shouldShowAd = (pageName, position = 'bottom') => {
   const pageConfig = getPageAdConfig(pageName);
+  // 修复：inline 位置也检查 showBottom（因为 inline 广告通常被视为底部广告的变体）
   const shouldShow =
-    position === 'top' ? pageConfig.showTop : pageConfig.showBottom;
+    position === 'top' 
+      ? pageConfig.showTop 
+      : pageConfig.showBottom; // bottom 和 inline 都检查 showBottom
 
   // 額外檢查：確保頁面有足夠內容
   if (shouldShow) {
@@ -147,6 +152,7 @@ const checkPageContent = pageName => {
       'explosive-power',
       'muscle-mass',
       'body-fat',
+      'arm-size', // PAS 臂圍評測
     ].includes(pageName)
   ) {
     // 評測頁面有豐富的說明內容，符合 AdMob 政策，直接顯示廣告
@@ -158,6 +164,12 @@ const checkPageContent = pageName => {
   if (pageName === 'training-tools') {
     logger.debug(`📄 工具頁面 [${pageName}] 內容豐富，顯示廣告`);
     return true; // 工具頁面有足夠內容，顯示廣告
+  }
+
+  // 5. 技能樹頁面 - 有豐富的評測選項和說明
+  if (pageName === 'skill-tree') {
+    logger.debug(`📄 技能樹頁面 [${pageName}] 內容豐富，顯示廣告`);
+    return true; // 技能樹頁面有足夠內容，顯示廣告
   }
 
   // 其他頁面暫時不顯示廣告，確保符合政策

@@ -5,6 +5,7 @@ import { useUser } from '../../UserContext';
 import { useTranslation } from 'react-i18next';
 import HonorUnlockModal from '../../components/shared/modals/HonorUnlockModal';
 import BottomNavBar from '../../components/BottomNavBar';
+import AdBanner from '../../components/AdBanner';
 import { ARM_SIZE_LEVELS } from '../../standards';
 import './ArmSize.css';
 
@@ -347,6 +348,13 @@ function ArmSize({ onComplete }) {
         </button>
       </div>
 
+      {/* 廣告區塊 (置中顯示) */}
+      {score !== null && (
+        <div className="ad-section" style={{ margin: '20px 0', textAlign: 'center' }}>
+          <AdBanner position="inline" isFixed={false} showAd={true} />
+        </div>
+      )}
+
       <HonorUnlockModal
         isOpen={isUnlockModalOpen}
         onClose={() => {
@@ -355,6 +363,9 @@ function ArmSize({ onComplete }) {
         }}
         data={unlockModalData}
       />
+
+      {/* Spacer for Ad + Navbar scrolling - 确保按钮完全可见且可点击 */}
+      <div style={{ height: '160px', width: '100%' }} />
 
       <BottomNavBar />
     </div>

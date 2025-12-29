@@ -5,6 +5,8 @@ import * as standards from './standards';
 import PropTypes from 'prop-types';
 import './Cardio.css';
 import { useTranslation } from 'react-i18next';
+import BottomNavBar from './components/BottomNavBar';
+import AdBanner from './components/AdBanner';
 
 function Cardio({ onComplete }) {
   const { userData, setUserData } = useUser();
@@ -250,6 +252,18 @@ function Cardio({ onComplete }) {
           {submitting ? t('common.submitting') : t('common.submitAndReturn')}
         </button>
       </div>
+
+      {/* 廣告區塊 (置中顯示) */}
+      {score !== null && (
+        <div className="ad-section" style={{ margin: '20px 0', textAlign: 'center' }}>
+          <AdBanner position="inline" isFixed={false} showAd={true} />
+        </div>
+      )}
+
+      {/* Spacer for Ad + Navbar scrolling - 确保按钮完全可见且可点击 */}
+      <div style={{ height: '160px', width: '100%' }} />
+
+      <BottomNavBar />
     </div>
   );
 }

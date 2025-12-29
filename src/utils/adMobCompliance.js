@@ -182,6 +182,7 @@ export const preAdDisplayCheck = (pageName, pageContent) => {
     'explosive-power',
     'muscle-mass',
     'body-fat',
+    'arm-size', // PAS 臂圍評測
   ];
   if (testPages.includes(pageName)) {
     // ✅ 移除重複日誌：checkPageContent 已經輸出了相同的日誌
@@ -193,6 +194,12 @@ export const preAdDisplayCheck = (pageName, pageContent) => {
   if (pageName === 'training-tools') {
     // ✅ 移除重複日誌：checkPageContent 已經輸出了相同的日誌
     // logger.debug(`📄 工具頁面 [${pageName}] 內容豐富，顯示廣告`);
+    return true;
+  }
+
+  // 技能樹頁面特殊處理 - 有豐富的評測選項和說明，符合 AdMob 政策
+  if (pageName === 'skill-tree') {
+    logger.debug(`📄 技能樹頁面 [${pageName}] 內容豐富，顯示廣告`);
     return true;
   }
 
