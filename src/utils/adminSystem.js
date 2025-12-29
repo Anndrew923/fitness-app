@@ -9,6 +9,7 @@ import {
   getDocs,
   orderBy,
   limit,
+  serverTimestamp,
 } from 'firebase/firestore';
 import { db, auth } from '../firebase';
 
@@ -185,10 +186,15 @@ class AdminSystem {
   /**
    * 將 exercise 名稱映射到 scores key（處理 snake_case 到 camelCase）
    * @param {string} exercise - Exercise 名稱（可能是中文、英文或 key）
-   * @returns {string} scores key（camelCase）
+   * @returns {string|null} scores key（camelCase），如果無法映射則返回 null
    */
   static mapExerciseToScoreKey(exercise) {
     if (!exercise || typeof exercise !== 'string') {
+      return null;
+    }
+
+    const trimmedExercise = exercise.trim();
+    if (!trimmedExercise) {
       return null;
     }
 
@@ -207,13 +213,13 @@ class AdminSystem {
       'bodyFat',
     ];
 
-    if (camelCaseKeys.includes(exercise)) {
-      return exercise;
+    if (camelCaseKeys.includes(trimmedExercise)) {
+      return trimmedExercise;
     }
 
     // 處理 snake_case 轉 camelCase
-    if (exercise.includes('_')) {
-      return exercise
+    if (trimmedExercise.includes('_')) {
+      const converted = trimmedExercise
         .split('_')
         .map((word, index) => {
           if (index === 0) {
@@ -222,6 +228,11 @@ class AdminSystem {
           return word.charAt(0).toUpperCase() + word.slice(1);
         })
         .join('');
+      
+      // 驗證轉換後的 key 是否有效
+      if (camelCaseKeys.includes(converted)) {
+        return converted;
+      }
     }
 
     // 常見映射表（中文名稱或英文名稱到 key）
@@ -233,17 +244,29 @@ class AdminSystem {
       硬舉: 'deadlift',
       划船: 'latPulldown',
       肩推: 'shoulderPress',
-      // 英文映射
+      // 英文映射（大小寫不敏感）
       'arm size': 'armSize',
       'arm_size': 'armSize',
+      'armsize': 'armSize',
       'bench press': 'benchPress',
       'bench_press': 'benchPress',
-      // 如果無法映射，嘗試直接使用（可能是已經正確的 key）
-      default: exercise,
+      'benchpress': 'benchPress',
     };
 
-    const normalizedExercise = exercise.toLowerCase().trim();
-    return exerciseMap[normalizedExercise] || exerciseMap[exercise] || exercise;
+    // 先嘗試原始值
+    if (exerciseMap[trimmedExercise]) {
+      return exerciseMap[trimmedExercise];
+    }
+
+    // 再嘗試小寫版本
+    const normalizedExercise = trimmedExercise.toLowerCase();
+    if (exerciseMap[normalizedExercise]) {
+      return exerciseMap[normalizedExercise];
+    }
+
+    // 如果無法映射，返回 null（讓調用者決定如何處理）
+    console.warn(`⚠️ 無法映射 exercise 名稱到 scores key: "${exercise}"`);
+    return null;
   }
 
   /**
@@ -371,6 +394,36 @@ class AdminSystem {
           verificationRequestId: requestId,
           updatedAt: now.toISOString(),
         });
+      }
+
+      // ✅ 發送通知：認證通過通知
+      try {
+        const notificationsRef = collection(db, 'users', requestData.userId, 'notifications');
+        
+        // 構建通知訊息
+        let notificationTitle = '認證通過！🎉';
+        let notificationMessage = '恭喜！您的認證申請已通過，天梯排名已更新！';
+
+        if (scoreUpdated && requestData.targetData) {
+          const exerciseName = requestData.targetData.exercise || '成績';
+          const score = requestData.targetData.score || updatedScore;
+          notificationMessage = `恭喜！您的 ${exerciseName} 成績 ${score} 分已通過認證，天梯排名已更新！`;
+        }
+
+        await addDoc(notificationsRef, {
+          type: 'verification_approved',
+          title: notificationTitle,
+          message: notificationMessage,
+          read: false,
+          createdAt: serverTimestamp(),
+          targetPath: '/rankings',
+          requestId: requestId,
+        });
+
+        console.log('✅ 通知已發送:', requestData.userId);
+      } catch (notificationError) {
+        console.error('❌ 發送通知失敗:', notificationError);
+        // 繼續執行，不影響認證流程
       }
 
       // 記錄管理員操作

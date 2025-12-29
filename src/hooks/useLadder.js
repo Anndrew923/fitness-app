@@ -358,13 +358,17 @@ export const useLadder = (options = {}) => {
         } else {
           sortField = 'stats_vertical';
         }
+      } else if (selectedDivision === 'stats_bodyFat') {
+        if (filterProject === 'ffmi') {
+          sortField = 'stats_ffmi';
+        } else {
+          sortField = 'stats_bodyFat';
+        }
       } else if (selectedDivision === 'stats_ffmi') {
         if (filterProject === 'smm') {
           sortField = 'stats_smm';
-        } else if (filterProject === 'armSize') {
-          sortField = 'stats_armSize';
         } else {
-          sortField = 'stats_ffmi';
+          sortField = 'stats_smm'; // 默认使用 SMM
         }
       } else if (selectedDivision === 'armSize') {
         // PAS 臂围：按照 scores.armSize 排序

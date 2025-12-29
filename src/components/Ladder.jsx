@@ -74,6 +74,31 @@ const Ladder = () => {
   const lastConditionCheckRef = useRef(null);
   const forceReloadProcessedRef = useRef(null);
 
+  // Reset filterProject when division changes
+  useEffect(() => {
+    // Set default filterProject based on selectedDivision
+    switch (selectedDivision) {
+      case 'stats_bodyFat':
+        setFilterProject('bodyFat');
+        break;
+      case 'stats_ffmi':
+        setFilterProject('smm');
+        break;
+      case 'stats_cooper':
+        setFilterProject('cooper');
+        break;
+      case 'stats_vertical':
+        setFilterProject('vertical');
+        break;
+      case 'stats_sbdTotal':
+        setFilterProject('total');
+        break;
+      default:
+        setFilterProject('total');
+        break;
+    }
+  }, [selectedDivision]);
+
   const ageGroups = useMemo(
     () => [
       { value: 'all', label: t('ladder.ageGroups.all') },
@@ -278,6 +303,16 @@ const Ladder = () => {
           formatValue: val => Number(val).toFixed(1),
         };
       case 'stats_bodyFat':
+        // Body Fat / FFMI: Check project filter
+        if (filterProject === 'ffmi') {
+          return {
+            value: userData.stats_ffmi || 0,
+            unit: '',
+            label: t('tests.ffmiLabels.ffmi'),
+            formatValue: val => Number(val).toFixed(2),
+          };
+        }
+        // Default: Body Fat %
         return {
           value: userData.stats_bodyFat || 0,
           unit: '%',
@@ -335,26 +370,12 @@ const Ladder = () => {
           formatValue: val => Number(val).toFixed(1),
         };
       case 'stats_ffmi':
-        if (filterProject === 'smm') {
-          return {
-            value: userData.stats_smm || 0,
-            unit: 'kg',
-            label: t('tests.muscleLabels.smm'),
-            formatValue: val => Number(val).toFixed(1),
-          };
-        } else if (filterProject === 'armSize') {
-          return {
-            value: userData.stats_armSize || 0,
-            unit: 'cm',
-            label: t('tests.muscleLabels.armSize'),
-            formatValue: val => Number(val).toFixed(1),
-          };
-        }
+        // Muscle Mass: Only SMM now (FFMI moved to bodyFat division)
         return {
-          value: userData.stats_ffmi || 0,
-          unit: '',
-          label: t('tests.ffmiLabels.ffmi'),
-          formatValue: val => Number(val).toFixed(2),
+          value: userData.stats_smm || 0,
+          unit: 'kg',
+          label: t('tests.muscleLabels.smm'),
+          formatValue: val => Number(val).toFixed(1),
         };
       case 'ladderScore':
       default:

@@ -25,7 +25,7 @@ const LadderDivisionSelector = ({ currentFilter, onFilterChange }) => {
     {
       label: '🔥 ' + t('tests.bodyFat'),
       value: 'stats_bodyFat',
-      desc: t('tests.bodyFat'),
+      desc: t('tests.bodyFat') + ' / FFMI',
     },
     {
       label: '📍 ' + t('ladder.filter.zone'),
@@ -45,7 +45,7 @@ const LadderDivisionSelector = ({ currentFilter, onFilterChange }) => {
     {
       label: '💪 ' + t('tests.muscleMass'),
       value: 'stats_ffmi',
-      desc: 'FFMI',
+      desc: 'SMM',
     },
     {
       label: '🦾 ' + t('tests.armSize'),

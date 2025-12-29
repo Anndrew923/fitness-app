@@ -69,11 +69,14 @@ const LadderSubFilters = ({
           { value: 'broad', label: t('tests.powerLabels.standingLongJump') },
           { value: 'sprint', label: t('tests.powerLabels.sprint') },
         ];
+      case 'stats_bodyFat':
+        return [
+          { value: 'bodyFat', label: t('tests.bodyFat') },
+          { value: 'ffmi', label: t('tests.ffmiLabels.ffmi') },
+        ];
       case 'stats_ffmi':
         return [
-          { value: 'ffmi', label: t('tests.ffmiLabels.ffmi') },
           { value: 'smm', label: t('tests.muscleLabels.smm') },
-          { value: 'armSize', label: t('tests.muscleLabels.armSize') },
         ];
       default:
         return [];

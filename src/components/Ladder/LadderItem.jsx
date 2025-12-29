@@ -127,6 +127,16 @@ const LadderItem = React.memo(
             formatValue: val => Number(val).toFixed(1),
           };
         case 'stats_bodyFat':
+          // Body Fat / FFMI: Check project filter
+          if (filterProject === 'ffmi') {
+            return {
+              value: user.stats_ffmi || 0,
+              unit: '',
+              label: t('tests.ffmiLabels.ffmi'),
+              formatValue: val => Number(val).toFixed(2),
+            };
+          }
+          // Default: Body Fat %
           return {
             value: user.stats_bodyFat || 0,
             unit: '%',
@@ -191,28 +201,12 @@ const LadderItem = React.memo(
             formatValue: val => Number(val).toFixed(1),
           };
         case 'stats_ffmi':
-          // Hypertrophy: Check project filter
-          if (filterProject === 'smm') {
-            return {
-              value: user.stats_smm || 0,
-              unit: 'kg',
-              label: t('tests.muscleLabels.smm'),
-              formatValue: val => Number(val).toFixed(1),
-            };
-          } else if (filterProject === 'armSize') {
-            return {
-              value: user.stats_armSize || 0,
-              unit: 'cm',
-              label: t('tests.muscleLabels.armSize'),
-              formatValue: val => Number(val).toFixed(1),
-            };
-          }
-          // Default: FFMI
+          // Muscle Mass: Only SMM now (FFMI moved to bodyFat division)
           return {
-            value: user.stats_ffmi || 0,
-            unit: '',
-            label: t('tests.ffmiLabels.ffmi'),
-            formatValue: val => Number(val).toFixed(2),
+            value: user.stats_smm || 0,
+            unit: 'kg',
+            label: t('tests.muscleLabels.smm'),
+            formatValue: val => Number(val).toFixed(1),
           };
         case 'armSize':
           // PAS 臂围：显示主分数 + 副信息（臂围 cm / 体脂 %）

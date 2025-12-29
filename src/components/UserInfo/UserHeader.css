@@ -54,14 +54,23 @@
   font-weight: bold !important;
 }
 
-/* 設定按鈕 - 右上角 */
-.user-info__settings-btn {
+/* 右上角按鈕組 */
+.user-info__top-actions {
   position: fixed !important;
   /* ✅ 修正：優先使用 CSS 變量，後備使用 env()，確保在不同設備上正確響應 */
   top: calc(
     15px + var(--safe-area-inset-top, env(safe-area-inset-top, 0px))
   ) !important;
   right: 15px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  z-index: 999 !important; /* 確保在 Modal 之下，Modal 通常是 1000+ */
+}
+
+/* 設定按鈕 - 右上角 */
+.user-info__settings-btn {
+  position: relative !important;
   width: 44px !important;
   height: 44px !important;
   border-radius: 50% !important;
@@ -74,7 +83,6 @@
   cursor: pointer !important;
   transition: all 0.3s ease !important;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
-  z-index: 999 !important; /* 確保在 Modal 之下，Modal 通常是 1000+ */
   backdrop-filter: blur(10px) !important;
 }
 
@@ -113,12 +121,16 @@
     font-size: 12px !important;
   }
 
-  .user-info__settings-btn {
+  .user-info__top-actions {
     /* ✅ 修正：移動版也考慮 Status Bar 高度，使用 CSS 變量優先 */
     top: calc(
       10px + var(--safe-area-inset-top, env(safe-area-inset-top, 0px))
     ) !important;
     right: 10px !important;
+    gap: 8px !important;
+  }
+
+  .user-info__settings-btn {
     width: 40px !important;
     height: 40px !important;
   }

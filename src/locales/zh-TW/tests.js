@@ -242,7 +242,7 @@ export default {
       needCalculate: '請先計算肌肉修煉分數！',
       updateUserFail: '更新角色數據失敗，請稍後再試！',
     },
-    bodyFat: '體脂率FFMI',
+    bodyFat: '體脂率',
     ffmiTitle: '體脂率FFMI',
     ffmiLabels: {
       bodyFatPercent: '體脂肪率 (%)',
