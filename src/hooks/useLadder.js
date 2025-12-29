@@ -7,6 +7,7 @@ import { safeGetDocs } from '../utils/firestoreHelper';
 import LadderLikeSystem from '../utils/ladderLikeSystem';
 import logger from '../utils/logger';
 import { useTranslation } from 'react-i18next';
+import { recalculateSMMScore } from '../utils/calculateSMMScore';
 
 /**
  * Custom hook for Ladder data management
@@ -151,14 +152,16 @@ export const useLadder = (options = {}) => {
               : docData.ageGroup || '',
           };
 
-          data.push({
+          const displayName = isAnonymous
+            ? t('community.fallback.anonymousUser')
+            : docData.nickname ||
+              docData.email?.split('@')[0] ||
+              t('community.fallback.unnamedUser');
+          
+          const userObject = {
             id: doc.id,
             ...userWithAgeGroup,
-            displayName: isAnonymous
-              ? t('community.fallback.anonymousUser')
-              : docData.nickname ||
-                docData.email?.split('@')[0] ||
-                t('community.fallback.unnamedUser'),
+            displayName,
             avatarUrl: isAnonymous ? '' : docData.avatarUrl,
             isAnonymous: isAnonymous,
             scores: docData.scores || {
@@ -178,7 +181,32 @@ export const useLadder = (options = {}) => {
             ladderLikeCount: docData.ladderLikeCount || 0,
             ladderLikes: docData.ladderLikes || [],
             isVerified: docData.isVerified === true,
-          });
+          };
+          
+          // 🕵️‍♀️ 强制诊断：针对美乐蒂的详细数据输出
+          if (displayName.includes('美樂蒂') || displayName.includes('Melody') || displayName.includes('美乐蒂')) {
+            console.log('🕵️‍♀️ 抓到美樂蒂了！');
+            console.log('=== 完整用户数据 ===');
+            console.log('User ID:', doc.id);
+            console.log('Display Name:', displayName);
+            console.log('Type of Score:', typeof userObject.scores?.muscleMass); // 關鍵：看是 number 還是 string
+            console.log('Raw Score Value:', userObject.scores?.muscleMass);
+            console.log('Raw Score Value (JSON):', JSON.stringify(userObject.scores?.muscleMass));
+            console.log('Number(Score):', Number(userObject.scores?.muscleMass));
+            console.log('Math.abs(Number(Score) - 100):', Math.abs(Number(userObject.scores?.muscleMass) - 100));
+            console.log('Is Suspicious 100?:', !isNaN(Number(userObject.scores?.muscleMass)) && Math.abs(Number(userObject.scores?.muscleMass) - 100) < 0.1);
+            console.log('SMM Data (stats_smm):', userObject.stats_smm);
+            console.log('SMM Data (testInputs.muscle.smm):', userObject.testInputs?.muscle?.smm);
+            console.log('Weight Data:', userObject.weight);
+            console.log('Has SMM?:', (userObject.stats_smm > 0) || (userObject.testInputs?.muscle?.smm > 0));
+            console.log('Has Weight?:', userObject.weight > 0);
+            console.log('Has Data?:', ((userObject.stats_smm > 0) || (userObject.testInputs?.muscle?.smm > 0)) && userObject.weight > 0);
+            console.log('Full scores object:', userObject.scores);
+            console.log('Full user object:', userObject);
+            console.log('==================');
+          }
+          
+          data.push(userObject);
         }
       });
 
@@ -324,6 +352,10 @@ export const useLadder = (options = {}) => {
         );
       }
 
+      // ✅ 性能优化：使用 useMemo 包裹排序逻辑（避免重复执行）
+      // 注意：由于这是在异步函数内部，我们使用函数提取来减少重复计算
+      // 排序逻辑会在数据或筛选条件改变时执行
+      
       // Re-sort based on selected division and project filter
       // For local_district, always sort by ladderScore (descending)
       let sortField = selectedDivision === 'local_district' ? 'ladderScore' : selectedDivision;
@@ -365,16 +397,23 @@ export const useLadder = (options = {}) => {
           sortField = 'stats_bodyFat';
         }
       } else if (selectedDivision === 'stats_ffmi') {
-        if (filterProject === 'smm') {
-          sortField = 'stats_smm';
+        if (filterProject === 'score') {
+          sortField = 'muscleMass_score'; // 使用 scores.muscleMass 排序
+        } else if (filterProject === 'weight') {
+          sortField = 'stats_smm'; // 使用 stats_smm (kg) 排序
+        } else if (filterProject === 'ratio') {
+          sortField = 'smm_ratio'; // 使用计算出的 SMM 比率排序
         } else {
-          sortField = 'stats_smm'; // 默认使用 SMM
+          sortField = 'muscleMass_score'; // 默认使用分数
         }
       } else if (selectedDivision === 'armSize') {
         // PAS 臂围：按照 scores.armSize 排序
         sortField = 'armSize';
       }
-      data.sort((a, b) => {
+      
+      // ✅ 性能优化：只在数据或筛选条件改变时执行排序
+      // 使用数组副本避免直接修改原数组
+      const sortedData = [...data].sort((a, b) => {
         // Special case: Calculate five-item total for sorting
         let aValue, bValue;
         if (sortField === 'total_five') {
@@ -384,6 +423,103 @@ export const useLadder = (options = {}) => {
           // PAS 臂围：从 scores.armSize 读取
           aValue = a.scores?.armSize || 0;
           bValue = b.scores?.armSize || 0;
+        } else if (sortField === 'muscleMass_score') {
+          // SMM 分数：从 scores.muscleMass 读取
+          // ✅ 修复：强制重算策略 - 当检测到 100 分时，尝试重新计算
+          const getValidScore = (user) => {
+            const storedScore = user.scores?.muscleMass;
+            // ✅ 终极修复：使用数值转换后的宽松判断，处理字符串类型
+            const numStoredScore = Number(storedScore);
+            const isSuspicious100 = !isNaN(numStoredScore) && Math.abs(numStoredScore - 100) < 0.1;
+            const hasSmm = (user.stats_smm > 0) || (user.testInputs?.muscle?.smm > 0);
+            const hasWeight = user.weight > 0;
+            const hasData = hasSmm && hasWeight;
+            
+            // ✅ 性能优化：减少诊断日志的重复输出
+            // 只在第一次检测到或数据状态改变时输出
+            if (isSuspicious100) {
+              const displayName = user.displayName || user.nickname || user.email?.split('@')[0] || 'Unknown';
+              const shouldLog = (displayName === 'Melody' || displayName === 'Feynman0418' || displayName.includes('Melody') || displayName.includes('Feynman'));
+              // 只在特定用户且数据状态改变时输出诊断信息（避免重复）
+              if (shouldLog && (!user._lastDiagnosticLog || user._lastDiagnosticLog !== `${hasSmm}-${hasWeight}`)) {
+                console.log('🔍 Bug User Diagnostic (useLadder):', {
+                  displayName,
+                  storedScore,
+                  storedScoreType: typeof storedScore,
+                  numStoredScore,
+                  isSuspicious100,
+                  stats_smm: user.stats_smm,
+                  weight: user.weight,
+                  hasSmm,
+                  hasWeight,
+                  hasData,
+                  testInputs_muscle: user.testInputs?.muscle,
+                  scores: user.scores,
+                });
+                // 标记已记录，避免重复输出
+                user._lastDiagnosticLog = `${hasSmm}-${hasWeight}`;
+              }
+            }
+            
+            // ✅ Kill Switch: 如果存储分数为 100（无论类型），必须处理（不能 fallback 回 100）
+            if (isSuspicious100) {
+              // 情况 A: 有数据，尝试重算
+              if (hasData) {
+                const recalculatedScore = recalculateSMMScore(user);
+                
+                if (recalculatedScore !== null && recalculatedScore !== 100) {
+                  // 重算成功，使用新分数
+                  const displayName = user.displayName || user.nickname || user.email?.split('@')[0] || 'Unknown';
+                  console.log(`✅ 强制重算成功 (排序): ${displayName} - 从 100 分重算为 ${recalculatedScore} 分`);
+                  return recalculatedScore;
+                } else if (recalculatedScore === null) {
+                  // 重算失败（数据不完整），返回 0（排序时排在最后）
+                  const displayName = user.displayName || user.nickname || user.email?.split('@')[0] || 'Unknown';
+                  console.warn(`⚠️ 强制重算失败 (排序): ${displayName} - 数据不完整，强制归零`);
+                  return 0;
+                }
+                // 重算结果仍为 100，可能是真实 100 分，使用原值
+                return storedScore;
+              } else {
+                // 情况 B: 无数据，强制归零（Kill Switch）- 这是关键修复点
+                const displayName = user.displayName || user.nickname || user.email?.split('@')[0] || 'Unknown';
+                console.warn(`🚫 Kill Switch 触发 (排序): ${displayName} - muscleMass=100 但缺少必要数据，强制归零`);
+                return 0;
+              }
+            }
+            
+            // 正常情况：直接使用存储值
+            if (storedScore !== undefined && storedScore !== null) {
+              const numScore = Number(storedScore);
+              // 检查是否为有效数字且不为 Infinity/NaN
+              if (!isNaN(numScore) && isFinite(numScore) && numScore >= 0) {
+                return numScore;
+              }
+            }
+            return 0;
+          };
+          
+          aValue = getValidScore(a);
+          bValue = getValidScore(b);
+        } else if (sortField === 'smm_ratio') {
+          // SMM 比率：计算 (smm / weight) * 100
+          // ✅ 修复：防止除以零导致的 Infinity/NaN
+          const getValidRatio = (user) => {
+            const smm = Number(user.stats_smm) || 0;
+            const weight = Number(user.weight) || 0;
+            
+            // 防御性检查：如果缺少必要数据，返回 0
+            if (!smm || !weight || weight <= 0) {
+              return 0;
+            }
+            
+            // 安全计算：确保不会产生 Infinity 或 NaN
+            const ratio = (smm / weight) * 100;
+            return isFinite(ratio) && !isNaN(ratio) ? ratio : 0;
+          };
+          
+          aValue = getValidRatio(a);
+          bValue = getValidRatio(b);
         } else {
           aValue = a[sortField];
           bValue = b[sortField];
@@ -428,6 +564,9 @@ export const useLadder = (options = {}) => {
         const bVal = bValue || 0;
         return bVal - aVal;
       });
+      
+      // 使用排序后的数据
+      data = sortedData;
 
       // Calculate user rank and pagination
       let displayData = [];

@@ -76,7 +76,9 @@ const LadderSubFilters = ({
         ];
       case 'stats_ffmi':
         return [
-          { value: 'smm', label: t('tests.muscleLabels.smm') },
+          { value: 'score', label: t('tests.muscleLabels.smmScore', '骨骼肌分數') },
+          { value: 'weight', label: t('tests.muscleLabels.smmKg', '骨骼肌重 kg') },
+          { value: 'ratio', label: t('tests.muscleLabels.smPercentShort', '骨骼肌率 %') },
         ];
       default:
         return [];

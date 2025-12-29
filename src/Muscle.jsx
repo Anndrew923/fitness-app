@@ -125,17 +125,19 @@ function Muscle({ onComplete }) {
 
   // 🔒 榮譽鎖機制：超過 100 分需認證才能顯示真實數值
   const applyHonorLock = (score, isVerified) => {
-    if (score > 100) {
+    // ✅ 確保分數保留兩位小數
+    const roundedScore = parseFloat(Number(score).toFixed(2));
+    if (roundedScore > 100) {
       if (isVerified) {
         // 已認證：顯示真實分數
-        return { displayScore: score, isCapped: false };
+        return { displayScore: roundedScore, isCapped: false };
       } else {
         // 未認證：強制鎖在 100
         return { displayScore: 100, isCapped: true };
       }
     }
     // 未超過 100 分，無需鎖定
-    return { displayScore: score, isCapped: false };
+    return { displayScore: roundedScore, isCapped: false };
   };
 
   const calculateMuscleScore = () => {
@@ -177,7 +179,8 @@ function Muscle({ onComplete }) {
     
     // 🚀 僅對 SMM (骨骼肌重量) 應用 1.25 倍放大係數
     // SM% (骨骼肌率) 保持原始分數，不應用係數
-    const smmScoreRaw = Math.round(smmRawScore * 1.25);
+    // ✅ 修改：保留兩位小數，提高鑑別度
+    const smmScoreRaw = parseFloat((smmRawScore * 1.25).toFixed(2));
     
     // 🔒 應用榮譽鎖機制
     const isVerified = userData.isVerified === true;
@@ -189,7 +192,7 @@ function Muscle({ onComplete }) {
     const finalScoreLocked = applyHonorLock(finalScoreRaw, isVerified);
     
     setResult({
-      smmScore: smmLocked.displayScore,
+      smmScore: parseFloat(smmLocked.displayScore.toFixed(2)), // ✅ 保留兩位小數
       smPercent,
       smPercentScore: smPercentLocked.displayScore,
       finalScore: finalScoreLocked.displayScore.toFixed(2),

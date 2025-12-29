@@ -17,6 +17,7 @@ import { useDopamineFeedback } from '../hooks/useDopamineFeedback';
 import LadderList from './Ladder/LadderList';
 import LadderFilters from './Ladder/LadderFilters';
 import LadderSubFilters from './Ladder/LadderSubFilters';
+import { recalculateSMMScore } from '../utils/calculateSMMScore';
 import './Ladder/Ladder.css';
 import './Ladder/LadderItem.css'; // For shared styles used in floating-rank-card
 import './Ladder/LadderStatusCard.css'; // For floating-rank-display styles
@@ -82,7 +83,7 @@ const Ladder = () => {
         setFilterProject('bodyFat');
         break;
       case 'stats_ffmi':
-        setFilterProject('smm');
+        setFilterProject('score');
         break;
       case 'stats_cooper':
         setFilterProject('cooper');
@@ -370,12 +371,147 @@ const Ladder = () => {
           formatValue: val => Number(val).toFixed(1),
         };
       case 'stats_ffmi':
-        // Muscle Mass: Only SMM now (FFMI moved to bodyFat division)
+        // Muscle Mass: Check project filter (score, weight, ratio)
+        if (filterProject === 'score') {
+          // SMM 分数：从 scores.muscleMass 读取
+          // ✅ 终极修复：使用数值转换后的宽松判断，处理字符串类型
+          const storedScore = userData.scores?.muscleMass;
+          const numStoredScore = Number(storedScore);
+          const isSuspicious100 = !isNaN(numStoredScore) && Math.abs(numStoredScore - 100) < 0.1;
+          const hasSmm = (userData.stats_smm > 0) || (userData.testInputs?.muscle?.smm > 0);
+          const hasWeight = userData.weight > 0;
+          const hasData = hasSmm && hasWeight;
+          
+          let displayScore = 0;
+          
+          // ✅ Kill Switch: 如果存储分数为 100（无论类型），必须处理（不能 fallback 回 100）
+          if (isSuspicious100) {
+            // 情况 A: 有数据，尝试重算
+            if (hasData) {
+              const recalculatedScore = recalculateSMMScore(userData);
+              
+              if (recalculatedScore !== null && recalculatedScore !== 100) {
+                displayScore = recalculatedScore;
+              } else if (recalculatedScore === null) {
+                displayScore = null;
+              } else {
+                displayScore = storedScore;
+              }
+            } else {
+              // 情况 B: 无数据，强制归零（Kill Switch）
+              displayScore = null;
+              const displayName = userData.displayName || userData.nickname || userData.email?.split('@')[0] || 'Unknown';
+              console.warn(`🚫 Kill Switch 触发 (浮动条): ${displayName} - muscleMass=100 但缺少必要数据，强制显示为 --`);
+            }
+          } else if (storedScore !== undefined && storedScore !== null) {
+            // 正常情况：非 100 分，直接使用存储值
+            const numScore = Number(storedScore);
+            if (!isNaN(numScore) && isFinite(numScore)) {
+              displayScore = numScore;
+            }
+          }
+          
+          return {
+            value: displayScore,
+            unit: t('community.ui.pointsUnit', '分'),
+            label: t('tests.muscleLabels.smmScore', '骨骼肌分數'),
+            formatValue: val => {
+              if (val === null || val === undefined) return '--';
+              const numVal = Number(val);
+              if (isNaN(numVal) || !isFinite(numVal) || numVal === 0) return '--';
+              return numVal.toFixed(2);
+            },
+          };
+        } else if (filterProject === 'weight') {
+          // SMM 重量：从 stats_smm 读取
+          return {
+            value: userData.stats_smm || 0,
+            unit: 'kg',
+            label: t('tests.muscleLabels.smmKg', '骨骼肌重'),
+            formatValue: val => Number(val).toFixed(1),
+          };
+        } else if (filterProject === 'ratio') {
+          // SMM 比率：计算 (smm / weight) * 100
+          // ✅ 修复：防止除以零导致的 Infinity/NaN
+          const smm = Number(userData.stats_smm) || 0;
+          const weight = Number(userData.weight) || 0;
+          
+          // 防御性检查：如果缺少必要数据，返回 0
+          if (!smm || !weight || weight <= 0) {
+            return {
+              value: 0,
+              unit: '%',
+              label: t('tests.muscleLabels.smPercentShort', '骨骼肌率'),
+              formatValue: val => {
+                const numVal = Number(val);
+                if (isNaN(numVal) || numVal === 0) return '--';
+                return numVal.toFixed(1);
+              },
+            };
+          }
+          
+          // 安全计算：确保不会产生 Infinity 或 NaN
+          const ratio = (smm / weight) * 100;
+          const safeRatio = isFinite(ratio) && !isNaN(ratio) ? ratio : 0;
+          
+          return {
+            value: safeRatio,
+            unit: '%',
+            label: t('tests.muscleLabels.smPercentShort', '骨骼肌率'),
+            formatValue: val => {
+              const numVal = Number(val);
+              if (isNaN(numVal) || !isFinite(numVal) || numVal === 0) return '--';
+              return numVal.toFixed(1);
+            },
+          };
+        }
+        // Default: SMM 分数
+        // ✅ 终极修复：使用数值转换后的宽松判断，处理字符串类型
+        const storedScore = userData.scores?.muscleMass;
+        const numStoredScore = Number(storedScore);
+        const isSuspicious100 = !isNaN(numStoredScore) && Math.abs(numStoredScore - 100) < 0.1;
+        const hasSmm = (userData.stats_smm > 0) || (userData.testInputs?.muscle?.smm > 0);
+        const hasWeight = userData.weight > 0;
+        const hasData = hasSmm && hasWeight;
+        
+        let displayScore = 0;
+        
+        if (isSuspicious100) {
+          // 情况 A: 有数据，尝试重算
+          if (hasData) {
+            const recalculatedScore = recalculateSMMScore(userData);
+            
+            if (recalculatedScore !== null && recalculatedScore !== 100) {
+              displayScore = recalculatedScore;
+            } else if (recalculatedScore === null) {
+              displayScore = null;
+            } else {
+              displayScore = storedScore;
+            }
+          } else {
+            // 情况 B: 无数据，强制归零（Kill Switch）
+            displayScore = null;
+            const displayName = userData.displayName || userData.nickname || userData.email?.split('@')[0] || 'Unknown';
+            console.warn(`🚫 Kill Switch 触发 (浮动条默认): ${displayName} - muscleMass=100 但缺少必要数据，强制显示为 --`);
+          }
+        } else if (storedScore !== undefined && storedScore !== null) {
+          // 正常情况：非 100 分，直接使用存储值
+          const numScore = Number(storedScore);
+          if (!isNaN(numScore) && isFinite(numScore)) {
+            displayScore = numScore;
+          }
+        }
+        
         return {
-          value: userData.stats_smm || 0,
-          unit: 'kg',
-          label: t('tests.muscleLabels.smm'),
-          formatValue: val => Number(val).toFixed(1),
+          value: displayScore,
+          unit: t('community.ui.pointsUnit', '分'),
+          label: t('tests.muscleLabels.smmScore', '骨骼肌分數'),
+          formatValue: val => {
+            if (val === null || val === undefined) return '--';
+            const numVal = Number(val);
+            if (isNaN(numVal) || !isFinite(numVal) || numVal === 0) return '--';
+            return numVal.toFixed(2);
+          },
         };
       case 'ladderScore':
       default:
