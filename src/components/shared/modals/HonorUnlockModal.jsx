@@ -7,7 +7,7 @@ import './HonorUnlockModal.css';
 
 const CERTIFICATION_ROUTE = '/verification';
 
-const HonorUnlockModal = ({ isOpen, onClose }) => {
+const HonorUnlockModal = ({ isOpen, onClose, data }) => {
   const navigate = useNavigate();
   const { t } = useTranslation();
 
@@ -53,7 +53,7 @@ const HonorUnlockModal = ({ isOpen, onClose }) => {
   };
 
   const handleNavigate = () => {
-    navigate(CERTIFICATION_ROUTE);
+    navigate(CERTIFICATION_ROUTE, { state: { targetData: data } });
     onClose();
   };
 
@@ -193,6 +193,12 @@ const HonorUnlockModal = ({ isOpen, onClose }) => {
 HonorUnlockModal.propTypes = {
   isOpen: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
+  data: PropTypes.shape({
+    exercise: PropTypes.string,
+    score: PropTypes.number,
+    level: PropTypes.string,
+    weight: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+  }),
 };
 
 export default HonorUnlockModal;

@@ -120,6 +120,8 @@ class VerificationSystem {
         videoLink: applicationData.videoLink || '',
         description: applicationData.description || '',
         requestedItems: ['ladderScore'], // 申請認證的項目
+        targetData: applicationData.targetData || null, // 解鎖申請的目標數據
+        paymentStatus: applicationData.paymentStatus || 'pending', // 付款狀態：'waived_beta' | 'pending' | 'paid'
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };

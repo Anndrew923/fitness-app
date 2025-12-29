@@ -72,6 +72,7 @@ function Strength({ onComplete }) {
   // const [isExpanded, setIsExpanded] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [isUnlockModalOpen, setIsUnlockModalOpen] = useState(false);
+  const [unlockModalData, setUnlockModalData] = useState(null);
 
   // 將 useRef 移到組件頂層
   const timeoutRef = useRef(null);
@@ -481,6 +482,29 @@ function Strength({ onComplete }) {
   // 展開狀態管理 - 所有項目初始都是收著的
   const [expandedExercises, setExpandedExercises] = useState(new Set());
 
+  // 根據分數獲取等級
+  const getLevelFromScore = score => {
+    if (!score) return t('tests.strength_rpg.levels.novice');
+    if (score >= 100) return t('tests.strength_rpg.levels.sovereign');
+    if (score >= 80) return t('tests.strength_rpg.levels.knight');
+    if (score >= 60) return t('tests.strength_rpg.levels.vanguard');
+    if (score >= 40) return t('tests.strength_rpg.levels.guardian');
+    return t('tests.strength_rpg.levels.novice');
+  };
+
+  // 處理解鎖按鈕點擊
+  const handleUnlockClick = exercise => {
+    const { name, state } = exercise;
+    const level = getLevelFromScore(state.score);
+    setUnlockModalData({
+      exercise: name,
+      score: state.score,
+      level: level,
+      weight: state.weight,
+    });
+    setIsUnlockModalOpen(true);
+  };
+
   // 渲染運動項目卡片
   const renderExerciseCard = exercise => {
     const { key, name, icon, state, setState } = exercise;
@@ -581,7 +605,7 @@ function Strength({ onComplete }) {
                     </p>
                     {state.isCapped && (
                       <button
-                        onClick={() => setIsUnlockModalOpen(true)}
+                        onClick={() => handleUnlockClick(exercise)}
                         style={{
                           display: 'flex',
                           alignItems: 'center',
@@ -789,7 +813,7 @@ function Strength({ onComplete }) {
                         </span>
                         {exercise.state.isCapped && (
                           <button
-                            onClick={() => setIsUnlockModalOpen(true)}
+                            onClick={() => handleUnlockClick(exercise)}
                             style={{
                               display: 'flex',
                               alignItems: 'center',
@@ -859,7 +883,23 @@ function Strength({ onComplete }) {
 
                       return shouldShowUnlock ? (
                         <button
-                          onClick={() => setIsUnlockModalOpen(true)}
+                          onClick={() => {
+                            // 找到第一個 capped 的 exercise，如果沒有則使用平均分
+                            const cappedExercise = exercises.find(ex => ex.state.isCapped);
+                            if (cappedExercise) {
+                              handleUnlockClick(cappedExercise);
+                            } else {
+                              // 使用平均分信息
+                              const level = getLevelFromScore(avgScoreNum);
+                              setUnlockModalData({
+                                exercise: t('tests.averageScore'),
+                                score: avgScoreNum,
+                                level: level,
+                                weight: null,
+                              });
+                              setIsUnlockModalOpen(true);
+                            }
+                          }}
                           style={{
                             display: 'flex',
                             alignItems: 'center',
@@ -964,7 +1004,11 @@ function Strength({ onComplete }) {
 
       <HonorUnlockModal
         isOpen={isUnlockModalOpen}
-        onClose={() => setIsUnlockModalOpen(false)}
+        onClose={() => {
+          setIsUnlockModalOpen(false);
+          setUnlockModalData(null);
+        }}
+        data={unlockModalData}
       />
     </div>
   );
