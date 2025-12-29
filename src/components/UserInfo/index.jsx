@@ -4,6 +4,8 @@ import React, {
   useMemo,
   useCallback,
   useRef,
+  lazy,
+  Suspense,
 } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useUser } from '../../UserContext';
@@ -25,8 +27,14 @@ import GeneralModal from './Modals/GeneralModal';
 import RPGClassModal from './Modals/RPGClassModal';
 import SubmitConfirmModal from './Modals/SubmitConfirmModal';
 import { usePageScroll } from '../../hooks/usePageScroll';
-import LadderStatusCard from '../Ladder/LadderStatusCard';
 import { getDefaultMetric } from '../../config/rankingSystem';
+
+// ⚠️ ARCHITECTURE WARNING (DO NOT REMOVE LAZY LOADING)
+// This component is lazy-loaded to break a Circular Dependency chain:
+// UserInfo -> LadderStatusCard -> UserContext -> UserInfo
+// Changing this back to a static import will crash the Production Build
+// with "ReferenceError: Cannot access before initialization".
+const LadderStatusCard = lazy(() => import('../Ladder/LadderStatusCard'));
 import { useLadderData } from '../../hooks/useLadderData';
 
 import './userinfo.css'; // Core layout
@@ -743,11 +751,17 @@ function UserInfo({ testData, onLogout, clearTestData }) {
       {/* ✅ UP-LADDER-EVO: 戰力資訊條 */}
       {completionStatus.isFullyCompleted && userData?.ladderScore > 0 && (
         <div className="ladder-status-wrapper">
-          <LadderStatusCard
-            userData={userData}
-            rank={ladderUserRank || userRank}
-            onNavigate={() => navigate('/ladder')}
-          />
+          <Suspense
+            fallback={
+              <div className="h-24 bg-gray-100 rounded-xl animate-pulse" />
+            }
+          >
+            <LadderStatusCard
+              userData={userData}
+              rank={ladderUserRank || userRank}
+              onNavigate={() => navigate('/ladder')}
+            />
+          </Suspense>
         </div>
       )}
 

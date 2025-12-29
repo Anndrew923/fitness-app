@@ -337,7 +337,7 @@
   will-change: auto;
 }
 
-.radar-chart-container.optimized .recharts-* {
+.radar-chart-container.optimized [class*="recharts-"] {
   animation-play-state: paused;
   will-change: auto;
 }

@@ -295,16 +295,20 @@ const LadderStatusCard = ({
   );
 };
 
-LadderStatusCard.propTypes = {
-  userData: PropTypes.object,
-  rank: PropTypes.number,
-  onNavigate: PropTypes.func,
-  onOpenLadder: PropTypes.func, // Legacy prop name for backward compatibility
-  title: PropTypes.string, // For future expansion (Job Rank, Region Rank, etc.)
-};
+// ✅ Define PropTypes after component to avoid initialization order issues in production builds
+// This prevents "Cannot access 'c' before initialization" errors
+if (typeof PropTypes !== 'undefined') {
+  LadderStatusCard.propTypes = {
+    userData: PropTypes.object,
+    rank: PropTypes.number,
+    onNavigate: PropTypes.func,
+    onOpenLadder: PropTypes.func, // Legacy prop name for backward compatibility
+    title: PropTypes.string, // For future expansion (Job Rank, Region Rank, etc.)
+  };
 
-LadderStatusCard.defaultProps = {
-  title: null, // Will use translation key by default
-};
+  LadderStatusCard.defaultProps = {
+    title: null, // Will use translation key by default
+  };
+}
 
 export default LadderStatusCard;
