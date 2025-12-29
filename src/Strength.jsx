@@ -14,6 +14,7 @@ import {
 import PropTypes from 'prop-types';
 import { calculateStrengthScore } from './utils/strength/scoring';
 import { calculateOneRepMax } from './utils/strength/calculations';
+import { SCORE_LEVELS } from '../standards';
 
 import './Strength.css';
 import { useTranslation } from 'react-i18next';
@@ -432,13 +433,15 @@ function Strength({ onComplete }) {
     }
   };
 
-  const SCORE_LEVELS = [
-    { score: 20, label: t('tests.strength_rpg.levels.novice'), color: '#FF6B6B' },
-    { score: 40, label: t('tests.strength_rpg.levels.guardian'), color: '#FFA726' },
-    { score: 60, label: t('tests.strength_rpg.levels.vanguard'), color: '#FFEE58' },
-    { score: 80, label: t('tests.strength_rpg.levels.knight'), color: '#66BB6A' },
-    { score: 100, label: t('tests.strength_rpg.levels.sovereign'), color: '#42A5F5' },
-  ];
+  // Map SCORE_LEVELS with translations and colors
+  const scoreLevelsWithTranslations = SCORE_LEVELS.map((level, index) => {
+    const colors = ['#FF6B6B', '#FFA726', '#FFEE58', '#66BB6A', '#42A5F5'];
+    return {
+      ...level,
+      label: t(`tests.${level.label}`),
+      color: colors[index],
+    };
+  });
 
   // 運動項目配置
   const exercises = [
@@ -921,7 +924,7 @@ function Strength({ onComplete }) {
           <div className="score-levels-table">
             <h3>{t('tests.strengthStandards.scoreLevelsTitle')}</h3>
             <div className="levels-container">
-              {SCORE_LEVELS.map((item, index) => (
+              {scoreLevelsWithTranslations.map((item, index) => (
                 <div key={index} className="level-item">
                   <div className="level-header">
                     <span className="level-name">{item.label}</span>

@@ -529,3 +529,12 @@ export const sprintStandardsFemale = {
   '61-70': { 0: 23, 50: 20, 100: 17 },
   '71-80': { 0: 25, 50: 22, 100: 19 },
 };
+
+// RPG Level Definitions for Strength
+export const SCORE_LEVELS = [
+  { score: 20, label: 'strength_rpg.levels.novice' },
+  { score: 40, label: 'strength_rpg.levels.guardian' },
+  { score: 60, label: 'strength_rpg.levels.vanguard' },
+  { score: 80, label: 'strength_rpg.levels.knight' },
+  { score: 100, label: 'strength_rpg.levels.sovereign' },
+];
