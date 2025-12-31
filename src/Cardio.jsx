@@ -98,28 +98,6 @@ function Cardio({ onComplete }) {
     }
   }, [userData.testInputs?.run_5km]);
 
-  // Recalculate score display when verification status changes
-  useEffect(() => {
-    if (rawScore !== null && rawScore > 100) {
-      const verified = userData.isVerified === true;
-      let displayScore = rawScore;
-      let capped = false;
-
-      if (rawScore > 100) {
-        if (verified) {
-          displayScore = rawScore;
-        } else {
-          displayScore = 100;
-          capped = true;
-        }
-      }
-
-      const formattedDisplayScore = parseFloat(Number(displayScore).toFixed(2));
-      setScore(formattedDisplayScore);
-      setIsCapped(capped);
-    }
-  }, [userData.isVerified, rawScore]);
-
   // --- Logic Helpers ---
   const getAgeRange = age => {
     if (!age) return null;
@@ -185,6 +163,7 @@ function Cardio({ onComplete }) {
   };
 
   // Calculation Handler
+  // 🔥 Civilian Limiter: UI 顯示真實分數 (rawScore)，永遠不在 UI 端 cap
   const handleCalculate = () => {
     if (!age || !gender) {
       alert(t('tests.cardioErrors.missingPrerequisites'));
@@ -204,24 +183,12 @@ function Cardio({ onComplete }) {
       
       const calculatedScore = calculateScoreFromStandard(parseFloat(distance), standard);
       
-      // Limit Break Logic
-      let displayScore = calculatedScore;
-      let capped = false;
-
-      if (calculatedScore > 100) {
-        if (isVerified) {
-          displayScore = calculatedScore;
-        } else {
-          displayScore = 100;
-          capped = true;
-        }
-      }
-
+      // 🔥 Civilian Limiter: UI 顯示真實分數
       const formattedRawScore = parseFloat(Number(calculatedScore).toFixed(2));
-      const formattedDisplayScore = parseFloat(Number(displayScore).toFixed(2));
+      const capped = !isVerified && calculatedScore > 100;
       
       setRawScore(formattedRawScore);
-      setScore(formattedDisplayScore);
+      setScore(formattedRawScore); // 🔥 UI 顯示 rawScore，不 cap
       setIsCapped(capped);
 
     } else if (activeTab === '5km') {
@@ -233,24 +200,12 @@ function Cardio({ onComplete }) {
       
       const calculatedScore = calculate5KmScoreLogic(totalSec);
       
-      // Limit Break Logic
-      let displayScore = calculatedScore;
-      let capped = false;
-
-      if (calculatedScore > 100) {
-        if (isVerified) {
-          displayScore = calculatedScore;
-        } else {
-          displayScore = 100;
-          capped = true;
-        }
-      }
-
+      // 🔥 Civilian Limiter: UI 顯示真實分數
       const formattedRawScore = parseFloat(Number(calculatedScore).toFixed(2));
-      const formattedDisplayScore = parseFloat(Number(displayScore).toFixed(2));
+      const capped = !isVerified && calculatedScore > 100;
       
       setRawScore(formattedRawScore);
-      setScore(formattedDisplayScore);
+      setScore(formattedRawScore); // 🔥 UI 顯示 rawScore，不 cap
       setIsCapped(capped);
     }
   };
@@ -293,11 +248,10 @@ function Cardio({ onComplete }) {
       const updatedScores = JSON.parse(JSON.stringify(userData.scores || {}));
       const updatedTestInputs = JSON.parse(JSON.stringify(userData.testInputs || {}));
 
-      // Strict Formatting: Ensure Number
-      let scoreValue = rawScore !== null ? rawScore : score;
-      if (isNaN(scoreValue)) scoreValue = 0;
-      
-      const scoreToSaveFormatted = parseFloat(Number(scoreValue).toFixed(2));
+      // 🔥 Civilian Limiter: 提交時，未驗證用戶分數鎖死 100
+      const currentRawScore = rawScore !== null ? rawScore : score;
+      const scoreToSave = (!isVerified && currentRawScore > 100) ? 100 : currentRawScore;
+      const scoreToSaveFormatted = parseFloat(Number(scoreToSave).toFixed(2));
 
       if (activeTab === 'cooper') {
         updatedScores.cardio = scoreToSaveFormatted;
@@ -348,12 +302,13 @@ function Cardio({ onComplete }) {
             date: new Date().toISOString(),
             pace: paceInSeconds,
             location: userData.record_5km?.location || '',
+            score: scoreToSaveFormatted, // 🔥 Civilian Limiter: 寫入鎖死分數
           },
           
           // 2. 保持原有 stats 欄位（用於排序，但不影響總分計算）
           stats_5k: totalSec,
           stats_5k_time: totalSec,
-          stats_5k_score: parseFloat(Number(scoreToSaveFormatted).toFixed(2)),
+          stats_5k_score: scoreToSaveFormatted, // 🔥 Civilian Limiter
           
           // ⚠️ 3. 絕對禁止更新 scores（保持原值）
           scores: {
@@ -400,10 +355,11 @@ function Cardio({ onComplete }) {
             date: new Date().toISOString(),
             pace: paceInSeconds,
             location: userData.record_5km?.location || '',
+            score: scoreToSaveFormatted, // 🔥 Civilian Limiter: 寫入鎖死分數
           },
           stats_5k: totalSec,
           stats_5k_time: totalSec,
-          stats_5k_score: parseFloat(Number(scoreToSaveFormatted).toFixed(2)),
+          stats_5k_score: scoreToSaveFormatted, // 🔥 Civilian Limiter
           testInputs: updatedTestInputs,
           // ⚠️ 不更新 scores，不更新 ladderScore
           updatedAt: new Date().toISOString()
@@ -542,6 +498,7 @@ function Cardio({ onComplete }) {
                     : `${t('tests.cardioLabels.run5kmScore')}: ${formattedScore}`
                   }
                 </span>
+                {/* 🔥 Civilian Limiter: 顯示鎖定警告 */}
                 {isCapped && (
                   <span style={{ fontSize: '0.875rem' }}>🔒</span>
                 )}
@@ -583,6 +540,19 @@ function Cardio({ onComplete }) {
                   </button>
                 )}
               </p>
+              {/* 🔥 Civilian Limiter: 顯示提示訊息 */}
+              {isCapped && (
+                <p style={{ 
+                  fontSize: '0.8rem', 
+                  color: '#f59e0b', 
+                  marginTop: '4px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px'
+                }}>
+                  ⚠️ {t('tests.civilianLimiter.warning', '未驗證用戶提交時分數將鎖定為 100')}
+                </p>
+              )}
               <p className="score-display">
                 {activeTab === 'cooper' ? getComment(rawScore || score, gender) : ((rawScore || score) >= 100 ? "🔥🔥🔥 UNGODLY PACE" : "Keep pushing for sub-20!")}
               </p>

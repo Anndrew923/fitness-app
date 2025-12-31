@@ -4,6 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { useUser } from '../../UserContext';
 import { useTranslation } from 'react-i18next';
+import { auth, db } from '../../firebase';
+import { doc, setDoc } from 'firebase/firestore';
 import HonorUnlockModal from '../../components/shared/modals/HonorUnlockModal';
 import BottomNavBar from '../../components/BottomNavBar';
 import AdBanner from '../../components/AdBanner';
@@ -11,9 +13,10 @@ import { ARM_SIZE_LEVELS } from '../../standards';
 import './ArmSize.css';
 
 function ArmSize({ onComplete }) {
-  const { userData, setUserData } = useUser();
+  const { userData, setUserData, saveUserData } = useUser();
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const isVerified = userData.isVerified === true;
 
   const [armSize, setArmSize] = useState(
     userData.testInputs?.armSize?.arm || userData.testInputs?.armSize?.armSize || ''
@@ -38,7 +41,8 @@ function ArmSize({ onComplete }) {
   const timeoutRef = useRef(null);
 
   // 🔥 核心計算函數（純函數，可在提交時重新調用）
-  const calculateArmScore = useCallback((armSizeValue, bodyFatValue, isVerifiedValue = userData.isVerified) => {
+  // 🔥 Civilian Limiter: UI 顯示真實分數，永遠不在 UI 端 cap
+  const calculateArmScore = useCallback((armSizeValue, bodyFatValue) => {
     if (!armSizeValue || armSizeValue <= 0) {
       return { displayScore: null, rawScore: null, isCapped: false };
     }
@@ -48,21 +52,15 @@ function ArmSize({ onComplete }) {
     let calculatedScore = (armSizeValue / benchmark) * fatMultiplier * 100;
     calculatedScore = Math.round(calculatedScore * 100) / 100; // 統一為兩位小數
 
-    const isVerified = isVerifiedValue === true;
-    let displayScore = calculatedScore;
-    let capped = false;
+    // 🔥 Civilian Limiter: UI 永遠顯示 rawScore
+    const capped = !isVerified && calculatedScore > 100;
 
-    if (calculatedScore > 100) {
-      if (isVerified) {
-        displayScore = calculatedScore;
-      } else {
-        displayScore = 100;
-        capped = true;
-      }
-    }
-
-    return { displayScore, rawScore: calculatedScore, isCapped };
-  }, [userData.isVerified]);
+    return { 
+      displayScore: calculatedScore, // 🔥 UI 顯示真實分數
+      rawScore: calculatedScore, 
+      isCapped: capped 
+    };
+  }, [isVerified]);
 
   // PAS 计算函数（用於即時預覽）
   const calculatePAS = useCallback(() => {
@@ -147,9 +145,11 @@ function ArmSize({ onComplete }) {
     // ⚠️ 關鍵：在提交前一刻，重新計算分數，確保與預覽一致
     // 不要依賴可能過期的 score state 變數
     const scoreResult = calculateArmScore(currentArmSize, currentBodyFat);
-    const finalScore = scoreResult.displayScore;
     const finalRawScore = scoreResult.rawScore;
     const finalIsCapped = scoreResult.isCapped;
+    
+    // 🔥 Civilian Limiter: 提交時，未驗證用戶分數鎖死 100
+    const finalScore = (!isVerified && finalRawScore > 100) ? 100 : finalRawScore;
     
     if (!finalScore || finalScore <= 0) {
       return alert(t('tests.armSizeErrors.needCalculate'));
@@ -158,19 +158,14 @@ function ArmSize({ onComplete }) {
     if (submitting) return;
     setSubmitting(true);
 
-    console.log(`✅ 提交審查: 輸入(${currentArmSize}cm, ${currentBodyFat}%), 計算分數:${finalScore}`);
+    console.log(`✅ 提交審查: 輸入(${currentArmSize}cm, ${currentBodyFat}%), rawScore:${finalRawScore}, 寫入分數:${finalScore}, isCapped:${finalIsCapped}`);
+
+    const isGuest = sessionStorage.getItem('guestMode') === 'true';
 
     try {
       // --- [Phase 1: State Snapshot & Calculation] ---
       // 🔥 修正：臂圍不參與總分計算，移除分數增量邏輯
       const newArmScore = parseFloat(finalScore);
-
-      // --- [Phase 2: Expansion Interface] ---
-      // 🔮 FUTURE HOOK: Rank Up Ceremony / Animation Trigger
-      // if (scoreDelta > 0) {
-      //    triggerLevelUpEffect();
-      //    checkIfRankSurpassed();
-      // }
 
       // --- [Phase 3: Optimistic Context Update] ---
       // 🔥 關鍵修正：臂圍數據寫入 record_arm_girth，絕對不碰 scores
@@ -180,7 +175,8 @@ function ArmSize({ onComplete }) {
         record_arm_girth: {
           value: currentArmSize,
           bodyFat: currentBodyFat,
-          score: finalScore, // 🔥 確保這裡送出的是重新計算的分數，與預覽一致
+          score: finalScore, // 🔥 Civilian Limiter: 寫入鎖死分數
+          rawScore: finalRawScore, // 保留原始分數供參考
           date: new Date().toISOString(),
           photoUrl: userData.record_arm_girth?.photoUrl || '',
         },
@@ -198,9 +194,9 @@ function ArmSize({ onComplete }) {
             ...userData.testInputs?.armSize,
             arm: currentArmSize,       // Raw measurement
             bodyFat: currentBodyFat,   // Context
-            score: finalScore,         // 🔥 使用重新計算的分數
-            rawScore: finalRawScore,   // 🔥 使用重新計算的原始分數
-            isCapped: finalIsCapped,   // 🔥 使用重新計算的 capped 狀態
+            score: finalScore,         // 🔥 Civilian Limiter: 寫入鎖死分數
+            rawScore: finalRawScore,   // 保留原始分數
+            isCapped: finalIsCapped,   // 是否被鎖定
             lastUpdated: new Date().toISOString()
           }
         },
@@ -212,7 +208,40 @@ function ArmSize({ onComplete }) {
       setUserData(optimisticUserData);
 
       // --- [Phase 4: Persistence] ---
-      // ... Proceed with Firebase setDoc ...
+      // 🔥 Firestore Payload: 只寫入 record_arm_girth，嚴禁寫入 scores
+      const firestoreUpdatePayload = {
+        record_arm_girth: {
+          value: currentArmSize,
+          bodyFat: currentBodyFat,
+          score: finalScore, // 🔥 Civilian Limiter
+          rawScore: finalRawScore,
+          date: new Date().toISOString(),
+          photoUrl: userData.record_arm_girth?.photoUrl || '',
+        },
+        testInputs: {
+          ...userData.testInputs,
+          armSize: {
+            arm: currentArmSize,
+            bodyFat: currentBodyFat,
+            score: finalScore,
+            rawScore: finalRawScore,
+            isCapped: finalIsCapped,
+            lastUpdated: new Date().toISOString()
+          }
+        },
+        // ⚠️ 不更新 scores，不更新 ladderScore
+        updatedAt: new Date().toISOString()
+      };
+
+      if (!isGuest) {
+        const userId = userData.userId || auth.currentUser?.uid;
+        if (userId) {
+          const userRef = doc(db, 'users', userId);
+          await setDoc(userRef, firestoreUpdatePayload, { merge: true });
+        }
+        // Also call saveUserData for backward compatibility
+        await saveUserData(optimisticUserData);
+      }
 
       const testData = {
         armSize: currentArmSize,
@@ -220,11 +249,6 @@ function ArmSize({ onComplete }) {
         score: finalScore,
         rawScore: finalRawScore,
       };
-
-      // 🛑 Disable legacy navigation to show RPG Modal
-      // if (onComplete) {
-      //   onComplete(testData);
-      // }
 
       // Show Success Modal instead of navigating
       console.log('🚀 Triggering ArmSize Modal via Portal...');
@@ -352,12 +376,32 @@ function ArmSize({ onComplete }) {
               {/* --- 核心分數 (視覺重頭戲) --- */}
               <div className="score-value-hero">
                 {parseFloat(score).toFixed(2)}
+                {/* 🔥 Civilian Limiter: 顯示鎖定圖示 */}
+                {isCapped && (
+                  <span style={{ marginLeft: '8px', fontSize: '0.5em' }}>🔒</span>
+                )}
                 {rawScore && rawScore > 100 && !isCapped && (
                   <span className="verified-badge" title={t('tests.verifiedBadge')}>
                     ✓
                   </span>
                 )}
               </div>
+              
+              {/* 🔥 Civilian Limiter: 顯示提示訊息 */}
+              {isCapped && (
+                <p style={{ 
+                  fontSize: '0.8rem', 
+                  color: '#f59e0b', 
+                  marginTop: '8px',
+                  marginBottom: '8px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '4px'
+                }}>
+                  ⚠️ {t('tests.civilianLimiter.warning', '未驗證用戶提交時分數將鎖定為 100')}
+                </p>
+              )}
               
               {/* 解鎖按鈕 */}
               {isCapped && (
@@ -467,4 +511,3 @@ ArmSize.propTypes = {
 };
 
 export default ArmSize;
-

@@ -31,6 +31,9 @@ function Muscle({ onComplete }) {
     smPercent: null,
     smPercentScore: null,
     finalScore: null,
+    smmRawScore: null,
+    smPercentRawScore: null,
+    finalRawScore: null,
     isSmmCapped: false,
     isSmPercentCapped: false,
     isFinalScoreCapped: false,
@@ -123,21 +126,13 @@ function Muscle({ onComplete }) {
     return rawScore;
   };
 
-  // 🔒 榮譽鎖機制：超過 100 分需認證才能顯示真實數值
+  // 🔥 Civilian Limiter: UI 顯示真實分數，永遠不在 UI 端 cap
   const applyHonorLock = (score, isVerified) => {
     // ✅ 確保分數保留兩位小數
     const roundedScore = parseFloat(Number(score).toFixed(2));
-    if (roundedScore > 100) {
-      if (isVerified) {
-        // 已認證：顯示真實分數
-        return { displayScore: roundedScore, isCapped: false };
-      } else {
-        // 未認證：強制鎖在 100
-        return { displayScore: 100, isCapped: true };
-      }
-    }
-    // 未超過 100 分，無需鎖定
-    return { displayScore: roundedScore, isCapped: false };
+    const isCapped = !isVerified && roundedScore > 100;
+    // 🔥 UI 永遠顯示 rawScore
+    return { displayScore: roundedScore, isCapped: isCapped };
   };
 
   const calculateMuscleScore = () => {
@@ -187,15 +182,18 @@ function Muscle({ onComplete }) {
     const smmLocked = applyHonorLock(smmScoreRaw, isVerified);
     const smPercentLocked = applyHonorLock(smPercentScore, isVerified);
     
-    // 計算最終分數（使用顯示分數）
-    const finalScoreRaw = (smmLocked.displayScore + smPercentLocked.displayScore) / 2;
+    // 🔥 Civilian Limiter: 計算最終分數（基於 rawScore）
+    const finalScoreRaw = (smmScoreRaw + smPercentScore) / 2;
     const finalScoreLocked = applyHonorLock(finalScoreRaw, isVerified);
     
     setResult({
-      smmScore: parseFloat(smmLocked.displayScore.toFixed(2)), // ✅ 保留兩位小數
+      smmScore: parseFloat(smmLocked.displayScore.toFixed(2)), // 🔥 UI 顯示 rawScore
       smPercent,
-      smPercentScore: smPercentLocked.displayScore,
-      finalScore: finalScoreLocked.displayScore.toFixed(2),
+      smPercentScore: smPercentLocked.displayScore, // 🔥 UI 顯示 rawScore
+      finalScore: finalScoreLocked.displayScore.toFixed(2), // 🔥 UI 顯示 rawScore
+      smmRawScore: smmScoreRaw, // 保存 rawScore
+      smPercentRawScore: smPercentScore, // 保存 rawScore
+      finalRawScore: finalScoreRaw, // 保存 rawScore
       isSmmCapped: smmLocked.isCapped,
       isSmPercentCapped: smPercentLocked.isCapped,
       isFinalScoreCapped: finalScoreLocked.isCapped,
@@ -213,10 +211,17 @@ function Muscle({ onComplete }) {
     try {
       if (submitting) return;
       setSubmitting(true);
+      
+      // 🔥 Civilian Limiter: 使用保存的 rawScore，提交時鎖死
+      const currentFinalRawScore = result.finalRawScore !== null ? result.finalRawScore : parseFloat(result.finalScore);
+      const isVerified = userData.isVerified === true;
+      // 🔥 提交時，未驗證用戶分數鎖死 100
+      const scoreToSave = (!isVerified && currentFinalRawScore > 100) ? 100 : currentFinalRawScore;
+      
       // 準備更新的數據
       const updatedScores = {
         ...userData.scores,
-        muscleMass: parseFloat(result.finalScore),
+        muscleMass: parseFloat(scoreToSave.toFixed(2)),
       };
       const updatedUserData = {
         ...userData,
@@ -456,34 +461,62 @@ function Muscle({ onComplete }) {
                 <strong>
                   {t('tests.muscleLabels.scoringReference.yourScore')}:{' '}
                   {result.finalScore}分
-                  {result.isFinalScoreCapped && (
-                    <button
-                      type="button"
-                      className="honor-lock-btn"
-                      onClick={() => setIsUnlockModalOpen(true)}
-                      title="點擊解鎖真實實力"
-                    >
-                      <span>🔒</span>
-                      <span className="flex-shrink-0 whitespace-normal">{t('actions.unlock_limit')}</span>
-                    </button>
+                  {result.finalRawScore && result.finalRawScore > 100 && !result.isFinalScoreCapped && (
+                    <span className="verified-badge" title={t('tests.verifiedBadge')}>
+                      {' '}✓
+                    </span>
                   )}
                 </strong>
               </p>
+              {/* 🔥 Civilian Limiter: 顯示警告訊息 */}
+              {result.isFinalScoreCapped && (
+                <>
+                  <p style={{ 
+                    fontSize: '0.8rem', 
+                    color: '#f59e0b', 
+                    marginTop: '4px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px'
+                  }}>
+                    ⚠️ {t('tests.civilianLimiter.warning', '未驗證用戶提交時分數將鎖定為 100')}
+                  </p>
+                  <button
+                    type="button"
+                    className="honor-lock-btn"
+                    onClick={() => setIsUnlockModalOpen(true)}
+                    title="點擊解鎖真實實力"
+                  >
+                    <span>🔒</span>
+                    <span className="flex-shrink-0 whitespace-normal">{t('actions.unlock_limit')}</span>
+                  </button>
+                </>
+              )}
             </div>
           </div>
 
           <p className="result-text">
             {t('tests.muscleLabels.smmShort')}: {result.smmScore}
+            {result.smmRawScore && result.smmRawScore > 100 && !result.isSmmCapped && (
+              <span className="verified-badge" title={t('tests.verifiedBadge')}>
+                {' '}✓
+              </span>
+            )}
             {result.isSmmCapped && (
-              <button
-                type="button"
-                className="honor-lock-btn"
-                onClick={() => setIsUnlockModalOpen(true)}
-                title="點擊解鎖真實實力"
-              >
-                <span>🔒</span>
-                <span className="flex-shrink-0 whitespace-normal">{t('actions.unlock_limit')}</span>
-              </button>
+              <>
+                <span style={{ fontSize: '0.8rem', color: '#f59e0b', marginLeft: '8px' }}>
+                  ⚠️ {t('tests.civilianLimiter.warning', '未驗證用戶提交時分數將鎖定為 100')}
+                </span>
+                <button
+                  type="button"
+                  className="honor-lock-btn"
+                  onClick={() => setIsUnlockModalOpen(true)}
+                  title="點擊解鎖真實實力"
+                >
+                  <span>🔒</span>
+                  <span className="flex-shrink-0 whitespace-normal">{t('actions.unlock_limit')}</span>
+                </button>
+              </>
             )}
           </p>
           <p className="result-text">
@@ -491,30 +524,50 @@ function Muscle({ onComplete }) {
           </p>
           <p className="result-text">
             {t('tests.muscleLabels.smPercentScore')}: {result.smPercentScore}
+            {result.smPercentRawScore && result.smPercentRawScore > 100 && !result.isSmPercentCapped && (
+              <span className="verified-badge" title={t('tests.verifiedBadge')}>
+                {' '}✓
+              </span>
+            )}
             {result.isSmPercentCapped && (
-              <button
-                type="button"
-                className="honor-lock-btn"
-                onClick={() => setIsUnlockModalOpen(true)}
-                title="點擊解鎖真實實力"
-              >
-                <span>🔒</span>
-                <span className="flex-shrink-0 whitespace-normal">{t('actions.unlock_limit')}</span>
-              </button>
+              <>
+                <span style={{ fontSize: '0.8rem', color: '#f59e0b', marginLeft: '8px' }}>
+                  ⚠️ {t('tests.civilianLimiter.warning', '未驗證用戶提交時分數將鎖定為 100')}
+                </span>
+                <button
+                  type="button"
+                  className="honor-lock-btn"
+                  onClick={() => setIsUnlockModalOpen(true)}
+                  title="點擊解鎖真實實力"
+                >
+                  <span>🔒</span>
+                  <span className="flex-shrink-0 whitespace-normal">{t('actions.unlock_limit')}</span>
+                </button>
+              </>
             )}
           </p>
           <p className="score-text final-score">
             {t('tests.muscleLabels.finalScore')}: {result.finalScore}
+            {result.finalRawScore && result.finalRawScore > 100 && !result.isFinalScoreCapped && (
+              <span className="verified-badge" title={t('tests.verifiedBadge')}>
+                {' '}✓
+              </span>
+            )}
             {result.isFinalScoreCapped && (
-              <button
-                type="button"
-                className="honor-lock-btn"
-                onClick={() => setIsUnlockModalOpen(true)}
-                title="點擊解鎖真實實力"
-              >
-                <span>🔒</span>
-                <span className="flex-shrink-0 whitespace-normal">{t('actions.unlock_limit')}</span>
-              </button>
+              <>
+                <span style={{ fontSize: '0.8rem', color: '#f59e0b', marginLeft: '8px' }}>
+                  ⚠️ {t('tests.civilianLimiter.warning', '未驗證用戶提交時分數將鎖定為 100')}
+                </span>
+                <button
+                  type="button"
+                  className="honor-lock-btn"
+                  onClick={() => setIsUnlockModalOpen(true)}
+                  title="點擊解鎖真實實力"
+                >
+                  <span>🔒</span>
+                  <span className="flex-shrink-0 whitespace-normal">{t('actions.unlock_limit')}</span>
+                </button>
+              </>
             )}
           </p>
         </div>

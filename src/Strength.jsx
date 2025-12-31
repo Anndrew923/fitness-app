@@ -216,26 +216,14 @@ function Strength({ onComplete }) {
         exerciseType === 'Pull-ups' ? userWeight + weightNum : weightNum;
       const oneRepMax = calculateOneRepMax(liftWeight, repsNum);
 
-      // 榮譽鎖邏輯
+      // 🔥 Civilian Limiter: UI 顯示真實分數，永遠不在 UI 端 cap
       const isVerified = userData.isVerified === true;
-      let displayScore = finalScore;
-      let isCapped = false;
-
-      if (finalScore > 100) {
-        if (isVerified) {
-          // VIP/已認證：顯示真實分數
-          displayScore = finalScore;
-        } else {
-          // 未認證：強制鎖在 100 分
-          displayScore = 100;
-          isCapped = true;
-        }
-      }
+      const isCapped = !isVerified && finalScore > 100;
 
       setState(prev => ({
         ...prev,
         max: oneRepMax.toFixed(2),
-        score: displayScore.toFixed(2),
+        score: finalScore.toFixed(2), // 🔥 UI 顯示 rawScore，不 cap
         rawScore: finalScore,
         isCapped: isCapped,
       }));
@@ -341,18 +329,27 @@ function Strength({ onComplete }) {
     ]
   );
 
-  const scores = [
-    benchPress.score,
-    squat.score,
-    deadlift.score,
-    latPulldown.score,
-    shoulderPress.score,
+  // 🔥 Civilian Limiter: 計算平均分時使用 rawScore（真實分數）
+  const rawScores = [
+    benchPress.rawScore !== null && benchPress.rawScore !== undefined
+      ? benchPress.rawScore
+      : parseFloat(benchPress.score) || null,
+    squat.rawScore !== null && squat.rawScore !== undefined
+      ? squat.rawScore
+      : parseFloat(squat.score) || null,
+    deadlift.rawScore !== null && deadlift.rawScore !== undefined
+      ? deadlift.rawScore
+      : parseFloat(deadlift.score) || null,
+    latPulldown.rawScore !== null && latPulldown.rawScore !== undefined
+      ? latPulldown.rawScore
+      : parseFloat(latPulldown.score) || null,
+    shoulderPress.rawScore !== null && shoulderPress.rawScore !== undefined
+      ? shoulderPress.rawScore
+      : parseFloat(shoulderPress.score) || null,
   ].filter(score => score !== null);
   const averageScore =
-    scores.length > 0
-      ? (scores.reduce((a, b) => a + parseFloat(b), 0) / scores.length).toFixed(
-          2
-        )
+    rawScores.length > 0
+      ? (rawScores.reduce((a, b) => a + b, 0) / rawScores.length).toFixed(2)
       : null;
 
   const handleSubmit = async () => {
@@ -363,9 +360,31 @@ function Strength({ onComplete }) {
     setSubmitting(true);
 
     try {
+      // 🔥 Civilian Limiter: 重新計算平均分（基於 rawScore），提交時鎖死
+      const rawScores = [
+        benchPress.rawScore,
+        squat.rawScore,
+        deadlift.rawScore,
+        latPulldown.rawScore,
+        shoulderPress.rawScore,
+      ].filter(score => score !== null && score !== undefined);
+
+      if (rawScores.length === 0) {
+        alert(t('tests.strengthErrors.needAtLeastOne'));
+        setSubmitting(false);
+        return;
+      }
+
+      const rawAverageScore =
+        rawScores.reduce((a, b) => a + b, 0) / rawScores.length;
+      const isVerified = userData.isVerified === true;
+      // 🔥 提交時，未驗證用戶分數鎖死 100
+      const scoreToSave =
+        !isVerified && rawAverageScore > 100 ? 100 : rawAverageScore;
+
       const updatedScores = {
         ...userData.scores,
-        strength: parseFloat(averageScore),
+        strength: parseFloat(scoreToSave.toFixed(2)),
       };
 
       // 儲存評測時的體重快照
@@ -385,54 +404,8 @@ function Strength({ onComplete }) {
         ladderScore: prev.ladderScore || 0,
       }));
 
-      const testData = {
-        squat: squat.max
-          ? {
-              weight: squat.weight,
-              reps: squat.reps,
-              max: squat.max,
-              score: squat.score,
-            }
-          : null,
-        benchPress: benchPress.max
-          ? {
-              weight: benchPress.weight,
-              reps: benchPress.reps,
-              max: benchPress.max,
-              score: benchPress.score,
-            }
-          : null,
-        deadlift: deadlift.max
-          ? {
-              weight: deadlift.weight,
-              reps: deadlift.reps,
-              max: deadlift.max,
-              score: deadlift.score,
-            }
-          : null,
-        latPulldown: latPulldown.max
-          ? {
-              weight: latPulldown.weight,
-              reps: latPulldown.reps,
-              max: latPulldown.max,
-              score: latPulldown.score,
-            }
-          : null,
-        shoulderPress: shoulderPress.max
-          ? {
-              weight: shoulderPress.weight,
-              reps: shoulderPress.reps,
-              max: shoulderPress.max,
-              score: shoulderPress.score,
-            }
-          : null,
-        averageScore: parseFloat(averageScore),
-      };
-
       // 🛑 Disable legacy navigation to show RPG Modal
-      // if (onComplete) {
-      //   onComplete(testData);
-      // }
+      // Legacy testData removed - no longer needed
 
       // Show Success Modal instead of navigating
       console.log('🚀 Triggering Strength Modal via Portal...');
@@ -614,51 +587,70 @@ function Strength({ onComplete }) {
                           </span>
                         )}
                     </p>
+                    {/* 🔥 Civilian Limiter: 顯示警告訊息 */}
                     {state.isCapped && (
-                      <button
-                        onClick={() => handleUnlockClick(exercise)}
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          gap: '8px',
-                          padding: '4px 12px',
-                          borderRadius: '9999px',
-                          width: 'fit-content',
-                          background: 'rgba(0, 0, 0, 0.6)',
-                          border: '1px solid rgba(234, 179, 8, 0.5)',
-                          cursor: 'pointer',
-                          marginTop: '8px',
-                          marginLeft: 'auto',
-                          marginRight: 'auto',
-                          transition: 'all 0.3s ease',
-                        }}
-                        onMouseEnter={e => {
-                          e.currentTarget.style.background =
-                            'rgba(0, 0, 0, 0.8)';
-                          e.currentTarget.style.borderColor =
-                            'rgba(234, 179, 8, 0.8)';
-                        }}
-                        onMouseLeave={e => {
-                          e.currentTarget.style.background =
-                            'rgba(0, 0, 0, 0.6)';
-                          e.currentTarget.style.borderColor =
-                            'rgba(234, 179, 8, 0.5)';
-                        }}
-                        title="點擊解鎖真實實力"
-                      >
-                        <span style={{ fontSize: '0.875rem' }}>🔒</span>
-                        <span
+                      <>
+                        <p
                           style={{
-                            fontSize: '0.75rem',
-                            color: '#facc15',
-                            fontWeight: 500,
+                            fontSize: '0.8rem',
+                            color: '#f59e0b',
+                            marginTop: '4px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '4px',
                           }}
-                          className="flex-shrink-0 whitespace-normal"
                         >
-                          {t('actions.unlock_limit')}
-                        </span>
-                      </button>
+                          ⚠️{' '}
+                          {t(
+                            'tests.civilianLimiter.warning',
+                            '未驗證用戶提交時分數將鎖定為 100'
+                          )}
+                        </p>
+                        <button
+                          onClick={() => handleUnlockClick(exercise)}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '8px',
+                            padding: '4px 12px',
+                            borderRadius: '9999px',
+                            width: 'fit-content',
+                            background: 'rgba(0, 0, 0, 0.6)',
+                            border: '1px solid rgba(234, 179, 8, 0.5)',
+                            cursor: 'pointer',
+                            marginTop: '8px',
+                            marginLeft: 'auto',
+                            marginRight: 'auto',
+                            transition: 'all 0.3s ease',
+                          }}
+                          onMouseEnter={e => {
+                            e.currentTarget.style.background =
+                              'rgba(0, 0, 0, 0.8)';
+                            e.currentTarget.style.borderColor =
+                              'rgba(234, 179, 8, 0.8)';
+                          }}
+                          onMouseLeave={e => {
+                            e.currentTarget.style.background =
+                              'rgba(0, 0, 0, 0.6)';
+                            e.currentTarget.style.borderColor =
+                              'rgba(234, 179, 8, 0.5)';
+                          }}
+                          title="點擊解鎖真實實力"
+                        >
+                          <span style={{ fontSize: '0.875rem' }}>🔒</span>
+                          <span
+                            style={{
+                              fontSize: '0.75rem',
+                              color: '#facc15',
+                              fontWeight: 500,
+                            }}
+                            className="flex-shrink-0 whitespace-normal"
+                          >
+                            {t('actions.unlock_limit')}
+                          </span>
+                        </button>
+                      </>
                     )}
                   </div>
                 )}
@@ -823,8 +815,131 @@ function Strength({ onComplete }) {
                             )}
                         </span>
                         {exercise.state.isCapped && (
+                          <>
+                            <p
+                              style={{
+                                fontSize: '0.7rem',
+                                color: '#f59e0b',
+                                margin: 0,
+                                textAlign: 'right',
+                              }}
+                            >
+                              ⚠️{' '}
+                              {t(
+                                'tests.civilianLimiter.warning',
+                                '未驗證用戶提交時分數將鎖定為 100'
+                              )}
+                            </p>
+                            <button
+                              onClick={() => handleUnlockClick(exercise)}
+                              style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                gap: '8px',
+                                padding: '4px 12px',
+                                borderRadius: '9999px',
+                                width: 'fit-content',
+                                background: 'rgba(0, 0, 0, 0.6)',
+                                border: '1px solid rgba(234, 179, 8, 0.5)',
+                                cursor: 'pointer',
+                                transition: 'all 0.3s ease',
+                              }}
+                              onMouseEnter={e => {
+                                e.currentTarget.style.background =
+                                  'rgba(0, 0, 0, 0.8)';
+                                e.currentTarget.style.borderColor =
+                                  'rgba(234, 179, 8, 0.8)';
+                              }}
+                              onMouseLeave={e => {
+                                e.currentTarget.style.background =
+                                  'rgba(0, 0, 0, 0.6)';
+                                e.currentTarget.style.borderColor =
+                                  'rgba(234, 179, 8, 0.5)';
+                              }}
+                              title="點擊解鎖真實實力"
+                            >
+                              <span style={{ fontSize: '0.875rem' }}>🔒</span>
+                              <span
+                                style={{
+                                  fontSize: '0.75rem',
+                                  color: '#facc15',
+                                  fontWeight: 500,
+                                }}
+                                className="flex-shrink-0 whitespace-normal"
+                              >
+                                {t('actions.unlock_limit')}
+                              </span>
+                            </button>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div className="average-score-display">
+                  <div
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      gap: '8px',
+                    }}
+                  >
+                    <p className="average-score" style={{ margin: 0 }}>
+                      {t('tests.averageScore')}: {averageScore}
+                    </p>
+                    {(() => {
+                      // 檢查是否有任何單項被鎖定
+                      const hasCappedScore = exercises.some(
+                        ex => ex.state.isCapped
+                      );
+                      // 檢查平均分是否超過 100 且未認證
+                      const avgScoreNum = parseFloat(averageScore);
+                      const isVerified = userData.isVerified === true;
+                      const shouldShowUnlock =
+                        (avgScoreNum > 100 && !isVerified) || hasCappedScore;
+
+                      return shouldShowUnlock ? (
+                        <>
+                          {/* 🔥 Civilian Limiter: 顯示警告訊息 */}
+                          {!isVerified && (
+                            <p
+                              style={{
+                                fontSize: '0.8rem',
+                                color: '#f59e0b',
+                                marginTop: '4px',
+                                marginBottom: '4px',
+                                textAlign: 'center',
+                              }}
+                            >
+                              ⚠️{' '}
+                              {t(
+                                'tests.civilianLimiter.warning',
+                                '未驗證用戶提交時分數將鎖定為 100'
+                              )}
+                            </p>
+                          )}
                           <button
-                            onClick={() => handleUnlockClick(exercise)}
+                            onClick={() => {
+                              // 找到第一個 capped 的 exercise，如果沒有則使用平均分
+                              const cappedExercise = exercises.find(
+                                ex => ex.state.isCapped
+                              );
+                              if (cappedExercise) {
+                                handleUnlockClick(cappedExercise);
+                              } else {
+                                // 使用平均分信息
+                                const level = getLevelFromScore(avgScoreNum);
+                                setUnlockModalData({
+                                  exercise: t('tests.averageScore'),
+                                  score: avgScoreNum,
+                                  level: level,
+                                  weight: null,
+                                });
+                                setIsUnlockModalOpen(true);
+                              }
+                            }}
                             style={{
                               display: 'flex',
                               alignItems: 'center',
@@ -864,94 +979,7 @@ function Strength({ onComplete }) {
                               {t('actions.unlock_limit')}
                             </span>
                           </button>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                <div className="average-score-display">
-                  <div
-                    style={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                      gap: '8px',
-                    }}
-                  >
-                    <p className="average-score" style={{ margin: 0 }}>
-                      {t('tests.averageScore')}: {averageScore}
-                    </p>
-                    {(() => {
-                      // 檢查是否有任何單項被鎖定
-                      const hasCappedScore = exercises.some(
-                        ex => ex.state.isCapped
-                      );
-                      // 檢查平均分是否超過 100 且未認證
-                      const avgScoreNum = parseFloat(averageScore);
-                      const isVerified = userData.isVerified === true;
-                      const shouldShowUnlock =
-                        (avgScoreNum > 100 && !isVerified) || hasCappedScore;
-
-                      return shouldShowUnlock ? (
-                        <button
-                          onClick={() => {
-                            // 找到第一個 capped 的 exercise，如果沒有則使用平均分
-                            const cappedExercise = exercises.find(
-                              ex => ex.state.isCapped
-                            );
-                            if (cappedExercise) {
-                              handleUnlockClick(cappedExercise);
-                            } else {
-                              // 使用平均分信息
-                              const level = getLevelFromScore(avgScoreNum);
-                              setUnlockModalData({
-                                exercise: t('tests.averageScore'),
-                                score: avgScoreNum,
-                                level: level,
-                                weight: null,
-                              });
-                              setIsUnlockModalOpen(true);
-                            }
-                          }}
-                          style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            gap: '8px',
-                            padding: '4px 12px',
-                            borderRadius: '9999px',
-                            width: 'fit-content',
-                            background: 'rgba(0, 0, 0, 0.6)',
-                            border: '1px solid rgba(234, 179, 8, 0.5)',
-                            cursor: 'pointer',
-                            transition: 'all 0.3s ease',
-                          }}
-                          onMouseEnter={e => {
-                            e.currentTarget.style.background =
-                              'rgba(0, 0, 0, 0.8)';
-                            e.currentTarget.style.borderColor =
-                              'rgba(234, 179, 8, 0.8)';
-                          }}
-                          onMouseLeave={e => {
-                            e.currentTarget.style.background =
-                              'rgba(0, 0, 0, 0.6)';
-                            e.currentTarget.style.borderColor =
-                              'rgba(234, 179, 8, 0.5)';
-                          }}
-                          title="點擊解鎖真實實力"
-                        >
-                          <span style={{ fontSize: '0.875rem' }}>🔒</span>
-                          <span
-                            style={{
-                              fontSize: '0.75rem',
-                              color: '#facc15',
-                              fontWeight: 500,
-                            }}
-                            className="flex-shrink-0 whitespace-normal"
-                          >
-                            {t('actions.unlock_limit')}
-                          </span>
-                        </button>
+                        </>
                       ) : null;
                     })()}
                   </div>

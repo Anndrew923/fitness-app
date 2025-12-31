@@ -1,17 +1,21 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from './UserContext';
+import { auth, db } from './firebase';
+import { doc, setDoc } from 'firebase/firestore';
 import * as standards from './standards';
 import PropTypes from 'prop-types';
 import './Power.css';
 import { useTranslation } from 'react-i18next';
 import BottomNavBar from './components/BottomNavBar';
 import AdBanner from './components/AdBanner';
+import HonorUnlockModal from './components/shared/modals/HonorUnlockModal';
 
 function Power({ onComplete }) {
-  const { userData, setUserData } = useUser();
+  const { userData, setUserData, saveUserData } = useUser();
   const navigate = useNavigate();
   const { age, gender } = userData;
+  const isVerified = userData.isVerified === true;
   const { t } = useTranslation();
 
   const [verticalJump, setVerticalJump] = useState(
@@ -28,10 +32,17 @@ function Power({ onComplete }) {
     standingLongJumpScore: null,
     sprintScore: null,
     finalScore: null,
+    verticalJumpRawScore: null,
+    standingLongJumpRawScore: null,
+    sprintRawScore: null,
+    finalRawScore: null,
+    isCapped: false,
   });
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
   const [isStandardsExpanded, setIsStandardsExpanded] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [isUnlockModalOpen, setIsUnlockModalOpen] = useState(false);
+  const [unlockModalData, setUnlockModalData] = useState(null);
 
   useEffect(() => {
     const updatedTestInputs = {
@@ -63,7 +74,15 @@ function Power({ onComplete }) {
 
   const calculateScoreIncreasing = (value, standard) => {
     if (value < standard[0]) return 0;
-    if (value >= standard[100]) return 100;
+    
+    // 🔥 Limit Break: 允許突破 100 分
+    if (value >= standard[100]) {
+      // 計算超出標準的部分，每超出標準上限 1 單位，額外 +2 分
+      const excess = value - standard[100];
+      const bonus = excess * 2; // 可調整倍數
+      return 100 + bonus;
+    }
+    
     if (value < standard[50])
       return ((value - standard[0]) / (standard[50] - standard[0])) * 50;
     return 50 + ((value - standard[50]) / (standard[100] - standard[50])) * 50;
@@ -71,7 +90,16 @@ function Power({ onComplete }) {
 
   const calculateScoreDecreasing = (value, standard) => {
     if (value > standard[0]) return 0;
-    if (value <= standard[100]) return 100;
+    
+    // 🔥 Limit Break: 允許突破 100 分（數值越小越好）
+    if (value <= standard[100]) {
+      // 計算超出標準的部分，每比標準下限低 0.1 秒，額外 +2 分
+      // 注意：這裡假設標準單位是秒，如果是其他單位需要調整倍數
+      const excess = standard[100] - value;
+      const bonus = excess * 20; // 可調整倍數（假設標準單位是秒，0.1秒 = 2分）
+      return 100 + bonus;
+    }
+    
     if (value > standard[50])
       return ((standard[0] - value) / (standard[0] - standard[50])) * 50;
     return 50 + ((standard[50] - value) / (standard[50] - standard[100])) * 50;
@@ -123,46 +151,59 @@ function Power({ onComplete }) {
       : null;
     const sprintNum = sprint ? parseFloat(sprint) : null;
 
-    const verticalJumpScore =
+    const verticalJumpRawScore =
       verticalJumpNum !== null
         ? calculateScoreIncreasing(verticalJumpNum, verticalJumpStandard)
         : null;
-    const standingLongJumpScore =
+    const standingLongJumpRawScore =
       standingLongJumpNum !== null
         ? calculateScoreIncreasing(
             standingLongJumpNum,
             standingLongJumpStandard
           )
         : null;
-    const sprintScore =
+    const sprintRawScore =
       sprintNum !== null
         ? calculateScoreDecreasing(sprintNum, sprintStandard)
         : null;
 
-    const scores = [
-      verticalJumpScore,
-      standingLongJumpScore,
-      sprintScore,
+    const rawScores = [
+      verticalJumpRawScore,
+      standingLongJumpRawScore,
+      sprintRawScore,
     ].filter(score => score !== null);
-    if (scores.length === 0) {
+    if (rawScores.length === 0) {
       alert(t('tests.powerErrors.needMeasure'));
       return;
     }
 
-    const finalScore = (
-      scores.reduce((sum, score) => sum + score, 0) / scores.length
-    ).toFixed(2);
+    const finalRawScore = rawScores.reduce((sum, score) => sum + score, 0) / rawScores.length;
+    
+    // 🔥 Civilian Limiter: UI 顯示真實分數，永遠不在 UI 端 cap
+    const isCapped = !isVerified && finalRawScore > 100;
 
     setResult({
-      verticalJumpScore:
-        verticalJumpScore !== null ? verticalJumpScore.toFixed(2) : null,
-      standingLongJumpScore:
-        standingLongJumpScore !== null
-          ? standingLongJumpScore.toFixed(2)
-          : null,
-      sprintScore: sprintScore !== null ? sprintScore.toFixed(2) : null,
-      finalScore,
+      verticalJumpScore: verticalJumpRawScore !== null ? verticalJumpRawScore.toFixed(2) : null,
+      standingLongJumpScore: standingLongJumpRawScore !== null ? standingLongJumpRawScore.toFixed(2) : null,
+      sprintScore: sprintRawScore !== null ? sprintRawScore.toFixed(2) : null,
+      finalScore: finalRawScore.toFixed(2), // 🔥 UI 顯示 rawScore
+      verticalJumpRawScore,
+      standingLongJumpRawScore,
+      sprintRawScore,
+      finalRawScore,
+      isCapped,
     });
+  };
+
+  const handleUnlockClick = () => {
+    const level = result.finalRawScore >= 100 ? 'legend' : 'apex';
+    setUnlockModalData({
+      exercise: t('tests.powerTitle'),
+      score: result.finalRawScore,
+      level: level,
+      weight: null,
+    });
+    setIsUnlockModalOpen(true);
   };
 
   const handleSubmit = async () => {
@@ -176,10 +217,15 @@ function Power({ onComplete }) {
     try {
       if (submitting) return;
       setSubmitting(true);
+      
+      // 🔥 Civilian Limiter: 提交時，未驗證用戶分數鎖死 100
+      const currentRawScore = result.finalRawScore !== null ? result.finalRawScore : parseFloat(result.finalScore);
+      const scoreToSave = (!isVerified && currentRawScore > 100) ? 100 : currentRawScore;
+      
       // 準備更新的數據
       const updatedScores = {
         ...userData.scores,
-        explosivePower: parseFloat(result.finalScore),
+        explosivePower: parseFloat(scoreToSave.toFixed(2)),
       };
       const updatedUserData = {
         ...userData,
@@ -192,18 +238,29 @@ function Power({ onComplete }) {
         ladderScore: userData.ladderScore || 0,
       });
 
-      // 移除重複的 saveUserData 調用，讓 UserContext 的防抖機制處理
-      // if (!isGuest) {
-      //   const success = await saveUserData(updatedUserData);
-      //   if (!success) throw new Error('保存數據失敗');
-      // }
+      // 🔥 Firestore Payload
+      if (!isGuest) {
+        const userId = userData.userId || auth.currentUser?.uid;
+        if (userId) {
+          const userRef = doc(db, 'users', userId);
+          await setDoc(userRef, {
+            scores: updatedScores,
+            testInputs: {
+              ...userData.testInputs,
+              power: { verticalJump, standingLongJump, sprint },
+            },
+            updatedAt: new Date().toISOString()
+          }, { merge: true });
+        }
+        await saveUserData(updatedUserData);
+      }
 
       // 準備測試數據
       const testData = {
         verticalJump: verticalJump || null,
         standingLongJump: standingLongJump || null,
         sprint: sprint || null,
-        finalScore: result.finalScore,
+        finalScore: scoreToSave.toFixed(2),
       };
       if (onComplete && typeof onComplete === 'function') {
         onComplete(testData);
@@ -307,7 +364,58 @@ function Power({ onComplete }) {
               )}
               <p className="score-display">
                 {t('tests.powerLabels.scoreLabels.final')}: {result.finalScore}
+                {result.finalRawScore && result.finalRawScore > 100 && !result.isCapped && (
+                  <span className="verified-badge" title={t('tests.verifiedBadge')}>
+                    {' '}✓
+                  </span>
+                )}
               </p>
+              {/* 🔥 Civilian Limiter: 顯示警告訊息 */}
+              {result.isCapped && (
+                <>
+                  <p style={{ 
+                    fontSize: '0.8rem', 
+                    color: '#f59e0b', 
+                    marginTop: '4px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px'
+                  }}>
+                    ⚠️ {t('tests.civilianLimiter.warning', '未驗證用戶提交時分數將鎖定為 100')}
+                  </p>
+                  <button
+                    onClick={handleUnlockClick}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '8px',
+                      padding: '4px 12px',
+                      borderRadius: '9999px',
+                      width: 'fit-content',
+                      background: 'rgba(0, 0, 0, 0.6)',
+                      border: '1px solid rgba(234, 179, 8, 0.5)',
+                      cursor: 'pointer',
+                      transition: 'all 0.3s ease',
+                      color: 'white',
+                      fontSize: '0.875rem',
+                      marginTop: '8px',
+                    }}
+                    onMouseEnter={e => {
+                      e.currentTarget.style.background = 'rgba(0, 0, 0, 0.8)';
+                      e.currentTarget.style.borderColor = 'rgba(234, 179, 8, 0.8)';
+                    }}
+                    onMouseLeave={e => {
+                      e.currentTarget.style.background = 'rgba(0, 0, 0, 0.6)';
+                      e.currentTarget.style.borderColor = 'rgba(234, 179, 8, 0.5)';
+                    }}
+                    title="點擊解鎖真實實力"
+                  >
+                    <span style={{ fontSize: '0.875rem' }}>🔒</span>
+                    <span>{t('actions.unlock_limit')}</span>
+                  </button>
+                </>
+              )}
             </>
           )}
         </div>
@@ -401,6 +509,15 @@ function Power({ onComplete }) {
           {submitting ? t('common.submitting') : t('common.submitAndReturn')}
         </button>
       </div>
+
+      <HonorUnlockModal
+        isOpen={isUnlockModalOpen}
+        onClose={() => {
+          setIsUnlockModalOpen(false);
+          setUnlockModalData(null);
+        }}
+        data={unlockModalData}
+      />
 
       {/* 廣告區塊 (置中顯示) */}
       {result.finalScore !== null && (
