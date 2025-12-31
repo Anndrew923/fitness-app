@@ -238,6 +238,34 @@ export const useLadder = (options = {}) => {
         }
       });
 
+      // 🟢 OPTIMISTIC PATCH: Inject local UserData into raw Firestore data before sorting
+      // This ensures the user gets the Correct Rank based on their latest local score
+      if (userData && (userData.userId || auth.currentUser?.uid)) {
+        const uid = userData.userId || auth.currentUser?.uid;
+        const localIndex = data.findIndex(u => u.id === uid);
+
+        if (localIndex !== -1) {
+          // Merge local context data (fresh) over Firestore data (stale)
+          data[localIndex] = {
+            ...data[localIndex],
+            ...userData, // Override with fresh local state
+            // Explicitly ensure critical sorting fields are synced
+            scores: userData.scores,
+            testInputs: userData.testInputs,
+            ladderScore: userData.ladderScore,
+            // Sync flat metrics if they exist in local state
+            stats_5k: userData.stats_5k ?? data[localIndex].stats_5k,
+            stats_5k_time:
+              userData.stats_5k_time ?? data[localIndex].stats_5k_time,
+            stats_cooper:
+              userData.stats_cooper ?? data[localIndex].stats_cooper,
+          };
+          logger.debug(
+            '🚀 Optimistic Patch: Applied local data to raw ladder list before sorting'
+          );
+        }
+      }
+
       logger.debug(`📊 過濾後有分數的用戶：${data.length} 名`);
 
       // Client-side filtering: Age Group
@@ -464,9 +492,9 @@ export const useLadder = (options = {}) => {
             (b.stats_ohp || 0) +
             (b.stats_latPull || 0);
         } else if (sortField === 'armSize') {
-          // PAS 臂围：从 scores.armSize 读取
-          aValue = a.scores?.armSize || 0;
-          bValue = b.scores?.armSize || 0;
+          // 🔥 修正：從 record_arm_girth.score 讀取，不再從 scores.armSize
+          aValue = a.record_arm_girth?.score || 0;
+          bValue = b.record_arm_girth?.score || 0;
         } else if (sortField === 'muscleMass_score') {
           // SMM 分数：从 scores.muscleMass 读取
           // ✅ 修复：强制重算策略 - 当检测到 100 分时，尝试重新计算
@@ -907,6 +935,39 @@ export const useLadder = (options = {}) => {
   const totalPages = useMemo(() => {
     return Math.ceil(totalUsers / usersPerPage);
   }, [totalUsers, usersPerPage]);
+
+  // ⚡️ REAL-TIME VISUAL SYNC: Update existing list items immediately when context changes
+  // This handles the gap between "Context Update" and "Network Fetch completion"
+  useEffect(() => {
+    if (!userData || ladderData.length === 0) return;
+
+    setLadderData(prev => {
+      const uid = userData.userId || auth.currentUser?.uid;
+      const idx = prev.findIndex(u => u.id === uid);
+      if (idx === -1) return prev;
+
+      // Create a merged user object using latest context data
+      const updatedUser = {
+        ...prev[idx],
+        ...userData,
+        scores: userData.scores,
+        ladderScore: userData.ladderScore,
+      };
+
+      // Prevent unnecessary renders if data matches
+      if (
+        JSON.stringify(prev[idx].scores) ===
+          JSON.stringify(updatedUser.scores) &&
+        prev[idx].ladderScore === updatedUser.ladderScore
+      ) {
+        return prev;
+      }
+
+      const newList = [...prev];
+      newList[idx] = updatedUser;
+      return newList;
+    });
+  }, [userData, ladderData.length]); // Dependencies ensure this runs on updates
 
   return {
     // State

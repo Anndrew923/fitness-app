@@ -487,31 +487,40 @@ const LadderItem = React.memo(
               return numVal.toFixed(2);
             },
           };
-        case 'armSize':
-          // PAS 臂围：显示主分数 + 副信息（臂围 cm / 体脂 %）
-          const armSizeScore = user.scores?.armSize || 0;
-          const armSizeInputs = user.testInputs?.armSize;
-          const armSizeValue =
-            armSizeInputs?.arm || armSizeInputs?.armSize || 0;
-          const bodyFatValue = armSizeInputs?.bodyFat || 0;
+        case 'armSize': {
+          // 🔥 修正：從 record_arm_girth 讀取所有數據
+          const armSizeRecord = user.record_arm_girth || {};
+          const armSizeScore = armSizeRecord.score || 0;
+          const armSizeValue = armSizeRecord.value || 0;
+          const bodyFatValue = armSizeRecord.bodyFat || 0;
+
+          // 如果 record_arm_girth 沒有數據，fallback 到 testInputs（向後兼容）
+          const fallbackInputs = user.testInputs?.armSize;
+          const finalArmSize =
+            armSizeValue || fallbackInputs?.arm || fallbackInputs?.armSize || 0;
+          const finalBodyFat = bodyFatValue || fallbackInputs?.bodyFat || 0;
+          const finalScore = armSizeScore || fallbackInputs?.score || 0;
 
           return {
-            value: armSizeScore,
+            value: finalScore,
             unit: t('community.ui.pointsUnit'),
-            label: armSizeInputs
-              ? `${Number(armSizeValue).toFixed(1)} cm / ${Number(
-                  bodyFatValue
-                ).toFixed(1)}%`
-              : 'N/A',
+            label:
+              finalArmSize && finalBodyFat
+                ? `${Number(finalArmSize).toFixed(1)} cm / ${Number(
+                    finalBodyFat
+                  ).toFixed(1)}%`
+                : 'N/A',
             formatValue: val => formatScore(val),
             // 添加副信息显示标志
             showSubInfo: true,
-            subInfo: armSizeInputs
-              ? `${Number(armSizeValue).toFixed(1)} cm / ${Number(
-                  bodyFatValue
-                ).toFixed(1)}%`
-              : null,
+            subInfo:
+              finalArmSize && finalBodyFat
+                ? `${Number(finalArmSize).toFixed(1)} cm / ${Number(
+                    finalBodyFat
+                  ).toFixed(1)}%`
+                : null,
           };
+        }
         case 'ladderScore':
         default:
           return {

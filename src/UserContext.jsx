@@ -84,12 +84,24 @@ const initialState = {
   job_category: '', // 職業分類（下拉選單 ID）
   gym_name: '', // 健身房名稱（選填）
   rpg_class: '', // 系統計算的職業（BERSERKER, ASSASSIN, RANGER, PALADIN, FIGHTER, MAGE, AWAKENED）
-  // 原有欄位
+  // 🔥【絕對隔離區】這兩個欄位完全獨立，不參與 scores 計算，不影響天梯總排名
+  record_5km: {
+    bestTime: 0, // 秒數
+    date: null,
+    pace: 0,
+    location: '',
+  },
+  record_arm_girth: {
+    value: 0, // cm
+    date: null,
+    photoUrl: '',
+  },
+  // ⚠️【天梯核心區】只有這裡的數據變動，才允許更新雷達圖和總排名
   scores: {
     strength: 0,
     explosivePower: 0,
-    cardio: 0,
-    muscleMass: 0,
+    cardio: 0, // 嚴格保留給 Cooper Test (12分鐘跑)
+    muscleMass: 0, // 嚴格保留給 InBody/FFMI
     bodyFat: 0,
   },
   history: [],
@@ -151,6 +163,19 @@ export function UserProvider({ children }) {
         const mergedData = {
           ...initialState,
           ...firebaseData,
+          // ✅ 讀取獨立數據 (若 Firebase 沒資料給預設值)
+          record_5km: firebaseData.record_5km || {
+            bestTime: 0,
+            date: null,
+            pace: 0,
+            location: '',
+          },
+          record_arm_girth: firebaseData.record_arm_girth || {
+            value: 0,
+            date: null,
+            photoUrl: '',
+          },
+          // ✅ 讀取雷達圖數據
           scores: {
             ...initialState.scores,
             ...(firebaseData.scores || {}),
@@ -302,6 +327,18 @@ export function UserProvider({ children }) {
           ...data,
           userId: auth.currentUser.uid,
           updatedAt: new Date().toISOString(),
+          // ✅ 保存獨立數據
+          record_5km: data.record_5km || {
+            bestTime: 0,
+            date: null,
+            pace: 0,
+            location: '',
+          },
+          record_arm_girth: data.record_arm_girth || {
+            value: 0,
+            date: null,
+            photoUrl: '',
+          },
           // 確保數值類型正確
           height: Number(data.height) || 0,
           weight: Number(data.weight) || 0,
@@ -545,6 +582,8 @@ export function UserProvider({ children }) {
       if (auth.currentUser) {
         const importantFields = [
           'scores',
+          'record_5km', // ✅ 新增監聽：5KM 變動時觸發保存
+          'record_arm_girth', // ✅ 新增監聽：臂圍變動時觸發保存
           'height',
           'weight',
           'age',
@@ -803,53 +842,6 @@ export function UserProvider({ children }) {
       unsubscribe();
     };
   }, []); // 使用 ref 避免重複執行
-
-  // 定期同步數據到 Firebase（每 60 分鐘，進一步減少寫入頻率）
-  useEffect(() => {
-    if (!auth.currentUser || !userData || Object.keys(userData).length === 0)
-      return;
-
-    const syncInterval = setInterval(() => {
-      if (auth.currentUser && userData && userData.height) {
-        // 檢查距離上次寫入的時間
-        const now = Date.now();
-        const timeSinceLastWrite = now - lastWriteTimeRef.current;
-
-        // 如果距離上次寫入不到30分鐘，跳過同步
-        if (timeSinceLastWrite < 1800000) {
-          logger.debug('⏭️ 定期同步：距離上次寫入時間太短，跳過同步');
-          return;
-        }
-
-        // 檢查是否有實際變化，避免無意義寫入
-        const lastSavedData = localStorage.getItem('lastSavedUserData');
-        const currentDataString = JSON.stringify({
-          scores: userData.scores,
-          height: userData.height,
-          weight: userData.weight,
-          age: userData.age,
-          gender: userData.gender,
-          nickname: userData.nickname,
-          avatarUrl: userData.avatarUrl,
-          ladderRank: userData.ladderRank,
-          isAnonymousInLadder: userData.isAnonymousInLadder,
-          profession: userData.profession,
-          weeklyTrainingHours: userData.weeklyTrainingHours,
-          trainingYears: userData.trainingYears,
-        });
-
-        if (lastSavedData !== currentDataString) {
-          logger.debug('🔄 定期同步：檢測到數據變化，執行保存');
-          addToWriteQueue(userData, 'periodic_sync');
-          localStorage.setItem('lastSavedUserData', currentDataString);
-        } else {
-          logger.debug('⏭️ 定期同步：無數據變化，跳過保存');
-        }
-      }
-    }, 3600000); // 改為60分鐘
-
-    return () => clearInterval(syncInterval);
-  }, [userData, addToWriteQueue]);
 
   return (
     <UserContext.Provider

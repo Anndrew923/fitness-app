@@ -48,17 +48,47 @@ function Cardio({ onComplete }) {
   // Persistence Effects
   useEffect(() => {
     if (activeTab === 'cooper' && distance) {
-      const updated = { ...userData.testInputs, cardio: { ...userData.testInputs?.cardio, distance } };
-      setUserData(prev => ({ ...prev, testInputs: updated }));
+      // ✅ 添加条件检查：只在值真正改变时才更新
+      const currentDistance = userData.testInputs?.cardio?.distance;
+      if (currentDistance !== Number(distance)) {
+        setUserData(prev => {
+          // ✅ 使用函数式更新，避免依赖 userData
+          const updated = { 
+            ...prev.testInputs, 
+            cardio: { 
+              ...prev.testInputs?.cardio, 
+              distance: Number(distance) 
+            } 
+          };
+          return { ...prev, testInputs: updated };
+        });
+      }
     }
-  }, [distance, activeTab, setUserData, userData.testInputs]);
+  }, [distance, activeTab]); // ✅ 移除 setUserData 依赖
 
   useEffect(() => {
     if (activeTab === '5km' && (runMinutes || runSeconds)) {
-      const updated = { ...userData.testInputs, run_5km: { minutes: runMinutes, seconds: runSeconds } };
-      setUserData(prev => ({ ...prev, testInputs: updated }));
+      // ✅ 添加条件检查：只在值真正改变时才更新
+      const currentMinutes = userData.testInputs?.run_5km?.minutes;
+      const currentSeconds = userData.testInputs?.run_5km?.seconds;
+      const newMinutes = Number(runMinutes) || 0;
+      const newSeconds = Number(runSeconds) || 0;
+      
+      if (currentMinutes !== newMinutes || currentSeconds !== newSeconds) {
+        setUserData(prev => {
+          // ✅ 使用函数式更新，避免依赖 userData
+          const updated = { 
+            ...prev.testInputs, 
+            run_5km: { 
+              minutes: newMinutes, 
+              seconds: newSeconds 
+            } 
+          };
+          return { ...prev, testInputs: updated };
+        });
+      }
     }
-  }, [runMinutes, runSeconds, activeTab, setUserData, userData.testInputs]);
+  }, [runMinutes, runSeconds, activeTab]); // ✅ 移除 setUserData 依赖
 
   // Load 5KM Data
   useEffect(() => {
@@ -277,19 +307,18 @@ function Cardio({ onComplete }) {
           distance: Number(distance) || 0 
         };
       } else {
-        // 5KM Logic
-        updatedScores.run_5km = scoreToSaveFormatted;
+        // 🔥 5KM Logic - 絕對禁止寫入 scores，只更新 record_5km
+        // 計算總秒數和配速
+        const totalSec = (parseInt(runMinutes || 0) * 60) + parseInt(runSeconds || 0);
+        const paceInSeconds = totalSec > 0 ? Math.round(totalSec / 5) : 0; // 每公里秒數
+        
+        // 更新 testInputs（僅用於本地顯示）
         updatedTestInputs.run_5km = { 
           minutes: Number(runMinutes) || 0, 
           seconds: Number(runSeconds) || 0 
         };
         
-        // Compatibility: Calculate total seconds for ladder
-        const totalSec = (parseInt(runMinutes || 0) * 60) + parseInt(runSeconds || 0);
-        updatedTestInputs.cardio = {
-          ...(updatedTestInputs.cardio || {}),
-          time5k: totalSec,
-        };
+        // ⚠️ 重要：不更新 updatedScores，5KM 數據完全獨立
       }
 
       // Recalculate Main Ladder Score (Core 5 / 5)
@@ -302,43 +331,92 @@ function Cardio({ onComplete }) {
       // STRICTLY divide by 5
       const currentRawTotal = (s_str + s_exp + s_mus + s_fat + s_cardio) / 5;
 
-      // Calculate totalSec for 5KM (needed for stats fields)
-      const totalSec = activeTab === '5km' 
-        ? (parseInt(runMinutes || 0) * 60) + parseInt(runSeconds || 0)
-        : 0;
-
       // 1. Prepare Base Data
-      const updatedUserData = {
-        ...userData,
-        scores: updatedScores,
-        testInputs: updatedTestInputs,
-        ladderScore: parseFloat(currentRawTotal.toFixed(2)), // Save correct average
-        
-        // ✅ ADD THIS: Instant Context Update
-        stats_5k: activeTab === '5km' ? totalSec : (userData.stats_5k || 0),
-        stats_5k_time: activeTab === '5km' ? totalSec : (userData.stats_5k_time || 0),
-        stats_cooper: activeTab === 'cooper' ? (Number(distance) || 0) : (userData.stats_cooper || 0)
-      };
+      let updatedUserData;
 
-      // 2. 🔥 CRITICAL FIX: Explicitly prepare Firestore Payload for Leaderboard
-      // This ensures the 5KM data appears on the ladder IMMEDIATELY without needing a manual update.
-      const firestoreUpdatePayload = {
-        ...updatedScores, // Save scores
-        testInputs: updatedTestInputs, // Save inputs
-        ladderScore: updatedUserData.ladderScore,
-        updatedAt: new Date().toISOString()
-      };
-
-      // If 5KM, explicitly write the sorting fields for the Elite Leaderboard
       if (activeTab === '5km') {
+        // --- [Phase 3: Optimistic Context Update] ---
+        // 🔥 關鍵修正：5KM 數據寫入 record_5km，絕對不碰 scores
         const totalSec = (parseInt(runMinutes || 0) * 60) + parseInt(runSeconds || 0);
-        firestoreUpdatePayload.stats_5k = totalSec; // Standardize field name
-        firestoreUpdatePayload.stats_5k_time = totalSec; // Redundancy for safety
-        firestoreUpdatePayload.stats_5k_score = parseFloat(Number(scoreToSaveFormatted).toFixed(2));
-        firestoreUpdatePayload.stats_cooper = Number(userData.testInputs?.cardio?.distance) || 0; // Preserve Cooper
+        const paceInSeconds = totalSec > 0 ? Math.round(totalSec / 5) : 0;
+        
+        updatedUserData = {
+          ...userData,
+          // 🔥 1. 更新 record_5km（獨立欄位，不影響雷達圖）
+          record_5km: {
+            bestTime: totalSec,
+            date: new Date().toISOString(),
+            pace: paceInSeconds,
+            location: userData.record_5km?.location || '',
+          },
+          
+          // 2. 保持原有 stats 欄位（用於排序，但不影響總分計算）
+          stats_5k: totalSec,
+          stats_5k_time: totalSec,
+          stats_5k_score: parseFloat(Number(scoreToSaveFormatted).toFixed(2)),
+          
+          // ⚠️ 3. 絕對禁止更新 scores（保持原值）
+          scores: {
+            ...userData.scores,
+            // 不添加 run_5km，不更新 cardio
+          },
+          
+          // 4. Update testInputs
+          testInputs: updatedTestInputs,
+          
+          // 5. 不更新 ladderScore（5KM 不參與總排名）
+          ladderScore: userData.ladderScore || 0,
+          
+          // 6. Force Activity Refresh
+          lastActive: new Date().toISOString()
+        };
       } else {
-        // If Cooper, ensure we update the Cooper stat
-        firestoreUpdatePayload.stats_cooper = Number(distance) || 0;
+        // Cooper logic - 🔥 修正：只更新 scores.cardio，不更新 ladderScore
+        updatedUserData = {
+          ...userData,
+          scores: updatedScores,
+          testInputs: updatedTestInputs,
+          // ⚠️ 不更新 ladderScore（天梯只在用戶主動點擊「更新排行榜」時才計算）
+          ladderScore: userData.ladderScore || 0,
+          
+          // 保持原有 stats 欄位
+          stats_5k: userData.stats_5k || 0,
+          stats_5k_time: userData.stats_5k_time || 0,
+          stats_cooper: Number(distance) || 0
+        };
+      }
+
+      // 2. 🔥 CRITICAL FIX: 準備 Firestore Payload
+      let firestoreUpdatePayload;
+      
+      if (activeTab === '5km') {
+        // 🔥 5KM：只更新 record_5km 和 stats，不更新 scores
+        const totalSec = (parseInt(runMinutes || 0) * 60) + parseInt(runSeconds || 0);
+        const paceInSeconds = totalSec > 0 ? Math.round(totalSec / 5) : 0;
+        
+        firestoreUpdatePayload = {
+          record_5km: {
+            bestTime: totalSec,
+            date: new Date().toISOString(),
+            pace: paceInSeconds,
+            location: userData.record_5km?.location || '',
+          },
+          stats_5k: totalSec,
+          stats_5k_time: totalSec,
+          stats_5k_score: parseFloat(Number(scoreToSaveFormatted).toFixed(2)),
+          testInputs: updatedTestInputs,
+          // ⚠️ 不更新 scores，不更新 ladderScore
+          updatedAt: new Date().toISOString()
+        };
+      } else {
+        // Cooper：🔥 只更新 scores.cardio，不更新 ladderScore
+        firestoreUpdatePayload = {
+          scores: updatedScores, // 🔥 只更新 scores 物件
+          testInputs: updatedTestInputs,
+          // ⚠️ 不更新 ladderScore（天梯只在用戶主動點擊「更新排行榜」時才計算）
+          stats_cooper: Number(distance) || 0,
+          updatedAt: new Date().toISOString()
+        };
       }
 
       // 3. Save Context

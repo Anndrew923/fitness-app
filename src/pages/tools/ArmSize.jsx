@@ -37,21 +37,18 @@ function ArmSize({ onComplete }) {
 
   const timeoutRef = useRef(null);
 
-  // PAS 计算函数
-  const calculatePAS = useCallback(() => {
-    if (!armSize || armSize <= 0) {
-      setScore(null);
-      setRawScore(null);
-      setIsCapped(false);
-      return;
+  // 🔥 核心計算函數（純函數，可在提交時重新調用）
+  const calculateArmScore = useCallback((armSizeValue, bodyFatValue, isVerifiedValue = userData.isVerified) => {
+    if (!armSizeValue || armSizeValue <= 0) {
+      return { displayScore: null, rawScore: null, isCapped: false };
     }
 
     const benchmark = 50;
-    const fatMultiplier = 1 + (20 - bodyFat) / 100;
-    let calculatedScore = (armSize / benchmark) * fatMultiplier * 100;
-    calculatedScore = Math.min(Math.round(calculatedScore * 100) / 100, 100); // 修复：统一为两位小数
+    const fatMultiplier = 1 + (20 - bodyFatValue) / 100;
+    let calculatedScore = (armSizeValue / benchmark) * fatMultiplier * 100;
+    calculatedScore = Math.round(calculatedScore * 100) / 100; // 統一為兩位小數
 
-    const isVerified = userData.isVerified === true;
+    const isVerified = isVerifiedValue === true;
     let displayScore = calculatedScore;
     let capped = false;
 
@@ -64,10 +61,16 @@ function ArmSize({ onComplete }) {
       }
     }
 
-    setScore(displayScore);
-    setRawScore(calculatedScore);
-    setIsCapped(capped);
-  }, [armSize, bodyFat, userData.isVerified]);
+    return { displayScore, rawScore: calculatedScore, isCapped };
+  }, [userData.isVerified]);
+
+  // PAS 计算函数（用於即時預覽）
+  const calculatePAS = useCallback(() => {
+    const result = calculateArmScore(armSize, bodyFat);
+    setScore(result.displayScore);
+    setRawScore(result.rawScore);
+    setIsCapped(result.isCapped);
+  }, [armSize, bodyFat, calculateArmScore]);
 
   // 当输入变化时自动计算
   useEffect(() => {
@@ -136,27 +139,86 @@ function ArmSize({ onComplete }) {
   // 提交
   const handleSubmit = async () => {
     flushTestInputs();
-    if (!score) return alert(t('tests.armSizeErrors.needCalculate'));
+    
+    // 🔥 關鍵修復：確保使用當前最新的輸入值
+    const currentArmSize = parseFloat(armSize) || 0;
+    const currentBodyFat = parseFloat(bodyFat) || 20;
+    
+    // ⚠️ 關鍵：在提交前一刻，重新計算分數，確保與預覽一致
+    // 不要依賴可能過期的 score state 變數
+    const scoreResult = calculateArmScore(currentArmSize, currentBodyFat);
+    const finalScore = scoreResult.displayScore;
+    const finalRawScore = scoreResult.rawScore;
+    const finalIsCapped = scoreResult.isCapped;
+    
+    if (!finalScore || finalScore <= 0) {
+      return alert(t('tests.armSizeErrors.needCalculate'));
+    }
+    
     if (submitting) return;
     setSubmitting(true);
 
+    console.log(`✅ 提交審查: 輸入(${currentArmSize}cm, ${currentBodyFat}%), 計算分數:${finalScore}`);
+
     try {
-      const updatedScores = {
-        ...userData.scores,
-        armSize: parseFloat(score),
+      // --- [Phase 1: State Snapshot & Calculation] ---
+      // 🔥 修正：臂圍不參與總分計算，移除分數增量邏輯
+      const newArmScore = parseFloat(finalScore);
+
+      // --- [Phase 2: Expansion Interface] ---
+      // 🔮 FUTURE HOOK: Rank Up Ceremony / Animation Trigger
+      // if (scoreDelta > 0) {
+      //    triggerLevelUpEffect();
+      //    checkIfRankSurpassed();
+      // }
+
+      // --- [Phase 3: Optimistic Context Update] ---
+      // 🔥 關鍵修正：臂圍數據寫入 record_arm_girth，絕對不碰 scores
+      const optimisticUserData = {
+        ...userData,
+        // 🔥 1. 更新 record_arm_girth（獨立欄位，不影響雷達圖）
+        record_arm_girth: {
+          value: currentArmSize,
+          bodyFat: currentBodyFat,
+          score: finalScore, // 🔥 確保這裡送出的是重新計算的分數，與預覽一致
+          date: new Date().toISOString(),
+          photoUrl: userData.record_arm_girth?.photoUrl || '',
+        },
+        // ⚠️ 2. 絕對禁止更新 scores（保持原值，不更新 muscleMass）
+        scores: {
+          ...userData.scores,
+          // 不添加 armSize，不更新 muscleMass
+        },
+        // 3. 不更新 ladderScore（臂圍不參與總排名）
+        ladderScore: userData.ladderScore || 0,
+        // 4. Update Input History (For "My Data" view in Ladder)
+        testInputs: {
+          ...userData.testInputs,
+          armSize: {
+            ...userData.testInputs?.armSize,
+            arm: currentArmSize,       // Raw measurement
+            bodyFat: currentBodyFat,   // Context
+            score: finalScore,         // 🔥 使用重新計算的分數
+            rawScore: finalRawScore,   // 🔥 使用重新計算的原始分數
+            isCapped: finalIsCapped,   // 🔥 使用重新計算的 capped 狀態
+            lastUpdated: new Date().toISOString()
+          }
+        },
+        // 5. Force Activity Refresh
+        lastActive: new Date().toISOString()
       };
 
-      setUserData(prev => ({
-        ...prev,
-        scores: updatedScores,
-        ladderScore: prev.ladderScore || 0,
-      }));
+      // Apply Update
+      setUserData(optimisticUserData);
+
+      // --- [Phase 4: Persistence] ---
+      // ... Proceed with Firebase setDoc ...
 
       const testData = {
-        armSize: armSize,
-        bodyFat: bodyFat,
-        score: score,
-        rawScore: rawScore,
+        armSize: currentArmSize,
+        bodyFat: currentBodyFat,
+        score: finalScore,
+        rawScore: finalRawScore,
       };
 
       // 🛑 Disable legacy navigation to show RPG Modal
@@ -273,40 +335,48 @@ function ArmSize({ onComplete }) {
             <div className="corner-decoration bottom-left"></div>
             <div className="corner-decoration bottom-right"></div>
 
-            <h3>📊 {t('tests.score')}</h3>
-            <div className="score-display">
-              <div
-                style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  gap: '8px',
-                }}
-              >
-                <p className="score-value">
-                  {parseFloat(score).toFixed(2)}
-                  {rawScore && rawScore > 100 && !isCapped && (
-                    <span
-                      className="verified-badge"
-                      title={t('tests.verifiedBadge')}
-                    >
-                      {' '}
-                      ✓
-                    </span>
-                  )}
-                </p>
-                {isCapped && (
-                  <button
-                    onClick={handleUnlockClick}
-                    className="unlock-btn"
-                    title={t('actions.unlock_limit')}
-                  >
-                    <span>🔒</span>
-                    <span>{t('actions.unlock_limit')}</span>
-                  </button>
+            {/* --- 分數顯示區塊 (鑽石級優化版) --- */}
+            <div className="score-hero-section">
+              {/* 背景光暈裝飾 */}
+              <div className="score-glow-bg" />
+              
+              {/* 上方小標題 */}
+              <div className="score-label-bar">
+                <div className="score-label-line" />
+                <span className="score-label-text">
+                  {t('tests.score')}
+                </span>
+                <div className="score-label-line" />
+              </div>
+              
+              {/* --- 核心分數 (視覺重頭戲) --- */}
+              <div className="score-value-hero">
+                {parseFloat(score).toFixed(2)}
+                {rawScore && rawScore > 100 && !isCapped && (
+                  <span className="verified-badge" title={t('tests.verifiedBadge')}>
+                    ✓
+                  </span>
                 )}
               </div>
-              <p className="score-comment">{getArmSizeFeedback(score)}</p>
+              
+              {/* 解鎖按鈕 */}
+              {isCapped && (
+                <button
+                  onClick={handleUnlockClick}
+                  className="unlock-btn"
+                  title={t('actions.unlock_limit')}
+                >
+                  <span>🔒</span>
+                  <span>{t('actions.unlock_limit')}</span>
+                </button>
+              )}
+
+              {/* 下方激勵語句：戰鬥風格 */}
+              <p className="score-comment">
+                <span className="score-comment-emoji">🔥</span>
+                <span>{getArmSizeFeedback(score)}</span>
+                <span className="score-comment-emoji">🔥</span>
+              </p>
             </div>
 
             {/* 等级进度条 */}
