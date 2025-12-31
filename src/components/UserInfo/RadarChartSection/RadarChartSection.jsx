@@ -19,8 +19,10 @@ const DEFAULT_SCORES = {
 
 // 自定義軸標籤組件 - 使用 React.memo 優化性能
 const CustomAxisTick = memo(
-  ({ payload, x, y, radarChartData, t }) => {
+  ({ payload, x, y, radarChartData, t, isLimitBreak, limitBreakColor }) => {
     const data = radarChartData.find(item => item.name === payload.value);
+    const value = data?.value || 0;
+    const isOverLimit = value > 100;
 
     // 計算調整後的位置 - 使用相對偏移而不是固定像素值
     let adjustedX = x;
@@ -51,6 +53,26 @@ const CustomAxisTick = memo(
       adjustedY = y + Math.sin(angle) * (distance * 0.1);
     }
 
+    // 🔥 Limit Break: 動態顏色
+    // 將 hex 顏色轉換為 rgba（用於透明度效果）
+    const hexToRgba = (hex, alpha) => {
+      const r = parseInt(hex.slice(1, 3), 16);
+      const g = parseInt(hex.slice(3, 5), 16);
+      const b = parseInt(hex.slice(5, 7), 16);
+      return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+    };
+    
+    const circleStrokeColor = isLimitBreak && isOverLimit 
+      ? limitBreakColor 
+      : 'rgba(129, 216, 208, 0.4)';
+    const circleGlowColor = isLimitBreak && isOverLimit 
+      ? hexToRgba(limitBreakColor, 0.2)
+      : 'rgba(129, 216, 208, 0.1)';
+    const labelColor = isLimitBreak && isOverLimit 
+      ? limitBreakColor 
+      : '#2d3748';
+    const labelWeight = isLimitBreak && isOverLimit ? '900' : '700';
+
     return (
       <g transform={`translate(${adjustedX},${adjustedY})`}>
         {/* 外圈光暈 */}
@@ -58,7 +80,7 @@ const CustomAxisTick = memo(
           cx={0}
           cy={0}
           r={16}
-          fill="rgba(129, 216, 208, 0.1)"
+          fill={circleGlowColor}
           filter="url(#glow)"
         />
         {/* 主圓圈 */}
@@ -67,18 +89,21 @@ const CustomAxisTick = memo(
           cy={0}
           r={14}
           fill="rgba(255, 255, 255, 0.95)"
-          stroke="rgba(129, 216, 208, 0.4)"
-          strokeWidth={2}
-          filter="drop-shadow(0 2px 4px rgba(129, 216, 208, 0.2))"
+          stroke={circleStrokeColor}
+          strokeWidth={isLimitBreak && isOverLimit ? 3 : 2}
+          filter={isLimitBreak && isOverLimit 
+            ? `drop-shadow(0 2px 6px ${hexToRgba(limitBreakColor, 0.4)})`
+            : "drop-shadow(0 2px 4px rgba(129, 216, 208, 0.2))"
+          }
         />
         {/* 圖標 */}
         <text
           x={0}
           y={-8}
           textAnchor="middle"
-          fill="#4a5568"
+          fill={isLimitBreak && isOverLimit ? limitBreakColor : '#4a5568'}
           fontSize="16"
-          fontWeight="600"
+          fontWeight={isLimitBreak && isOverLimit ? "700" : "600"}
           dominantBaseline="middle"
           filter="drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1))"
         >
@@ -89,14 +114,29 @@ const CustomAxisTick = memo(
           x={0}
           y={12}
           textAnchor="middle"
-          fill="#2d3748"
+          fill={labelColor}
           fontSize="13"
-          fontWeight="700"
+          fontWeight={labelWeight}
           dominantBaseline="middle"
           filter="drop-shadow(0 1px 3px rgba(255, 255, 255, 0.9))"
         >
           {payload.value}
         </text>
+        {/* 🔥 Limit Break: 顯示超過 100 的數值標籤 */}
+        {isOverLimit && (
+          <text
+            x={0}
+            y={28}
+            textAnchor="middle"
+            fill={limitBreakColor}
+            fontSize="11"
+            fontWeight="900"
+            dominantBaseline="middle"
+            filter={`drop-shadow(0 1px 3px ${hexToRgba(limitBreakColor, 0.5)})`}
+          >
+            {value.toFixed(1)}
+          </text>
+        )}
       </g>
     );
   },
@@ -106,7 +146,9 @@ const CustomAxisTick = memo(
       Math.abs(prevProps.x - nextProps.x) < 0.1 &&
       Math.abs(prevProps.y - nextProps.y) < 0.1 &&
       prevProps.radarChartData === nextProps.radarChartData &&
-      prevProps.t === nextProps.t
+      prevProps.t === nextProps.t &&
+      prevProps.isLimitBreak === nextProps.isLimitBreak &&
+      prevProps.limitBreakColor === nextProps.limitBreakColor
     );
   }
 );
@@ -121,6 +163,8 @@ CustomAxisTick.propTypes = {
   y: PropTypes.number.isRequired,
   radarChartData: PropTypes.array.isRequired,
   t: PropTypes.func.isRequired,
+  isLimitBreak: PropTypes.bool,
+  limitBreakColor: PropTypes.string,
 };
 
 const RadarChartSection = ({ scores, loading, t }) => {
@@ -248,6 +292,18 @@ const RadarChartSection = ({ scores, loading, t }) => {
     Array.isArray(radarChartData) &&
     radarChartData.length > 0;
 
+  // 🔥 Limit Break: 檢測是否有任何數值超過 100
+  const isLimitBreak = useMemo(() => {
+    return radarChartData.some(item => item.value > 100);
+  }, [radarChartData]);
+
+  // 🔥 Limit Break: 動態顏色（Amber-500 或 Red-500）
+  const limitBreakColor = '#f59e0b'; // Amber-500
+  // 如果需要紅色，可以使用: '#ef4444' // Red-500
+
+  // 🔥 Limit Break: 動態漸變色 ID
+  const gradientId = isLimitBreak ? 'limitBreakGradient' : 'tiffanyGradient';
+
   if (loading) {
     return (
       <div className="radar-section">
@@ -293,6 +349,18 @@ const RadarChartSection = ({ scores, loading, t }) => {
               <stop offset="50%" stopColor="#5F9EA0" stopOpacity={0.7} />
               <stop offset="100%" stopColor="#81D8D0" stopOpacity={0.6} />
             </linearGradient>
+            {/* 🔥 Limit Break: 覺醒狀態漸變（金色/紅色） */}
+            <linearGradient
+              id="limitBreakGradient"
+              x1="0%"
+              y1="0%"
+              x2="100%"
+              y2="100%"
+            >
+              <stop offset="0%" stopColor="#f59e0b" stopOpacity={0.7} />
+              <stop offset="50%" stopColor="#d97706" stopOpacity={0.6} />
+              <stop offset="100%" stopColor="#f59e0b" stopOpacity={0.5} />
+            </linearGradient>
           </defs>
         </svg>
 
@@ -315,7 +383,12 @@ const RadarChartSection = ({ scores, loading, t }) => {
               <PolarAngleAxis
                 dataKey="name"
                 tick={
-                  <CustomAxisTick radarChartData={radarChartData} t={t} />
+                  <CustomAxisTick 
+                    radarChartData={radarChartData} 
+                    t={t}
+                    isLimitBreak={isLimitBreak}
+                    limitBreakColor={limitBreakColor}
+                  />
                 }
                 axisLine={false}
               />
@@ -330,15 +403,18 @@ const RadarChartSection = ({ scores, loading, t }) => {
                 }}
                 axisLine={false}
               />
+              {/* 🔥 Limit Break: 允許數據溢出網格，動態變色 */}
               <Radar
                 name={t('userInfo.yourPerformance')}
                 dataKey="value"
-                stroke="#81D8D0"
-                fill="url(#tiffanyGradient)"
-                fillOpacity={0.8}
-                strokeWidth={4}
+                stroke={isLimitBreak ? limitBreakColor : '#81D8D0'}
+                fill={`url(#${gradientId})`}
+                fillOpacity={isLimitBreak ? 0.6 : 0.8}
+                strokeWidth={isLimitBreak ? 5 : 4}
                 strokeLinecap="round"
                 strokeLinejoin="round"
+                // 允許數據超出 domain，實現溢出效果
+                isAnimationActive={true}
               />
             </RadarChart>
           </div>
