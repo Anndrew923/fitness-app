@@ -135,5 +135,12 @@ export default {
     weightUpdateMessage: '體重已從 {{oldWeight}}kg 更新為 {{newWeight}}kg。建議您前往重新評測，以確保天梯排名精準。',
     goToSkillTree: '前往技能樹',
   },
+  saveSuccessModal: {
+    title: '戰果已封存',
+    quote: '「今天的汗水，是明天的傳說。」',
+    message: '您的修練數據已成功寫入歷史卷軸。\n隨時前往「成就」頁面，見證您的變強之路。',
+    stayHere: '留在這裡',
+    goToHistory: '前往成就 📜',
+  },
 };
 

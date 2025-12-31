@@ -1,8 +1,11 @@
 import React from 'react';
 import { createPortal } from 'react-dom';
 import PropTypes from 'prop-types';
+import { useTranslation } from 'react-i18next';
 
 const SaveSuccessModal = ({ isOpen, onClose, onNavigate }) => {
+  const { t } = useTranslation();
+  
   if (!isOpen) return null;
 
   const handleOverlayClick = e => {
@@ -17,16 +20,14 @@ const SaveSuccessModal = ({ isOpen, onClose, onNavigate }) => {
         {/* Icon & Title */}
         <div style={styles.header}>
           <div style={styles.icon}>💾</div>
-          <h3 style={styles.title}>戰果已封存</h3>
+          <h3 style={styles.title}>{t('saveSuccessModal.title')}</h3>
         </div>
 
         {/* Description */}
         <div style={styles.content}>
-          <p style={styles.quote}>「今天的汗水，是明天的傳說。」</p>
+          <p style={styles.quote}>{t('saveSuccessModal.quote')}</p>
           <p style={styles.text}>
-            您的修練數據已成功寫入歷史卷軸。
-            <br />
-            隨時前往「成就」頁面，見證您的變強之路。
+            {t('saveSuccessModal.message')}
           </p>
         </div>
 
@@ -42,7 +43,7 @@ const SaveSuccessModal = ({ isOpen, onClose, onNavigate }) => {
               e.currentTarget.style.backgroundColor = 'transparent';
             }}
           >
-            留在這裡
+            {t('saveSuccessModal.stayHere')}
           </button>
           <button
             onClick={onNavigate}
@@ -56,7 +57,7 @@ const SaveSuccessModal = ({ isOpen, onClose, onNavigate }) => {
               e.currentTarget.style.transform = 'translateY(0)';
             }}
           >
-            前往成就 📜
+            {t('saveSuccessModal.goToHistory')}
           </button>
         </div>
       </div>

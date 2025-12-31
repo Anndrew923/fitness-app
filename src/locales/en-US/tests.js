@@ -362,6 +362,9 @@ export default {
       updateFail: 'Failed to save character data. Please try again later',
     },
     verifiedBadge: 'Verified - showing real score',
+    civilianLimiter: {
+      warning: 'Unverified scores capped at 100',
+    },
   },
   skillTree: {
     title: 'Skill Tree',

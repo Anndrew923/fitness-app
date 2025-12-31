@@ -139,5 +139,12 @@ export default {
     weightUpdateMessage: 'Weight has been updated from {{oldWeight}}kg to {{newWeight}}kg. It is recommended that you go to re-evaluate to ensure the accuracy of the ladder ranking.',
     goToSkillTree: 'Go to Skill Tree',
   },
+  saveSuccessModal: {
+    title: 'Chronicle Updated',
+    quote: '"Today\'s struggle becomes tomorrow\'s legend."',
+    message: 'Your training data has been recorded in the annals.\nVisit your Achievements to witness your path to power.',
+    stayHere: 'Remain Here',
+    goToHistory: 'View Chronicle 📜',
+  },
 };
 

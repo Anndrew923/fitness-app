@@ -343,6 +343,9 @@ export default {
       updateFail: '更新角色數據失敗，請稍後再試！',
     },
     verifiedBadge: '已認證顯示真實分數',
+    civilianLimiter: {
+      warning: '未驗證用戶提交時分數將鎖定為 100',
+    },
   },
   skillTree: {
     title: '天賦技能樹',

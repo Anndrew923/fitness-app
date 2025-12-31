@@ -226,7 +226,7 @@ const RPGClassModal = ({ isOpen, onClose, classInfo }) => {
                 userSelect: 'none',
               }}
             >
-              確 認
+              {t('common.confirm')}
             </span>
           </div>
         </div>
