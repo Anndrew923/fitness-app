@@ -11,6 +11,7 @@ export default {
       total: '🏆 總排行榜',
       weekly: '⭐ 本周新進榜',
       verified: '🏅 通過榮譽認證',
+      totalLoginDays: '累積登入次數',
     },
     ageGroups: {
       all: '全部年齡',
@@ -132,6 +133,7 @@ export default {
       district: '地區分組',
       national: '國家排行榜',
       all: '全區',
+      totalLoginDays: '累積登入次數',
     },
     filter: {
       zone: '賽區',

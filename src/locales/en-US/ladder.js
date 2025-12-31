@@ -11,6 +11,7 @@ export default {
       total: '🏆 Overall',
       weekly: '⭐ New this week',
       verified: '🏅 Verified',
+      totalLoginDays: 'Cumulative Login Count',
     },
     ageGroups: {
       all: 'All Ages',
@@ -134,6 +135,7 @@ export default {
       district: 'District Ladder',
       national: 'National Leaderboard',
       all: 'All Regions',
+      totalLoginDays: 'Cumulative Login Count',
     },
     filter: {
       zone: 'Zone',

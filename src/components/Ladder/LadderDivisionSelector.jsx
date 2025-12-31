@@ -13,9 +13,9 @@ const LadderDivisionSelector = ({ currentFilter, onFilterChange }) => {
       desc: t('ladder.filter.filter'),
     },
     {
-      label: '📅 ' + t('ladder.filters.weekly'),
+      label: '📅 ' + t('ladder.filters.totalLoginDays', '累積登入次數'),
       value: 'stats_totalLoginDays',
-      desc: t('ladder.zones.district'),
+      desc: t('ladder.zones.totalLoginDays', '累積登入次數'),
     },
     {
       label: '💪 ' + t('tests.strength'),
