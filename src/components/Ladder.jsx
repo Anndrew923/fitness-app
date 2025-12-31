@@ -35,6 +35,7 @@ const Ladder = () => {
   const [filterWeight, setFilterWeight] = useState('all');
   const [filterJob, setFilterJob] = useState('all');
   const [filterProject, setFilterProject] = useState('total');
+  const [filterRegionLevel, setFilterRegionLevel] = useState('all');
   const [showUserContext, setShowUserContext] = useState(false);
   const [showUserCard, setShowUserCard] = useState(false);
   const [selectedUserForCard, setSelectedUserForCard] = useState(null);
@@ -70,6 +71,7 @@ const Ladder = () => {
     filterWeight,
     filterJob,
     filterProject,
+    filterRegionLevel,
   });
 
   const lastConditionCheckRef = useRef(null);
@@ -355,13 +357,6 @@ const Ladder = () => {
           unit: '%',
           label: t('tests.ffmiLabels.bodyFatPercent', '體脂率'),
           formatValue: val => Number(val).toFixed(1),
-        };
-      case 'local_district':
-        return {
-          value: userData.ladderScore || 0,
-          unit: t('community.ui.pointsUnit'),
-          label: t('userInfo.profileCard.combatPower', '戰鬥力'),
-          formatValue: val => formatScore(val),
         };
       case 'stats_cooper':
         // ✅ Fix: Must match the dropdown value '5km'
@@ -943,13 +938,16 @@ const Ladder = () => {
           filterWeight={filterWeight}
           filterJob={filterJob}
           filterProject={filterProject}
+          filterRegionLevel={filterRegionLevel}
           currentDivision={selectedDivision}
+          userData={userData}
           onGenderChange={setFilterGender}
           onAgeChange={setFilterAge}
           onHeightChange={setFilterHeight}
           onWeightChange={setFilterWeight}
           onJobChange={setFilterJob}
           onProjectChange={setFilterProject}
+          onRegionLevelChange={setFilterRegionLevel}
         />
 
         {userRank > 50 && (

@@ -58,14 +58,6 @@ const LadderEmptyState = ({ division }) => {
           buttonText: t('ladder.empty.buttonLogin', '開始登入'),
           link: '/user-info',
         };
-      case 'local_district':
-        return {
-          icon: '📍',
-          title: t('ladder.empty.title', 'Position Vacant'),
-          description: t('ladder.empty.desc.local', '你的地區還沒有其他挑戰者。成為本地第一人！'),
-          buttonText: t('ladder.empty.button', '成為第一名'),
-          link: '/user-info',
-        };
       default:
         return {
           icon: '🏆',

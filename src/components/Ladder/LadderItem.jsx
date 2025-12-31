@@ -155,14 +155,6 @@ const LadderItem = React.memo(
             icon: '💧',
             formatValue: val => Number(val).toFixed(1),
           };
-        case 'local_district':
-          // Local district uses ladderScore for display
-          return {
-            value: user.ladderScore || 0,
-            unit: t('community.ui.pointsUnit'),
-            label: t('userInfo.profileCard.combatPower', '戰鬥力'),
-            formatValue: val => formatScore(val),
-          };
         case 'stats_cooper':
           // Endurance: Check project filter
           // ✅ Fix: Check for '5km' (matching config), NOT '5k'

@@ -140,6 +140,13 @@ export default {
       totalLoginDays: '累計天數',
       height: '身高 (cm)',
       sbdTotal: '三項總和',
+      regionLevelLabel: '地區層級',
+      regionLevel: {
+        all: '全部地區',
+        country: '國家',
+        city: '城市',
+        district: '行政區',
+      },
     },
   },
   ladderCard: {

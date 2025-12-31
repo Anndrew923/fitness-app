@@ -10,13 +10,16 @@ const LadderSubFilters = ({
   filterWeight,
   filterJob,
   filterProject,
+  filterRegionLevel,
   currentDivision,
+  userData,
   onGenderChange,
   onAgeChange,
   onHeightChange,
   onWeightChange,
   onJobChange,
   onProjectChange,
+  onRegionLevelChange,
 }) => {
   const { t, i18n } = useTranslation();
   const isEnglish = i18n.language === 'en-US';
@@ -112,6 +115,44 @@ const LadderSubFilters = ({
   const projectOptions = getProjectOptions();
   const showProjectFilter = projectOptions.length > 0;
 
+  // 根据用户资料生成地区层级选项
+  const regionLevelOptions = React.useMemo(() => {
+    const options = [
+      { value: 'all', label: t('ladder.filter.regionLevel.all', '全部地區') },
+    ];
+
+    const userCountry = userData?.country || '';
+    const userCity = userData?.city || '';
+    const userDistrict = userData?.district || '';
+
+    if (userCountry) {
+      options.push({
+        value: 'country',
+        label:
+          t('ladder.filter.regionLevel.country', '國家') +
+          `: ${t(`userInfo.countries.${userCountry}`, userCountry)}`,
+      });
+    }
+
+    if (userCity) {
+      options.push({
+        value: 'city',
+        label: t('ladder.filter.regionLevel.city', '城市') + `: ${userCity}`,
+      });
+    }
+
+    if (userDistrict) {
+      options.push({
+        value: 'district',
+        label:
+          t('ladder.filter.regionLevel.district', '行政區') +
+          `: ${userDistrict}`,
+      });
+    }
+
+    return options;
+  }, [userData, t]);
+
   return (
     <div className="ladder-sub-filters">
       <div className="ladder-sub-filter-group">
@@ -204,6 +245,26 @@ const LadderSubFilters = ({
         </select>
       </div>
 
+      {/* 地区层级筛选器 */}
+      {regionLevelOptions.length > 1 && (
+        <div className="ladder-sub-filter-group">
+          <label className="ladder-sub-filter-label">
+            {t('ladder.filter.regionLevelLabel', '地區層級')}
+          </label>
+          <select
+            value={filterRegionLevel || 'all'}
+            onChange={e => onRegionLevelChange(e.target.value)}
+            className="ladder-sub-filter-select"
+          >
+            {regionLevelOptions.map(option => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
+
       {showProjectFilter && (
         <div className="ladder-sub-filter-group">
           <label className="ladder-sub-filter-label">
@@ -233,13 +294,16 @@ LadderSubFilters.propTypes = {
   filterWeight: PropTypes.string.isRequired,
   filterJob: PropTypes.string.isRequired,
   filterProject: PropTypes.string.isRequired,
+  filterRegionLevel: PropTypes.string,
   currentDivision: PropTypes.string.isRequired,
+  userData: PropTypes.object,
   onGenderChange: PropTypes.func.isRequired,
   onAgeChange: PropTypes.func.isRequired,
   onHeightChange: PropTypes.func.isRequired,
   onWeightChange: PropTypes.func.isRequired,
   onJobChange: PropTypes.func.isRequired,
   onProjectChange: PropTypes.func.isRequired,
+  onRegionLevelChange: PropTypes.func,
 };
 
 export default LadderSubFilters;

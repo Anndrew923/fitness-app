@@ -142,6 +142,13 @@ export default {
       totalLoginDays: 'Total Login Days',
       height: 'Height (cm)',
       sbdTotal: 'SBD Total',
+      regionLevelLabel: 'Region Level',
+      regionLevel: {
+        all: 'All Regions',
+        country: 'Country',
+        city: 'City',
+        district: 'District',
+      },
     },
   },
   ladderCard: {

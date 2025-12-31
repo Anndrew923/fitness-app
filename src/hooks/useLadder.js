@@ -29,6 +29,7 @@ export const useLadder = (options = {}) => {
     filterWeight = 'all',
     filterJob = 'all',
     filterProject = 'total',
+    filterRegionLevel = 'all',
   } = options;
   const { userData } = useUser();
   const { t } = useTranslation();
@@ -94,6 +95,7 @@ export const useLadder = (options = {}) => {
       filterWeight,
       filterJob,
       filterProject,
+      filterRegionLevel,
       userLadderScore: userData?.ladderScore || 0,
       userCity: userData?.city || '',
       userDistrict: userData?.district || '',
@@ -301,29 +303,33 @@ export const useLadder = (options = {}) => {
         );
       }
 
-      // Client-side filtering: Local District
-      if (selectedDivision === 'local_district') {
+      // Client-side filtering: Region Level
+      if (filterRegionLevel !== 'all' && userData) {
         const beforeFilterCount = data.length;
-        const currentUserCity = userData?.city || '';
-        const currentUserDistrict = userData?.district || '';
+        const userCountry = userData.country || '';
+        const userCity = userData.city || '';
+        const userDistrict = userData.district || '';
 
-        if (!currentUserCity || !currentUserDistrict) {
-          // User hasn't set location, return empty list
-          logger.debug('📍 用戶未設定地區，返回空列表');
-          data = [];
-        } else {
-          data = data.filter(user => {
-            const userCity = user.city || '';
-            const userDistrict = user.district || '';
-            return (
-              userCity === currentUserCity &&
-              userDistrict === currentUserDistrict
-            );
-          });
-          logger.debug(
-            `📍 地區過濾 (${currentUserCity} ${currentUserDistrict})：${beforeFilterCount} → ${data.length} 名用戶`
-          );
-        }
+        data = data.filter(user => {
+          switch (filterRegionLevel) {
+            case 'country':
+              return user.country === userCountry;
+            case 'city':
+              return user.country === userCountry && user.city === userCity;
+            case 'district':
+              return (
+                user.country === userCountry &&
+                user.city === userCity &&
+                user.district === userDistrict
+              );
+            default:
+              return true;
+          }
+        });
+
+        logger.debug(
+          `🌍 地區層級過濾 (${filterRegionLevel})：${beforeFilterCount} → ${data.length} 名用戶`
+        );
       }
 
       // Client-side filtering: Gender
@@ -419,11 +425,7 @@ export const useLadder = (options = {}) => {
       // 排序逻辑会在数据或筛选条件改变时执行
 
       // Re-sort based on selected division and project filter
-      // For local_district, always sort by ladderScore (descending)
-      let sortField =
-        selectedDivision === 'local_district'
-          ? 'ladderScore'
-          : selectedDivision;
+      let sortField = selectedDivision;
 
       // Override sort field based on division and project filter
       if (selectedDivision === 'stats_sbdTotal' && filterProject !== 'total') {
@@ -755,9 +757,11 @@ export const useLadder = (options = {}) => {
     selectedDivision,
     filterGender,
     filterAge,
+    filterHeight,
     filterWeight,
     filterJob,
     filterProject,
+    filterRegionLevel,
     userData,
     currentPage,
     ladderData.length,

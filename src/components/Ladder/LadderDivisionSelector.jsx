@@ -28,11 +28,6 @@ const LadderDivisionSelector = ({ currentFilter, onFilterChange }) => {
       desc: t('tests.bodyFat') + ' / FFMI',
     },
     {
-      label: '📍 ' + t('ladder.filter.zone'),
-      value: 'local_district',
-      desc: t('ladder.zones.district'),
-    },
-    {
       label: '💓 ' + t('tests.cardio'),
       value: 'stats_cooper',
       desc: t('tests.cardioTabs.cooper'),
