@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from './UserContext';
+import { auth, db } from './firebase';
+import { doc, setDoc } from 'firebase/firestore';
 import * as standards from './standards';
 import PropTypes from 'prop-types';
 import './Cardio.css';
@@ -300,18 +302,57 @@ function Cardio({ onComplete }) {
       // STRICTLY divide by 5
       const currentRawTotal = (s_str + s_exp + s_mus + s_fat + s_cardio) / 5;
 
+      // Calculate totalSec for 5KM (needed for stats fields)
+      const totalSec = activeTab === '5km' 
+        ? (parseInt(runMinutes || 0) * 60) + parseInt(runSeconds || 0)
+        : 0;
+
+      // 1. Prepare Base Data
       const updatedUserData = {
         ...userData,
         scores: updatedScores,
         testInputs: updatedTestInputs,
-        ladderScore: parseFloat(currentRawTotal.toFixed(2)) // Save correct average
+        ladderScore: parseFloat(currentRawTotal.toFixed(2)), // Save correct average
+        
+        // ✅ ADD THIS: Instant Context Update
+        stats_5k: activeTab === '5km' ? totalSec : (userData.stats_5k || 0),
+        stats_5k_time: activeTab === '5km' ? totalSec : (userData.stats_5k_time || 0),
+        stats_cooper: activeTab === 'cooper' ? (Number(distance) || 0) : (userData.stats_cooper || 0)
       };
 
-      // 4. Save to Context
+      // 2. 🔥 CRITICAL FIX: Explicitly prepare Firestore Payload for Leaderboard
+      // This ensures the 5KM data appears on the ladder IMMEDIATELY without needing a manual update.
+      const firestoreUpdatePayload = {
+        ...updatedScores, // Save scores
+        testInputs: updatedTestInputs, // Save inputs
+        ladderScore: updatedUserData.ladderScore,
+        updatedAt: new Date().toISOString()
+      };
+
+      // If 5KM, explicitly write the sorting fields for the Elite Leaderboard
+      if (activeTab === '5km') {
+        const totalSec = (parseInt(runMinutes || 0) * 60) + parseInt(runSeconds || 0);
+        firestoreUpdatePayload.stats_5k = totalSec; // Standardize field name
+        firestoreUpdatePayload.stats_5k_time = totalSec; // Redundancy for safety
+        firestoreUpdatePayload.stats_5k_score = parseFloat(Number(scoreToSaveFormatted).toFixed(2));
+        firestoreUpdatePayload.stats_cooper = Number(userData.testInputs?.cardio?.distance) || 0; // Preserve Cooper
+      } else {
+        // If Cooper, ensure we update the Cooper stat
+        firestoreUpdatePayload.stats_cooper = Number(distance) || 0;
+      }
+
+      // 3. Save Context
       setUserData(updatedUserData);
       
-      // 5. Save to Backend (if not guest)
+      // 4. Save to Firestore (Merged)
       if (!isGuest) {
+        const userId = userData.userId || auth.currentUser?.uid;
+        if (userId) {
+          const userRef = doc(db, 'users', userId);
+          // We use setDoc with merge:true to ensure we write these specific stats fields
+          await setDoc(userRef, firestoreUpdatePayload, { merge: true });
+        }
+        // Also call saveUserData for backward compatibility
         await saveUserData(updatedUserData);
       }
 
@@ -578,12 +619,22 @@ function Cardio({ onComplete }) {
             </p>
             
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              {/* 5KM Button -> Ladder */}
+              {/* 5KM Button -> Ladder (Elite Section) */}
               {activeTab === '5km' && (
                 <button
                   onClick={() => {
                     setShowSuccessModal(false);
-                    navigate('/ladder', { state: { targetTab: 'cardio', targetSubTab: '5km' } });
+                    navigate('/ladder', {
+                      state: {
+                        // Send ALL possible variations to ensure Ladder.jsx catches it
+                        targetTab: 'cardio',
+                        activeTab: 'cardio',
+                        subTab: '5km',
+                        filter: '5km',
+                        scrollTo: 'top',
+                        forceRefresh: true
+                      }
+                    });
                   }}
                   style={{
                     padding: '12px',

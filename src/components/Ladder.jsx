@@ -77,6 +77,12 @@ const Ladder = () => {
 
   // Reset filterProject when division changes
   useEffect(() => {
+    // 🛡️ GUARD: If navigating from another page (e.g. Cardio 5KM), DO NOT RESET defaults
+    // This prevents overriding the '5km' filter passed via navigation
+    if (location.state?.filter && location.state?.targetTab === 'cardio') {
+      return;
+    }
+
     // Set default filterProject based on selectedDivision
     switch (selectedDivision) {
       case 'stats_bodyFat':
@@ -86,7 +92,7 @@ const Ladder = () => {
         setFilterProject('score');
         break;
       case 'stats_cooper':
-        setFilterProject('cooper');
+        setFilterProject('cooper'); // This was killing our '5km' state!
         break;
       case 'stats_vertical':
         setFilterProject('vertical');
@@ -98,7 +104,22 @@ const Ladder = () => {
         setFilterProject('total');
         break;
     }
-  }, [selectedDivision]);
+  }, [selectedDivision, location.state]); // ✅ Added location.state to dependencies
+
+  // ✅ Handle Navigation from other pages (e.g. Cardio 5KM)
+  useEffect(() => {
+    if (location.state?.filter === '5km') {
+      logger.debug('🚀 Ladder: Detecting 5KM Navigation');
+      // 1. Switch to Cardio Division
+      setSelectedDivision('stats_cooper');
+
+      // 2. Switch Project to 5km
+      // We use a small timeout to ensure this runs AFTER the default division reset logic
+      setTimeout(() => {
+        setFilterProject('5km');
+      }, 50);
+    }
+  }, [location.state, setSelectedDivision]);
 
   const ageGroups = useMemo(
     () => [
@@ -328,7 +349,8 @@ const Ladder = () => {
           formatValue: val => formatScore(val),
         };
       case 'stats_cooper':
-        if (filterProject === '5k') {
+        // ✅ Fix: Must match the dropdown value '5km'
+        if (filterProject === '5km') {
           const format5KTime = val => {
             if (!val || val === 0) return '0:00';
             const minutes = Math.floor(val / 60);
@@ -336,7 +358,8 @@ const Ladder = () => {
             return `${minutes}:${seconds.toString().padStart(2, '0')}`;
           };
           return {
-            value: userData.stats_5k || 0,
+            // Read both possible field names for safety
+            value: userData.stats_5k_time || userData.stats_5k || 0,
             unit: 'mins',
             label: '5K Run',
             formatValue: format5KTime,
@@ -377,19 +400,21 @@ const Ladder = () => {
           // ✅ 终极修复：使用数值转换后的宽松判断，处理字符串类型
           const storedScore = userData.scores?.muscleMass;
           const numStoredScore = Number(storedScore);
-          const isSuspicious100 = !isNaN(numStoredScore) && Math.abs(numStoredScore - 100) < 0.1;
-          const hasSmm = (userData.stats_smm > 0) || (userData.testInputs?.muscle?.smm > 0);
+          const isSuspicious100 =
+            !isNaN(numStoredScore) && Math.abs(numStoredScore - 100) < 0.1;
+          const hasSmm =
+            userData.stats_smm > 0 || userData.testInputs?.muscle?.smm > 0;
           const hasWeight = userData.weight > 0;
           const hasData = hasSmm && hasWeight;
-          
+
           let displayScore = 0;
-          
+
           // ✅ Kill Switch: 如果存储分数为 100（无论类型），必须处理（不能 fallback 回 100）
           if (isSuspicious100) {
             // 情况 A: 有数据，尝试重算
             if (hasData) {
               const recalculatedScore = recalculateSMMScore(userData);
-              
+
               if (recalculatedScore !== null && recalculatedScore !== 100) {
                 displayScore = recalculatedScore;
               } else if (recalculatedScore === null) {
@@ -400,8 +425,14 @@ const Ladder = () => {
             } else {
               // 情况 B: 无数据，强制归零（Kill Switch）
               displayScore = null;
-              const displayName = userData.displayName || userData.nickname || userData.email?.split('@')[0] || 'Unknown';
-              console.warn(`🚫 Kill Switch 触发 (浮动条): ${displayName} - muscleMass=100 但缺少必要数据，强制显示为 --`);
+              const displayName =
+                userData.displayName ||
+                userData.nickname ||
+                userData.email?.split('@')[0] ||
+                'Unknown';
+              console.warn(
+                `🚫 Kill Switch 触发 (浮动条): ${displayName} - muscleMass=100 但缺少必要数据，强制显示为 --`
+              );
             }
           } else if (storedScore !== undefined && storedScore !== null) {
             // 正常情况：非 100 分，直接使用存储值
@@ -410,7 +441,7 @@ const Ladder = () => {
               displayScore = numScore;
             }
           }
-          
+
           return {
             value: displayScore,
             unit: t('community.ui.pointsUnit', '分'),
@@ -418,7 +449,8 @@ const Ladder = () => {
             formatValue: val => {
               if (val === null || val === undefined) return '--';
               const numVal = Number(val);
-              if (isNaN(numVal) || !isFinite(numVal) || numVal === 0) return '--';
+              if (isNaN(numVal) || !isFinite(numVal) || numVal === 0)
+                return '--';
               return numVal.toFixed(2);
             },
           };
@@ -435,7 +467,7 @@ const Ladder = () => {
           // ✅ 修复：防止除以零导致的 Infinity/NaN
           const smm = Number(userData.stats_smm) || 0;
           const weight = Number(userData.weight) || 0;
-          
+
           // 防御性检查：如果缺少必要数据，返回 0
           if (!smm || !weight || weight <= 0) {
             return {
@@ -449,18 +481,19 @@ const Ladder = () => {
               },
             };
           }
-          
+
           // 安全计算：确保不会产生 Infinity 或 NaN
           const ratio = (smm / weight) * 100;
           const safeRatio = isFinite(ratio) && !isNaN(ratio) ? ratio : 0;
-          
+
           return {
             value: safeRatio,
             unit: '%',
             label: t('tests.muscleLabels.smPercentShort', '骨骼肌率'),
             formatValue: val => {
               const numVal = Number(val);
-              if (isNaN(numVal) || !isFinite(numVal) || numVal === 0) return '--';
+              if (isNaN(numVal) || !isFinite(numVal) || numVal === 0)
+                return '--';
               return numVal.toFixed(1);
             },
           };
@@ -469,18 +502,20 @@ const Ladder = () => {
         // ✅ 终极修复：使用数值转换后的宽松判断，处理字符串类型
         const storedScore = userData.scores?.muscleMass;
         const numStoredScore = Number(storedScore);
-        const isSuspicious100 = !isNaN(numStoredScore) && Math.abs(numStoredScore - 100) < 0.1;
-        const hasSmm = (userData.stats_smm > 0) || (userData.testInputs?.muscle?.smm > 0);
+        const isSuspicious100 =
+          !isNaN(numStoredScore) && Math.abs(numStoredScore - 100) < 0.1;
+        const hasSmm =
+          userData.stats_smm > 0 || userData.testInputs?.muscle?.smm > 0;
         const hasWeight = userData.weight > 0;
         const hasData = hasSmm && hasWeight;
-        
+
         let displayScore = 0;
-        
+
         if (isSuspicious100) {
           // 情况 A: 有数据，尝试重算
           if (hasData) {
             const recalculatedScore = recalculateSMMScore(userData);
-            
+
             if (recalculatedScore !== null && recalculatedScore !== 100) {
               displayScore = recalculatedScore;
             } else if (recalculatedScore === null) {
@@ -491,8 +526,14 @@ const Ladder = () => {
           } else {
             // 情况 B: 无数据，强制归零（Kill Switch）
             displayScore = null;
-            const displayName = userData.displayName || userData.nickname || userData.email?.split('@')[0] || 'Unknown';
-            console.warn(`🚫 Kill Switch 触发 (浮动条默认): ${displayName} - muscleMass=100 但缺少必要数据，强制显示为 --`);
+            const displayName =
+              userData.displayName ||
+              userData.nickname ||
+              userData.email?.split('@')[0] ||
+              'Unknown';
+            console.warn(
+              `🚫 Kill Switch 触发 (浮动条默认): ${displayName} - muscleMass=100 但缺少必要数据，强制显示为 --`
+            );
           }
         } else if (storedScore !== undefined && storedScore !== null) {
           // 正常情况：非 100 分，直接使用存储值
@@ -501,7 +542,7 @@ const Ladder = () => {
             displayScore = numScore;
           }
         }
-        
+
         return {
           value: displayScore,
           unit: t('community.ui.pointsUnit', '分'),
@@ -599,7 +640,9 @@ const Ladder = () => {
                   ? t('userInfo.male')
                   : t('userInfo.female')}
                 <br />
-                <span className="last-update">{t('userInfo.profileCard.myRank')}</span>
+                <span className="last-update">
+                  {t('userInfo.profileCard.myRank')}
+                </span>
               </div>
             </div>
           </div>

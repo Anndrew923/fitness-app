@@ -36,12 +36,21 @@ const LadderSubFilters = ({
     { value: 'medical', label: t('userInfo.profession.medical') },
     { value: 'coach', label: t('userInfo.profession.coach') },
     { value: 'student', label: t('userInfo.profession.student') },
-    { value: 'police_military', label: t('userInfo.profession.police_military') },
+    {
+      value: 'police_military',
+      label: t('userInfo.profession.police_military'),
+    },
     { value: 'business', label: t('userInfo.profession.business') },
     { value: 'freelance', label: t('userInfo.profession.freelance') },
     { value: 'service', label: t('userInfo.profession.service') },
-    { value: 'professional_athlete', label: t('userInfo.profession.professional_athlete') },
-    { value: 'artist_performer', label: t('userInfo.profession.artist_performer') },
+    {
+      value: 'professional_athlete',
+      label: t('userInfo.profession.professional_athlete'),
+    },
+    {
+      value: 'artist_performer',
+      label: t('userInfo.profession.artist_performer'),
+    },
     { value: 'other', label: t('userInfo.profession.other') },
   ];
 
@@ -50,8 +59,14 @@ const LadderSubFilters = ({
     switch (currentDivision) {
       case 'stats_sbdTotal':
         return [
-          { value: 'total_five', label: t('ladder.filter.totalFive', '五項總和') },
-          { value: 'total', label: t('tests.strengthLabels.maxStrength', 'SBD 總和') },
+          {
+            value: 'total_five',
+            label: t('ladder.filter.totalFive', '五項總和'),
+          },
+          {
+            value: 'total',
+            label: t('tests.strengthLabels.maxStrength', 'SBD 總和'),
+          },
           { value: 'squat', label: t('tests.strengthExercises.squat') },
           { value: 'bench', label: t('tests.strengthExercises.benchPress') },
           { value: 'deadlift', label: t('tests.strengthExercises.deadlift') },
@@ -61,7 +76,7 @@ const LadderSubFilters = ({
       case 'stats_cooper':
         return [
           { value: 'cooper', label: 'Cooper Test' },
-          { value: '5k', label: '5K Run' },
+          { value: '5km', label: '5K Run' }, // ✅ Fixed typo
         ];
       case 'stats_vertical':
         return [
@@ -76,9 +91,18 @@ const LadderSubFilters = ({
         ];
       case 'stats_ffmi':
         return [
-          { value: 'score', label: t('tests.muscleLabels.smmScore', '骨骼肌分數') },
-          { value: 'weight', label: t('tests.muscleLabels.smmKg', '骨骼肌重 kg') },
-          { value: 'ratio', label: t('tests.muscleLabels.smPercentShort', '骨骼肌率 %') },
+          {
+            value: 'score',
+            label: t('tests.muscleLabels.smmScore', '骨骼肌分數'),
+          },
+          {
+            value: 'weight',
+            label: t('tests.muscleLabels.smmKg', '骨骼肌重 kg'),
+          },
+          {
+            value: 'ratio',
+            label: t('tests.muscleLabels.smPercentShort', '骨骼肌率 %'),
+          },
         ];
       default:
         return [];
@@ -91,7 +115,9 @@ const LadderSubFilters = ({
   return (
     <div className="ladder-sub-filters">
       <div className="ladder-sub-filter-group">
-        <label className="ladder-sub-filter-label">{t('userInfo.gender')}</label>
+        <label className="ladder-sub-filter-label">
+          {t('userInfo.gender')}
+        </label>
         <select
           value={filterGender}
           onChange={e => onGenderChange(e.target.value)}
@@ -104,7 +130,9 @@ const LadderSubFilters = ({
       </div>
 
       <div className="ladder-sub-filter-group">
-        <label className="ladder-sub-filter-label">{t('common.ageLabel')}</label>
+        <label className="ladder-sub-filter-label">
+          {t('common.ageLabel')}
+        </label>
         <select
           value={filterAge}
           onChange={e => onAgeChange(e.target.value)}
@@ -122,7 +150,9 @@ const LadderSubFilters = ({
       </div>
 
       <div className="ladder-sub-filter-group">
-        <label className="ladder-sub-filter-label">{t('ladder.filter.height')}</label>
+        <label className="ladder-sub-filter-label">
+          {t('ladder.filter.height')}
+        </label>
         <select
           value={filterHeight || 'all'}
           onChange={e => onHeightChange(e.target.value)}
@@ -137,7 +167,9 @@ const LadderSubFilters = ({
       </div>
 
       <div className="ladder-sub-filter-group">
-        <label className="ladder-sub-filter-label">{t('userInfo.weight')}</label>
+        <label className="ladder-sub-filter-label">
+          {t('userInfo.weight')}
+        </label>
         <select
           value={filterWeight}
           onChange={e => onWeightChange(e.target.value)}
@@ -156,7 +188,9 @@ const LadderSubFilters = ({
       </div>
 
       <div className="ladder-sub-filter-group">
-        <label className="ladder-sub-filter-label">{t('userInfo.training.profession', '職業')}</label>
+        <label className="ladder-sub-filter-label">
+          {t('userInfo.training.profession', '職業')}
+        </label>
         <select
           value={filterJob}
           onChange={e => onJobChange(e.target.value)}
@@ -172,7 +206,9 @@ const LadderSubFilters = ({
 
       {showProjectFilter && (
         <div className="ladder-sub-filter-group">
-          <label className="ladder-sub-filter-label">{t('ladder.filter.filter')}</label>
+          <label className="ladder-sub-filter-label">
+            {t('ladder.filter.filter')}
+          </label>
           <select
             value={filterProject}
             onChange={e => onProjectChange(e.target.value)}

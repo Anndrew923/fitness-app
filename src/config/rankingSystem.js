@@ -71,10 +71,18 @@ export const RANKING_CATEGORIES = [
       {
         id: 'distance',
         label: '跑步距離',
-        dbField: 'testInputs.cardio.distance',
+        dbField: 'testInputs.cardio.distance', // Cooper (Legacy)
         sortOrder: 'desc',
         isPremium: false,
         unit: 'm',
+      },
+      {
+        id: '5km',
+        label: '5公里挑戰',
+        dbField: 'stats_5k_score', // Matches the field saved in Cardio.jsx
+        sortOrder: 'desc', // Higher score = Higher rank
+        isPremium: false,
+        unit: '分',
       },
     ],
   },

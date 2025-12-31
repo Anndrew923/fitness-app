@@ -124,7 +124,9 @@ const LadderItem = React.memo(
           return {
             value: user.stats_sbdTotal || 0,
             unit: 'kg',
-            label: user.weight ? `BW: ${user.weight}kg` : t('tests.strengthLabels.maxStrength', 'SBD 總和'),
+            label: user.weight
+              ? `BW: ${user.weight}kg`
+              : t('tests.strengthLabels.maxStrength', 'SBD 總和'),
             formatValue: val => Number(val).toFixed(1),
           };
         case 'stats_bodyFat':
@@ -155,7 +157,8 @@ const LadderItem = React.memo(
           };
         case 'stats_cooper':
           // Endurance: Check project filter
-          if (filterProject === '5k') {
+          // ✅ Fix: Check for '5km' (matching config), NOT '5k'
+          if (filterProject === '5km') {
             // Format 5K time: convert seconds to minutes:seconds
             const format5KTime = val => {
               if (!val || val === 0) return '0:00';
@@ -163,13 +166,29 @@ const LadderItem = React.memo(
               const seconds = Math.floor(val % 60);
               return `${minutes}:${seconds.toString().padStart(2, '0')}`;
             };
+
+            if (rank <= 3) {
+              // Only log top 3 to reduce noise
+              console.log(`🏃 5KM Data Check [Rank ${rank}]:`, {
+                id: user.id,
+                name: user.displayName,
+                stats_5k: user.stats_5k,
+                stats_5k_time: user.stats_5k_time,
+                run_5km: user.scores?.run_5km, // Check nested score
+                raw: user, // Dump full object if needed
+              });
+            }
+
             return {
-              value: user.stats_5k || 0,
+              // ✅ Fix: Read 'stats_5k_time' or 'stats_5k' (seconds)
+              value: user.stats_5k_time || user.stats_5k || 0,
               unit: 'mins',
               label: '5K Run',
               formatValue: format5KTime,
             };
           }
+
+          // ... existing default Cooper logic ...
           // Default: Cooper Test (distance in meters, convert to km)
           return {
             value: user.stats_cooper || 0,
@@ -208,15 +227,26 @@ const LadderItem = React.memo(
             // ✅ 终极修复：使用数值转换后的宽松判断，处理字符串类型
             const storedScore = user.scores?.muscleMass;
             const numStoredScore = Number(storedScore);
-            const isSuspicious100 = !isNaN(numStoredScore) && Math.abs(numStoredScore - 100) < 0.1;
-            const hasSmm = (user.stats_smm > 0) || (user.testInputs?.muscle?.smm > 0);
+            const isSuspicious100 =
+              !isNaN(numStoredScore) && Math.abs(numStoredScore - 100) < 0.1;
+            const hasSmm =
+              user.stats_smm > 0 || user.testInputs?.muscle?.smm > 0;
             const hasWeight = user.weight > 0;
             const hasData = hasSmm && hasWeight;
-            
+
             // 诊断：检查显示 100 分的用户
             if (isSuspicious100) {
-              const displayName = user.displayName || user.nickname || user.email?.split('@')[0] || 'Unknown';
-              if (displayName === 'Melody' || displayName === 'Feynman0418' || displayName.includes('Melody') || displayName.includes('Feynman')) {
+              const displayName =
+                user.displayName ||
+                user.nickname ||
+                user.email?.split('@')[0] ||
+                'Unknown';
+              if (
+                displayName === 'Melody' ||
+                displayName === 'Feynman0418' ||
+                displayName.includes('Melody') ||
+                displayName.includes('Feynman')
+              ) {
                 console.log('🔍 Bug User Diagnostic (LadderItem):', {
                   displayName,
                   storedScore,
@@ -233,25 +263,37 @@ const LadderItem = React.memo(
                 });
               }
             }
-            
+
             let displayScore = 0;
-            
+
             // ✅ Kill Switch: 如果存储分数为 100（无论类型），必须处理（不能 fallback 回 100）
             if (isSuspicious100) {
               // 情况 A: 有数据，尝试重算
               if (hasSmm && hasWeight) {
                 const recalculatedScore = recalculateSMMScore(user);
-                
+
                 if (recalculatedScore !== null && recalculatedScore !== 100) {
                   // 重算成功，使用新分数
                   displayScore = recalculatedScore;
-                  const displayName = user.displayName || user.nickname || user.email?.split('@')[0] || 'Unknown';
-                  console.log(`✅ 强制重算成功: ${displayName} - 从 100 分重算为 ${recalculatedScore} 分`);
+                  const displayName =
+                    user.displayName ||
+                    user.nickname ||
+                    user.email?.split('@')[0] ||
+                    'Unknown';
+                  console.log(
+                    `✅ 强制重算成功: ${displayName} - 从 100 分重算为 ${recalculatedScore} 分`
+                  );
                 } else if (recalculatedScore === null) {
                   // 重算失败（缺少数据），强制显示为 --
                   displayScore = null;
-                  const displayName = user.displayName || user.nickname || user.email?.split('@')[0] || 'Unknown';
-                  console.warn(`⚠️ 强制重算失败: ${displayName} - 缺少必要数据，显示为 --`);
+                  const displayName =
+                    user.displayName ||
+                    user.nickname ||
+                    user.email?.split('@')[0] ||
+                    'Unknown';
+                  console.warn(
+                    `⚠️ 强制重算失败: ${displayName} - 缺少必要数据，显示为 --`
+                  );
                 } else {
                   // 重算结果仍为 100，使用原值（可能是真实 100 分）
                   displayScore = storedScore;
@@ -259,8 +301,14 @@ const LadderItem = React.memo(
               } else {
                 // 情况 B: 无数据，强制归零（Kill Switch）
                 displayScore = null;
-                const displayName = user.displayName || user.nickname || user.email?.split('@')[0] || 'Unknown';
-                console.warn(`🚫 Kill Switch 触发: ${displayName} - muscleMass=100 但缺少必要数据，强制显示为 --`);
+                const displayName =
+                  user.displayName ||
+                  user.nickname ||
+                  user.email?.split('@')[0] ||
+                  'Unknown';
+                console.warn(
+                  `🚫 Kill Switch 触发: ${displayName} - muscleMass=100 但缺少必要数据，强制显示为 --`
+                );
               }
             } else if (storedScore !== undefined && storedScore !== null) {
               // 正常情况：非 100 分，直接使用存储值
@@ -269,17 +317,27 @@ const LadderItem = React.memo(
                 displayScore = numScore;
               }
             }
-            
+
             // ✅ 显示层强制拦截：即使排序逻辑漏了，UI 层也要拦截
             const finalDisplayScore = displayScore;
             const finalNumScore = Number(finalDisplayScore);
-            const isFinalSuspicious100 = !isNaN(finalNumScore) && Math.abs(finalNumScore - 100) < 0.1;
-            const finalHasData = (user.stats_smm > 0) || (user.testInputs?.muscle?.smm > 0) || (user.weight > 0);
-            
+            const isFinalSuspicious100 =
+              !isNaN(finalNumScore) && Math.abs(finalNumScore - 100) < 0.1;
+            const finalHasData =
+              user.stats_smm > 0 ||
+              user.testInputs?.muscle?.smm > 0 ||
+              user.weight > 0;
+
             // 强制拦截：如果是可疑的 100 分且没有数据，直接显示为 --
             if (isFinalSuspicious100 && !finalHasData) {
-              const displayName = user.displayName || user.nickname || user.email?.split('@')[0] || 'Unknown';
-              console.warn(`🛡️ 显示层强制拦截: ${displayName} - 检测到可疑 100 分且无数据，强制显示为 --`);
+              const displayName =
+                user.displayName ||
+                user.nickname ||
+                user.email?.split('@')[0] ||
+                'Unknown';
+              console.warn(
+                `🛡️ 显示层强制拦截: ${displayName} - 检测到可疑 100 分且无数据，强制显示为 --`
+              );
               return {
                 value: null,
                 unit: t('community.ui.pointsUnit', '分'),
@@ -287,7 +345,7 @@ const LadderItem = React.memo(
                 formatValue: () => '--',
               };
             }
-            
+
             return {
               value: displayScore,
               unit: t('community.ui.pointsUnit', '分'),
@@ -296,7 +354,8 @@ const LadderItem = React.memo(
                 // 如果值为 null、undefined、0 或无效，显示为 --
                 if (val === null || val === undefined) return '--';
                 const numVal = Number(val);
-                if (isNaN(numVal) || !isFinite(numVal) || numVal === 0) return '--';
+                if (isNaN(numVal) || !isFinite(numVal) || numVal === 0)
+                  return '--';
                 return numVal.toFixed(2);
               },
             };
@@ -313,7 +372,7 @@ const LadderItem = React.memo(
             // ✅ 修复：防止除以零导致的 Infinity/NaN
             const smm = Number(user.stats_smm) || 0;
             const weight = Number(user.weight) || 0;
-            
+
             // 防御性检查：如果缺少必要数据，返回 0
             if (!smm || !weight || weight <= 0) {
               return {
@@ -327,18 +386,19 @@ const LadderItem = React.memo(
                 },
               };
             }
-            
+
             // 安全计算：确保不会产生 Infinity 或 NaN
             const ratio = (smm / weight) * 100;
             const safeRatio = isFinite(ratio) && !isNaN(ratio) ? ratio : 0;
-            
+
             return {
               value: safeRatio,
               unit: '%',
               label: t('tests.muscleLabels.smPercentShort', '骨骼肌率'),
               formatValue: val => {
                 const numVal = Number(val);
-                if (isNaN(numVal) || !isFinite(numVal) || numVal === 0) return '--';
+                if (isNaN(numVal) || !isFinite(numVal) || numVal === 0)
+                  return '--';
                 return numVal.toFixed(1);
               },
             };
@@ -347,18 +407,19 @@ const LadderItem = React.memo(
           // ✅ 终极修复：使用数值转换后的宽松判断，处理字符串类型
           const storedScore = user.scores?.muscleMass;
           const numStoredScore = Number(storedScore);
-          const isSuspicious100 = !isNaN(numStoredScore) && Math.abs(numStoredScore - 100) < 0.1;
-          const hasSmm = (user.stats_smm > 0) || (user.testInputs?.muscle?.smm > 0);
+          const isSuspicious100 =
+            !isNaN(numStoredScore) && Math.abs(numStoredScore - 100) < 0.1;
+          const hasSmm = user.stats_smm > 0 || user.testInputs?.muscle?.smm > 0;
           const hasWeight = user.weight > 0;
           const hasData = hasSmm && hasWeight;
-          
+
           let displayScore = 0;
-          
+
           if (isSuspicious100) {
             // 情况 A: 有数据，尝试重算
             if (hasSmm && hasWeight) {
               const recalculatedScore = recalculateSMMScore(user);
-              
+
               if (recalculatedScore !== null && recalculatedScore !== 100) {
                 displayScore = recalculatedScore;
               } else if (recalculatedScore === null) {
@@ -369,8 +430,14 @@ const LadderItem = React.memo(
             } else {
               // 情况 B: 无数据，强制归零（Kill Switch）
               displayScore = null;
-              const displayName = user.displayName || user.nickname || user.email?.split('@')[0] || 'Unknown';
-              console.warn(`🚫 Kill Switch 触发: ${displayName} - muscleMass=100 但缺少必要数据，强制显示为 --`);
+              const displayName =
+                user.displayName ||
+                user.nickname ||
+                user.email?.split('@')[0] ||
+                'Unknown';
+              console.warn(
+                `🚫 Kill Switch 触发: ${displayName} - muscleMass=100 但缺少必要数据，强制显示为 --`
+              );
             }
           } else if (storedScore !== undefined && storedScore !== null) {
             // 正常情况：非 100 分，直接使用存储值
@@ -379,17 +446,27 @@ const LadderItem = React.memo(
               displayScore = numScore;
             }
           }
-          
+
           // ✅ 显示层强制拦截：即使排序逻辑漏了，UI 层也要拦截
           const finalDisplayScore = displayScore;
           const finalNumScore = Number(finalDisplayScore);
-          const isFinalSuspicious100 = !isNaN(finalNumScore) && Math.abs(finalNumScore - 100) < 0.1;
-          const finalHasData = (user.stats_smm > 0) || (user.testInputs?.muscle?.smm > 0) || (user.weight > 0);
-          
+          const isFinalSuspicious100 =
+            !isNaN(finalNumScore) && Math.abs(finalNumScore - 100) < 0.1;
+          const finalHasData =
+            user.stats_smm > 0 ||
+            user.testInputs?.muscle?.smm > 0 ||
+            user.weight > 0;
+
           // 强制拦截：如果是可疑的 100 分且没有数据，直接显示为 --
           if (isFinalSuspicious100 && !finalHasData) {
-            const displayName = user.displayName || user.nickname || user.email?.split('@')[0] || 'Unknown';
-            console.warn(`🛡️ 显示层强制拦截 (默认): ${displayName} - 检测到可疑 100 分且无数据，强制显示为 --`);
+            const displayName =
+              user.displayName ||
+              user.nickname ||
+              user.email?.split('@')[0] ||
+              'Unknown';
+            console.warn(
+              `🛡️ 显示层强制拦截 (默认): ${displayName} - 检测到可疑 100 分且无数据，强制显示为 --`
+            );
             return {
               value: null,
               unit: t('community.ui.pointsUnit', '分'),
@@ -397,7 +474,7 @@ const LadderItem = React.memo(
               formatValue: () => '--',
             };
           }
-          
+
           return {
             value: displayScore,
             unit: t('community.ui.pointsUnit', '分'),
@@ -405,7 +482,8 @@ const LadderItem = React.memo(
             formatValue: val => {
               if (val === null || val === undefined) return '--';
               const numVal = Number(val);
-              if (isNaN(numVal) || !isFinite(numVal) || numVal === 0) return '--';
+              if (isNaN(numVal) || !isFinite(numVal) || numVal === 0)
+                return '--';
               return numVal.toFixed(2);
             },
           };
@@ -413,20 +491,25 @@ const LadderItem = React.memo(
           // PAS 臂围：显示主分数 + 副信息（臂围 cm / 体脂 %）
           const armSizeScore = user.scores?.armSize || 0;
           const armSizeInputs = user.testInputs?.armSize;
-          const armSizeValue = armSizeInputs?.arm || armSizeInputs?.armSize || 0;
+          const armSizeValue =
+            armSizeInputs?.arm || armSizeInputs?.armSize || 0;
           const bodyFatValue = armSizeInputs?.bodyFat || 0;
-          
+
           return {
             value: armSizeScore,
             unit: t('community.ui.pointsUnit'),
-            label: armSizeInputs 
-              ? `${Number(armSizeValue).toFixed(1)} cm / ${Number(bodyFatValue).toFixed(1)}%`
+            label: armSizeInputs
+              ? `${Number(armSizeValue).toFixed(1)} cm / ${Number(
+                  bodyFatValue
+                ).toFixed(1)}%`
               : 'N/A',
             formatValue: val => formatScore(val),
             // 添加副信息显示标志
             showSubInfo: true,
-            subInfo: armSizeInputs 
-              ? `${Number(armSizeValue).toFixed(1)} cm / ${Number(bodyFatValue).toFixed(1)}%`
+            subInfo: armSizeInputs
+              ? `${Number(armSizeValue).toFixed(1)} cm / ${Number(
+                  bodyFatValue
+                ).toFixed(1)}%`
               : null,
           };
         case 'ladderScore':
@@ -698,7 +781,9 @@ const LadderItem = React.memo(
       prevProps.user.ladderLikeCount === nextProps.user.ladderLikeCount &&
       prevProps.isLiked === nextProps.isLiked &&
       prevProps.isLikeProcessing === nextProps.isLikeProcessing &&
-      prevProps.displayMode === nextProps.displayMode
+      prevProps.displayMode === nextProps.displayMode &&
+      // ✅ ADD THIS LINE:
+      prevProps.filterProject === nextProps.filterProject
     );
   }
 );
