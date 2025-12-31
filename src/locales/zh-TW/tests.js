@@ -161,10 +161,15 @@ export default {
     },
     gamified: {
       questComplete: '試煉達成',
-      '5km_desc': '您的耐力壯舉已銘刻於傳奇菁英榜，前往見證您的榮耀！',
-      cooper_desc: '戰術數據已同步，您的潛在戰力正在提升。',
       view_rank: '見證榮耀',
+      check_stats: '檢視成果',
       stay: '休養生息',
+      submit_btn: '同步戰鬥數據',
+      
+      '5km_desc': '您的耐力壯舉已銘刻於傳奇菁英榜，前往見證您的榮耀！',
+      arm_desc: '麒麟臂養成進度已更新！您的臂圍數據已同步至排行榜。',
+      strength_desc: '力量數據已注入系統，您的戰鬥數值正在重新計算中...',
+      default_desc: '數據同步完成，您的潛在戰力已提升。',
     },
     strengthErrors: {
       missingInputs: '請輸入重量和次數！',

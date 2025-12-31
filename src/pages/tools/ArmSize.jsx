@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { useUser } from '../../UserContext';
@@ -32,6 +33,7 @@ function ArmSize({ onComplete }) {
   const [submitting, setSubmitting] = useState(false);
   const [isUnlockModalOpen, setIsUnlockModalOpen] = useState(false);
   const [unlockModalData, setUnlockModalData] = useState(null);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   const timeoutRef = useRef(null);
 
@@ -157,15 +159,17 @@ function ArmSize({ onComplete }) {
         rawScore: rawScore,
       };
 
-      if (onComplete) {
-        onComplete(testData);
-      }
+      // 🛑 Disable legacy navigation to show RPG Modal
+      // if (onComplete) {
+      //   onComplete(testData);
+      // }
 
-      navigate('/user-info', { state: { from: '/arm-size' } });
+      // Show Success Modal instead of navigating
+      console.log('🚀 Triggering ArmSize Modal via Portal...');
+      setShowSuccessModal(true);
     } catch (error) {
       console.error('提交失敗:', error);
       alert(t('tests.armSizeErrors.updateFail'));
-      navigate('/user-info', { state: { from: '/arm-size' } });
     } finally {
       setSubmitting(false);
     }
@@ -343,7 +347,7 @@ function ArmSize({ onComplete }) {
           {submitting
             ? t('common.submitting')
             : score
-            ? `✅ ${t('common.submitAndReturn')}`
+            ? `✅ ${t('tests.gamified.submit_btn')}`
             : t('errors.required')}
         </button>
       </div>
@@ -368,6 +372,22 @@ function ArmSize({ onComplete }) {
       <div style={{ height: '160px', width: '100%' }} />
 
       <BottomNavBar />
+
+      {/* Portal the Modal to Body */}
+      {showSuccessModal && createPortal(
+        <div className="modal-overlay" onClick={() => setShowSuccessModal(false)} style={{position:'fixed',top:0,left:0,width:'100%',height:'100%',backgroundColor:'rgba(0,0,0,0.85)',zIndex:9999,display:'flex',alignItems:'center',justifyContent:'center',backdropFilter:'blur(8px)'}}>
+          <div className="modal-content" onClick={e => e.stopPropagation()} style={{backgroundColor:'#1a202c',borderRadius:'16px',padding:'32px 24px',width:'90%',maxWidth:'360px',textAlign:'center',boxShadow:'0 0 30px rgba(139, 92, 246, 0.5)',border:'1px solid rgba(139, 92, 246, 0.3)',color:'white'}}>
+            <div style={{fontSize:'48px',marginBottom:'16px'}}>💪</div>
+            <h3 style={{fontSize:'24px',fontWeight:'900',color:'#a78bfa',marginBottom:'16px',textTransform:'uppercase',letterSpacing:'1px'}}>{t('tests.gamified.questComplete')}</h3>
+            <p style={{color:'#e2e8f0',marginBottom:'32px',lineHeight:'1.6',fontSize:'15px'}}>{t('tests.gamified.arm_desc')}</p>
+            <div style={{display:'flex',flexDirection:'column',gap:'16px'}}>
+              <button onClick={() => { setShowSuccessModal(false); navigate('/ladder', { state: { targetTab: 'body', filter: 'armSize', forceRefresh: true } }); }} style={{padding:'14px',borderRadius:'12px',border:'none',background:'linear-gradient(135deg, #8b5cf6, #6d28d9)',color:'white',fontWeight:'800',fontSize:'16px',boxShadow:'0 4px 15px rgba(139, 92, 246, 0.4)',cursor:'pointer',textTransform:'uppercase',letterSpacing:'0.5px'}}>{t('tests.gamified.view_rank')}</button>
+              <button onClick={() => setShowSuccessModal(false)} style={{padding:'12px',borderRadius:'12px',border:'1px solid rgba(255,255,255,0.1)',background:'transparent',color:'#cbd5e0',fontWeight:'600',cursor:'pointer',fontSize:'14px'}}>{t('tests.gamified.stay')}</button>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
     </div>
   );
 }

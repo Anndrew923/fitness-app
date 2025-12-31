@@ -77,9 +77,13 @@ const Ladder = () => {
 
   // Reset filterProject when division changes
   useEffect(() => {
-    // 🛡️ GUARD: If navigating from another page (e.g. Cardio 5KM), DO NOT RESET defaults
-    // This prevents overriding the '5km' filter passed via navigation
-    if (location.state?.filter && location.state?.targetTab === 'cardio') {
+    // 🛡️ GUARD: If navigating from another page (e.g. Cardio 5KM, ArmSize), DO NOT RESET defaults
+    // This prevents overriding the filter passed via navigation
+    if (
+      location.state?.filter &&
+      (location.state?.targetTab === 'cardio' ||
+        location.state?.filter === 'armSize')
+    ) {
       return;
     }
 
@@ -117,6 +121,17 @@ const Ladder = () => {
       // We use a small timeout to ensure this runs AFTER the default division reset logic
       setTimeout(() => {
         setFilterProject('5km');
+      }, 50);
+    }
+
+    // ✅ Handle Arm Size Navigation
+    if (location.state?.filter === 'armSize') {
+      logger.debug('🚀 Ladder: Detecting Arm Size Navigation');
+      // Ensure we switch to the correct division for Arm Size
+      setSelectedDivision('armSize');
+      // Arm Size doesn't need filterProject, but we ensure it's set correctly
+      setTimeout(() => {
+        // No filterProject needed for armSize, it uses scores.armSize directly
       }, 50);
     }
   }, [location.state, setSelectedDivision]);
