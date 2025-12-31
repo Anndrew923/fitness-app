@@ -107,6 +107,10 @@ export default {
     },
     cardio: 'Endurance',
     cardioTitle: 'Endurance',
+    cardioTabs: {
+      cooper: '12-Min Run (Cooper)',
+      run5km: '5KM Challenge (Elite)',
+    },
     cardioInfo: {
       cooperTitle: 'Cooper 12-minute run test',
       sectionTitle: 'How to perform',
@@ -123,6 +127,9 @@ export default {
       },
       sourceNote:
         'Cooper test standard chart by Carl Magnus Swahn (Cooper Test Chart).',
+      run5kmTitle: 'About 5KM Elite Challenge',
+      run5kmIntro: 'A limit-testing challenge for advanced runners. Score counts towards Ladder Ranking only.',
+      run5kmBenchmark: 'Benchmark: Sub-20 mins achieves 100 points (God Tier).',
     },
     cardioComments: {
       male: {
@@ -158,6 +165,9 @@ export default {
     cardioLabels: {
       distanceMeters: 'Running distance (m)',
       score: 'Cardio score',
+      timeMin: 'Time (Minutes)',
+      timeSec: 'Time (Seconds)',
+      run5kmScore: '5KM Elite Score',
     },
     muscleLabels: {
       smmKg: 'Skeletal muscle mass (kg)',

@@ -101,9 +101,16 @@ export default {
     },
     cardio: '心肺能力',
     cardioTitle: '心肺能力',
+    cardioTabs: {
+      cooper: '12分鐘跑 (Cooper)',
+      run5km: '5公里挑戰 (Elite)',
+    },
     cardioLabels: {
       distanceMeters: '跑步距離 (公尺)',
       score: '心肺耐力分數',
+      timeMin: '花費時間 (分)',
+      timeSec: '花費時間 (秒)',
+      run5kmScore: '5KM 菁英積分',
     },
     cardioInfo: {
       cooperTitle: 'Cooper 12 分鐘跑步測試',
@@ -119,6 +126,9 @@ export default {
       },
       sourceNote:
         '本 Cooper 測試標準表可在 Cooper Test Chart 找到，由 Carl Magnus Swahn 設計。',
+      run5kmTitle: '關於 5KM 菁英挑戰',
+      run5kmIntro: '這是針對進階跑者設計的極限測試，分數將計入天梯排行，但不影響基礎雷達圖。',
+      run5kmBenchmark: '基準：20分鐘內完成即獲得 100 分 (神之領域)。',
     },
     cardioComments: {
       male: {

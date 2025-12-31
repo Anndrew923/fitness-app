@@ -16,6 +16,7 @@ export const getAgeGroup = age => {
 
 // 計算天梯總分
 // 修复：明確只讀取核心5項，忽略 armSize 等其他分數，並處理 NaN 情況
+// 如果存在 run_5km 分數，則用它替換 cardio 分數（5KM 只影響天梯，不影響雷達圖）
 export const calculateLadderScore = scores => {
   if (!scores || typeof scores !== 'object') {
     return 0;
@@ -24,7 +25,9 @@ export const calculateLadderScore = scores => {
   // 明確只讀取核心5項，忽略 armSize 等其他分數
   const strength = Number(scores.strength) || 0;
   const explosivePower = Number(scores.explosivePower) || 0;
-  const cardio = Number(scores.cardio) || 0;
+  // 如果存在 run_5km，優先使用它（5KM 挑戰只影響天梯）
+  const run5km = Number(scores.run_5km) || 0;
+  const cardio = run5km > 0 ? run5km : (Number(scores.cardio) || 0);
   const muscleMass = Number(scores.muscleMass) || 0;
   const bodyFat = Number(scores.bodyFat) || 0;
 

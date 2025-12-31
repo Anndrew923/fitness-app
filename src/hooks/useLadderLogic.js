@@ -233,8 +233,15 @@ export const useLadderLogic = (
 
       // ✅ Extract Endurance stats
       const stats_cooper = Number(cardioInputs.distance) || 0; // Distance in meters
-      const stats_5k =
-        Number(cardioInputs.time5k) || Number(cardioInputs.fiveKTime) || 0; // Time in seconds
+      
+      // Extract 5KM time from run_5km (minutes + seconds converted to total seconds)
+      const run5kmInputs = testInputs.run_5km || {};
+      const run5kmMinutes = Number(run5kmInputs.minutes) || 0;
+      const run5kmSeconds = Number(run5kmInputs.seconds) || 0;
+      const stats_5k = (run5kmMinutes * 60) + run5kmSeconds || 
+        Number(cardioInputs.time5k) || 
+        Number(cardioInputs.fiveKTime) || 
+        0; // Time in seconds
 
       // ✅ Extract Power stats (from testInputs.power)
       const stats_vertical = Number(powerInputs.verticalJump) || 0; // Height in cm
