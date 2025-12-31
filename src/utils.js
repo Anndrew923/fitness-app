@@ -25,11 +25,11 @@ export const calculateLadderScore = scores => {
   // 明確只讀取核心5項，忽略 armSize 等其他分數
   const strength = Number(scores.strength) || 0;
   const explosivePower = Number(scores.explosivePower) || 0;
-  // 如果存在 run_5km，優先使用它（5KM 挑戰只影響天梯）
-  const run5km = Number(scores.run_5km) || 0;
-  const cardio = run5km > 0 ? run5km : (Number(scores.cardio) || 0);
+  const cardio = Number(scores.cardio) || 0;
   const muscleMass = Number(scores.muscleMass) || 0;
   const bodyFat = Number(scores.bodyFat) || 0;
+  // Extract run_5km as bonus (does not replace cardio, adds to total)
+  const run5km = Number(scores.run_5km) || 0;
 
   const scoreValues = [strength, explosivePower, cardio, muscleMass, bodyFat];
 
@@ -49,7 +49,9 @@ export const calculateLadderScore = scores => {
     return 0; // 如果有任何無效值，返回 0
   }
 
-  const total = validScores.reduce((sum, score) => sum + Number(score), 0);
+  // Calculate total: include run_5km as additional bonus if present
+  const total = validScores.reduce((sum, score) => sum + Number(score), 0) + run5km;
+  // Average is still based on 5 core items, but run_5km adds to total
   const average = total / 5;
 
   // 確保結果是有效數字

@@ -209,6 +209,11 @@ export default {
     saveFailed: 'Save failed, please try again',
     yourPerformance: 'Your Character Stats',
     powerTitle: 'Battle Power',
+    potentialPower: 'Potential Power',
+    updateAvailable: 'Level Up',
+    syncHint: 'Submit to Update',
+    notSynced: 'Not Synced',
+    currentPotential: 'Current Potential',
     radarLabels: {
       strength: 'Strength',
       explosivePower: 'Explosive Power',

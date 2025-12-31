@@ -399,6 +399,29 @@ function UserInfo({ testData, onLogout, clearTestData }) {
     return avg;
   }, [userData?.scores]);
 
+  // ✅ LIVE PREVIEW: Calculate strictly 5-axis average (excluding 5KM)
+  const liveLadderScore = useMemo(() => {
+    const s = userData?.scores || {};
+
+    const v1 = Number(s.strength) || 0;
+    // Handle key variations for explosive power
+    const v2 =
+      Number(s.explosivePower) || Number(s.explosive) || Number(s.power) || 0;
+    const v3 = Number(s.muscleMass) || 0;
+    const v4 = Number(s.bodyFat) || 0;
+    const v5 = Number(s.cardio) || 0; // Cooper Test Only
+
+    // Strict Average of 5
+    const avg = (v1 + v2 + v3 + v4 + v5) / 5;
+    return parseFloat(avg.toFixed(2));
+  }, [userData?.scores]);
+
+  // Check if we need to show the preview
+  const savedLadderScore = userData?.ladderScore || 0;
+  const isScoreHigher = liveLadderScore > savedLadderScore;
+  const isUnsynced =
+    liveLadderScore !== savedLadderScore && liveLadderScore > 0;
+
   // 計算當前天梯分數（用於顯示，不影響已提交的分數）
   const currentLadderScore = useMemo(() => {
     const scores = userData?.scores || DEFAULT_SCORES;
@@ -805,21 +828,133 @@ function UserInfo({ testData, onLogout, clearTestData }) {
         )}
       </div>
 
-      {/* ✅ UP-LADDER-EVO: 戰力資訊條 */}
-      {/* 修复：即使 ladderScore 为 0 也显示卡片，让用户知道状态 */}
+      {/* ✅ UP-LADDER-EVO: 戰力資訊條 (Stacked Layout) */}
       {completionStatus.isFullyCompleted && (
-        <div className="ladder-status-wrapper">
-          <Suspense
-            fallback={
-              <div className="h-24 bg-gray-100 rounded-xl animate-pulse" />
-            }
-          >
-            <LadderStatusCard
-              userData={userData}
-              rank={ladderUserRank || userRank}
-              onNavigate={() => navigate('/ladder')}
-            />
-          </Suspense>
+        <div
+          className="ladder-status-wrapper"
+          style={{
+            display: 'flex',
+            flexDirection: 'column', // 🔥 FORCE VERTICAL STACK
+            alignItems: 'center',
+            width: '100%',
+            position: 'relative',
+            marginBottom: '20px',
+          }}
+        >
+          {/* 1. Main Ladder Card (Top Layer) */}
+          <div style={{ position: 'relative', zIndex: 2, width: '100%' }}>
+            <Suspense
+              fallback={
+                <div className="h-24 bg-gray-100 rounded-xl animate-pulse" />
+              }
+            >
+              <LadderStatusCard
+                userData={userData}
+                rank={ladderUserRank || userRank}
+                onNavigate={() => navigate('/ladder')}
+              />
+            </Suspense>
+          </div>
+
+          {/* 2. Upgrade Module (Bottom Layer - Tucked Under) */}
+          {isUnsynced && (
+            <div
+              className="ladder-potential-module"
+              style={{
+                width: '96%', // Slightly narrower than main card
+                marginTop: '-18px', // Tuck underneath the main card
+                paddingTop: '22px', // Internal padding to clear the overlap
+                paddingBottom: '10px',
+                paddingLeft: '16px',
+                paddingRight: '16px',
+                background: 'rgba(20, 20, 20, 0.85)', // Dark glass
+                backdropFilter: 'blur(12px)',
+                border: '1px solid rgba(16, 185, 129, 0.3)',
+                borderTop: 'none',
+                borderRadius: '0 0 16px 16px', // Rounded bottom only
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                position: 'relative',
+                zIndex: 1, // Sits behind main card
+                boxShadow: '0 10px 25px -5px rgba(0,0,0,0.3)',
+              }}
+            >
+              {/* Left: Stacked Label & Score */}
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'center',
+                }}
+              >
+                <span
+                  style={{
+                    fontSize: '0.65rem',
+                    color: '#9ca3af',
+                    fontWeight: '700',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.5px',
+                    lineHeight: '1.2',
+                  }}
+                >
+                  {t('userInfo.potentialPower', '潛在戰力')}
+                </span>
+                <div
+                  style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+                >
+                  <span
+                    style={{
+                      fontSize: '1.3rem',
+                      color: '#10B981',
+                      fontWeight: '800',
+                      fontFamily: 'monospace',
+                      lineHeight: '1.2',
+                      textShadow: '0 0 10px rgba(16, 185, 129, 0.3)',
+                    }}
+                  >
+                    {liveLadderScore}
+                  </span>
+                </div>
+              </div>
+
+              {/* Right: Action Button */}
+              {isScoreHigher ? (
+                <div
+                  style={{
+                    background:
+                      'linear-gradient(135deg, #10B981 0%, #059669 100%)',
+                    padding: '6px 12px',
+                    borderRadius: '8px',
+                    color: 'white',
+                    fontSize: '0.85rem',
+                    fontWeight: 'bold',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    boxShadow: '0 4px 12px rgba(16, 185, 129, 0.4)',
+                    whiteSpace: 'nowrap',
+                    animation: 'pulse-green 2s infinite',
+                  }}
+                >
+                  <span style={{ fontSize: '1rem', lineHeight: 0 }}>⇡</span>
+                  <span>
+                    +{(liveLadderScore - savedLadderScore).toFixed(2)}
+                  </span>
+                </div>
+              ) : (
+                <span
+                  style={{
+                    fontSize: '0.7rem',
+                    color: '#6b7280',
+                    fontStyle: 'italic',
+                  }}
+                >
+                  {t('userInfo.notSynced', '未同步')}
+                </span>
+              )}
+            </div>
+          )}
         </div>
       )}
 
@@ -918,6 +1053,15 @@ function UserInfo({ testData, onLogout, clearTestData }) {
           remainingCount={submitConfirmModal.remainingCount}
         />
       )}
+
+      {/* Keyframe animation for pulse-green */}
+      <style>{`
+        @keyframes pulse-green {
+          0% { box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4); }
+          50% { box-shadow: 0 4px 18px rgba(16, 185, 129, 0.6); }
+          100% { box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4); }
+        }
+      `}</style>
     </div>
   );
 }

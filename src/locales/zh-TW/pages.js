@@ -205,6 +205,11 @@ export default {
     saveFailed: '儲存失敗，請稍後再試',
     yourPerformance: '你的角色屬性',
     powerTitle: '角色戰鬥力',
+    potentialPower: '潛在戰力',
+    updateAvailable: '可提升',
+    syncHint: '提交以更新排名',
+    notSynced: '尚未同步',
+    currentPotential: '目前實力',
     radarLabels: {
       strength: '力量',
       explosivePower: '爆發力',

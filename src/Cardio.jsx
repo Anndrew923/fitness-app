@@ -239,63 +239,86 @@ function Cardio({ onComplete }) {
   };
 
   // Submit Handler
-  const handleSubmit = async () => {
-    if (score === null) { alert(t('tests.cardioErrors.needCalculate')); return; }
+  const handleSubmit = async (e) => {
+    // 1. BLOCK ALL DEFAULT EVENTS
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+
+    // 2. Validate current tab's score
+    if (score === null || score === undefined || score === '') {
+      alert(t('tests.cardioErrors.needCalculate'));
+      return;
+    }
+
     const isGuest = sessionStorage.getItem('guestMode') === 'true';
+    setSubmitting(true);
 
     try {
-      if (submitting) return;
-      setSubmitting(true);
+      // 3. Prepare Data
+      // Deep copy to avoid reference issues
+      const updatedScores = JSON.parse(JSON.stringify(userData.scores || {}));
+      const updatedTestInputs = JSON.parse(JSON.stringify(userData.testInputs || {}));
 
-      // Data Separation: Cooper -> cardio, 5KM -> run_5km
-      // Ensure all scores are stored with 2 decimal precision
-      const scoreToSave = rawScore !== null ? rawScore : score;
-      const scoreToSaveFormatted = parseFloat(Number(scoreToSave).toFixed(2));
+      // Strict Formatting: Ensure Number
+      let scoreValue = rawScore !== null ? rawScore : score;
+      if (isNaN(scoreValue)) scoreValue = 0;
       
-      const updatedScores = { ...userData.scores };
+      const scoreToSaveFormatted = parseFloat(Number(scoreValue).toFixed(2));
+
       if (activeTab === 'cooper') {
         updatedScores.cardio = scoreToSaveFormatted;
+        // Ensure distance is saved
+        updatedTestInputs.cardio = { 
+          ...(updatedTestInputs.cardio || {}), 
+          distance: Number(distance) || 0 
+        };
       } else {
+        // 5KM Logic
         updatedScores.run_5km = scoreToSaveFormatted;
-      }
-
-      const updatedUserData = { ...userData, scores: updatedScores };
-
-      // Also save 5KM time to cardioInputs for ladder compatibility
-      if (activeTab === '5km') {
+        updatedTestInputs.run_5km = { 
+          minutes: Number(runMinutes) || 0, 
+          seconds: Number(runSeconds) || 0 
+        };
+        
+        // Compatibility: Calculate total seconds for ladder
         const totalSec = (parseInt(runMinutes || 0) * 60) + parseInt(runSeconds || 0);
-        updatedUserData.testInputs = {
-          ...updatedUserData.testInputs,
-          cardio: {
-            ...updatedUserData.testInputs?.cardio,
-            time5k: totalSec,
-          },
-          run_5km: {
-            minutes: runMinutes,
-            seconds: runSeconds,
-          },
+        updatedTestInputs.cardio = {
+          ...(updatedTestInputs.cardio || {}),
+          time5k: totalSec,
         };
       }
 
-      setUserData(updatedUserData);
+      // Recalculate Main Ladder Score (Core 5 / 5)
+      const s_str = Number(updatedScores.strength) || 0;
+      const s_exp = Number(updatedScores.explosive) || Number(updatedScores.power) || 0;
+      const s_mus = Number(updatedScores.muscleMass) || 0;
+      const s_fat = Number(updatedScores.bodyFat) || 0;
+      const s_cardio = Number(updatedScores.cardio) || 0; // Cooper
 
+      // STRICTLY divide by 5
+      const currentRawTotal = (s_str + s_exp + s_mus + s_fat + s_cardio) / 5;
+
+      const updatedUserData = {
+        ...userData,
+        scores: updatedScores,
+        testInputs: updatedTestInputs,
+        ladderScore: parseFloat(currentRawTotal.toFixed(2)) // Save correct average
+      };
+
+      // 4. Save to Context
+      setUserData(updatedUserData);
+      
+      // 5. Save to Backend (if not guest)
       if (!isGuest) {
         await saveUserData(updatedUserData);
       }
 
-      const testData = {
-        type: activeTab,
-        distance: activeTab === 'cooper' ? parseFloat(distance) : undefined,
-        time: activeTab === '5km' ? ((parseInt(runMinutes||0)*60) + parseInt(runSeconds||0)) : undefined,
-        score: scoreToSaveFormatted,
-      };
-
-      if (onComplete && typeof onComplete === 'function') {
-        onComplete(testData);
-      }
-
-      // Show Success Modal instead of navigating
+      // 6. Show Modal (DO NOT CALL onComplete HERE)
+      // The parent's onComplete likely navigates away, killing the modal.
       setShowSuccessModal(true);
+
     } catch (error) {
       console.error('Submit Failed:', error);
       if (!isGuest) alert(t('tests.cardioErrors.updateUserFail'));
@@ -517,96 +540,103 @@ function Cardio({ onComplete }) {
             position: 'fixed',
             top: 0,
             left: 0,
-            width: '100vw',
-            height: '100vh',
-            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            width: '100%',
+            height: '100%',
+            backgroundColor: 'rgba(0,0,0,0.6)',
+            zIndex: 9999,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            zIndex: 10000,
           }}
         >
           <div
             className="modal-content"
             onClick={(e) => e.stopPropagation()}
             style={{
-              background: 'white',
+              backgroundColor: 'white',
               borderRadius: '16px',
-              boxShadow: '0 8px 24px rgba(0, 0, 0, 0.15)',
-              maxWidth: '340px',
+              padding: '24px',
               width: '90%',
-              padding: '20px',
+              maxWidth: '340px',
+              textAlign: 'center',
+              boxShadow: '0 10px 25px rgba(0,0,0,0.2)',
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
-              <span style={{ fontSize: '22px' }}>✅</span>
-              <h3 style={{ margin: 0, fontSize: '17px', fontWeight: 700, color: '#2d3748' }}>
-                {t('tests.testComplete') || '測驗完成 (Test Complete)'}
-              </h3>
+            <div style={{ fontSize: '40px', marginBottom: '10px' }}>
+              {activeTab === '5km' ? '🏆' : '✅'}
             </div>
-            <div style={{ marginBottom: '20px' }}>
-              <p style={{ margin: 0, fontSize: '16px', lineHeight: 1.6, color: '#4a5568' }}>
-                {activeTab === '5km' 
-                  ? (t('cardio.success.5kmUploaded') || '您的 5KM 成績已上傳至天梯！(Your 5KM score has been uploaded to the Ladder!)')
-                  : (t('cardio.success.cooperUploaded') || '您的 Cooper 測試成績已保存！(Your Cooper test score has been saved!)')
-                }
-              </p>
-            </div>
-            <div style={{ display: 'flex', gap: '12px', width: '100%' }}>
+            <h3 style={{ fontSize: '20px', fontWeight: 'bold', color: '#2d3748', marginBottom: '12px' }}>
+              {t('tests.testComplete', '測驗完成')}
+            </h3>
+            
+            {/* Dynamic Message */}
+            <p style={{ color: '#4a5568', marginBottom: '24px', lineHeight: '1.5' }}>
+              {activeTab === '5km' 
+                ? t('cardio.success.5kmUploaded', '您的 5KM 成績已上傳至菁英榜！')
+                : t('cardio.success.cooperSaved', '您的成績已更新至雷達圖！')
+              }
+            </p>
+            
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              {/* 5KM Button -> Ladder */}
               {activeTab === '5km' && (
                 <button
                   onClick={() => {
                     setShowSuccessModal(false);
-                    navigate('/ladder');
+                    navigate('/ladder', { state: { targetTab: 'cardio', targetSubTab: '5km' } });
                   }}
                   style={{
-                    flex: 1,
-                    padding: '10px 20px',
+                    padding: '12px',
+                    borderRadius: '10px',
                     border: 'none',
-                    borderRadius: '8px',
-                    fontSize: '14px',
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                    background: 'linear-gradient(135deg, #81d8d0, #5f9ea0)',
+                    background: 'linear-gradient(135deg, #fbbf24, #d97706)',
                     color: 'white',
-                    transition: 'all 0.2s ease',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.opacity = '0.9';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.opacity = '1';
+                    fontWeight: 'bold',
+                    fontSize: '16px',
+                    boxShadow: '0 4px 6px rgba(217, 119, 6, 0.3)',
+                    cursor: 'pointer',
                   }}
                 >
-                  {t('cardio.success.viewRankings') || '前往天梯查看排名 (View Rankings)'}
+                  {t('cardio.success.viewRankings', '前往查看排名')}
                 </button>
               )}
+
+              {/* Cooper Button -> User Info */}
+              {activeTab === 'cooper' && (
+                <button
+                  onClick={() => {
+                    setShowSuccessModal(false);
+                    navigate('/user-info');
+                  }}
+                  style={{
+                    padding: '12px',
+                    borderRadius: '10px',
+                    border: 'none',
+                    background: '#5f9ea0',
+                    color: 'white',
+                    fontWeight: 'bold',
+                    fontSize: '16px',
+                    cursor: 'pointer',
+                  }}
+                >
+                  {t('common.returnToProfile', '返回個人主頁')}
+                </button>
+              )}
+              
+              {/* Cancel/Stay Button */}
               <button
-                onClick={() => {
-                  setShowSuccessModal(false);
-                  navigate('/user-info', { state: { from: '/cardio' } });
-                }}
+                onClick={() => setShowSuccessModal(false)}
                 style={{
-                  flex: activeTab === '5km' ? 1 : 'none',
-                  padding: '10px 20px',
-                  border: '1px solid #e2e8f0',
-                  borderRadius: '8px',
-                  fontSize: '14px',
-                  fontWeight: 600,
+                  padding: '12px',
+                  borderRadius: '10px',
+                  border: 'none',
+                  background: 'transparent',
+                  color: '#718096',
+                  fontWeight: '600',
                   cursor: 'pointer',
-                  background: 'white',
-                  color: '#4a5568',
-                  transition: 'all 0.2s ease',
-                  minWidth: activeTab === '5km' ? 'auto' : '80px',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = '#f7fafc';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = 'white';
                 }}
               >
-                {t('common.return') || '返回 (Return)'}
+                {t('common.stayHere', '留在本頁')}
               </button>
             </div>
           </div>

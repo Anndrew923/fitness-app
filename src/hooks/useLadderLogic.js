@@ -8,7 +8,6 @@ import {
   doc,
   setDoc,
 } from 'firebase/firestore';
-import { calculateLadderScore } from '../utils';
 import logger from '../utils/logger';
 import {
   applyLimitBreak,
@@ -37,50 +36,39 @@ export const useLadderLogic = (
     remainingCount: 3,
   });
 
-  // 載入天梯提交狀態
+  // 1. Load Submission State
   useEffect(() => {
     const loadSubmissionState = () => {
-      if (!auth.currentUser) {
-        return;
-      }
-
+      if (!auth.currentUser) return;
       try {
         const userId = auth.currentUser.uid;
         const storageKey = `ladderSubmissionState_${userId}`;
         const savedState = localStorage.getItem(storageKey);
-
         if (savedState) {
-          const parsedState = JSON.parse(savedState);
-          setLadderSubmissionState(parsedState);
+          setLadderSubmissionState(JSON.parse(savedState));
         }
       } catch (error) {
-        logger.error('載入提交狀態失敗:', error);
-        setLadderSubmissionState({
-          lastSubmissionTime: null,
-          dailySubmissionCount: 0,
-          lastSubmissionDate: null,
-        });
+        logger.error('Load submission state failed:', error);
       }
     };
-
     loadSubmissionState();
-  }, [userData?.userId, auth.currentUser?.uid]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [auth.currentUser?.uid]); // Reduced deps
 
-  // 保存天梯提交狀態到localStorage
+  // 2. Save Submission State
   useEffect(() => {
-    if (!auth.currentUser || !ladderSubmissionState.lastSubmissionDate) {
-      return;
-    }
-
+    if (!auth.currentUser || !ladderSubmissionState.lastSubmissionDate) return;
     try {
       const userId = auth.currentUser.uid;
       const storageKey = `ladderSubmissionState_${userId}`;
       localStorage.setItem(storageKey, JSON.stringify(ladderSubmissionState));
     } catch (error) {
-      logger.error('保存提交狀態失敗:', error);
+      logger.error('Save submission state failed:', error);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ladderSubmissionState, auth.currentUser?.uid]);
 
+  // 3. Limits Check
   const checkLadderSubmissionLimit = useCallback(() => {
     const now = new Date();
     const today = now.toDateString();
@@ -102,7 +90,7 @@ export const useLadderLogic = (
     }
 
     if (ladderSubmissionState.lastSubmissionTime) {
-      const timeDiff = now - ladderSubmissionState.lastSubmissionTime;
+      const timeDiff = now - new Date(ladderSubmissionState.lastSubmissionTime);
       const cooldownHours = 2;
       const cooldownMs = cooldownHours * 60 * 60 * 1000;
 
@@ -118,13 +106,11 @@ export const useLadderLogic = (
         };
       }
     }
-
     return { canSubmit: true, reason: null };
   }, [ladderSubmissionState, t]);
 
   const showSubmitConfirmModal = useCallback(() => {
     const limitCheck = checkLadderSubmissionLimit();
-
     if (!limitCheck.canSubmit) {
       onShowModal({
         isOpen: true,
@@ -139,7 +125,6 @@ export const useLadderLogic = (
       });
       return;
     }
-
     const remainingCount =
       3 - (ladderSubmissionState.dailySubmissionCount || 0);
     setSubmitConfirmModal({
@@ -154,64 +139,63 @@ export const useLadderLogic = (
     onShowModal,
   ]);
 
+  // 4. Confirm Submit (The Core Logic)
   const confirmSubmitToLadder = useCallback(async () => {
     setSubmitConfirmModal({ isOpen: false, remainingCount: 0 });
 
     try {
-      const oldLadderScore = userData.ladderScore || 0;
-      const isFirstTime = oldLadderScore === 0;
+      const scores = userData.scores || {};
 
-      let oldRank = 0;
-      if (oldLadderScore > 0 && auth.currentUser) {
-        try {
-          const q = query(
-            collection(db, 'users'),
-            orderBy('ladderScore', 'desc'),
-            limit(200)
-          );
-          const querySnapshot = await getDocs(q);
-          const allUsers = [];
-          querySnapshot.forEach(doc => {
-            const docData = doc.data();
-            if (docData.ladderScore > 0) {
-              allUsers.push({
-                id: doc.id,
-                ladderScore: docData.ladderScore,
-              });
-            }
-          });
+      // 1. Get Core 5 Stats ONLY
+      const strength = Number(scores.strength) || 0;
+      const explosive = Number(scores.explosive) || Number(scores.power) || 0;
+      const muscleMass = Number(scores.muscleMass) || 0;
+      const bodyFat = Number(scores.bodyFat) || 0;
+      const baseCardio = Number(scores.cardio) || 0; // Cooper Test
 
-          allUsers.sort((a, b) => b.ladderScore - a.ladderScore);
-          const currentUserIndex = allUsers.findIndex(
-            user => user.id === auth.currentUser.uid
-          );
+      // 2. Calculate Average of 5 (Strictly / 5)
+      // Do NOT include run_5km in this average.
+      const rawCalculatedScore =
+        (strength + explosive + muscleMass + bodyFat + baseCardio) / 5;
 
-          if (currentUserIndex >= 0) {
-            oldRank = currentUserIndex + 1;
-            logger.debug(`📊 查詢到當前排名：第 ${oldRank} 名`);
-          }
-        } catch (error) {
-          logger.error('查詢當前排名失敗:', error);
-        }
+      // 3. Apply Limit Break Cap
+      const isVerified = userData.isVerified === true;
+      const finalScore = applyLimitBreak(rawCalculatedScore, isVerified);
+
+      // 4. Prepare 5KM Stat (Standalone)
+      const run5kmScore = Number(scores.run_5km) || 0;
+      const run5kmInputs = userData.testInputs?.run_5km || {};
+      const run5kmTime =
+        Number(run5kmInputs.minutes) * 60 + Number(run5kmInputs.seconds) || 0;
+
+      // 🛑 LOOP BREAKER: Only update if score actually changed
+      if (userData.ladderScore === finalScore) {
+        logger.debug(
+          'Ladder score unchanged, skipping update to prevent loop.'
+        );
+        // Even if score is same, we might want to proceed to save to DB if user explicitly clicked submit
+        // But for safety, let's allow flow to proceed to DB save, just be careful with setUserData
+      } else {
+        const updatedUserData = {
+          ...userData,
+          ladderScore: finalScore,
+          lastLadderSubmission: new Date().toISOString(),
+        };
+        setUserData(updatedUserData);
       }
 
-      const scores = userData.scores || {};
-      const rawCalculatedScore = calculateLadderScore(scores);
-
-      // ✅ Step A: Calculate stats aggregates from testInputs
+      // ... (Rest of DB save logic - Stats Aggregation) ...
       const testInputs = userData.testInputs || {};
       const strengthInputs = testInputs.strength || {};
       const powerInputs = testInputs.power || {};
       const cardioInputs = testInputs.cardio || {};
       const ffmiInputs = testInputs.ffmi || {};
-      const muscleInputs = testInputs.muscle || {};
 
-      // Extract exercise data for stats calculation
       const exerciseScores = {
         benchPress: strengthInputs.benchPress?.max || 0,
         squat: strengthInputs.squat?.max || 0,
         deadlift: strengthInputs.deadlift?.max || 0,
-        pullUp: strengthInputs.latPulldown?.max || 0, // Using latPulldown as pull-up proxy
+        pullUp: strengthInputs.latPulldown?.max || 0,
         overheadPress: strengthInputs.shoulderPress?.max || 0,
         sprint: powerInputs.sprint || 0,
         verticalJump: powerInputs.verticalJump || 0,
@@ -221,183 +205,39 @@ export const useLadderLogic = (
       const stats = calculateStatsAggregates(exerciseScores);
       const filters = generateFilterTags(userData);
 
-      // ✅ Extract body fat from testInputs
-      const bodyFat = Number(ffmiInputs.bodyFat) || 0;
+      const bodyFatVal = Number(ffmiInputs.bodyFat) || 0;
 
-      // ✅ Extract individual SBD lifts for ranking
-      const stats_squat = Number(strengthInputs.squat?.max) || 0;
-      const stats_bench = Number(strengthInputs.benchPress?.max) || 0;
-      const stats_deadlift = Number(strengthInputs.deadlift?.max) || 0;
-      const stats_ohp = Number(strengthInputs.shoulderPress?.max) || 0;
-      const stats_latPull = Number(strengthInputs.latPulldown?.max) || 0;
-
-      // ✅ Extract Endurance stats
-      const stats_cooper = Number(cardioInputs.distance) || 0; // Distance in meters
-      
-      // Extract 5KM time from run_5km (minutes + seconds converted to total seconds)
-      const run5kmInputs = testInputs.run_5km || {};
-      const run5kmMinutes = Number(run5kmInputs.minutes) || 0;
-      const run5kmSeconds = Number(run5kmInputs.seconds) || 0;
-      const stats_5k = (run5kmMinutes * 60) + run5kmSeconds || 
-        Number(cardioInputs.time5k) || 
-        Number(cardioInputs.fiveKTime) || 
-        0; // Time in seconds
-
-      // ✅ Extract Power stats (from testInputs.power)
-      const stats_vertical = Number(powerInputs.verticalJump) || 0; // Height in cm
-      const stats_broad = Number(powerInputs.standingLongJump) || 0; // Distance in cm
-      const stats_100m = Number(powerInputs.sprint) || 0; // Time in seconds (Ascending sort)
-
-      // ✅ Extract Hypertrophy stats
-      // SMM: from testInputs.muscle.smm
-      const stats_smm = Number(muscleInputs.smm) || 0; // Skeletal Muscle Mass in kg
-
-      // FFMI: Calculate from weight, height, and bodyFat
-      let stats_ffmi = 0;
-      if (userData.weight && userData.height && ffmiInputs.bodyFat) {
-        const weight = Number(userData.weight);
-        const heightInMeters = Number(userData.height) / 100;
-        const bodyFatValue = Number(ffmiInputs.bodyFat) / 100;
-
-        if (
-          weight > 0 &&
-          heightInMeters > 0 &&
-          bodyFatValue >= 0 &&
-          bodyFatValue <= 1
-        ) {
-          const fatFreeMass = weight * (1 - bodyFatValue);
-          const rawFfmi = fatFreeMass / (heightInMeters * heightInMeters);
-          // Apply height adjustment (same as FFMI.jsx)
-          const adjustedFfmi =
-            heightInMeters > 1.8
-              ? rawFfmi + 6.0 * (heightInMeters - 1.8)
-              : rawFfmi;
-          stats_ffmi = adjustedFfmi;
-        }
-      }
-
-      // Arm Size: Check multiple possible sources
-      // 修复：优先从 testInputs.armSize 读取（PAS 臂围评测数据）
+      // Arm Size Fallback Chain
       const armSizeInputs = testInputs.armSize || {};
       const stats_armSize =
-        Number(armSizeInputs.arm) ||
-        Number(armSizeInputs.armSize) ||
-        Number(ffmiInputs.armSize) ||
-        Number(ffmiInputs.arm) ||
-        Number(testInputs.bodyStats?.arm) ||
-        Number(testInputs.bodyStats?.bicep) ||
-        Number(userData.armSize) ||
-        0; // Arm circumference in cm
+        Number(armSizeInputs.arm) || Number(userData.armSize) || 0;
 
-      // ✅ Apply Limit Break: Cap unverified users at 100
-      const isVerified = userData.isVerified === true;
-      const finalScore = applyLimitBreak(rawCalculatedScore, isVerified);
-
-      localStorage.setItem(
-        'ladderUpdateNotification',
-        JSON.stringify({
-          isFirstTime: isFirstTime,
-          oldScore: oldLadderScore,
-          newScore: finalScore,
-          oldRank: oldRank,
-          timestamp: Date.now(),
-          hasShown: false,
-        })
-      );
-
-      const updatedUserData = {
-        ...userData,
-        ladderScore: finalScore,
+      // 5. Save to Firestore
+      const userRef = doc(db, 'users', auth.currentUser.uid);
+      const updateData = {
+        ladderScore: finalScore, // Pure 5-axis average score
+        rawScore: rawCalculatedScore,
+        // Save 5KM separately for the Elite Leaderboard sorting
+        stats_5k_score: run5kmScore,
+        stats_5k_time: run5kmTime,
+        stats_sbdTotal: stats.sbdTotal,
+        stats_bigFiveTotal: stats.bigFiveTotal,
+        stats_bodyFat: bodyFatVal,
+        stats_cooper: Number(cardioInputs.distance) || 0,
+        stats_armSize: stats_armSize,
+        filter_ageGroup: filters.filter_ageGroup,
         lastLadderSubmission: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
       };
 
-      setUserData(updatedUserData);
-
-      try {
-        const ladderData = {
-          ...userData,
-          ladderScore: finalScore,
-          lastLadderSubmission: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        };
-
-        localStorage.setItem('userData', JSON.stringify(ladderData));
-        localStorage.setItem('lastSavedUserData', JSON.stringify(ladderData));
-
-        const userRef = doc(db, 'users', auth.currentUser.uid);
-
-        // ✅ Step B: Merge all calculated data into updateData
-        const updateData = {
-          // CRITICAL: Use finalScore (capped) for ranking
-          ladderScore: finalScore,
-          // Keep original score for internal reference
-          rawScore: rawCalculatedScore,
-          // Stats aggregates
-          stats_sbdTotal: stats.sbdTotal,
-          stats_bigFiveTotal: stats.bigFiveTotal,
-          stats_explosiveAvg: stats.explosiveAvg,
-          // ✅ Height stats (for direct sorting: "Who is the tallest?")
-          stats_height: Number(userData.height) || 0,
-          // ✅ Body fat stats (from testInputs, not scores)
-          stats_bodyFat: bodyFat,
-          // ✅ Individual SBD lifts for project filtering
-          stats_squat: stats_squat,
-          stats_bench: stats_bench,
-          stats_deadlift: stats_deadlift,
-          stats_ohp: stats_ohp,
-          stats_latPull: stats_latPull,
-          // ✅ Endurance stats
-          stats_cooper: stats_cooper,
-          stats_5k: stats_5k,
-          // ✅ Power stats
-          stats_vertical: stats_vertical,
-          stats_broad: stats_broad,
-          stats_100m: stats_100m,
-          // ✅ Hypertrophy stats
-          stats_ffmi: stats_ffmi,
-          stats_smm: stats_smm,
-          stats_armSize: stats_armSize,
-          // Filter tags
-          filter_is1000lbClub: stats.is1000lbClub,
-          filter_ageGroup: filters.filter_ageGroup,
-          filter_weightClass: filters.filter_weightClass,
-          filter_heightClass: filters.filter_heightClass,
-          filter_region_city: filters.filter_region_city,
-          filter_region_district: filters.filter_region_district,
-          filter_bodyFatClass: filters.filter_bodyFatClass,
-          filter_job: filters.filter_job,
-          // ✅ Location fields for district ladder filtering
-          city: userData.city || '',
-          district: userData.district || '',
-          country: userData.country || '',
-          // Metadata
-          lastLadderSubmission: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        };
-
-        if (userData.isVerified === true) {
-          updateData.isVerified = false;
-          updateData.verifiedLadderScore = null;
-          updateData.verificationStatus = null;
-          updateData.verifiedAt = null;
-          updateData.verificationExpiredAt = null;
-          updateData.verificationRequestId = null;
-          logger.debug('✅ 已清除榮譽認證狀態（重新提交分數）');
-        }
-
-        await setDoc(userRef, updateData, { merge: true });
-
-        logger.debug('✅ 天梯數據已保存到 Firebase:', {
-          ladderScore: finalScore,
-          rawScore: rawCalculatedScore,
-          stats,
-          filters,
-        });
-      } catch (error) {
-        logger.error('保存天梯分數失敗:', error);
-        throw error;
+      if (isVerified) {
+        updateData.isVerified = false;
+        updateData.verifiedLadderScore = null;
       }
 
+      await setDoc(userRef, updateData, { merge: true });
+
+      // Update State & Show Modal
       const now = new Date();
       setLadderSubmissionState(prev => ({
         lastSubmissionTime: now,
@@ -414,22 +254,12 @@ export const useLadderLogic = (
         type: 'success',
         onAction: () => {
           onShowModal(prev => ({ ...prev, isOpen: false }));
-          navigate('/ladder', {
-            state: {
-              forceReload: true,
-              from: '/user-info',
-              timestamp: Date.now(),
-            },
-          });
+          navigate('/ladder', { state: { forceReload: true } });
         },
         actionText: t('userInfo.modal.viewLadder'),
       });
-
-      setTimeout(() => {
-        onShowModal(prev => ({ ...prev, isOpen: false }));
-      }, 5000);
     } catch (error) {
-      logger.error('提交到天梯失敗:', error);
+      logger.error('Submit to ladder failed:', error);
       onShowModal({
         isOpen: true,
         title: t('userInfo.modal.submitFailTitle'),
@@ -439,38 +269,11 @@ export const useLadderLogic = (
     }
   }, [userData, setUserData, auth, db, t, navigate, onShowModal]);
 
-  const cancelSubmit = useCallback(() => {
-    setSubmitConfirmModal({ isOpen: false, remainingCount: 0 });
-  }, []);
-
+  // 5. Submit Handler
   const handleSubmitToLadder = useCallback(async () => {
     if (!auth.currentUser) {
-      onShowModal({
-        isOpen: true,
-        title: t('community.messages.needLogin'),
-        message: t('userInfo.limits.needLoginToSubmit'),
-        type: 'warning',
-      });
       return;
     }
-
-    const scores = userData.scores || {};
-    const completedCount = Object.values(scores).filter(
-      score => score > 0
-    ).length;
-
-    if (completedCount < 5) {
-      onShowModal({
-        isOpen: true,
-        title: t('userInfo.limits.assessmentIncomplete'),
-        message: t('userInfo.limits.assessmentIncompleteMessage', {
-          count: completedCount,
-        }),
-        type: 'warning',
-      });
-      return;
-    }
-
     const { canSubmit, reason } = checkLadderSubmissionLimit();
     if (!canSubmit) {
       onShowModal({
@@ -478,27 +281,19 @@ export const useLadderLogic = (
         title: t('userInfo.limits.limitReached'),
         message: reason,
         type: 'warning',
-        onAction: () => {
-          onShowModal(prev => ({ ...prev, isOpen: false }));
-          navigate('/ladder');
-        },
-        actionText: t('userInfo.modal.viewLadder'),
       });
       return;
     }
-
     showSubmitConfirmModal();
   }, [
-    userData,
-    showSubmitConfirmModal,
-    checkLadderSubmissionLimit,
-    t,
-    navigate,
     auth,
+    checkLadderSubmissionLimit,
+    showSubmitConfirmModal,
+    t,
     onShowModal,
   ]);
 
-  // 獲取用戶排名
+  // Rank Fetching Logic
   const fetchUserRank = useCallback(async () => {
     if (
       !userData?.userId ||
@@ -508,24 +303,17 @@ export const useLadderLogic = (
       setUserRank(null);
       return;
     }
-
     try {
       const usersRef = collection(db, 'users');
       const q = query(usersRef, orderBy('ladderScore', 'desc'), limit(200));
-
       const querySnapshot = await getDocs(q);
       const users = [];
-
       querySnapshot.forEach(doc => {
         const docData = doc.data();
         if (docData.ladderScore > 0) {
-          users.push({
-            id: doc.id,
-            ...docData,
-          });
+          users.push({ id: doc.id, ...docData });
         }
       });
-
       const userIndex = users.findIndex(user => user.id === userData.userId);
       if (userIndex !== -1) {
         setUserRank(userIndex + 1);
@@ -533,58 +321,44 @@ export const useLadderLogic = (
         setUserRank(null);
       }
     } catch (error) {
-      logger.error('獲取用戶排名失敗:', error);
+      logger.error('Fetch user rank failed:', error);
       setUserRank(null);
     }
   }, [userData?.userId, submittedLadderScore, db]);
 
-  // 優化 Firebase 查詢（防抖 + 緩存 + requestIdleCallback）
+  // Debounced Fetching
   const fetchUserRankRef = useRef(null);
   const lastFetchParamsRef = useRef({ userId: null, score: null });
-
   useEffect(() => {
     if (fetchUserRankRef.current) {
-      if (window.cancelIdleCallback) {
+      if (window.cancelIdleCallback)
         cancelIdleCallback(fetchUserRankRef.current);
-      } else {
-        clearTimeout(fetchUserRankRef.current);
-      }
+      else clearTimeout(fetchUserRankRef.current);
     }
-
     const userId = userData?.userId;
     const score = submittedLadderScore;
-
     if (
       lastFetchParamsRef.current.userId === userId &&
       lastFetchParamsRef.current.score === score
     ) {
       return;
     }
-
     lastFetchParamsRef.current = { userId, score };
 
     if (userId && score > 0) {
       if (window.requestIdleCallback) {
-        fetchUserRankRef.current = requestIdleCallback(
-          () => {
-            fetchUserRank();
-          },
-          { timeout: 2000 }
-        );
+        fetchUserRankRef.current = requestIdleCallback(() => fetchUserRank(), {
+          timeout: 2000,
+        });
       } else {
-        fetchUserRankRef.current = setTimeout(() => {
-          fetchUserRank();
-        }, 800);
+        fetchUserRankRef.current = setTimeout(() => fetchUserRank(), 800);
       }
     }
-
     return () => {
       if (fetchUserRankRef.current) {
-        if (window.cancelIdleCallback) {
+        if (window.cancelIdleCallback)
           cancelIdleCallback(fetchUserRankRef.current);
-        } else {
-          clearTimeout(fetchUserRankRef.current);
-        }
+        else clearTimeout(fetchUserRankRef.current);
       }
     };
   }, [userData?.userId, submittedLadderScore, fetchUserRank]);
@@ -595,6 +369,7 @@ export const useLadderLogic = (
     submitConfirmModal,
     handleSubmitToLadder,
     confirmSubmitToLadder,
-    cancelSubmit,
+    cancelSubmit: () =>
+      setSubmitConfirmModal({ isOpen: false, remainingCount: 0 }),
   };
 };
