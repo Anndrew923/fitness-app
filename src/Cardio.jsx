@@ -666,14 +666,14 @@ function Cardio({ onComplete }) {
               letterSpacing: '1px',
               fontFamily: 'sans-serif' 
             }}>
-              {t('cardio.gamified.questComplete', 'QUEST COMPLETED')}
+              {t('tests.gamified.questComplete', 'QUEST COMPLETED')}
             </h3>
             
             {/* RPG Description */}
             <p style={{ color: '#cbd5e0', marginBottom: '32px', lineHeight: '1.6', fontSize: '15px' }}>
               {activeTab === '5km' 
-                ? t('cardio.gamified.5km_desc', 'Your endurance feat has been inscribed in the Hall of Legends!')
-                : t('cardio.gamified.cooper_desc', 'Combat data synced. Your tactical potential has increased.')
+                ? t('tests.gamified.5km_desc', 'Your endurance feat has been inscribed in the Hall of Legends!')
+                : t('tests.gamified.cooper_desc', 'Combat data synced. Your tactical potential has increased.')
               }
             </p>
             
@@ -709,7 +709,7 @@ function Cardio({ onComplete }) {
                     transition: 'transform 0.2s'
                   }}
                 >
-                  {t('cardio.gamified.view_rank', 'CLAIM GLORY')}
+                  {t('tests.gamified.view_rank', 'CLAIM GLORY')}
                 </button>
               )}
 
@@ -733,7 +733,7 @@ function Cardio({ onComplete }) {
                     textTransform: 'uppercase'
                   }}
                 >
-                  {t('common.returnToProfile', 'CHECK STATS')}
+                  {t('tests.gamified.check_stats', 'CHECK STATS')}
                 </button>
               )}
               
@@ -751,7 +751,7 @@ function Cardio({ onComplete }) {
                   fontSize: '14px'
                 }}
               >
-                {t('cardio.gamified.stay', 'REST & RECOVER')}
+                {t('tests.gamified.stay', 'REST & RECOVER')}
               </button>
             </div>
           </div>

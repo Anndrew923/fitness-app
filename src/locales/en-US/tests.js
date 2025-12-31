@@ -168,6 +168,7 @@ export default {
       submit_btn: 'INITIATE SYNC',
       
       '5km_desc': 'Endurance feat immortalized. Your legacy is recorded on the Elite Leaderboard.',
+      cooper_desc: 'Combat data synced. Your tactical potential has increased.', // 🔴 新增：Cooper Test 描述
       arm_desc: 'Arm specs synchronized. Your hypertrophy rating has been uploaded to the Titan Registry.',
       strength_desc: 'Raw power input detected. Combat Power is recalculating...',
       default_desc: 'Data synchronization complete. Your potential has increased.',
