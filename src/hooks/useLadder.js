@@ -442,9 +442,9 @@ export const useLadder = (options = {}) => {
           sortField = 'stats_latPull';
         }
       } else if (selectedDivision === 'stats_cooper') {
-        // ✅ Fix: Use '5km' to match the filter value
+        // 🔥 5KM 視覺重構：按分數排序（降序），不再是時間
         if (filterProject === '5km') {
-          sortField = 'stats_5k';
+          sortField = 'stats_5k_score'; // 按分數排序，不是時間
         } else {
           sortField = 'stats_cooper';
         }
@@ -624,13 +624,27 @@ export const useLadder = (options = {}) => {
 
           aValue = getValidRatio(a);
           bValue = getValidRatio(b);
+        } else if (sortField === 'stats_5k_score') {
+          // 🔥 5KM 視覺重構：從 record_5km.score 或 stats_5k_score 讀取分數
+          const get5KmScore = user => {
+            // 優先從 record_5km.score 讀取
+            const recordScore = user.record_5km?.score;
+            if (recordScore !== undefined && recordScore !== null) {
+              return Number(recordScore) || 0;
+            }
+            // Fallback 到 stats_5k_score
+            return Number(user.stats_5k_score) || 0;
+          };
+          aValue = get5KmScore(a);
+          bValue = get5KmScore(b);
         } else {
           aValue = a[sortField];
           bValue = b[sortField];
         }
 
         // Special cases: Lower is better (ascending) - Time-based metrics
-        if (sortField === 'stats_5k' || sortField === 'stats_100m') {
+        // 🔥 5KM 不再按時間排序，已改為按分數排序
+        if (sortField === 'stats_100m') {
           // Helper function: Check if value is valid (not 0, null, undefined, NaN, or empty string)
           const isValidTime = val => {
             if (val === null || val === undefined || val === '') return false;

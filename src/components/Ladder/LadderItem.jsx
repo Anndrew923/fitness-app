@@ -159,32 +159,61 @@ const LadderItem = React.memo(
           // Endurance: Check project filter
           // ✅ Fix: Check for '5km' (matching config), NOT '5k'
           if (filterProject === '5km') {
-            // Format 5K time: convert seconds to minutes:seconds
-            const format5KTime = val => {
-              if (!val || val === 0) return '0:00';
-              const minutes = Math.floor(val / 60);
-              const seconds = Math.floor(val % 60);
-              return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            // 🔥 5KM 視覺重構：分數為主，時間為次
+            // 1. 從 record_5km 讀取原始數據
+            const record = user.record_5km || {};
+            const rawScore = record.score || user.stats_5k_score || 0;
+            const rawTimeSeconds =
+              record.bestTime || user.stats_5k_time || user.stats_5k || 0;
+
+            // 2. 定義 100 分門檻
+            const CAP_SCORE = 100;
+            const CAP_TIME_SECONDS = 20 * 60; // 20:00 = 1200 秒
+
+            // 3. 判斷顯示邏輯：未認證且分數 >= 100 時鎖死
+            const isCapped = !user.isVerified && rawScore >= CAP_SCORE;
+
+            const displayScore = isCapped ? CAP_SCORE : rawScore;
+            const displayTimeSeconds = isCapped
+              ? CAP_TIME_SECONDS
+              : rawTimeSeconds;
+
+            // 格式化時間：秒數轉換為 mm:ss
+            const format5KTime = seconds => {
+              if (!seconds || seconds === 0) return '0:00';
+              const minutes = Math.floor(seconds / 60);
+              const secs = Math.floor(seconds % 60);
+              return `${minutes}:${secs.toString().padStart(2, '0')}`;
             };
+
+            const displayTime = format5KTime(displayTimeSeconds);
 
             if (rank <= 3) {
               // Only log top 3 to reduce noise
               console.log(`🏃 5KM Data Check [Rank ${rank}]:`, {
                 id: user.id,
                 name: user.displayName,
-                stats_5k: user.stats_5k,
-                stats_5k_time: user.stats_5k_time,
-                run_5km: user.scores?.run_5km, // Check nested score
-                raw: user, // Dump full object if needed
+                record_5km: record,
+                rawScore,
+                rawTimeSeconds,
+                isCapped,
+                displayScore,
+                displayTime,
+                isVerified: user.isVerified,
               });
             }
 
             return {
-              // ✅ Fix: Read 'stats_5k_time' or 'stats_5k' (seconds)
-              value: user.stats_5k_time || user.stats_5k || 0,
-              unit: 'mins',
+              // 🔥 主視覺：分數（戰鬥力）
+              value: displayScore,
+              unit: 'pts',
               label: '5K Run',
-              formatValue: format5KTime,
+              formatValue: val => Number(val).toFixed(2),
+              // 🔥 次要資訊：時間（加上單位）
+              showSubInfo: true,
+              subInfo: `${displayTime} mins`,
+              // 🔥 標記是否被鎖定
+              isCapped: isCapped,
             };
           }
 
@@ -737,6 +766,7 @@ const LadderItem = React.memo(
 
         <div className="ladder__score-section">
           <div className="ladder__score">
+            {/* 🔥 5KM 使用標準樣式，與其他排行榜一致 */}
             <span className="ladder__score-value">
               {displayMetrics.icon && (
                 <span className="ladder__score-icon">
