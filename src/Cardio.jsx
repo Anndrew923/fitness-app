@@ -504,7 +504,7 @@ function Cardio({ onComplete }) {
                 )}
                 {!isCapped && isLimitBroken && (
                   <span style={{ marginLeft: '8px', color: '#ef4444', fontWeight: '800', fontStyle: 'italic' }}>
-                    🚀 LIMIT BREAK!
+                    🚀 {t('assessment.limit_break', 'LIMIT BREAK!')}
                   </span>
                 )}
                 {isCapped && (
@@ -533,7 +533,7 @@ function Cardio({ onComplete }) {
                       e.currentTarget.style.background = 'rgba(0, 0, 0, 0.6)';
                       e.currentTarget.style.borderColor = 'rgba(234, 179, 8, 0.5)';
                     }}
-                    title="點擊解鎖真實實力"
+                    title={t('actions.unlock_limit_tooltip', '點擊解鎖真實實力')}
                   >
                     <span style={{ fontSize: '0.875rem' }}>🔒</span>
                     <span>{t('actions.unlock_limit')}</span>
@@ -554,7 +554,7 @@ function Cardio({ onComplete }) {
                 </p>
               )}
               <p className="score-display">
-                {activeTab === 'cooper' ? getComment(rawScore || score, gender) : ((rawScore || score) >= 100 ? "🔥🔥🔥 UNGODLY PACE" : "Keep pushing for sub-20!")}
+                {activeTab === 'cooper' ? getComment(rawScore || score, gender) : ((rawScore || score) >= 100 ? t('assessment.ungodly_pace', '🔥🔥🔥 UNGODLY PACE') : t('assessment.keep_pushing', 'Keep pushing for sub-20!'))}
               </p>
             </>
           )}
@@ -586,7 +586,7 @@ function Cardio({ onComplete }) {
                 </>
               ) : (
                 <>
-                  <p className="font-semibold text-yellow-600">ELITE CHALLENGE</p>
+                  <p className="font-semibold text-yellow-600">{t('assessment.elite_challenge', 'ELITE CHALLENGE')}</p>
                   <p>{t('tests.cardioInfo.run5kmIntro')}</p>
                   <p className="mt-2 font-bold">{t('tests.cardioInfo.run5kmBenchmark')}</p>
                 </>

@@ -336,7 +336,7 @@ const Ladder = () => {
         return {
           value: userData.stats_sbdTotal || 0,
           unit: 'kg',
-          label: t('tests.strengthLabels.maxStrength', 'SBD 總和'),
+          label: t('ladder.filter.sbdTotal', '三項總和'),
           formatValue: val => Number(val).toFixed(1),
         };
       case 'stats_bodyFat':
@@ -375,15 +375,15 @@ const Ladder = () => {
           return {
             // Read both possible field names for safety
             value: userData.stats_5k_time || userData.stats_5k || 0,
-            unit: 'mins',
-            label: '5K Run',
+            unit: t('common.minutes', 'mins'),
+            label: t('tests.cardioTabs.run5km'),
             formatValue: format5KTime,
           };
         }
         return {
           value: userData.stats_cooper || 0,
           unit: 'km',
-          label: 'Cooper Test',
+          label: t('tests.cardioTabs.cooper'),
           formatValue: val => (Number(val) / 1000).toFixed(2),
         };
       case 'stats_vertical':

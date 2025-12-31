@@ -194,14 +194,21 @@ export const useUserInfoForm = (
           // 顯示體重變更引導 Modal
           // 使用 setTimeout 確保 Modal 在狀態更新後顯示
           setTimeout(() => {
+            const oldWeightStr = oldWeight.toFixed(1);
+            const newWeightStr = newWeight.toFixed(1);
+            const messageTemplate = t('notifications.weightUpdateMessage');
+            const message = messageTemplate
+              .replace('{{oldWeight}}', oldWeightStr)
+              .replace('{{newWeight}}', newWeightStr);
+            
             onShowModal({
               isOpen: true,
-              title: '體重已更新！',
-              message: `體重已從 ${oldWeight.toFixed(1)}kg 更新為 ${newWeight.toFixed(1)}kg。建議您前往重新評測，以確保天梯排名精準。`,
+              title: t('notifications.weightUpdateTitle'),
+              message: message,
               type: 'info',
-              actionText: '前往工具頁',
+              actionText: t('notifications.goToSkillTree'),
               onAction: () => {
-                // 導航到工具頁面（skill-tree）
+                // 導航到技能樹頁面
                 if (navigate) {
                   navigate('/skill-tree');
                 } else {

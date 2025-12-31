@@ -29,6 +29,8 @@ export default {
     points: 'pts',
     close: 'Close',
     optional: 'Optional',
+    minutes: 'mins',
+    days: 'days',
   },
   navbar: {
     community: 'Camp',
@@ -112,6 +114,18 @@ export default {
   },
   actions: {
     unlock_limit: 'Unlock Limit',
+    unlock_limit_tooltip: 'Click to unlock true strength',
+  },
+  assessment: {
+    power_level: 'Power Level',
+    unleash_limit: 'Unleash your limit',
+    score_capped_title: 'Score Capped at 100',
+    score_capped_desc: 'Unverified Rank maximum cap. Get {link} to unlock true power.',
+    limit_break: 'LIMIT BREAK!',
+    ungodly_pace: '🔥🔥🔥 UNGODLY PACE',
+    keep_pushing: 'Keep pushing for sub-20!',
+    elite_challenge: 'ELITE CHALLENGE',
+    get_certified: 'Get Certified',
   },
   notifications: {
     title: 'Notifications',
@@ -121,8 +135,9 @@ export default {
       title: 'Welcome to Upcore!',
       message: 'Notification system is online.',
     },
-    weightUpdateTitle: 'Weight Updated',
-    weightUpdateMessage: 'Your weight has been updated to {{newWeight}}kg (previously {{oldWeight}}kg). Please retake assessments to maintain ranking accuracy.',
+    weightUpdateTitle: 'Weight Updated!',
+    weightUpdateMessage: 'Weight has been updated from {{oldWeight}}kg to {{newWeight}}kg. It is recommended that you go to re-evaluate to ensure the accuracy of the ladder ranking.',
+    goToSkillTree: 'Go to Skill Tree',
   },
 };
 

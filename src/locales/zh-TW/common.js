@@ -29,6 +29,8 @@ export default {
     points: '分',
     close: '關閉',
     optional: '選填',
+    minutes: '分鐘',
+    days: '天',
   },
   navbar: {
     community: '營地',
@@ -108,6 +110,18 @@ export default {
   },
   actions: {
     unlock_limit: '解鎖極限',
+    unlock_limit_tooltip: '點擊解鎖真實實力',
+  },
+  assessment: {
+    power_level: '戰鬥等級',
+    unleash_limit: '突破你的極限',
+    score_capped_title: '等級上限鎖定',
+    score_capped_desc: '未認證排名的最高上限。進行{link}以解放真實戰力。',
+    limit_break: '突破極限！',
+    ungodly_pace: '🔥🔥🔥 神級配速',
+    keep_pushing: '繼續努力，目標突破20分鐘！',
+    elite_challenge: '精英挑戰',
+    get_certified: '進行認證',
   },
   notifications: {
     title: '通知中心',
@@ -117,8 +131,9 @@ export default {
       title: '歡迎來到 Upcore!',
       message: '通知系統運作正常。',
     },
-    weightUpdateTitle: '體重已更新',
-    weightUpdateMessage: '您的體重已更新為 {{newWeight}}kg（原為 {{oldWeight}}kg），請重新評測以維持排名精準度。',
+    weightUpdateTitle: '體重已更新！',
+    weightUpdateMessage: '體重已從 {{oldWeight}}kg 更新為 {{newWeight}}kg。建議您前往重新評測，以確保天梯排名精準。',
+    goToSkillTree: '前往技能樹',
   },
 };
 

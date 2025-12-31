@@ -65,7 +65,7 @@ const LadderSubFilters = ({
           },
           {
             value: 'total',
-            label: t('tests.strengthLabels.maxStrength', 'SBD 總和'),
+            label: t('ladder.filter.sbdTotal', '三項總和'),
           },
           { value: 'squat', label: t('tests.strengthExercises.squat') },
           { value: 'bench', label: t('tests.strengthExercises.benchPress') },
@@ -75,8 +75,8 @@ const LadderSubFilters = ({
         ];
       case 'stats_cooper':
         return [
-          { value: 'cooper', label: 'Cooper Test' },
-          { value: '5km', label: '5K Run' }, // ✅ Fixed typo
+          { value: 'cooper', label: t('tests.cardioTabs.cooper') },
+          { value: '5km', label: t('tests.cardioTabs.run5km') },
         ];
       case 'stats_vertical':
         return [

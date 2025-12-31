@@ -20,7 +20,7 @@ const LadderDivisionSelector = ({ currentFilter, onFilterChange }) => {
     {
       label: '💪 ' + t('tests.strength'),
       value: 'stats_sbdTotal',
-      desc: 'SBD',
+      desc: t('ladder.filter.sbdTotal', '三項總和'),
     },
     {
       label: '🔥 ' + t('tests.bodyFat'),
@@ -35,7 +35,7 @@ const LadderDivisionSelector = ({ currentFilter, onFilterChange }) => {
     {
       label: '💓 ' + t('tests.cardio'),
       value: 'stats_cooper',
-      desc: 'Cooper Test',
+      desc: t('tests.cardioTabs.cooper'),
     },
     {
       label: '⚡ ' + t('tests.explosivePower'),
@@ -45,12 +45,12 @@ const LadderDivisionSelector = ({ currentFilter, onFilterChange }) => {
     {
       label: '💪 ' + t('tests.muscleMass'),
       value: 'stats_ffmi',
-      desc: 'SMM',
+      desc: t('tests.muscleLabels.smmShort', 'SMM'),
     },
     {
       label: '🦾 ' + t('tests.armSize'),
       value: 'armSize',
-      desc: 'PAS 臂圍',
+      desc: t('tests.armSizeShort', 'PAS 臂圍'),
     },
   ];
 

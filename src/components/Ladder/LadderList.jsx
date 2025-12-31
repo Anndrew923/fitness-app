@@ -159,9 +159,9 @@ const LadderList = ({
           }}
         >
           {pullDistance >= PULL_THRESHOLD ? (
-            <span>釋放以刷新</span>
+            <span>{t('ladder.pullRefresh.release', '釋放以刷新')}</span>
           ) : (
-            <span>下拉刷新</span>
+            <span>{t('ladder.pullRefresh.pull', '下拉刷新')}</span>
           )}
         </div>
       )}

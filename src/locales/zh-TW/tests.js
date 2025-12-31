@@ -313,6 +313,7 @@ export default {
     averageScore: '平均分數',
     armSize: '臂圍評測',
     armSizeTitle: '純粹臂圍評測',
+    armSizeShort: 'PAS 臂圍',
     armSizeSafetyNote: '💪 請在充血狀態下測量曲臂臂圍，確保數據準確',
     armSizeLabels: {
       armSize: '臂圍',

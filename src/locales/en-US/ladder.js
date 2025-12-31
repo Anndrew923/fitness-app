@@ -49,6 +49,18 @@ export default {
       minutesAgo: '{{count}} minutes ago',
       hoursAgo: '{{count}} hours ago',
       daysAgo: '{{count}} days ago',
+      unknown: 'Unknown',
+    },
+    pullRefresh: {
+      pull: 'Pull to refresh',
+      release: 'Release to refresh',
+    },
+    anonymous: 'Anonymous User',
+    badges: {
+      verified: 'Verified',
+      honor: 'Honor Certification',
+      '1000lb': '1000lb',
+      '1000lbClub': '1000lb Club',
     },
     labels: {
       updatedAt: 'Updated',
@@ -129,6 +141,7 @@ export default {
       totalFive: 'Five Total',
       totalLoginDays: 'Total Login Days',
       height: 'Height (cm)',
+      sbdTotal: 'SBD Total',
     },
   },
   ladderCard: {

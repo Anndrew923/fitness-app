@@ -49,6 +49,18 @@ export default {
       minutesAgo: '{{count}}分鐘前',
       hoursAgo: '{{count}}小時前',
       daysAgo: '{{count}}天前',
+      unknown: '未知',
+    },
+    pullRefresh: {
+      pull: '下拉刷新',
+      release: '釋放以刷新',
+    },
+    anonymous: '匿名用戶',
+    badges: {
+      verified: '已認證',
+      honor: '榮譽認證',
+      '1000lb': '1000lb',
+      '1000lbClub': '1000lb Club',
     },
     labels: {
       updatedAt: '更新於',
@@ -127,6 +139,7 @@ export default {
       totalFive: '五項總和',
       totalLoginDays: '累計天數',
       height: '身高 (cm)',
+      sbdTotal: '三項總和',
     },
   },
   ladderCard: {

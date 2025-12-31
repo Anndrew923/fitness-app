@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
+import i18n from '../../i18n';
 import { formatScore } from '../../utils.js';
 import { recalculateSMMScore } from '../../utils/calculateSMMScore';
 import './LadderItem.css';
@@ -38,7 +39,7 @@ const LadderItem = React.memo(
     };
 
     const formatLastUpdate = timestamp => {
-      if (!timestamp) return '未知';
+      if (!timestamp) return t('ladder.time.unknown', '未知');
       const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
       const now = new Date();
       const diffMs = now - date;
@@ -46,11 +47,15 @@ const LadderItem = React.memo(
       const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
       const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
 
-      if (diffMins < 1) return '剛剛';
-      if (diffMins < 60) return `${diffMins}分鐘前`;
-      if (diffHours < 24) return `${diffHours}小時前`;
-      if (diffDays < 7) return `${diffDays}天前`;
-      return date.toLocaleDateString('zh-TW');
+      if (diffMins < 1) return t('ladder.time.justNow');
+      if (diffMins < 60)
+        return t('ladder.time.minutesAgo', { count: diffMins });
+      if (diffHours < 24)
+        return t('ladder.time.hoursAgo', { count: diffHours });
+      if (diffDays < 7) return t('ladder.time.daysAgo', { count: diffDays });
+      return date.toLocaleDateString(
+        i18n.language === 'zh-TW' ? 'zh-TW' : 'en-US'
+      );
     };
 
     const handleLikeClick = e => {
@@ -66,10 +71,13 @@ const LadderItem = React.memo(
         case 'stats_totalLoginDays':
           return {
             value: user.stats_totalLoginDays || 0,
-            unit: '天',
-            label: '累計天數',
+            unit: t('common.days', '天'),
+            label: t('ladder.filter.totalLoginDays'),
             icon: '🔥',
-            formatValue: val => Math.floor(val).toLocaleString('zh-TW'),
+            formatValue: val =>
+              Math.floor(val).toLocaleString(
+                i18n.language === 'zh-TW' ? 'zh-TW' : 'en-US'
+              ),
           };
         case 'stats_sbdTotal':
           // Check if filtering by specific lift
@@ -126,7 +134,7 @@ const LadderItem = React.memo(
             unit: 'kg',
             label: user.weight
               ? `BW: ${user.weight}kg`
-              : t('tests.strengthLabels.maxStrength', 'SBD 總和'),
+              : t('ladder.filter.sbdTotal', '三項總和'),
             formatValue: val => Number(val).toFixed(1),
           };
         case 'stats_bodyFat':
@@ -143,7 +151,7 @@ const LadderItem = React.memo(
           return {
             value: user.stats_bodyFat || 0,
             unit: '%',
-            label: '體脂率',
+            label: t('tests.bodyFatPercent', '體脂率'),
             icon: '💧',
             formatValue: val => Number(val).toFixed(1),
           };
@@ -206,12 +214,12 @@ const LadderItem = React.memo(
             return {
               // 🔥 主視覺：分數（戰鬥力）
               value: displayScore,
-              unit: 'pts',
-              label: '5K Run',
+              unit: t('common.points'),
+              label: t('tests.cardioTabs.run5km'),
               formatValue: val => Number(val).toFixed(2),
               // 🔥 次要資訊：時間（加上單位）
               showSubInfo: true,
-              subInfo: `${displayTime} mins`,
+              subInfo: `${displayTime} ${t('common.minutes')}`,
               // 🔥 標記是否被鎖定
               isCapped: isCapped,
             };
@@ -222,7 +230,7 @@ const LadderItem = React.memo(
           return {
             value: user.stats_cooper || 0,
             unit: 'km',
-            label: 'Cooper Test',
+            label: t('tests.cardioTabs.cooper'),
             formatValue: val => (Number(val) / 1000).toFixed(2),
           };
         case 'stats_vertical':
@@ -572,9 +580,9 @@ const LadderItem = React.memo(
         badges.push({
           id: 'verified',
           icon: '🏅',
-          text: '已認證',
+          text: t('ladder.badges.verified', '已認證'),
           className: 'badge-verified',
-          title: '榮譽認證',
+          title: t('ladder.badges.honor', '榮譽認證'),
         });
       }
 
@@ -583,10 +591,10 @@ const LadderItem = React.memo(
         badges.push({
           id: '1k',
           icon: '🏆',
-          text: '1000lb',
+          text: t('ladder.badges.1000lb', '1000lb'),
           shortText: '1K',
           className: 'badge-1000lb',
-          title: '1000lb Club',
+          title: t('ladder.badges.1000lbClub', '1000lb Club'),
         });
       }
 
@@ -740,7 +748,7 @@ const LadderItem = React.memo(
             </div>
             <div className="ladder__user-details">
               {user.isAnonymous ? (
-                '匿名用戶'
+                t('ladder.anonymous', '匿名用戶')
               ) : (
                 <>
                   {getAgeGroupLabel(user.ageGroup)} •{' '}

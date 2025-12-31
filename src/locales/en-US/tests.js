@@ -332,6 +332,7 @@ export default {
     averageScore: 'Average Score',
     armSize: 'Arm Size',
     armSizeTitle: 'Pure Arm Size',
+    armSizeShort: 'PAS Arm Girth',
     armSizeSafetyNote: '💪 Please measure flexed arm size in a pumped state for accurate data',
     armSizeLabels: {
       armSize: 'Arm Size',
