@@ -422,10 +422,10 @@ export default {
       limitReachedMessage:
         'You have reached the daily limit for ladder updates. Please try again tomorrow!',
       cooldownMessage:
-        'Please wait {{minutes}} minutes before updating again',
+        'Please wait {{minutes}} minutes before updating again', // 🔴 Reserved but no longer used
       nextResetTime: 'Next reset time: Tomorrow 00:00',
       limitInfo:
-        'To maintain ladder ranking fairness, each user can update their ladder score up to 3 times per day',
+        'To maintain ladder ranking fairness, each user can update their ladder score up to 3 times per day (no cooldown restriction)',
       needLoginToSubmit: 'Please log in to submit to the ladder',
       assessmentIncomplete: 'Assessment Incomplete',
       assessmentIncompleteMessage:

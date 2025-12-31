@@ -3,11 +3,16 @@
 .ladder__list {
   background: white;
   border-radius: 10px;
-  overflow: hidden;
+  /* 🔴 修复：移除 overflow: hidden，改为 overflow: visible，让内容可以正常显示 */
+  overflow: visible;
   box-shadow: 0 3px 16px rgba(255, 107, 53, 0.15);
   border: 1px solid rgba(255, 107, 53, 0.1);
   position: relative;
   transition: opacity 0.3s ease-in-out;
+  /* 🔴 新增：确保在 Capacitor 原生环境中可见 */
+  min-height: 100px;
+  display: block;
+  visibility: visible;
 }
 
 /* The "Curtain" Technique: Hide list while positioning */
@@ -78,4 +83,15 @@
 
 .ladder__empty p {
   margin: 8px 0;
+}
+
+/* 🔴 新增：Capacitor 原生环境特定修复 */
+@supports (-webkit-touch-callout: none) {
+  /* iOS/Android WebView 特定样式 */
+  .ladder__list {
+    overflow: visible !important;
+    -webkit-overflow-scrolling: touch;
+    display: block !important;
+    visibility: visible !important;
+  }
 }

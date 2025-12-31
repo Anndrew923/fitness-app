@@ -1108,13 +1108,18 @@
 
 /* 操作工具列 - 白底高對比風格 */
 .action-toolbar {
-  display: flex;
+  display: flex !important;
   flex-direction: column; /* 垂直堆疊 */
   gap: 12px;
   margin-top: 24px;
   padding: 0 16px;
   position: relative;
-  z-index: 1;
+  z-index: 10;
+  /* 🔴 新增：确保在原生环境中可见 */
+  visibility: visible !important;
+  opacity: 1 !important;
+  /* 🔴 新增：强制显示，防止被其他样式覆盖 */
+  min-height: 60px;
 }
 
 /* ✅ 修復 CSS 特异性：使用更高特异性的選擇器 + !important 確保覆蓋全局樣式 */
@@ -1265,5 +1270,23 @@
   .user-info-container .action-toolbar .action-toolbar-label,
   .action-toolbar .action-toolbar-label {
     font-size: 11px !important;
+  }
+}
+
+/* 🔴 新增：Capacitor 原生环境特定修复 */
+@supports (-webkit-touch-callout: none) {
+  .action-toolbar {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    position: relative !important;
+    z-index: 10 !important;
+  }
+  
+  .action-toolbar-btn {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    position: relative !important;
   }
 }

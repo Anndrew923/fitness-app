@@ -182,7 +182,9 @@ code {
   flex: 1;
   /* ✅ 確保內容區域正確填充可用空間 */
   height: 100%;
-  overflow-y: auto;
+  /* 🔴 修复：确保滚动容器正确设置 */
+  overflow-y: auto !important;
+  overflow-x: hidden;
   /* 🔴 關鍵修復：為底部導航列預留空間，防止內容被遮擋或露出青色背景 */
   /* BottomNavBar 高度：calc(64px + env(safe-area-inset-bottom, 0px)) */
   /* 添加額外緩衝空間（16px），確保內容完全可見 */
@@ -191,6 +193,12 @@ code {
   min-height: 100%;
   /* 確保背景色為透明，讓內容決定背景 */
   background-color: transparent;
+  /* 🔴 新增：Capacitor 滚动优化 */
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+  /* 🔴 新增：确保滚动容器在原生环境中工作 */
+  position: relative;
+  display: block;
 }
 
 /* 🔴 額外修復：確保有底部導航列的頁面內容容器有足夠的 padding */
@@ -250,3 +258,27 @@ code {
 }
 
 /* 已移除頁尾隱私權政策連結，相關樣式清理 */
+
+/* 🔴 新增：Capacitor 原生环境特定修复 */
+@supports (-webkit-touch-callout: none) {
+  .main-content {
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    /* 确保滚动容器有足够的高度 */
+    min-height: 100vh;
+    height: auto;
+  }
+  
+  /* 确保天梯页面可以正常滚动 */
+  .ladder {
+    overflow: visible !important;
+  }
+  
+  .ladder__list {
+    overflow: visible !important;
+  }
+  
+  .ladder-content-area {
+    overflow: visible !important;
+  }
+}
