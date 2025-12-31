@@ -160,6 +160,13 @@ export default {
       },
       default: 'Keep it up!',
     },
+    gamified: {
+      questComplete: 'QUEST COMPLETED',
+      '5km_desc': 'Your endurance feat has been eternally inscribed in the Hall of Legends!',
+      cooper_desc: 'Tactical assessment complete. Your combat potential has been updated.',
+      view_rank: 'WITNESS GLORY',
+      stay: 'REST & RECOVER',
+    },
     muscleMass: 'Muscle',
     muscleTitle: 'Muscle',
     cardioLabels: {

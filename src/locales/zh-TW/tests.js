@@ -159,6 +159,13 @@ export default {
       },
       default: '加油！',
     },
+    gamified: {
+      questComplete: '試煉達成',
+      '5km_desc': '您的耐力壯舉已銘刻於傳奇菁英榜，前往見證您的榮耀！',
+      cooper_desc: '戰術數據已同步，您的潛在戰力正在提升。',
+      view_rank: '見證榮耀',
+      stay: '休養生息',
+    },
     strengthErrors: {
       missingInputs: '請輸入重量和次數！',
       missingUserData: '請確保已輸入有效的體重和年齡！',

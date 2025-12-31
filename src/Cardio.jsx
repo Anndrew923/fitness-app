@@ -573,9 +573,7 @@ function Cardio({ onComplete }) {
         <div
           className="modal-overlay"
           onClick={(e) => {
-            if (e.target === e.currentTarget) {
-              setShowSuccessModal(false);
-            }
+            if (e.target === e.currentTarget) setShowSuccessModal(false);
           }}
           style={{
             position: 'fixed',
@@ -583,111 +581,129 @@ function Cardio({ onComplete }) {
             left: 0,
             width: '100%',
             height: '100%',
-            backgroundColor: 'rgba(0,0,0,0.6)',
+            backgroundColor: 'rgba(0,0,0,0.8)', // Darker background for RPG feel
             zIndex: 9999,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
+            backdropFilter: 'blur(5px)' // Add blur effect
           }}
         >
           <div
             className="modal-content"
             onClick={(e) => e.stopPropagation()}
             style={{
-              backgroundColor: 'white',
+              backgroundColor: '#1a202c', // Dark RPG card background
               borderRadius: '16px',
-              padding: '24px',
+              padding: '32px 24px',
               width: '90%',
-              maxWidth: '340px',
+              maxWidth: '360px',
               textAlign: 'center',
-              boxShadow: '0 10px 25px rgba(0,0,0,0.2)',
+              boxShadow: '0 0 25px rgba(255, 165, 0, 0.3)', // Golden glow
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+              color: 'white'
             }}
           >
-            <div style={{ fontSize: '40px', marginBottom: '10px' }}>
-              {activeTab === '5km' ? '🏆' : '✅'}
+            <div style={{ fontSize: '48px', marginBottom: '16px', filter: 'drop-shadow(0 0 10px rgba(255,215,0,0.5))' }}>
+              {activeTab === '5km' ? '🏆' : '⚔️'}
             </div>
-            <h3 style={{ fontSize: '20px', fontWeight: 'bold', color: '#2d3748', marginBottom: '12px' }}>
-              {t('tests.testComplete', '測驗完成')}
+            
+            {/* RPG Title */}
+            <h3 style={{ 
+              fontSize: '24px', 
+              fontWeight: '900', 
+              color: '#fbbf24', // Gold text
+              marginBottom: '16px',
+              textTransform: 'uppercase',
+              letterSpacing: '1px',
+              fontFamily: 'sans-serif' 
+            }}>
+              {t('cardio.gamified.questComplete', 'QUEST COMPLETED')}
             </h3>
             
-            {/* Dynamic Message */}
-            <p style={{ color: '#4a5568', marginBottom: '24px', lineHeight: '1.5' }}>
+            {/* RPG Description */}
+            <p style={{ color: '#cbd5e0', marginBottom: '32px', lineHeight: '1.6', fontSize: '15px' }}>
               {activeTab === '5km' 
-                ? t('cardio.success.5kmUploaded', '您的 5KM 成績已上傳至菁英榜！')
-                : t('cardio.success.cooperSaved', '您的成績已更新至雷達圖！')
+                ? t('cardio.gamified.5km_desc', 'Your endurance feat has been inscribed in the Hall of Legends!')
+                : t('cardio.gamified.cooper_desc', 'Combat data synced. Your tactical potential has increased.')
               }
             </p>
             
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              {/* 5KM Button -> Ladder (Elite Section) */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              {/* 5KM Button -> Ladder */}
               {activeTab === '5km' && (
                 <button
-                  onClick={() => {
-                    setShowSuccessModal(false);
-                    navigate('/ladder', {
-                      state: {
-                        // Send ALL possible variations to ensure Ladder.jsx catches it
-                        targetTab: 'cardio',
-                        activeTab: 'cardio',
-                        subTab: '5km',
-                        filter: '5km',
-                        scrollTo: 'top',
-                        forceRefresh: true
-                      }
-                    });
+                  onClick={() => { 
+                      setShowSuccessModal(false); 
+                      navigate('/ladder', { 
+                        state: { 
+                          targetTab: 'cardio', 
+                          activeTab: 'cardio',
+                          subTab: '5km',
+                          filter: '5km',
+                          scrollTo: 'top',
+                          forceRefresh: true
+                        } 
+                      }); 
                   }}
                   style={{
-                    padding: '12px',
-                    borderRadius: '10px',
+                    padding: '14px',
+                    borderRadius: '12px',
                     border: 'none',
-                    background: 'linear-gradient(135deg, #fbbf24, #d97706)',
+                    background: 'linear-gradient(135deg, #f59e0b, #d97706)', // Amber Gold
                     color: 'white',
-                    fontWeight: 'bold',
+                    fontWeight: '800',
                     fontSize: '16px',
-                    boxShadow: '0 4px 6px rgba(217, 119, 6, 0.3)',
+                    boxShadow: '0 4px 15px rgba(245, 158, 11, 0.4)',
                     cursor: 'pointer',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.5px',
+                    transition: 'transform 0.2s'
                   }}
                 >
-                  {t('cardio.success.viewRankings', '前往查看排名')}
+                  {t('cardio.gamified.view_rank', 'CLAIM GLORY')}
                 </button>
               )}
 
               {/* Cooper Button -> User Info */}
               {activeTab === 'cooper' && (
                 <button
-                  onClick={() => {
-                    setShowSuccessModal(false);
+                  onClick={() => { 
+                    setShowSuccessModal(false); 
                     navigate('/user-info');
                   }}
                   style={{
-                    padding: '12px',
-                    borderRadius: '10px',
+                    padding: '14px',
+                    borderRadius: '12px',
                     border: 'none',
-                    background: '#5f9ea0',
+                    background: 'linear-gradient(135deg, #3b82f6, #2563eb)', // Royal Blue
                     color: 'white',
-                    fontWeight: 'bold',
+                    fontWeight: '800',
                     fontSize: '16px',
+                    boxShadow: '0 4px 15px rgba(59, 130, 246, 0.4)',
                     cursor: 'pointer',
+                    textTransform: 'uppercase'
                   }}
                 >
-                  {t('common.returnToProfile', '返回個人主頁')}
+                  {t('common.returnToProfile', 'CHECK STATS')}
                 </button>
               )}
               
-              {/* Cancel/Stay Button */}
+              {/* Cancel Button */}
               <button
                 onClick={() => setShowSuccessModal(false)}
                 style={{
                   padding: '12px',
-                  borderRadius: '10px',
-                  border: 'none',
+                  borderRadius: '12px',
+                  border: '1px solid rgba(255,255,255,0.1)',
                   background: 'transparent',
-                  color: '#718096',
+                  color: '#a0aec0',
                   fontWeight: '600',
                   cursor: 'pointer',
+                  fontSize: '14px'
                 }}
               >
-                {t('common.stayHere', '留在本頁')}
+                {t('cardio.gamified.stay', 'REST & RECOVER')}
               </button>
             </div>
           </div>
