@@ -573,9 +573,29 @@ export const useLadderLogic = (
 
   // 5. Submit Handler
   const handleSubmitToLadder = useCallback(async () => {
+    // ✅ 检查访客模式
+    const isGuest = sessionStorage.getItem('guestMode') === 'true' && !auth.currentUser;
+    
+    if (isGuest) {
+      // 访客模式：显示注册提醒
+      onShowModal({
+        isOpen: true,
+        title: t('guestMode.modal.title'),
+        message: t('guestMode.modal.message'),
+        type: 'warning',
+        onAction: () => {
+          navigate('/login');
+        },
+        actionText: t('guestMode.modal.registerButton'),
+      });
+      return;
+    }
+    
+    // 非访客模式但未登录：直接返回（保持原有逻辑）
     if (!auth.currentUser) {
       return;
     }
+    
     const { canSubmit, reason } = checkLadderSubmissionLimit();
     if (!canSubmit) {
       onShowModal({
@@ -593,6 +613,7 @@ export const useLadderLogic = (
     showSubmitConfirmModal,
     t,
     onShowModal,
+    navigate, // ✅ 添加 navigate 到依赖数组
   ]);
 
   // Rank Fetching Logic

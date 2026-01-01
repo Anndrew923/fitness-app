@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { auth } from '../firebase';
-import GuestModal from './GuestModal';
+import GeneralModal from './UserInfo/Modals/GeneralModal';
 import { useTranslation } from 'react-i18next';
 import { Capacitor } from '@capacitor/core';
 
@@ -152,7 +152,14 @@ function BottomNavBar() {
   const navigate = useNavigate();
   const location = useLocation();
   const { t } = useTranslation();
-  const [modalOpen, setModalOpen] = useState(false);
+  const [modalState, setModalState] = useState({
+    isOpen: false,
+    title: '',
+    message: '',
+    type: 'warning',
+    onAction: null,
+    actionText: null,
+  });
   const [screenSize, setScreenSize] = useState('medium');
   // ✅ 新增：鍵盤可見狀態
   const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
@@ -246,13 +253,23 @@ function BottomNavBar() {
 
   const handleNav = item => {
     if (item.guestBlock && isGuestMode()) {
-      // setPendingPath(item.path);
-      setModalOpen(true);
+      // 显示注册提醒 modal
+      setModalState({
+        isOpen: true,
+        title: t('guestMode.modal.title'),
+        message: t('guestMode.modal.message'),
+        type: 'warning',
+        onAction: () => {
+          navigate('/login');
+        },
+        actionText: t('guestMode.modal.registerButton'),
+      });
     } else {
       if (item.key === 'home') {
-        // 智能首頁：已登入用戶導向 /user-info，未登入用戶導向 /landing
+        // 智能首頁：已登入用戶或訪客模式導向 /user-info，未登入用戶導向 /landing
         const hasAuthUser = auth.currentUser;
-        if (hasAuthUser) {
+        const isGuest = isGuestMode();
+        if (hasAuthUser || isGuest) {
           navigate('/user-info', { state: { scrollTo: 'radar' } });
         } else {
           navigate('/landing');
@@ -265,10 +282,6 @@ function BottomNavBar() {
     }
   };
 
-  const handleRegister = () => {
-    setModalOpen(false);
-    navigate('/login');
-  };
 
   return (
     <>
@@ -360,10 +373,16 @@ function BottomNavBar() {
           </div>
         ))}
       </nav>
-      <GuestModal
-        open={modalOpen}
-        onClose={() => setModalOpen(false)}
-        onRegister={handleRegister}
+      <GeneralModal
+        isOpen={modalState.isOpen}
+        onClose={() => {
+          setModalState(prev => ({ ...prev, isOpen: false }));
+        }}
+        title={modalState.title}
+        message={modalState.message}
+        type={modalState.type}
+        onAction={modalState.onAction}
+        actionText={modalState.actionText}
       />
     </>
   );

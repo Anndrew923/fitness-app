@@ -82,16 +82,16 @@ const GeneralModal = ({
           {onAction && actionText ? (
             <div className="modal-footer-actions">
               <button
-                className="modal-btn modal-btn-secondary"
-                onClick={handleClose}
-              >
-                {t('common.cancel')}
-              </button>
-              <button
                 className={getButtonClass()}
                 onClick={handleAction}
               >
                 {actionText || t('common.confirm')}
+              </button>
+              <button
+                className="modal-btn modal-btn-secondary"
+                onClick={handleClose}
+              >
+                {t('common.cancel')}
               </button>
             </div>
           ) : (

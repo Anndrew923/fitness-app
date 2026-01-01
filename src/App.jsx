@@ -352,6 +352,8 @@ function AppContent() {
       '/body-fat',
       '/arm-size',
       '/settings', // 允許訪客進入設定頁面
+      '/skill-tree', // 允許訪客進入技能數頁面
+      '/training-tools', // 允許訪客進入工具頁面
     ];
     if (
       isGuest &&
