@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '../UserContext';
 import LanguageSwitcher from '../components/LanguageSwitcher';
-import './LandingPage.css';
+import '../LandingPage.css';
 
 function LandingPage() {
   const { t } = useTranslation();
