@@ -721,11 +721,11 @@ export default {
         'We provide unique fitness assessment experience, helping you deeply understand your physical fitness',
       scientific: {
         title: 'Scientific Assessment',
-        desc: 'Based on Strength Level database and Cooper test standards, ensuring accuracy of assessment results',
+        desc: 'Based on international DOTS, McCulloch, and Cooper Test standards to ensure elite-level accuracy and professionalism.',
       },
       data: {
         title: 'Big Data Analysis',
-        desc: 'Integrating over 134 million exercise performance records, providing the most comprehensive scoring benchmarks',
+        desc: 'Data Source: Built on global Powerlifting competition standards and exercise physiology research for elite-level benchmarks.',
       },
       personalized: {
         title: 'Personalized Scoring',
@@ -743,14 +743,14 @@ export default {
       dataSources: {
         title: 'Data Sources',
         strengthLevel: {
-          title: 'Strength Level Database',
-          desc: "The world's largest fitness database, containing over 134 million exercise performance records",
+          title: 'Global Strength Benchmarks',
+          desc: 'Built on international Powerlifting competition data and physiological models.',
           point1:
-            'Covers multiple fitness exercises including bench press, squat, deadlift, shoulder press',
+            'Precision relative strength via DOTS coefficient',
           point2:
-            'Gender-grouped statistics ensuring accuracy of scoring standards',
+            'Age-neutral assessment using McCulloch scale',
           point3:
-            'Continuously updated, reflecting latest fitness trends and standards',
+            'Elite benchmarks set by competitive standards',
         },
         cooperTest: {
           title: 'Cooper Test Standards',
@@ -884,7 +884,7 @@ export default {
       shoulderPress: 'Shoulder Press',
       standards: 'Scoring Standards',
       standardsDesc:
-        'Based on Strength Level database, gender-grouped scoring',
+        'Standards: Powered by DOTS & McCulloch pro models. Scientifically removes weight and age bias for elite assessment.',
     },
     power: {
       title: 'Explosive Power Test',
@@ -933,7 +933,7 @@ export default {
       title: 'Scientific Basis',
       dataSource: 'Data Source',
       dataSourceDesc:
-        'Reference Strength Level (https://strengthlevel.com/), a database with over 134 million exercise performance records. Cooper test (military-designed assessment standard), and various exercise physiology research data',
+        'Based on international DOTS, McCulloch, and Cooper Test standards to ensure elite-level accuracy and professionalism.',
       algorithm: 'Scoring Algorithm',
       algorithmDesc:
         'Using linear interpolation algorithm, combined with age-gender grouping, ensuring scoring accuracy and fairness',

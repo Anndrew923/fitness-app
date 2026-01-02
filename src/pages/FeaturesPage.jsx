@@ -112,7 +112,7 @@ function Features() {
                   <span>
                     {t(
                       'features.strength.standardsDesc',
-                      '基於 Strength Level 數據庫，男女分組評分'
+                      '採用國際競技級 DOTS 係數與 McCulloch 年齡修正模型，科學消除體重與年齡差異。'
                     )}
                   </span>
                 </div>
@@ -289,7 +289,7 @@ function Features() {
               <p className="science-item-desc">
                 {t(
                   'features.science.dataSourceDesc',
-                  '基於 Strength Level 超過 1.34 億次舉重數據，Cooper 測試標準，以及運動生理學研究'
+                  '基於國際賽事 DOTS 係數、McCulloch 模型及 Cooper 測試等科學標準，確保評測結果的準確性與專業度。'
                 )}
               </p>
             </div>

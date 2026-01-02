@@ -701,11 +701,11 @@ export default {
       subtitle: '我們提供獨特的健身評測體驗，讓您深入了解自己的身體素質',
       scientific: {
         title: '科學化評測',
-        desc: '基於 Strength Level 數據庫和 Cooper 測試等科學標準，確保評測結果的準確性',
+        desc: '基於國際賽事 DOTS 係數、McCulloch 模型及 Cooper 測試等科學標準，確保評測結果的準確性與專業度。',
       },
       data: {
         title: '大數據分析',
-        desc: '整合超過 1.34 億人次運動表現數據，提供最全面的評分基準',
+        desc: '數據來源：結合國際力量舉 (Powerlifting) 競賽通用標準與運動生理學研究，提供具備競技鑑別度的評分基準。',
       },
       personalized: {
         title: '個人化評分',
@@ -722,11 +722,11 @@ export default {
       dataSources: {
         title: '數據來源',
         strengthLevel: {
-          title: 'Strength Level 數據庫',
-          desc: '全球最大的健身數據庫，包含超過 1.34 億人次的運動表現記錄',
-          point1: '涵蓋臥推、深蹲、硬舉、肩推等多項健身動作',
-          point2: '男女分組統計，確保評分標準的準確性',
-          point3: '持續更新，反映最新的健身趨勢和標準',
+          title: '國際實力評測基準',
+          desc: '基於全球力量舉 (Powerlifting) 競賽數據與運動生理學模型。',
+          point1: '採用 DOTS 係數精準計算相對強度',
+          point2: '整合 McCulloch 係數進行跨年齡公平評估',
+          point3: '依據競技數據設定 Elite 菁英門檻',
         },
         cooperTest: {
           title: 'Cooper 測試標準',
@@ -1136,6 +1136,18 @@ export default {
       respondFail: '回應挑戰失敗',
       shownInvitesInfo: '已顯示所有邀請資訊，請查看控制台',
       clearFail: '清除失敗',
+    },
+  },
+
+  // 功能說明頁
+  features: {
+    strength: {
+      standardsDesc:
+        '採用國際競技級 DOTS 係數與 McCulloch 年齡修正模型，科學消除體重與年齡差異。',
+    },
+    science: {
+      dataSourceDesc:
+        '基於國際賽事 DOTS 係數、McCulloch 模型及 Cooper 測試等科學標準，確保評測結果的準確性與專業度。',
     },
   },
 };
