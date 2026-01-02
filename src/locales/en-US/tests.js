@@ -243,7 +243,7 @@ export default {
     strengthErrors: {
       missingInputs: 'Please enter weight and reps',
       missingUserData: 'Please make sure weight and age are provided',
-      repsTooHigh: 'Reps must not exceed 12. Please re-enter',
+      repsTooHigh: '⚠️ Too many reps. Increase weight for true strength accuracy.',
       needAtLeastOne: 'Please complete at least one training exercise',
       updateFail:
         'Failed to update character data or navigate. Please try again later',

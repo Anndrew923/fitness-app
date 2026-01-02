@@ -175,7 +175,7 @@ export default {
     strengthErrors: {
       missingInputs: '請輸入重量和次數！',
       missingUserData: '請確保已輸入有效的體重和年齡！',
-      repsTooHigh: '可完成次數不得超過12次，請重新輸入！',
+      repsTooHigh: '⚠️ 次數過高。請增加重量，以精準評估絕對力量。',
       needAtLeastOne: '請至少完成一項修煉挑戰！',
       updateFail: '更新角色數據或導航失敗，請稍後再試！',
     },

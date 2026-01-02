@@ -151,7 +151,7 @@ export function useStrengthLogic() {
       const userAge = parseFloat(age);
       if (!userWeight || !userAge)
         return alert(t('tests.strengthErrors.missingUserData'));
-      if (repsNum > 12) {
+      if (repsNum > 10) {
         alert(t('tests.strengthErrors.repsTooHigh'));
         setState(prev => ({ ...prev, reps: '' }));
         return;
