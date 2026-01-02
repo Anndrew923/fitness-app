@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
 import { useUser } from '../UserContext';
 import { auth } from '../firebase';
-import { getRPGClassIcon, getRPGClassName } from '../utils/rpgClassCalculator';
+import { getRPGClassIcon, getRPGClassName } from '../utils/rpgSystem';
 import { getCityNameEn } from '../utils/taiwanDistricts';
 import {
   RadarChart,

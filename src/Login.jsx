@@ -159,6 +159,17 @@ function Login({ onLogin }) {
           job_category: '',
           gym_name: '',
           rpg_class: '',
+          // ✅ Phase 1-5 新增：商業系統預埋
+          subscription: {
+            status: 'active',
+            isEarlyAdopter: false, // 新用戶預設為 false
+          },
+          // ✅ Phase 1-5 新增：RPG 統計數據
+          rpgStats: {
+            lastGachaDate: null,
+            totalExp: 0,
+            level: 1,
+          },
         };
 
         console.log('儲存初始用戶數據:', initialUserData);

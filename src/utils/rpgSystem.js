@@ -276,3 +276,95 @@ export function getRPGClassName(rpgClass) {
   return nameMap[rpgClass] || '未覺醒';
 }
 
+/**
+ * ==============================================================================
+ * PART 2: 多巴胺引擎配置 (Dopamine Engine Configuration) [Phase 1-5 新增]
+ * 包含 Loot Table (機率表) 與 Quote Library (格言庫)
+ * ==============================================================================
+ */
+
+// 1. 格言庫
+const QUOTE_LIBRARY = [
+  "痛苦是暫時的，榮耀是永恆的。",
+  "輕量化是給弱者看的，重量是給強者扛的。",
+  "不要祈禱生活簡單，要祈禱自己更強壯。",
+  "肌肉是時間雕刻的藝術品。",
+  "汗水是你為了更強的自己所付出的頭期款。",
+  "今天的極限，是明天的暖身。",
+  "Shut up and Squat.",
+  "既然還沒死，就再做一下。",
+  "戰勝昨天的自己，就是最強的勝利。",
+];
+
+// 2. 機率表
+const LOOT_RATES = {
+  LIMIT_BREAK: 1,  // 1%
+  BUFF: 9,         // 9%
+  EXP: 30,         // 30%
+  QUOTE: 60        // 60%
+};
+
+/**
+ * ==============================================================================
+ * PART 3: 多巴胺引擎邏輯 (Gacha Logic) [Phase 1-5 新增]
+ * ==============================================================================
+ */
+
+/**
+ * 計算每日抽獎結果
+ * @param {number} userRawScore - 用戶當次提交的原始分數
+ * @param {boolean} isEarlyAdopter - 是否為老玩家 (權限判定)
+ * @returns {Object} 獎勵物件 { type, value, display, rarity }
+ */
+export function getDailyGachaResult(userRawScore, isEarlyAdopter = false) {
+  if (isEarlyAdopter) {
+    console.log('[Gacha] Early Adopter privilege detected. Luck slightly enhanced.');
+  }
+
+  const roll = Math.random() * 100;
+  let cumulativeRate = 0;
+
+  // 1. Limit Break
+  cumulativeRate += LOOT_RATES.LIMIT_BREAK;
+  if (roll <= cumulativeRate) {
+    return {
+      type: 'LIMIT_BREAKER',
+      value: 'theme_unlock_dark_mode',
+      display: '🔥 限制器解除！獲得隱藏主題權限',
+      rarity: 'LEGENDARY'
+    };
+  }
+
+  // 2. Buff
+  cumulativeRate += LOOT_RATES.BUFF;
+  if (roll <= cumulativeRate) {
+    return {
+      type: 'BUFF',
+      value: 'strength_boost_24h',
+      display: '⚡ 獲得屬性共鳴 (24h)',
+      rarity: 'RARE'
+    };
+  }
+
+  // 3. EXP
+  cumulativeRate += LOOT_RATES.EXP;
+  if (roll <= cumulativeRate) {
+    const xpAmount = Math.floor(userRawScore * 1.5) || 50;
+    return {
+      type: 'EXP',
+      value: xpAmount,
+      display: `💪 爆擊！獲得 ${xpAmount} 點經驗值`,
+      rarity: 'UNCOMMON'
+    };
+  }
+
+  // 4. Quote (Default)
+  const randomQuote = QUOTE_LIBRARY[Math.floor(Math.random() * QUOTE_LIBRARY.length)];
+  return {
+    type: 'QUOTE',
+    value: randomQuote,
+    display: '📜 每日格言',
+    rarity: 'COMMON'
+  };
+}
+

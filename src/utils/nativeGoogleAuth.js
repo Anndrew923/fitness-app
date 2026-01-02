@@ -341,24 +341,52 @@ class NativeGoogleAuth {
           job_category: '',
           gym_name: '',
           rpg_class: '',
+          // ✅ Phase 1-5 新增：商業系統預埋
+          subscription: {
+            status: 'active',
+            isEarlyAdopter: false, // 新用戶預設為 false
+          },
+          // ✅ Phase 1-5 新增：RPG 統計數據
+          rpgStats: {
+            lastGachaDate: null,
+            totalExp: 0,
+            level: 1,
+          },
         };
 
         await setDoc(userRef, initialUserData);
         console.log('✅ 新用戶資料已創建到 Firestore');
       } else {
         // 現有用戶 - 更新最後活躍時間和可能更新過的用戶資訊
-        await setDoc(
-          userRef,
-          {
-            lastActive: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-            // 更新用戶資訊（如果 Google 資訊更新了）
-            email: firebaseUser.email,
-            nickname: firebaseUser.displayName || userSnap.data().nickname,
-            avatarUrl: firebaseUser.photoURL || userSnap.data().avatarUrl,
-          },
-          { merge: true }
-        );
+        const existingData = userSnap.data();
+        const updateData = {
+          lastActive: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          // 更新用戶資訊（如果 Google 資訊更新了）
+          email: firebaseUser.email,
+          nickname: firebaseUser.displayName || existingData.nickname,
+          avatarUrl: firebaseUser.photoURL || existingData.avatarUrl,
+        };
+
+        // ✅ Phase 1-5 新增：檢查並補全缺失的欄位（老用戶遷移）
+        if (!existingData.subscription) {
+          updateData.subscription = {
+            status: 'active',
+            isEarlyAdopter: true, // 老用戶永久保留 Pro 權限
+          };
+          console.log('✅ [Phase 1-5] 補全 subscription 欄位（老用戶）');
+        }
+        
+        if (!existingData.rpgStats) {
+          updateData.rpgStats = {
+            lastGachaDate: null,
+            totalExp: 0,
+            level: 1,
+          };
+          console.log('✅ [Phase 1-5] 補全 rpgStats 欄位（老用戶）');
+        }
+
+        await setDoc(userRef, updateData, { merge: true });
         console.log('✅ 現有用戶資料已更新');
       }
     } catch (error) {

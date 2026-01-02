@@ -84,6 +84,17 @@ const initialState = {
   job_category: '', // 職業分類（下拉選單 ID）
   gym_name: '', // 健身房名稱（選填）
   rpg_class: '', // 系統計算的職業（BERSERKER, ASSASSIN, RANGER, PALADIN, FIGHTER, MAGE, AWAKENED）
+  // ✅ Phase 1-5 新增：商業系統預埋
+  subscription: {
+    status: 'active', // 'active' | 'inactive' | 'expired'
+    isEarlyAdopter: false, // 新用戶預設為 false，老用戶在遷移時會設為 true
+  },
+  // ✅ Phase 1-5 新增：RPG 統計數據
+  rpgStats: {
+    lastGachaDate: null, // 最後一次抽獎日期 (YYYY-MM-DD)
+    totalExp: 0, // 累積經驗值
+    level: 1, // 當前等級
+  },
   // 🔥【絕對隔離區】這兩個欄位完全獨立，不參與 scores 計算，不影響天梯總排名
   record_5km: {
     bestTime: 0, // 秒數
@@ -208,7 +219,56 @@ export function UserProvider({ children }) {
           job_category: firebaseData.job_category || '',
           gym_name: firebaseData.gym_name || '',
           rpg_class: firebaseData.rpg_class || '',
+          // ✅ Phase 1-5 新增：確保商業系統欄位被正確讀取
+          subscription: firebaseData.subscription || {
+            status: 'active',
+            isEarlyAdopter: true, // 老用戶自動標記為 Early Adopter
+          },
+          rpgStats: firebaseData.rpgStats || {
+            lastGachaDate: null,
+            totalExp: 0,
+            level: 1,
+          },
         };
+
+        // ✅ Phase 1-5 新增：檢查並補全缺失的欄位（老用戶遷移）
+        const needsMigration = !firebaseData.subscription || !firebaseData.rpgStats;
+        if (needsMigration) {
+          logger.debug('🔄 [Phase 1-5] 檢測到老用戶，開始補全缺失欄位...');
+          const migrationData = {};
+          
+          if (!firebaseData.subscription) {
+            migrationData.subscription = {
+              status: 'active',
+              isEarlyAdopter: true, // 老用戶永久保留 Pro 權限
+            };
+            logger.debug('✅ [Phase 1-5] 補全 subscription 欄位');
+          }
+          
+          if (!firebaseData.rpgStats) {
+            migrationData.rpgStats = {
+              lastGachaDate: null,
+              totalExp: 0,
+              level: 1,
+            };
+            logger.debug('✅ [Phase 1-5] 補全 rpgStats 欄位');
+          }
+
+          // 使用 merge: true 確保不覆蓋現有數據
+          try {
+            await updateDoc(userRef, {
+              ...migrationData,
+              updatedAt: new Date().toISOString(),
+            });
+            logger.debug('✅ [Phase 1-5] 老用戶數據遷移完成');
+            
+            // 更新本地 mergedData
+            Object.assign(mergedData, migrationData);
+          } catch (error) {
+            logger.error('❌ [Phase 1-5] 數據遷移失敗:', error);
+            // 不影響主流程，繼續執行
+          }
+        }
 
         if (isMountedRef.current) {
           dispatch({ type: 'SET_USER_DATA', payload: mergedData });
@@ -365,9 +425,20 @@ export function UserProvider({ children }) {
           job_category: data.job_category || '',
           gym_name: data.gym_name || '',
           rpg_class: data.rpg_class || '',
+          // ✅ Phase 1-5 新增：確保商業系統欄位被保存
+          subscription: data.subscription || {
+            status: 'active',
+            isEarlyAdopter: true,
+          },
+          rpgStats: data.rpgStats || {
+            lastGachaDate: null,
+            totalExp: 0,
+            level: 1,
+          },
         };
 
-        await setDoc(userRef, dataToSave);
+        // ✅ Phase 1-5 新增：使用 merge: true 確保不覆蓋現有數據
+        await setDoc(userRef, dataToSave, { merge: true });
         localStorage.setItem('userData', JSON.stringify(dataToSave));
 
         // 記錄寫入操作

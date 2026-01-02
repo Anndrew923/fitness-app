@@ -16,7 +16,7 @@ import { updateDoc, doc } from 'firebase/firestore';
 import PropTypes from 'prop-types';
 import { calculateLadderScore } from '../../utils';
 import logger from '../../utils/logger';
-import { getRPGClass } from '../../utils/rpgClassCalculator';
+import { getRPGClass } from '../../utils/rpgSystem';
 import SaveSuccessModal from './SaveSuccessModal';
 import AvatarSection from './AvatarSection';
 import RadarChartSection from './RadarChartSection/RadarChartSection';
