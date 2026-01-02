@@ -2,6 +2,7 @@ import { GoogleAuth } from '@belongnet/capacitor-google-auth';
 import { auth, db } from '../firebase';
 import { signInWithCredential, GoogleAuthProvider } from 'firebase/auth';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
+import { checkEarlyBirdStatus } from './rpgSystem';
 
 class NativeGoogleAuth {
   // 定義正確的 Client ID 常量
@@ -342,10 +343,18 @@ class NativeGoogleAuth {
           gym_name: '',
           rpg_class: '',
           // ✅ Phase 1-5 新增：商業系統預埋
-          subscription: {
-            status: 'active',
-            isEarlyAdopter: false, // 新用戶預設為 false
-          },
+          // 優先級 B: 新用戶判定 - 根據早鳥期判定
+          subscription: (() => {
+            const isEarlyBird = checkEarlyBirdStatus();
+            const isEarlyAdopter = isEarlyBird;
+            console.log(
+              `✅ [Phase 1-5] 新用戶註冊: isEarlyAdopter=${isEarlyAdopter} (${isEarlyBird ? 'Joined before deadline' : 'Joined after deadline'})`
+            );
+            return {
+              status: 'active',
+              isEarlyAdopter: isEarlyAdopter,
+            };
+          })(),
           // ✅ Phase 1-5 新增：RPG 統計數據
           rpgStats: {
             lastGachaDate: null,
@@ -369,12 +378,27 @@ class NativeGoogleAuth {
         };
 
         // ✅ Phase 1-5 新增：檢查並補全缺失的欄位（老用戶遷移）
+        // 優先級 A: 既存權限檢查 - 如果資料庫中已有 isEarlyAdopter === true，絕對保持
         if (!existingData.subscription) {
+          // 優先級 C: 補全機制 - 根據早鳥期判定
+          const isEarlyBird = checkEarlyBirdStatus();
+          const shouldBeEarlyAdopter = isEarlyBird;
           updateData.subscription = {
             status: 'active',
-            isEarlyAdopter: true, // 老用戶永久保留 Pro 權限
+            isEarlyAdopter: shouldBeEarlyAdopter,
           };
-          console.log('✅ [Phase 1-5] 補全 subscription 欄位（老用戶）');
+          console.log(
+            `✅ [Phase 1-5] 補全 subscription 欄位（老用戶）: isEarlyAdopter=${shouldBeEarlyAdopter} (${isEarlyBird ? 'Joined before deadline' : 'Joined after deadline'})`
+          );
+        } else if (existingData.subscription.isEarlyAdopter === true) {
+          // 優先級 A: 既存權限檢查 - 絕對保持為 true
+          console.log(
+            '✅ [Phase 1-5] 檢測到既存 Early Adopter 權限，保持為 true (絕對不覆蓋)'
+          );
+          updateData.subscription = {
+            status: existingData.subscription.status || 'active',
+            isEarlyAdopter: true, // 絕對保持
+          };
         }
         
         if (!existingData.rpgStats) {

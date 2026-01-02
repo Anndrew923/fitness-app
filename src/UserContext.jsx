@@ -15,6 +15,7 @@ import { getAgeGroup, validateAndCleanUserData } from './utils';
 import firebaseWriteMonitor from './utils/firebaseMonitor';
 import logger from './utils/logger';
 import { handleDailyLogin } from './utils/activityTracker';
+import { checkEarlyBirdStatus } from './utils/rpgSystem';
 
 const UserContext = createContext();
 
@@ -222,7 +223,7 @@ export function UserProvider({ children }) {
           // ✅ Phase 1-5 新增：確保商業系統欄位被正確讀取
           subscription: firebaseData.subscription || {
             status: 'active',
-            isEarlyAdopter: true, // 老用戶自動標記為 Early Adopter
+            isEarlyAdopter: checkEarlyBirdStatus(), // 根據早鳥期判定（後續遷移邏輯會正確處理）
           },
           rpgStats: firebaseData.rpgStats || {
             lastGachaDate: null,
@@ -234,15 +235,33 @@ export function UserProvider({ children }) {
         // ✅ Phase 1-5 新增：檢查並補全缺失的欄位（老用戶遷移）
         const needsMigration = !firebaseData.subscription || !firebaseData.rpgStats;
         if (needsMigration) {
-          logger.debug('🔄 [Phase 1-5] 檢測到老用戶，開始補全缺失欄位...');
+          logger.info('🔄 [Phase 1-5] 檢測到老用戶，開始補全缺失欄位...');
           const migrationData = {};
           
           if (!firebaseData.subscription) {
+            // 優先級 A: 如果資料庫中已有 isEarlyAdopter === true，絕對保持
+            // 優先級 C: 補全機制 - 根據早鳥期判定
+            const isEarlyBird = checkEarlyBirdStatus();
+            const shouldBeEarlyAdopter = isEarlyBird;
+            
             migrationData.subscription = {
               status: 'active',
-              isEarlyAdopter: true, // 老用戶永久保留 Pro 權限
+              isEarlyAdopter: shouldBeEarlyAdopter,
             };
-            logger.debug('✅ [Phase 1-5] 補全 subscription 欄位');
+            
+            logger.info(
+              `✅ [Phase 1-5] 補全 subscription 欄位: isEarlyAdopter=${shouldBeEarlyAdopter} (${isEarlyBird ? 'Joined before deadline' : 'Joined after deadline'})`
+            );
+          } else if (firebaseData.subscription.isEarlyAdopter === true) {
+            // 優先級 A: 既存權限檢查 - 絕對保持為 true
+            logger.info(
+              '✅ [Phase 1-5] 檢測到既存 Early Adopter 權限，保持為 true (絕對不覆蓋)'
+            );
+            // 確保 subscription 結構正確
+            mergedData.subscription = {
+              status: firebaseData.subscription.status || 'active',
+              isEarlyAdopter: true, // 絕對保持
+            };
           }
           
           if (!firebaseData.rpgStats) {
@@ -251,23 +270,34 @@ export function UserProvider({ children }) {
               totalExp: 0,
               level: 1,
             };
-            logger.debug('✅ [Phase 1-5] 補全 rpgStats 欄位');
+            logger.info('✅ [Phase 1-5] 補全 rpgStats 欄位');
           }
 
           // 使用 merge: true 確保不覆蓋現有數據
-          try {
-            await updateDoc(userRef, {
-              ...migrationData,
-              updatedAt: new Date().toISOString(),
-            });
-            logger.debug('✅ [Phase 1-5] 老用戶數據遷移完成');
-            
-            // 更新本地 mergedData
-            Object.assign(mergedData, migrationData);
-          } catch (error) {
-            logger.error('❌ [Phase 1-5] 數據遷移失敗:', error);
-            // 不影響主流程，繼續執行
+          if (Object.keys(migrationData).length > 0) {
+            try {
+              await updateDoc(userRef, {
+                ...migrationData,
+                updatedAt: new Date().toISOString(),
+              });
+              logger.info('✅ [Phase 1-5] 老用戶數據遷移完成');
+              
+              // 更新本地 mergedData
+              Object.assign(mergedData, migrationData);
+            } catch (error) {
+              logger.error('❌ [Phase 1-5] 數據遷移失敗:', error);
+              // 不影響主流程，繼續執行
+            }
           }
+        } else if (firebaseData.subscription?.isEarlyAdopter === true) {
+          // 優先級 A: 既存權限檢查 - 確保結構正確且保持為 true
+          logger.info(
+            '✅ [Phase 1-5] 檢測到既存 Early Adopter 權限，保持為 true (絕對不覆蓋)'
+          );
+          mergedData.subscription = {
+            status: firebaseData.subscription.status || 'active',
+            isEarlyAdopter: true, // 絕對保持
+          };
         }
 
         if (isMountedRef.current) {
@@ -322,6 +352,16 @@ export function UserProvider({ children }) {
         logger.debug('用戶文檔不存在，創建新的');
         // 如果用戶文檔不存在，創建一個新的
         const newUserData = { ...initialState, userId: currentUser.uid };
+
+        // ✅ Phase 1-5 新增：優先級 B - 新用戶判定
+        const isEarlyBird = checkEarlyBirdStatus();
+        newUserData.subscription = {
+          status: 'active',
+          isEarlyAdopter: isEarlyBird,
+        };
+        logger.info(
+          `✅ [Phase 1-5] 新用戶註冊: isEarlyAdopter=${isEarlyBird} (${isEarlyBird ? 'Joined before deadline' : 'Joined after deadline'})`
+        );
 
         // ✅ Daily Login Tracker: Initialize login stats for new user
         const loginUpdates = handleDailyLogin(newUserData);
@@ -426,10 +466,24 @@ export function UserProvider({ children }) {
           gym_name: data.gym_name || '',
           rpg_class: data.rpg_class || '',
           // ✅ Phase 1-5 新增：確保商業系統欄位被保存
-          subscription: data.subscription || {
-            status: 'active',
-            isEarlyAdopter: true,
-          },
+          // 優先級 A: 如果資料庫中已有 isEarlyAdopter === true，絕對保持
+          subscription: (() => {
+            if (data.subscription?.isEarlyAdopter === true) {
+              // 既存權限檢查 - 絕對保持為 true
+              logger.info(
+                '✅ [Phase 1-5] 保存數據時檢測到 Early Adopter 權限，保持為 true (絕對不覆蓋)'
+              );
+              return {
+                status: data.subscription.status || 'active',
+                isEarlyAdopter: true, // 絕對保持
+              };
+            }
+            // 如果沒有既存權限，使用傳入的數據或預設值
+            return data.subscription || {
+              status: 'active',
+              isEarlyAdopter: checkEarlyBirdStatus(),
+            };
+          })(),
           rpgStats: data.rpgStats || {
             lastGachaDate: null,
             totalExp: 0,

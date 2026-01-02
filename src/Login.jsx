@@ -6,6 +6,7 @@ import {
   createUserWithEmailAndPassword,
 } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
+import { checkEarlyBirdStatus } from './utils/rpgSystem';
 import PropTypes from 'prop-types';
 import SocialLogin from './components/SocialLogin';
 import PrivacyPolicyModal from './components/PrivacyPolicyModal';
@@ -160,10 +161,18 @@ function Login({ onLogin }) {
           gym_name: '',
           rpg_class: '',
           // ✅ Phase 1-5 新增：商業系統預埋
-          subscription: {
-            status: 'active',
-            isEarlyAdopter: false, // 新用戶預設為 false
-          },
+          // 優先級 B: 新用戶判定 - 根據早鳥期判定
+          subscription: (() => {
+            const isEarlyBird = checkEarlyBirdStatus();
+            const isEarlyAdopter = isEarlyBird;
+            console.log(
+              `✅ [Phase 1-5] 新用戶註冊: isEarlyAdopter=${isEarlyAdopter} (${isEarlyBird ? 'Joined before deadline' : 'Joined after deadline'})`
+            );
+            return {
+              status: 'active',
+              isEarlyAdopter: isEarlyAdopter,
+            };
+          })(),
           // ✅ Phase 1-5 新增：RPG 統計數據
           rpgStats: {
             lastGachaDate: null,

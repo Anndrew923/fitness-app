@@ -1,5 +1,3 @@
-import logger from './logger';
-
 /**
  * ✅ RPG 職業系統計算器
  * 根據五項評測分數動態計算用戶的「戰鬥風格 / 職業」
@@ -27,11 +25,11 @@ function calculateStandardDeviation(values) {
  */
 function calculateFFMI(weight, height, bodyFat) {
   if (!weight || !height || bodyFat === undefined) return 0;
-  
+
   const heightM = height / 100; // 轉換為公尺
   const leanBodyMass = weight * (1 - bodyFat / 100); // 去脂體重
   const ffmi = leanBodyMass / (heightM * heightM);
-  
+
   return Number(ffmi.toFixed(2));
 }
 
@@ -59,16 +57,18 @@ export function getRPGClass(scores, userData = {}, options = {}) {
     bodyFat = 0,
   } = scores;
 
-  const {
-    averageMuscleMass = 50,
-  } = options;
+  const { averageMuscleMass = 50 } = options;
 
   const { weight = 0, height = 0 } = userData;
 
   // 獲取所有分數值（用於計算標準差和平均分）
-  const scoreValues = [strength, explosivePower, cardio, muscleMass, bodyFat].filter(
-    score => score > 0
-  );
+  const scoreValues = [
+    strength,
+    explosivePower,
+    cardio,
+    muscleMass,
+    bodyFat,
+  ].filter(score => score > 0);
 
   // 如果沒有任何分數，返回預設值
   if (scoreValues.length === 0) {
@@ -127,7 +127,13 @@ export function getRPGClass(scores, userData = {}, options = {}) {
   };
 
   // 找出最高分數和對應的項目
-  const maxScore = Math.max(strength, explosivePower, cardio, muscleMass, bodyFat);
+  const maxScore = Math.max(
+    strength,
+    explosivePower,
+    cardio,
+    muscleMass,
+    bodyFat
+  );
   const maxScoreKey = Object.keys(allScores).find(
     key => allScores[key] === maxScore
   );
@@ -283,25 +289,48 @@ export function getRPGClassName(rpgClass) {
  * ==============================================================================
  */
 
+/**
+ * ==============================================================================
+ * PART 1.5: 限時早鳥認證系統 (Early Bird Certification System) [Phase 1-5 新增]
+ * ==============================================================================
+ */
+
+/**
+ * 早鳥截止日期 (UTC 時間)
+ * 在此日期之前註冊的用戶將自動獲得 Early Adopter 權限
+ */
+export const EARLY_BIRD_DEADLINE = '2026-06-30T23:59:59Z';
+
+/**
+ * 檢查當前是否處於早鳥期
+ * @returns {boolean} 如果當前時間早於截止日期，返回 true
+ */
+export function checkEarlyBirdStatus() {
+  const now = new Date();
+  const deadline = new Date(EARLY_BIRD_DEADLINE);
+  const isEarlyBird = now < deadline;
+  return isEarlyBird;
+}
+
 // 1. 格言庫
 const QUOTE_LIBRARY = [
-  "痛苦是暫時的，榮耀是永恆的。",
-  "輕量化是給弱者看的，重量是給強者扛的。",
-  "不要祈禱生活簡單，要祈禱自己更強壯。",
-  "肌肉是時間雕刻的藝術品。",
-  "汗水是你為了更強的自己所付出的頭期款。",
-  "今天的極限，是明天的暖身。",
-  "Shut up and Squat.",
-  "既然還沒死，就再做一下。",
-  "戰勝昨天的自己，就是最強的勝利。",
+  '痛苦是暫時的，榮耀是永恆的。',
+  '輕量化是給弱者看的，重量是給強者扛的。',
+  '不要祈禱生活簡單，要祈禱自己更強壯。',
+  '肌肉是時間雕刻的藝術品。',
+  '汗水是你為了更強的自己所付出的頭期款。',
+  '今天的極限，是明天的暖身。',
+  'Shut up and Squat.',
+  '既然還沒死，就再做一下。',
+  '戰勝昨天的自己，就是最強的勝利。',
 ];
 
 // 2. 機率表
 const LOOT_RATES = {
-  LIMIT_BREAK: 1,  // 1%
-  BUFF: 9,         // 9%
-  EXP: 30,         // 30%
-  QUOTE: 60        // 60%
+  LIMIT_BREAK: 1, // 1%
+  BUFF: 9, // 9%
+  EXP: 30, // 30%
+  QUOTE: 60, // 60%
 };
 
 /**
@@ -318,7 +347,9 @@ const LOOT_RATES = {
  */
 export function getDailyGachaResult(userRawScore, isEarlyAdopter = false) {
   if (isEarlyAdopter) {
-    console.log('[Gacha] Early Adopter privilege detected. Luck slightly enhanced.');
+    console.log(
+      '[Gacha] Early Adopter privilege detected. Luck slightly enhanced.'
+    );
   }
 
   const roll = Math.random() * 100;
@@ -331,7 +362,7 @@ export function getDailyGachaResult(userRawScore, isEarlyAdopter = false) {
       type: 'LIMIT_BREAKER',
       value: 'theme_unlock_dark_mode',
       display: '🔥 限制器解除！獲得隱藏主題權限',
-      rarity: 'LEGENDARY'
+      rarity: 'LEGENDARY',
     };
   }
 
@@ -342,7 +373,7 @@ export function getDailyGachaResult(userRawScore, isEarlyAdopter = false) {
       type: 'BUFF',
       value: 'strength_boost_24h',
       display: '⚡ 獲得屬性共鳴 (24h)',
-      rarity: 'RARE'
+      rarity: 'RARE',
     };
   }
 
@@ -354,17 +385,17 @@ export function getDailyGachaResult(userRawScore, isEarlyAdopter = false) {
       type: 'EXP',
       value: xpAmount,
       display: `💪 爆擊！獲得 ${xpAmount} 點經驗值`,
-      rarity: 'UNCOMMON'
+      rarity: 'UNCOMMON',
     };
   }
 
   // 4. Quote (Default)
-  const randomQuote = QUOTE_LIBRARY[Math.floor(Math.random() * QUOTE_LIBRARY.length)];
+  const randomQuote =
+    QUOTE_LIBRARY[Math.floor(Math.random() * QUOTE_LIBRARY.length)];
   return {
     type: 'QUOTE',
     value: randomQuote,
     display: '📜 每日格言',
-    rarity: 'COMMON'
+    rarity: 'COMMON',
   };
 }
-
