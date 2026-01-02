@@ -1,0 +1,206 @@
+/* Welcome Splash Page - 響應式圖片版本 */
+.welcome-splash {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  /* 背景圖片設置 - 響應式設計 */
+  background: linear-gradient(
+      135deg,
+      rgba(30, 60, 114, 0.85) 0%,
+      rgba(42, 82, 152, 0.85) 50%,
+      rgba(30, 60, 114, 0.85) 100%
+    ),
+    url('/images/splash-background.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed; /* 固定背景，避免滾動時移動 */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  z-index: 9999;
+}
+
+/* 背景動畫 */
+.splash-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.particle {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 50%;
+  animation: float 6s ease-in-out infinite;
+}
+
+.particle:nth-child(1) {
+  top: 20%;
+  left: 20%;
+  animation-delay: 0s;
+  animation-duration: 4s;
+}
+
+.particle:nth-child(2) {
+  top: 40%;
+  left: 80%;
+  animation-delay: 1s;
+  animation-duration: 5s;
+}
+
+.particle:nth-child(3) {
+  top: 60%;
+  left: 10%;
+  animation-delay: 2s;
+  animation-duration: 6s;
+}
+
+.particle:nth-child(4) {
+  top: 80%;
+  left: 70%;
+  animation-delay: 3s;
+  animation-duration: 4.5s;
+}
+
+.particle:nth-child(5) {
+  top: 30%;
+  left: 50%;
+  animation-delay: 1.5s;
+  animation-duration: 5.5s;
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0px) rotate(0deg);
+    opacity: 0.6;
+  }
+  50% {
+    transform: translateY(-20px) rotate(180deg);
+    opacity: 1;
+  }
+}
+
+/* 主要內容 - 只保留讀條 */
+.splash-content {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  z-index: 2;
+  animation: fadeInUp 1s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 載入進度 - 完全置中 */
+.loading-container {
+  width: 300px;
+}
+
+.loading-bar {
+  width: 100%;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+  overflow: hidden;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.loading-progress {
+  height: 100%;
+  background: linear-gradient(90deg, #ff6b35, #f7931e, #ffd700);
+  border-radius: 3px;
+  /* 移除 transition，使用更簡單的方式 */
+  box-shadow: 0 0 10px rgba(255, 107, 53, 0.5);
+  position: relative;
+  overflow: hidden;
+}
+
+.loading-progress::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.8),
+    transparent
+  );
+  /* 使用更簡單的動畫 */
+  animation: shimmer 1.8s linear infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+
+/* 響應式圖片設置 */
+@media (max-width: 768px) {
+  .welcome-splash {
+    /* 手機端：使用相同的圖片，但調整覆蓋層透明度 */
+    background: linear-gradient(
+        135deg,
+        rgba(30, 60, 114, 0.8) 0%,
+        rgba(42, 82, 152, 0.8) 50%,
+        rgba(30, 60, 114, 0.8) 100%
+      ),
+      url('/images/splash-background.jpg');
+    background-size: cover;
+    background-position: center;
+    background-attachment: scroll; /* 手機端使用scroll以提升性能 */
+  }
+
+  .loading-container {
+    width: 250px;
+  }
+}
+
+@media (min-width: 1920px) {
+  .welcome-splash {
+    /* 大螢幕：使用相同圖片，但調整覆蓋層透明度 */
+    background: linear-gradient(
+        135deg,
+        rgba(30, 60, 114, 0.6) 0%,
+        rgba(42, 82, 152, 0.6) 50%,
+        rgba(30, 60, 114, 0.6) 100%
+      ),
+      url('/images/splash-background.jpg');
+    background-size: cover;
+    background-position: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .loading-container {
+    width: 200px;
+  }
+}
+

@@ -1,0 +1,780 @@
+/* 效能優化：精確的硬體加速 */
+.history-container {
+  max-width: 100%;
+  padding: 0.5rem; /* 從 0.8rem 減少到 0.5rem */
+  padding-bottom: 120px; /* 為底部導覽列和廣告留空間 */
+  margin: 0 auto;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  min-height: calc(100vh - 140px); /* 確保頁面有足夠高度 */
+  -webkit-overflow-scrolling: touch;
+  will-change: scroll-position;
+}
+
+/* 只對動畫元素應用硬體加速 */
+.history-container .record-item,
+.history-container .chart-container {
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+
+/* 響應式調整 */
+@media (max-width: 768px) {
+  .history-container {
+    padding-bottom: 140px; /* 行動版需要更多空間 */
+    border-radius: 0; /* 行動版移除圓角 */
+    margin: 0;
+    min-height: calc(100vh - 120px);
+  }
+}
+
+.history-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 0.75rem; /* 從 1rem 減少到 0.75rem */
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.history-table th,
+.history-table td {
+  padding: 0.4rem; /* 從 0.6rem 減少到 0.4rem */
+  border: 1px solid #ddd;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.history-table th {
+  background: linear-gradient(135deg, #81d8d0 0%, #5f9ea0 100%);
+  color: white;
+  font-weight: 600;
+  border-color: #5f9ea0;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+/* 表頭欄位樣式 */
+.date-col {
+  min-width: 100px;
+}
+.score-col {
+  min-width: 80px;
+}
+.average-col {
+  min-width: 90px;
+}
+.select-col {
+  min-width: 60px;
+}
+
+/* 圖示與文字容器 */
+.history-table th .icon {
+  display: inline-block;
+  font-size: 16px;
+  margin-right: 4px;
+}
+
+.history-table th .desktop-text {
+  font-size: 14px;
+}
+
+/* 儲存格樣式 */
+.date-cell {
+  font-weight: 500;
+  color: #495057;
+}
+
+.score-cell,
+.average-cell {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.average-cell {
+  background-color: #f8f9fa;
+  border-left: 3px solid #81d8d0;
+}
+
+/* 分數色彩系統 */
+.score-excellent {
+  background-color: #d4edda !important;
+  color: #155724;
+}
+
+.score-good {
+  background-color: #d1ecf1 !important;
+  color: #0c5460;
+}
+
+.score-fair {
+  background-color: #fff3cd !important;
+  color: #856404;
+}
+
+.score-poor {
+  background-color: #f8d7da !important;
+  color: #721c24;
+}
+
+.score-none {
+  background-color: #e9ecef !important;
+  color: #6c757d;
+}
+
+.history-table tr:nth-child(even) {
+  background-color: #f8f9fa;
+}
+
+.history-table tr:hover {
+  background-color: rgba(129, 216, 208, 0.1);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(129, 216, 208, 0.2);
+  transition: all 0.2s ease;
+}
+
+/* 響應式表格 */
+@media (max-width: 768px) {
+  .history-table {
+    font-size: 12px;
+  }
+
+  .history-table th,
+  .history-table td {
+    padding: 0.5rem 0.25rem;
+  }
+
+  /* 手機版隱藏部分欄位 */
+  .mobile-hidden {
+    display: none;
+  }
+
+  /* 確保展開時表格不會超出螢幕 */
+  .history-table {
+    table-layout: fixed;
+  }
+
+  /* 手機版只顯示圖示 */
+  .history-table th .desktop-text {
+    display: none;
+  }
+
+  .history-table th .icon {
+    font-size: 18px;
+    margin-right: 0;
+  }
+
+  /* 調整手機版表格間距 */
+  .date-col {
+    min-width: 80px;
+  }
+  .score-col {
+    min-width: 60px;
+  }
+  .average-col {
+    min-width: 70px;
+  }
+}
+
+/* 平板尺寸優化 */
+@media (max-width: 1024px) and (min-width: 769px) {
+  .history-table {
+    font-size: 13px;
+  }
+
+  .history-table th .desktop-text {
+    font-size: 12px;
+  }
+}
+
+.action-buttons {
+  text-align: center;
+  margin-top: 0.625rem;
+  margin-bottom: 20px; /* 增加底部間距 */
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.toggle-delete-btn {
+  padding: 0.5rem 1rem;
+  color: #fff;
+  border: none;
+  border-radius: 0.3125rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.toggle-delete-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.delete-selected-btn {
+  background-color: #dc3545;
+}
+
+.delete-selected-btn:hover {
+  background-color: #c82333;
+}
+
+.cancel-delete-btn {
+  background-color: #6c757d;
+}
+
+.cancel-delete-btn:hover {
+  background-color: #5a6268;
+}
+
+.edit-mode-btn {
+  background-color: #ffc107;
+  color: #212529;
+}
+
+.edit-mode-btn:hover {
+  background-color: #e0a800;
+}
+
+.mobile-toggle-btn {
+  background-color: #17a2b8;
+  display: none; /* 預設隱藏 */
+}
+
+.mobile-toggle-btn:hover {
+  background-color: #138496;
+}
+
+/* 在手機版顯示展開按鈕 */
+@media (max-width: 768px) {
+  .mobile-toggle-btn {
+    display: inline-block;
+  }
+
+  .action-buttons {
+    gap: 8px;
+  }
+
+  .toggle-delete-btn {
+    padding: 0.4rem 0.8rem;
+    font-size: 14px;
+  }
+}
+
+/* 空狀態樣式 */
+.no-history {
+  text-align: center;
+  padding: 40px 20px;
+  color: #6c757d;
+}
+
+.no-history h3 {
+  margin-bottom: 10px;
+  color: #495057;
+}
+
+/* 選擇框樣式 */
+.history-checkbox {
+  width: 18px;
+  height: 18px;
+  accent-color: #81d8d0;
+}
+
+/* 分數圖例樣式 */
+.score-legend {
+  background: white;
+  border-radius: 8px;
+  padding: 10px; /* 從 15px 減少到 10px */
+  margin-bottom: 15px; /* 從 20px 減少到 15px */
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e9ecef;
+}
+
+.score-legend h4 {
+  margin: 0 0 8px 0; /* 從 10px 減少到 8px */
+  color: #495057;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.legend-items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.legend-item {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+/* 響應式圖例 */
+@media (max-width: 768px) {
+  .score-legend {
+    padding: 10px;
+    margin-bottom: 15px;
+  }
+
+  .score-legend h4 {
+    font-size: 14px;
+    margin-bottom: 8px;
+  }
+
+  .legend-items {
+    gap: 6px;
+  }
+
+  .legend-item {
+    font-size: 11px;
+    padding: 3px 6px;
+  }
+}
+
+/* 標題樣式改進 */
+.history-container h1 {
+  color: #333;
+  margin-bottom: 15px; /* 從 20px 減少到 15px */
+  text-align: center;
+  background: linear-gradient(135deg, #81d8d0 0%, #5f9ea0 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 700;
+  font-size: 1.8rem;
+  text-shadow: 0 2px 4px rgba(129, 216, 208, 0.3);
+}
+
+/* 記錄數量統計和限制提醒樣式 */
+.history-stats {
+  background: white;
+  padding: 0.75rem; /* 從 1rem 減少到 0.75rem */
+  margin-bottom: 0.75rem; /* 從 1rem 減少到 0.75rem */
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border-left: 4px solid #81d8d0;
+}
+
+.record-count {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+
+.count-label {
+  font-weight: 600;
+  color: #495057;
+  font-size: 14px;
+}
+
+.count-value {
+  font-weight: 700;
+  font-size: 16px;
+  color: #28a745;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  background-color: #d4edda;
+}
+
+.count-value.near-limit {
+  color: #856404;
+  background-color: #fff3cd;
+  border: 1px solid #ffeaa7;
+}
+
+.count-value.at-limit {
+  color: #721c24;
+  background-color: #f8d7da;
+  border: 1px solid #f5c6cb;
+}
+
+.limit-warning {
+  background-color: #fff3cd;
+  color: #856404;
+  padding: 0.75rem;
+  border-radius: 4px;
+  border: 1px solid #ffeaa7;
+  font-size: 14px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.limit-error {
+  background-color: #f8d7da;
+  color: #721c24;
+  padding: 0.75rem;
+  border-radius: 4px;
+  border: 1px solid #f5c6cb;
+  font-size: 14px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* 響應式調整 */
+@media (max-width: 768px) {
+  .history-stats {
+    padding: 0.75rem;
+    margin-bottom: 0.75rem;
+  }
+
+  /* 記錄數量統計和操作按鈕 - 手機版也保持左右排列 */
+  .stats-and-actions {
+    flex-direction: row;
+    gap: 0.5rem;
+    padding: 0.75rem;
+  }
+
+  .stats-and-actions .record-count {
+    flex-direction: row;
+    align-items: center;
+    gap: 0.25rem;
+    flex-shrink: 0;
+  }
+
+  .count-label {
+    font-size: 12px;
+  }
+
+  .count-value {
+    font-size: 13px;
+    padding: 0.15rem 0.3rem;
+  }
+
+  .stats-and-actions .action-buttons {
+    flex-direction: row;
+    gap: 0.5rem;
+    flex-shrink: 0;
+  }
+
+  .stats-and-actions .toggle-delete-btn {
+    padding: 0.3rem 0.6rem;
+    font-size: 11px;
+    min-width: 70px;
+    max-width: 100px;
+  }
+
+  .stats-and-actions .cancel-delete-btn,
+  .stats-and-actions .delete-selected-btn {
+    padding: 0.3rem 0.6rem;
+    font-size: 11px;
+    min-width: 70px;
+    max-width: 100px;
+  }
+
+  .limit-warning,
+  .limit-error {
+    font-size: 13px;
+    padding: 0.5rem;
+    margin-bottom: 0.75rem;
+  }
+
+  /* 分頁控制 - 手機版保持左右排列 */
+  .pagination {
+    flex-direction: row;
+    gap: 0.5rem;
+    padding: 0.75rem;
+  }
+
+  .pagination-btn {
+    min-width: 80px;
+    font-size: 12px;
+    padding: 0.4rem 0.8rem;
+  }
+
+  .page-info {
+    margin: 0 0.5rem;
+    font-size: 14px;
+    padding: 0.4rem 0.8rem;
+    min-width: 50px;
+  }
+
+  /* 圖表容器 - 手機版優化 */
+  .chart-container {
+    padding: 1rem;
+    margin: 0.75rem 0;
+  }
+
+  .chart-container h3 {
+    font-size: 16px;
+  }
+
+  .chart-wrapper {
+    padding: 0.5rem 0;
+  }
+
+  .chart {
+    padding: 0.5rem;
+  }
+}
+
+/* 分頁控制樣式 */
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  margin: 1rem 0;
+  padding: 1rem;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.pagination-btn {
+  padding: 0.5rem 1rem;
+  border: 2px solid #81d8d0;
+  background: white;
+  color: #81d8d0;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 14px;
+  min-width: 100px;
+  white-space: pre-line;
+  line-height: 1.4;
+}
+
+.pagination-btn:hover:not(:disabled) {
+  background: #81d8d0;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(129, 216, 208, 0.3);
+}
+
+.pagination-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.page-info {
+  font-weight: 700;
+  color: #495057;
+  font-size: 16px;
+  padding: 0.6rem 1.2rem;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: 8px;
+  border: 2px solid #dee2e6;
+  margin: 0 1rem;
+  white-space: nowrap;
+  text-align: center;
+  min-width: 80px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.page-info:hover {
+  border-color: #81d8d0;
+  box-shadow: 0 4px 8px rgba(129, 216, 208, 0.2);
+  transform: translateY(-1px);
+}
+
+/* 底部操作按鈕樣式 - 已整合到 stats-and-actions 中 */
+/* 移除舊的樣式，使用新的 .stats-and-actions 樣式 */
+
+/* 折線圖樣式 */
+.chart-container {
+  background: white;
+  padding: 0.5rem;
+  margin: 1rem 0;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border-left: 4px solid #28a745;
+}
+
+.chart-container h3 {
+  margin: 0;
+  color: #495057;
+  font-size: 18px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.chart-note {
+  font-size: 12px;
+  color: #6c757d;
+  text-align: center;
+  margin: 0.25rem 0;
+  font-weight: 400;
+}
+
+.chart-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow-x: auto;
+  padding: 0.25rem 0;
+}
+
+.chart {
+  max-width: 100%;
+  height: auto;
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+/* 歷史記錄表格區域 */
+.history-table-section {
+  margin-bottom: 1rem;
+}
+
+/* 記錄數量統計和操作按鈕的左右排列 */
+.stats-and-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  padding: 1rem;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.stats-and-actions .record-count {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0;
+}
+
+.stats-and-actions .action-buttons {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.stats-and-actions .toggle-delete-btn {
+  padding: 0.4rem 0.8rem;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 13px;
+  min-width: 80px;
+  max-width: 120px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.stats-and-actions .edit-mode-btn {
+  background: linear-gradient(135deg, #81d8d0 0%, #5f9ea0 100%);
+  color: white;
+}
+
+.stats-and-actions .edit-mode-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(129, 216, 208, 0.3);
+}
+
+.stats-and-actions .cancel-delete-btn {
+  background: #6c757d;
+  color: white;
+}
+
+.stats-and-actions .cancel-delete-btn:hover {
+  background: #5a6268;
+  transform: translateY(-2px);
+}
+
+.stats-and-actions .delete-selected-btn {
+  background: #dc3545;
+  color: white;
+}
+
+.stats-and-actions .delete-selected-btn:hover {
+  background: #c82333;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(220, 53, 69, 0.3);
+}
+
+/* 圖表標題和選單樣式 */
+.chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.25rem;
+  padding: 0 0.5rem;
+}
+
+.chart-header h3 {
+  margin: 0;
+  color: #495057;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.chart-selector {
+  display: flex;
+  align-items: center;
+}
+
+.chart-select {
+  padding: 0.5rem 1rem;
+  border: 2px solid #81d8d0;
+  border-radius: 6px;
+  background: white;
+  color: #495057;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 120px;
+}
+
+.chart-select:hover {
+  border-color: #5f9ea0;
+  box-shadow: 0 2px 4px rgba(129, 216, 208, 0.2);
+}
+
+.chart-select:focus {
+  outline: none;
+  border-color: #5f9ea0;
+  box-shadow: 0 0 0 3px rgba(129, 216, 208, 0.1);
+}
+
+/* 手機版響應式設計 */
+@media (max-width: 768px) {
+  .chart-header {
+    flex-direction: column;
+    gap: 0.5rem; /* 減少間距讓版面更緊湊 */
+    align-items: stretch;
+  }
+
+  .chart-header h3 {
+    text-align: center;
+    font-size: 16px;
+  }
+
+  .chart-note {
+    font-size: 11px; /* 手機版字體更小 */
+    margin: 0.15rem 0; /* 減少間距 */
+  }
+
+  .chart-selector {
+    justify-content: center;
+  }
+
+  .chart-select {
+    min-width: 140px;
+    font-size: 13px;
+    padding: 0.4rem 0.8rem;
+  }
+}

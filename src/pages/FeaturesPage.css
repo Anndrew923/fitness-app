@@ -1,0 +1,627 @@
+/* Features Page Styles */
+.features-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #81d8d0 0%, #5f9ea0 100%);
+  color: #333;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  position: relative;
+  overflow-x: hidden; /* 防止水平滾動 */
+  width: 100%; /* 確保寬度控制 */
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* 確保所有內容置中 */
+}
+
+.features-page::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(
+      circle at 20% 80%,
+      rgba(129, 216, 208, 0.3) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 80% 20%,
+      rgba(95, 158, 160, 0.3) 0%,
+      transparent 50%
+    );
+  pointer-events: none;
+}
+
+/* Header */
+.features-header {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  padding: 1rem 0;
+  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.header-content {
+  max-width: 1000px; /* 從 1200px 改為 1000px */
+  margin: 0 auto;
+  padding: 0 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo-section {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.features-page .app-title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #2c3e50;
+  margin: 0;
+  background: linear-gradient(45deg, #81d8d0, #5f9ea0);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.features-page .app-subtitle {
+  font-size: 0.9rem;
+  color: #2d3748;
+  margin-top: -0.2rem;
+  font-weight: 600;
+}
+
+/* Hero Section */
+.features-page .hero-section {
+  padding: 3rem 2rem;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.1) !important;
+  backdrop-filter: blur(10px) !important;
+  margin: 6rem auto 2rem;
+  max-width: 1000px; /* 從 900px 改為 1000px，與 header 一致 */
+  border-radius: 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  position: relative;
+  z-index: 1;
+  width: calc(100% - 2rem); /* 確保左右有足夠邊距 */
+  box-sizing: border-box; /* 包含邊距在寬度計算中 */
+}
+
+.features-page .hero-content {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.features-page .hero-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 0.8rem;
+  color: white !important;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3) !important;
+  background: none !important;
+  -webkit-background-clip: initial !important;
+  -webkit-text-fill-color: initial !important;
+  background-clip: initial !important;
+}
+
+.features-page .hero-subtitle {
+  font-size: 1.1rem;
+  margin-bottom: 1.5rem;
+  opacity: 0.9;
+  line-height: 1.5;
+  color: white !important;
+}
+
+.features-page .hero-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.features-page .cta-button {
+  padding: 0.8rem 2rem;
+  border: none;
+  border-radius: 50px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.features-page .cta-button.primary {
+  background: linear-gradient(45deg, #ff6b35, #f7931e) !important;
+  color: white !important;
+  box-shadow: 0 4px 15px rgba(255, 107, 53, 0.4) !important;
+}
+
+.features-page .cta-button.primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 107, 53, 0.6) !important;
+}
+
+.features-page .cta-button.secondary {
+  background: rgba(255, 255, 255, 0.95) !important;
+  color: #2d3748 !important;
+  border: 2px solid rgba(255, 255, 255, 0.8) !important;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
+}
+
+.features-page .cta-button.secondary:hover {
+  background: rgba(255, 255, 255, 1) !important;
+  color: #1a202c !important;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15) !important;
+}
+
+.features-page .cta-button.large {
+  padding: 1rem 2.5rem;
+  font-size: 1.1rem;
+}
+
+/* Container */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+/* Section Titles */
+.features-page .section-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 1rem;
+  color: white !important;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3) !important;
+}
+
+.section-subtitle {
+  font-size: 1.1rem;
+  text-align: center;
+  margin-bottom: 3rem;
+  color: rgba(255, 255, 255, 0.9);
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Overview Section */
+.overview-section {
+  padding: 2rem 0;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Assessments Section */
+.assessments-section {
+  padding: 2.5rem 0;
+  position: relative;
+  z-index: 1;
+}
+
+.assessment-card {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 15px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.assessment-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+}
+
+.assessment-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.assessment-icon {
+  font-size: 2.5rem;
+  margin-right: 1rem;
+}
+
+.assessment-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #2c3e50;
+  margin: 0;
+}
+
+.assessment-description {
+  font-size: 1rem;
+  color: #555;
+  margin-bottom: 1rem;
+  line-height: 1.5;
+}
+
+.assessment-details {
+  background: #f8f9fa;
+  padding: 1rem;
+  border-radius: 12px;
+  border-left: 4px solid #81d8d0;
+}
+
+.details-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 0.8rem;
+}
+
+.exercises-list,
+.tests-list {
+  list-style: none;
+  padding: 0;
+  margin-bottom: 1rem;
+}
+
+.exercises-list li,
+.tests-list li {
+  padding: 0.5rem 0;
+  padding-left: 1.5rem;
+  position: relative;
+  color: #555;
+}
+
+.exercises-list li::before,
+.tests-list li::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  color: #81d8d0;
+  font-weight: bold;
+}
+
+.test-method {
+  font-size: 0.95rem;
+  color: #555;
+  margin-bottom: 1rem;
+  padding: 0.8rem;
+  background: rgba(129, 216, 208, 0.1);
+  border-radius: 8px;
+  border-left: 4px solid #81d8d0;
+}
+
+.assessment-standards {
+  background: rgba(255, 107, 53, 0.1);
+  padding: 0.8rem;
+  border-radius: 8px;
+  border-left: 4px solid #ff6b35;
+}
+
+.assessment-standards strong {
+  color: #ff6b35;
+}
+
+.assessment-standards span {
+  color: #6c757d;
+  margin-left: 0.5rem;
+}
+
+/* Science Section */
+.science-section {
+  padding: 2.5rem 0;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  position: relative;
+  z-index: 1;
+}
+
+.science-content {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.science-item {
+  background: rgba(255, 255, 255, 0.95);
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.science-item-title {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 0.8rem;
+}
+
+.science-item-desc {
+  color: #555;
+  line-height: 1.6;
+}
+
+/* Usage Section */
+.usage-section {
+  padding: 2.5rem 0;
+  position: relative;
+  z-index: 1;
+}
+
+.usage-steps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.usage-step {
+  display: flex;
+  align-items: flex-start;
+  background: rgba(255, 255, 255, 0.95);
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+}
+
+.usage-step:hover {
+  transform: translateY(-3px);
+}
+
+.step-number {
+  background: linear-gradient(45deg, #81d8d0, #5f9ea0);
+  color: white;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-right: 1rem;
+  flex-shrink: 0;
+}
+
+.step-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+.step-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 0.4rem;
+  text-align: left;
+  min-height: 1.5rem;
+  display: flex;
+  align-items: center;
+}
+
+.step-desc {
+  color: #555;
+  line-height: 1.5;
+}
+
+/* FAQ Section */
+.faq-section {
+  padding: 2.5rem 0;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  position: relative;
+  z-index: 1;
+}
+
+.faq-list {
+  max-width: 800px;
+  margin: 0 auto;
+  margin-top: 1.5rem;
+}
+
+.faq-item {
+  background: rgba(255, 255, 255, 0.95);
+  margin-bottom: 0.8rem;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+}
+
+.faq-question {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #2c3e50;
+  padding: 1.2rem;
+  margin: 0;
+  background: #f8f9fa;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.faq-question:hover {
+  background: #e9ecef;
+}
+
+.faq-answer {
+  padding: 0 1.2rem 1.2rem;
+  color: #555;
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* CTA Section */
+.cta-section {
+  padding: 2.5rem 0;
+  text-align: center;
+  position: relative;
+  z-index: 1;
+}
+
+.cta-content {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.cta-title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: white;
+  margin-bottom: 0.8rem;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.cta-subtitle {
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.9);
+  margin-bottom: 1.5rem;
+}
+
+.cta-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* Footer */
+.features-footer {
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 2rem 0;
+  position: relative;
+  z-index: 1;
+}
+
+.footer-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.footer-links {
+  display: flex;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+.footer-link {
+  color: rgba(255, 255, 255, 0.8);
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.footer-link:hover {
+  color: white;
+}
+
+.footer-copyright {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.9rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .features-page .hero-section {
+    padding: 2rem 1.5rem;
+    margin: 5rem 1rem 1rem; /* 確保左右邊距 */
+    width: calc(100% - 2rem); /* 確保寬度控制 */
+    max-width: none; /* 手機版不限制最大寬度 */
+  }
+
+  .features-page .hero-title {
+    font-size: 2rem;
+  }
+
+  .features-page .hero-subtitle {
+    font-size: 0.95rem;
+  }
+
+  .features-page .section-title {
+    font-size: 1.8rem;
+  }
+
+  .assessment-card {
+    padding: 1.2rem;
+  }
+
+  .assessment-title {
+    font-size: 1.3rem;
+  }
+
+  .usage-step {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .step-number {
+    margin-right: 0;
+    margin-bottom: 1rem;
+  }
+
+  .cta-actions {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .features-page .cta-button {
+    width: 100%;
+    max-width: 300px;
+  }
+
+  .footer-content {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .footer-links {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .features-page .hero-section {
+    padding: 1.5rem 1rem;
+    margin: 4.5rem 0.8rem 1rem; /* 增加左右邊距 */
+    width: calc(100% - 1.6rem); /* 確保寬度控制 */
+  }
+
+  .features-page .hero-title {
+    font-size: 1.6rem;
+  }
+
+  .assessment-card {
+    padding: 1rem;
+  }
+
+  .science-content {
+    grid-template-columns: 1fr;
+  }
+
+  .usage-steps {
+    grid-template-columns: 1fr;
+  }
+
+  .cta-title {
+    font-size: 1.5rem;
+  }
+}

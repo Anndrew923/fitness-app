@@ -1,0 +1,694 @@
+.muscle-container {
+  max-width: 100%;
+  padding: 0.8rem;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: linear-gradient(135deg, #f0f8ff 0%, #e6f3ff 100%);
+  min-height: 100vh;
+}
+
+/* 美化標題 */
+.muscle-container h1 {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #2c5aa0;
+  margin-bottom: 1.2rem;
+  text-align: center;
+  background: linear-gradient(135deg, #81d8d0 0%, #5f9ea0 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 2px 4px rgba(129, 216, 208, 0.3);
+}
+
+/* 輸入區域卡片樣式 */
+.input-section {
+  width: 90%;
+  max-width: 400px;
+  background: white;
+  padding: 1.2rem;
+  border-radius: 12px;
+  box-shadow: 0 8px 25px rgba(44, 90, 160, 0.15);
+  margin-bottom: 1.2rem;
+  border: 1px solid rgba(44, 90, 160, 0.1);
+}
+
+.input-label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #2c5aa0;
+  margin-bottom: 0.4rem;
+  text-align: left;
+}
+
+.exercise-section {
+  margin-bottom: 1.5rem;
+}
+
+.input-field {
+  width: 100%;
+  padding: 0.6rem;
+  font-size: 0.9rem;
+  border: 2px solid #e1e8ed;
+  border-radius: 8px;
+  outline: none;
+  transition: all 0.3s ease;
+  background-color: #fafbfc;
+}
+
+.input-field:focus {
+  border-color: #81d4fa;
+  box-shadow: 0 0 0 3px rgba(129, 212, 250, 0.2);
+  background-color: white;
+}
+
+.calculate-btn {
+  width: 100%;
+  margin-top: 0.8rem;
+  padding: 0.7rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: white;
+  background: linear-gradient(135deg, #81d8d0 0%, #5f9ea0 100%);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(129, 216, 208, 0.3);
+}
+
+.calculate-btn:hover {
+  background: linear-gradient(135deg, #5f9ea0 0%, #4a7c7a 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(129, 216, 208, 0.4);
+}
+
+.calculate-btn:active {
+  transform: translateY(0);
+}
+
+/* 結果區域卡片樣式 */
+.result-section {
+  width: 90%;
+  max-width: 400px;
+  background: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 8px 25px rgba(44, 90, 160, 0.15);
+  margin-bottom: 1.5rem;
+  border: 1px solid rgba(44, 90, 160, 0.1);
+}
+
+.result-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #2c5aa0;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.result-text {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #81d4fa;
+  margin: 0.5rem 0;
+  text-align: center;
+}
+
+.score-text {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #81d4fa;
+  margin: 0.5rem 0;
+  text-align: center;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.final-score {
+  margin-top: 0.8rem;
+  padding: 0.4rem;
+  background-color: #f9fafb;
+  border-radius: 6px;
+  text-align: center;
+}
+
+.chart-section {
+  width: 90%;
+  max-width: 400px;
+  background: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 8px 25px rgba(44, 90, 160, 0.15);
+  margin-bottom: 1.5rem;
+  border: 1px solid rgba(44, 90, 160, 0.1);
+}
+
+.chart-container {
+  position: relative;
+  width: 100%;
+  margin-bottom: 1.2rem;
+}
+
+.button-group {
+  width: 90%;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin-top: 1.5rem;
+}
+
+.submit-btn {
+  width: 100%;
+  padding: 0.875rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: white;
+  background: linear-gradient(135deg, #81d8d0 0%, #5f9ea0 100%);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(129, 216, 208, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  text-align: center;
+  text-decoration: none;
+  line-height: 1.5;
+}
+
+.submit-btn:hover {
+  background: linear-gradient(135deg, #5f9ea0 0%, #4a7c7a 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(129, 216, 208, 0.4);
+}
+
+.submit-btn:active {
+  transform: translateY(0);
+}
+
+@media (min-width: 768px) {
+  .muscle-container {
+    max-width: 800px;
+  }
+
+  .muscle-container h1 {
+    font-size: 2rem;
+  }
+
+  .result-title {
+    font-size: 1.5rem;
+  }
+
+  .result-text,
+  .score-text {
+    font-size: 1.125rem;
+  }
+
+  .chart-container {
+    height: 300px;
+  }
+
+  .button-group {
+    flex-direction: row;
+    justify-content: space-between;
+  }
+
+  .submit-btn {
+    width: 48%;
+  }
+}
+
+/* 簡潔的雙重指標說明樣式 */
+.concise-explanation {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e8f5e8 100%);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  border: 2px solid #81d8d0;
+  box-shadow: 0 4px 15px rgba(44, 90, 160, 0.1);
+}
+
+.concise-explanation h3 {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #2c5aa0;
+  margin-bottom: 1.2rem;
+  text-align: center;
+  border-bottom: 2px solid #81d8d0;
+  padding-bottom: 0.8rem;
+}
+
+.dual-metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.2rem;
+  margin-bottom: 1.5rem;
+}
+
+.metric {
+  background: white;
+  border-radius: 8px;
+  padding: 1.2rem;
+  text-align: center;
+  border: 1px solid #e1e8ed;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s ease;
+}
+
+.metric:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.metric h4 {
+  color: #2c5aa0;
+  margin-bottom: 0.8rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.metric p {
+  color: #666;
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.4;
+  text-align: center;
+}
+
+.why-both {
+  background: white;
+  border-radius: 8px;
+  padding: 1.2rem;
+  border: 1px solid #e1e8ed;
+}
+
+.why-both h4 {
+  color: #2c5aa0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.examples {
+  background: #f8f9fa;
+  border-radius: 6px;
+  padding: 1rem;
+  margin: 0 auto 1rem auto;
+  border-left: 3px solid #81d8d0;
+  max-width: 600px;
+  text-align: center;
+}
+
+.examples p {
+  color: #666;
+  margin: 0.5rem 0;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.solution {
+  background: linear-gradient(135deg, #e8f5e8 0%, #f0f8f0 100%);
+  border-radius: 6px;
+  padding: 1rem;
+  text-align: center;
+  border: 2px solid #81d8d0;
+}
+
+.solution p {
+  color: #2c5aa0;
+  margin: 0;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+@media (min-width: 768px) {
+  .concise-explanation {
+    padding: 2rem;
+  }
+
+  .concise-explanation h3 {
+    font-size: 1.5rem;
+  }
+
+  .dual-metrics {
+    gap: 1.5rem;
+  }
+
+  .metric {
+    padding: 1.5rem;
+  }
+
+  .examples {
+    max-width: 700px;
+  }
+}
+
+@media (max-width: 767px) {
+  .concise-explanation {
+    padding: 1rem;
+    margin: 0.8rem;
+    border-radius: 8px;
+  }
+
+  .concise-explanation h3 {
+    font-size: 1.1rem;
+    margin-bottom: 0.8rem;
+    padding-bottom: 0.5rem;
+  }
+
+  .dual-metrics {
+    grid-template-columns: 1fr;
+    gap: 0.8rem;
+    margin-bottom: 1rem;
+  }
+
+  .metric {
+    padding: 0.8rem;
+    text-align: left;
+    border-radius: 6px;
+  }
+
+  .metric h4 {
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+    text-align: left;
+  }
+
+  .metric p {
+    font-size: 0.85rem;
+    text-align: left;
+    line-height: 1.3;
+  }
+
+  .why-both {
+    padding: 0.8rem;
+    margin-top: 0.8rem;
+  }
+
+  .why-both h4 {
+    font-size: 1rem;
+    margin-bottom: 0.6rem;
+    text-align: left;
+  }
+
+  .examples {
+    padding: 0.6rem;
+    margin-bottom: 0.6rem;
+    font-size: 0.8rem;
+    line-height: 1.3;
+    max-width: 90%;
+  }
+
+  .solution {
+    padding: 0.6rem;
+    font-size: 0.8rem;
+    line-height: 1.3;
+  }
+
+  .muscle-container {
+    padding: 0.6rem;
+  }
+
+  .result-section {
+    margin-bottom: 1rem;
+  }
+
+  .chart-section {
+    margin-bottom: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .concise-explanation {
+    padding: 0.8rem;
+    margin: 0.6rem;
+  }
+
+  .metric {
+    padding: 0.6rem;
+  }
+
+  .metric h4 {
+    font-size: 0.9rem;
+  }
+
+  .metric p {
+    font-size: 0.8rem;
+  }
+
+  .why-both h4 {
+    font-size: 0.9rem;
+  }
+
+  .examples,
+  .solution {
+    font-size: 0.75rem;
+    padding: 0.5rem;
+  }
+}
+
+/* 評分標準參考樣式 */
+.scoring-reference {
+  background: linear-gradient(135deg, #f0f8ff 0%, #e6f3ff 100%);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  border: 2px solid #4a90e2;
+  box-shadow: 0 4px 15px rgba(74, 144, 226, 0.1);
+}
+
+.scoring-reference h3 {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #2c5aa0;
+  margin-bottom: 1.2rem;
+  text-align: center;
+  border-bottom: 2px solid #4a90e2;
+  padding-bottom: 0.8rem;
+}
+
+.reference-levels {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.level {
+  background: white;
+  border-radius: 8px;
+  padding: 1rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.8rem;
+  border: 1px solid #e1e8ed;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s ease;
+}
+
+.level:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.level-icon {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+.level-content {
+  flex: 1;
+}
+
+.level-content h4 {
+  color: #2c5aa0;
+  margin-bottom: 0.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.score-range {
+  color: #4a90e2;
+  font-weight: 600;
+  font-size: 0.9rem;
+  margin-bottom: 0.3rem;
+}
+
+.description {
+  color: #666;
+  font-size: 0.85rem;
+  line-height: 1.4;
+  margin: 0;
+}
+
+.your-score {
+  background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%);
+  color: white;
+  border-radius: 8px;
+  padding: 1rem;
+  text-align: center;
+  font-size: 1.1rem;
+}
+
+.your-score p {
+  margin: 0;
+  font-weight: 600;
+}
+
+/* 響應式設計 */
+@media (min-width: 1200px) {
+  .reference-levels {
+    grid-template-columns: repeat(5, 1fr);
+  }
+}
+
+@media (min-width: 768px) {
+  .scoring-reference {
+    padding: 2rem;
+  }
+
+  .scoring-reference h3 {
+    font-size: 1.5rem;
+  }
+
+  .reference-levels {
+    gap: 1.5rem;
+  }
+
+  .level {
+    padding: 1.5rem;
+  }
+}
+
+@media (max-width: 767px) {
+  .scoring-reference {
+    padding: 1rem;
+    margin: 0.8rem;
+  }
+
+  .reference-levels {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.8rem;
+  }
+
+  .level {
+    padding: 0.8rem;
+  }
+
+  .level-content h4 {
+    font-size: 0.9rem;
+  }
+
+  .score-range {
+    font-size: 0.8rem;
+  }
+
+  .description {
+    font-size: 0.8rem;
+  }
+
+  .your-score {
+    font-size: 1rem;
+    padding: 0.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .reference-levels {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* 榮譽鎖按鈕樣式 - 精緻徽章風格 - 強制覆蓋全局樣式 */
+.honor-lock-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  margin-left: 8px !important;
+  padding: 6px 14px !important;
+  background-color: rgba(0, 0, 0, 0.6) !important;
+  background-image: none !important;
+  border: 1px solid rgba(234, 179, 8, 0.5) !important;
+  border-radius: 9999px !important;
+  cursor: pointer !important;
+  font-size: 0.75rem !important;
+  font-weight: 500 !important;
+  color: #fcd34d !important;
+  line-height: 1.2 !important;
+  transition: all 0.3s ease !important;
+  position: relative !important;
+  animation: honorLockPulse 2s ease-in-out infinite !important;
+  box-shadow: 0 0 8px rgba(234, 179, 8, 0.2) !important;
+  letter-spacing: 0.5px !important;
+  white-space: nowrap !important;
+  width: fit-content !important;
+  min-width: auto !important;
+  max-width: none !important;
+  flex-shrink: 0 !important;
+  align-self: center !important;
+}
+
+.honor-lock-btn span:first-child {
+  font-size: 0.875rem !important;
+  display: inline-flex !important;
+  align-items: center !important;
+}
+
+.honor-lock-btn span:last-child {
+  font-size: 0.75rem !important;
+}
+
+.honor-lock-btn:hover {
+  background-color: rgba(234, 179, 8, 0.1) !important;
+  background-image: none !important;
+  border-color: rgba(234, 179, 8, 0.8) !important;
+  color: #fbbf24 !important;
+  box-shadow: 0 0 15px rgba(234, 179, 8, 0.3) !important;
+  transform: translateY(-1px) !important;
+}
+
+.honor-lock-btn:active {
+  transform: translateY(0) !important;
+  box-shadow: 0 0 10px rgba(234, 179, 8, 0.25) !important;
+}
+
+/* 呼吸動畫 - 讓鎖頭看起來在召喚用戶 */
+@keyframes honorLockPulse {
+  0%,
+  100% {
+    opacity: 1;
+    box-shadow: 0 0 8px rgba(234, 179, 8, 0.2);
+  }
+  50% {
+    opacity: 0.9;
+    box-shadow: 0 0 12px rgba(234, 179, 8, 0.4);
+  }
+}
+
+/* 確保按鈕在各種文本環境中都能正常顯示 - 強制覆蓋 */
+.result-text .honor-lock-btn,
+.score-text .honor-lock-btn,
+.your-score .honor-lock-btn,
+.result-text .honor-lock-btn *,
+.score-text .honor-lock-btn *,
+.your-score .honor-lock-btn * {
+  vertical-align: middle !important;
+  width: fit-content !important;
+  flex-shrink: 0 !important;
+}
+
+/* 防止父容器拉伸鎖頭按鈕 - 使用更兼容的方式 */
+strong .honor-lock-btn,
+.result-text .honor-lock-btn,
+.score-text .honor-lock-btn {
+  align-self: center !important;
+  flex-shrink: 0 !important;
+}

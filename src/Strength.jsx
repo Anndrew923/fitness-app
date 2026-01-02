@@ -1,7 +1,7 @@
 import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
-import { useUser } from './UserContext';
+import { useUser } from '../UserContext';
 import {
   RadarChart,
   PolarGrid,
@@ -13,15 +13,15 @@ import {
   LabelList,
 } from 'recharts';
 import PropTypes from 'prop-types';
-import { calculateStrengthScore } from './utils/strength/scoring';
-import { calculateOneRepMax } from './utils/strength/calculations';
-import { SCORE_LEVELS } from './standards';
+import { calculateStrengthScore } from '../utils/strength/scoring';
+import { calculateOneRepMax } from '../utils/strength/calculations';
+import { SCORE_LEVELS } from '../standards';
 
-import './Strength.css';
+import './StrengthPage.css';
 import { useTranslation } from 'react-i18next';
-import HonorUnlockModal from './components/shared/modals/HonorUnlockModal';
-import BottomNavBar from './components/BottomNavBar';
-import AdBanner from './components/AdBanner';
+import HonorUnlockModal from '../components/shared/modals/HonorUnlockModal';
+import BottomNavBar from '../components/BottomNavBar';
+import AdBanner from '../components/AdBanner';
 
 function Strength({ onComplete }) {
   const { userData, setUserData } = useUser();
