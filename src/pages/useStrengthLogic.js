@@ -3,6 +3,8 @@ import { useUser } from '../UserContext';
 import { calculateStrengthScore } from '../utils/strength/scoring';
 import { calculateOneRepMax } from '../utils/strength/calculations';
 import { useTranslation } from 'react-i18next';
+import { applyLinearExtension } from '../utils/ladderUtils';
+import { isUserVerified } from '../utils/verificationSystem';
 
 // Exercise type mapping
 const exerciseTypeMap = {
@@ -179,14 +181,17 @@ export function useStrengthLogic() {
         exerciseType === 'Pull-ups' ? userWeight + weightNum : weightNum;
       const oneRepMax = calculateOneRepMax(liftWeight, repsNum);
 
-      const isVerified = userData.isVerified === true;
+      // Phase 1-6: Apply linear extension with tier support
+      const verificationStatus = userData?.verifications || {};
+      const extendedScore = applyLinearExtension(finalScore, verificationStatus, 'limit_break');
+      const isVerified = isUserVerified(userData, 'limit_break');
       const isCapped = !isVerified && finalScore > 100;
 
       setState(prev => ({
         ...prev,
         max: oneRepMax.toFixed(2),
-        score: finalScore.toFixed(2),
-        rawScore: finalScore,
+        score: extendedScore.toFixed(2), // Display extended score
+        rawScore: finalScore, // Store raw score for unlock modal
         isCapped: isCapped,
       }));
     },
@@ -280,9 +285,9 @@ export function useStrengthLogic() {
 
       const rawAverageScore =
         rawScores.reduce((a, b) => a + b, 0) / rawScores.length;
-      const isVerified = userData.isVerified === true;
-      const scoreToSave =
-        !isVerified && rawAverageScore > 100 ? 100 : rawAverageScore;
+      // Phase 1-6: Apply linear extension on submit
+      const verificationStatus = userData?.verifications || {};
+      const scoreToSave = applyLinearExtension(rawAverageScore, verificationStatus, 'limit_break');
 
       const updatedScores = {
         ...userData.scores,

@@ -3,8 +3,8 @@ html {
   height: 100%;
   /* ✅ 使用 100% 而非 100vh，避免包含系統列高度 */
   /* 在畫框式佈局中，WebView 高度已自動排除系統列 */
-  /* ✅ 修改：將背景色改為白色，與 BottomNavBar 融合 */
-  background-color: #FFFFFF; /* 純白色，與導航列一致 */
+  /* ✅ Magitek Resonance: 背景設為深邃虛空，與 MagitekFrame 一致 */
+  background-color: var(--color-void-black, #050505);
 }
 
 body {
@@ -12,8 +12,8 @@ body {
   /* ✅ 關鍵：使用 100% 高度，跟隨父層 WebView（已排除系統列） */
   height: 100%;
   /* ✅ 不使用 100vh，因為在畫框式佈局中，WebView 高度已正確計算 */
-  /* ✅ 修改：將背景色改為白色，與 BottomNavBar 融合 */
-  background-color: #FFFFFF; /* 純白色，與導航列一致 */
+  /* ✅ Magitek Resonance: 背景設為深邃虛空，與 MagitekFrame 一致 */
+  background-color: var(--color-void-black, #050505);
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
     sans-serif;
@@ -30,11 +30,54 @@ body {
   height: 100%;
   /* ✅ 使用 100% 高度，跟隨 body（已排除系統列） */
   /* 不使用 100vh，避免包含系統列高度導致捲軸 */
-  /* ✅ 修改：將背景色改為白色，與 BottomNavBar 融合 */
-  background-color: #FFFFFF; /* 純白色，與導航列一致 */
+  /* ✅ Magitek Resonance: 背景設為深邃虛空，與 MagitekFrame 一致 */
+  background-color: var(--color-void-black, #050505);
 }
 
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
+}
+
+/* ============================================================
+   MAGITEK RESONANCE: 地毯式靜默
+   只殺死干擾物，不准殺死變數
+   ============================================================ */
+
+/* 地毯式靜默：精準針對標籤選擇器，不使用 * 選擇器 */
+/* 排除 CSS Module 的按鈕（它們有自己的樣式） */
+button:not([class*="button"]):not([class*="Button"]),
+input:not([class*="rune"]):not([class*="Rune"]),
+a {
+  outline: none !important;
+  -webkit-tap-highlight-color: transparent; /* 殺掉手機點擊的預設綠色 */
+}
+
+/* 針對 focus 狀態的靜默（同樣排除 CSS Module） */
+button:not([class*="button"]):not([class*="Button"]):focus,
+input:not([class*="rune"]):not([class*="Rune"]):focus,
+a:focus {
+  outline: none !important;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ============================================================
+   終極覆蓋方案：針對隱私權政策區域的 a 標籤強制清除螢光綠
+   ============================================================ */
+/* 針對隱私權政策區域的 a 標籤強制清除螢光綠 */
+.privacyNotice a,
+.privacyNotice a:focus,
+.privacyNotice a:active,
+.privacyNotice a:hover {
+  outline: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  -webkit-tap-highlight-color: transparent !important;
+}
+
+/* 強制覆蓋隱私權政策容器的邊框 */
+.privacyNotice {
+  border: 1px solid rgba(0, 191, 255, 0.2) !important;
+  outline: none !important;
+  box-shadow: none !important;
 }

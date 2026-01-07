@@ -5,12 +5,15 @@ import { auth, db } from '../firebase';
 import { doc, setDoc } from 'firebase/firestore';
 import * as standards from '../standards';
 import { useTranslation } from 'react-i18next';
+import { applyLinearExtension } from '../utils/ladderUtils';
+import { isUserVerified } from '../utils/verificationSystem';
 
 export function useCardioLogic() {
   const { userData, setUserData, saveUserData } = useUser();
   const navigate = useNavigate();
-  const { age, gender } = userData;
-  const isVerified = userData.isVerified === true;
+  const { age, gender } = userData || {};
+  // Phase 1-6: Use new verification system with tier support
+  const isVerified = isUserVerified(userData, 'limit_break');
   const { t } = useTranslation();
 
   // --- State Management ---
@@ -169,11 +172,14 @@ export function useCardioLogic() {
       
       const calculatedScore = calculateScoreFromStandard(parseFloat(distance), standard);
       
-      const formattedRawScore = parseFloat(Number(calculatedScore).toFixed(2));
+      // Phase 1-6: Apply linear extension with tier support (cooper_test)
+      const verificationStatus = userData?.verifications || {};
+      const finalScore = applyLinearExtension(calculatedScore, verificationStatus, 'limit_break');
+      const formattedRawScore = parseFloat(Number(finalScore).toFixed(2));
       const capped = !isVerified && calculatedScore > 100;
       
-      setRawScore(formattedRawScore);
-      setScore(formattedRawScore);
+      setRawScore(calculatedScore); // Store raw score for unlock modal
+      setScore(formattedRawScore); // Display final score (capped or extended)
       setIsCapped(capped);
 
     } else if (activeTab === '5km') {
@@ -185,11 +191,14 @@ export function useCardioLogic() {
       
       const calculatedScore = calculate5KmScoreLogic(totalSec);
       
-      const formattedRawScore = parseFloat(Number(calculatedScore).toFixed(2));
+      // Phase 1-6: Apply linear extension with tier support (5km_run)
+      const verificationStatus = userData?.verifications || {};
+      const finalScore = applyLinearExtension(calculatedScore, verificationStatus, 'limit_break');
+      const formattedRawScore = parseFloat(Number(finalScore).toFixed(2));
       const capped = !isVerified && calculatedScore > 100;
       
-      setRawScore(formattedRawScore);
-      setScore(formattedRawScore);
+      setRawScore(calculatedScore); // Store raw score for unlock modal
+      setScore(formattedRawScore); // Display final score (capped or extended)
       setIsCapped(capped);
     }
   };
@@ -228,8 +237,11 @@ export function useCardioLogic() {
       const updatedScores = JSON.parse(JSON.stringify(userData.scores || {}));
       const updatedTestInputs = JSON.parse(JSON.stringify(userData.testInputs || {}));
 
+      // Phase 1-6: Apply linear extension on submit
       const currentRawScore = rawScore !== null ? rawScore : score;
-      const scoreToSave = (!isVerified && currentRawScore > 100) ? 100 : currentRawScore;
+      const verificationStatus = userData?.verifications || {};
+      const tier = activeTab === 'cooper' ? 'limit_break' : 'limit_break'; // Both use limit_break tier
+      const scoreToSave = applyLinearExtension(currentRawScore, verificationStatus, tier);
       const scoreToSaveFormatted = parseFloat(Number(scoreToSave).toFixed(2));
 
       if (activeTab === 'cooper') {

@@ -1,16 +1,29 @@
-/* CSS 變數系統 - 統一管理所有樣式變數 */
+/* ============================================================
+   MAGITEK RESONANCE - 魔導共鳴視覺系統
+   ============================================================ */
 :root {
-  /* 顏色系統 */
-  --color-primary: #ff6f61;
-  --color-primary-light: #ff8a80;
-  --color-secondary: #81d8d0;
-  --color-secondary-light: #5f9ea0;
-  --color-success: #2ed573;
-  --color-warning: #ffa502;
-  --color-error: #ff4757;
-  --color-info: #3742fa;
+  /* ========== Magitek Core Colors (魔導核心色) ========== */
+  --color-void-black: #050505;          /* 深邃虛空底色 */
+  --color-magitek-gold: #FF8C00;        /* 熾熱金橘 (能量主色) */
+  --color-arcane-blue: #00BFFF;         /* 奧術藍 (科技輔色) */
 
-  /* 中性色 */
+  /* ========== Class Accents (職業動態色) ========== */
+  --color-class-str: #FF4500;           /* 力量紅 - 破壞者 */
+  --color-class-agi: #9400D3;           /* 瞬影紫 - 刺客 */
+
+  /* ========== Materials (材質定義) ========== */
+  --bg-void-space: url('/assets/textures/stardust_void.webp');    /* 星塵虛空底圖 */
+  --glass-reflection: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 100%);   /* 水晶折射感 */
+
+  /* ========== Borders & Glows (VFX 輝光效果) ========== */
+  --border-bloom: 1px solid rgba(0, 191, 255, 0.4);    /* 自發光邊框 */
+  --glow-magitek: 0 0 15px rgba(255, 140, 0, 0.5);     /* 金色能量暈光 */
+  --glow-arcane: 0 0 15px rgba(0, 191, 255, 0.4);      /* 藍色魔法暈光 */
+
+  /* ========== Typography (特殊數值字體) ========== */
+  --font-epic: 'Exocet', 'Cinematic', monospace;
+
+  /* ========== Legacy Compatibility (保留基礎中性色) ========== */
   --color-white: #ffffff;
   --color-black: #000000;
   --color-gray-50: #f8f9fa;
@@ -160,8 +173,8 @@ body {
 
 .input:focus {
   outline: none;
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(255, 111, 97, 0.1);
+  border-color: var(--color-arcane-blue);
+  box-shadow: var(--glow-arcane);
 }
 
 /* 響應式斷點 */

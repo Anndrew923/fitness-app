@@ -1,0 +1,123 @@
+/* ============================================================
+   MAGITEK BUTTON - 魔導能量按鈕
+   水晶碎片視覺，魔導金橘色能量
+   ============================================================ */
+
+.button {
+  /* 基礎樣式 */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
+  /* 餘裕：大氣感 */
+  min-height: 48px;
+  padding: 0.875rem 1.5rem; /* 左右留白增加 */
+  
+  /* 底色：魔導金橘漸層 */
+  background: linear-gradient(135deg, var(--color-magitek-gold) 0%, #FF6B00 100%);
+  color: white;
+  border: none;
+  border-radius: var(--border-radius-md);
+  
+  /* 字體 */
+  font-size: 1rem;
+  font-weight: 600;
+  font-family: inherit;
+  
+  /* 特效：文字能量感 */
+  text-shadow: 0 0 8px rgba(255, 140, 0, 0.5);
+  
+  /* 奪回發光權：因為 Module 會生成唯一的類名，我們在裡面加入 !important 就能確保它在「帝國法令」之後執行 */
+  box-shadow: 0 0 15px rgba(255, 140, 0, 0.5) !important; /* 強制拿回常駐輝光 */
+  
+  /* 神秘火焰：緩慢呼吸感動畫（強制啟用） */
+  animation: magicPulse 3s ease-in-out infinite !important; /* 強制啟用呼吸動畫，確保在任何全域重置之上 */
+  
+  /* 交互 */
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  
+  /* 確保可點擊 */
+  pointer-events: auto;
+  position: relative;
+  z-index: 1;
+}
+
+.button:hover:not(:disabled) {
+  background: linear-gradient(135deg, #FF9D00 0%, var(--color-magitek-gold) 100%);
+  box-shadow: 
+    0 0 20px rgba(255, 140, 0, 0.6),
+    0 4px 12px rgba(0, 0, 0, 0.3);
+  transform: translateY(-1px);
+  text-shadow: 0 0 12px rgba(255, 140, 0, 0.7);
+}
+
+.button:active:not(:disabled) {
+  transform: translateY(0) scale(0.98); /* 輕微縮放，模擬按壓感 */
+  /* 能量爆裂：徹底殲滅綠色閃爍，實裝魔導能量反應 */
+  background: linear-gradient(135deg, var(--color-magitek-gold) 0%, #FF6B00 100%) !important;
+  /* 碎裂光效：瞬發的亮度與光效擴張 */
+  filter: brightness(1.8) !important;
+  box-shadow: 
+    0 0 30px rgba(255, 140, 0, 0.9),
+    0 0 60px rgba(255, 140, 0, 0.6),
+    var(--glow-magitek) !important;
+  text-shadow: 0 0 15px rgba(255, 140, 0, 0.9) !important;
+}
+
+.button:disabled {
+  background: rgba(100, 100, 100, 0.5);
+  cursor: not-allowed;
+  box-shadow: none;
+  opacity: 0.6;
+  text-shadow: none;
+  /* 功能安全：確保 loading 狀態文字清晰可見 */
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 600;
+}
+
+/* 全寬變體 */
+.button.fullWidth {
+  width: 100%;
+}
+
+/* 小尺寸變體 */
+.button.small {
+  min-height: 40px;
+  padding: 0.625rem 1.25rem;
+  font-size: 0.875rem;
+}
+
+/* 大尺寸變體 */
+.button.large {
+  min-height: 56px;
+  padding: 1rem 2rem;
+  font-size: 1.125rem;
+}
+
+/* 神秘火焰呼吸動畫 */
+@keyframes magicPulse {
+  0%, 100% {
+    filter: brightness(1);
+    opacity: 0.9;
+    box-shadow: 0 0 15px rgba(255, 140, 0, 0.5) !important; /* 強制使用金色輝光 */
+  }
+  50% {
+    filter: brightness(1.3);
+    opacity: 1;
+    box-shadow: 0 0 25px rgba(255, 140, 0, 0.7) !important; /* 呼吸時增強輝光 */
+  }
+}
+
+/* 低效能模式 */
+@media (prefers-reduced-motion: reduce) {
+  .button {
+    transition: none;
+    animation: none; /* 移除動畫 */
+  }
+  
+  .button:hover:not(:disabled) {
+    transform: none;
+  }
+}
+

@@ -404,4 +404,38 @@ class VerificationSystem {
   }
 }
 
+/**
+ * Phase 1-6: Compatibility layer for verification status check
+ * Prioritizes new verifications Map structure, falls back to legacy isVerified boolean
+ * 
+ * @param {Object} userData - User data object
+ * @param {string} tier - Verification tier: 'limit_break' | 'rank_exam' (optional)
+ * @returns {boolean} True if user is verified (either via new Map or legacy boolean)
+ */
+export function isUserVerified(userData, tier = null) {
+  if (!userData) {
+    return false;
+  }
+
+  // Priority 1: Check new verifications Map structure
+  if (userData.verifications && typeof userData.verifications === 'object') {
+    // If tier specified, check specific tier
+    if (tier) {
+      const tierVerification = userData.verifications[tier];
+      return tierVerification?.status === 'verified';
+    }
+
+    // If no tier specified, check if any tier is verified
+    const tiers = Object.keys(userData.verifications);
+    for (const t of tiers) {
+      if (userData.verifications[t]?.status === 'verified') {
+        return true;
+      }
+    }
+  }
+
+  // Priority 2: Fallback to legacy isVerified boolean
+  return userData.isVerified === true;
+}
+
 export default VerificationSystem;

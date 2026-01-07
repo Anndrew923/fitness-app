@@ -2,7 +2,7 @@ import { useState, useCallback, useRef } from 'react';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
 import logger from '../utils/logger';
 import {
-  applyLimitBreak,
+  applyLinearExtension,
   calculateStatsAggregates,
   generateFilterTags,
 } from '../utils/ladderUtils';
@@ -80,9 +80,9 @@ export const useLadderSubmit = (
         sum: strength + explosive + muscleMass + bodyFat + baseCardio,
       });
 
-      // 3. Apply Limit Break Cap
-      const isVerified = userData.isVerified === true;
-      const finalScore = applyLimitBreak(rawCalculatedScore, isVerified);
+      // 3. Phase 1-6: Apply Linear Extension (replaces Limit Break)
+      const verificationStatus = userData?.verifications || {};
+      const finalScore = applyLinearExtension(rawCalculatedScore, verificationStatus, 'limit_break');
 
       // 4. Prepare 5KM Stat (Standalone)
       const run5kmScore = Number(scores.run_5km) || 0;

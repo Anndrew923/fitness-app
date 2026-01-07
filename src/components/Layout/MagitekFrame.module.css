@@ -1,0 +1,75 @@
+/* ============================================================
+   MAGITEK FRAME - 魔導外殼容器
+   深邃虛空背景 + 魔力粒子 VFX 層
+   ============================================================ */
+
+.container {
+  /* 深邃虛空背景 */
+  background: var(--color-void-black) var(--bg-void-space);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  
+  /* 全螢幕佈局 */
+  min-height: 100vh;
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+  
+  /* 確保 z-index 層級正確 */
+  z-index: 0;
+}
+
+/* 魔力粒子 VFX 層 - 使用 ::after 虛擬元素 */
+.container::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  
+  /* 噪聲紋理（如果沒有圖片，使用 CSS 生成） */
+  background-image: 
+    url('/assets/textures/noise.png'),
+    radial-gradient(circle at 20% 50%, rgba(0, 191, 255, 0.03) 0%, transparent 50%),
+    radial-gradient(circle at 80% 50%, rgba(255, 140, 0, 0.02) 0%, transparent 50%);
+  background-size: 200px 200px, 100% 100%, 100% 100%;
+  background-position: 0 0, center, center;
+  background-repeat: repeat;
+  
+  /* 極低透明度，模擬空氣中飄浮的魔力粒子 */
+  opacity: 0.03;
+  
+  /* 不阻擋交互 */
+  pointer-events: none;
+  
+  /* 緩慢漂移動畫，模擬魔力流動 */
+  animation: magicDrift 20s linear infinite;
+  
+  /* 確保在背景之上，內容之下 */
+  z-index: 1;
+}
+
+/* 魔力粒子漂移動畫 */
+@keyframes magicDrift {
+  from {
+    transform: translate(0, 0);
+  }
+  to {
+    transform: translate(2%, 2%);
+  }
+}
+
+/* 內容層 - 確保在 VFX 層之上 */
+.content {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  min-height: 100vh;
+}
+
+/* 低效能模式：減少動畫 */
+@media (prefers-reduced-motion: reduce) {
+  .container::after {
+    animation: none;
+  }
+}
+

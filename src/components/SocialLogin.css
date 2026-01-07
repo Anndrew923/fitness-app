@@ -1,11 +1,11 @@
 .social-login-container {
-  margin-top: 20px;
+  margin-top: 0; /* 移除頂部間距，因為已在 googleLoginContainer 中處理 */
 }
 
 .divider {
   position: relative;
   text-align: center;
-  margin: 20px 0;
+  margin: 15px 0;
 }
 
 .divider::before {
@@ -15,14 +15,16 @@
   left: 0;
   right: 0;
   height: 1px;
-  background: #e5e7eb;
+  background: rgba(0, 191, 255, 0.3); /* 奧術藍色分隔線 */
 }
 
 .divider span {
-  background: white;
+  background: rgba(5, 5, 5, 0.5); /* 深色背景以配合魔導化容器 */
   padding: 0 15px;
-  color: #6b7280;
+  color: rgba(255, 255, 255, 0.7); /* 白色文字 */
   font-size: 14px;
+  position: relative;
+  z-index: 1;
 }
 
 .social-buttons {
@@ -31,16 +33,24 @@
   gap: 12px;
 }
 
-.social-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+/* 魔導化重塑：鑲嵌在藍色能量中的透明水晶 - 強制水晶化 */
+.social-btn,
+button.social-btn,
+button.google-btn,
+.social-btn.google-btn {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
   gap: 12px;
   padding: 12px 16px;
-  border: 1px solid #e5e7eb;
+  /* 魔導化重塑：鑲嵌在藍色能量中的透明水晶 */
+  background: rgba(255, 255, 255, 0.05) !important; /* 透明度要夠高，顯出深度感 */
+  border: var(--border-bloom) !important; /* 必須看到藍色發光邊框 */
+  box-shadow: var(--glow-arcane) !important; /* 讓它懸浮在奧術光芒中 */
+  backdrop-filter: blur(12px) !important; /* 增強水晶質感 */
+  -webkit-backdrop-filter: blur(12px) !important;
   border-radius: 8px;
-  background: white;
-  color: #374151;
+  color: rgba(255, 255, 255, 0.9) !important; /* 白色文字 */
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
@@ -48,18 +58,25 @@
   width: 100%;
   position: relative;
   overflow: hidden;
+  /* 強制覆蓋：確保沒有任何賽博殘留 */
+  outline: none !important;
 }
 
-.social-btn:hover {
-  background: #f9fafb;
-  border-color: #d1d5db;
+.social-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.1) !important; /* 懸浮時稍微增亮 */
+  border-color: var(--color-arcane-blue) !important;
   transform: translateY(-1px);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 
+    var(--glow-arcane),
+    0 0 20px rgba(0, 191, 255, 0.4) !important; /* 增強懸浮光效 */
 }
 
 .social-btn:active {
   transform: translateY(0);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  /* 能量爆裂：點擊時的能量反應 */
+  background: rgba(255, 255, 255, 0.1) !important;
+  box-shadow: var(--glow-arcane) !important;
+  filter: brightness(1.2);
 }
 
 .social-btn:disabled {
@@ -74,18 +91,85 @@
   flex-shrink: 0;
 }
 
-/* Google 按鈕樣式 */
+/* Google 按鈕樣式 - 魔導化 */
 .google-btn {
-  color: #374151;
+  color: rgba(255, 255, 255, 0.9);
 }
 
-.google-btn:hover {
-  border-color: #4285f4;
-  color: #4285f4;
+.google-btn:hover:not(:disabled) {
+  border-color: var(--color-arcane-blue);
+  color: rgba(255, 255, 255, 1);
+  box-shadow: var(--glow-arcane);
+}
+
+/* ============================================================
+   終極覆蓋方案：確保 Google 按鈕樣式不被任何其他樣式覆蓋
+   ============================================================ */
+/* 終極覆蓋：確保 Google 按鈕樣式不被任何其他樣式覆蓋 */
+button.social-btn.google-btn,
+button.google-btn.social-btn,
+.social-login-container button.social-btn,
+.social-login-container button.google-btn,
+.googleLoginContainer button.social-btn,
+.googleLoginContainer button.google-btn {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 12px !important;
+  padding: 12px 16px !important;
+  background: rgba(255, 255, 255, 0.05) !important;
+  border: var(--border-bloom) !important;
+  box-shadow: var(--glow-arcane) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  border-radius: 8px !important;
+  color: rgba(255, 255, 255, 0.9) !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  width: 100% !important;
+  position: relative !important;
+  overflow: hidden !important;
+  outline: none !important;
+  /* 強制清除任何可能的綠色殘留 */
+  -webkit-tap-highlight-color: transparent !important;
+  /* 強制清除任何可能的邊框殘留 */
+  border-color: rgba(0, 191, 255, 0.4) !important;
+}
+
+/* 確保 hover 狀態也正確 */
+button.social-btn.google-btn:hover:not(:disabled),
+button.google-btn.social-btn:hover:not(:disabled),
+.social-login-container button.social-btn:hover:not(:disabled),
+.social-login-container button.google-btn:hover:not(:disabled),
+.googleLoginContainer button.social-btn:hover:not(:disabled),
+.googleLoginContainer button.google-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border-color: var(--color-arcane-blue) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 
+    var(--glow-arcane),
+    0 0 20px rgba(0, 191, 255, 0.4) !important;
+}
+
+/* 確保 active 狀態也正確 */
+button.social-btn.google-btn:active,
+button.google-btn.social-btn:active,
+.social-login-container button.social-btn:active,
+.social-login-container button.google-btn:active,
+.googleLoginContainer button.social-btn:active,
+.googleLoginContainer button.google-btn:active {
+  transform: translateY(0) !important;
+  background: rgba(255, 255, 255, 0.1) !important;
+  box-shadow: var(--glow-arcane) !important;
+  filter: brightness(1.2) !important;
 }
 
 .google-icon {
-  fill: #4285f4;
+  fill: rgba(255, 255, 255, 0.9); /* 白色圖標 */
+  /* 給圖標也上一點魔力：奧術藍光暈 */
+  filter: drop-shadow(0 0 5px var(--color-arcane-blue)) !important;
 }
 
 /* 響應式設計 */
@@ -101,22 +185,28 @@
   }
 }
 
-/* 載入狀態 */
+/* 載入狀態 - 魔導化 */
 .social-btn:disabled {
-  background: #f3f4f6;
-  color: #9ca3af;
+  background: rgba(5, 5, 5, 0.3);
+  color: rgba(255, 255, 255, 0.5);
+  border-color: rgba(0, 191, 255, 0.2);
 }
 
 .social-btn:disabled svg {
-  opacity: 0.5;
+  opacity: 0.4;
 }
 
-/* 初始化狀態樣式 */
+/* 靈魂共鳴初始化狀態樣式 - 魔導化 */
 .initialization-status {
   text-align: center;
   margin-top: 8px;
-  color: #718096;
+  color: rgba(255, 255, 255, 0.6);
   font-size: 12px;
+  /* 套用三層輝光特效 */
+  text-shadow: 
+    0 0 6px var(--color-magitek-gold),
+    0 0 12px var(--color-magitek-gold),
+    0 0 20px rgba(255, 140, 0, 0.8);
 }
 
 .social-btn:disabled:hover {

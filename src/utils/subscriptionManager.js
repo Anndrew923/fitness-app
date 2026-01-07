@@ -49,22 +49,54 @@ class SubscriptionManager {
   }
 
   /**
-   * 獲取訂閱狀態
+   * Phase 1-6: 獲取訂閱狀態（支援新的 subscription 欄位結構）
+   * 優先讀取 userData.subscription，若無則從 RevenueCat 獲取
+   * 
    * @param {string} userId - 用戶 ID
+   * @param {Object} userData - 用戶數據（可選，用於讀取 subscription 欄位）
+   * @returns {Object} { isVip, expiryDate, platform, isEarlyAdopter, status }
    */
-  async getSubscriptionStatus(userId) {
+  async getSubscriptionStatus(userId, userData = null) {
+    // Phase 1-6: 優先讀取 userData.subscription 欄位
+    if (userData?.subscription && typeof userData.subscription === 'object') {
+      const sub = userData.subscription;
+      const isPro = sub.status === 'pro' || sub.isEarlyAdopter === true;
+      logger.debug('[SubscriptionManager] 從 userData.subscription 讀取訂閱狀態', {
+        status: sub.status,
+        isEarlyAdopter: sub.isEarlyAdopter,
+        isPro,
+      });
+      return {
+        isVip: isPro,
+        isPro: isPro,
+        expiryDate: sub.expiryDate || null,
+        platform: 'local',
+        isEarlyAdopter: sub.isEarlyAdopter === true,
+        status: sub.status || 'inactive',
+      };
+    }
+
     if (!this.isSupported()) {
       // 網頁版：返回預設狀態
       return {
         isVip: false,
+        isPro: false,
         expiryDate: null,
         platform: 'web',
+        isEarlyAdopter: false,
+        status: 'inactive',
       };
     }
 
     if (!this.isInitialized || !this.Purchases) {
       logger.warn('RevenueCat 未初始化');
-      return { isVip: false, expiryDate: null };
+      return { 
+        isVip: false, 
+        isPro: false,
+        expiryDate: null,
+        isEarlyAdopter: false,
+        status: 'inactive',
+      };
     }
 
     try {
@@ -76,12 +108,22 @@ class SubscriptionManager {
 
       return {
         isVip,
+        isPro: isVip,
         expiryDate: expiryDate ? new Date(expiryDate).getTime() : null,
         platform: 'native',
+        isEarlyAdopter: false, // RevenueCat 不提供 Early Adopter 狀態
+        status: isVip ? 'pro' : 'inactive',
       };
     } catch (error) {
       logger.error('獲取訂閱狀態失敗:', error);
-      return { isVip: false, expiryDate: null, error: error.message };
+      return { 
+        isVip: false, 
+        isPro: false,
+        expiryDate: null, 
+        error: error.message,
+        isEarlyAdopter: false,
+        status: 'inactive',
+      };
     }
   }
 

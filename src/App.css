@@ -80,7 +80,23 @@ p {
   line-height: 1.4;
 }
 
+/* ✅ Magitek Resonance: 移除全域 button 樣式，避免與 MagitekButton 衝突 */
+/* 所有按鈕應使用 MagitekButton 組件，展現魔導金橘色能量 */
+/* 
 button,
+input {
+  display: block;
+  width: 100%;
+  max-width: 300px;
+  margin: 0.4rem auto;
+  padding: 0.6rem;
+  font-size: 0.9rem;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+}
+*/
+
+/* ✅ 保留 input 的基本樣式，但移除 button 樣式 */
 input {
   display: block;
   width: 100%;
@@ -92,6 +108,19 @@ input {
   border: 1px solid #ccc;
 }
 
+/* ✅ Magitek Resonance: 舊的綠色按鈕樣式已移除 */
+/* 所有按鈕應使用 MagitekButton 組件，展現魔導金橘色能量 */
+/* 保留 comment-delete-btn 的特殊樣式 */
+button.comment-delete-btn {
+  background: transparent !important;
+  width: auto !important;
+  max-width: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+/* ✅ 移除：舊的綠色按鈕樣式已註解，避免與 MagitekButton 衝突 */
+/* 
 button:not(.comment-delete-btn) {
   background: linear-gradient(135deg, #81d8d0 0%, #5f9ea0 100%);
   color: white;
@@ -101,14 +130,6 @@ button:not(.comment-delete-btn) {
   font-weight: 600;
   transition: all 0.3s ease;
   box-shadow: 0 2px 6px rgba(129, 216, 208, 0.3);
-}
-
-button.comment-delete-btn {
-  background: transparent !important;
-  width: auto !important;
-  max-width: none !important;
-  border-radius: 0 !important;
-  box-shadow: none !important;
 }
 
 button:not(.comment-delete-btn):hover:not(:disabled) {
@@ -121,6 +142,7 @@ button:not(.comment-delete-btn):disabled {
   background-color: #ccc;
   cursor: not-allowed;
 }
+*/
 
 .radar-chart {
   max-width: 100%;
@@ -162,8 +184,8 @@ code {
   min-height: 100%;
   display: flex;
   flex-direction: column;
-  /* ✅ 修改：將背景色改為白色，與 BottomNavBar 融合 */
-  background-color: #ffffff; /* 純白色，與導航列一致 */
+  /* ✅ Magitek Resonance: 背景透明，讓 MagitekFrame 的深邃虛空背景顯示 */
+  background-color: transparent;
   width: 100%;
 }
 

@@ -312,7 +312,7 @@ export function checkEarlyBirdStatus() {
   return isEarlyBird;
 }
 
-// 1. 格言庫
+// 1. 格言庫 (Phase 1-6: Expanded)
 const QUOTE_LIBRARY = [
   '痛苦是暫時的，榮耀是永恆的。',
   '輕量化是給弱者看的，重量是給強者扛的。',
@@ -323,6 +323,17 @@ const QUOTE_LIBRARY = [
   'Shut up and Squat.',
   '既然還沒死，就再做一下。',
   '戰勝昨天的自己，就是最強的勝利。',
+  '沒有痛苦，就沒有收穫。',
+  '每一次失敗都是通往成功的階梯。',
+  '強者不是沒有眼淚，而是含著眼淚繼續奔跑。',
+  '你的身體能承受的，遠比你想象的更多。',
+  '訓練是痛苦的，但後悔更痛苦。',
+  '不要停止，直到你為自己感到驕傲。',
+  '極限只存在於你的腦海中。',
+  '當你覺得累的時候，記住：你的對手也在累。',
+  '成功不是終點，失敗也不是末日。',
+  '真正的強者，是在最黑暗的時刻依然堅持。',
+  '每一次舉起，都是對過去的超越。',
 ];
 
 // 2. 機率表
@@ -340,7 +351,19 @@ const LOOT_RATES = {
  */
 
 /**
- * 計算每日抽獎結果
+ * Phase 1-6: 多巴胺獎勵系統 (Dopamine Reward System)
+ * 根據 Loot Table 比例（60% 格言、30% 資源、9% Buff、1% 傳奇 Buff）實作獎勵判定
+ * 
+ * @param {number} userRawScore - 用戶當次提交的原始分數
+ * @param {boolean} isEarlyAdopter - 是否為老玩家 (權限判定)
+ * @returns {Object} 獎勵物件 { type, value, display, rarity }
+ */
+export function getRandomDopamineReward(userRawScore, isEarlyAdopter = false) {
+  return getDailyGachaResult(userRawScore, isEarlyAdopter);
+}
+
+/**
+ * 計算每日抽獎結果 (Legacy alias for getRandomDopamineReward)
  * @param {number} userRawScore - 用戶當次提交的原始分數
  * @param {boolean} isEarlyAdopter - 是否為老玩家 (權限判定)
  * @returns {Object} 獎勵物件 { type, value, display, rarity }

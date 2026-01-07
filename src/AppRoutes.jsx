@@ -18,7 +18,7 @@ const Muscle = React.lazy(() => import('./pages/MusclePage'));
 const FFMI = React.lazy(() => import('./pages/FFMIPage'));
 const ArmSize = React.lazy(() => import('./pages/tools/ArmSize'));
 
-const Login = React.lazy(() => import('./pages/LoginPage'));
+const Login = React.lazy(() => import('./pages/Login/LoginPage'));
 const History = React.lazy(() => import('./pages/HistoryPage'));
 const PrivacyPolicy = React.lazy(() => import('./pages/PrivacyPolicyPage'));
 const Terms = React.lazy(() => import('./pages/TermsPage'));
@@ -36,6 +36,7 @@ const Verification = React.lazy(() => import('./pages/Verification'));
 const AdminPanel = React.lazy(() => import('./pages/AdminPanel'));
 const Timer = React.lazy(() => import('./pages/Timer'));
 const SkillTreePage = React.lazy(() => import('./pages/SkillTreePage'));
+const DebugToolPage = React.lazy(() => import('./pages/DebugToolPage'));
 
 function ProtectedRoute({ element }) {
   const { userData } = useUser();
@@ -55,17 +56,23 @@ function ProtectedRoute({ element }) {
     '/settings', // 允許訪客進入設定頁面
     '/skill-tree', // 允許訪客進入技能數頁面
     '/training-tools', // 允許訪客進入工具頁面
+    '/debug-tool', // 允許訪客進入測試頁面
   ];
-  if (
-    isGuest &&
-    guestAllowedPaths.some(path => currentPath.startsWith(path))
-  ) {
+  if (isGuest && guestAllowedPaths.some(path => currentPath.startsWith(path))) {
     return element;
   }
 
   // 再檢查登入狀態
   if (!auth.currentUser) {
+    // 保存原始路徑，以便登入後返回
+    const returnPath = currentPath !== '/login' ? currentPath : '/user-info';
+    sessionStorage.setItem('returnPath', returnPath);
     return <Navigate to="/login" />;
+  }
+
+  // 測試頁面跳過基本資料驗證
+  if (currentPath === '/debug-tool') {
+    return element;
   }
 
   if (currentPath !== '/user-info' && currentPath !== '/login') {
@@ -89,7 +96,14 @@ ProtectedRoute.propTypes = {
   element: PropTypes.element.isRequired,
 };
 
-function AppRoutes({ testData, onLogin, onLogout, handleTestComplete, clearTestData, handleGuestMode }) {
+function AppRoutes({
+  testData,
+  onLogin,
+  onLogout,
+  handleTestComplete,
+  clearTestData,
+  handleGuestMode,
+}) {
   const { t } = useTranslation();
 
   return (
@@ -108,10 +122,7 @@ function AppRoutes({ testData, onLogin, onLogout, handleTestComplete, clearTestD
               auth.currentUser ? (
                 <Navigate to="/user-info" />
               ) : (
-                <Welcome
-                  onLogin={onLogin}
-                  onGuestMode={handleGuestMode}
-                />
+                <Welcome onLogin={onLogin} onGuestMode={handleGuestMode} />
               )
             }
           />
@@ -256,6 +267,10 @@ function AppRoutes({ testData, onLogin, onLogout, handleTestComplete, clearTestD
             path="/admin"
             element={<ProtectedRoute element={<AdminPanel />} />}
           />
+          <Route
+            path="/debug-tool"
+            element={<ProtectedRoute element={<DebugToolPage />} />}
+          />
           <Route path="*" element={<div>{t('common.notFound')}</div>} />
         </Routes>
       </div>
@@ -273,4 +288,3 @@ AppRoutes.propTypes = {
 };
 
 export default AppRoutes;
-

@@ -5,6 +5,7 @@
 
 /**
  * Apply Limit Break: Cap unverified users' scores at 100
+ * @deprecated Use applyLinearExtension instead for Phase 1-6+
  * @param {number} rawScore - Raw calculated score
  * @param {boolean} isVerified - Whether user is verified
  * @returns {number} Capped score (100.00 if unverified and > 100, otherwise rawScore)
@@ -14,6 +15,36 @@ export const applyLimitBreak = (rawScore, isVerified) => {
     return 100.0;
   }
   return rawScore;
+};
+
+/**
+ * Phase 1-6: Apply Linear Extension for scores > 100
+ * Supports linear growth beyond 100 points for verified users
+ * 
+ * @param {number} rawScore - Raw calculated score
+ * @param {boolean|Object} verificationStatus - Verification status (boolean for legacy, or object with tier status)
+ * @param {string} tier - Verification tier: 'limit_break' | 'rank_exam' (optional, defaults to 'limit_break')
+ * @returns {number} Extended score (linear growth if verified, capped at 100 if unverified)
+ */
+export const applyLinearExtension = (rawScore, verificationStatus, tier = 'limit_break') => {
+  // Handle legacy boolean verification status
+  let isVerified = false;
+  if (typeof verificationStatus === 'boolean') {
+    isVerified = verificationStatus;
+  } else if (verificationStatus && typeof verificationStatus === 'object') {
+    // Check verification status from verifications Map
+    const tierStatus = verificationStatus[tier];
+    isVerified = tierStatus?.status === 'verified';
+  }
+
+  // If unverified and score > 100, cap at 100
+  if (!isVerified && rawScore > 100) {
+    return 100.0;
+  }
+
+  // If verified, allow linear extension beyond 100
+  // Linear formula: score = rawScore (no cap, linear growth)
+  return Number(rawScore.toFixed(2));
 };
 
 /**

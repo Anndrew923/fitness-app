@@ -33,7 +33,15 @@ export function useLoginLogic(onLogin) {
     const unsubscribe = auth.onAuthStateChanged(user => {
       if (user) {
         console.log('用戶已登入:', user.email);
-        navigate('/user-info');
+        // 檢查是否有保存的返回路徑
+        const returnPath = sessionStorage.getItem('returnPath');
+        if (returnPath && returnPath !== '/login') {
+          console.log('導航回原路徑:', returnPath);
+          sessionStorage.removeItem('returnPath');
+          navigate(returnPath);
+        } else {
+          navigate('/user-info');
+        }
       }
     });
 
@@ -194,8 +202,16 @@ export function useLoginLogic(onLogin) {
       }
 
       setTimeout(() => {
-        console.log('導航到 /user-info');
-        navigate('/user-info');
+        // 檢查是否有保存的返回路徑
+        const returnPath = sessionStorage.getItem('returnPath');
+        if (returnPath && returnPath !== '/login') {
+          console.log('導航回原路徑:', returnPath);
+          sessionStorage.removeItem('returnPath');
+          navigate(returnPath);
+        } else {
+          console.log('導航到 /user-info');
+          navigate('/user-info');
+        }
       }, 500);
     } catch (error) {
       console.error('登入/註冊失敗:', error.code, error.message);
@@ -226,8 +242,16 @@ export function useLoginLogic(onLogin) {
   };
 
   const handleSocialLogin = () => {
-    console.log('社交登入成功，導航到 /user-info');
-    navigate('/user-info');
+    // 檢查是否有保存的返回路徑
+    const returnPath = sessionStorage.getItem('returnPath');
+    if (returnPath && returnPath !== '/login') {
+      console.log('社交登入成功，導航回原路徑:', returnPath);
+      sessionStorage.removeItem('returnPath');
+      navigate(returnPath);
+    } else {
+      console.log('社交登入成功，導航到 /user-info');
+      navigate('/user-info');
+    }
   };
 
   const handleSocialError = errorMessage => {

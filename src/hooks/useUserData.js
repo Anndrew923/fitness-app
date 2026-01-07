@@ -100,6 +100,16 @@ export function useUserData(initialState, isMockMode) {
             // Phase 1-5: Ensure subscription field is read correctly
             subscription: subscriptionLogic.migrateSubscription(firebaseData),
             rpgStats: rpgManager.migrateRpgStats(firebaseData),
+            // Phase 1-6: Honor Seals Economy Schema
+            honorSeals: Number(firebaseData.honorSeals) || 0,
+            monthlySeals: Number(firebaseData.monthlySeals) || 0,
+            verifications: firebaseData.verifications || {},
+            // Phase 1-6: Decoration Interfaces (V3.4)
+            equippedFrameId: String(firebaseData.equippedFrameId || ''),
+            equippedBannerId: String(firebaseData.equippedBannerId || ''),
+            unlockedCosmetics: Array.isArray(firebaseData.unlockedCosmetics) 
+              ? firebaseData.unlockedCosmetics 
+              : [],
           };
 
           // Phase 1-5: Check and complete missing fields (old user migration)
@@ -167,6 +177,14 @@ export function useUserData(initialState, isMockMode) {
             userId: currentUser.uid,
             subscription: subscriptionLogic.initializeSubscription(),
             rpgStats: rpgManager.initializeRpgStats(),
+            // Phase 1-6: Honor Seals Economy Schema
+            honorSeals: 0,
+            monthlySeals: 0,
+            verifications: {},
+            // Phase 1-6: Decoration Interfaces (V3.4)
+            equippedFrameId: '',
+            equippedBannerId: '',
+            unlockedCosmetics: [],
           };
 
           // Daily Login Tracker: Initialize login stats for new user
@@ -325,6 +343,16 @@ export function useUserData(initialState, isMockMode) {
             data.subscription
           ),
           rpgStats: data.rpgStats || rpgManager.initializeRpgStats(),
+          // Phase 1-6: Honor Seals Economy Schema
+          honorSeals: Number(data.honorSeals) || 0,
+          monthlySeals: Number(data.monthlySeals) || 0,
+          verifications: data.verifications || {},
+          // Phase 1-6: Decoration Interfaces (V3.4)
+          equippedFrameId: String(data.equippedFrameId || ''),
+          equippedBannerId: String(data.equippedBannerId || ''),
+          unlockedCosmetics: Array.isArray(data.unlockedCosmetics) 
+            ? data.unlockedCosmetics 
+            : [],
           // Emergency fix: Protect verification fields
           ...subscriptionLogic.protectVerificationFields(
             existingVerificationFields,

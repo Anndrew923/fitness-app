@@ -1,9 +1,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import SocialLogin from '../components/SocialLogin';
-import PrivacyPolicyModal from '../components/PrivacyPolicyModal';
-import './LoginPage.css';
-import { useLoginLogic } from '../hooks/useLoginLogic';
+import SocialLogin from '../../components/SocialLogin';
+import PrivacyPolicyModal from '../../components/PrivacyPolicyModal';
+import MagitekButton from '../../components/Common/MagitekButton/MagitekButton';
+import RuneInput from '../../components/Common/RuneInput/RuneInput';
+import styles from './LoginPage.module.css';
+import { useLoginLogic } from '../../hooks/useLoginLogic';
 
 function Login({ onLogin }) {
   const {
@@ -31,38 +33,37 @@ function Login({ onLogin }) {
   } = useLoginLogic(onLogin);
 
   return (
-    <div className="login-container">
-      <h1 className="text-2xl font-bold text-center mb-6">
+    <div className={styles.loginContainer}>
+      <div className={styles.crystalCard}>
+        <h1 className={styles.title}>
         {isRegistering ? t('login.register') : t('login.login')}
       </h1>
-      {error && <p className="error-message">{error}</p>}
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700">
+      {error && <p className={styles.errorMessage}>{error}</p>}
+      <form onSubmit={handleSubmit} className={styles.form}>
+        <div className={styles.field}>
+          <label className={styles.label}>
             {t('login.email')}
           </label>
-          <input
+          <RuneInput
             type="email"
             value={email}
             onChange={e => setEmail(e.target.value)}
             placeholder={t('login.emailPlaceholder')}
-            className="input-field"
             required
             onInvalid={handleEmailInvalid}
             onInput={e => e.currentTarget.setCustomValidity('')}
             disabled={loading}
           />
         </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700">
+        <div className={styles.field}>
+          <label className={styles.label}>
             {t('login.password')}
           </label>
-          <input
+          <RuneInput
             type="password"
             value={password}
             onChange={e => setPassword(e.target.value)}
             placeholder={t('login.passwordPlaceholder')}
-            className="input-field"
             required
             minLength={6}
             onInvalid={handlePasswordInvalid}
@@ -70,24 +71,10 @@ function Login({ onLogin }) {
             disabled={loading}
           />
         </div>
-        <div
-          style={{
-            width: '100%',
-            display: 'flex',
-            justifyContent: 'flex-end',
-            marginBottom: '8px',
-          }}
-        >
+        <div className={styles.rememberMeContainer}>
           <label
             htmlFor="rememberMe"
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              cursor: 'pointer',
-              whiteSpace: 'nowrap',
-              fontSize: '14px',
-              color: '#555',
-            }}
+            className={styles.rememberMeLabel}
           >
             <input
               id="rememberMe"
@@ -95,43 +82,52 @@ function Login({ onLogin }) {
               checked={rememberMe}
               onChange={e => setRememberMe(e.target.checked)}
               disabled={loading}
-              style={{ margin: 0 }}
+              className={styles.rememberMeCheckbox}
             />
-            <span style={{ marginLeft: '6px' }}>{t('login.rememberMe')}</span>
+            <span>{t('login.rememberMe')}</span>
           </label>
         </div>
-        <button type="submit" className="submit-btn" disabled={loading}>
+        <MagitekButton
+          type="submit"
+          disabled={loading}
+          fullWidth
+        >
           {loading
             ? t('common.loading')
             : isRegistering
             ? t('login.register')
             : t('login.login')}
-        </button>
+        </MagitekButton>
       </form>
-      <button
-        onClick={() => setIsRegistering(!isRegistering)}
-        className="toggle-btn"
-      >
-        {isRegistering ? t('login.switchToLogin') : t('login.switchToRegister')}
-      </button>
+      {/* 神秘入口底盤 - 功能按鈕區域 */}
+      <div className={styles.portalPanel}>
+        <MagitekButton
+          onClick={() => setIsRegistering(!isRegistering)}
+          fullWidth
+          size="small"
+        >
+          {isRegistering ? t('login.switchToLogin') : t('login.switchToRegister')}
+        </MagitekButton>
 
-      <button
-        onClick={handleGuestMode}
-        className="guest-btn"
-        disabled={loading}
-      >
-        {t('login.guestMode')}
-      </button>
+        <MagitekButton
+          onClick={handleGuestMode}
+          disabled={loading}
+          fullWidth
+          size="small"
+        >
+          {t('login.guestMode')}
+        </MagitekButton>
+      </div>
 
-      <div className="privacy-notice">
+      <div className={styles.privacyNotice}>
         {i18n.language && i18n.language.toLowerCase().startsWith('zh') ? (
           <p>
             若繼續操作，即表示你同意最強肉體
-            <a className="privacy-link" href="/terms">
+            <a className={styles.privacyLink} href="/terms">
               使用條款
             </a>
             。請參閱我們的
-            <a className="privacy-link" href="/privacy-policy">
+            <a className={styles.privacyLink} href="/privacy-policy">
               隱私權政策
             </a>
             。
@@ -139,11 +135,11 @@ function Login({ onLogin }) {
         ) : (
           <p>
             By continuing, you agree to the Ultimate Physique
-            <a className="privacy-link" href="/terms">
+            <a className={styles.privacyLink} href="/terms">
               Terms of Service
             </a>
             . Please review our
-            <a className="privacy-link" href="/privacy-policy">
+            <a className={styles.privacyLink} href="/privacy-policy">
               Privacy Policy
             </a>
             .
@@ -151,11 +147,15 @@ function Login({ onLogin }) {
         )}
       </div>
 
-      <SocialLogin onLogin={handleSocialLogin} onError={handleSocialError} />
+      {/* Google 登入 - 魔導化水晶容器 */}
+      <div className={styles.googleLoginContainer}>
+        <SocialLogin onLogin={handleSocialLogin} onError={handleSocialError} />
+      </div>
 
-      <div className="instructions-container">
-        <h2 className="instructions-title">{t('login.instructions.title')}</h2>
-        <ul className="instructions-list">
+      {/* 說明區域 */}
+      <div className={styles.instructionsContainer}>
+        <h2 className={styles.instructionsTitle}>{t('login.instructions.title')}</h2>
+        <ul className={styles.instructionsList}>
           <li>
             <strong>{t('login.instructions.items.fair.title')}</strong>：
             {t('login.instructions.items.fair.desc')}
@@ -176,6 +176,7 @@ function Login({ onLogin }) {
         onClose={() => setShowPrivacyPolicy(false)}
         onAccept={handlePrivacyAccept}
       />
+      </div>
     </div>
   );
 }
@@ -185,3 +186,4 @@ Login.propTypes = {
 };
 
 export default Login;
+

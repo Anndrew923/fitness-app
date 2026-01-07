@@ -62,6 +62,7 @@ export default {
       startButton: '開始冒險',
       guestButton: '試玩模式',
       slogan: '練成五邊形全能戰士',
+      cyberSlogan: '解除安全協定，釋放全部潛能。',
     },
     features: {
       title: '修煉技能',
@@ -155,13 +156,13 @@ export default {
     subtitle: '留下運動數據,進步多少馬上知道',
     login: '登入',
     guestMode: '立即體驗（訪客模式）',
-    register: '註冊帳號',
+    register: '靈魂共鳴初始化',
     guestInfo: {
       title: '訪客模式功能：',
       features: [
         '完整體驗所有評測功能',
         '本地儲存評測結果',
-        '隨時可註冊同步資料',
+        '隨時可進行靈魂共鳴同步資料',
         '無法使用好友、天梯等社交功能',
       ],
     },
@@ -194,7 +195,7 @@ export default {
     weight: '體重 (kg)',
     weightChangeReminder: '更改體重後，要重新計算所有屬性唷',
     age: '年齡',
-    saveData: '儲存角色',
+    saveData: '機體參數調校',
     saving: '儲存中...',
     saveResults: '儲存修煉結果',
     submitToLadder: '提交到排行榜',
@@ -441,7 +442,7 @@ export default {
     title: '歡迎使用最強肉體',
     subtitle: '您可以選擇註冊帳號或直接體驗',
     startGuest: '立即體驗（訪客模式）',
-    register: '註冊帳號',
+    register: '靈魂共鳴初始化',
     or: '或',
     banner: '訪客模式 - 您的資料僅儲存在本地',
     syncData: '註冊同步',
@@ -457,8 +458,8 @@ export default {
 
   // 登入頁
   login: {
-    login: '登入',
-    register: '註冊',
+    login: '開啟覺醒儀式',
+    register: '靈魂共鳴初始化',
     email: '電子郵件',
     password: '密碼',
     emailPlaceholder: '輸入你的電子郵件',
@@ -1148,6 +1149,31 @@ export default {
     science: {
       dataSourceDesc:
         '基於國際賽事 DOTS 係數、McCulloch 模型及 Cooper 測試等科學標準，確保評測結果的準確性與專業度。',
+    },
+  },
+
+  // Phase 1-6: Market Modal - Cyber Commercial
+  market: {
+    title: '權限金鑰商店',
+    currentBalance: '當前權限金鑰餘額',
+    requiredSeals: '所需權限金鑰',
+    earlyAdopter: '測試者特權：權限全開',
+    processing: '處理中...',
+    activate: '啟動特權',
+    purchase: '購買',
+    popular: '熱門',
+    maxEfficiency: '最高效益',
+    perMonth: '/月',
+    singleKey: '單枚權限金鑰',
+    tripleKey: '三枚權限金鑰包',
+    eliteLicense: '菁英執照 (Elite License)',
+    features: {
+      singleKey: '1 枚權限金鑰',
+      tripleKey: '3 枚權限金鑰',
+      betterValue: '更超值',
+      monthlyKeys: '每月 5 枚權限金鑰',
+      godView: '上帝視角（入侵偵測）',
+      rivalTracking: '宿敵追蹤（鎖定目標）',
     },
   },
 };

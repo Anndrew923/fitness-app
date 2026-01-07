@@ -15,6 +15,7 @@ import useAndroidBackButton from './hooks/useAndroidBackButton'; // ✅ Phase 1.
 import useNativeViewport from './hooks/useNativeViewport'; // ✅ 原生视口管理
 import BottomNavBar from './components/BottomNavBar';
 import GlobalAdBanner from './components/GlobalAdBanner';
+import MagitekFrame from './components/Layout/MagitekFrame';
 import performanceMonitor from './utils/performanceMonitor';
 import AppRoutes from './AppRoutes';
 import './App.css';
@@ -304,23 +305,25 @@ function AppContent() {
   };
 
   return (
-    <div className={`app-container ${showFixedAd ? 'page-with-fixed-ad' : ''}`}>
-      <ScrollToTop />
-      <ErrorBoundary>
-        <AppRoutes
-          testData={testData}
-          onLogin={handleLogin}
-          onLogout={handleLogout}
-          handleTestComplete={handleTestComplete}
-          clearTestData={clearTestData}
-          handleGuestMode={handleGuestMode}
-        />
-      </ErrorBoundary>
+    <MagitekFrame>
+      <div className={`app-container ${showFixedAd ? 'page-with-fixed-ad' : ''}`}>
+        <ScrollToTop />
+        <ErrorBoundary>
+          <AppRoutes
+            testData={testData}
+            onLogin={handleLogin}
+            onLogout={handleLogout}
+            handleTestComplete={handleTestComplete}
+            clearTestData={clearTestData}
+            handleGuestMode={handleGuestMode}
+          />
+        </ErrorBoundary>
 
-      {/* 在天梯頁面隱藏廣告，保持頁面乾淨 */}
-      {location.pathname !== '/ladder' && <GlobalAdBanner />}
-      {showNavBar && <BottomNavBar />}
-    </div>
+        {/* 在天梯頁面隱藏廣告，保持頁面乾淨 */}
+        {location.pathname !== '/ladder' && <GlobalAdBanner />}
+        {showNavBar && <BottomNavBar />}
+      </div>
+    </MagitekFrame>
   );
 }
 

@@ -1,0 +1,83 @@
+/* ============================================================
+   RUNE INPUT - 符文輸入框
+   充滿魔力的輸入區域，Focus 時符文被點亮
+   ============================================================ */
+
+.input {
+  width: 100%;
+  
+  /* 邊白：增加左右留白，讓文字不貼牆 */
+  padding: 1rem 1.25rem;
+  margin: 0.5rem 0;
+  
+  /* 奧術水晶輸入框 */
+  background: rgba(5, 5, 5, 0.6);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  
+  border: 1px solid rgba(0, 191, 255, 0.3);
+  border-radius: var(--border-radius-md);
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.95);
+  
+  transition: all var(--transition-normal);
+  
+  /* 功能安全：確保輸入框可點擊 */
+  position: relative;
+  z-index: 1;
+  pointer-events: auto;
+  opacity: 1;
+  
+  /* 移除預設樣式 */
+  outline: none;
+  font-family: inherit;
+}
+
+.input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+/* Focus 動效：符文被點亮的流光感 - 綠色禁令強制覆蓋 */
+.input:focus,
+.input:focus-within {
+  border-color: var(--color-arcane-blue) !important; /* 強制轉為奧術藍 */
+  box-shadow: var(--glow-arcane) !important;       /* 強制轉為藍色發光 */
+  background: rgba(5, 5, 5, 0.7) !important;
+  /* 底部邊框特別強調 */
+  border-bottom: 2px solid var(--color-arcane-blue) !important;
+  outline: none !important; /* 徹底消滅任何外框 */
+}
+
+.input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  pointer-events: auto;
+}
+
+.input:active {
+  /* 能量爆裂：點擊時的魔導反應 */
+  background: rgba(5, 5, 5, 0.8) !important;
+  border-color: var(--color-arcane-blue) !important;
+  box-shadow: 
+    var(--glow-arcane),
+    0 0 20px rgba(0, 191, 255, 0.5) !important;
+  filter: brightness(1.1);
+}
+
+.input:invalid:not(:focus):not(:placeholder-shown) {
+  border-color: var(--color-class-str, #FF4500);
+  box-shadow: 0 0 8px rgba(255, 69, 0, 0.3);
+}
+
+/* 全寬變體 */
+.input.fullWidth {
+  width: 100%;
+}
+
+/* 低效能模式 */
+@media (prefers-reduced-motion: reduce) {
+  .input {
+    transition: border-color 0.15s ease;
+  }
+}
+
