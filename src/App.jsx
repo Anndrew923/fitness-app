@@ -305,8 +305,15 @@ function AppContent() {
   };
 
   return (
-    <MagitekFrame>
-      <div className={`app-container ${showFixedAd ? 'page-with-fixed-ad' : ''}`}>
+    <MagitekFrame
+      extraChildren={
+        /* 全域透視：導覽列徹底移出 app-container，直接作為 MagitekFrame 的子元素，與 .content 並列 */
+        showNavBar ? <BottomNavBar /> : null
+      }
+    >
+      <div
+        className={`app-container ${showFixedAd ? 'page-with-fixed-ad' : ''}`}
+      >
         <ScrollToTop />
         <ErrorBoundary>
           <AppRoutes
@@ -321,7 +328,6 @@ function AppContent() {
 
         {/* 在天梯頁面隱藏廣告，保持頁面乾淨 */}
         {location.pathname !== '/ladder' && <GlobalAdBanner />}
-        {showNavBar && <BottomNavBar />}
       </div>
     </MagitekFrame>
   );

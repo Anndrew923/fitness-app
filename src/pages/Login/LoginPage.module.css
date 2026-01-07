@@ -3,70 +3,108 @@
    Magitek Resonance: Crystal Glassmorphism
    ============================================================ */
 
-/* 外層容器 - 居中對齊 */
+/* 外層容器 - 居中對齊 - 視界大開：強力穿透 - 結構性手術：徹底拆分卡片 */
 .loginContainer {
   display: flex;
-  justify-content: center;
+  flex-direction: column; /* 結構性手術：改為垂直排列，讓區塊之間有間隙 */
+  justify-content: flex-start; /* 從頂部開始排列 */
   align-items: center;
   min-height: 100vh;
   width: 100%;
   padding: var(--spacing-md);
-  /* 確保背景完全穿透，露出 MagitekFrame 的虛空 */
-  background: transparent;
+  gap: 1.5rem; /* 結構性手術：區塊之間的間隙，讓星空背景顯現 */
+  /* 視界大開：確保背景完全穿透，露出 MagitekFrame 的虛空 */
+  /* 結構校準：強力穿透 - 完全清除 background 屬性 */
+  background: transparent !important;
+  background-color: transparent !important;
+  /* 確保包裹 CrystalCard 的外部容器樣式完全清除 background 屬性 */
 }
 
-/* 綠色禁令：深層清理螢光殘留 - 地毯式搜索並精準擊殺 */
+/* 魔導屬性覆蓋：將 crystalCard 內所有元素的 focus 狀態轉化為奧術能量 */
 .crystalCard :focus,
+.crystalCard :focus-visible,
 .crystalCard :focus-within,
 .crystalCard input:focus,
-.crystalCard button:focus {
+.crystalCard input:focus-visible,
+.crystalCard button:focus,
+.crystalCard button:focus-visible {
   border-color: var(--color-arcane-blue) !important; /* 強制轉為奧術藍 */
-  box-shadow: var(--glow-arcane) !important;       /* 強制轉為藍色發光 */
-  outline: none !important;
+  box-shadow: var(--glow-arcane) !important; /* 強制轉為藍色發光 */
+  outline: 2px solid var(--color-arcane-blue) !important;
+  outline-offset: 2px !important;
 }
 
-/* 確保所有互動元素不會出現螢光綠外框 */
-.crystalCard *:focus {
-  outline: none !important;
+/* 魔導屬性覆蓋：確保所有互動元素顯示奧術藍色外框 */
+.crystalCard *:focus,
+.crystalCard *:focus-visible,
+.crystalCard *:focus-within {
+  outline: 2px solid var(--color-arcane-blue) !important;
+  outline-offset: 2px !important;
+  box-shadow: 0 0 10px var(--color-arcane-blue) !important;
   /* 注意：不要覆蓋 MagitekButton 的 box-shadow */
 }
 
-/* 特別針對 a 標籤的螢光綠清除 */
+/* 魔導屬性覆蓋：特別針對 a 標籤轉化為奧術能量 */
 .crystalCard a:focus,
+.crystalCard a:focus-visible,
 .crystalCard a:active,
 .crystalCard a:hover {
-  outline: none !important;
+  outline: 2px solid var(--color-arcane-blue) !important;
+  outline-offset: 2px !important;
+  box-shadow: 0 0 10px var(--color-arcane-blue) !important;
   border: none !important;
-  box-shadow: none !important;
   -webkit-tap-highlight-color: transparent !important;
 }
 
-/* 奧術水晶卡片 - 核心視覺 */
+.crystalCard a:hover {
+  /* hover 時切換為金橘色 */
+  outline: 2px solid var(--color-magitek-gold) !important;
+  box-shadow: 0 0 15px var(--color-magitek-gold) !important;
+}
+
+/* 奧術水晶卡片 - 核心視覺 - 魔導屬性覆蓋 - 結構性手術：徹底拆分卡片 */
 .crystalCard {
-  /* 核心：高通透水晶感 */
-  background: rgba(5, 5, 5, 0.75);
+  /* 核心：高通透水晶感 - 降低不透明度，讓星空背景透出 */
+  background: rgba(5, 5, 5, 0.4); /* 從 0.75 降低到 0.4，讓背景更透明 */
   backdrop-filter: blur(16px) saturate(180%); /* 魔導靈魂：毛玻璃效果 */
   -webkit-backdrop-filter: blur(16px) saturate(180%);
-  
+
   /* 邊框：自發光 (Bloom) */
   border: var(--border-bloom);
   border-radius: var(--border-radius-lg);
   padding: 2.5rem; /* 強化餘裕感：增加內距，讓組件與邊緣保持距離 */
-  
+
   /* 陰影：外發光 + 內折射 */
-  box-shadow: 
-    var(--glow-arcane),                   /* 外部藍色暈光 */
-    inset 0 0 20px rgba(255, 255, 255, 0.05); /* 內部折射感 */
-    
+  box-shadow: var(--glow-arcane),
+    /* 外部藍色暈光 */ inset 0 0 20px rgba(255, 255, 255, 0.05); /* 內部折射感 */
+
+  /* 結構性手術：徹底拆分卡片 - 僅限於頂部區塊（標題與登入表單） */
   width: 100%;
   max-width: 400px;
-  margin: 0 auto; /* 強制對齊校準：確保卡片居中 */
+  margin: 0; /* 結構性手術：移除 margin: auto，由父容器的 flexbox 控制居中 */
+  /* 禁止全頁包裹：絕不能擁有 min-height: 100vh 或類似屬性 */
+  /* 讓卡片根據內容自動調整高度 */
   transition: transform var(--transition-normal);
-  
+
   /* 功能安全：確保所有子元素可交互 */
   position: relative;
   /* 確保 backdrop-filter 不會阻擋點擊事件 */
   pointer-events: auto;
+
+  /* 魔導屬性覆蓋：將所有 focus 狀態轉化為奧術能量 */
+  &:focus,
+  &:focus-visible,
+  &:focus-within {
+    outline: 2px solid var(--color-arcane-blue) !important;
+    outline-offset: 2px !important;
+    box-shadow: 0 0 10px var(--color-arcane-blue) !important;
+  }
+
+  &:active,
+  &:hover {
+    /* hover 和 active 時保持奧術能量 */
+    box-shadow: 0 0 10px var(--color-arcane-blue) !important;
+  }
 }
 
 .crystalCard:hover {
@@ -80,18 +118,21 @@
   font-weight: 700;
   text-align: center;
   margin-bottom: 1.5rem;
-  color: #FFFFFF !important; /* 強制設為純白，避免被父容器透明度影響 */
-  text-shadow: 
-    0 0 10px #FFD700, 
-    0 0 20px var(--color-magitek-gold), 
+  color: #ffffff !important; /* 強制設為純白，避免被父容器透明度影響 */
+  text-shadow: 0 0 10px #ffd700, 0 0 20px var(--color-magitek-gold),
     0 0 40px rgba(255, 140, 0, 1) !important; /* 提高 Alpha 值至 1，製造強烈發光體效果 */
-  font-family: var(--font-epic, 'Exocet', 'Cinematic', monospace) !important; /* 確保使用數值專用字體 */
+  font-family: var(
+    --font-epic,
+    'Exocet',
+    'Cinematic',
+    monospace
+  ) !important; /* 確保使用數值專用字體 */
   letter-spacing: 0.2rem; /* 增加神聖感：更寬鬆的字距 */
 }
 
 /* 錯誤訊息 - 使用力量紅/破壞者色，確保在毛玻璃背景上清晰可見 */
 .errorMessage {
-  color: var(--color-class-str, #FF4500); /* 力量紅 - 破壞者 */
+  color: var(--color-class-str, #ff4500); /* 力量紅 - 破壞者 */
   font-size: 0.875rem;
   margin-bottom: 1rem;
   text-align: center;
@@ -137,19 +178,19 @@
   width: 100%;
   padding: 1rem 1.25rem; /* 增加空間感：上下 1rem，左右 1.25rem */
   margin: 0.5rem 0; /* 增加上下間距 */
-  
+
   /* 奧術水晶輸入框 */
   background: rgba(5, 5, 5, 0.6);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  
+
   border: 1px solid rgba(0, 191, 255, 0.3);
   border-radius: 8px;
   font-size: 0.9rem;
   color: rgba(255, 255, 255, 0.95);
-  
+
   transition: all 0.3s ease;
-  
+
   /* 功能安全：確保輸入框可點擊 */
   position: relative;
   z-index: 1;
@@ -172,9 +213,7 @@
 .inputField:focus {
   outline: none;
   border-color: var(--color-arcane-blue);
-  box-shadow: 
-    var(--glow-arcane),
-    inset 0 0 10px rgba(0, 191, 255, 0.1);
+  box-shadow: var(--glow-arcane), inset 0 0 10px rgba(0, 191, 255, 0.1);
   background: rgba(5, 5, 5, 0.7);
 }
 
@@ -205,27 +244,33 @@
 .submitBtn {
   width: 100%;
   padding: 0.875rem;
-  
+
   /* 魔導能量按鈕 */
-  background: linear-gradient(135deg, var(--color-magitek-gold) 0%, #FF6B00 100%);
+  background: linear-gradient(
+    135deg,
+    var(--color-magitek-gold) 0%,
+    #ff6b00 100%
+  );
   color: white;
   border: none;
   border-radius: 8px;
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
-  
+
   /* 輝光效果 */
   box-shadow: var(--glow-magitek);
-  
+
   transition: all 0.3s ease;
 }
 
 .submitBtn:hover:not(:disabled) {
-  background: linear-gradient(135deg, #FF9D00 0%, var(--color-magitek-gold) 100%);
-  box-shadow: 
-    0 0 20px rgba(255, 140, 0, 0.6),
-    0 4px 12px rgba(0, 0, 0, 0.3);
+  background: linear-gradient(
+    135deg,
+    #ff9d00 0%,
+    var(--color-magitek-gold) 100%
+  );
+  box-shadow: 0 0 20px rgba(255, 140, 0, 0.6), 0 4px 12px rgba(0, 0, 0, 0.3);
   transform: translateY(-1px);
 }
 
@@ -248,12 +293,12 @@
   width: 100%;
   padding: 0.75rem;
   margin-top: 1rem;
-  
+
   /* 透明水晶按鈕 */
   background: rgba(5, 5, 5, 0.5);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  
+
   color: rgba(255, 255, 255, 0.9);
   border: 1px solid rgba(0, 191, 255, 0.3);
   border-radius: 8px;
@@ -261,7 +306,7 @@
   font-weight: 500;
   cursor: pointer;
   text-align: center;
-  
+
   transition: all 0.3s ease;
 }
 
@@ -276,12 +321,12 @@
   width: 100%;
   padding: 0.75rem;
   margin-top: 0.5rem;
-  
+
   /* 低調水晶按鈕 */
   background: rgba(5, 5, 5, 0.4);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  
+
   color: rgba(255, 255, 255, 0.8);
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 8px;
@@ -289,7 +334,7 @@
   font-weight: 500;
   cursor: pointer;
   text-align: center;
-  
+
   transition: all 0.3s ease;
 }
 
@@ -304,22 +349,51 @@
   cursor: not-allowed;
 }
 
-/* 隱私權聲明 */
+/* 隱私權聲明 - 魔導屬性覆蓋：轉化為奧術能量 */
 .privacyNotice {
   margin: 1.5rem 0;
   padding: 1rem;
-  
+
   /* 半透明背景 */
   background: rgba(5, 5, 5, 0.5);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  
+
   border-radius: 8px;
   border: 1px solid rgba(0, 191, 255, 0.2) !important; /* 強制使用奧術藍 */
   text-align: center;
-  /* 終極覆蓋：強制清除所有螢光綠殘留 */
-  outline: none !important;
-  box-shadow: none !important;
+
+  /* 魔導屬性覆蓋：將所有 focus 狀態轉化為奧術能量 */
+  &:focus,
+  &:focus-visible,
+  &:focus-within {
+    outline: 2px solid var(--color-arcane-blue) !important;
+    outline-offset: 2px !important;
+    box-shadow: 0 0 10px var(--color-arcane-blue) !important;
+    border: 1px solid rgba(0, 191, 255, 0.2) !important;
+  }
+
+  &:active,
+  &:hover {
+    /* hover 和 active 時保持奧術能量 */
+    box-shadow: 0 0 10px var(--color-arcane-blue) !important;
+    border: 1px solid rgba(0, 191, 255, 0.2) !important;
+  }
+}
+
+/* 魔導屬性覆蓋：將所有子元素的 focus 狀態轉化為奧術能量 */
+.privacyNotice *:focus,
+.privacyNotice *:focus-visible,
+.privacyNotice *:focus-within {
+  outline: 2px solid var(--color-arcane-blue) !important;
+  outline-offset: 2px !important;
+  box-shadow: 0 0 10px var(--color-arcane-blue) !important;
+}
+
+.privacyNotice *:active,
+.privacyNotice *:hover {
+  /* hover 和 active 時保持奧術能量，但允許其他樣式 */
+  box-shadow: 0 0 10px var(--color-arcane-blue) !important;
 }
 
 .privacyNotice p {
@@ -332,7 +406,7 @@
 .privacyLink {
   background: none;
   border: none;
-  color: var(--color-arcane-blue);
+  color: var(--color-arcane-blue) !important; /* 強制使用奧術藍 */
   text-decoration: underline;
   cursor: pointer;
   font-size: 0.875rem;
@@ -340,20 +414,23 @@
   margin: 0;
   font-weight: 500;
   transition: all 0.2s ease;
-  /* 終極覆蓋：強制清除所有螢光綠殘留 */
-  outline: none !important;
-  box-shadow: none !important;
+  /* 魔導屬性覆蓋：轉化為奧術能量 */
+  outline: 2px solid var(--color-arcane-blue) !important;
+  outline-offset: 2px !important;
+  box-shadow: 0 0 10px var(--color-arcane-blue) !important;
   -webkit-tap-highlight-color: transparent !important;
 }
 
-/* 終極覆蓋：強制清除隱私權政策區域內所有 a 標籤的螢光綠 */
+/* 魔導屬性覆蓋：將隱私權政策區域內所有 a 標籤轉化為奧術能量 */
 .privacyNotice a,
 .privacyNotice a:focus,
-.privacyNotice a:active,
-.privacyNotice a:hover {
-  outline: none !important;
+.privacyNotice a:focus-visible,
+.privacyNotice a:active {
+  /* 魔導屬性覆蓋：轉化為奧術能量 */
+  outline: 2px solid var(--color-arcane-blue) !important;
+  outline-offset: 2px !important;
+  box-shadow: 0 0 10px var(--color-arcane-blue) !important;
   border: none !important;
-  box-shadow: none !important;
   -webkit-tap-highlight-color: transparent !important;
   /* 確保連結樣式正確 */
   color: var(--color-arcane-blue) !important;
@@ -362,34 +439,75 @@
 
 .privacyLink:hover,
 .privacyNotice a:hover {
-  color: var(--color-magitek-gold) !important;
+  color: var(--color-magitek-gold) !important; /* hover 時切換為金橘色 */
   text-decoration: none !important;
   text-shadow: 0 0 8px rgba(255, 140, 0, 0.5) !important;
+  /* hover 時增強奧術能量 */
+  outline: 2px solid var(--color-magitek-gold) !important;
+  outline-offset: 2px !important;
+  box-shadow: 0 0 15px var(--color-magitek-gold) !important;
 }
 
-/* 說明容器 */
+/* 說明容器 - 魔導屬性覆蓋：轉化為奧術能量 */
+/* 結構性手術：底部區塊 - 使用說明 - 改為獨立的水晶卡片 */
 .instructionsContainer {
-  margin-top: 1.5rem;
+  margin-top: 0; /* 結構性手術：移除 margin-top，由父容器的 gap 控制間距 */
   padding: 1.25rem;
-  
-  /* 半透明背景 */
-  background: rgba(5, 5, 5, 0.5);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  
-  border-radius: 12px;
-  border: 1px solid rgba(0, 191, 255, 0.2);
+
+  /* 半透明背景 - 結構性手術：改為水晶卡片樣式 - 降低不透明度，讓星空背景透出 */
+  background: rgba(5, 5, 5, 0.4); /* 從 0.75 降低到 0.4，與 crystalCard 一致 */
+  backdrop-filter: blur(16px) saturate(180%); /* 結構性手術：與 crystalCard 一致的毛玻璃效果 */
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+
+  border-radius: var(
+    --border-radius-lg
+  ); /* 結構性手術：使用與 crystalCard 一致的圓角 */
+  border: var(--border-bloom); /* 結構性手術：使用與 crystalCard 一致的邊框 */
+
+  /* 結構性手術：與 crystalCard 一致的尺寸限制 */
+  width: 100%;
+  max-width: 400px;
+
+  /* 魔導屬性覆蓋：將所有 focus 狀態轉化為奧術能量 */
+  &:focus,
+  &:focus-visible,
+  &:focus-within {
+    outline: 2px solid var(--color-arcane-blue) !important;
+    outline-offset: 2px !important;
+    box-shadow: 0 0 10px var(--color-arcane-blue) !important;
+    border: 1px solid rgba(0, 191, 255, 0.2) !important;
+  }
+
+  &:active,
+  &:hover {
+    /* hover 和 active 時保持奧術能量 */
+    box-shadow: 0 0 10px var(--color-arcane-blue) !important;
+    border: 1px solid rgba(0, 191, 255, 0.2) !important;
+  }
+}
+
+/* 魔導屬性覆蓋：將說明容器內所有子元素的 focus 狀態轉化為奧術能量 */
+.instructionsContainer *:focus,
+.instructionsContainer *:focus-visible,
+.instructionsContainer *:focus-within {
+  outline: 2px solid var(--color-arcane-blue) !important;
+  outline-offset: 2px !important;
+  box-shadow: 0 0 10px var(--color-arcane-blue) !important;
+}
+
+.instructionsContainer *:active,
+.instructionsContainer *:hover {
+  /* hover 和 active 時保持奧術能量 */
+  box-shadow: 0 0 10px var(--color-arcane-blue) !important;
 }
 
 .instructionsTitle {
   font-size: 1.1rem;
   font-weight: 600;
-  color: #FFFFFF !important; /* 強制設為純白，避免被父容器透明度影響 */
+  color: #ffffff !important; /* 強制設為純白，避免被父容器透明度影響 */
   margin-bottom: 0.75rem;
   text-align: center;
-  text-shadow: 
-    0 0 8px #FFD700,
-    0 0 16px var(--color-magitek-gold),
+  text-shadow: 0 0 8px #ffd700, 0 0 16px var(--color-magitek-gold),
     0 0 30px rgba(255, 140, 0, 1) !important; /* 提高 Alpha 值至 1 */
   letter-spacing: 2px;
 }
@@ -426,30 +544,59 @@
 .portalPanel {
   margin: 1rem 0;
   padding: 2rem; /* 增加內距，營造儀式感 */
-  
+
   /* 通透水晶背景：使用 CrystalCard 的設計邏輯 */
   background: rgba(5, 5, 5, 0.6);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  
+
   /* 奧術藍自發光邊框：流暢圓潤的奇幻感 */
   border: var(--border-bloom); /* 使用 --border-bloom（奧術藍自發光邊框） */
   border-radius: 24px; /* 更流暢、更具奇幻感的圓角 */
-  
+
   /* 內部折射感 */
-  box-shadow: 
-    var(--glow-arcane),                   /* 外部藍色暈光 */
-    inset 0 0 20px rgba(255, 255, 255, 0.05); /* 內部折射感 */
-  
+  box-shadow: var(--glow-arcane),
+    /* 外部藍色暈光 */ inset 0 0 20px rgba(255, 255, 255, 0.05); /* 內部折射感 */
+
   /* 置中校準 */
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 0.75rem;
-  
+
   /* 確保通透感 */
   position: relative;
   pointer-events: auto;
+
+  /* 魔導屬性覆蓋：將所有 focus 狀態轉化為奧術能量 */
+  &:focus,
+  &:focus-visible,
+  &:focus-within {
+    outline: 2px solid var(--color-arcane-blue) !important;
+    outline-offset: 2px !important;
+    box-shadow: 0 0 10px var(--color-arcane-blue) !important;
+  }
+
+  &:active,
+  &:hover {
+    /* hover 和 active 時保持奧術能量 */
+    box-shadow: 0 0 10px var(--color-arcane-blue) !important;
+  }
+}
+
+/* 魔導屬性覆蓋：將 portalPanel 內所有子元素的 focus 狀態轉化為奧術能量 */
+.portalPanel *:focus,
+.portalPanel *:focus-visible,
+.portalPanel *:focus-within {
+  outline: 2px solid var(--color-arcane-blue) !important;
+  outline-offset: 2px !important;
+  box-shadow: 0 0 10px var(--color-arcane-blue) !important;
+}
+
+.portalPanel *:active,
+.portalPanel *:hover {
+  /* hover 和 active 時保持奧術能量 */
+  box-shadow: 0 0 10px var(--color-arcane-blue) !important;
 }
 
 /* 確保 portalPanel 內的按鈕寬度為 85%，製造左右的呼吸感 */
@@ -457,29 +604,65 @@
   width: 85%;
 }
 
-/* Google 登入 - 魔導化水晶容器：明顯的藍色邊框 */
+/* 結構性手術：中間區塊 - Google 登入 - 魔導化水晶容器：明顯的藍色邊框 - 魔導屬性覆蓋 */
 .googleLoginContainer {
-  margin: 1.5rem 0;
+  margin: 0; /* 結構性手術：移除 margin，由父容器的 gap 控制間距 */
   padding: 1rem;
-  
+
   /* 水晶容器：明顯的奧術藍邊框與水晶折射背景 */
   background: rgba(255, 255, 255, 0.05); /* 水晶質感背景 */
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  
-  border: 2px solid var(--color-arcane-blue) !important; /* 明顯的藍色邊框 */
+
+  border: var(
+    --border-bloom
+  ) !important; /* 使用奧術藍自發光邊框，讓 Google 按鈕看起來被鑲嵌在發光的水晶底座上 */
   border-radius: var(--border-radius-md);
-  
+
+  /* 結構性手術：與 crystalCard 一致的尺寸限制 */
+  width: 100%;
+  max-width: 400px;
+
   /* 懸浮在藍色奧術能量上的效果 */
-  box-shadow: 
-    var(--glow-arcane),
-    inset 0 0 15px rgba(0, 191, 255, 0.1);
-  
+  box-shadow: var(--glow-arcane), inset 0 0 15px rgba(0, 191, 255, 0.1);
+
   /* 修正對齊：確保文字與圖標絕對置中，與上方的 portalPanel 保持視覺對稱 */
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+
+  /* 魔導屬性覆蓋：將所有 focus 狀態轉化為奧術能量 */
+  &:focus,
+  &:focus-visible,
+  &:focus-within {
+    outline: 2px solid var(--color-arcane-blue) !important;
+    outline-offset: 2px !important;
+    box-shadow: 0 0 10px var(--color-arcane-blue) !important;
+    border: 2px solid var(--color-arcane-blue) !important;
+  }
+
+  &:active,
+  &:hover {
+    /* hover 和 active 時保持奧術能量 */
+    box-shadow: 0 0 10px var(--color-arcane-blue) !important;
+    border: 2px solid var(--color-arcane-blue) !important;
+  }
+}
+
+/* 魔導屬性覆蓋：將 Google 登入容器內所有子元素的 focus 狀態轉化為奧術能量 */
+.googleLoginContainer *:focus,
+.googleLoginContainer *:focus-visible,
+.googleLoginContainer *:focus-within {
+  outline: 2px solid var(--color-arcane-blue) !important;
+  outline-offset: 2px !important;
+  box-shadow: 0 0 10px var(--color-arcane-blue) !important;
+}
+
+.googleLoginContainer *:active,
+.googleLoginContainer *:hover {
+  /* hover 和 active 時保持奧術能量 */
+  box-shadow: 0 0 10px var(--color-arcane-blue) !important;
 }
 
 /* 響應式設計 */
@@ -489,7 +672,7 @@
     padding: 2.5rem; /* 保持餘裕感 */
     margin-bottom: calc(1.5rem + env(safe-area-inset-bottom, 0px));
   }
-  
+
   .title {
     font-size: 2rem;
   }
@@ -504,4 +687,3 @@
     -webkit-backdrop-filter: blur(6px);
   }
 }
-

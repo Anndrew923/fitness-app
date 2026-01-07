@@ -177,15 +177,16 @@ code {
     monospace;
 }
 
-/* ✅ Level 3-4: 修正 App 容器高度 */
+/* ✅ Level 3-4: 修正 App 容器高度 - 星域重塑：強力穿透 */
 .app-container {
-  /* ✅ 使用 100% 而非 100vh，避免包含系統列高度 */
-  height: 100%;
+  /* ✅ 使用 min-height 而非 height，允許內容擴展 */
   min-height: 100%;
   display: flex;
   flex-direction: column;
   /* ✅ Magitek Resonance: 背景透明，讓 MagitekFrame 的深邃虛空背景顯示 */
-  background-color: transparent;
+  /* 星域重塑：確保 100% 透明，讓星空背景能直接透視 */
+  background-color: transparent !important;
+  background: transparent !important;
   width: 100%;
 }
 
@@ -213,8 +214,9 @@ code {
   padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px));
   /* 確保白色內容卡片能延伸到底部 */
   min-height: 100%;
-  /* 確保背景色為透明，讓內容決定背景 */
-  background-color: transparent;
+  /* 星域重塑：確保背景色為 100% 透明，讓星空背景能直接透視 */
+  background-color: transparent !important;
+  background: transparent !important;
   /* 🔴 新增：Capacitor 滚动优化 */
   -webkit-overflow-scrolling: touch;
   overscroll-behavior-y: contain;
@@ -290,16 +292,16 @@ code {
     min-height: 100vh;
     height: auto;
   }
-  
+
   /* 确保天梯页面可以正常滚动 */
   .ladder {
     overflow: visible !important;
   }
-  
+
   .ladder__list {
     overflow: visible !important;
   }
-  
+
   .ladder-content-area {
     overflow: visible !important;
   }

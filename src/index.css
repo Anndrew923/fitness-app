@@ -1,10 +1,28 @@
+/* ============================================================
+   全域透視：暴力清除所有中間層背景 (The Great Transparency Nuke)
+   強制讓所有結構容器透明，露出底層 MagitekFrame 的星空
+   ============================================================ */
+html,
+body,
+#root,
+.app-container,
+.main-content,
+main,
+section {
+  background: transparent !important;
+  background-color: transparent !important;
+  border: none !important;
+}
+
 /* ✅ Level 3-1: 修正 HTML 和 Body 高度 */
+/* 終極導覽列淨化：深度清潔畫布 - 強制將背景色設為主題深色，避免任何隙縫露出白色 */
 html {
   height: 100%;
   /* ✅ 使用 100% 而非 100vh，避免包含系統列高度 */
   /* 在畫框式佈局中，WebView 高度已自動排除系統列 */
-  /* ✅ Magitek Resonance: 背景設為深邃虛空，與 MagitekFrame 一致 */
-  background-color: var(--color-void-black, #050505);
+  /* 終極導覽列淨化：即使有任何隙縫，露出來的也會是深邃的虛空，而不是刺眼的白色 */
+  background: #050505 !important;
+  background-color: #050505 !important;
 }
 
 body {
@@ -12,8 +30,9 @@ body {
   /* ✅ 關鍵：使用 100% 高度，跟隨父層 WebView（已排除系統列） */
   height: 100%;
   /* ✅ 不使用 100vh，因為在畫框式佈局中，WebView 高度已正確計算 */
-  /* ✅ Magitek Resonance: 背景設為深邃虛空，與 MagitekFrame 一致 */
-  background-color: var(--color-void-black, #050505);
+  /* 終極導覽列淨化：深度清潔畫布 - 強制將背景色設為主題深色，避免任何隙縫露出白色 */
+  background: #050505 !important;
+  background-color: #050505 !important;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
     sans-serif;
@@ -30,8 +49,9 @@ body {
   height: 100%;
   /* ✅ 使用 100% 高度，跟隨 body（已排除系統列） */
   /* 不使用 100vh，避免包含系統列高度導致捲軸 */
-  /* ✅ Magitek Resonance: 背景設為深邃虛空，與 MagitekFrame 一致 */
-  background-color: var(--color-void-black, #050505);
+  /* 全域透視：背景必須透明，讓 MagitekFrame 的星空完整顯現 */
+  background: transparent !important;
+  background-color: transparent !important;
 }
 
 code {
@@ -44,40 +64,114 @@ code {
    只殺死干擾物，不准殺死變數
    ============================================================ */
 
-/* 地毯式靜默：精準針對標籤選擇器，不使用 * 選擇器 */
-/* 排除 CSS Module 的按鈕（它們有自己的樣式） */
-button:not([class*="button"]):not([class*="Button"]),
-input:not([class*="rune"]):not([class*="Rune"]),
-a {
-  outline: none !important;
-  -webkit-tap-highlight-color: transparent; /* 殺掉手機點擊的預設綠色 */
+/* ============================================================
+   魔導屬性覆蓋：將所有聚焦外框轉化為奧術能量
+   不再刪除，而是正向定義奧術藍色聚焦效果
+   ============================================================ */
+
+/* 強制能量覆蓋：將所有聚焦外框轉化為奧術能量 */
+*:focus-visible {
+  outline: 2px solid var(--color-arcane-blue) !important; /* 強制藍色外框 */
+  outline-offset: 2px !important;
+  box-shadow: 0 0 15px var(--color-arcane-blue) !important; /* 藍色魔法暈光 */
 }
 
-/* 針對 focus 狀態的靜默（同樣排除 CSS Module） */
-button:not([class*="button"]):not([class*="Button"]):focus,
-input:not([class*="rune"]):not([class*="Rune"]):focus,
-a:focus {
-  outline: none !important;
-  -webkit-tap-highlight-color: transparent;
+/* 地毯式靜默：精準針對標籤選擇器，不使用 * 選擇器 */
+/* 排除 CSS Module 的按鈕（它們有自己的樣式） */
+button:not([class*='button']):not([class*='Button']),
+input:not([class*='rune']):not([class*='Rune']),
+a {
+  -webkit-tap-highlight-color: transparent !important; /* 強制清除手機點擊的預設綠色 */
+  tap-highlight-color: transparent !important;
+}
+
+/* 針對 focus 和 active 狀態：轉化為奧術能量 */
+button:not([class*='button']):not([class*='Button']):focus,
+button:not([class*='button']):not([class*='Button']):focus-visible,
+button:not([class*='button']):not([class*='Button']):active,
+input:not([class*='rune']):not([class*='Rune']):focus,
+input:not([class*='rune']):not([class*='Rune']):focus-visible,
+input:not([class*='rune']):not([class*='Rune']):active,
+a:focus,
+a:focus-visible,
+a:active {
+  outline: 2px solid var(--color-arcane-blue) !important; /* 強制藍色外框 */
+  outline-offset: 2px !important;
+  box-shadow: 0 0 15px var(--color-arcane-blue) !important; /* 藍色魔法暈光 */
+  -webkit-tap-highlight-color: transparent !important;
+  tap-highlight-color: transparent !important;
+  /* 強制清除任何綠色背景（針對 active 狀態） */
+  background-color: transparent !important;
 }
 
 /* ============================================================
    終極覆蓋方案：針對隱私權政策區域的 a 標籤強制清除螢光綠
    ============================================================ */
-/* 針對隱私權政策區域的 a 標籤強制清除螢光綠 */
-.privacyNotice a,
-.privacyNotice a:focus,
-.privacyNotice a:active,
-.privacyNotice a:hover {
-  outline: none !important;
-  border: none !important;
-  box-shadow: none !important;
+/* 針對隱私權連結的「魔導化」 */
+.privacyNotice a {
+  color: var(--color-arcane-blue) !important;
+  text-decoration: underline;
+  transition: all 0.3s ease;
+  outline: 2px solid var(--color-arcane-blue) !important;
+  outline-offset: 2px !important;
+  box-shadow: 0 0 15px var(--color-arcane-blue) !important;
   -webkit-tap-highlight-color: transparent !important;
 }
 
-/* 強制覆蓋隱私權政策容器的邊框 */
+.privacyNotice a:focus,
+.privacyNotice a:focus-visible,
+.privacyNotice a:active {
+  outline: 2px solid var(--color-arcane-blue) !important;
+  outline-offset: 2px !important;
+  box-shadow: 0 0 15px var(--color-arcane-blue) !important;
+  border: none !important;
+  -webkit-tap-highlight-color: transparent !important;
+}
+
+.privacyNotice a:hover {
+  color: var(--color-magitek-gold) !important;
+  text-shadow: var(--glow-magitek) !important;
+  outline: 2px solid var(--color-magitek-gold) !important;
+  box-shadow: 0 0 20px var(--color-magitek-gold) !important;
+}
+
+/* 強制覆蓋隱私權政策容器的邊框（注意：CSS Module 類名不匹配，此規則可能無效） */
+/* 實際清除應在 LoginPage.module.css 中進行 */
 .privacyNotice {
   border: 1px solid rgba(0, 191, 255, 0.2) !important;
   outline: none !important;
+  outline-width: 0 !important;
+  outline-style: none !important;
+  outline-color: transparent !important;
+  outline-offset: 0 !important;
   box-shadow: none !important;
+}
+
+.privacyNotice:focus,
+.privacyNotice:focus-within,
+.privacyNotice:active,
+.privacyNotice:hover {
+  outline: none !important;
+  outline-width: 0 !important;
+  outline-style: none !important;
+  outline-color: transparent !important;
+  outline-offset: 0 !important;
+  box-shadow: none !important;
+}
+
+/* ============================================================
+   終極導覽列淨化：強力覆蓋 UI 框架預設值
+   確保導覽列本身及其所有包裝層都是透明水晶感
+   ============================================================ */
+/* 確保導覽列本身及其所有包裝層都是透明水晶感 */
+nav[style*='position: fixed'],
+.bottomNavBar,
+.bottomNavBar-wrapper,
+.MuiBottomNavigation-root,
+[class*='bottom-nav'],
+[class*='BottomNav'] {
+  background: rgba(5, 5, 5, 0.85) !important;
+  background-color: rgba(5, 5, 5, 0.85) !important; /* 二重保護 */
+  backdrop-filter: blur(16px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(180%) !important;
 }

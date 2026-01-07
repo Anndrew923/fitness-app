@@ -37,15 +37,19 @@
   color: rgba(255, 255, 255, 0.5);
 }
 
-/* Focus 動效：符文被點亮的流光感 - 綠色禁令強制覆蓋 */
+/* Focus 動效：符文被點亮的流光感 - 能量屬性覆蓋 */
 .input:focus,
+.input:focus-visible,
 .input:focus-within {
   border-color: var(--color-arcane-blue) !important; /* 強制轉為奧術藍 */
   box-shadow: var(--glow-arcane) !important;       /* 強制轉為藍色發光 */
   background: rgba(5, 5, 5, 0.7) !important;
   /* 底部邊框特別強調 */
   border-bottom: 2px solid var(--color-arcane-blue) !important;
-  outline: none !important; /* 徹底消滅任何外框 */
+  /* 能量屬性覆蓋：藍色流動感外框 */
+  outline: 2px solid var(--color-arcane-blue) !important;
+  outline-offset: 2px !important;
+  box-shadow: var(--glow-arcane), 0 0 15px var(--color-arcane-blue) !important;
 }
 
 .input:disabled {

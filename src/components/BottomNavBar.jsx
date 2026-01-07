@@ -190,20 +190,22 @@ function BottomNavBar() {
       return;
     }
 
-    const handleKeyboardToggle = (event) => {
+    const handleKeyboardToggle = event => {
       setIsKeyboardVisible(event.detail.isVisible);
     };
 
     // 監聽鍵盤狀態變化事件
     window.addEventListener('keyboardToggle', handleKeyboardToggle);
-    
+
     // 初始檢查 CSS 變數
     const checkInitialState = () => {
-      const isVisible = getComputedStyle(document.documentElement)
-        .getPropertyValue('--is-keyboard-visible') === '1';
+      const isVisible =
+        getComputedStyle(document.documentElement).getPropertyValue(
+          '--is-keyboard-visible'
+        ) === '1';
       setIsKeyboardVisible(isVisible);
     };
-    
+
     // 延遲檢查，確保 CSS 變數已設置
     const timer = setTimeout(checkInitialState, 200);
 
@@ -282,34 +284,43 @@ function BottomNavBar() {
     }
   };
 
-
   return (
     <>
       <nav
         style={{
+          // 全域透視：修復導覽列「固定定位」失效 - 強制固定
           position: 'fixed',
           bottom: 0,
           left: 0,
           right: 0,
+          width: '100vw', // 全域透視：使用 100vw 確保填滿整個視窗寬度
           // 🔧 修正：使用 minHeight + calc 計算總高度（參考 Material Design 標準做法）
           // 總高度 = 內容高度(64px) + 安全區域
           // Android 15: calc(64px + 48px) = 112px（正確高度）
           // Android 14: calc(64px + 0px) = 64px（保持原樣，向後兼容）
           minHeight: '64px',
           height: 'calc(64px + env(safe-area-inset-bottom, 0px))',
-          // 添加底部 padding 為系統導覽列預留空間
+          // 全域透視：安全區域 - 加入 padding-bottom 以適應手機螢幕底部
           paddingBottom: 'env(safe-area-inset-bottom, 0px)',
-          background: '#fff',
-          borderTop: '1px solid #eee',
+          // 魔導主題：廢除「白色禁區」- 深色半透明材質，讓星空背景透出
+          background: 'rgba(5, 5, 5, 0.85)',
+          // 魔導主題：實裝奧術毛玻璃 - 厚實水晶折射感
+          backdropFilter: 'blur(16px) saturate(180%)',
+          WebkitBackdropFilter: 'blur(16px) saturate(180%)',
+          // 魔導主題：邊框同步 - 使用奧術藍邊框替代灰色
+          borderTop: '1px solid rgba(0, 191, 255, 0.4)',
           display: 'flex',
           justifyContent: 'space-around',
           alignItems: 'center',
-          zIndex: 1200,
-          boxShadow: '0 -2px 8px rgba(0,0,0,0.04)',
+          // 全域透視：絕對最高權限 - 將導覽列的 z-index 設定為絕對最高
+          zIndex: 9999, // 全域透視：絕對最高權限
+          // 魔導主題：光暈效果統一 - 使用奧術藍陰影
+          boxShadow: '0 -2px 8px rgba(0, 191, 255, 0.2)',
           // ✅ 新增：鍵盤開啟時隱藏導覽列（原生應用優化）
           transform: isKeyboardVisible ? 'translateY(100%)' : 'translateY(0)',
           // ✅ 改進：更快的動畫（150ms 而不是 250ms），避免短暫顯示
-          transition: 'transform 0.15s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.15s cubic-bezier(0.4, 0, 0.2, 1)',
+          transition:
+            'transform 0.15s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.15s cubic-bezier(0.4, 0, 0.2, 1)',
           opacity: isKeyboardVisible ? 0 : 1,
           visibility: isKeyboardVisible ? 'hidden' : 'visible',
           pointerEvents: isKeyboardVisible ? 'none' : 'auto',
@@ -333,7 +344,11 @@ function BottomNavBar() {
                 flexDirection: 'column',
                 alignItems: 'center',
                 justifyContent: 'center',
-                color: location.pathname === item.path ? '#667eea' : '#888',
+                // 魔導主題：當前頁面使用奧術藍，非當前頁面使用半透明白色
+                color:
+                  location.pathname === item.path
+                    ? 'rgba(0, 191, 255, 1)' // 奧術藍 - 當前頁面
+                    : 'rgba(255, 255, 255, 0.7)', // 半透明白色 - 非當前頁面
                 fontWeight: location.pathname === item.path ? 'bold' : 'normal',
                 fontSize: getTextStyles().fontSize,
                 width: '100%',

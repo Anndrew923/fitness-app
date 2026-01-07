@@ -33,6 +33,10 @@
   /* 神秘火焰：緩慢呼吸感動畫（強制啟用） */
   animation: magicPulse 3s ease-in-out infinite !important; /* 強制啟用呼吸動畫，確保在任何全域重置之上 */
   
+  /* 強制清除手機點擊的綠色高亮 */
+  -webkit-tap-highlight-color: transparent !important;
+  tap-highlight-color: transparent !important;
+  
   /* 交互 */
   cursor: pointer;
   transition: all var(--transition-normal);
@@ -53,16 +57,28 @@
 }
 
 .button:active:not(:disabled) {
-  transform: translateY(0) scale(0.98); /* 輕微縮放，模擬按壓感 */
+  /* 能量爆裂：物理按壓感 + 能量瞬間高亮 - 星雲覺醒強化版 */
+  transform: scale(0.96) !important; /* 物理按壓感 */
+  filter: brightness(2.5) !important; /* 能量瞬間高亮 - 提升至 2.5 倍，讓點擊那一瞬間亮到爆表 */
+  
   /* 能量爆裂：徹底殲滅綠色閃爍，實裝魔導能量反應 */
   background: linear-gradient(135deg, var(--color-magitek-gold) 0%, #FF6B00 100%) !important;
-  /* 碎裂光效：瞬發的亮度與光效擴張 */
-  filter: brightness(1.8) !important;
+  background-color: transparent !important; /* 強制清除任何背景色殘留 */
+  
+  /* 金色能量爆裂感：大面積光效擴張 - 強化閃光回饋 */
   box-shadow: 
-    0 0 30px rgba(255, 140, 0, 0.9),
-    0 0 60px rgba(255, 140, 0, 0.6),
-    var(--glow-magitek) !important;
-  text-shadow: 0 0 15px rgba(255, 140, 0, 0.9) !important;
+    0 0 50px var(--color-magitek-gold), 
+    0 0 100px rgba(255, 140, 0, 0.9), 
+    inset 0 0 30px white !important;
+    
+  text-shadow: 0 0 25px rgba(255, 140, 0, 1) !important;
+  
+  /* 縮短反應時間，製造爆發感 - 確保快速響應 */
+  transition: all 0.05s ease !important;
+  
+  /* 強制清除手機點擊的綠色高亮 */
+  -webkit-tap-highlight-color: transparent !important;
+  tap-highlight-color: transparent !important;
 }
 
 .button:disabled {

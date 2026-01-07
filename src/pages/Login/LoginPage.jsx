@@ -1,4 +1,3 @@
-import React from 'react';
 import PropTypes from 'prop-types';
 import SocialLogin from '../../components/SocialLogin';
 import PrivacyPolicyModal from '../../components/PrivacyPolicyModal';
@@ -34,127 +33,122 @@ function Login({ onLogin }) {
 
   return (
     <div className={styles.loginContainer}>
+      {/* 結構性手術：頂部區塊 - 標題與登入表單 */}
       <div className={styles.crystalCard}>
         <h1 className={styles.title}>
-        {isRegistering ? t('login.register') : t('login.login')}
-      </h1>
-      {error && <p className={styles.errorMessage}>{error}</p>}
-      <form onSubmit={handleSubmit} className={styles.form}>
-        <div className={styles.field}>
-          <label className={styles.label}>
-            {t('login.email')}
-          </label>
-          <RuneInput
-            type="email"
-            value={email}
-            onChange={e => setEmail(e.target.value)}
-            placeholder={t('login.emailPlaceholder')}
-            required
-            onInvalid={handleEmailInvalid}
-            onInput={e => e.currentTarget.setCustomValidity('')}
-            disabled={loading}
-          />
-        </div>
-        <div className={styles.field}>
-          <label className={styles.label}>
-            {t('login.password')}
-          </label>
-          <RuneInput
-            type="password"
-            value={password}
-            onChange={e => setPassword(e.target.value)}
-            placeholder={t('login.passwordPlaceholder')}
-            required
-            minLength={6}
-            onInvalid={handlePasswordInvalid}
-            onInput={e => e.currentTarget.setCustomValidity('')}
-            disabled={loading}
-          />
-        </div>
-        <div className={styles.rememberMeContainer}>
-          <label
-            htmlFor="rememberMe"
-            className={styles.rememberMeLabel}
-          >
-            <input
-              id="rememberMe"
-              type="checkbox"
-              checked={rememberMe}
-              onChange={e => setRememberMe(e.target.checked)}
+          {isRegistering ? t('login.register') : t('login.login')}
+        </h1>
+        {error && <p className={styles.errorMessage}>{error}</p>}
+        <form onSubmit={handleSubmit} className={styles.form}>
+          <div className={styles.field}>
+            <label className={styles.label}>{t('login.email')}</label>
+            <RuneInput
+              type="email"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              placeholder={t('login.emailPlaceholder')}
+              required
+              onInvalid={handleEmailInvalid}
+              onInput={e => e.currentTarget.setCustomValidity('')}
               disabled={loading}
-              className={styles.rememberMeCheckbox}
             />
-            <span>{t('login.rememberMe')}</span>
-          </label>
+          </div>
+          <div className={styles.field}>
+            <label className={styles.label}>{t('login.password')}</label>
+            <RuneInput
+              type="password"
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+              placeholder={t('login.passwordPlaceholder')}
+              required
+              minLength={6}
+              onInvalid={handlePasswordInvalid}
+              onInput={e => e.currentTarget.setCustomValidity('')}
+              disabled={loading}
+            />
+          </div>
+          <div className={styles.rememberMeContainer}>
+            <label htmlFor="rememberMe" className={styles.rememberMeLabel}>
+              <input
+                id="rememberMe"
+                type="checkbox"
+                checked={rememberMe}
+                onChange={e => setRememberMe(e.target.checked)}
+                disabled={loading}
+                className={styles.rememberMeCheckbox}
+              />
+              <span>{t('login.rememberMe')}</span>
+            </label>
+          </div>
+          <MagitekButton type="submit" disabled={loading} fullWidth>
+            {loading
+              ? t('common.loading')
+              : isRegistering
+              ? t('login.register')
+              : t('login.login')}
+          </MagitekButton>
+        </form>
+        {/* 神秘入口底盤 - 功能按鈕區域 */}
+        <div className={styles.portalPanel}>
+          <MagitekButton
+            onClick={() => setIsRegistering(!isRegistering)}
+            fullWidth
+            size="small"
+          >
+            {isRegistering
+              ? t('login.switchToLogin')
+              : t('login.switchToRegister')}
+          </MagitekButton>
+
+          <MagitekButton
+            onClick={handleGuestMode}
+            disabled={loading}
+            fullWidth
+            size="small"
+          >
+            {t('login.guestMode')}
+          </MagitekButton>
         </div>
-        <MagitekButton
-          type="submit"
-          disabled={loading}
-          fullWidth
-        >
-          {loading
-            ? t('common.loading')
-            : isRegistering
-            ? t('login.register')
-            : t('login.login')}
-        </MagitekButton>
-      </form>
-      {/* 神秘入口底盤 - 功能按鈕區域 */}
-      <div className={styles.portalPanel}>
-        <MagitekButton
-          onClick={() => setIsRegistering(!isRegistering)}
-          fullWidth
-          size="small"
-        >
-          {isRegistering ? t('login.switchToLogin') : t('login.switchToRegister')}
-        </MagitekButton>
 
-        <MagitekButton
-          onClick={handleGuestMode}
-          disabled={loading}
-          fullWidth
-          size="small"
-        >
-          {t('login.guestMode')}
-        </MagitekButton>
+        <div className={styles.privacyNotice}>
+          {i18n.language && i18n.language.toLowerCase().startsWith('zh') ? (
+            <p>
+              若繼續操作，即表示你同意最強肉體
+              <a className={styles.privacyLink} href="/terms">
+                使用條款
+              </a>
+              。請參閱我們的
+              <a className={styles.privacyLink} href="/privacy-policy">
+                隱私權政策
+              </a>
+              。
+            </p>
+          ) : (
+            <p>
+              By continuing, you agree to the Ultimate Physique
+              <a className={styles.privacyLink} href="/terms">
+                Terms of Service
+              </a>
+              . Please review our
+              <a className={styles.privacyLink} href="/privacy-policy">
+                Privacy Policy
+              </a>
+              .
+            </p>
+          )}
+        </div>
       </div>
 
-      <div className={styles.privacyNotice}>
-        {i18n.language && i18n.language.toLowerCase().startsWith('zh') ? (
-          <p>
-            若繼續操作，即表示你同意最強肉體
-            <a className={styles.privacyLink} href="/terms">
-              使用條款
-            </a>
-            。請參閱我們的
-            <a className={styles.privacyLink} href="/privacy-policy">
-              隱私權政策
-            </a>
-            。
-          </p>
-        ) : (
-          <p>
-            By continuing, you agree to the Ultimate Physique
-            <a className={styles.privacyLink} href="/terms">
-              Terms of Service
-            </a>
-            . Please review our
-            <a className={styles.privacyLink} href="/privacy-policy">
-              Privacy Policy
-            </a>
-            .
-          </p>
-        )}
-      </div>
-
-      {/* Google 登入 - 魔導化水晶容器 */}
+      {/* 結構性手術：中間區塊 - Google 登入 */}
       <div className={styles.googleLoginContainer}>
         <SocialLogin onLogin={handleSocialLogin} onError={handleSocialError} />
       </div>
 
-      {/* 說明區域 */}
+      {/* 結構性手術：底部區塊 - 使用說明 */}
       <div className={styles.instructionsContainer}>
-        <h2 className={styles.instructionsTitle}>{t('login.instructions.title')}</h2>
+        <h2 className={styles.instructionsTitle}>
+          {t('login.instructions.title')}
+        </h2>
         <ul className={styles.instructionsList}>
           <li>
             <strong>{t('login.instructions.items.fair.title')}</strong>：
@@ -176,7 +170,6 @@ function Login({ onLogin }) {
         onClose={() => setShowPrivacyPolicy(false)}
         onAccept={handlePrivacyAccept}
       />
-      </div>
     </div>
   );
 }
@@ -186,4 +179,3 @@ Login.propTypes = {
 };
 
 export default Login;
-
