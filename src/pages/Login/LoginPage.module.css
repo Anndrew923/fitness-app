@@ -112,22 +112,49 @@
   box-shadow: var(--glow-magitek); /* 互動時切換為能量金光 */
 }
 
-/* 標題 - 魔導化：神聖感與儀式感 */
+/* 標題 - 超頻定稿：標題亮度極致化 - 一眼萬年的亮度 */
 .title {
   font-size: 1.75rem;
-  font-weight: 700;
+  font-weight: 900 !important; /* 強制使用 Black (900) 版本，確保字體筆畫足夠粗 */
   text-align: center;
   margin-bottom: 1.5rem;
-  color: #ffffff !important; /* 強制設為純白，避免被父容器透明度影響 */
-  text-shadow: 0 0 10px #ffd700, 0 0 20px var(--color-magitek-gold),
-    0 0 40px rgba(255, 140, 0, 1) !important; /* 提高 Alpha 值至 1，製造強烈發光體效果 */
-  font-family: var(
-    --font-epic,
-    'Exocet',
-    'Cinematic',
-    monospace
-  ) !important; /* 確保使用數值專用字體 */
-  letter-spacing: 0.2rem; /* 增加神聖感：更寬鬆的字距 */
+
+  /* 靈魂注入：都市奇幻字體 - Cinzel Decorative (英文) + Noto Serif TC (中文) */
+  font-family: 'Cinzel Decorative', 'Noto Serif TC', var(--font-epic, serif) !important;
+  letter-spacing: 0.5rem !important; /* 加大間距，防止輝光互相干擾 */
+
+  /* 英文大寫轉換（中文不受影響） */
+  text-transform: uppercase;
+
+  /* 字體渲染優化：確保文字清晰銳利 */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+
+  /* 超頻定稿：核心增亮 - 白光佔比拉高到 75%，確保字體完全不暗沉 */
+  background: linear-gradient(
+    180deg,
+    #ffffff 0%,
+    #ffffff 75%,
+    var(--color-magitek-gold) 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+
+  /* Fallback：如果漸層不工作，使用純白確保文字可見 */
+  color: #ffffff;
+
+  /* 超頻定稿：濾鏡超頻 - 小幅增加亮度與飽和度，讓金橘色像火燄一樣燃燒 */
+  filter: brightness(1.2) saturate(1.3) !important;
+
+  /* 超頻定稿：晶體切割投影 - 加入「極高光」白核，解決模糊感 */
+  text-shadow: 
+    /* 第一層：絕對白核，解決模糊感 */ 0 0 2px
+      rgba(255, 255, 255, 1),
+    /* 第二層：核心金光邊緣 */ 0 0 5px rgba(255, 140, 0, 0.9),
+    /* 第三層：能量場氛圍 */ 0 0 15px rgba(255, 69, 0, 0.5),
+    /* 第四層：遠程 Bloom */ 0 0 30px rgba(255, 69, 0, 0.2);
 }
 
 /* 錯誤訊息 - 使用力量紅/破壞者色，確保在毛玻璃背景上清晰可見 */
@@ -164,13 +191,25 @@
   margin-bottom: 0.5rem; /* 增加欄位間距 */
 }
 
-/* 標籤 */
+/* 標籤 - 魔導公文規範：數位化對比 - 使用 Monospace 等寬字體 */
 .label {
   display: block;
   font-size: 0.875rem;
   font-weight: 500;
   margin-bottom: 0.5rem;
   color: rgba(255, 255, 255, 0.9);
+
+  /* 數位化對比：極簡的 Monospace 等寬字體，產生科技感 */
+  font-family: var(
+    --font-mono,
+    'JetBrains Mono',
+    'Courier New',
+    'Monaco',
+    'Menlo',
+    'Consolas',
+    monospace
+  );
+  letter-spacing: 0.08rem; /* 增加字距，提升可讀性與科技感 */
 }
 
 /* 輸入框 - 功能安全：確保可點擊和輸入 */
@@ -188,6 +227,7 @@
   border-radius: 8px;
   font-size: 0.9rem;
   color: rgba(255, 255, 255, 0.95);
+  letter-spacing: 0.03rem; /* 增加字距，提升可讀性 */
 
   transition: all 0.3s ease;
 
@@ -510,13 +550,39 @@
   text-shadow: 0 0 8px #ffd700, 0 0 16px var(--color-magitek-gold),
     0 0 30px rgba(255, 140, 0, 1) !important; /* 提高 Alpha 值至 1 */
   letter-spacing: 2px;
+
+  /* 魔導公文規範：小標題使用 Monospace，產生科技感對比 */
+  font-family: var(
+    --font-mono,
+    'JetBrains Mono',
+    'Courier New',
+    'Monaco',
+    'Menlo',
+    'Consolas',
+    monospace
+  );
+  letter-spacing: 0.1rem; /* 增加字距，提升科技感 */
 }
 
 .instructionsList {
   list-style-type: none;
   padding: 0;
   font-size: 0.9rem;
-  color: rgba(255, 255, 255, 0.8);
+
+  /* 數據刻印：對比強化 - 使用 JetBrains Mono 並設定高對比度 */
+  color: rgba(255, 255, 255, 0.85); /* 設定 opacity 為 0.85，保持高對比度 */
+
+  /* 魔導公文規範：說明文字使用 Monospace，產生數位化對比 */
+  font-family: var(
+    --font-mono,
+    'JetBrains Mono',
+    'Courier New',
+    'Monaco',
+    'Menlo',
+    'Consolas',
+    monospace
+  );
+  letter-spacing: 0.05rem; /* 增加字距，提升可讀性與科技感 */
 }
 
 .instructionsList li {
@@ -538,6 +604,8 @@
 
 .instructionsList li strong {
   color: var(--color-magitek-gold);
+  /* 數據刻印：對比強化 - 保持高對比度 */
+  opacity: 0.9;
 }
 
 /* 神秘入口底盤 - 功能按鈕區域：通透水晶設計 */

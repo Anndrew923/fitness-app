@@ -3,25 +3,30 @@
    ============================================================ */
 :root {
   /* ========== Magitek Core Colors (魔導核心色) ========== */
-  --color-void-black: #050505;          /* 深邃虛空底色 */
-  --color-magitek-gold: #FF8C00;        /* 熾熱金橘 (能量主色) */
-  --color-arcane-blue: #00BFFF;         /* 奧術藍 (科技輔色) */
+  --color-void-black: #050505; /* 深邃虛空底色 */
+  --color-magitek-gold: #ff8c00; /* 熾熱金橘 (能量主色) */
+  --color-arcane-blue: #00bfff; /* 奧術藍 (科技輔色) */
 
   /* ========== Class Accents (職業動態色) ========== */
-  --color-class-str: #FF4500;           /* 力量紅 - 破壞者 */
-  --color-class-agi: #9400D3;           /* 瞬影紫 - 刺客 */
+  --color-class-str: #ff4500; /* 力量紅 - 破壞者 */
+  --color-class-agi: #9400d3; /* 瞬影紫 - 刺客 */
 
   /* ========== Materials (材質定義) ========== */
-  --bg-void-space: url('/assets/textures/stardust_void.webp');    /* 星塵虛空底圖 */
-  --glass-reflection: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 100%);   /* 水晶折射感 */
+  --bg-void-space: url('/assets/textures/stardust_void.webp'); /* 星塵虛空底圖 */
+  --glass-reflection: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.1) 0%,
+    rgba(255, 255, 255, 0) 100%
+  ); /* 水晶折射感 */
 
   /* ========== Borders & Glows (VFX 輝光效果) ========== */
-  --border-bloom: 1px solid rgba(0, 191, 255, 0.4);    /* 自發光邊框 */
-  --glow-magitek: 0 0 15px rgba(255, 140, 0, 0.5);     /* 金色能量暈光 */
-  --glow-arcane: 0 0 15px rgba(0, 191, 255, 0.4);      /* 藍色魔法暈光 */
+  --border-bloom: 1px solid rgba(0, 191, 255, 0.4); /* 自發光邊框 */
+  --glow-magitek: 0 0 15px rgba(255, 140, 0, 0.5); /* 金色能量暈光 */
+  --glow-arcane: 0 0 15px rgba(0, 191, 255, 0.4); /* 藍色魔法暈光 */
 
   /* ========== Typography (特殊數值字體) ========== */
-  --font-epic: 'Exocet', 'Cinematic', monospace;
+  --font-epic: 'Cinzel Decorative', '源雲明體', 'Noto Serif TC', serif; /* 主標題：史詩感字體 */
+  --font-mono: 'JetBrains Mono', 'Courier New', 'Monaco', monospace; /* 雷達圖數值：等寬字體 */
 
   /* ========== Legacy Compatibility (保留基礎中性色) ========== */
   --color-white: #ffffff;

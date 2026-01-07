@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useRef, memo } from 'react';
+import { useState, useEffect, useMemo, useRef, memo } from 'react';
 import PropTypes from 'prop-types';
 import {
   RadarChart,
@@ -61,16 +61,17 @@ const CustomAxisTick = memo(
       const b = parseInt(hex.slice(5, 7), 16);
       return `rgba(${r}, ${g}, ${b}, ${alpha})`;
     };
-    
-    const circleStrokeColor = isLimitBreak && isOverLimit 
-      ? limitBreakColor 
-      : 'rgba(129, 216, 208, 0.4)';
-    const circleGlowColor = isLimitBreak && isOverLimit 
-      ? hexToRgba(limitBreakColor, 0.2)
-      : 'rgba(129, 216, 208, 0.1)';
-    const labelColor = isLimitBreak && isOverLimit 
-      ? limitBreakColor 
-      : '#2d3748';
+
+    const circleStrokeColor =
+      isLimitBreak && isOverLimit
+        ? limitBreakColor
+        : 'rgba(129, 216, 208, 0.4)';
+    const circleGlowColor =
+      isLimitBreak && isOverLimit
+        ? hexToRgba(limitBreakColor, 0.2)
+        : 'rgba(129, 216, 208, 0.1)';
+    const labelColor =
+      isLimitBreak && isOverLimit ? limitBreakColor : '#2d3748';
     const labelWeight = isLimitBreak && isOverLimit ? '900' : '700';
 
     return (
@@ -91,9 +92,10 @@ const CustomAxisTick = memo(
           fill="rgba(255, 255, 255, 0.95)"
           stroke={circleStrokeColor}
           strokeWidth={isLimitBreak && isOverLimit ? 3 : 2}
-          filter={isLimitBreak && isOverLimit 
-            ? `drop-shadow(0 2px 6px ${hexToRgba(limitBreakColor, 0.4)})`
-            : "drop-shadow(0 2px 4px rgba(129, 216, 208, 0.2))"
+          filter={
+            isLimitBreak && isOverLimit
+              ? `drop-shadow(0 2px 6px ${hexToRgba(limitBreakColor, 0.4)})`
+              : 'drop-shadow(0 2px 4px rgba(129, 216, 208, 0.2))'
           }
         />
         {/* 圖標 */}
@@ -103,13 +105,13 @@ const CustomAxisTick = memo(
           textAnchor="middle"
           fill={isLimitBreak && isOverLimit ? limitBreakColor : '#4a5568'}
           fontSize="16"
-          fontWeight={isLimitBreak && isOverLimit ? "700" : "600"}
+          fontWeight={isLimitBreak && isOverLimit ? '700' : '600'}
           dominantBaseline="middle"
           filter="drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1))"
         >
           {data?.icon}
         </text>
-        {/* 標籤文字 */}
+        {/* 標籤文字 - 使用 JetBrains Mono 字體 */}
         <text
           x={0}
           y={12}
@@ -117,12 +119,14 @@ const CustomAxisTick = memo(
           fill={labelColor}
           fontSize="13"
           fontWeight={labelWeight}
+          fontFamily="'JetBrains Mono', 'Courier New', 'Monaco', monospace"
+          letterSpacing="0.05em"
           dominantBaseline="middle"
           filter="drop-shadow(0 1px 3px rgba(255, 255, 255, 0.9))"
         >
           {payload.value}
         </text>
-        {/* 🔥 Limit Break: 顯示超過 100 的數值標籤 */}
+        {/* 🔥 Limit Break: 顯示超過 100 的數值標籤 - 使用 JetBrains Mono 字體 */}
         {isOverLimit && (
           <text
             x={0}
@@ -131,6 +135,8 @@ const CustomAxisTick = memo(
             fill={limitBreakColor}
             fontSize="11"
             fontWeight="900"
+            fontFamily="'JetBrains Mono', 'Courier New', 'Monaco', monospace"
+            letterSpacing="0.05em"
             dominantBaseline="middle"
             filter={`drop-shadow(0 1px 3px ${hexToRgba(limitBreakColor, 0.5)})`}
           >
@@ -187,11 +193,13 @@ const RadarChartSection = ({ scores, loading, t }) => {
         muscleMass: scoreData.muscleMass,
         bodyFat: scoreData.bodyFat,
       };
-      
+
       const data = [
         {
           name: t('userInfo.radarLabels.strength'),
-          value: coreScores.strength ? Number(coreScores.strength).toFixed(2) * 1 : 0,
+          value: coreScores.strength
+            ? Number(coreScores.strength).toFixed(2) * 1
+            : 0,
           icon: '💪',
         },
         {
@@ -203,7 +211,9 @@ const RadarChartSection = ({ scores, loading, t }) => {
         },
         {
           name: t('userInfo.radarLabels.cardio'),
-          value: coreScores.cardio ? Number(coreScores.cardio).toFixed(2) * 1 : 0,
+          value: coreScores.cardio
+            ? Number(coreScores.cardio).toFixed(2) * 1
+            : 0,
           icon: '❤️',
         },
         {
@@ -215,13 +225,16 @@ const RadarChartSection = ({ scores, loading, t }) => {
         },
         {
           name: t('userInfo.radarLabels.ffmi'),
-          value: coreScores.bodyFat ? Number(coreScores.bodyFat).toFixed(2) * 1 : 0,
+          value: coreScores.bodyFat
+            ? Number(coreScores.bodyFat).toFixed(2) * 1
+            : 0,
           icon: '📊',
         },
       ];
       // 確保只返回核心5項，過濾掉任何異常值
       const filtered = data.filter(
-        item => item.value !== null && item.value !== undefined && !isNaN(item.value)
+        item =>
+          item.value !== null && item.value !== undefined && !isNaN(item.value)
       );
       return filtered.length > 0 ? filtered : data;
     } catch (error) {
@@ -327,7 +340,7 @@ const RadarChartSection = ({ scores, loading, t }) => {
         <div className="corner-decoration bottom-right"></div>
 
         <h2 className="radar-title">{t('userInfo.radarOverview')}</h2>
-        
+
         {/* SVG defs */}
         <svg style={{ position: 'absolute', width: 0, height: 0 }}>
           <defs>
@@ -365,10 +378,7 @@ const RadarChartSection = ({ scores, loading, t }) => {
         </svg>
 
         {hasValidData && (
-          <div
-            className="radar-chart-container"
-            ref={radarContainerRef}
-          >
+          <div className="radar-chart-container" ref={radarContainerRef}>
             <RadarChart
               width={chartDimensions.width}
               height={chartDimensions.height}
@@ -383,8 +393,8 @@ const RadarChartSection = ({ scores, loading, t }) => {
               <PolarAngleAxis
                 dataKey="name"
                 tick={
-                  <CustomAxisTick 
-                    radarChartData={radarChartData} 
+                  <CustomAxisTick
+                    radarChartData={radarChartData}
                     t={t}
                     isLimitBreak={isLimitBreak}
                     limitBreakColor={limitBreakColor}
@@ -400,6 +410,9 @@ const RadarChartSection = ({ scores, loading, t }) => {
                   fontSize: 12,
                   fill: '#2d3748',
                   fontWeight: 600,
+                  fontFamily:
+                    "'JetBrains Mono', 'Courier New', 'Monaco', monospace",
+                  letterSpacing: '0.05em',
                 }}
                 axisLine={false}
               />
@@ -437,4 +450,3 @@ RadarChartSection.propTypes = {
 };
 
 export default RadarChartSection;
-
