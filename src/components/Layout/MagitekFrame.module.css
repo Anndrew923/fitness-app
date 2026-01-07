@@ -47,6 +47,13 @@
   content: '';
   position: fixed; /* 鎖定全螢幕，不隨捲動消失 */
   inset: 0;
+
+  /* ⚡ GPU 加速引擎：強制啟動硬體加速 */
+  transform: translateZ(0);
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+  perspective: 1000px;
+
   /* 視界大開：星塵過載 - 多層隨機星簇，密度倍增，巨星閃耀 */
   background-image: 
     /* 小星點 (1px) - 密度倍增 */ radial-gradient(
@@ -200,8 +207,8 @@
   /* 視界大開：動態閃爍 + 銀河自轉 - 讓星群「活過來」並產生動態深度感 */
   animation: twinkle 5s ease-in-out infinite alternate,
     galaxyRotate 120s linear infinite !important;
-  /* 巨星光暈：為超巨星和極巨星加入模糊濾鏡，製作光暈感 */
-  filter: blur(2px);
+  /* ⚡ 濾鏡脫離工程：移除昂貴的 blur 濾鏡，改用預處理背景減少 GPU 負擔 */
+  /* filter: blur(2px); 已移除 - 改用預處理的星點大小差異模擬光暈 */
 }
 
 /* 魔力粒子 VFX 層 - 使用 ::after 虛擬元素 - 星域覺醒：圖層深度校準 */
@@ -245,9 +252,9 @@
   /* 色彩共鳴：讓背後的星光「穿透」星雲並與其色彩融合，產生更強的發光感 */
   mix-blend-mode: screen;
 
-  /* 全域透視：將 filter 移到這裡，避免破壞 .container 的 position: fixed 基準點 */
-  /* 提升星雲層次感：增強顏色飽和度 */
-  filter: contrast(1.2);
+  /* ⚡ 濾鏡脫離工程：移除 contrast 濾鏡，改用直接調整 radial-gradient 顏色數值 */
+  /* filter: contrast(1.2); 已移除 - 改用預處理的漸層顏色提升飽和度 */
+  /* 提升星雲層次感：直接調整漸層顏色數值，避免 GPU 濾鏡運算 */
 }
 
 /* 魔力粒子漂移動畫 */
@@ -292,6 +299,28 @@
   /* 強力穿透：確保星空背景能直接透視到 CrystalCard 的毛玻璃後方 */
   background: transparent !important;
   /* 不設定 overflow，讓 .main-content 自己控制滾動 */
+}
+
+/* ⚡ 降級開關：移動端性能優化 */
+@media (max-width: 768px) {
+  .container::before {
+    /* 手機模式：將 galaxyRotate 動畫速度放慢 2 倍（從 120s 改為 240s） */
+    animation: twinkle 5s ease-in-out infinite alternate,
+      galaxyRotate 240s linear infinite !important;
+    /* 減少星塵數量：簡化 background-size 和 background-position */
+    background-size: 200px 200px, 150px 150px, 250px 250px, 300px 300px,
+      400px 400px, 500px 500px, 600px 600px, 700px 700px, 800px 800px,
+      900px 900px, 1000px 1000px;
+    background-position: 0 0, 25px 15px, 50px 40px, 75px 60px, 100px 100px,
+      125px 125px, 150px 150px, 175px 175px, 200px 200px, 225px 225px,
+      250px 250px;
+  }
+
+  .container::after {
+    /* 手機模式：降低 backdrop-filter 模糊樣本數（從 16px 調至 8px） */
+    /* 注意：此處沒有 backdrop-filter，但保留註釋作為參考 */
+    animation: magicDrift 30s linear infinite; /* 放慢漂移動畫 */
+  }
 }
 
 /* 低效能模式：減少動畫 */

@@ -244,7 +244,7 @@ export default {
       },
       mage: {
         title: 'Physique Mage',
-        desc: 'Your muscle density (FFMI) defies logic. This isn\'t just training; it\'s the crystallization of talent and science. Your very existence is a magical interpretation of human limits.',
+        desc: "Your muscle density (FFMI) defies logic. This isn't just training; it's the crystallization of talent and science. Your very existence is a magical interpretation of human limits.",
       },
       berserker: {
         title: 'Berserker',
@@ -252,7 +252,7 @@ export default {
       },
       assassin: {
         title: 'Assassin',
-        desc: 'Speed is everything. You possess incredible neural drive and explosive power, unleashing massive energy in an instant. While others are still warming up, you\'ve already ended the battle.',
+        desc: "Speed is everything. You possess incredible neural drive and explosive power, unleashing massive energy in an instant. While others are still warming up, you've already ended the battle.",
       },
       ranger: {
         title: 'Ranger',
@@ -282,7 +282,8 @@ export default {
       desc: 'Share your background to inspire other fitness enthusiasts!',
       profession: 'Profession',
       selectProfession: 'Please select your profession',
-      professionHint: 'Select profession to participate in future "Profession Group Ladder"',
+      professionHint:
+        'Select profession to participate in future "Profession Group Ladder"',
       weeklyHours: 'Weekly training hours',
       years: 'Training years',
     },
@@ -421,8 +422,7 @@ export default {
       limitReached: 'Daily limit reached (3 updates)',
       limitReachedMessage:
         'You have reached the daily limit for ladder updates. Please try again tomorrow!',
-      cooldownMessage:
-        'Please wait {{minutes}} minutes before updating again', // 🔴 Reserved but no longer used
+      cooldownMessage: 'Please wait {{minutes}} minutes before updating again', // 🔴 Reserved but no longer used
       nextResetTime: 'Next reset time: Tomorrow 00:00',
       limitInfo:
         'To maintain ladder ranking fairness, each user can update their ladder score up to 3 times per day (no cooldown restriction)',
@@ -469,8 +469,11 @@ export default {
 
   // Login
   login: {
+    loginTitle: 'Awakening Ritual',
     login: 'Login',
+    loginBtn: 'Initiate Awakening Ritual (Login)',
     register: 'Register',
+    registerLink: 'Unsealed? Link Soul (Sign Up)',
     email: 'Email',
     password: 'Password',
     emailPlaceholder: 'Enter your email',
@@ -480,9 +483,10 @@ export default {
     switchToRegister: "Don't have an account? Sign up",
     google: 'Sign in with Google',
     processing: 'Processing...',
-    guestMode: 'Try Guest Mode',
+    guestMode: 'Anonymous Spirit Intervention (Guest)',
+    instructionTitle: 'Ritual Guidance',
     instructions: {
-      title: 'How it works',
+      title: 'Ritual Guidance',
       items: {
         fair: {
           title: 'Fair scoring',
@@ -498,6 +502,22 @@ export default {
         },
       },
     },
+    features: {
+      appraisal: {
+        title: 'Magitek Precision Appraisal',
+        desc: 'Calculate physical data through arcane algorithms based on gender, age, and biometrics.',
+      },
+      aura: {
+        title: 'Omni-Dimensional Aura Monitoring',
+        desc: 'Visualize weaknesses via fluid radar charts to guide your mana reinforcement.',
+      },
+      trajectory: {
+        title: 'Awakening Trajectory Recording',
+        desc: 'Precisely record your path to awakening and optimize training efficiency.',
+      },
+    },
+    contract: 'Service Terms (Contract)',
+    soulBarrier: 'Privacy Agreement (Soul Barrier)',
   },
 
   // About
@@ -745,18 +765,14 @@ export default {
         strengthLevel: {
           title: 'Global Strength Benchmarks',
           desc: 'Built on international Powerlifting competition data and physiological models.',
-          point1:
-            'Precision relative strength via DOTS coefficient',
-          point2:
-            'Age-neutral assessment using McCulloch scale',
-          point3:
-            'Elite benchmarks set by competitive standards',
+          point1: 'Precision relative strength via DOTS coefficient',
+          point2: 'Age-neutral assessment using McCulloch scale',
+          point3: 'Elite benchmarks set by competitive standards',
         },
         cooperTest: {
           title: 'Cooper Test Standards',
           desc: '12-minute running test designed by Dr. Kenneth Cooper, US Air Force Colonel',
-          point1:
-            'Military-designed fitness test standard with high authority',
+          point1: 'Military-designed fitness test standard with high authority',
           point2:
             'Estimates maximum oxygen uptake (VO₂ Max) through running distance',
           point3:
@@ -768,8 +784,7 @@ export default {
           point1:
             'References American College of Sports Medicine (ACSM) exercise standards',
           point2: 'Integrates World Athletics track and field standard data',
-          point3:
-            'Combines national sports administration fitness norm data',
+          point3: 'Combines national sports administration fitness norm data',
         },
       },
       algorithms: {
@@ -1314,8 +1329,7 @@ export default {
       removeFail: 'Failed to remove friend',
       challengeSent: 'Challenge sent successfully!',
       challengeSendFail: 'Failed to send challenge',
-      loadChallengesFail:
-        'Failed to load challenges. Please try again later.',
+      loadChallengesFail: 'Failed to load challenges. Please try again later.',
       respondFail: 'Failed to respond to challenge',
       shownInvitesInfo: 'All invitations shown in console',
       clearFail: 'Failed to clear',

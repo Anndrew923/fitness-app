@@ -180,3 +180,52 @@ nav[style*='position: fixed'],
   backdrop-filter: blur(16px) saturate(180%) !important;
   -webkit-backdrop-filter: blur(16px) saturate(180%) !important;
 }
+
+/* ⚡ 降級開關：移動端性能優化 - 降低 backdrop-filter 模糊樣本數 */
+@media (max-width: 768px) {
+  nav[style*='position: fixed'],
+  .bottomNavBar,
+  .bottomNavBar-wrapper,
+  .MuiBottomNavigation-root,
+  [class*='bottom-nav'],
+  [class*='BottomNav'] {
+    backdrop-filter: blur(8px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(8px) saturate(180%) !important;
+  }
+}
+
+/* ============================================================
+   魔導大一統：全域標題 CSS (Magitek Grand Unification)
+   將超頻定稿樣式遷移至全域，供所有頁面使用
+   ============================================================ */
+/* 全域魔導標題規範 - 超頻定稿版本 */
+.magitek-header {
+  font-family: 'Cinzel Decorative', 'Noto Serif TC', serif !important;
+  font-weight: 900 !important;
+  letter-spacing: 0.5rem !important;
+  text-align: center;
+  text-transform: uppercase;
+
+  /* 字體渲染優化：確保文字清晰銳利 */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+
+  /* 核心超頻漸層 - 白光佔比拉高到 75%，確保字體完全不暗沉 */
+  background: linear-gradient(180deg, #ffffff 0%, #ffffff 75%, #ff8c00 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+
+  /* Fallback：如果漸層不工作，使用純白確保文字可見 */
+  color: #ffffff;
+
+  /* 濾鏡爆發感 - 小幅增加亮度與飽和度，讓金橘色像火燄一樣燃燒 */
+  filter: brightness(1.2) saturate(1.3) !important;
+
+  /* 晶體切割投影系統 - 加入「極高光」白核，解決模糊感 */
+  text-shadow: 0 0 2px rgba(255, 255, 255, 1),
+    /* 第一層：絕對白核，解決模糊感 */ 0 0 5px rgba(255, 140, 0, 0.9),
+    /* 第二層：核心金光邊緣 */ 0 0 15px rgba(255, 69, 0, 0.5),
+    /* 第三層：能量場氛圍 */ 0 0 30px rgba(255, 69, 0, 0.2); /* 第四層：遠程 Bloom */
+}

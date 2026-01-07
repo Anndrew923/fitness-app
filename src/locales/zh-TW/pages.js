@@ -458,8 +458,11 @@ export default {
 
   // 登入頁
   login: {
+    loginTitle: '開啟覺醒儀式',
     login: '開啟覺醒儀式',
+    loginBtn: '開啟覺醒儀式 (登入)',
     register: '靈魂共鳴初始化',
+    registerLink: '未受封印？建立靈魂共鳴 (註冊)',
     email: '電子郵件',
     password: '密碼',
     emailPlaceholder: '輸入你的電子郵件',
@@ -469,9 +472,10 @@ export default {
     switchToRegister: '沒有帳號？點此註冊',
     google: '使用 Google 登入',
     processing: '處理中...',
-    guestMode: '訪客模式體驗',
+    guestMode: '無名靈體介入 (訪客模式)',
+    instructionTitle: '儀式導引',
     instructions: {
-      title: '使用說明',
+      title: '儀式導引',
       items: {
         fair: {
           title: '公平評測',
@@ -487,6 +491,22 @@ export default {
         },
       },
     },
+    features: {
+      appraisal: {
+        title: '魔導精準鑑定',
+        desc: '依性別、年齡、體態，結合奧術演算，將肉體數值化呈現。',
+      },
+      aura: {
+        title: '全維度靈壓監測',
+        desc: '透過五維流體雷達圖揭示弱項，指引魔力補強方向。',
+      },
+      trajectory: {
+        title: '覺醒軌跡紀錄',
+        desc: '精確刻印進步軌跡，優化您的覺醒課表效率。',
+      },
+    },
+    contract: '服務條款 (Contract)',
+    soulBarrier: '隱私協議 (Soul Barrier)',
   },
 
   // 關於我們頁面

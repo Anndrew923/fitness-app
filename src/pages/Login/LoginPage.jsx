@@ -35,8 +35,8 @@ function Login({ onLogin }) {
     <div className={styles.loginContainer}>
       {/* 結構性手術：頂部區塊 - 標題與登入表單 */}
       <div className={styles.crystalCard}>
-        <h1 className={styles.title}>
-          {isRegistering ? t('login.register') : t('login.login')}
+        <h1 className={`magitek-header ${styles.title}`}>
+          {t('login.loginTitle')}
         </h1>
         {error && <p className={styles.errorMessage}>{error}</p>}
         <form onSubmit={handleSubmit} className={styles.form}>
@@ -84,8 +84,8 @@ function Login({ onLogin }) {
             {loading
               ? t('common.loading')
               : isRegistering
-              ? t('login.register')
-              : t('login.login')}
+              ? t('login.registerLink')
+              : t('login.loginBtn')}
           </MagitekButton>
         </form>
         {/* 神秘入口底盤 - 功能按鈕區域 */}
@@ -146,21 +146,27 @@ function Login({ onLogin }) {
 
       {/* 結構性手術：底部區塊 - 使用說明 */}
       <div className={styles.instructionsContainer}>
-        <h2 className={styles.instructionsTitle}>
-          {t('login.instructions.title')}
+        <h2 className={`magitek-header ${styles.instructionsTitle}`}>
+          {t('login.instructionTitle')}
         </h2>
         <ul className={styles.instructionsList}>
           <li>
-            <strong>{t('login.instructions.items.fair.title')}</strong>：
-            {t('login.instructions.items.fair.desc')}
+            <strong>{t('login.features.appraisal.title')}</strong>：
+            <span className={styles.featureDesc}>
+              {t('login.features.appraisal.desc')}
+            </span>
           </li>
           <li>
-            <strong>{t('login.instructions.items.analysis.title')}</strong>：
-            {t('login.instructions.items.analysis.desc')}
+            <strong>{t('login.features.aura.title')}</strong>：
+            <span className={styles.featureDesc}>
+              {t('login.features.aura.desc')}
+            </span>
           </li>
           <li>
-            <strong>{t('login.instructions.items.tracking.title')}</strong>：
-            {t('login.instructions.items.tracking.desc')}
+            <strong>{t('login.features.trajectory.title')}</strong>：
+            <span className={styles.featureDesc}>
+              {t('login.features.trajectory.desc')}
+            </span>
           </li>
         </ul>
       </div>
