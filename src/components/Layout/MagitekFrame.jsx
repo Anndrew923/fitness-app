@@ -12,6 +12,8 @@ import styles from './MagitekFrame.module.css';
 function MagitekFrame({ children, className = '', extraChildren }) {
   return (
     <div className={`${styles.container} ${className}`}>
+      {/* ⚡ 紋理化效能超頻：星域圖層 - 以貼圖取代數學運算 */}
+      <div className={styles.starLayer}></div>
       <div className={styles.content}>{children}</div>
       {/* 全域透視：額外子元素（如 BottomNavBar）直接作為 container 的子元素，確保 position: fixed 正常工作 */}
       {extraChildren}

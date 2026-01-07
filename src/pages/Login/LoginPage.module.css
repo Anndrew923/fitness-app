@@ -748,6 +748,19 @@
   }
 }
 
+/* ⚡ 降級開關：移動端性能優化 - 固定 backdrop-filter 為 8px */
+@media (max-width: 768px) {
+  .crystalCard,
+  .privacyNotice,
+  .instructionsContainer,
+  .socialLoginContainer {
+    backdrop-filter: blur(8px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(8px) saturate(180%) !important;
+    /* ⚡ 移除所有 filter (contrast, blur) */
+    filter: none !important;
+  }
+}
+
 /* 低效能模式：減少模糊效果 */
 @media (prefers-reduced-motion: reduce) {
   .crystalCard,

@@ -25,9 +25,9 @@ html {
   height: 100%;
   /* ✅ 使用 100% 而非 100vh，避免包含系統列高度 */
   /* 在畫框式佈局中，WebView 高度已自動排除系統列 */
-  /* 終極導覽列淨化：即使有任何隙縫，露出來的也會是深邃的虛空，而不是刺眼的白色 */
-  background: #050505 !important;
-  background-color: #050505 !important;
+  /* ⚡ 星域召喚：移除背景色，讓星空顯示 */
+  background: transparent !important;
+  background-color: transparent !important;
 }
 
 body {
@@ -35,9 +35,9 @@ body {
   /* ✅ 關鍵：使用 100% 高度，跟隨父層 WebView（已排除系統列） */
   height: 100%;
   /* ✅ 不使用 100vh，因為在畫框式佈局中，WebView 高度已正確計算 */
-  /* 終極導覽列淨化：深度清潔畫布 - 強制將背景色設為主題深色，避免任何隙縫露出白色 */
-  background: #050505 !important;
-  background-color: #050505 !important;
+  /* ⚡ 星域召喚：移除背景色，讓星空顯示 */
+  background: transparent !important;
+  background-color: transparent !important;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
     sans-serif;

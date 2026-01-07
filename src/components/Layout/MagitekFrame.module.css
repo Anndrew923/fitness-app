@@ -1,40 +1,18 @@
 /* ============================================================
    MAGITEK FRAME - 魔導外殼容器
    深邃虛空背景 + 魔力粒子 VFX 層
+   ⚡ 紋理化效能超頻：以圖片紋理取代 CSS 漸層運算
    ============================================================ */
 
 .container {
-  /* 星塵虛空背景：使用多層徑向漸層模擬星雲與遠星 - 星域重塑：提升層次感 */
-  background: radial-gradient(
-      circle at 50% 50%,
-      rgba(0, 191, 255, 0.2) 0%,
-      transparent 50%
-    ),
-    /* 奧術藍星雲 - 提升能見度 */
-      radial-gradient(
-        circle at 20% 80%,
-        rgba(148, 0, 211, 0.1) 0%,
-        transparent 40%
-      ),
-    /* 瞬影紫餘暉 - 提升能見度 */
-      radial-gradient(
-        circle at 80% 20%,
-        rgba(255, 140, 0, 0.08) 0%,
-        transparent 30%
-      ),
-    /* 金橘能量餘暉 - 提升能見度 */ #050505; /* 深邃底色 */
-  background-size: 100% 100%, 100% 100%, 100% 100%, cover;
-  background-position: center, center, center, center;
-  background-repeat: no-repeat, no-repeat, no-repeat, no-repeat;
-  /* 全域透視：移除 filter，避免破壞 position: fixed 的基準點 */
-  /* filter: contrast(1.2); 已移至 ::after 偽元素 */
-
-  /* 全螢幕佈局 - 終極導覽列淨化：打通安全區域 - 使用 100dvh 確保包含安全區域 */
-  min-height: 100dvh; /* Dynamic Viewport Height - 包含安全區域 */
-  height: 100dvh; /* 確保背景漸層包含到安全區域 */
+  /* ⚡ 解除滑動封鎖：恢復全域捲動 */
   width: 100%;
+  min-height: 100vh;
+  height: auto;
+  overflow-y: visible !important; /* 核心：恢復縱向捲動 */
+  overflow-x: hidden;
+  background-color: transparent !important; /* ⚡ 關鍵修正：改為透明，讓星空顯示 */
   position: relative;
-  /* 不設定 overflow，讓子元素自己控制滾動 */
   /* 終極導覽列淨化：確保背景漸層包含到 padding-bottom: env(safe-area-inset-bottom) 的區域 */
   padding-bottom: env(safe-area-inset-bottom, 0px);
 
@@ -42,294 +20,64 @@
   z-index: 0;
 }
 
-/* 增加一層「星塵粒子」層 - 星域覺醒：巨星化與動態閃爍 */
-.container::before {
-  content: '';
-  position: fixed; /* 鎖定全螢幕，不隨捲動消失 */
-  inset: 0;
-
-  /* ⚡ GPU 加速引擎：強制啟動硬體加速 */
-  transform: translateZ(0);
-  will-change: transform, opacity;
-  backface-visibility: hidden;
-  perspective: 1000px;
-
-  /* 視界大開：星塵過載 - 多層隨機星簇，密度倍增，巨星閃耀 */
-  background-image: 
-    /* 小星點 (1px) - 密度倍增 */ radial-gradient(
-      1px 1px at 20px 30px,
-      white,
-      rgba(0, 0, 0, 0)
-    ),
-    radial-gradient(1px 1px at 250px 50px, white, rgba(0, 0, 0, 0)),
-    radial-gradient(
-      1px 1px at 400px 200px,
-      rgba(255, 255, 255, 0.9),
-      rgba(0, 0, 0, 0)
-    ),
-    radial-gradient(
-      1px 1px at 800px 300px,
-      rgba(255, 255, 255, 0.7),
-      rgba(0, 0, 0, 0)
-    ),
-    radial-gradient(1px 1px at 50px 400px, white, rgba(0, 0, 0, 0)),
-    radial-gradient(1px 1px at 700px 600px, white, rgba(0, 0, 0, 0)),
-    radial-gradient(1px 1px at 150px 250px, white, rgba(0, 0, 0, 0)),
-    radial-gradient(
-      1px 1px at 550px 450px,
-      rgba(255, 255, 255, 0.8),
-      rgba(0, 0, 0, 0)
-    ),
-    /* 中星點 (1.5px) */
-      radial-gradient(
-        1.5px 1.5px at 100px 150px,
-        rgba(255, 255, 255, 0.8),
-        rgba(0, 0, 0, 0)
-      ),
-    radial-gradient(1.5px 1.5px at 600px 80px, white, rgba(0, 0, 0, 0)),
-    radial-gradient(
-      1.5px 1.5px at 300px 500px,
-      rgba(255, 255, 255, 0.8),
-      rgba(0, 0, 0, 0)
-    ),
-    /* 大星點 (2px) - 增加存在感 */
-      radial-gradient(2px 2px at 15% 25%, white, rgba(0, 0, 0, 0)),
-    radial-gradient(
-      2px 2px at 85% 75%,
-      rgba(255, 255, 255, 0.9),
-      rgba(0, 0, 0, 0)
-    ),
-    radial-gradient(
-      2px 2px at 45% 60%,
-      rgba(255, 140, 0, 0.9),
-      rgba(0, 0, 0, 0)
-    ),
-    /* 金橘色巨星 - 色彩強化 */
-      /* 巨星 (3px) - 帶光暈效果，模擬距離更近的星體 */
-      radial-gradient(
-        3px 3px at 75% 65%,
-        rgba(0, 191, 255, 0.9),
-        rgba(0, 0, 0, 0)
-      ),
-    /* 帶藍光的巨星 - 色彩強化 */
-      radial-gradient(
-        3px 3px at 25% 85%,
-        rgba(255, 140, 0, 0.9),
-        rgba(0, 0, 0, 0)
-      ),
-    /* 帶金橘光的巨星 - 色彩強化 */
-      radial-gradient(3px 3px at 60% 30%, white, rgba(0, 0, 0, 0)),
-    /* 白色巨星 */ /* 超巨星 (4px) - 帶模糊濾鏡，確保肉眼能清晰捕捉 */
-      radial-gradient(
-        4px 4px at 35% 70%,
-        rgba(0, 191, 255, 0.9),
-        rgba(0, 0, 0, 0)
-      ),
-    /* 帶藍光的超巨星 */
-      radial-gradient(
-        4px 4px at 65% 40%,
-        rgba(255, 140, 0, 0.9),
-        rgba(0, 0, 0, 0)
-      ),
-    /* 帶金橘光的超巨星 */
-      radial-gradient(4px 4px at 10% 50%, white, rgba(0, 0, 0, 0)),
-    /* 白色超巨星 */ /* 極巨星 (5px) - 帶模糊濾鏡，像霓虹燈一樣在虛空中閃爍 */
-      radial-gradient(
-        5px 5px at 50% 50%,
-        rgba(0, 191, 255, 1),
-        rgba(0, 0, 0, 0)
-      ),
-    /* 帶藍光的極巨星 - 亮度倍增 */
-      radial-gradient(
-        5px 5px at 90% 20%,
-        rgba(255, 140, 0, 1),
-        rgba(0, 0, 0, 0)
-      ),
-    /* 帶金橘光的極巨星 - 亮度倍增 */
-      /* 超巨星 (6px) - 星域全開：巨星化與亮度倍增 */
-      radial-gradient(6px 6px at 20% 30%, white, rgba(0, 0, 0, 0)),
-    /* 白色超巨星 */
-      radial-gradient(
-        6px 6px at 80% 70%,
-        rgba(0, 191, 255, 1),
-        rgba(0, 0, 0, 0)
-      ),
-    /* 帶藍光的超巨星 - 亮度倍增 */
-      radial-gradient(
-        6px 6px at 40% 10%,
-        rgba(255, 140, 0, 1),
-        rgba(0, 0, 0, 0)
-      ),
-    /* 帶金橘光的超巨星 - 亮度倍增 */
-      /* 極超巨星 (7px) - 星域全開：確保在畫面任何位置都能一眼看到 */
-      radial-gradient(7px 7px at 60% 80%, white, rgba(0, 0, 0, 0)),
-    /* 白色極超巨星 */
-      radial-gradient(
-        7px 7px at 10% 60%,
-        rgba(0, 191, 255, 1),
-        rgba(0, 0, 0, 0)
-      ),
-    /* 帶藍光的極超巨星 - 亮度倍增 */
-      radial-gradient(
-        7px 7px at 70% 40%,
-        rgba(255, 140, 0, 1),
-        rgba(0, 0, 0, 0)
-      ),
-    /* 帶金橘光的極超巨星 - 亮度倍增 */
-      /* 終極巨星 (8px) - 星域全開：最震撼的視覺衝擊 */
-      radial-gradient(8px 8px at 30% 50%, white, rgba(0, 0, 0, 0)),
-    /* 白色終極巨星 */
-      radial-gradient(
-        8px 8px at 50% 20%,
-        rgba(0, 191, 255, 1),
-        rgba(0, 0, 0, 0)
-      ),
-    /* 帶藍光的終極巨星 - 亮度倍增 */
-      radial-gradient(
-        8px 8px at 90% 80%,
-        rgba(255, 140, 0, 1),
-        rgba(0, 0, 0, 0)
-      ); /* 帶金橘光的終極巨星 - 亮度倍增 */
-  /* 密度倍增：將 background-size 縮小，讓單位面積內的星點數量翻倍 */
-  background-size: 150px 150px, 100px 100px, 175px 175px, 125px 125px,
-    200px 200px, 150px 150px, 120px 120px, 180px 180px, 225px 225px, 250px 250px,
-    275px 275px, 300px 300px, 350px 350px, 400px 400px, 450px 450px, 500px 500px,
-    550px 550px, 600px 600px, 650px 650px, 700px 700px, 750px 750px, 800px 800px,
-    850px 850px, 900px 900px, 950px 950px, 1000px 1000px; /* 多層交錯，消除規律性 */
-  background-position: 0 0, 25px 15px, 50px 40px, 75px 60px, 100px 100px,
-    125px 125px, 150px 150px, 175px 175px, 200px 200px, 225px 225px, 250px 250px,
-    275px 275px, 300px 300px, 325px 325px, 350px 350px, 375px 375px, 400px 400px,
-    425px 425px, 450px 450px, 475px 475px, 500px 500px, 525px 525px, 550px 550px,
-    575px 575px, 600px 600px; /* 不同位移，創造隨機感 */
-  opacity: 1; /* 星域全開：取消透明度限制，讓星點像霓虹燈一樣亮 */
-  pointer-events: none; /* 星域全開：確保不被任何登入框的標籤遮擋 */
-  z-index: 2; /* 確保在星雲層 (::after) 之上，但在 UI 內容之下，擁有最高的「背景層級」 */
-  /* 視界大開：動態閃爍 + 銀河自轉 - 讓星群「活過來」並產生動態深度感 */
-  animation: twinkle 5s ease-in-out infinite alternate,
-    galaxyRotate 120s linear infinite !important;
-  /* ⚡ 濾鏡脫離工程：移除昂貴的 blur 濾鏡，改用預處理背景減少 GPU 負擔 */
-  /* filter: blur(2px); 已移除 - 改用預處理的星點大小差異模擬光暈 */
-}
-
-/* 魔力粒子 VFX 層 - 使用 ::after 虛擬元素 - 星域覺醒：圖層深度校準 */
-.container::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-
-  /* 動態星雲流動效果 - 星雲覺醒強化版 */
-  background-image: radial-gradient(
-      circle at 20% 50%,
-      rgba(0, 191, 255, 0.15) 0%,
-      transparent 50%
-    ),
-    radial-gradient(
-      circle at 80% 50%,
-      rgba(255, 140, 0, 0.1) 0%,
-      transparent 50%
-    ),
-    radial-gradient(
-      circle at 50% 20%,
-      rgba(148, 0, 211, 0.12) 0%,
-      transparent 40%
-    );
-  background-size: 100% 100%, 100% 100%, 100% 100%;
-  background-position: center, center, center;
+/* ⚡ 紋理化效能超頻：星域圖層 - 以貼圖取代數學運算 */
+.starLayer {
+  /* ⚡ 核心優化：修正圖片路徑（使用實際文件名） */
+  background-image: url('/images/magitek_nebula_core.webp.png') !important;
+  background-size: cover;
+  background-position: center;
   background-repeat: no-repeat;
 
-  /* 提升透明度，確保肉眼可見流動的彩色雲霧 */
-  opacity: 0.2;
+  /* ⚡ 空間擴張：設為 300vmax 確保任何旋轉角度都不會露白邊 */
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  width: 300vmax;
+  height: 300vmax;
+  transform: translate(-50%, -50%) translateZ(0); /* 居中並開啟 GPU 加速 */
 
-  /* 不阻擋交互 */
+  z-index: 0 !important; /* ⚡ 關鍵修正：改為 0，確保在 container 之上 */
   pointer-events: none;
+  will-change: transform;
 
-  /* 緩慢漂移動畫，模擬魔力流動 */
-  animation: magicDrift 20s linear infinite;
+  /* ⚡ 緊急降噪：移除亮度濾鏡，恢復原始深邃虛空對比感 */
+  /* filter: brightness(1.3) saturate(1.2) !important; 已移除 */
 
-  /* 圖層深度校準：確保在背景之上，但在星塵層 (::before) 之下 */
-  z-index: 1;
-
-  /* 色彩共鳴：讓背後的星光「穿透」星雲並與其色彩融合，產生更強的發光感 */
-  mix-blend-mode: screen;
-
-  /* ⚡ 濾鏡脫離工程：移除 contrast 濾鏡，改用直接調整 radial-gradient 顏色數值 */
-  /* filter: contrast(1.2); 已移除 - 改用預處理的漸層顏色提升飽和度 */
-  /* 提升星雲層次感：直接調整漸層顏色數值，避免 GPU 濾鏡運算 */
-}
-
-/* 魔力粒子漂移動畫 */
-@keyframes magicDrift {
-  from {
-    transform: translate(0, 0);
-  }
-  to {
-    transform: translate(2%, 2%);
-  }
-}
-
-/* 動態閃爍動畫 - 星域覺醒：讓星群「活過來」 */
-@keyframes twinkle {
-  0%,
-  100% {
-    opacity: 0.4;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.8;
-    transform: scale(1.1); /* 週期性爆發亮度 */
-  }
+  animation: galaxyRotate 240s linear infinite;
 }
 
 /* 銀河自轉動畫 - 視界大開：虛空深度校準 */
 @keyframes galaxyRotate {
   from {
-    transform: rotate(0deg) scale(1.2);
+    transform: translate(-50%, -50%) translateZ(0) rotate(0deg) scale(1.2);
   }
   to {
-    transform: rotate(360deg) scale(1.2);
+    transform: translate(-50%, -50%) translateZ(0) rotate(360deg) scale(1.2);
   }
 }
 
 /* 內容層 - 確保在 VFX 層之上，強力穿透：確保星空「穿過」所有組件 */
 .content {
+  background: transparent !important;
   position: relative;
-  z-index: 3; /* 確保在星塵層 (::before, z-index: 2) 之上，但在 BottomNavBar (z-index: 1200) 之下 */
+  z-index: 1;
   width: 100%;
   min-height: 100vh;
   /* 強力穿透：確保星空背景能直接透視到 CrystalCard 的毛玻璃後方 */
-  background: transparent !important;
   /* 不設定 overflow，讓 .main-content 自己控制滾動 */
 }
 
 /* ⚡ 降級開關：移動端性能優化 */
 @media (max-width: 768px) {
-  .container::before {
-    /* 手機模式：將 galaxyRotate 動畫速度放慢 2 倍（從 120s 改為 240s） */
-    animation: twinkle 5s ease-in-out infinite alternate,
-      galaxyRotate 240s linear infinite !important;
-    /* 減少星塵數量：簡化 background-size 和 background-position */
-    background-size: 200px 200px, 150px 150px, 250px 250px, 300px 300px,
-      400px 400px, 500px 500px, 600px 600px, 700px 700px, 800px 800px,
-      900px 900px, 1000px 1000px;
-    background-position: 0 0, 25px 15px, 50px 40px, 75px 60px, 100px 100px,
-      125px 125px, 150px 150px, 175px 175px, 200px 200px, 225px 225px,
-      250px 250px;
-  }
-
-  .container::after {
-    /* 手機模式：降低 backdrop-filter 模糊樣本數（從 16px 調至 8px） */
-    /* 注意：此處沒有 backdrop-filter，但保留註釋作為參考 */
-    animation: magicDrift 30s linear infinite; /* 放慢漂移動畫 */
+  .starLayer {
+    /* 手機模式：將 galaxyRotate 動畫速度放慢（從 240s 改為 480s） */
+    animation: galaxyRotate 480s linear infinite;
   }
 }
 
 /* 低效能模式：減少動畫 */
 @media (prefers-reduced-motion: reduce) {
-  .container::before {
-    animation: none !important; /* 禁用閃爍動畫和自轉動畫 */
-    filter: none; /* 移除模糊濾鏡 */
-  }
-  .container::after {
-    animation: none; /* 禁用漂移動畫 */
+  .starLayer {
+    animation: none !important; /* 禁用自轉動畫 */
   }
 }
