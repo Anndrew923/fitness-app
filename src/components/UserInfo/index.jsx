@@ -737,7 +737,9 @@ function UserInfo({ testData, onLogout, clearTestData }) {
             justifyContent: 'center',
             margin: 0,
             padding: 0,
-            background: 'rgba(255, 255, 255, 0.95)',
+            background: 'rgba(0, 10, 30, 0.6)',
+            backdropFilter: 'blur(10px)',
+            border: '2px solid rgba(0, 191, 255, 0.5)',
             borderRadius: '50%',
             boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
             border: '2px solid rgba(102, 126, 234, 0.3)',
@@ -800,15 +802,8 @@ function UserInfo({ testData, onLogout, clearTestData }) {
 
       {/* ✅ UP-LADDER-EVO: 頂部身份區 */}
       <div className="user-info-identity">
-        {/* 頭像 */}
-        <AvatarSection
-          avatarUrl={isGuest ? '/guest-avatar.svg' : userData?.avatarUrl}
-          isGuest={isGuest}
-          isUploading={avatarUploading}
-          onImageSelected={handleAvatarChange}
-          onError={setAvatarError}
-          t={t}
-        />
+        {/* ⚡ 2. 大頭照「越獄」行動：頭像已移至 MagitekFrame 最外層，此處僅保留佔位空間 */}
+        {/* 頭像已移至 MagitekFrame，此處不再渲染 AvatarSection */}
 
         {/* 名字 */}
         <h2 className="user-info-name">

@@ -4,7 +4,7 @@ import {
   useLocation,
   useNavigate,
 } from 'react-router-dom';
-import { UserProvider } from './UserContext';
+import { UserProvider, useUser } from './UserContext';
 import { auth } from './firebase';
 import { signInWithEmailAndPassword, signOut } from 'firebase/auth';
 import PropTypes from 'prop-types';
@@ -18,6 +18,12 @@ import GlobalAdBanner from './components/GlobalAdBanner';
 import MagitekFrame from './components/Layout/MagitekFrame';
 import performanceMonitor from './utils/performanceMonitor';
 import AppRoutes from './AppRoutes';
+import AvatarSection from './components/UserInfo/AvatarSection'; // ⚡ 2. 大頭照「越獄」行動
+import { storage } from './firebase';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { updateDoc, doc } from 'firebase/firestore';
+import { db } from './firebase';
+import { compressImage } from './utils/imageUtils';
 import './App.css';
 import { useTranslation, withTranslation } from 'react-i18next';
 
@@ -113,10 +119,59 @@ function AppContent() {
   const { t } = useTranslation();
   const [testData, setTestData] = useState(null);
   const location = useLocation();
+  // ⚡ 2. 大頭照「越獄」行動：從 UserContext 獲取數據
+  const { userData, setUserData } = useUser();
+  const [avatarUploading, setAvatarUploading] = useState(false);
+  const [avatarError, setAvatarError] = useState(null);
   // ✅ Phase 1.9.5 新增：啟用 Android 返回鍵監聽
   useAndroidBackButton();
   // ✅ 原生视口管理（Status Bar、键盘检测、输入框滚动）
   useNativeViewport();
+  
+  // ⚡ 2. 大頭照「越獄」行動：處理頭像上傳
+  const handleAvatarChange = async blob => {
+    setAvatarError(null);
+    setAvatarUploading(true);
+    try {
+      const userId = auth.currentUser?.uid;
+      if (!userId) throw new Error('未登入，無法上傳頭像');
+      
+      const avatarRef = ref(storage, `avatars/${userId}/avatar.jpg`);
+      const metadata = {
+        contentType: 'image/jpeg',
+        cacheControl: 'public, max-age=31536000',
+      };
+      
+      await uploadBytes(avatarRef, blob, metadata);
+      const downloadURL = await getDownloadURL(avatarRef);
+      
+      await updateDoc(doc(db, 'users', userId), {
+        avatarUrl: downloadURL,
+      });
+      
+      setUserData(prev => ({ ...prev, avatarUrl: downloadURL }));
+      logger.debug('✅ 頭像上傳成功');
+    } catch (error) {
+      logger.error('❌ 頭像上傳失敗:', error);
+      setAvatarError('頭像上傳失敗: ' + error.message);
+    } finally {
+      setAvatarUploading(false);
+    }
+  };
+  
+  // ⚡ 2. 大頭照「越獄」行動：只在 /user-info 頁面渲染 AvatarSection
+  const isUserInfoPage = location.pathname === '/user-info';
+  const isGuest = sessionStorage.getItem('guestMode') === 'true';
+  const avatarSection = isUserInfoPage ? (
+    <AvatarSection
+      avatarUrl={isGuest ? '/guest-avatar.svg' : userData?.avatarUrl}
+      isGuest={isGuest}
+      isUploading={avatarUploading}
+      onImageSelected={handleAvatarChange}
+      onError={setAvatarError}
+      t={t}
+    />
+  ) : null;
   const showNavBar = [
     '/user-info',
     '/history',
@@ -306,6 +361,7 @@ function AppContent() {
 
   return (
     <MagitekFrame
+      avatarSection={avatarSection}
       extraChildren={
         /* 全域透視：導覽列徹底移出 app-container，直接作為 MagitekFrame 的子元素，與 .content 並列 */
         showNavBar ? <BottomNavBar /> : null
@@ -313,6 +369,10 @@ function AppContent() {
     >
       <div
         className={`app-container ${showFixedAd ? 'page-with-fixed-ad' : ''}`}
+        style={{
+          background: 'transparent',
+          backgroundColor: 'transparent',
+        }}
       >
         <ScrollToTop />
         <ErrorBoundary>

@@ -19,7 +19,15 @@ const UserFormSection = ({
 }) => {
   return (
     <>
-      <div id="user-form-section" className="form-card">
+      {/* ⚡ 4. 擊穿白塊：直接在容器上套用內聯樣式，這是權重最高的做法 */}
+      <div
+        id="user-form-section"
+        className="form-card"
+        style={{
+          background: 'transparent',
+          backgroundColor: 'transparent',
+        }}
+      >
         <form className="user-form" onSubmit={onSubmit}>
           {/* 1. 基本資料表單 (Basic Info) */}
           <BasicInfoForm

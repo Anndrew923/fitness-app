@@ -178,6 +178,7 @@ code {
 }
 
 /* ✅ Level 3-4: 修正 App 容器高度 - 星域重塑：強力穿透 */
+/* ⚡ 1. 擊穿父容器限制：移除所有寬度限制，強制填滿物理螢幕 */
 .app-container {
   /* ✅ 使用 min-height 而非 height，允許內容擴展 */
   min-height: 100%;
@@ -187,7 +188,20 @@ code {
   /* 星域重塑：確保 100% 透明，讓星空背景能直接透視 */
   background-color: transparent !important;
   background: transparent !important;
-  width: 100%;
+  /* ⚡ 1. 擊穿父容器限制：移除所有寬度限制，強制填滿物理螢幕 */
+  width: 100vw !important;
+  max-width: 100vw !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  /* ⚡ 強制修正：清除所有外距，讓邊框貼齊螢幕四角 */
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+  /* ⚡ B. 擊穿隱形盒子：強制移除 overflow: hidden，讓頭像不被切掉 */
+  overflow: visible !important;
 }
 
 /* ✅ 修正父容器：移除 padding，讓它佔滿全螢幕，不要擠壓內容 */
@@ -205,9 +219,8 @@ code {
   flex: 1;
   /* ✅ 確保內容區域正確填充可用空間 */
   height: 100%;
-  /* 🔴 修复：确保滚动容器正确设置 */
-  overflow-y: auto !important;
-  overflow-x: hidden;
+  /* ⚡ Phase 2: 魔導終端 - 移除滾動，由 #layer-content 統一處理 */
+  overflow: visible !important; /* 不再自己處理滾動 */
   /* 🔴 關鍵修復：為底部導航列預留空間，防止內容被遮擋或露出青色背景 */
   /* BottomNavBar 高度：calc(64px + env(safe-area-inset-bottom, 0px)) */
   /* 添加額外緩衝空間（16px），確保內容完全可見 */
@@ -217,9 +230,6 @@ code {
   /* 星域重塑：確保背景色為 100% 透明，讓星空背景能直接透視 */
   background-color: transparent !important;
   background: transparent !important;
-  /* 🔴 新增：Capacitor 滚动优化 */
-  -webkit-overflow-scrolling: touch;
-  overscroll-behavior-y: contain;
   /* 🔴 新增：确保滚动容器在原生环境中工作 */
   position: relative;
   display: block;
@@ -286,8 +296,8 @@ code {
 /* 🔴 新增：Capacitor 原生环境特定修复 */
 @supports (-webkit-touch-callout: none) {
   .main-content {
-    overflow-y: auto !important;
-    -webkit-overflow-scrolling: touch !important;
+    /* ⚡ Phase 2: 魔導終端 - 移除滾動，由 #layer-content 統一處理 */
+    overflow: visible !important;
     /* 确保滚动容器有足够的高度 */
     min-height: 100vh;
     height: auto;

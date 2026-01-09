@@ -1,19 +1,19 @@
-/* 表單卡片 */
+/* ⚡ Phase 2: 表單卡片 - 魔導化 */
+/* ⚡ 組件玻璃化樣式：統一玻璃化規範 */
 .form-card {
-  /* ✅ 調整：恢復原始半透明背景樣式 */
-  background: rgba(255, 255, 255, 0.95);
+  /* 魔導背景：深藍透明 + 磨砂玻璃 */
+  background: rgba(0, 10, 30, 0.4) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
   border-radius: 20px;
-  /* ✅ 修復：恢復正常內部padding */
   padding: 20px;
-  /* ✅ 修復：恢復標準margin */
   margin-bottom: 20px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  /* ✅ 修復：創建定位上下文，z-index設為1（白色背景層級） */
+  /* 藍色發光邊線：統一規範 */
+  border: 1px solid rgba(0, 191, 255, 0.5) !important;
+  box-shadow: 0 0 20px rgba(0, 191, 255, 0.2),
+    0 8px 32px rgba(0, 0, 0, 0.2);
   position: relative;
   z-index: 1;
-  /* ✅ 修復：確保下拉列表可以視覺上逃離卡片 */
   overflow: visible;
 }
 
@@ -35,18 +35,20 @@
   padding-right: 36px; /* 為登出按鈕留空間 */
 }
 
+/* ⚡ Phase 2: 白瓷掃除：section-title 改為白色文字 */
 .section-title {
   font-size: 26px;
-  font-weight: 700 !important; /* ✅ UI 優化：確保字重 */
-  color: #2c3e50 !important; /* ✅ UI 優化：深藍灰色，高對比度，避免白色文字在白色卡片上不可見 */
+  font-weight: 700 !important;
+  color: #ffffff !important; /* 白色文字，適配魔導背景 */
   margin: 0;
   display: flex;
   align-items: center;
   gap: 8px;
-  text-shadow: none; /* ✅ UI 優化：移除文字陰影，因為現在是深色文字 */
+  text-shadow: 0 0 10px rgba(255, 140, 0, 0.5),
+    0 2px 4px rgba(0, 0, 0, 0.5); /* 發光效果 */
   line-height: 1.2;
-  border-bottom: 1px solid #eee !important; /* ✅ UI 優化：添加細分隔線增加清晰度 */
-  padding-bottom: 8px !important; /* ✅ UI 優化：分隔線下方留空間 */
+  border-bottom: 1px solid rgba(0, 191, 255, 0.3) !important; /* 藍色發光分隔線 */
+  padding-bottom: 8px !important;
 }
 
 /* 登出按鈕 - BEM命名 */
@@ -119,26 +121,44 @@
   line-height: 1.2;
 }
 
-/* 表單輸入框 */
+/* ⚡ Phase 2: 表單輸入框 - 魔導化 */
 .form-input {
   width: 100%;
   padding: 12px 16px;
-  border: 2px solid rgba(255, 255, 255, 0.3);
+  border: 2px solid rgba(0, 191, 255, 0.4);
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.9);
-  font-size: 16px;
-  color: #2d3748;
-  transition: all 0.3s ease;
+  /* 魔導背景：半透明 + 磨砂玻璃 */
+  background: rgba(0, 10, 30, 0.5);
   backdrop-filter: blur(10px);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  -webkit-backdrop-filter: blur(10px);
+  font-size: 16px;
+  color: #ffffff;
+  transition: all 0.3s ease;
+  box-shadow: 0 0 15px rgba(0, 191, 255, 0.2),
+    0 4px 16px rgba(0, 0, 0, 0.2);
 }
 
-/* ✅ 修復：行政區下拉菜單溢出問題 */
-/* Select元素樣式 */
+.form-input::placeholder {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.form-input:focus {
+  border-color: rgba(0, 191, 255, 0.7);
+  box-shadow: 0 0 25px rgba(0, 191, 255, 0.4),
+    0 4px 16px rgba(0, 0, 0, 0.3);
+  background: rgba(0, 20, 40, 0.6);
+  outline: none;
+}
+
+/* ⚡ Phase 2: Select 元素 - 魔導化 */
 select.form-input {
   position: relative;
   z-index: 1001;
-  background: white;
+  /* 魔導背景：半透明 + 磨砂玻璃 */
+  background: rgba(0, 10, 30, 0.5);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: #ffffff;
   /* 確保在移動設備上正確顯示 */
   -webkit-appearance: none;
   -moz-appearance: none;
@@ -150,8 +170,9 @@ select.form-input {
 /* 確保select元素的下拉選項列表正確顯示 */
 select.form-input option {
   padding: 8px 12px;
-  background: white;
-  color: #2d3748;
+  /* 下拉選項使用深色背景以確保可讀性 */
+  background: rgba(0, 20, 40, 0.95);
+  color: #ffffff;
 }
 
 /* ✅ 新增：當select獲得焦點時，確保下拉列表正確顯示 */
@@ -292,23 +313,29 @@ select.form-input[size] option:hover {
   flex: 1;
 }
 
+/* ⚡ Phase 2: 生成暱稱按鈕 - 魔導化 */
 .generate-nickname-btn {
-  background: linear-gradient(135deg, #81d8d0 0%, #5f9ea0 100%);
-  color: white;
+  /* 魔導背景：半透明 + 磨砂玻璃 */
+  background: rgba(0, 10, 30, 0.6);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: #ffffff;
   padding: 8px 12px;
-  border: none;
+  border: 1px solid rgba(0, 191, 255, 0.5);
   border-radius: 8px;
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
   white-space: nowrap;
-  box-shadow: 0 4px 12px rgba(129, 216, 208, 0.3);
+  box-shadow: 0 0 15px rgba(0, 191, 255, 0.3);
 }
 
 .generate-nickname-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(129, 216, 208, 0.4);
+  background: rgba(0, 20, 40, 0.7);
+  border-color: rgba(0, 191, 255, 0.7);
+  box-shadow: 0 0 25px rgba(0, 191, 255, 0.5);
 }
 
 /* 隱私設置 */
@@ -410,23 +437,29 @@ select.form-input[size] option:hover {
   z-index: 10; /* 低於section */
 }
 
+/* ⚡ Phase 2: 提交按鈕 - 魔導化 */
 .submit-btn {
-  background: linear-gradient(135deg, #81d8d0 0%, #5f9ea0 100%);
-  color: white;
+  /* 魔導背景：半透明 + 磨砂玻璃 */
+  background: rgba(0, 10, 30, 0.6);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: #ffffff;
   padding: 12px 24px;
-  border: none;
+  border: 1px solid rgba(0, 191, 255, 0.5);
   border-radius: 10px;
   font-size: 15px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(129, 216, 208, 0.3);
+  box-shadow: 0 0 15px rgba(0, 191, 255, 0.3);
   min-width: 180px;
 }
 
 .submit-btn:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(129, 216, 208, 0.4);
+  background: rgba(0, 20, 40, 0.7);
+  border-color: rgba(0, 191, 255, 0.7);
+  box-shadow: 0 0 25px rgba(0, 191, 255, 0.5);
 }
 
 .submit-btn:disabled {

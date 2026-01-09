@@ -9,20 +9,23 @@
   --transition-duration: 0.3s;
 }
 
-/* 主容器 */
+/* 主容器 - Phase 2: 魔導終端重組 */
+/* ⚡ 1. 擊穿父容器限制：移除所有寬度限制，強制填滿物理螢幕 */
 .user-info-container {
-  max-width: 800px;
-  margin: 0 auto;
-  /* ✅ Bug 2 修复：移除重复的 safe-area-inset-top，因为 body 已经有 padding-top */
-  /* ✅ 問題2 修復：將 padding-top 從 15px 縮小為 10px，減少 status bar 下方空白 */
-  padding: 10px 15px
-    calc(15px + var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)));
+  /* ⚡ 1. 擊穿父容器限制：移除所有寬度限制，強制填滿物理螢幕 */
+  width: 100vw !important;
+  max-width: 100vw !important;
+  margin: 0 auto !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  padding: 0 !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
   min-height: 100vh;
-  background: linear-gradient(135deg, #81d8d0 0%, #5f9ea0 100%);
+  /* ⚡ Phase 2: 背景徹底清場 - 完全透明，露出底層星域 */
+  background: transparent !important;
+  background-color: transparent !important;
   position: relative;
-  /* ✅ 修復 3: 移除 content-visibility，可能導致渲染問題和雷達圖消失 */
-  /* content-visibility: auto; */
-  /* contain-intrinsic-size: auto 1000px; */
   /* ✅ 啟用硬體加速 */
   transform: translateZ(0);
   /* ✅ 滾動性能優化 */
@@ -30,34 +33,20 @@
   overscroll-behavior: contain;
   /* ✅ 使用 CSS containment */
   contain: layout style paint;
+  /* ⚡ B. 擊穿隱形盒子：強制移除 overflow: hidden，讓頭像不被切掉 */
+  overflow: visible !important;
 }
 
 /* ✅ 技能樹頁面特定樣式：修復底部白色間隙 */
 .user-info-container.skill-tree-page {
   min-height: 100dvh; /* 使用動態視口高度，確保覆蓋全屏 */
-  background: linear-gradient(135deg, #81d8d0 0%, #5f9ea0 100%);
-  background-attachment: fixed; /* 確保背景固定，不會出現白色間隙 */
+  /* ⚡ Phase 2: 背景徹底清場 */
+  background: transparent !important;
+  background-color: transparent !important;
 }
 
 .user-info-container.skill-tree-page::before {
-  content: '';
-  position: fixed; /* 改為 fixed，確保覆蓋整個視口 */
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: radial-gradient(
-      circle at 20% 80%,
-      rgba(129, 216, 208, 0.3) 0%,
-      transparent 50%
-    ),
-    radial-gradient(
-      circle at 80% 20%,
-      rgba(95, 158, 160, 0.3) 0%,
-      transparent 50%
-    );
-  pointer-events: none;
-  z-index: 0;
+  display: none;
 }
 
 /* 確保技能樹頁面內容顯示在背景之上 */
@@ -66,24 +55,9 @@
   z-index: 1;
 }
 
+/* ⚡ Phase 2: 移除舊的背景漸層 */
 .user-info-container::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: radial-gradient(
-      circle at 20% 80%,
-      rgba(129, 216, 208, 0.3) 0%,
-      transparent 50%
-    ),
-    radial-gradient(
-      circle at 80% 20%,
-      rgba(95, 158, 160, 0.3) 0%,
-      transparent 50%
-    );
-  pointer-events: none;
+  display: none;
 }
 
 /* ✅ 新增：全屏載入動畫 */
@@ -169,46 +143,55 @@
 /* 基本資料標題區域 */
 /* ✅ Phase 3: 表單相關樣式已移至 UserFormSection/UserFormSection.css */
 
-/* 頁面標題 */
+/* ⚡ Phase 2: 頁面標題 - 透明背景，讓星域透出 */
 .page-header {
   text-align: center;
-  margin-top: 32px !important; /* ✅ UI 優化：與上方 Action Buttons 分開 */
-  margin-bottom: 16px !important; /* ✅ UI 優化：與表單卡片之間留空間 */
+  margin-top: 32px !important;
+  margin-bottom: 16px !important;
   position: relative;
   z-index: 1;
+  /* 背景透明 */
+  background: transparent !important;
 }
 
 .page-title {
   font-size: 26px;
   font-weight: 700;
-  color: white;
+  color: #ffffff;
   margin: 0 0 4px 0;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  text-shadow: 0 0 10px rgba(255, 140, 0, 0.5),
+    0 2px 4px rgba(0, 0, 0, 0.5);
   line-height: 1.2;
 }
 
 .page-subtitle {
   font-size: 13px;
-  color: rgba(255, 255, 255, 0.8);
+  color: rgba(255, 255, 255, 0.9);
   margin: 0;
   line-height: 1.2;
+  text-shadow: 0 0 8px rgba(0, 191, 255, 0.4);
 }
 
 /* ✅ Phase 3: 表單相關樣式已移至 UserFormSection/UserFormSection.css */
 
+/* ⚡ Phase 2: 分數區塊 - 魔導化 */
+/* ⚡ 組件玻璃化樣式：統一玻璃化規範 */
 .score-section {
   text-align: center;
   margin-top: 30px;
   padding: 30px;
-  background: linear-gradient(135deg, #ff6b35 0%, #f7931e 50%, #ffd700 100%);
+  /* 魔導背景：半透明 + 磨砂玻璃 */
+  background: rgba(0, 10, 30, 0.4) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
   border-radius: 20px;
   color: white;
-  box-shadow: 0 15px 35px rgba(255, 107, 53, 0.4), 0 6px 15px rgba(0, 0, 0, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  /* 藍色發光邊線：統一規範 */
+  border: 1px solid rgba(0, 191, 255, 0.5) !important;
+  box-shadow: 0 0 20px rgba(0, 191, 255, 0.3),
+    0 15px 35px rgba(0, 0, 0, 0.2);
   position: relative;
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(10px);
 }
 
 .score-section::before {
@@ -292,9 +275,13 @@
   margin-top: 15px;
 }
 
+/* ⚡ Phase 2: 測試按鈕 - 魔導化 */
 .test-btn {
-  background: white !important;
-  border: 1px solid #e4e6eb !important;
+  /* 魔導背景：半透明 + 磨砂玻璃 */
+  background: rgba(0, 10, 30, 0.4) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(0, 191, 255, 0.4) !important;
   border-radius: 12px;
   padding: 16px 12px;
   cursor: pointer;
@@ -303,10 +290,11 @@
   flex-direction: column;
   align-items: center;
   gap: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+  box-shadow: 0 0 15px rgba(0, 191, 255, 0.2),
+    0 2px 8px rgba(0, 0, 0, 0.2) !important;
   position: relative;
   overflow: hidden;
-  color: #333 !important;
+  color: #ffffff !important;
 }
 
 .test-btn::before {
@@ -314,10 +302,12 @@
 }
 
 .test-btn:hover {
-  background: #f8f9fa !important;
-  color: #333 !important;
+  background: rgba(0, 20, 40, 0.6) !important;
+  color: #ffffff !important;
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+  box-shadow: 0 0 25px rgba(0, 191, 255, 0.4),
+    0 4px 12px rgba(0, 0, 0, 0.3) !important;
+  border-color: rgba(0, 191, 255, 0.6) !important;
 }
 
 .test-btn:hover::before {
@@ -339,7 +329,7 @@
   transition: color 0.3s ease;
   text-align: center;
   line-height: 1.2;
-  color: #333 !important;
+  color: #ffffff !important;
 }
 
 /* 各評測按鈕的漸層顏色 */
@@ -458,13 +448,19 @@
 
 /* ✅ Phase 3: 訓練背景區域樣式已移至 UserFormSection/UserFormSection.css */
 
-/* 完成狀態樣式 */
+/* ⚡ Phase 2: 完成狀態樣式 - 魔導化 */
+/* ⚡ 組件玻璃化樣式：統一玻璃化規範 */
 .completion-status {
   margin-bottom: 20px;
   padding: 20px;
-  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  /* 魔導背景：半透明 + 磨砂玻璃 */
+  background: rgba(0, 10, 30, 0.4) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
   border-radius: 16px;
-  border: 1px solid rgba(129, 216, 208, 0.2);
+  /* 藍色發光邊線：統一規範 */
+  border: 1px solid rgba(0, 191, 255, 0.5) !important;
+  box-shadow: 0 0 15px rgba(0, 191, 255, 0.2);
 }
 
 .completion-header {
@@ -474,37 +470,45 @@
   margin-bottom: 12px;
 }
 
+/* ⚡ Phase 2: 完成標籤 - 白色文字 */
 .completion-label {
   font-size: 16px;
   font-weight: 600;
-  color: #2d3748;
+  color: #ffffff;
+  text-shadow: 0 0 8px rgba(0, 191, 255, 0.4);
 }
 
+/* ⚡ Phase 2: 完成計數 - 魔導化 */
 .completion-count {
   font-size: 18px;
   font-weight: 700;
-  color: #81d8d0;
-  background: rgba(129, 216, 208, 0.1);
+  color: rgba(0, 191, 255, 1);
+  background: rgba(0, 191, 255, 0.15);
   padding: 4px 12px;
   border-radius: 20px;
-  border: 2px solid rgba(129, 216, 208, 0.3);
+  border: 2px solid rgba(0, 191, 255, 0.4);
+  box-shadow: 0 0 10px rgba(0, 191, 255, 0.3);
 }
 
+/* ⚡ Phase 2: 完成進度條背景 - 魔導化 */
 .completion-progress {
   width: 100%;
   height: 8px;
-  background: rgba(129, 216, 208, 0.2);
+  background: rgba(0, 191, 255, 0.15);
   border-radius: 4px;
   overflow: hidden;
   margin-bottom: 12px;
 }
 
+/* ⚡ Phase 2: 完成進度條 - 魔導化 */
 .completion-bar {
   height: 100%;
-  background: linear-gradient(90deg, #81d8d0 0%, #5f9ea0 100%);
+  /* 魔導漸層：藍色發光 */
+  background: linear-gradient(90deg, rgba(0, 191, 255, 0.8) 0%, rgba(0, 150, 255, 0.9) 100%);
   border-radius: 4px;
   transition: width 0.6s ease-out;
   position: relative;
+  box-shadow: 0 0 10px rgba(0, 191, 255, 0.4);
 }
 
 .completion-bar::after {
@@ -532,9 +536,10 @@
   }
 }
 
+/* ⚡ Phase 2: 完成訊息 - 白色文字 */
 .completion-message {
   font-size: 14px;
-  color: #718096;
+  color: rgba(255, 255, 255, 0.8);
   text-align: center;
   margin: 0;
   font-style: italic;
@@ -578,32 +583,40 @@
 }
 
 /* 新增：天梯信息詳細顯示 */
+/* ⚡ Phase 2: 天梯資訊 - 魔導化 */
 .ladder-info {
   margin-top: 12px;
   padding: 12px;
-  background: rgba(255, 255, 255, 0.8);
+  /* 魔導背景：半透明 + 磨砂玻璃 */
+  background: rgba(0, 10, 30, 0.4);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   border-radius: 8px;
-  border: 1px solid rgba(129, 216, 208, 0.2);
+  border: 1px solid rgba(0, 191, 255, 0.4);
+  box-shadow: 0 0 15px rgba(0, 191, 255, 0.2);
 }
 
+/* ⚡ Phase 2: 分數文字 - 白色 */
 .submitted-score,
 .current-score {
   font-size: 13px;
-  color: #666;
+  color: rgba(255, 255, 255, 0.9);
   margin-bottom: 4px;
   font-weight: 500;
 }
 
 .score-value {
   font-weight: 600;
-  color: #4a7c7a;
+  color: rgba(0, 191, 255, 1);
+  text-shadow: 0 0 8px rgba(0, 191, 255, 0.5);
 }
 
 .score-note {
   font-size: 11px;
-  color: #ff6b35;
+  color: rgba(255, 140, 0, 1);
   font-style: italic;
   margin-left: 4px;
+  text-shadow: 0 0 6px rgba(255, 140, 0, 0.5);
 }
 
 /* 響應式設計 */
@@ -830,33 +843,41 @@
   font-family: 'Noto Sans TC', sans-serif;
 }
 
-/* 儲存評測結果按鈕 */
+/* ⚡ Phase 2: 儲存評測結果按鈕 - 魔導化（已移至底部控制台，此處保留樣式以防其他地方使用） */
 .save-results-btn {
-  background: white !important;
-  color: #333 !important;
-  border: 1px solid #e4e6eb !important;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+  /* 魔導背景：半透明 + 磨砂玻璃 */
+  background: rgba(0, 10, 30, 0.5) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: #ffffff !important;
+  border: 1px solid rgba(0, 191, 255, 0.4) !important;
+  box-shadow: 0 0 15px rgba(0, 191, 255, 0.2) !important;
 }
 
 .save-results-btn:not(:disabled):hover {
-  background: #f8f9fa !important;
-  color: #333 !important;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+  background: rgba(0, 20, 40, 0.7) !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 25px rgba(0, 191, 255, 0.4) !important;
+  border-color: rgba(0, 191, 255, 0.6) !important;
 }
 
-/* 提交到天梯按鈕 */
+/* ⚡ Phase 2: 提交到天梯按鈕 - 魔導化（已移至底部控制台，此處保留樣式以防其他地方使用） */
 .submit-ladder-btn {
-  background: white !important;
-  color: #333 !important;
-  border: 1px solid #e4e6eb !important;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+  /* 魔導背景：半透明 + 磨砂玻璃 */
+  background: rgba(0, 10, 30, 0.5) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: #ffffff !important;
+  border: 1px solid rgba(0, 191, 255, 0.4) !important;
+  box-shadow: 0 0 15px rgba(0, 191, 255, 0.2) !important;
   position: relative;
 }
 
 .submit-ladder-btn:not(:disabled):hover {
-  background: #f8f9fa !important;
-  color: #333 !important;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+  background: rgba(0, 20, 40, 0.7) !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 25px rgba(0, 191, 255, 0.4) !important;
+  border-color: rgba(0, 191, 255, 0.6) !important;
 }
 
 .submit-ladder-btn::before {
@@ -947,18 +968,22 @@
 
 /* ✅ Phase 6: SubmitConfirmModal 樣式已移至 Modals/Modals.css */
 
-/* 榮譽認證按鈕樣式 */
+/* ⚡ Phase 2: 榮譽認證按鈕 - 白瓷掃除：魔導化 */
 .verification-btn {
-  background: white !important;
-  color: #333 !important;
-  border: 1px solid #e4e6eb !important;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+  /* 魔導背景：半透明 + 磨砂玻璃 */
+  background: rgba(0, 10, 30, 0.4) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: #ffffff !important;
+  border: 1px solid rgba(0, 191, 255, 0.4) !important;
+  box-shadow: 0 0 15px rgba(0, 191, 255, 0.2) !important;
 }
 
 .verification-btn:not(:disabled):hover {
-  background: #f8f9fa !important;
-  color: #333 !important;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+  background: rgba(0, 20, 40, 0.6) !important;
+  color: #ffffff !important;
+  border-color: rgba(0, 191, 255, 0.6) !important;
+  box-shadow: 0 0 25px rgba(0, 191, 255, 0.4) !important;
 }
 
 .verification-btn .btn-icon {
@@ -994,6 +1019,7 @@
 /* ✅ Phase 3: optional-badge, field-hint, form-input:disabled 已移至 UserFormSection/UserFormSection.css */
 
 /* 設定按鈕 - 右上角 */
+/* ⚡ Phase 2: 設定按鈕 - 魔導化 */
 .user-info__settings-btn {
   position: fixed !important;
   /* ✅ 修正：優先使用 CSS 變量，後備使用 env()，確保在不同設備上正確響應 */
@@ -1004,24 +1030,26 @@
   width: 44px !important;
   height: 44px !important;
   border-radius: 50% !important;
-  background: rgba(255, 255, 255, 0.95) !important;
-  color: #667eea !important;
-  border: 2px solid rgba(102, 126, 234, 0.3) !important;
+  /* 魔導背景：半透明 + 磨砂玻璃 */
+  background: rgba(0, 10, 30, 0.6) !important;
+  color: #ffffff !important;
+  border: 2px solid rgba(0, 191, 255, 0.5) !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
   cursor: pointer !important;
   transition: all 0.3s ease !important;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+  box-shadow: 0 0 15px rgba(0, 191, 255, 0.3) !important;
   z-index: 999 !important; /* 確保在 Modal 之下，Modal 通常是 1000+ */
   backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
 }
 
 .user-info__settings-btn:hover {
-  background: rgba(255, 255, 255, 1) !important;
+  background: rgba(0, 20, 40, 0.8) !important;
   transform: scale(1.1) !important;
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2) !important;
-  border-color: #667eea !important;
+  box-shadow: 0 0 25px rgba(0, 191, 255, 0.5) !important;
+  border-color: rgba(0, 191, 255, 0.8) !important;
 }
 
 .user-info__settings-btn:active {
@@ -1051,78 +1079,141 @@
   }
 }
 
-/* ✅ UP-LADDER-EVO: 新佈局樣式 */
-
-/* 身份區 */
+/* ⚡ Phase 2: 身份區 - 調整位置（頭像已固定定位，從 identity 中獨立） */
 .user-info-identity {
-  text-align: center;
+  text-align: left; /* 改為左對齊 */
   margin-bottom: 20px;
+  margin-top: calc(100px + env(safe-area-inset-top, 0px)); /* 為固定頭像預留空間 */
+  padding-left: 120px; /* 為頭像預留左側空間 */
   position: relative;
   z-index: 1;
+  /* 背景透明 */
+  background: transparent !important;
+  /* ⚡ B. 擊穿隱形盒子：強制移除 overflow: hidden，讓頭像不被切掉 */
+  overflow: visible !important;
 }
 
 .user-info-name {
   font-size: 24px;
   font-weight: 700;
-  color: white;
+  color: #ffffff;
   margin: 12px 0 8px 0;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  text-shadow: 0 0 10px rgba(255, 140, 0, 0.5),
+    0 2px 4px rgba(0, 0, 0, 0.5);
 }
 
-/* 職業標籤（內聯） - 實體質感 */
+@media (max-width: 768px) {
+  .user-info-identity {
+    margin-top: 90px;
+    padding-left: 100px;
+  }
+}
+
+@media (max-width: 480px) {
+  .user-info-identity {
+    margin-top: 80px;
+    padding-left: 85px;
+  }
+}
+
+/* ⚡ 組件玻璃化樣式：職業標籤 - 統一玻璃化規範 */
 .rpg-class-badge-inline {
   display: inline-flex;
   align-items: center;
   gap: 6px;
   margin-top: 8px;
   padding: 6px 14px;
-  background: #1a1f2e;
+  /* 魔導背景：半透明 + 磨砂玻璃 */
+  background: rgba(0, 10, 30, 0.4) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
   border-radius: 8px;
-  border: none;
+  /* 藍色發光邊線：統一規範 */
+  border: 1px solid rgba(0, 191, 255, 0.5) !important;
   font-size: 14px;
   font-weight: 600;
   color: white;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 0 15px rgba(0, 191, 255, 0.2),
+    0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 .rpg-class-badge-inline:hover {
-  background: #252b3d;
+  background: rgba(0, 20, 40, 0.6) !important;
   transform: scale(1.05);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  border-color: rgba(0, 191, 255, 0.7) !important;
+  box-shadow: 0 0 25px rgba(0, 191, 255, 0.4),
+    0 4px 12px rgba(0, 0, 0, 0.4);
 }
 
 .rpg-class-badge-icon {
   font-size: 18px;
 }
 
-/* 戰力資訊條容器 */
+/* ⚡ Phase 2: 排行榜懸浮面板 - 靠左側分佈 */
 .ladder-status-wrapper {
   display: flex;
-  justify-content: center;
-  margin: 16px 0;
-  position: relative;
-  z-index: 1;
+  justify-content: flex-start;
+  margin: 0;
+  position: fixed;
+  left: 20px;
+  top: calc(120px + env(safe-area-inset-top, 0px)); /* 在頂部狀態列下方 */
+  z-index: 50;
+  width: auto;
+  max-width: 280px;
 }
 
-/* 操作工具列 - 白底高對比風格 */
+@media (max-width: 768px) {
+  .ladder-status-wrapper {
+    left: 15px;
+    top: calc(100px + env(safe-area-inset-top, 0px));
+    max-width: 240px;
+  }
+}
+
+/* ⚡ Phase 2: 固定式底部控制台（Bottom Dock） */
+/* ⚡ 組件玻璃化樣式：統一玻璃化規範 */
 .action-toolbar {
   display: flex !important;
-  flex-direction: column; /* 垂直堆疊 */
-  gap: 12px;
-  margin-top: 24px;
-  padding: 0 16px;
-  position: relative;
-  z-index: 10;
+  flex-direction: row; /* 改為水平排列 */
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  margin: 0;
+  padding: 16px 20px;
+  /* 固定定位在底部 */
+  position: fixed;
+  bottom: calc(80px + env(safe-area-inset-bottom, 0px)); /* 在 BottomNavBar 上方 */
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(100% - 40px);
+  max-width: 500px;
+  /* 魔導背景：半透明懸浮面板 - 統一玻璃化規範 */
+  background: rgba(0, 10, 30, 0.4) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  border-radius: 20px;
+  /* 藍色發光邊線：統一規範 */
+  border: 1px solid rgba(0, 191, 255, 0.5) !important;
+  box-shadow: 0 0 30px rgba(0, 191, 255, 0.3),
+    0 10px 40px rgba(0, 0, 0, 0.3);
+  z-index: 100; /* 確保在內容之上 */
   /* 🔴 新增：确保在原生环境中可见 */
   visibility: visible !important;
   opacity: 1 !important;
-  /* 🔴 新增：强制显示，防止被其他样式覆盖 */
-  min-height: 60px;
 }
 
-/* ✅ 修復 CSS 特异性：使用更高特异性的選擇器 + !important 確保覆蓋全局樣式 */
+@media (max-width: 768px) {
+  .action-toolbar {
+    width: calc(100% - 30px);
+    padding: 12px 16px;
+    gap: 12px;
+    bottom: calc(76px + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+/* ⚡ Phase 2: 底部控制台按鈕 - 魔導風格 */
 .user-info-container .action-toolbar .action-toolbar-btn,
 .user-info-container .action-toolbar button.action-toolbar-btn,
 .action-toolbar .action-toolbar-btn {
@@ -1131,20 +1222,21 @@
   align-items: center !important;
   justify-content: center !important;
   gap: 6px !important;
-  padding: 12px 16px !important;
-  min-width: 80px !important;
-  /* 核心改變：白底 + 微透 - 使用 !important 強制覆蓋 */
-  background: rgba(255, 255, 255, 0.95) !important;
-  background-color: rgba(255, 255, 255, 0.95) !important;
-  border: 1px solid rgba(255, 255, 255, 1) !important;
-  border-color: rgba(255, 255, 255, 1) !important;
+  padding: 12px 20px !important;
+  min-width: 90px !important;
+  flex: 1;
+  /* 魔導背景：半透明 + 藍色發光邊線 */
+  background: rgba(0, 10, 30, 0.5) !important;
+  background-color: rgba(0, 10, 30, 0.5) !important;
+  border: 1px solid rgba(0, 191, 255, 0.5) !important;
+  border-color: rgba(0, 191, 255, 0.5) !important;
   border-radius: 12px !important;
   cursor: pointer !important;
-  /* 文字與陰影 - 深藍灰文字，閱讀性最高 */
-  color: #2c3e50 !important;
+  /* 文字：白色，高對比 */
+  color: #ffffff !important;
   font-weight: 600 !important;
-  font-size: 14px !important;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
+  font-size: 13px !important;
+  box-shadow: 0 0 15px rgba(0, 191, 255, 0.2) !important;
   /* 互動感 */
   transition: all 0.2s ease !important;
   /* 確保沒有繼承全局按鈕樣式 */
@@ -1158,10 +1250,11 @@
   button.action-toolbar-btn:hover:not(:disabled),
 .action-toolbar .action-toolbar-btn:hover:not(:disabled) {
   transform: translateY(-2px) !important;
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12) !important;
-  background: rgba(255, 255, 255, 1) !important;
-  background-color: rgba(255, 255, 255, 1) !important;
-  color: #2c3e50 !important;
+  box-shadow: 0 0 25px rgba(0, 191, 255, 0.5) !important;
+  background: rgba(0, 20, 40, 0.7) !important;
+  background-color: rgba(0, 20, 40, 0.7) !important;
+  border-color: rgba(0, 191, 255, 0.8) !important;
+  color: #ffffff !important;
 }
 
 .user-info-container .action-toolbar .action-toolbar-btn:active:not(:disabled),
@@ -1170,20 +1263,21 @@
   button.action-toolbar-btn:active:not(:disabled),
 .action-toolbar .action-toolbar-btn:active:not(:disabled) {
   transform: scale(0.98) !important;
-  background: #f0f2f5 !important;
-  background-color: #f0f2f5 !important;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05) !important;
-  color: #2c3e50 !important;
+  background: rgba(0, 30, 50, 0.8) !important;
+  background-color: rgba(0, 30, 50, 0.8) !important;
+  box-shadow: 0 0 20px rgba(0, 191, 255, 0.4) !important;
+  color: #ffffff !important;
 }
 
 .user-info-container .action-toolbar .action-toolbar-btn:disabled,
 .user-info-container .action-toolbar button.action-toolbar-btn:disabled,
 .action-toolbar .action-toolbar-btn:disabled {
-  opacity: 0.6 !important;
+  opacity: 0.5 !important;
   cursor: not-allowed !important;
-  background: rgba(255, 255, 255, 0.95) !important;
-  background-color: rgba(255, 255, 255, 0.95) !important;
-  color: #2c3e50 !important;
+  background: rgba(0, 10, 30, 0.3) !important;
+  background-color: rgba(0, 10, 30, 0.3) !important;
+  border-color: rgba(0, 191, 255, 0.2) !important;
+  color: rgba(255, 255, 255, 0.5) !important;
 }
 
 .user-info-container .action-toolbar .action-toolbar-icon,
@@ -1251,15 +1345,16 @@
   }
 
   .action-toolbar {
-    gap: 8px;
-    padding: 0 12px;
+    gap: 10px;
+    padding: 12px 14px;
   }
 
   .user-info-container .action-toolbar .action-toolbar-btn,
   .user-info-container .action-toolbar button.action-toolbar-btn,
   .action-toolbar .action-toolbar-btn {
-    padding: 10px 12px !important;
+    padding: 10px 14px !important;
     min-width: 70px !important;
+    font-size: 12px !important;
   }
 
   .user-info-container .action-toolbar .action-toolbar-icon,

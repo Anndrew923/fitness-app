@@ -1,23 +1,37 @@
-/* 雷達圖區域 */
+/* ⚡ Phase 2: 雷達圖區域 - 核心位置調整：置於螢幕中心，放大作為視覺核心 */
 .radar-section {
-  margin-bottom: 20px;
+  margin-bottom: 0;
   position: relative;
   z-index: 1;
+  /* 置於螢幕中心 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(100vh - 200px); /* 預留上下空間 */
+  padding: 40px 20px;
 }
 
+/* 響應式：移動端調整 */
+@media (max-width: 768px) {
+  .radar-section {
+    min-height: calc(100vh - 150px);
+    padding: 30px 15px;
+  }
+}
+
+/* ⚡ Phase 2: 卡片魔導化 - 屬性總覽卡片 */
+/* ⚡ 組件玻璃化樣式：統一玻璃化規範 */
 .radar-card {
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.98) 0%,
-    rgba(248, 250, 252, 0.98) 100%
-  );
+  /* 魔導背景：深藍透明 + 磨砂玻璃 */
+  background: rgba(0, 10, 30, 0.4) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
   border-radius: 28px;
   padding: 35px;
-  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.1),
-    0 12px 24px rgba(129, 216, 208, 0.2), 0 4px 8px rgba(129, 216, 208, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.9);
-  backdrop-filter: blur(25px);
-  border: 1px solid rgba(255, 255, 255, 0.4);
+  /* 藍色發光邊線：統一規範 */
+  border: 1px solid rgba(0, 191, 255, 0.5) !important;
+  box-shadow: 0 0 20px rgba(0, 191, 255, 0.3),
+    0 25px 50px rgba(0, 0, 0, 0.2);
   position: relative;
   overflow: hidden;
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
@@ -25,9 +39,10 @@
 
 .radar-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.12),
-    0 15px 30px rgba(129, 216, 208, 0.25), 0 6px 12px rgba(129, 216, 208, 0.15),
-    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  /* 增強藍色發光效果 */
+  box-shadow: 0 0 30px rgba(0, 191, 255, 0.5),
+    0 30px 60px rgba(0, 0, 0, 0.3);
+  border-color: rgba(0, 191, 255, 0.7);
 }
 
 .radar-card::before {
@@ -37,11 +52,13 @@
   left: 0;
   right: 0;
   height: 5px;
-  background: linear-gradient(90deg, #81d8d0 0%, #5f9ea0 50%, #81d8d0 100%);
+  /* 藍色發光頂部邊線 */
+  background: linear-gradient(90deg, rgba(0, 191, 255, 0.6) 0%, rgba(0, 150, 255, 0.8) 50%, rgba(0, 191, 255, 0.6) 100%);
   border-radius: 28px 28px 0 0;
-  box-shadow: 0 2px 8px rgba(129, 216, 208, 0.3);
+  box-shadow: 0 2px 8px rgba(0, 191, 255, 0.4);
 }
 
+/* ⚡ Phase 2: 移除舊的淺青色背景，改為透明或魔導風格 */
 .radar-card::after {
   content: '';
   position: absolute;
@@ -50,10 +67,11 @@
   transform: translate(-50%, -50%);
   width: 90%;
   height: 90%;
+  /* 魔導風格：藍色發光漸層 */
   background: radial-gradient(
     circle,
-    rgba(129, 216, 208, 0.03) 0%,
-    rgba(129, 216, 208, 0.01) 40%,
+    rgba(0, 191, 255, 0.05) 0%,
+    rgba(0, 150, 255, 0.02) 40%,
     transparent 70%
   );
   border-radius: 50%;
@@ -118,17 +136,20 @@
   }
 }
 
+/* ⚡ Phase 2: 雷達圖標題 - 魔導風格 */
 .radar-title {
   font-size: 26px;
   font-weight: 700;
-  background: linear-gradient(135deg, #81d8d0 0%, #5f9ea0 50%, #81d8d0 100%);
+  /* 魔導漸層：藍色發光 */
+  background: linear-gradient(135deg, rgba(0, 191, 255, 1) 0%, rgba(255, 140, 0, 0.9) 50%, rgba(0, 191, 255, 1) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
   text-align: center;
   margin: 0 0 30px 0;
   position: relative;
-  text-shadow: 0 2px 4px rgba(129, 216, 208, 0.1);
+  text-shadow: 0 0 10px rgba(0, 191, 255, 0.5);
+  filter: drop-shadow(0 0 8px rgba(0, 191, 255, 0.4));
 }
 
 .radar-title::after {
@@ -139,9 +160,10 @@
   transform: translateX(-50%);
   width: 60px;
   height: 3px;
-  background: linear-gradient(90deg, #81d8d0 0%, #5f9ea0 100%);
+  /* 魔導漸層：藍色發光 */
+  background: linear-gradient(90deg, rgba(0, 191, 255, 0.8) 0%, rgba(0, 150, 255, 1) 100%);
   border-radius: 2px;
-  box-shadow: 0 2px 4px rgba(129, 216, 208, 0.3);
+  box-shadow: 0 0 10px rgba(0, 191, 255, 0.5);
 }
 
 .loading-container {
@@ -169,29 +191,43 @@
   }
 }
 
+/* ⚡ Phase 2: 雷達圖容器 - 放大作為視覺核心 */
 .radar-chart-container {
   width: 100%;
-  max-width: 750px;
+  max-width: 600px; /* 稍微放大 */
   margin: 0 auto;
   padding: 40px;
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.95) 0%,
-    rgba(248, 250, 252, 0.95) 100%
-  );
+  /* 魔導背景：透明，讓星域透出 */
+  background: transparent;
   border-radius: 20px;
-  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.06),
-    0 4px 12px rgba(129, 216, 208, 0.1);
   position: relative;
-  border: 1px solid rgba(129, 216, 208, 0.1);
+  border: none;
   min-height: 500px;
   display: flex;
   align-items: center;
   justify-content: center;
   -webkit-overflow-scrolling: touch;
   will-change: auto;
+  /* 放大效果 */
+  transform: scale(1.1);
 }
 
+@media (max-width: 768px) {
+  .radar-chart-container {
+    transform: scale(1.05);
+    max-width: 100%;
+    padding: 30px 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .radar-chart-container {
+    transform: scale(1);
+    padding: 20px 15px;
+  }
+}
+
+/* ⚡ Phase 2: 修正雷達圖底色 - 移除不透明背景，改為全像投影效果 */
 .radar-chart-container::before {
   content: '';
   position: absolute;
@@ -200,10 +236,11 @@
   transform: translate(-50%, -50%);
   width: 85%;
   height: 85%;
+  /* 魔導風格：極淡的藍色發光，幾乎透明，讓星域透出 */
   background: radial-gradient(
     circle,
-    rgba(129, 216, 208, 0.08) 0%,
-    rgba(129, 216, 208, 0.03) 50%,
+    rgba(0, 191, 255, 0.02) 0%,
+    rgba(0, 150, 255, 0.01) 50%,
     transparent 80%
   );
   border-radius: 50%;
@@ -234,6 +271,7 @@
   }
 }
 
+/* ⚡ Phase 2: 移除不透明背景，讓雷達圖浮在星空上 */
 .radar-chart-container::after {
   content: '';
   position: absolute;
@@ -242,11 +280,12 @@
   right: 0;
   bottom: 0;
   border-radius: 20px;
+  /* 極淡的魔導漸層，幾乎透明 */
   background: linear-gradient(
     135deg,
-    rgba(129, 216, 208, 0.05) 0%,
+    rgba(0, 191, 255, 0.01) 0%,
     transparent 50%,
-    rgba(129, 216, 208, 0.02) 100%
+    rgba(0, 150, 255, 0.01) 100%
   );
   pointer-events: none;
 }
@@ -414,11 +453,8 @@
   .radar-chart-container {
     padding: 15px;
     min-height: 400px;
-    background: linear-gradient(
-      135deg,
-      rgba(255, 255, 255, 0.95) 0%,
-      rgba(248, 250, 252, 0.95) 100%
-    );
+    /* ⚡ Phase 2: 移除白色背景，保持透明 */
+    background: transparent;
   }
 
   .radar-chart-container::before {

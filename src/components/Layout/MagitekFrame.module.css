@@ -1,83 +1,153 @@
 /* ============================================================
-   MAGITEK FRAME - 魔導外殼容器
-   深邃虛空背景 + 魔力粒子 VFX 層
-   ⚡ 紋理化效能超頻：以圖片紋理取代 CSS 漸層運算
+   MAGITEK FRAME - 魔導外殼容器 (V4.1: 物理層級清場)
    ============================================================ */
 
-.container {
-  /* ⚡ 解除滑動封鎖：恢復全域捲動 */
-  width: 100%;
-  min-height: 100vh;
-  height: auto;
-  overflow-y: visible !important; /* 核心：恢復縱向捲動 */
-  overflow-x: hidden;
-  background-color: transparent !important; /* ⚡ 關鍵修正：改為透明，讓星空顯示 */
+/* ⚡ 強制修正：邊框邊界重置 - 強制「全面屏」貼合 */
+/* ⚡ 2. 邊框物理貼合修正：針對 CSS Modules 類名強制拉伸 */
+.container,
+[class*='container_nkizs_'],
+[class*='container_'] {
+  /* 強制將最外層容器設為全螢幕，且不留任何縫隙 */
+  padding: 0 !important;
+  margin: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  max-width: none !important;
+  overflow: hidden !important; /* 徹底鎖死整頁捲動 */
+  background-color: transparent !important;
   position: relative;
-  /* 終極導覽列淨化：確保背景漸層包含到 padding-bottom: env(safe-area-inset-bottom) 的區域 */
-  padding-bottom: env(safe-area-inset-bottom, 0px);
-
-  /* 確保 z-index 層級正確 */
   z-index: 0;
 }
 
-/* ⚡ 紋理化效能超頻：星域圖層 - 以貼圖取代數學運算 */
-.starLayer {
-  /* ⚡ 核心優化：修正圖片路徑（使用實際文件名） */
-  background-image: url('/images/magitek_nebula_core.webp.png') !important;
+/* ============================================================
+   Layer 1: 唯一星空背景層 (z: -100)
+   V4.1: 物理層級清場 - 背景層樣式由 index.css 的 #layer-master-bg 控制
+   此處保留類名以維持兼容性
+   ============================================================ */
+.layerBg {
+  /* 引用 Phase 2 背景圖 */
+  background-image: url('/images/magitek_bg_layer1_v2.png');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
 
-  /* ⚡ 空間擴張：設為 300vmax 確保任何旋轉角度都不會露白邊 */
+  /* 固定定位，釘死背景 */
   position: fixed;
-  top: 50%;
-  left: 50%;
-  width: 300vmax;
-  height: 300vmax;
-  transform: translate(-50%, -50%) translateZ(0); /* 居中並開啟 GPU 加速 */
-
-  z-index: 0 !important; /* ⚡ 關鍵修正：改為 0，確保在 container 之上 */
-  pointer-events: none;
-  will-change: transform;
-
-  /* ⚡ 緊急降噪：移除亮度濾鏡，恢復原始深邃虛空對比感 */
-  /* filter: brightness(1.3) saturate(1.2) !important; 已移除 */
-
-  animation: galaxyRotate 240s linear infinite;
-}
-
-/* 銀河自轉動畫 - 視界大開：虛空深度校準 */
-@keyframes galaxyRotate {
-  from {
-    transform: translate(-50%, -50%) translateZ(0) rotate(0deg) scale(1.2);
-  }
-  to {
-    transform: translate(-50%, -50%) translateZ(0) rotate(360deg) scale(1.2);
-  }
-}
-
-/* 內容層 - 確保在 VFX 層之上，強力穿透：確保星空「穿過」所有組件 */
-.content {
-  background: transparent !important;
-  position: relative;
-  z-index: 1;
+  top: 0;
+  left: 0;
   width: 100%;
-  min-height: 100vh;
-  /* 強力穿透：確保星空背景能直接透視到 CrystalCard 的毛玻璃後方 */
-  /* 不設定 overflow，讓 .main-content 自己控制滾動 */
+  height: 100%;
+
+  /* ⚡ V4.1: z-index 由 index.css 的 #layer-master-bg 控制 (z: -100) */
+  z-index: -100 !important;
+  pointer-events: none; /* 不阻擋點擊事件 */
+
+  /* ⚡ 徹底禁用所有 CSS 動畫特效以優化效能 */
+  animation: none !important;
+  transform: none !important;
+  will-change: auto !important;
+  transition: none !important;
 }
 
-/* ⚡ 降級開關：移動端性能優化 */
-@media (max-width: 768px) {
-  .starLayer {
-    /* 手機模式：將 galaxyRotate 動畫速度放慢（從 240s 改為 480s） */
-    animation: galaxyRotate 480s linear infinite;
-  }
+/* ============================================================
+   Layer 2: HUD 9-Slice 邊框層 (z:10)
+   ⚡ 強制修正：徹底清場背景 - 實現「星空穿透」
+   ============================================================ */
+.layerHud {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 10;
+  pointer-events: none; /* 不阻擋點擊事件 */
+  /* 移除所有中間層級的背景顏色 */
+  background: transparent !important;
+  background-color: transparent !important;
 }
 
-/* 低效能模式：減少動畫 */
-@media (prefers-reduced-motion: reduce) {
-  .starLayer {
-    animation: none !important; /* 禁用自轉動畫 */
-  }
+/* 頂部狀態列 HUD - 全像投影效果 */
+/* ⚡ 靈能流動校準：徹底去黑塊與濾色 */
+.topStatusHud {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: auto;
+  min-height: 120px; /* 根據素材高度調整 */
+  max-height: 120px; /* ⚡ 限制高度，避免產生黑區 */
+
+  /* 引用頂部狀態列素材 */
+  background-image: url('/images/magitek_hud_top_v2.png');
+  background-size: 100% auto;
+  background-position: top center;
+  background-repeat: no-repeat;
+
+  /* ⚡ 強制修正：徹底清場背景 - 移除所有背景色，確保不阻擋後方星空 */
+  background: transparent !important;
+  background-color: transparent !important;
+
+  /* ⚡ 2. 徹底去黑塊：濾除素材本身的黑底，讓星空透出來 */
+  /* ⚡ 核心技術：mix-blend-mode: screen 是讓星空透出來的唯一關鍵 */
+  mix-blend-mode: screen !important;
+
+  /* 適配安全區域：確保不被手機瀏海遮擋 */
+  padding-top: env(safe-area-inset-top, 0px);
+  /* ⚡ 移除不必要的 padding，避免產生黑區 */
+  padding-bottom: 0;
+  padding-left: 0;
+  padding-right: 0;
+
+  /* V4.1: HUD 位於 #layer-hud-status (z: 1000) 內，此處保持樣式 */
+  z-index: 1000 !important; /* V4.1: 統一為 z: 1000 */
+  /* ⚡ 1. 解鎖滑動感應：HUD 不阻擋觸摸事件 */
+  pointer-events: none !important;
 }
+
+/* ============================================================
+   Layer 3: 唯一捲動層 (z: 10)
+   V4.1: 物理層級清場 - 捲動層樣式由 index.css 的 #layer-scroll-content 控制
+   此處保留類名以維持兼容性
+   ============================================================ */
+.layerContent {
+  /* V4.1: 主要樣式由 index.css 的 #layer-scroll-content 控制 */
+  /* 保留基本樣式以維持兼容性 */
+  width: 100%;
+  margin: 0 !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  box-sizing: border-box;
+  
+  /* GPU 加速優化 */
+  transform: translateZ(0);
+  will-change: scroll-position;
+}
+
+/* ============================================================
+   V4.1: 終端邊框已移至 index.css 的 #layer-terminal-frame
+   此處保留舊 ID 以維持兼容性
+   ⚡ 確保邊框置頂且不擋觸控
+   ============================================================ */
+#fixed-terminal-border {
+  /* V4.1: 已遷移至 #layer-terminal-frame，此處保留以維持兼容性 */
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 9999 !important; /* ⚡ 確保在最頂層 */
+  pointer-events: none !important; /* ⚡ 關鍵：讓手指能穿透此層滑動下方內容 */
+  mix-blend-mode: screen !important; /* 濾除任何黑邊 */
+  border-style: solid;
+  border-width: 40px;
+  border-image: url('/images/magitek_hud_frame_9slice.png') 60 fill !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+/* ⚡ 強制修正：邊框邊界重置 - 確保 9-slice 邊框直接釘死在螢幕四個頂點 */
+/* ⚡ 清除「影子邊框」：刪除此偽元素，確保全 App 只有 #fixed-terminal-border 這一層有藍色邊框 */
+/* 注意：此偽元素已由 #fixed-terminal-border 取代，現已刪除以避免重複邊框 */
+/* .layerContent::before {
+  content: '';
+  ...
+} */

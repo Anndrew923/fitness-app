@@ -1,17 +1,23 @@
 /* LadderStatusCard - Black & Gold Premium Design */
 /* ✅ "Dark Knight" Theme: Premium VIP Membership Card Style */
 
+/* ⚡ Phase 2: 排行榜懸浮面板 - 半透明魔導風格 */
+/* ⚡ 組件玻璃化樣式：統一玻璃化規範 */
 .ladder-status-card {
   display: flex;
   align-items: center;
   gap: 20px;
   padding: 18px 24px;
-  margin: 12px 0;
-  background: linear-gradient(135deg, #1a1a1a 0%, #000000 100%);
+  margin: 0;
+  /* 魔導背景：半透明 + 磨砂玻璃 */
+  background: rgba(0, 10, 30, 0.4) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
   border-radius: 16px;
-  border: 2px solid #d4af37;
-  box-shadow: 0 8px 32px rgba(212, 175, 55, 0.3), 0 4px 16px rgba(0, 0, 0, 0.5),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  /* 藍色發光邊線：統一規範 */
+  border: 1px solid rgba(0, 191, 255, 0.5) !important;
+  box-shadow: 0 0 20px rgba(0, 191, 255, 0.3),
+    0 8px 32px rgba(0, 0, 0, 0.3);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
@@ -45,9 +51,10 @@
 
 .ladder-status-card.clickable:hover {
   transform: translateY(-2px);
-  border-color: #ffd700;
-  box-shadow: 0 12px 40px rgba(212, 175, 55, 0.4), 0 6px 20px rgba(0, 0, 0, 0.6),
-    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  border-color: rgba(0, 191, 255, 0.7);
+  box-shadow: 0 0 30px rgba(0, 191, 255, 0.5),
+    0 12px 40px rgba(0, 0, 0, 0.4);
+  background: rgba(0, 20, 40, 0.6);
 }
 
 .ladder-status-card.clickable:active {
