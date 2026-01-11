@@ -380,8 +380,8 @@ body, #root, #layer-master-root, #layer-master-bg, #layer-terminal-frame {
   width: 100vw !important;
   /* ⚡ V12.4: 必須給予實體高度，內容才不會被切掉 */
   display: block !important;
-  height: 120px !important;
-  min-height: 120px !important;
+  height: 100px !important; /* ⚡ V13.6: 調整為 100px 與 topStatusHud 一致 */
+  min-height: 100px !important;
   overflow: visible !important;
   /* ⚡ V7.0: 封鎖 HUD 閃退邏輯 - 強制鎖定可見性 */
   opacity: 1 !important;
@@ -438,7 +438,7 @@ textarea,
   background-size: contain !important;
   background-repeat: no-repeat !important;
   background-position: top center !important;
-  height: 120px !important;
+  height: 100px !important; /* ⚡ V13.6: 調整為 100px 與 topStatusHud 一致 */
   display: block !important;
   z-index: 1000 !important;
   position: fixed !important;
@@ -467,10 +467,10 @@ textarea,
   top: 0 !important;
   left: 0 !important;
   width: 100% !important;
-  /* ⚡ V12.0: 根據新素材高度調整 */
-  height: 120px !important;
-  min-height: 120px !important;
-  max-height: 120px !important;
+   /* ⚡ V13.6: 調整為 100px 與 topStatusHud 一致 */
+   height: 100px !important;
+   min-height: 100px !important;
+   max-height: 100px !important;
   /* ⚡ V12.0: 更換為 V3 素材 */
   background-image: url('/images/magitek_hud_v3.png') !important;
   background-size: 100% 100% !important;

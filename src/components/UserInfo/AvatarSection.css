@@ -1,15 +1,9 @@
-/* ⚡ V4.2 魔導裝甲歸位 3: 修正頭像與 HUD 校準 (HUD & Avatar Re-sync) */
-/* 頭像已移入 #layer-hud-status，使用 position: absolute 精確對位 HUD 圓形槽位 */
+/* ⚡ V17.0: 頭像定位已由 UserInfoV5.css 統一控制 */
+/* 此處只保留不影響定位的樣式，定位規則已移至 UserInfoV5.css */
 .avatar-section {
   text-align: left;
   margin-bottom: 0;
-  position: absolute !important;      /* ⚡ 使用 absolute 對位 HUD 圓形槽位 */
-  /* ⚡ V4.2 結構性修正 1: 加入手機安全區 (Safe Area Buffer) */
-  /* ⚡ 為瀏海留出 44px 或使用環境變數 */
-  top: calc(env(safe-area-inset-top, 44px) + 10px) !important;
-  left: 15px !important;
-  pointer-events: auto !important;
-  z-index: 1001 !important;           /* ⚡ 確保它高於 HUD 容器 */
+  /* ⚡ V17.0: 定位規則已由 UserInfoV5.css 統一控制，此處不覆蓋 */
 }
 
 .avatar-container {
@@ -97,14 +91,8 @@
   box-shadow: 0 0 10px rgba(0, 191, 255, 0.3);
 }
 
-/* 響應式設計 */
+/* ⚡ V17.0: 響應式設計 - 定位規則已由 UserInfoV5.css 統一控制 */
 @media (max-width: 768px) {
-  .avatar-section {
-    /* ⚡ 移動端：調整位置以適配 HUD */
-    top: calc(25px + env(safe-area-inset-top, 0px));
-    left: 20px;
-  }
-  
   .user-avatar {
     width: 60px !important;
     height: 60px !important;
@@ -112,12 +100,6 @@
 }
 
 @media (max-width: 480px) {
-  .avatar-section {
-    /* ⚡ 小螢幕：進一步調整 */
-    top: calc(22px + env(safe-area-inset-top, 0px));
-    left: 18px;
-  }
-  
   .user-avatar {
     width: 55px !important;
     height: 55px !important;

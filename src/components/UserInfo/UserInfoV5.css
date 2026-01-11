@@ -1,11 +1,10 @@
 /**
- * UserInfoV5.css - 靈魂轉生計畫 V6.0 (萬象森羅 - Final Calibration)
+ * UserInfoV5.css - 靈魂轉生計畫 V17.0 (最終物理對位 - Final Physical Alignment)
  * 
- * V6.0 萬象森羅最終校準：
- * - 擊穿虛擬牆（強制清除所有父層的寬度限制）
- * - 邊框「邊際擴張」（使用 border-image-outset 將邊框推向螢幕邊緣）
- * - 頭像裝飾「外掛化」（改用 :before 虛擬元素，置於照片之上）
- * - 移除所有「黑底殘留」（確保所有 background 為 transparent）
+ * V17.0 最終物理對位階段：
+ * - 固定水晶觀測窗：毛玻璃面板絕對靜止，與邊框保持 30-40px 負空間
+ * - 大頭照組件級對位：精準嵌入 HUD 圓框中心
+ * - 消除黑色閃現與切斷邊界：內容消失點對齊 HUD 下邊緣
  * 
  * 絕對禁令：
  * - NO INLINE STYLES
@@ -16,30 +15,18 @@
  */
 
 /* ============================================================
-   V5.4 結構性爆破：外殼層已由下方規則處理
-   ============================================================ */
-
-/* ============================================================
-   V5.8 魔導飾紋重建：恢復外殼層的視覺面積
-   外殼層容器必須具備全螢幕體積，但絕對禁止攔截觸控
-   ============================================================ */
-/* ============================================================
-   V12.0 最終視覺合體 - 邊框物理座標微調
-   使用新版透明素材 V3，零邊距 PNG 直接貼邊
+   V17.0: 邊框層 - 絕對靜止的 9-slice 魔導邊框
    ============================================================ */
 #layer-terminal-frame {
   position: fixed !important;
-  /* ⚡ V12.0: 因為是零邊距 PNG，直接貼邊 */
   inset: 0 !important;
   width: 100vw !important;
   height: 100vh !important;
   border-image-source: url('/images/magitek_frame_v3.png') !important;
-  /* ⚡ V12.0: 根據 V3 素材比例微調 */
   border-image-slice: 150 fill !important;
   border-width: 45px !important;
   pointer-events: none !important;
   z-index: 500 !important;
-  /* ⚡ V12.0: 既然是透明 PNG，不需要再用 screen 濾黑 */
   mix-blend-mode: normal !important;
   border-style: solid !important;
   background: transparent !important;
@@ -51,69 +38,21 @@
 }
 
 /* ============================================================
-   V7.0 封鎖 HUD 閃退邏輯 (Lock HUD Visibility)
-   為了防止 HUD 消失，強制將 HUD 的透明度鎖定為 1
-   ============================================================ */
-/* ============================================================
-   V12.4 物理高度召喚 (Summon HUD Dimensions)
-   ::before 已存在於 DOM 中，但不可見。請確保容器具備物理寬高
+   V17.0: HUD 狀態層 - 絕對靜止的頂部狀態列
    ============================================================ */
 #layer-hud-status {
   position: fixed !important;
   top: 0 !important;
   left: 0 !important;
   width: 100vw !important;
-  /* ⚡ V12.4: 必須給予實體高度，內容才不會被切掉 */
-  display: block !important;
-  height: 120px !important;
-  min-height: 120px !important;
+  height: 100px !important;
+  min-height: 100px !important;
   overflow: visible !important;
-  pointer-events: none !important; /* ⚡ 容器觸控穿透 */
-  background: transparent !important; /* ⚡ 確保沒有任何黑底 */
-  /* ⚡ V7.0: 封鎖 HUD 閃退邏輯 - 強制鎖定可見性 */
+  pointer-events: none !important;
+  background: transparent !important;
   opacity: 1 !important;
   visibility: visible !important;
-  /* ⚡ V12.4: 提高 z-index 確保顯示 */
   z-index: 5000 !important;
-}
-
-/* ============================================================
-   V12.4 面板水晶化偏移 (Panel Glassmorphism Offset)
-   確保 #layer-scroll-content 不要蓋住頂部
-   ============================================================ */
-/* ============================================================
-   V12.6 面板「水晶化」 (Crystallize the Panel)
-   只讓中間的數據面板有毛玻璃感，並調整顏色深度
-   ============================================================ */
-/* ⚡ V13.5: 使用高特異性選擇器擊穿 index.css 的覆蓋規則 */
-#layer-master-root #layer-scroll-content {
-  position: fixed !important;
-  /* ⚡ 四邊物理留白：絕對不準碰到外骨骼 */
-  top: 130px !important;
-  bottom: 70px !important;
-  left: 35px !important;
-  right: 35px !important;
-  
-  /* ⚡ 強制重新計算寬高，擊穿 100% 的限制 */
-  width: calc(100vw - 70px) !important;
-  height: calc(100vh - 200px) !important;
-
-  background: rgba(0, 10, 30, 0.6) !important;
-  backdrop-filter: blur(20px) !important;
-  -webkit-backdrop-filter: blur(20px) !important;
-  border: 1px solid rgba(0, 191, 255, 0.3) !important;
-  border-radius: 20px !important;
-  margin: 0 !important; /* 清除所有可能干擾的 margin */
-  overflow-y: auto !important;
-  z-index: 100 !important;
-}
-
-#layer-hud-status {
-  z-index: 1000 !important; /* ⚡ 回歸最上層 */
-  pointer-events: none !important; /* ⚡ 容器觸控穿透 */
-  /* ⚡ V7.0: 封鎖 HUD 閃退邏輯 - 強制鎖定可見性 */
-  opacity: 1 !important;
-  visibility: visible !important;
   display: block !important;
 }
 
@@ -121,12 +60,67 @@
 #layer-hud-status .avatar-section,
 #layer-hud-status button,
 #layer-hud-status a {
-  pointer-events: auto !important; /* ⚡ 只有功能組件能點擊 */
+  pointer-events: auto !important;
 }
 
 /* ============================================================
-   V5.4 移除所有「黑底」 (Remove Background Toxin)
-   除了星空背景層，全螢幕必須 100% 透明
+   V17.0: 固定水晶觀測窗 - 絕對靜止的毛玻璃托盤
+   邊框寬度 45px + 35px 負空間 = 80px 總間距
+   ============================================================ */
+#layer-glass-panel {
+  position: fixed !important;
+  /* ⚡ V17.0: 絕對領域保護 - 與邊框保持 35px 負空間（總間距 80px） */
+  top: 110px !important; /* HUD 100px + 10px 間距 */
+  bottom: 100px !important; /* 底部導覽列空間 */
+  left: 80px !important; /* 邊框 45px + 35px 負空間 */
+  right: 80px !important; /* 邊框 45px + 35px 負空間 */
+  width: calc(100vw - 160px) !important; /* 左右各 80px */
+  height: calc(100vh - 210px) !important; /* 上下各 110px + 100px */
+
+  /* ⚡ V17.0: 毛玻璃效果 */
+  background: rgba(0, 15, 40, 0.5) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border-radius: 20px !important;
+  border: 1px solid rgba(0, 191, 255, 0.2) !important;
+
+  /* ⚡ V17.0: 固定層級，在邊框之上，在 HUD 之下 */
+  z-index: 400 !important;
+  pointer-events: none !important; /* 容器本身不攔截，只有內部內容可點擊 */
+  overflow: hidden !important; /* 確保內容不會溢出毛玻璃邊界 */
+}
+
+/* ============================================================
+   V17.0: 滾動層 - 只負責內容滾動，背景透明
+   內容消失點必須對齊 HUD 下邊緣（100px）
+   ============================================================ */
+#layer-master-root #layer-scroll-content {
+  position: relative !important;
+  width: 100% !important;
+  /* ⚡ V17.0: 確保足夠高度，消除黑色斷層 */
+  /* 使用更大的最小高度，確保滾動到底部時背景連貫 */
+  min-height: calc(
+    100vh + 200px
+  ) !important; /* 額外 200px 確保滾動到底部時背景連貫 */
+  /* ⚡ V17.0: 內容消失點對齊 HUD 下邊緣（100px） */
+  padding-top: 110px !important; /* HUD 100px + 10px 間距 */
+  padding-bottom: 120px !important; /* 底部導覽列 100px + 20px 緩衝 */
+  /* ⚡ V17.0: 與毛玻璃層對齊（80px 總間距） */
+  padding-left: 80px !important;
+  padding-right: 80px !important;
+  margin: 0 !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  background: transparent !important; /* 背景由 layer-master-bg 提供 */
+  z-index: 100 !important;
+  pointer-events: auto !important;
+  /* GPU 加速優化 */
+  transform: translateZ(0);
+  will-change: scroll-position;
+}
+
+/* ============================================================
+   V17.0: 移除所有「黑底」 - 確保背景透明
    ============================================================ */
 #layer-terminal-frame,
 #layer-hud-status,
@@ -138,10 +132,6 @@
   background-color: transparent !important;
 }
 
-/* ============================================================
-   V6.0 移除所有「黑底殘留」 (Remove All Black Residue)
-   確保 .topStatusHud 和 .avatar-section 的 background 全部為 transparent
-   ============================================================ */
 #layer-hud-status [class*='hud'],
 #layer-hud-status [class*='Hud'],
 #layer-hud-status [class*='HUD'],
@@ -153,85 +143,113 @@
 .avatar-section,
 .avatar-container,
 .avatar-actions-container {
-  background: transparent !important; /* ⚡ 絕對不准有黑底 */
+  background: transparent !important;
   background-color: transparent !important;
-  background-image: none !important; /* ⚡ V6.0: 頭像背景圖片已移至 :before */
+  background-image: none !important;
   max-width: none !important;
-  box-shadow: none !important; /* ⚡ 根除陰影 */
-  pointer-events: none !important; /* ⚡ 裝飾物不攔截 */
+  box-shadow: none !important;
+  pointer-events: none !important;
 }
 
 /* ============================================================
-   V12.0 最終視覺合體 - 頂部 HUD 物理座標微調
-   使用新版透明素材 V3，確保星空背景能正確穿透
-   ============================================================ */
-/* ============================================================
-   V12.5 HUD 尺寸與頭像對位 (HUD & Avatar Sync)
-   調整 React 組件內的 HUD 尺寸，並將頭像移入圓框
+   V17.0: HUD 素材 - 頂部狀態列背景
    ============================================================ */
 .topStatusHud,
 #layer-hud-status .topStatusHud,
 [class*='topStatusHud'] {
-  /* ⚡ V12.0: 更換為 V3 素材 */
   background-image: url('/images/magitek_hud_v3.png') !important;
-  /* ⚡ V12.5: 調整 HUD 容器寬度與位置 */
   width: 100vw !important;
-  height: 100px !important; /* ⚡ 根據 V3 素材調整高度 */
+  height: 100px !important;
   background-size: 100% auto !important;
   background-position: center top !important;
   background-color: transparent !important;
-  /* ⚡ V12.0: 透明 PNG 不需要 screen 濾黑 */
   mix-blend-mode: normal !important;
   pointer-events: none !important;
-  /* ⚡ V9.0: 確保 z-index 高於 .avatar-section (1001) */
-  z-index: 10002 !important; /* ⚡ 高於所有元素，包括頭像 */
+  z-index: 10002 !important;
   position: fixed !important;
   top: 0 !important;
   left: 0 !important;
 }
 
 /* ============================================================
-   V12.1 修復大頭照對位
-   確保大頭照 .avatar-section 能夠完美對準新素材 magitek_hud_v3.png 的圓框位置
+   V17.0: 大頭照組件級對位 - 精準嵌入 HUD 圓框中心
+   使用 fixed 定位，不受父容器 padding/flex 影響
    ============================================================ */
-/* ============================================================
-   V12.5 讓頭像精準嵌入 V3 素材的圓框
-   ============================================================ */
-/* ⚡ V6.0: 只有 .avatar-section 本身可以點擊 */
+/* ⚡ V17.0: 組件級校準 - 直接對準螢幕座標 */
+#root #layer-master-root #layer-hud-status .avatar-section,
+#layer-master-root #layer-hud-status .avatar-section,
+#layer-hud-status .avatar-section,
 .avatar-section {
-  position: absolute !important; /* ⚡ V12.1: 改為 absolute 對位 HUD 圓框 */
-  /* ⚡ V12.5: 微調直到進入圓框 */
-  top: 15px !important;
-  left: 15px !important;
-  /* ⚡ V12.5: 縮小一點以符合框體 */
-  transform: scale(0.9) !important;
-  background: transparent !important; /* ⚡ V12.1: 確保背景透明 */
-  pointer-events: auto !important; /* ⚡ 頭像區域可點擊 */
-  /* ⚡ V9.0: 確保頭像 z-index 低於 HUD */
-  z-index: 1001 !important; /* 低於 topStatusHud 的 10002 */
+  position: fixed !important; /* ⚡ V17.0: 使用 fixed，直接對準螢幕座標 */
+  /* ⚡ V17.0: 精確計算 HUD 圓框中心位置 */
+  /* HUD 高度 100px，圓框中心約在 50px，大頭照 80px scale(0.85) = 68px */
+  /* 所以 top = 50px - 34px = 16px，但考慮 safe-area */
+  top: calc(env(safe-area-inset-top, 44px) + 16px) !important;
+  left: 30px !important; /* ⚡ V17.0: 根據 HUD 素材圓框位置調整 */
+  width: 80px !important;
+  height: auto !important;
+  /* ⚡ V17.0: 稍微縮小，完美嵌入圓框 */
+  transform: scale(0.85) !important;
+  pointer-events: auto !important;
+  z-index: 5001 !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  /* ⚡ V17.0: 確保父容器不會影響定位 */
+  margin: 0 !important;
+  padding: 0 !important;
 }
 
-/* ⚡ V5.9: 只有 HUD 內部的按鈕能點擊 */
+/* ⚡ V17.0: 大頭照容器 - 移除所有可能影響定位的樣式 */
+.avatar-container,
+.avatar-actions-container {
+  position: relative !important;
+  display: inline-block !important;
+  width: auto !important;
+  height: auto !important;
+  max-width: 80px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  background: transparent !important;
+  /* ⚡ V17.0: 確保不會影響 fixed 定位的子元素 */
+  transform: none !important;
+}
+
+/* ⚡ V17.0: 使用 :before 虛擬元素放置魔導圓框 */
+#root #layer-master-root #layer-hud-status .avatar-section::before,
+#layer-master-root #layer-hud-status .avatar-section::before,
+#layer-hud-status .avatar-section::before,
+.avatar-section::before {
+  content: '' !important;
+  position: absolute !important;
+  inset: -5px !important;
+  background-image: url('/images/magitek_avatar_frame.png') !important;
+  background-size: contain !important;
+  background-repeat: no-repeat !important;
+  background-position: center !important;
+  mix-blend-mode: screen !important;
+  z-index: 10 !important;
+  pointer-events: none !important;
+  background-color: transparent !important;
+}
+
+/* ============================================================
+   V17.0: 點擊白名單 - 只有功能組件能點擊
+   ============================================================ */
 .topStatusHud > *,
 .topStatusHud button,
 .topStatusHud a,
 #layer-hud-status button,
 #layer-hud-status a {
-  pointer-events: auto !important; /* ⚡ 只有裡面的按鈕能點擊 */
+  pointer-events: auto !important;
 }
 
-/* ============================================================
-   V5.4 恢復點擊「白名單」 (Click Whitelist)
-   只有按鈕能被點擊，其餘空間全部讓給底下的捲動層
-   ============================================================ */
-/* 所有裝飾性子元素：完全透明 */
 #layer-terminal-frame *,
 #layer-hud-status *,
 .topStatusHud * {
-  pointer-events: none !important; /* 裝飾物不攔截 */
+  pointer-events: none !important;
 }
 
-/* 只有功能組件能點擊 */
 #layer-hud-status .avatar-section,
 #layer-hud-status .avatar-section *,
 .topStatusHud button,
@@ -241,115 +259,41 @@
 #layer-hud-status input,
 #layer-hud-status select,
 #layer-hud-status textarea,
-#layer-hud-status [role="button"] {
-  pointer-events: auto !important; /* 只有功能組件能點擊 */
-}
-
-/* ============================================================
-   V5.7 修正「幽靈體積」 (Fixing Ghost Dimensions)
-   強制縮減大頭照容器，嚴禁撐滿全螢幕
-   ⚡ V6.0: 注意：.avatar-section 的具體尺寸由下方 V6.0 規則控制
-   ============================================================ */
-/* ⚡ 強制縮減大頭照容器，嚴禁撐滿全螢幕 */
-.avatar-container,
-.avatar-actions-container,
-[class*="topStatusHud"] {
-  width: auto !important;
-  height: auto !important;
-  max-width: none !important;
-  background: transparent !important; /* 確保沒有任何黑底 */
-}
-
-/* ============================================================
-   V6.0 頭像裝飾「外掛化」 (Avatar Deco Decoupling)
-   不要將魔導圓框放在背景，改用 :before 虛擬元素，並置於照片之上
-   ============================================================ */
-/* ============================================================
-   V12.1 修復大頭照對位
-   確保大頭照 .avatar-section 能夠完美對準新素材 magitek_hud_v3.png 的圓框位置
-   ============================================================ */
-/* 頭像本身保持固定尺寸，移除背景圖片 */
-#root #layer-master-root #layer-hud-status .avatar-section,
-#layer-master-root #layer-hud-status .avatar-section,
-#layer-hud-status .avatar-section,
-.avatar-section {
-  width: 80px !important; /* ⚡ 只有這 80px 能被點擊 */
-  height: auto !important; /* 讓高度自動適應內容 */
-  /* ⚡ V12.1: 改為 absolute 對位 HUD 圓框 */
-  position: absolute !important;
-  /* ⚡ V12.6: 使用 V12.5 的正確對位數值，與 HUD 圓框對齊 */
-  top: 15px !important;
-  left: 15px !important;
-  transform: scale(0.9) !important; /* 縮小一點以符合框體 */
-  pointer-events: auto !important;
-  z-index: 1001 !important; /* 高於所有層級 */
-  background: transparent !important; /* ⚡ V12.1: 確保背景透明 */
-  background-color: transparent !important;
-  background-image: none !important; /* ⚡ V6.0: 移除背景圖片，改用 :before */
-}
-
-/* ⚡ V6.0: 使用 :before 虛擬元素放置魔導圓框 */
-#root #layer-master-root #layer-hud-status .avatar-section::before,
-#layer-master-root #layer-hud-status .avatar-section::before,
-#layer-hud-status .avatar-section::before,
-.avatar-section::before {
-  content: "" !important;
-  position: absolute !important;
-  inset: -5px !important; /* ⚡ 稍微比頭像大一點 */
-  background-image: url('/images/magitek_avatar_frame.png') !important;
-  background-size: contain !important;
-  background-repeat: no-repeat !important;
-  background-position: center !important;
-  mix-blend-mode: screen !important; /* ⚡ 殺死素材自帶的黑邊 */
-  z-index: 10 !important; /* ⚡ 確保在照片上方 */
-  pointer-events: none !important; /* ⚡ 不攔截點擊 */
-  background-color: transparent !important;
-}
-
-/* 容器不應佔據額外空間 */
-.avatar-container,
-.avatar-actions-container {
-  width: auto !important;
-  height: auto !important;
-  max-width: 80px !important; /* 限制最大寬度為頭像尺寸 */
-  display: inline-block !important;
-  position: relative !important;
-}
-
-/* 按鈕組精確對位 */
-.topStatusHud button,
-#layer-hud-status button,
-.topStatusHud .buttons-group,
-#layer-hud-status .buttons-group {
-  width: auto !important;
+#layer-hud-status [role='button'] {
   pointer-events: auto !important;
 }
 
 /* ============================================================
-   V12.7 Container - 尊重父容器邊距，不撐滿視窗
+   V17.0: 內容容器 - 移除毛玻璃效果（已移至固定層）
    ============================================================ */
 #root #layer-master-root #layer-scroll-content .user-info-v5-container,
 #layer-master-root #layer-scroll-content .user-info-v5-container,
-.user-info-v5-container {
-  width: 100% !important; /* ⚡ V12.7: 改為 100%，尊重父容器邊距 */
-  max-width: none !important;
-  min-width: auto !important; /* ⚡ V12.7: 移除強制最小寬度 */
+.user-info-v5-container,
+[class*='user-info-v5-container'] {
+  background: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
   margin: 0 !important;
-  padding: 0 !important;
+  padding: 20px !important;
+  border: none !important;
+  border-radius: 0 !important;
+  width: 100% !important;
+  max-width: none !important;
+  min-width: auto !important;
   box-sizing: border-box !important;
   position: relative !important;
-  background: transparent !important;
   pointer-events: auto !important;
+  /* ⚡ V17.0: 確保內容高度足夠，消除黑色斷層 */
+  min-height: calc(100vh - 150px) !important;
 }
 
 /* ============================================================
-   V12.7 Content Area - 尊重父容器邊距，不撐滿視窗
-   Safe Area 補償已由 #layer-scroll-content 的 padding-top 處理
+   Content Area
    ============================================================ */
 .user-info-v5-content {
-  width: 100% !important; /* ⚡ V12.7: 改為 100%，尊重父容器邊距 */
+  width: 100% !important;
   max-width: none !important;
-  min-width: auto !important; /* ⚡ V12.7: 移除強制最小寬度 */
+  min-width: auto !important;
   margin: 0 !important;
   padding: 0 20px 40px 20px !important;
   box-sizing: border-box !important;
@@ -368,7 +312,7 @@
   padding: 0 !important;
   font-size: 2rem !important;
   font-weight: bold !important;
-  color: #00BFFF !important;
+  color: #00bfff !important;
   text-align: center !important;
   pointer-events: auto !important;
 }
@@ -379,13 +323,13 @@
   margin: 0 0 30px 0 !important;
   padding: 0 !important;
   font-size: 1rem !important;
-  color: #FF8C00 !important;
+  color: #ff8c00 !important;
   text-align: center !important;
   pointer-events: auto !important;
 }
 
 /* ============================================================
-   Test Button - 可點擊，pointer-events: auto
+   Test Button
    ============================================================ */
 .user-info-v5-test-button {
   width: 200px !important;
@@ -393,10 +337,10 @@
   margin: 0 auto 40px auto !important;
   padding: 0 !important;
   display: block !important;
-  background: linear-gradient(135deg, #00BFFF 0%, #0066CC 100%) !important;
+  background: linear-gradient(135deg, #00bfff 0%, #0066cc 100%) !important;
   border: 2px solid rgba(0, 191, 255, 0.5) !important;
   border-radius: 12px !important;
-  color: #FFFFFF !important;
+  color: #ffffff !important;
   font-size: 1rem !important;
   font-weight: bold !important;
   cursor: pointer !important;
@@ -416,7 +360,7 @@
 }
 
 /* ============================================================
-   Test Content - 200vh 測試文字
+   Test Content
    ============================================================ */
 .user-info-v5-test-content {
   width: 100% !important;
@@ -435,7 +379,7 @@
   backdrop-filter: blur(8px) !important;
   border: 1px solid rgba(0, 191, 255, 0.2) !important;
   border-radius: 8px !important;
-  color: #FFFFFF !important;
+  color: #ffffff !important;
   font-size: 1rem !important;
   line-height: 1.6 !important;
   pointer-events: auto !important;
@@ -460,7 +404,7 @@
   width: 50px !important;
   height: 50px !important;
   border: 4px solid rgba(0, 191, 255, 0.3) !important;
-  border-top-color: #00BFFF !important;
+  border-top-color: #00bfff !important;
   border-radius: 50% !important;
   animation: user-info-v5-spin 1s linear infinite !important;
   pointer-events: auto !important;
@@ -474,13 +418,13 @@
 
 .user-info-v5-loading-text {
   margin-top: 20px !important;
-  color: #00BFFF !important;
+  color: #00bfff !important;
   font-size: 1rem !important;
   pointer-events: auto !important;
 }
 
 /* ============================================================
-   Top Actions (Settings & Notification Bell)
+   Top Actions
    ============================================================ */
 .user-info-v5-top-actions {
   position: fixed !important;
@@ -521,7 +465,7 @@
   border-radius: 50% !important;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
   cursor: pointer !important;
-  color: #00BFFF !important;
+  color: #00bfff !important;
   pointer-events: auto !important;
   transition: transform 0.2s ease, box-shadow 0.2s ease !important;
 }
@@ -556,7 +500,7 @@
    Identity Section
    ============================================================ */
 .user-info-v5-identity {
-  width: 100% !important; /* ⚡ V12.7: 改為 100%，尊重父容器邊距 */
+  width: 100% !important;
   max-width: none !important;
   margin: 0 0 20px 0 !important;
   padding: 0 20px !important;
@@ -574,7 +518,7 @@
   padding: 0 !important;
   font-size: 1.8rem !important;
   font-weight: bold !important;
-  color: #FFFFFF !important;
+  color: #ffffff !important;
   text-align: center !important;
   pointer-events: auto !important;
 }
@@ -607,7 +551,7 @@
 
 .user-info-v5-rpg-name {
   font-size: 0.9rem !important;
-  color: #00BFFF !important;
+  color: #00bfff !important;
   font-weight: 600 !important;
   pointer-events: auto !important;
 }
@@ -616,7 +560,7 @@
    Ladder Status Section
    ============================================================ */
 .user-info-v5-ladder-wrapper {
-  width: 100% !important; /* ⚡ V12.7: 改為 100%，尊重父容器邊距 */
+  width: 100% !important;
   max-width: none !important;
   margin: 0 0 20px 0 !important;
   padding: 0 20px !important;
@@ -644,7 +588,8 @@
 }
 
 @keyframes user-info-v5-pulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1 !important;
   }
   50% {
@@ -696,7 +641,7 @@
 
 .user-info-v5-ladder-potential-value {
   font-size: 1.3rem !important;
-  color: #10B981 !important;
+  color: #10b981 !important;
   font-weight: 800 !important;
   font-family: monospace !important;
   line-height: 1.2 !important;
@@ -709,7 +654,7 @@
 }
 
 .user-info-v5-ladder-potential-badge {
-  background: linear-gradient(135deg, #10B981 0%, #059669 100%) !important;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
   padding: 6px 12px !important;
   border-radius: 8px !important;
   color: white !important;
@@ -757,7 +702,7 @@
    Radar Section
    ============================================================ */
 .user-info-v5-radar-section {
-  width: 100% !important; /* ⚡ V12.7: 改為 100%，尊重父容器邊距 */
+  width: 100% !important;
   max-width: none !important;
   margin: 0 0 20px 0 !important;
   padding: 0 !important;
@@ -769,7 +714,7 @@
    Action Toolbar
    ============================================================ */
 .user-info-v5-action-toolbar {
-  width: 100% !important; /* ⚡ V12.7: 改為 100%，尊重父容器邊距 */
+  width: 100% !important;
   max-width: none !important;
   margin: 0 0 20px 0 !important;
   padding: 0 20px !important;
@@ -790,7 +735,7 @@
   backdrop-filter: blur(10px) !important;
   border: 2px solid rgba(0, 191, 255, 0.3) !important;
   border-radius: 12px !important;
-  color: #FFFFFF !important;
+  color: #ffffff !important;
   font-size: 0.9rem !important;
   font-weight: 600 !important;
   cursor: pointer !important;
@@ -830,7 +775,7 @@
    Page Header
    ============================================================ */
 .user-info-v5-page-header {
-  width: 100% !important; /* ⚡ V12.7: 改為 100%，尊重父容器邊距 */
+  width: 100% !important;
   max-width: none !important;
   margin: 0 0 20px 0 !important;
   padding: 0 20px !important;
@@ -846,7 +791,7 @@
   padding: 0 !important;
   font-size: 1.8rem !important;
   font-weight: bold !important;
-  color: #FFFFFF !important;
+  color: #ffffff !important;
   pointer-events: auto !important;
 }
 
@@ -856,7 +801,7 @@
   margin: 0 !important;
   padding: 0 !important;
   font-size: 1rem !important;
-  color: #00BFFF !important;
+  color: #00bfff !important;
   pointer-events: auto !important;
 }
 
@@ -869,19 +814,18 @@
 }
 
 /* ============================================================
-   V12.7 絕對領空區 - 尊重父容器邊距，不撐滿視窗
+   絕對領空區 - 尊重父容器邊距
    ============================================================ */
 #root #layer-master-root #layer-scroll-content .user-info-v5-container,
 #root #layer-master-root #layer-scroll-content .user-info-v5-container *,
 #layer-master-root #layer-scroll-content .user-info-v5-container,
 #layer-master-root #layer-scroll-content .user-info-v5-container * {
-  width: 100% !important; /* ⚡ V12.7: 改為 100%，尊重父容器邊距 */
+  width: 100% !important;
   max-width: none !important;
-  min-width: auto !important; /* ⚡ V12.7: 移除強制最小寬度 */
+  min-width: auto !important;
   box-sizing: border-box !important;
 }
 
-/* 確保內容區域可以滑動 */
 #root #layer-master-root #layer-scroll-content .user-info-v5-container {
   overflow-y: visible !important;
   overflow-x: hidden !important;
@@ -901,31 +845,55 @@
 }
 
 /* ============================================================
-   V5.2 組件「去毒」樣式覆蓋 (Style Detox)
-   殺死組件內部的寬度限制與定位問題
+   組件「去毒」樣式覆蓋 - 殺死組件內部的寬度限制與定位問題
    ============================================================ */
-/* ⚡ 殺死 RadarChartSection 內部的寬度限制 */
-#root #layer-master-root #layer-scroll-content .user-info-v5-container .radar-section,
-#root #layer-master-root #layer-scroll-content .user-info-v5-container .radar-card,
-#root #layer-master-root #layer-scroll-content .user-info-v5-container .radar-chart-container,
+#root
+  #layer-master-root
+  #layer-scroll-content
+  .user-info-v5-container
+  .radar-section,
+#root
+  #layer-master-root
+  #layer-scroll-content
+  .user-info-v5-container
+  .radar-card,
+#root
+  #layer-master-root
+  #layer-scroll-content
+  .user-info-v5-container
+  .radar-chart-container,
 #layer-master-root #layer-scroll-content .user-info-v5-container .radar-section,
 #layer-master-root #layer-scroll-content .user-info-v5-container .radar-card,
-#layer-master-root #layer-scroll-content .user-info-v5-container .radar-chart-container,
+#layer-master-root
+  #layer-scroll-content
+  .user-info-v5-container
+  .radar-chart-container,
 .user-info-v5-container .radar-section,
 .user-info-v5-container .radar-card,
 .user-info-v5-container .radar-chart-container {
   max-width: none !important;
   width: 100% !important;
   margin: 0 !important;
-  position: relative !important; /* 確保不是 fixed 或 absolute 導致滑動中斷 */
+  position: relative !important;
   pointer-events: auto !important;
   box-sizing: border-box !important;
 }
 
-/* ⚡ 殺死 UserFormSection 內部的寬度限制 */
-#root #layer-master-root #layer-scroll-content .user-info-v5-container .form-section,
-#root #layer-master-root #layer-scroll-content .user-info-v5-container .form-card,
-#root #layer-master-root #layer-scroll-content .user-info-v5-container .user-form,
+#root
+  #layer-master-root
+  #layer-scroll-content
+  .user-info-v5-container
+  .form-section,
+#root
+  #layer-master-root
+  #layer-scroll-content
+  .user-info-v5-container
+  .form-card,
+#root
+  #layer-master-root
+  #layer-scroll-content
+  .user-info-v5-container
+  .user-form,
 #layer-master-root #layer-scroll-content .user-info-v5-container .form-section,
 #layer-master-root #layer-scroll-content .user-info-v5-container .form-card,
 #layer-master-root #layer-scroll-content .user-info-v5-container .user-form,
@@ -935,16 +903,31 @@
   max-width: none !important;
   width: 100% !important;
   margin: 0 !important;
-  position: relative !important; /* 確保不是 fixed 或 absolute 導致滑動中斷 */
+  position: relative !important;
   pointer-events: auto !important;
   box-sizing: border-box !important;
 }
 
-/* ⚡ 通用覆蓋：所有卡片和面板 */
-#root #layer-master-root #layer-scroll-content .user-info-v5-container [class*='card'],
-#root #layer-master-root #layer-scroll-content .user-info-v5-container [class*='Card'],
-#root #layer-master-root #layer-scroll-content .user-info-v5-container [class*='panel'],
-#root #layer-master-root #layer-scroll-content .user-info-v5-container [class*='Panel'] {
+#root
+  #layer-master-root
+  #layer-scroll-content
+  .user-info-v5-container
+  [class*='card'],
+#root
+  #layer-master-root
+  #layer-scroll-content
+  .user-info-v5-container
+  [class*='Card'],
+#root
+  #layer-master-root
+  #layer-scroll-content
+  .user-info-v5-container
+  [class*='panel'],
+#root
+  #layer-master-root
+  #layer-scroll-content
+  .user-info-v5-container
+  [class*='Panel'] {
   width: 100% !important;
   max-width: none !important;
   min-width: 100% !important;
