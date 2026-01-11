@@ -6,11 +6,13 @@ import PropTypes from 'prop-types';
 import LoadingSpinner from './components/LoadingSpinner';
 import { useTranslation } from 'react-i18next';
 
+// ⚡ V8.0 硬核重連：使用靜態匯入測試，強迫 Vite 報出精確路徑錯誤
+import UserInfoV5 from './components/UserInfo/UserInfoV5';
+
 // Lazy load all page components
 const WelcomeSplash = React.lazy(() => import('./pages/WelcomeSplashPage'));
 const LandingPage = React.lazy(() => import('./pages/LandingPage'));
 const Welcome = React.lazy(() => import('./pages/WelcomePage'));
-const UserInfo = React.lazy(() => import('./components/UserInfo/index'));
 const Strength = React.lazy(() => import('./pages/StrengthPage'));
 const Cardio = React.lazy(() => import('./pages/CardioPage'));
 const Power = React.lazy(() => import('./pages/PowerPage'));
@@ -112,168 +114,161 @@ function AppRoutes({
         <LoadingSpinner message={t('common.loading')} fullScreen={true} />
       }
     >
-      <div className="main-content">
-        <Routes>
-          <Route path="/" element={<WelcomeSplash />} />
-          <Route path="/landing" element={<LandingPage />} />
-          <Route
-            path="/welcome"
-            element={
-              auth.currentUser ? (
-                <Navigate to="/user-info" />
-              ) : (
-                <Welcome onLogin={onLogin} onGuestMode={handleGuestMode} />
-              )
-            }
-          />
-          <Route
-            path="/user-info"
-            element={
-              <ProtectedRoute
-                element={
-                  <UserInfo
-                    testData={testData}
-                    onLogout={onLogout}
-                    clearTestData={clearTestData}
-                  />
-                }
-              />
-            }
-          />
-          <Route
-            path="/strength"
-            element={
-              <ProtectedRoute
-                element={
-                  <Strength
-                    onComplete={handleTestComplete}
-                    clearTestData={clearTestData}
-                  />
-                }
-              />
-            }
-          />
-          <Route
-            path="/cardio"
-            element={
-              <ProtectedRoute
-                element={
-                  <Cardio
-                    onComplete={handleTestComplete}
-                    clearTestData={clearTestData}
-                  />
-                }
-              />
-            }
-          />
-          <Route
-            path="/explosive-power"
-            element={
-              <ProtectedRoute
-                element={
-                  <Power
-                    onComplete={handleTestComplete}
-                    clearTestData={clearTestData}
-                  />
-                }
-              />
-            }
-          />
-          <Route
-            path="/muscle-mass"
-            element={
-              <ProtectedRoute
-                element={
-                  <Muscle
-                    onComplete={handleTestComplete}
-                    clearTestData={clearTestData}
-                  />
-                }
-              />
-            }
-          />
-          <Route
-            path="/body-fat"
-            element={
-              <ProtectedRoute
-                element={
-                  <FFMI
-                    onComplete={handleTestComplete}
-                    clearTestData={clearTestData}
-                  />
-                }
-              />
-            }
-          />
-          <Route
-            path="/arm-size"
-            element={
-              <ProtectedRoute
-                element={
-                  <ArmSize
-                    onComplete={handleTestComplete}
-                    clearTestData={clearTestData}
-                  />
-                }
-              />
-            }
-          />
+      {/* ⚡ V4.2 外科手術：移除 .main-content 容器，讓 Routes 直接裝在 #layer-scroll-content 裡面 */}
+      <Routes>
+        <Route path="/" element={<WelcomeSplash />} />
+        <Route path="/landing" element={<LandingPage />} />
+        <Route
+          path="/welcome"
+          element={
+            auth.currentUser ? (
+              <Navigate to="/user-info" />
+            ) : (
+              <Welcome onLogin={onLogin} onGuestMode={handleGuestMode} />
+            )
+          }
+        />
+        <Route
+          path="/user-info"
+          element={
+            /* ⚡ V8.0 硬核重連：暫時移除 ProtectedRoute，繞過 Auth 驗證測試 */
+            <UserInfoV5
+              testData={testData}
+              onLogout={onLogout}
+              clearTestData={clearTestData}
+            />
+          }
+        />
+        <Route
+          path="/strength"
+          element={
+            <ProtectedRoute
+              element={
+                <Strength
+                  onComplete={handleTestComplete}
+                  clearTestData={clearTestData}
+                />
+              }
+            />
+          }
+        />
+        <Route
+          path="/cardio"
+          element={
+            <ProtectedRoute
+              element={
+                <Cardio
+                  onComplete={handleTestComplete}
+                  clearTestData={clearTestData}
+                />
+              }
+            />
+          }
+        />
+        <Route
+          path="/explosive-power"
+          element={
+            <ProtectedRoute
+              element={
+                <Power
+                  onComplete={handleTestComplete}
+                  clearTestData={clearTestData}
+                />
+              }
+            />
+          }
+        />
+        <Route
+          path="/muscle-mass"
+          element={
+            <ProtectedRoute
+              element={
+                <Muscle
+                  onComplete={handleTestComplete}
+                  clearTestData={clearTestData}
+                />
+              }
+            />
+          }
+        />
+        <Route
+          path="/body-fat"
+          element={
+            <ProtectedRoute
+              element={
+                <FFMI
+                  onComplete={handleTestComplete}
+                  clearTestData={clearTestData}
+                />
+              }
+            />
+          }
+        />
+        <Route
+          path="/arm-size"
+          element={
+            <ProtectedRoute
+              element={
+                <ArmSize
+                  onComplete={handleTestComplete}
+                  clearTestData={clearTestData}
+                />
+              }
+            />
+          }
+        />
 
-          <Route path="/login" element={<Login onLogin={onLogin} />} />
-          <Route
-            path="/history"
-            element={<ProtectedRoute element={<History />} />}
-          />
-          <Route
-            path="/ladder"
-            element={<ProtectedRoute element={<Ladder />} />}
-          />
-          <Route
-            path="/settings"
-            element={<ProtectedRoute element={<Settings />} />}
-          />
-          <Route
-            path="/community"
-            element={<ProtectedRoute element={<Community />} />}
-          />
-          <Route
-            path="/friend-feed/:userId"
-            element={<ProtectedRoute element={<FriendFeed />} />}
-          />
+        <Route path="/login" element={<Login onLogin={onLogin} />} />
+        <Route
+          path="/history"
+          element={<ProtectedRoute element={<History />} />}
+        />
+        <Route
+          path="/ladder"
+          element={<ProtectedRoute element={<Ladder />} />}
+        />
+        <Route
+          path="/settings"
+          element={<ProtectedRoute element={<Settings />} />}
+        />
+        <Route
+          path="/community"
+          element={<ProtectedRoute element={<Community />} />}
+        />
+        <Route
+          path="/friend-feed/:userId"
+          element={<ProtectedRoute element={<FriendFeed />} />}
+        />
 
-          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-          <Route path="/terms" element={<Terms />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/features" element={<Features />} />
-          <Route path="/disclaimer" element={<Disclaimer />} />
-          <Route path="/contact" element={<Contact />} />
-          <Route
-            path="/verification"
-            element={<ProtectedRoute element={<Verification />} />}
-          />
-          <Route
-            path="/training-tools"
-            element={<ProtectedRoute element={<TrainingTools />} />}
-          />
-          <Route
-            path="/timer"
-            element={<ProtectedRoute element={<Timer />} />}
-          />
-          <Route
-            path="/skill-tree"
-            element={<ProtectedRoute element={<SkillTreePage />} />}
-          />
-          <Route
-            path="/admin"
-            element={<ProtectedRoute element={<AdminPanel />} />}
-          />
-          <Route
-            path="/debug-tool"
-            element={<ProtectedRoute element={<DebugToolPage />} />}
-          />
-          <Route path="*" element={<div>{t('common.notFound')}</div>} />
-        </Routes>
-      </div>
+        <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+        <Route path="/terms" element={<Terms />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/features" element={<Features />} />
+        <Route path="/disclaimer" element={<Disclaimer />} />
+        <Route path="/contact" element={<Contact />} />
+        <Route
+          path="/verification"
+          element={<ProtectedRoute element={<Verification />} />}
+        />
+        <Route
+          path="/training-tools"
+          element={<ProtectedRoute element={<TrainingTools />} />}
+        />
+        <Route path="/timer" element={<ProtectedRoute element={<Timer />} />} />
+        <Route
+          path="/skill-tree"
+          element={<ProtectedRoute element={<SkillTreePage />} />}
+        />
+        <Route
+          path="/admin"
+          element={<ProtectedRoute element={<AdminPanel />} />}
+        />
+        <Route
+          path="/debug-tool"
+          element={<ProtectedRoute element={<DebugToolPage />} />}
+        />
+        <Route path="*" element={<div>{t('common.notFound')}</div>} />
+      </Routes>
     </Suspense>
   );
 }

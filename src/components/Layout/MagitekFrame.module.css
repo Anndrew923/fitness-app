@@ -1,48 +1,42 @@
 /* ============================================================
-   MAGITEK FRAME - 魔導外殼容器 (V4.1: 物理層級清場)
+   MAGITEK FRAME - 魔導外殼容器 (V4.2: Triple-Layer Strata)
    ============================================================ */
 
-/* ⚡ 強制修正：邊框邊界重置 - 強制「全面屏」貼合 */
-/* ⚡ 2. 邊框物理貼合修正：針對 CSS Modules 類名強制拉伸 */
-.container,
-[class*='container_nkizs_'],
-[class*='container_'] {
-  /* 強制將最外層容器設為全螢幕，且不留任何縫隙 */
+/* ============================================================
+   根容器：徹底擊穿 390px 限制，確保邊框自動貼邊
+   ⚡ V4.2 精準擊穿：針對瀏覽器模擬，恢復滑動邏輯
+   ============================================================ */
+.container {
   padding: 0 !important;
   margin: 0 !important;
   width: 100vw !important;
   height: 100vh !important;
-  max-width: none !important;
-  overflow: hidden !important; /* 徹底鎖死整頁捲動 */
+  max-width: none !important;        /* ⚡ 擊穿 390px 限制 */
+  /* ⚡ V4.2 精準擊穿：真正的滾動容器（針對瀏覽器） */
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  position: relative !important;
   background-color: transparent !important;
-  position: relative;
   z-index: 0;
 }
 
 /* ============================================================
    Layer 1: 唯一星空背景層 (z: -100)
-   V4.1: 物理層級清場 - 背景層樣式由 index.css 的 #layer-master-bg 控制
+   主要樣式由 index.css 的 #layer-master-bg 控制
    此處保留類名以維持兼容性
    ============================================================ */
 .layerBg {
-  /* 引用 Phase 2 背景圖 */
-  background-image: url('/images/magitek_bg_layer1_v2.png');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-
-  /* 固定定位，釘死背景 */
+  /* 主要樣式由 index.css 的 #layer-master-bg 控制 */
+  /* 此處僅保留基本定位，確保兼容性 */
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-
-  /* ⚡ V4.1: z-index 由 index.css 的 #layer-master-bg 控制 (z: -100) */
   z-index: -100 !important;
-  pointer-events: none; /* 不阻擋點擊事件 */
-
-  /* ⚡ 徹底禁用所有 CSS 動畫特效以優化效能 */
+  pointer-events: none;
+  background-color: transparent !important;
+  /* 性能優化：禁用所有動畫 */
   animation: none !important;
   transform: none !important;
   will-change: auto !important;
@@ -50,104 +44,55 @@
 }
 
 /* ============================================================
-   Layer 2: HUD 9-Slice 邊框層 (z:10)
-   ⚡ 強制修正：徹底清場背景 - 實現「星空穿透」
-   ============================================================ */
-.layerHud {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 10;
-  pointer-events: none; /* 不阻擋點擊事件 */
-  /* 移除所有中間層級的背景顏色 */
-  background: transparent !important;
-  background-color: transparent !important;
-}
-
-/* 頂部狀態列 HUD - 全像投影效果 */
-/* ⚡ 靈能流動校準：徹底去黑塊與濾色 */
-.topStatusHud {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: auto;
-  min-height: 120px; /* 根據素材高度調整 */
-  max-height: 120px; /* ⚡ 限制高度，避免產生黑區 */
-
-  /* 引用頂部狀態列素材 */
-  background-image: url('/images/magitek_hud_top_v2.png');
-  background-size: 100% auto;
-  background-position: top center;
-  background-repeat: no-repeat;
-
-  /* ⚡ 強制修正：徹底清場背景 - 移除所有背景色，確保不阻擋後方星空 */
-  background: transparent !important;
-  background-color: transparent !important;
-
-  /* ⚡ 2. 徹底去黑塊：濾除素材本身的黑底，讓星空透出來 */
-  /* ⚡ 核心技術：mix-blend-mode: screen 是讓星空透出來的唯一關鍵 */
-  mix-blend-mode: screen !important;
-
-  /* 適配安全區域：確保不被手機瀏海遮擋 */
-  padding-top: env(safe-area-inset-top, 0px);
-  /* ⚡ 移除不必要的 padding，避免產生黑區 */
-  padding-bottom: 0;
-  padding-left: 0;
-  padding-right: 0;
-
-  /* V4.1: HUD 位於 #layer-hud-status (z: 1000) 內，此處保持樣式 */
-  z-index: 1000 !important; /* V4.1: 統一為 z: 1000 */
-  /* ⚡ 1. 解鎖滑動感應：HUD 不阻擋觸摸事件 */
-  pointer-events: none !important;
-}
-
-/* ============================================================
    Layer 3: 唯一捲動層 (z: 10)
-   V4.1: 物理層級清場 - 捲動層樣式由 index.css 的 #layer-scroll-content 控制
+   主要樣式由 index.css 的 #layer-scroll-content 控制
    此處保留類名以維持兼容性
    ============================================================ */
 .layerContent {
-  /* V4.1: 主要樣式由 index.css 的 #layer-scroll-content 控制 */
+  /* 主要樣式由 index.css 的 #layer-scroll-content 控制 */
   /* 保留基本樣式以維持兼容性 */
   width: 100%;
   margin: 0 !important;
   background: transparent !important;
   background-color: transparent !important;
   box-sizing: border-box;
-  
   /* GPU 加速優化 */
   transform: translateZ(0);
   will-change: scroll-position;
 }
 
 /* ============================================================
-   V4.1: 終端邊框已移至 index.css 的 #layer-terminal-frame
-   此處保留舊 ID 以維持兼容性
-   ⚡ 確保邊框置頂且不擋觸控
+   V12.0 最終視覺合體 - 頂部狀態列 HUD
+   使用新版透明素材 V3，確保星空背景能正確穿透
    ============================================================ */
-#fixed-terminal-border {
-  /* V4.1: 已遷移至 #layer-terminal-frame，此處保留以維持兼容性 */
+.topStatusHud {
   position: fixed !important;
-  inset: 0 !important;
-  z-index: 9999 !important; /* ⚡ 確保在最頂層 */
-  pointer-events: none !important; /* ⚡ 關鍵：讓手指能穿透此層滑動下方內容 */
-  mix-blend-mode: screen !important; /* 濾除任何黑邊 */
-  border-style: solid;
-  border-width: 40px;
-  border-image: url('/images/magitek_hud_frame_9slice.png') 60 fill !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  /* ⚡ V12.0: 根據新素材高度調整 */
+  height: 120px !important;
+  min-height: 120px !important;
+  max-height: 120px !important;
+  /* ⚡ V12.0: 背景圖片由 index.css 控制，使用 V3 素材 */
   background: transparent !important;
   background-color: transparent !important;
-  padding: 0 !important;
+  box-shadow: none !important;
+  /* ⚡ V12.0: 透明 PNG 不需要 screen 濾黑 */
+  mix-blend-mode: normal !important;
+  padding-top: calc(var(--mg-safe-area-top, 0px) + env(safe-area-inset-top, 44px)) !important;
+  padding-bottom: 0 !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
   margin: 0 !important;
+  pointer-events: none !important; /* ⚡ 確保不阻擋觸控 */
+  z-index: 10000 !important; /* ⚡ 全 App 最高權重 */
+  overflow: visible !important; /* 確保內部組件依然看得見 */
 }
 
-/* ⚡ 強制修正：邊框邊界重置 - 確保 9-slice 邊框直接釘死在螢幕四個頂點 */
-/* ⚡ 清除「影子邊框」：刪除此偽元素，確保全 App 只有 #fixed-terminal-border 這一層有藍色邊框 */
-/* 注意：此偽元素已由 #fixed-terminal-border 取代，現已刪除以避免重複邊框 */
-/* .layerContent::before {
-  content: '';
-  ...
-} */
+/* ⚡ V5.8: 只有 HUD 內部的按鈕能點擊 */
+.topStatusHud > *,
+.topStatusHud button,
+.topStatusHud a {
+  pointer-events: auto !important; /* ⚡ 只有裡面的按鈕能點擊 */
+}

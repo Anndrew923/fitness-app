@@ -363,32 +363,25 @@ function AppContent() {
     <MagitekFrame
       avatarSection={avatarSection}
       extraChildren={
-        /* 全域透視：導覽列徹底移出 app-container，直接作為 MagitekFrame 的子元素，與 .content 並列 */
+        /* 全域透視：導覽列徹底移出 app-container，直接作為 MagitekFrame 的子元素 */
         showNavBar ? <BottomNavBar /> : null
       }
     >
-      <div
-        className={`app-container ${showFixedAd ? 'page-with-fixed-ad' : ''}`}
-        style={{
-          background: 'transparent',
-          backgroundColor: 'transparent',
-        }}
-      >
-        <ScrollToTop />
-        <ErrorBoundary>
-          <AppRoutes
-            testData={testData}
-            onLogin={handleLogin}
-            onLogout={handleLogout}
-            handleTestComplete={handleTestComplete}
-            clearTestData={clearTestData}
-            handleGuestMode={handleGuestMode}
-          />
-        </ErrorBoundary>
+      {/* ⚡ V4.2 外科手術：移除所有中間容器，讓數據直接裝在 #layer-scroll-content 裡面 */}
+      <ScrollToTop />
+      <ErrorBoundary>
+        <AppRoutes
+          testData={testData}
+          onLogin={handleLogin}
+          onLogout={handleLogout}
+          handleTestComplete={handleTestComplete}
+          clearTestData={clearTestData}
+          handleGuestMode={handleGuestMode}
+        />
+      </ErrorBoundary>
 
-        {/* 在天梯頁面隱藏廣告，保持頁面乾淨 */}
-        {location.pathname !== '/ladder' && <GlobalAdBanner />}
-      </div>
+      {/* 在天梯頁面隱藏廣告，保持頁面乾淨 */}
+      {location.pathname !== '/ladder' && <GlobalAdBanner />}
     </MagitekFrame>
   );
 }

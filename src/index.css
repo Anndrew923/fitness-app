@@ -1,16 +1,532 @@
 /* ============================================================
+   V7.0 萬象更新 - 強制 HTML/BODY 物理擴張
+   ============================================================ */
+/* ⚡ V5.6 權限大降階：根除「黑色塊」源頭 */
+body {
+  background-color: #050505 !important;
+}
+
+#root,
+#layer-master-root {
+  background: transparent !important;
+}
+
+/* ============================================================
+   🌌 全域魔導架構搬家計畫 - Triple-Layer Strata
+   V4.2: 三層物理隔離架構 (The Triple-Layer Strata)
+   ============================================================ */
+
+/* ============================================================
+   ⚡ V4.2 毀滅性修正 2: 全域寬度「大滅絕」 (Nuclear Width Reset)
+   擊穿所有 CSS Modules 可能帶來的限制，徹底殺死所有 max-width 限制
+   ============================================================ */
+* { 
+  max-width: none !important;         /* ⚡ 擊穿所有 390px 限制 */
+}
+
+/* ============================================================
+   V7.0 強制 HTML/BODY 物理擴張 (Force HTML/BODY Physical Expansion)
+   既然 #root 縮水，我們從最外層開始擊穿
+   ============================================================ */
+html, body {
+  width: 100vw !important;
+  min-width: 100vw !important;
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow-x: hidden !important; /* ⚡ 防止橫向抖動 */
+  display: block !important;
+}
+
+html, body, #root, #layer-master-root {
+  width: 100vw !important;
+  max-width: none !important;
+  display: block !important;         /* ⚡ 移除 flex 導致的壓縮 */
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* ⚡ V6.0: 強制重設物理根節點，殺死 390px 殘留 */
+#root, #layer-master-root {
+  width: 100vw !important;
+  max-width: none !important;
+  margin: 0 !important;
+  transform: none !important; /* ⚡ 防止 fixed 定位失效 */
+}
+
+#layer-master-root {
+  width: 100vw !important;
+  height: 100vh !important;
+  max-width: none !important;
+  min-width: 100vw !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  /* ⚡ V5.9: 確保沒有任何間距影響邊框貼邊 */
+  box-sizing: border-box !important;
+}
+
+html, body, #root {
+  overflow: hidden !important;        /* 鎖死外殼，只讓 #layer-master-root 滑動 */
+}
+
+/* ⚡ V4.2 物理隔離測試 3: 重啟「物理捲動」引擎 */
+/* ⚡ V5.1 核彈級診斷：根節點權限重啟 */
+/* 捨棄複雜定位，回歸最簡單的 overflow 結構 */
+#layer-master-root {
+  position: fixed !important;
+  inset: 0 !important;
+  overflow-y: scroll !important;       /* ⚡ 強制開啟物理引擎 */
+  overflow-x: hidden !important;
+  -webkit-overflow-scrolling: touch !important;
+  pointer-events: auto !important;     /* ⚡ V5.1: 確保可交互 */
+  height: 100vh !important;
+  width: 100vw !important;
+  max-width: none !important;
+}
+
+/* ⚡ V4.2 精準擊穿：確保 app-container 透明且不限制寬度 */
+.app-container {
+  width: 100% !important;
+  max-width: none !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* ============================================================
+   ⚡ V4.2 毀滅性修正 1: 全域寬度「大滅絕」
+   強制擊穿所有寬度限制，包含所有第三方或隱藏容器
+   ============================================================ */
+* {
+  max-width: none !important;
+  box-sizing: border-box !important;
+}
+
+html, body, #root, [class*='container'], .App {
+  width: 100vw !important;
+  min-width: 100vw !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* ============================================================
    靈魂注入：導入史詩字體
    ============================================================ */
 @import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Noto+Serif+TC:wght@700;900&display=swap');
 
 /* ============================================================
-   全域透視：暴力清除所有中間層背景 (The Great Transparency Nuke)
-   強制讓所有結構容器透明，露出底層 MagitekFrame 的星空
-   V4.1: 物理層級清場 - 強制透明與寬度解放
+   🎨 CSS 核心聖經：全域變數系統 (Global Design Tokens)
+   所有 CSS 必須引用此處定義的變數，嚴禁硬編碼顏色與數值
+   ============================================================ */
+:root {
+  /* ============================================================
+     魔導核心色譜 (Magitek Core Palette)
+     ============================================================ */
+  --mg-primary-blue: #00BFFF;        /* 奧術藍 */
+  --mg-primary-gold: #FF8C00;        /* 熾熱金 */
+  --mg-void-black: #050505;          /* 深邃虛空 */
+  --mg-starlight-white: #FFFFFF;     /* 星輝白 */
+  --mg-arcane-cyan: #00FFFF;         /* 奧術青 */
+  --mg-energy-orange: #FF4500;       /* 能量橙 */
+  
+  /* 兼容性別名（向後兼容舊變數） */
+  --color-arcane-blue: var(--mg-primary-blue);
+  --color-magitek-gold: var(--mg-primary-gold);
+  
+  /* ============================================================
+     玻璃擬態規範 (Glassmorphism Standard)
+     ============================================================ */
+  --mg-panel-bg: rgba(0, 10, 30, 0.4);
+  --mg-panel-bg-dark: rgba(5, 5, 5, 0.85);
+  --mg-panel-blur: 12px;
+  --mg-panel-blur-mobile: 8px;
+  --mg-panel-border: 1px solid rgba(0, 191, 255, 0.4);
+  --mg-panel-border-radius: 16px;
+  
+  /* ============================================================
+     物理座標規範 (Physical Coordinates)
+     ============================================================ */
+  --mg-hud-height: 140px;             /* 頂部 HUD 預留高度（擴大以容納頭像） */
+  --mg-nav-height: 80px;              /* 底部導航預留高度 */
+  --mg-terminal-border-width: 40px;   /* 終端邊框寬度 */
+  --mg-safe-area-top: env(safe-area-inset-top, 0px);
+  --mg-safe-area-bottom: env(safe-area-inset-bottom, 0px);
+  
+  /* ============================================================
+     魔導光效規範 (Magitek Glow Effects)
+     ============================================================ */
+  --mg-glow-blue: 0 0 15px var(--mg-primary-blue);
+  --mg-glow-gold: 0 0 20px var(--mg-primary-gold);
+  --mg-glow-strong: 0 0 30px var(--mg-primary-blue);
+  
+  /* ============================================================
+     性能優化變數 (Performance Tuning)
+     ============================================================ */
+  --mg-transition-fast: 0.2s;
+  --mg-transition-normal: 0.3s;
+  --mg-transition-slow: 0.5s;
+  --mg-backdrop-saturate: 180%;
+}
+
+/* ============================================================
+   ⚡ 物理邊界徹底重置：擊穿 390px 限制
+   強制將所有頂層容器歸零，確保邊框自動貼邊
    ============================================================ */
 html,
 body,
 #root,
+.App,
+[class*='magitek-terminal-root'],
+[class*='container'],
+[class*='app-container'] {
+  padding: 0 !important;
+  margin: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  max-width: none !important;        /* ⚡ 擊穿 390px 限制 */
+  min-width: 100vw !important;
+  overflow: hidden !important;        /* 鎖死外殼，防止整頁捲動 */
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
+/* ============================================================
+   ⚡ V4.2 外科手術 2: 暴力去背 - 針對所有可能帶有背景色的容器
+   ============================================================ */
+* {
+  background-color: transparent !important;
+}
+
+/* ============================================================
+   🌌 Layer 1: 背景層 (Background Layer)
+   #layer-master-bg - z-index: -100
+   唯一星空背景，100% 透視星空
+   ⚡ V4.2 外科手術：只有星空層可以有底色
+   ============================================================ */
+#layer-master-bg {
+  position: fixed !important;
+  inset: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  z-index: -100 !important;          /* 真正的最低層 */
+  pointer-events: none !important;    /* 不阻擋任何交互 */
+  background-image: url('/images/magitek_bg_layer1_v2.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  /* ⚡ V4.2 外科手術：只有星空層可以有底色 */
+  background-color: #050505 !important;
+  /* 性能優化：禁用所有動畫 */
+  animation: none !important;
+  transform: none !important;
+  will-change: auto !important;
+  transition: none !important;
+}
+
+/* ============================================================
+   V12.1 毛玻璃效果限制 (Glassmorphism Constraint)
+   移除全域模糊，僅在捲動面板內實施毛玻璃效果
+   ============================================================ */
+/* ============================================================
+   V12.2 物理層級「去霧化」 (De-blur the Base)
+   徹底移除所有父層容器的模糊效果
+   ============================================================ */
+/* ============================================================
+   V12.4 擊穿背景模糊 (Neutralize Background Blur)
+   直接針對背景層進行「去霧化」
+   ============================================================ */
+/* ⚡ V12.2: 強制恢復銳利度，禁止全域模糊 */
+body, #root, #layer-master-root, #layer-master-bg, #layer-terminal-frame {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  filter: none !important;
+}
+
+/* ============================================================
+   V12.5 擊穿背景層模糊 (Neutralize Background Layer Blur)
+   直接針對控制台抓到的類名進行物理去霧
+   ============================================================ */
+/* ⚡ V12.4: 強制關閉背景層的模糊 */
+[class*="layerBg"], #layer-master-bg {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  filter: none !important;
+}
+
+/* ⚡ V12.5: 直接針對背景層類名強制去霧 */
+[class*="layerBg"] {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* ============================================================
+   V12.6 全域「去霧」 (Clear the Fog)
+   徹底移除所有背景層、根節點的模糊，確保邊框與星空 100% 銳利
+   ============================================================ */
+/* ⚡ 強制關閉背景層的模糊，還我清晰星空 */
+[class*="layerBg"], #layer-master-bg, #root, body {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* ============================================================
+   📜 Layer 2: 捲動層 (Scroll Layer)
+   #layer-scroll-content - z-index: 10
+   唯一捲動層，內容獨立滑動
+   ⚡ V4.2 物理隔離測試 3: 重啟「物理捲動」引擎
+   捨棄複雜定位，回歸最簡單的 overflow 結構
+   ============================================================ */
+/* ============================================================
+   V12.2 面板內容「局部水晶化」 (Localized Glassmorphism)
+   只在 #layer-scroll-content 內實施模糊，且必須與邊框留出間隙
+   ============================================================ */
+/* ⚡ V12.2: 僅在捲動面板內實施毛玻璃效果 */
+#layer-scroll-content {
+  position: relative !important;       /* ⚡ 讓它成為正常的文件流內容 */
+  width: 100% !important;
+  height: auto !important;
+  min-height: 105vh !important;      /* ⚡ 故意撐高，確保一定能滑動 */
+  padding-top: calc(140px + env(safe-area-inset-top, 0px)) !important;      /* ⚡ 避開頂部 HUD + 安全區 */
+  /* ⚡ V5.7 恢復「正確層級」：恢復正常層級 */
+  z-index: 100 !important;          /* ⚡ 恢復正常層級 */
+  pointer-events: auto !important;
+  /* ⚡ V12.7: 面板「水晶化」完全由 UserInfoV5.css 統一控制 */
+  /* 此處移除所有樣式設定，避免與 UserInfoV5.css 衝突 */
+  /* background, margin, border, border-radius 均由 UserInfoV5.css 控制 */
+  /* GPU 加速優化 */
+  transform: translateZ(0);
+  will-change: scroll-position;
+}
+
+/* 確保捲動層內部的所有直接子元素都可以接收事件 */
+#layer-scroll-content > *,
+#layer-content > * {
+  pointer-events: auto !important;
+  width: 100% !important;
+  position: relative !important;
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
+/* 確保所有內容卡片在捲動層內正確排列 */
+#layer-scroll-content [class*='card'],
+#layer-scroll-content [class*='Card'],
+#layer-scroll-content [class*='panel'],
+#layer-scroll-content [class*='Panel'],
+#layer-scroll-content .magitek-panel {
+  width: 100% !important;
+  position: relative !important;
+  left: auto !important;
+  right: auto !important;
+  top: auto !important;
+  bottom: auto !important;
+}
+
+/* ============================================================
+   🔲 Layer 3: 邊框層 (Terminal Frame Layer)
+   #layer-terminal-frame - z-index: 500
+   9-Slice 藍色邊框，自動貼邊，不阻擋觸控
+   ⚡ V4.2 物理隔離測試 1: 關閉「裝飾層」進行純淨測試
+   ============================================================ */
+/* ============================================================
+   V7.0 強制藍框「跨越紅線」 (Expand the Terminal Frame)
+   既然紅線能貼邊，我們把藍框直接掛載到跟紅線同一個寬度層級
+   ============================================================ */
+/* ============================================================
+   V12.0 最終視覺合體 - 邊框物理座標微調
+   使用新版透明素材 V3，零邊距 PNG 直接貼邊
+   ============================================================ */
+#layer-terminal-frame {
+  position: fixed !important;
+  /* ⚡ V12.0: 因為是零邊距 PNG，直接貼邊 */
+  inset: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  border-image-source: url('/images/magitek_frame_v3.png') !important;
+  /* ⚡ V12.0: 根據 V3 素材比例微調 */
+  border-image-slice: 150 fill !important;
+  border-width: 45px !important;
+  pointer-events: none !important;
+  z-index: 500 !important;
+  /* ⚡ V12.0: 既然是透明 PNG，不需要再用 screen 濾黑 */
+  mix-blend-mode: normal !important;
+  border-style: solid !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  display: block !important;
+  overflow: visible !important;
+  /* ⚡ V12.1: 移除診斷綠線 */
+}
+
+/* ============================================================
+   🎮 Layer 4: HUD 狀態層 (HUD Status Layer)
+   #layer-hud-status - z-index: 1000
+   頂部狀態列與頭像，不阻擋滑動
+   ⚡ V4.2 物理隔離測試 1: 關閉「裝飾層」進行純淨測試
+   ============================================================ */
+/* ============================================================
+   V7.0 封鎖 HUD 閃退邏輯 (Lock HUD Visibility)
+   為了防止 HUD 消失，強制將 HUD 的透明度鎖定為 1
+   ============================================================ */
+#layer-hud-status {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100vw !important;
+  /* ⚡ V12.4: 必須給予實體高度，內容才不會被切掉 */
+  display: block !important;
+  height: 120px !important;
+  min-height: 120px !important;
+  overflow: visible !important;
+  /* ⚡ V7.0: 封鎖 HUD 閃退邏輯 - 強制鎖定可見性 */
+  opacity: 1 !important;
+  visibility: visible !important;
+  /* ⚡ V12.4: 提高 z-index 確保顯示 */
+  z-index: 5000 !important;
+  pointer-events: none !important;    /* ⚡ 容器觸控穿透 */
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
+/* ⚡ V4.2 全域架構檢診：觸控最終判決 (Final Touch Verdict) */
+/* 只有特定元素擁有 pointer-events: auto，其餘所有外殼零件一律禁止攔截觸控 */
+* {
+  pointer-events: none !important;     /* ⚡ 全域封鎖：先把所有東西都變「幻影」 */
+}
+
+/* ⚡ 觸控白名單：只有這些元素能被觸摸 */
+button, 
+a, 
+input, 
+select,
+textarea,
+[role="button"],
+.avatar-section,
+.avatar-section *,
+#layer-scroll-content,
+#layer-scroll-content * {
+  pointer-events: auto !important;     /* ⚡ 白名單：只有這些能被觸摸 */
+}
+
+/* ⚡ 絕對確保外殼層及其所有子元素不攔截任何觸控 */
+#layer-terminal-frame, 
+#layer-terminal-frame *, 
+#layer-hud-status, 
+#layer-hud-status *:not(.avatar-section, button, a, input, select, textarea, [role="button"]) {
+  pointer-events: none !important;     /* ⚡ 遞迴式封印：所有外殼層及其子元素都是「幻影」 */
+}
+
+/* ⚡ V4.2 魔導裝甲歸位：擊穿「頂部黑洞」 */
+/* 頂部狀態列 HUD - 全像投影效果 */
+/* ============================================================
+   V12.5 魔導校準：拆除臨時支架
+   React 組件已正常運作，不再需要 CSS 暴力注入
+   ============================================================ */
+
+/* ============================================================
+   V12.1 全域顯影 - 使用全域選擇器強制顯示 HUD 飾條
+   不要依賴局部類名，直接對 #layer-hud-status 內部的 HUD 容器進行全域強制顯影
+   ============================================================ */
+/* ⚡ V12.1: 強制召喚 HUD 飾條 - 使用全域選擇器避免 CSS Modules 命名衝突 */
+#layer-hud-status [class*="topStatusHud"] {
+  background-image: url('/images/magitek_hud_v3.png') !important;
+  background-size: contain !important;
+  background-repeat: no-repeat !important;
+  background-position: top center !important;
+  height: 120px !important;
+  display: block !important;
+  z-index: 1000 !important;
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100vw !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  background-color: transparent !important;
+  mix-blend-mode: normal !important;
+  pointer-events: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* 強制移除所有黑色背景，確保完全透明 */
+#layer-hud-status [class*='topStatusHud'],
+#layer-hud-status .topStatusHud,
+.topStatusHud,
+[class*='topStatusHud'],
+[class*='TopStatusHud'],
+[class*='hud'],
+[class*='Hud'],
+[class*='HUD'] {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  /* ⚡ V12.0: 根據新素材高度調整 */
+  height: 120px !important;
+  min-height: 120px !important;
+  max-height: 120px !important;
+  /* ⚡ V12.0: 更換為 V3 素材 */
+  background-image: url('/images/magitek_hud_v3.png') !important;
+  background-size: 100% 100% !important;
+  background-color: transparent !important;
+  background-position: top center !important;
+  background-repeat: no-repeat !important;
+  box-shadow: none !important;
+  /* ⚡ V12.0: 透明 PNG 不需要 screen 濾黑 */
+  mix-blend-mode: normal !important;
+  padding-top: calc(var(--mg-safe-area-top, 0px) + env(safe-area-inset-top, 44px)) !important;
+  padding-bottom: 0 !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  margin: 0 !important;
+  pointer-events: none !important;     /* ⚡ 裝飾性元素必須是「幻影」 */
+  /* ⚡ V9.0: 確保 z-index 高於 avatar-section (1001) */
+  z-index: 10002 !important;          /* ⚡ 高於所有元素，包括頭像 */
+  overflow: visible !important; /* 確保內部組件依然看得見 */
+}
+
+/* ⚡ V5.8: 只有 HUD 內部的按鈕能點擊 */
+.topStatusHud > *,
+.topStatusHud button,
+.topStatusHud a {
+  pointer-events: auto !important; /* ⚡ 只有裡面的按鈕能點擊 */
+}
+
+/* ============================================================
+   V12.1 修復大頭照對位
+   確保大頭照 .avatar-section 能夠完美對準新素材 magitek_hud_v3.png 的圓框位置
+   ============================================================ */
+/* 大頭照「靈能置頂」 (Avatar Z-Index Nuke) */
+[class*='avatar-section'],
+.avatar-section {
+  position: absolute !important; /* ⚡ V12.1: 改為 absolute 對位 HUD 圓框 */
+  top: 10px !important; /* ⚡ V12.1: 對準新素材圓框位置 */
+  left: 10px !important; /* ⚡ V12.1: 對準新素材圓框位置 */
+  background: transparent !important; /* ⚡ V12.1: 確保背景透明 */
+  /* ⚡ V9.0: 降低 z-index，確保低於 topStatusHud (10002) */
+  z-index: 1001 !important;         /* 低於 HUD，但高於其他內容 */
+  visibility: visible !important;
+  opacity: 1 !important;
+  overflow: visible !important;        /* ⚡ 確保所有父層都不會切掉頭像 */
+}
+
+/* ============================================================
+   🧹 全域透明化：徹底清場背景 - 實現「星空穿透」
+   移除所有組件層級的不透明背景
+   ============================================================ */
+/* ============================================================
+   V12.7 修復：排除 #layer-scroll-content 從背景透明規則
+   讓 UserInfoV5.css 的水晶化背景能夠生效
+   ============================================================ */
+#layer-hud,
+#layer-content,
+/* ⚡ V12.7: 排除 #layer-scroll-content，讓其背景由 UserInfoV5.css 控制 */
 .app-container,
 .main-content,
 main,
@@ -18,102 +534,82 @@ section,
 [class*='container'] {
   background: transparent !important;
   background-color: transparent !important;
-  border: none !important;
-  width: 100vw !important;
-  max-width: none !important;
 }
 
-/* ✅ Level 3-1: 修正 HTML 和 Body 高度 */
-/* 終極導覽列淨化：深度清潔畫布 - 強制將背景色設為主題深色，避免任何隙縫露出白色 */
-/* ⚡ 強制修正：鎖定捲動區域 - 鎖定 HTML 與 Body，不准動 */
-/* V4.1: 鎖定外殼，釋放數據流 */
-html {
-  height: 100% !important;
-  /* ✅ 使用 100% 而非 100vh，避免包含系統列高度 */
-  /* 在畫框式佈局中，WebView 高度已自動排除系統列 */
-  /* ⚡ 星域召喚：移除背景色，讓星空顯示 */
+/* 確保捲動層下的主要容器背景透明 */
+#layer-content .main-content,
+#layer-content .app-container,
+#layer-scroll-content .main-content,
+#layer-scroll-content .app-container {
   background: transparent !important;
   background-color: transparent !important;
-  /* 鎖定 HTML，不准動 */
-  overflow: hidden !important;
 }
 
-/* ⚡ 強制修正：鎖定捲動區域 - 鎖定 HTML 與 Body，不准動 */
-/* V4.1: 鎖定外殼，釋放數據流 */
-body {
-  margin: 0 !important;
-  /* ✅ 關鍵：使用 100% 高度，跟隨父層 WebView（已排除系統列） */
-  height: 100% !important;
-  /* ✅ 不使用 100vh，因為在畫框式佈局中，WebView 高度已正確計算 */
-  /* ⚡ 星域召喚：移除背景色，讓星空顯示 */
-  background: transparent !important;
-  background-color: transparent !important;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+/* 濾色技術：這是讓星空透出來的唯一關鍵 */
+[class*='layerContent']::before {
+  mix-blend-mode: screen !important;  /* 強制濾掉素材中的純黑背景 */
+  pointer-events: none !important;
+}
+
+/* ============================================================
+   🎨 魔導玻璃規範 (Glassmorphism Standard)
+   ============================================================ */
+.magitek-panel {
+  background: var(--mg-panel-bg) !important;
+  backdrop-filter: blur(var(--mg-panel-blur)) !important;
+  -webkit-backdrop-filter: blur(var(--mg-panel-blur)) !important;
+  border: var(--mg-panel-border) !important;
+  border-radius: var(--mg-panel-border-radius);
+}
+
+/* 移動端性能優化 - 降低 backdrop-filter 模糊樣本數 */
+@media (max-width: 768px) {
+  .magitek-panel {
+    backdrop-filter: blur(var(--mg-panel-blur-mobile)) !important;
+    -webkit-backdrop-filter: blur(var(--mg-panel-blur-mobile)) !important;
+  }
+}
+
+/* ============================================================
+   🎯 魔導大一統：全域標題 CSS (Magitek Grand Unification)
+   ============================================================ */
+.magitek-header {
+  font-family: 'Cinzel Decorative', 'Noto Serif TC', serif !important;
+  font-weight: 900 !important;
+  letter-spacing: 0.5rem !important;
+  text-align: center;
+  text-transform: uppercase;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  /* ✅ 移除所有 padding-top，因為 fitsSystemWindows 已處理 */
-  padding-top: 0 !important;
-  padding-left: 0 !important;
-  padding-right: 0 !important;
-
-  /* ⚡ 強制修正：鎖定 HTML 與 Body，不准動 */
-  overflow: hidden !important;
-}
-
-/* ✅ Level 3-2: 修正 Root 容器高度 */
-/* ⚡ 1. 擊穿父容器限制：移除所有寬度限制，強制填滿物理螢幕 */
-/* V4.1: 物理層級清場 - 強制透明與寬度解放 */
-#root,
-.app-container,
-.main-content,
-[class*='container'] {
-  height: 100% !important;
-  /* ⚡ 強制修正：清除所有外距，讓邊框貼齊螢幕四角 */
-  padding: 0 !important;
-  margin: 0 !important;
-  width: 100vw !important;
-  max-width: none !important;
-  margin-left: 0 !important;
-  margin-right: 0 !important;
-  padding-left: 0 !important;
-  padding-right: 0 !important;
-  /* ✅ 使用 100% 高度，跟隨 body（已排除系統列） */
-  /* 不使用 100vh，避免包含系統列高度導致捲軸 */
-  /* 全域透視：背景必須透明，讓 MagitekFrame 的星空完整顯現 */
-  background: transparent !important;
-  background-color: transparent !important;
-}
-
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+  text-rendering: optimizeLegibility;
+  /* 核心超頻漸層 - 白光佔比拉高到 75%，確保字體完全不暗沉 */
+  background: linear-gradient(180deg, #ffffff 0%, #ffffff 75%, #ff8c00 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: #ffffff;                     /* Fallback：如果漸層不工作，使用純白確保文字可見 */
+  filter: brightness(1.2) saturate(1.3) !important;
+  /* 晶體切割投影系統 - 加入「極高光」白核，解決模糊感 */
+  text-shadow: 0 0 2px rgba(255, 255, 255, 1),
+               0 0 5px rgba(255, 140, 0, 0.9),
+               0 0 15px rgba(255, 69, 0, 0.5),
+               0 0 30px rgba(255, 69, 0, 0.2);
 }
 
 /* ============================================================
-   MAGITEK RESONANCE: 地毯式靜默
-   只殺死干擾物，不准殺死變數
+   ⚡ 魔導屬性覆蓋：將所有聚焦外框轉化為奧術能量
    ============================================================ */
-
-/* ============================================================
-   魔導屬性覆蓋：將所有聚焦外框轉化為奧術能量
-   不再刪除，而是正向定義奧術藍色聚焦效果
-   ============================================================ */
-
-/* 強制能量覆蓋：將所有聚焦外框轉化為奧術能量 */
 *:focus-visible {
-  outline: 2px solid var(--color-arcane-blue) !important; /* 強制藍色外框 */
+  outline: 2px solid var(--mg-primary-blue) !important;
   outline-offset: 2px !important;
-  box-shadow: 0 0 15px var(--color-arcane-blue) !important; /* 藍色魔法暈光 */
+  box-shadow: var(--mg-glow-blue) !important;
 }
 
 /* 地毯式靜默：精準針對標籤選擇器，不使用 * 選擇器 */
-/* 排除 CSS Module 的按鈕（它們有自己的樣式） */
 button:not([class*='button']):not([class*='Button']),
 input:not([class*='rune']):not([class*='Rune']),
 a {
-  -webkit-tap-highlight-color: transparent !important; /* 強制清除手機點擊的預設綠色 */
+  -webkit-tap-highlight-color: transparent !important;
   tap-highlight-color: transparent !important;
 }
 
@@ -127,48 +623,44 @@ input:not([class*='rune']):not([class*='Rune']):active,
 a:focus,
 a:focus-visible,
 a:active {
-  outline: 2px solid var(--color-arcane-blue) !important; /* 強制藍色外框 */
+  outline: 2px solid var(--mg-primary-blue) !important;
   outline-offset: 2px !important;
-  box-shadow: 0 0 15px var(--color-arcane-blue) !important; /* 藍色魔法暈光 */
+  box-shadow: var(--mg-glow-blue) !important;
   -webkit-tap-highlight-color: transparent !important;
   tap-highlight-color: transparent !important;
-  /* 強制清除任何綠色背景（針對 active 狀態） */
   background-color: transparent !important;
 }
 
 /* ============================================================
-   終極覆蓋方案：針對隱私權政策區域的 a 標籤強制清除螢光綠
+   🔗 隱私權政策區域的魔導化
    ============================================================ */
-/* 針對隱私權連結的「魔導化」 */
 .privacyNotice a {
-  color: var(--color-arcane-blue) !important;
+  color: var(--mg-primary-blue) !important;
   text-decoration: underline;
-  transition: all 0.3s ease;
-  outline: 2px solid var(--color-arcane-blue) !important;
+  transition: all var(--mg-transition-normal) ease;
+  outline: 2px solid var(--mg-primary-blue) !important;
   outline-offset: 2px !important;
-  box-shadow: 0 0 15px var(--color-arcane-blue) !important;
+  box-shadow: var(--mg-glow-blue) !important;
   -webkit-tap-highlight-color: transparent !important;
 }
 
 .privacyNotice a:focus,
 .privacyNotice a:focus-visible,
 .privacyNotice a:active {
-  outline: 2px solid var(--color-arcane-blue) !important;
+  outline: 2px solid var(--mg-primary-blue) !important;
   outline-offset: 2px !important;
-  box-shadow: 0 0 15px var(--color-arcane-blue) !important;
+  box-shadow: var(--mg-glow-blue) !important;
   border: none !important;
   -webkit-tap-highlight-color: transparent !important;
 }
 
 .privacyNotice a:hover {
-  color: var(--color-magitek-gold) !important;
-  text-shadow: var(--glow-magitek) !important;
-  outline: 2px solid var(--color-magitek-gold) !important;
-  box-shadow: 0 0 20px var(--color-magitek-gold) !important;
+  color: var(--mg-primary-gold) !important;
+  text-shadow: var(--mg-glow-gold) !important;
+  outline: 2px solid var(--mg-primary-gold) !important;
+  box-shadow: var(--mg-glow-gold) !important;
 }
 
-/* 強制覆蓋隱私權政策容器的邊框（注意：CSS Module 類名不匹配，此規則可能無效） */
-/* 實際清除應在 LoginPage.module.css 中進行 */
 .privacyNotice {
   border: 1px solid rgba(0, 191, 255, 0.2) !important;
   outline: none !important;
@@ -192,23 +684,21 @@ a:active {
 }
 
 /* ============================================================
-   終極導覽列淨化：強力覆蓋 UI 框架預設值
-   確保導覽列本身及其所有包裝層都是透明水晶感
+   🧭 終極導覽列淨化：強力覆蓋 UI 框架預設值
    ============================================================ */
-/* 確保導覽列本身及其所有包裝層都是透明水晶感 */
 nav[style*='position: fixed'],
 .bottomNavBar,
 .bottomNavBar-wrapper,
 .MuiBottomNavigation-root,
 [class*='bottom-nav'],
 [class*='BottomNav'] {
-  background: rgba(5, 5, 5, 0.85) !important;
-  background-color: rgba(5, 5, 5, 0.85) !important; /* 二重保護 */
-  backdrop-filter: blur(16px) saturate(180%) !important;
-  -webkit-backdrop-filter: blur(16px) saturate(180%) !important;
+  background: var(--mg-panel-bg-dark) !important;
+  background-color: var(--mg-panel-bg-dark) !important;
+  backdrop-filter: blur(16px) saturate(var(--mg-backdrop-saturate)) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(var(--mg-backdrop-saturate)) !important;
 }
 
-/* ⚡ 降級開關：移動端性能優化 - 降低 backdrop-filter 模糊樣本數 */
+/* 移動端性能優化 - 降低 backdrop-filter 模糊樣本數 */
 @media (max-width: 768px) {
   nav[style*='position: fixed'],
   .bottomNavBar,
@@ -216,294 +706,75 @@ nav[style*='position: fixed'],
   .MuiBottomNavigation-root,
   [class*='bottom-nav'],
   [class*='BottomNav'] {
-    backdrop-filter: blur(8px) saturate(180%) !important;
-    -webkit-backdrop-filter: blur(8px) saturate(180%) !important;
+    backdrop-filter: blur(var(--mg-panel-blur-mobile)) saturate(var(--mg-backdrop-saturate)) !important;
+    -webkit-backdrop-filter: blur(var(--mg-panel-blur-mobile)) saturate(var(--mg-backdrop-saturate)) !important;
   }
 }
 
 /* ============================================================
-   魔導大一統：全域標題 CSS (Magitek Grand Unification)
-   將超頻定稿樣式遷移至全域，供所有頁面使用
+   📝 基礎樣式
    ============================================================ */
-/* 全域魔導標題規範 - 超頻定稿版本 */
-.magitek-header {
-  font-family: 'Cinzel Decorative', 'Noto Serif TC', serif !important;
-  font-weight: 900 !important;
-  letter-spacing: 0.5rem !important;
-  text-align: center;
-  text-transform: uppercase;
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
+}
 
-  /* 字體渲染優化：確保文字清晰銳利 */
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  text-rendering: optimizeLegibility;
-
-  /* 核心超頻漸層 - 白光佔比拉高到 75%，確保字體完全不暗沉 */
-  background: linear-gradient(180deg, #ffffff 0%, #ffffff 75%, #ff8c00 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-
-  /* Fallback：如果漸層不工作，使用純白確保文字可見 */
-  color: #ffffff;
-
-  /* 濾鏡爆發感 - 小幅增加亮度與飽和度，讓金橘色像火燄一樣燃燒 */
-  filter: brightness(1.2) saturate(1.3) !important;
-
-  /* 晶體切割投影系統 - 加入「極高光」白核，解決模糊感 */
-  text-shadow: 0 0 2px rgba(255, 255, 255, 1),
-    /* 第一層：絕對白核，解決模糊感 */ 0 0 5px rgba(255, 140, 0, 0.9),
-    /* 第二層：核心金光邊緣 */ 0 0 15px rgba(255, 69, 0, 0.5),
-    /* 第三層：能量場氛圍 */ 0 0 30px rgba(255, 69, 0, 0.2); /* 第四層：遠程 Bloom */
 }
 
 /* ============================================================
-   ⚡ 強制修正：徹底清場背景 - 實現「星空穿透」
-   移除所有組件層級的不透明背景
-   V4.1: 物理層級清場 - 支援新舊 ID 兼容性
+   ⚡ V4.2 全域架構檢診：權重奪回戰 (CSS Specificity - Absolute Airspace)
+   在 index.css 最下方建立「絕對領空區」，用最暴力的選擇器一次定義好寬度與捲動權限
    ============================================================ */
-/* 移除所有中間層級的背景顏色 */
-#layer-hud,
-#layer-content,
-#layer-scroll-content,
-.topStatusHud {
-  background: transparent !important;
-  background-color: transparent !important;
-}
-
-/* 確保捲動層下的主要容器背景透明 */
-#layer-content .main-content,
-#layer-content .app-container,
-#layer-scroll-content .main-content,
-#layer-scroll-content .app-container {
-  background: transparent !important;
-  background-color: transparent !important;
-}
-
-/* 優化卡片透視：確保卡片背景為半透明，讓星域與邊框的全像感透出 */
-/* 注意：卡片玻璃化樣式已在各組件 CSS 中統一實作，此處僅作為備註 */
-
-/* 確保內容區域不會阻擋背景層 */
-#layer-content > *,
-#layer-scroll-content > * {
-  /* 確保直接子元素背景透明 */
-  background: transparent !important;
-  background-color: transparent !important;
-}
-
 /* ============================================================
-   ⚡ 暴力全域覆蓋：最高優先級強制擊穿所有層級
-   這不是建議，是「強制覆蓋」
+   V12.7 修復：排除 #layer-scroll-content 從 100vw 規則
+   讓 UserInfoV5.css 的寬度和邊距設定能夠生效
    ============================================================ */
-
-/* 1. 物理邊界徹底重置 (Force Full-Screen Fit) */
-/* 目的：解決影片 00:00 秒邊框沒貼齊螢幕的問題 */
-/* 強制將所有頂層容器歸零，不准留任何 Padding 或 Margin */
-html, body, #root, .App, [class*='magitek-terminal-root'] {
-  padding: 0 !important;
-  margin: 0 !important;
-  width: 100vw !important;
-  height: 100vh !important;
-  max-width: 100vw !important;
-  overflow: hidden !important; /* 徹底鎖死整頁捲動，防止 HUD 跟著滑 */
-}
-
-/* 2. 全域透明化與「去黑塊」 (The Starfield Reveal) */
-/* 目的：解決影片 00:15 秒看到的黑塊遮蔽問題，讓星空底圖現身 */
-/* 強制擊穿所有帶有背景色的容器 */
-/* V4.1: 物理層級清場 - 支援新舊 ID 兼容性 */
-#layer-hud, #layer-content, #layer-scroll-content, [class*='topStatusHud'], [class*='container'] {
-  background: transparent !important;
-  background-color: transparent !important;
-}
-
-/* 濾色技術：這是讓星空透出來的唯一關鍵 */
-[class*='layerContent']::before, [class*='topStatusHud'] {
-  mix-blend-mode: screen !important; /* 強制濾掉素材中的純黑背景 */
-  pointer-events: none !important;
-}
-
-/* 3. 大頭照「靈能置頂」 (Avatar Z-Index Nuke) */
-/* 目的：解決「大頭照被星空底圖遮蔽」問題 */
-/* 強制提升頭像所在的整個區塊層級，不論它的父層在哪 */
-[class*='avatar-section'], .avatar-section {
-  position: fixed !important;
-  z-index: 999999 !important; /* 全 App 最高權重 */
-  visibility: visible !important;
-  opacity: 1 !important;
-  /* ⚡ B. 擊穿隱形盒子：確保所有父層都不會切掉頭像 */
-  overflow: visible !important;
-}
-
-/* ⚡ 1. 擊穿父容器限制：移除所有容器的寬度限制，強制填滿物理螢幕 */
-#root, .app-container, [class*='container'] {
-  width: 100vw !important;
-  max-width: 100vw !important;
-  margin-left: 0 !important;
-  margin-right: 0 !important;
-  padding-left: 0 !important;
-  padding-right: 0 !important;
-}
-
-/* ⚡ B. 擊穿隱形盒子：強制所有可能包含頭像的父層容器為 overflow: visible */
-.user-info-container,
-.user-info-identity,
-.app-container,
-.main-content,
-#layer-content {
-  overflow: visible !important;
-}
-
 /* ============================================================
-   ⚡ 突破最後的邊界：高成功率組合指令
+   V12.7 修復：排除 #layer-scroll-content 從 100vw 規則
+   讓 UserInfoV5.css 的寬度和邊距設定能夠生效
    ============================================================ */
-
-/* 2. 強制全域重置：擊穿所有帶有 Max-Width 的容器 */
-/* ⚡ 擊穿寬度與捲動鎖定：解決 max-width: 390px 與 overflow: hidden 的死結 */
-html, body, #root, [class*='container'], [class*='app-container'] {
-  width: 100vw !important;
-  max-width: none !important; /* ⚡ 擊穿 390px 限制 */
-  min-width: 100vw !important;
-  padding: 0 !important;
-  margin: 0 !important;
-  overflow: hidden !important; /* 鎖死外殼 */
+/* ⚡ 絕對領空區：使用最暴力的選擇器確保寬度與捲動權限 */
+/* ⚡ V12.7: 完全排除 #layer-scroll-content 本身，只對子元素應用規則 */
+/* 這樣 UserInfoV5.css 的樣式才能生效 */
+#layer-master-root #layer-scroll-content > *,
+#root #layer-master-root #layer-scroll-content > * {
+  box-sizing: border-box !important;
 }
 
-/* ============================================================
-   V4.1: 鎖定外殼，釋放數據流
-   ============================================================ */
-
-/* 鎖定外殼：html, body 不准動 */
-html, body {
-  overflow: hidden !important;
-}
-
-/* 釋放數據流：唯一捲動層 */
-/* ⚡ 強制解鎖捲動層：數據顯示此處目前為 hidden，必須強制轉為 auto */
-#layer-scroll-content {
-  display: block !important;
-  position: absolute !important;
-  inset: 0 !important;
-  height: 100vh !important;
-  overflow-y: auto !important; /* ⚡ 數據顯示此處目前為 hidden，必須強制轉為 auto */
-  overflow-x: hidden !important;
-  -webkit-overflow-scrolling: touch !important;
-  z-index: 10 !important;
-  padding-top: 130px !important;
-  
-  /* 確保可以接收觸摸事件 */
-  pointer-events: auto !important;
-}
-
-/* 確保卷動層內部的所有直接子元素都可以接收事件 */
-#layer-scroll-content > * {
-  pointer-events: auto !important;
-  width: 100% !important;
-  /* 確保卡片不使用 absolute 定位，讓它們在捲動層內自動排列 */
+/* ⚡ 絕對領空區：確保捲動權限 */
+#layer-master-root #layer-scroll-content {
   position: relative !important;
-}
-
-/* 終端邊框：固定不動，濾除黑邊 */
-/* ⚡ 靈能流動校準：解鎖滑動感應 + 徹底去黑塊 */
-/* ⚡ 確保邊框置頂且不擋觸控 */
-#layer-terminal-frame {
-  position: fixed !important;
-  inset: 0 !important;
-  /* ⚡ 1. 解鎖滑動感應：確保邊框不阻擋觸摸事件 */
-  pointer-events: none !important; /* ⚡ 關鍵：讓手指能穿透此層滑動下方內容 */
-  /* ⚡ 2. 徹底去黑塊：濾除 PNG 素材的黑底 */
-  mix-blend-mode: screen !important;
-  z-index: 9999 !important; /* ⚡ 確保在最頂層 */
-  border-style: solid;
-  border-width: 40px;
-  border-image: url('/images/magitek_hud_frame_9slice.png') 60 fill !important;
-  background: transparent !important;
-  background-color: transparent !important;
-}
-
-/* 背景層：唯一星空背景 */
-/* ⚡ 靈能流動校準：確保背景層是真正的最低層 */
-#layer-master-bg {
-  position: fixed !important;
-  inset: 0 !important;
-  /* ⚡ 2. 徹底去黑塊：確保 z-index 是真正的最低層 */
-  z-index: -100 !important;
-  pointer-events: none !important;
-  background-image: url('/images/magitek_bg_layer1_v2.png');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-}
-
-/* HUD 狀態層：頂部狀態列與頭像 */
-/* ⚡ 靈能流動校準：解鎖滑動感應 + 徹底去黑塊 */
-#layer-hud-status {
-  position: fixed !important;
-  inset: 0 !important;
-  z-index: 1000 !important;
-  /* ⚡ 1. 解鎖滑動感應：確保 HUD 層不阻擋觸摸事件 */
-  pointer-events: none !important;
-}
-
-/* 只有頭像等需要交互的元素才啟用 pointer-events */
-#layer-hud-status > * {
+  height: auto !important;
+  min-height: 105vh !important;
+  overflow-y: visible !important;
+  overflow-x: hidden !important;
+  padding-top: calc(140px + env(safe-area-inset-top, 0px)) !important;
+  z-index: 1000 !important;          /* ⚡ 讓它與 HUD 層平起平坐，確保滑動不被攔截 */
   pointer-events: auto !important;
 }
 
-/* ⚡ 2. 徹底去黑塊：為所有帶有 background-image 的 HUD 組件強制添加 mix-blend-mode */
-#layer-hud-status [class*='topStatusHud'],
+/* ⚡ V4.2 結構性微調 2: 頭像座標降階 (Status Bar Buffer) */
+/* 為了保留狀態列空間，手動增加 top 數值 */
+.avatar-section {
+  /* ⚡ 手動向下移動以避開攝像頭與狀態列 */
+  top: calc(env(safe-area-inset-top, 0px) + 25px) !important;
+  left: 15px !important;
+  pointer-events: auto !important;
+  z-index: 1001 !important;          /* ⚡ 確保頭像與 HUD 按鈕依然在最上層 */
+}
+
+/* ⚡ HUD 安全區補償 */
 #layer-hud-status .topStatusHud,
 .topStatusHud {
-  mix-blend-mode: screen !important;
+  padding-top: calc(var(--mg-safe-area-top, 0px) + env(safe-area-inset-top, 44px)) !important;
 }
 
-/* ============================================================
-   V4.1: 魔導玻璃規範 (Glassmorphism Standard)
-   ============================================================ */
-.magitek-panel {
-  background: rgba(0, 10, 30, 0.4) !important;
-  backdrop-filter: blur(12px) !important;
-  -webkit-backdrop-filter: blur(12px) !important;
-  border: 1px solid rgba(0, 191, 255, 0.4) !important;
-  border-radius: 16px;
-}
-
-/* ⚡ 3. 修正換頁崩潰：確保所有卡片在捲動層內正確排列 */
-/* 確保所有內容卡片（Card）寬度為 100%，且不帶有任何 absolute 定位 */
-#layer-scroll-content [class*='card'],
-#layer-scroll-content [class*='Card'],
-#layer-scroll-content [class*='panel'],
-#layer-scroll-content [class*='Panel'],
-#layer-scroll-content .magitek-panel {
-  width: 100% !important;
-  position: relative !important;
-  /* 確保卡片不會使用 absolute 定位，讓它們在捲動層內自動排列 */
-  left: auto !important;
-  right: auto !important;
-  top: auto !important;
-  bottom: auto !important;
-}
-
-/* ⚡ 1. 釋放滑動層：強制恢復 #layer-content 的垂直滑動（保留舊 ID 兼容性） */
-/* ⚡ 強制解鎖捲動層：數據顯示此處目前為 hidden，必須強制轉為 auto */
-#layer-content {
-  display: block !important;
-  position: absolute !important;
-  inset: 0 !important;
-  height: 100vh !important;
-  overflow-y: auto !important; /* ⚡ 數據顯示此處目前為 hidden，必須強制轉為 auto */
-  overflow-x: hidden !important;
-  -webkit-overflow-scrolling: touch !important;
-  z-index: 20 !important;
-  padding-top: 130px !important;
-  
-  /* 確保可以接收觸摸事件 */
-  pointer-events: auto !important;
-}
-
-/* 確保舊 ID 卷動層內部的所有直接子元素都可以接收事件 */
-#layer-content > * {
-  pointer-events: auto !important;
-  width: 100% !important;
-  position: relative !important;
+/* ⚡ V4.2 結構性微調 3: 確保頭像與 HUD 按鈕依然在最上層 */
+.topStatusHud button,
+#layer-hud-status button {
+  z-index: 1001 !important;          /* ⚡ 確保 HUD 按鈕在最上層 */
 }

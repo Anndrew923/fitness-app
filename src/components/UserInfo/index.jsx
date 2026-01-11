@@ -675,22 +675,17 @@ function UserInfo({ testData, onLogout, clearTestData }) {
   // ✅ 修改：顯示全屏載入動畫，直到頁面準備好
   if (!isPageReady) {
     return (
-      <div className="user-info-container page-loading">
-        <div className="full-page-loader">
-          <div className="loading-spinner-large"></div>
-          <p className="loading-text">{t('common.loading')}</p>
-        </div>
+      <div className="full-page-loader">
+        <div className="loading-spinner-large"></div>
+        <p className="loading-text">{t('common.loading')}</p>
       </div>
     );
   }
 
-  // ✅ 修改：頁面準備好後，一次性顯示所有內容（帶淡入動畫）
-  // ✅ 修復：強制設置 opacity 確保內容可見，避免動畫未執行時內容不可見
+  // ⚡ V4.2 毀滅性修正 3: 恢復「首頁」滑動權限
+  // 刪除最外層的 .user-info-container，讓雷達圖和卡片直接暴露在 #layer-scroll-content 之下
   return (
-    <div
-      className={`user-info-container page-ready performance-mode-${performanceMode}`}
-      style={{ opacity: 1 }}
-    >
+    <>
       {/* 右上角按鈕組 */}
       <div
         className="user-info__top-actions"
@@ -1057,7 +1052,7 @@ function UserInfo({ testData, onLogout, clearTestData }) {
           100% { box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4); }
         }
       `}</style>
-    </div>
+    </>
   );
 }
 

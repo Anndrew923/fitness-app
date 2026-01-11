@@ -9,20 +9,13 @@
   --transition-duration: 0.3s;
 }
 
-/* 主容器 - Phase 2: 魔導終端重組 */
-/* ⚡ 1. 擊穿父容器限制：移除所有寬度限制，強制填滿物理螢幕 */
+/* ⚡ V4.1 Final: 全域清場 - 移除所有硬編碼樣式 */
+/* 主容器 - 寬度 100% 填滿 #layer-scroll-content，預設透明 */
 .user-info-container {
-  /* ⚡ 1. 擊穿父容器限制：移除所有寬度限制，強制填滿物理螢幕 */
-  width: 100vw !important;
-  max-width: 100vw !important;
-  margin: 0 auto !important;
-  margin-left: 0 !important;
-  margin-right: 0 !important;
+  width: 100% !important;             /* ⚡ 填滿 #layer-scroll-content */
   padding: 0 !important;
-  padding-left: 0 !important;
-  padding-right: 0 !important;
   min-height: 100vh;
-  /* ⚡ Phase 2: 背景徹底清場 - 完全透明，露出底層星域 */
+  /* ⚡ 背景徹底清場 - 完全透明，露出底層星域 */
   background: transparent !important;
   background-color: transparent !important;
   position: relative;

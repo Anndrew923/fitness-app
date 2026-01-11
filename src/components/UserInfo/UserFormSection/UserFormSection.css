@@ -1,8 +1,10 @@
-/* ⚡ Phase 2: 表單卡片 - 魔導化 */
+/* ⚡ V4.1 Final: 全域清場 - 卡片預設透明，寬度 100% 填滿 */
 /* ⚡ 組件玻璃化樣式：統一玻璃化規範 */
 .form-card {
-  /* 魔導背景：深藍透明 + 磨砂玻璃 */
-  background: rgba(0, 10, 30, 0.4) !important;
+  width: 100% !important;             /* ⚡ 寬度 100% 填滿 #layer-scroll-content */
+  /* ⚡ 背景徹底清場 - 預設透明，露出底層星域 */
+  background: transparent !important;
+  background-color: transparent !important;
   backdrop-filter: blur(12px) !important;
   -webkit-backdrop-filter: blur(12px) !important;
   border-radius: 20px;

@@ -1,11 +1,13 @@
 /* 表單相關樣式 */
 
-/* ⚡ Phase 2: 表單卡片 - 白瓷掃除：魔導化 */
+/* ⚡ V4.1 Final: 全域清場 - 卡片預設透明，寬度 100% 填滿 */
 .form-card {
-  /* 魔導背景：深藍透明 + 磨砂玻璃 */
-  background: rgba(0, 10, 30, 0.4);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  width: 100% !important;             /* ⚡ 寬度 100% 填滿 #layer-scroll-content */
+  /* ⚡ 背景徹底清場 - 預設透明，露出底層星域 */
+  background: transparent !important;
+  background-color: transparent !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
   border-radius: 20px;
   padding: 20px;
   margin-bottom: 20px;

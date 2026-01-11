@@ -38,6 +38,20 @@
 
     <!-- AdSense 腳本已移至動態載入，避免 CSP 衝突 -->
     <title>最強肉體</title>
+    
+    <!-- ⚡ V6.1 物理剝離：強制「物理擊穿」 -->
+    <!-- 在 head 最末端插入 style 標籤，這是權重最高的地方 -->
+    <style>
+      #root, #layer-master-root, #layer-terminal-frame, #layer-hud-status {
+        width: 100vw !important;
+        height: 100vh !important;
+        max-width: none !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        left: 0 !important;
+        top: 0 !important;
+      }
+    </style>
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
