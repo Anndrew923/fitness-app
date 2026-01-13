@@ -24,20 +24,8 @@ const BasicInfoForm = ({
             onMouseEnter={e => {
               const tooltip = document.createElement('div');
               tooltip.innerText = '登出';
-              Object.assign(tooltip.style, {
-                position: 'absolute',
-                bottom: '44px',
-                left: '50%',
-                transform: 'translateX(-50%)',
-                background: 'rgba(60,60,60,0.95)',
-                color: '#fff',
-                padding: '6px 14px',
-                borderRadius: '6px',
-                fontSize: '13px',
-                whiteSpace: 'nowrap',
-                pointerEvents: 'none',
-                zIndex: '1001',
-              });
+              // ⚡ Phase 0: The Grand Purge - 移除内联样式，改用 className
+              tooltip.className = 'logout-tooltip-styled';
               tooltip.className = 'logout-tooltip';
               e.currentTarget.parentNode.appendChild(tooltip);
             }}

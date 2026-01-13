@@ -152,52 +152,54 @@
 }
 
 /* ============================================================
-   V17.0: HUD 素材 - 頂部狀態列背景
+   V6.1: HUD 素材 - 響應式百分比錨定策略
+   使用 absolute 定位，相對於 .hud-wrapper
    ============================================================ */
 .topStatusHud,
 #layer-hud-status .topStatusHud,
 [class*='topStatusHud'] {
-  background-image: url('/images/magitek_hud_v3.png') !important;
-  width: 100vw !important;
-  height: 100px !important;
-  background-size: 100% auto !important;
+  position: absolute !important; /* ⚡ V6.1: 相對於 .hud-wrapper */
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  background-image: url('/images/V6_Top_HUD_Clean.png') !important;
+  background-size: 100% 100% !important;
   background-position: center top !important;
   background-color: transparent !important;
   mix-blend-mode: normal !important;
   pointer-events: none !important;
-  z-index: 10002 !important;
-  position: fixed !important;
-  top: 0 !important;
-  left: 0 !important;
+  z-index: 1 !important; /* ⚡ V6.1: 在 .hud-wrapper 內相對定位 */
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: visible !important;
 }
 
 /* ============================================================
-   V17.0: 大頭照組件級對位 - 精準嵌入 HUD 圓框中心
-   使用 fixed 定位，不受父容器 padding/flex 影響
+   V6.1: 大頭照組件級對位 - 百分比錨定策略
+   使用百分比定位，確保在不同設備上正確對齊 HUD 圓框
    ============================================================ */
-/* ⚡ V17.0: 組件級校準 - 直接對準螢幕座標 */
+/* ⚡ V6.2: 百分比錨定 - 視覺補償定位 */
 #root #layer-master-root #layer-hud-status .avatar-section,
 #layer-master-root #layer-hud-status .avatar-section,
 #layer-hud-status .avatar-section,
 .avatar-section {
-  position: fixed !important; /* ⚡ V17.0: 使用 fixed，直接對準螢幕座標 */
-  /* ⚡ V17.0: 精確計算 HUD 圓框中心位置 */
-  /* HUD 高度 100px，圓框中心約在 50px，大頭照 80px scale(0.85) = 68px */
-  /* 所以 top = 50px - 34px = 16px，但考慮 safe-area */
-  top: calc(env(safe-area-inset-top, 44px) + 16px) !important;
-  left: 30px !important; /* ⚡ V17.0: 根據 HUD 素材圓框位置調整 */
+  position: absolute !important; /* ⚡ V6.2: absolute 相對於 .hud-wrapper */
+  /* ⚡ V6.2: 視覺補償定位 - 根據 HUD 素材實際幾何結構 */
+  left: 11.5% !important; /* ⚡ V6.2: 圓框中心實際位置，比 8% 更靠右 */
+  top: 42% !important; /* ⚡ V6.2: 提升到深色顯示區域，而非 HUD 幾何中心 */
+  transform: translate(-50%, -50%) scale(0.85) !important; /* ⚡ 完美居中並縮放 */
   width: 80px !important;
   height: auto !important;
-  /* ⚡ V17.0: 稍微縮小，完美嵌入圓框 */
-  transform: scale(0.85) !important;
+  display: block !important; /* ⚡ V6.2: 確保可見性 */
   pointer-events: auto !important;
-  z-index: 5001 !important;
+  z-index: 1001 !important; /* ⚡ V6.2: 暫時設為 1001 確保可見 */
   background: transparent !important;
   background-color: transparent !important;
   background-image: none !important;
-  /* ⚡ V17.0: 確保父容器不會影響定位 */
   margin: 0 !important;
   padding: 0 !important;
+  overflow: visible !important; /* ⚡ V6.2: 防止被裁剪 */
 }
 
 /* ⚡ V17.0: 大頭照容器 - 移除所有可能影響定位的樣式 */

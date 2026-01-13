@@ -1,0 +1,481 @@
+/* ⚡ Phase 1: Magitek Resonance Infusion - V5.5 Visual Specifications
+ * 
+ * Magitek Architecture:
+ * - Master Void: Deep space gradient background
+ * - Crystal Glassmorphism: Translucent panels with blur
+ * - Terminal Shell: Mechanical frame with gold accents
+ * - Magitek Typography: Gold labels, Blue data values, HUD glow
+ */
+
+/* ============================================================
+   Phase 1.1: Master Void - Deep Space Background
+   ⚡ HIGH SPECIFICITY: Override index.css and UserInfoV5.css
+   ============================================================ */
+#root #layer-master-bg,
+#layer-master-root #layer-master-bg,
+#layer-master-bg {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  background: radial-gradient(circle at center, #0a0a0a 0%, #050505 100%) !important;
+  background-image: none !important; /* Override index.css background-image */
+  pointer-events: none !important;
+  z-index: -100 !important; /* Match index.css z-index */
+}
+
+/* ============================================================
+   Phase 1.2: Crystal Glassmorphism Panels
+   ============================================================ */
+
+/* Radar Chart Container - Crystal Panel */
+/* ⚡ HIGH SPECIFICITY: Override all legacy styles */
+#layer-scroll-content .radar-section,
+#layer-scroll-content #radar-section,
+#layer-master-root #layer-scroll-content .radar-section,
+#root #layer-master-root #layer-scroll-content .radar-section,
+.radar-section,
+#radar-section {
+  position: relative !important;
+  margin: 20px 0 !important;
+}
+
+#layer-scroll-content .radar-card,
+#layer-scroll-content #radar-section .radar-card,
+#layer-master-root #layer-scroll-content .radar-card,
+#root #layer-master-root #layer-scroll-content .radar-card,
+.user-info-v5-container .radar-card,
+.radar-card {
+  /* Crystal Glassmorphism - FORCE OVERRIDE */
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  background: rgba(255, 255, 255, 0.03) !important;
+  background-color: rgba(255, 255, 255, 0.03) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 16px !important;
+  padding: 24px !important;
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+  position: relative !important;
+  overflow: hidden !important;
+  /* Ensure transform doesn't break backdrop-filter */
+  transform: translateZ(0) !important;
+  will-change: transform !important;
+}
+
+/* Form Card - Crystal Panel */
+/* ⚡ HIGH SPECIFICITY: Override all legacy styles */
+#layer-scroll-content .form-card,
+#layer-scroll-content #user-form-section,
+#layer-master-root #layer-scroll-content .form-card,
+#root #layer-master-root #layer-scroll-content .form-card,
+.user-info-v5-container .form-card,
+.form-card,
+#user-form-section {
+  /* Crystal Glassmorphism - FORCE OVERRIDE */
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  background: rgba(255, 255, 255, 0.03) !important;
+  background-color: rgba(255, 255, 255, 0.03) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 16px !important;
+  padding: 24px !important;
+  margin: 20px 0 !important;
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+  position: relative !important;
+  overflow: hidden !important;
+  /* Ensure transform doesn't break backdrop-filter */
+  transform: translateZ(0) !important;
+  will-change: transform !important;
+}
+
+/* Crystal Panel Hover Effect */
+.radar-card:hover,
+.form-card:hover {
+  border-color: rgba(255, 255, 255, 0.15) !important;
+  box-shadow: 
+    0 12px 40px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15),
+    0 0 20px rgba(0, 191, 255, 0.1) !important;
+}
+
+/* ============================================================
+   Phase 1.3: Terminal Shell - Mechanical Frame
+   ⚡ HIGH SPECIFICITY: Override index.css border-image
+   ============================================================ */
+#root #layer-terminal-frame,
+#layer-master-root #layer-terminal-frame,
+#layer-terminal-frame {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  pointer-events: none !important;
+  z-index: 500 !important; /* Match index.css z-index */
+  /* Override border-image from index.css */
+  border-image: none !important;
+  border-image-source: none !important;
+  border: 4px solid rgba(0, 0, 0, 0.8) !important;
+  box-sizing: border-box !important;
+}
+
+/* Mechanical Frame Corner Brackets - Top Left */
+#root #layer-terminal-frame::before,
+#layer-master-root #layer-terminal-frame::before,
+#layer-terminal-frame::before {
+  content: '' !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 40px !important;
+  height: 40px !important;
+  border-top: 3px solid #FF8C00 !important;
+  border-left: 3px solid #FF8C00 !important;
+  border-right: none !important;
+  border-bottom: none !important;
+  box-shadow: 
+    0 0 10px rgba(255, 140, 0, 0.6),
+    inset 0 0 10px rgba(255, 140, 0, 0.3) !important;
+  z-index: 501 !important;
+  pointer-events: none !important;
+}
+
+/* Mechanical Frame Corner Brackets - Top Right */
+#root #layer-terminal-frame::after,
+#layer-master-root #layer-terminal-frame::after,
+#layer-terminal-frame::after {
+  content: '' !important;
+  position: absolute !important;
+  top: 0 !important;
+  right: 0 !important;
+  width: 40px !important;
+  height: 40px !important;
+  border-top: 3px solid #FF8C00 !important;
+  border-right: 3px solid #FF8C00 !important;
+  border-left: none !important;
+  border-bottom: none !important;
+  box-shadow: 
+    0 0 10px rgba(255, 140, 0, 0.6),
+    inset 0 0 10px rgba(255, 140, 0, 0.3) !important;
+  z-index: 501 !important;
+  pointer-events: none !important;
+}
+
+/* Bottom Corner Brackets - Using additional pseudo-elements via wrapper */
+/* Note: Since we can only use ::before and ::after, we'll use a different approach */
+/* We'll create the bottom corners using box-shadow on the frame itself */
+#root #layer-terminal-frame,
+#layer-master-root #layer-terminal-frame,
+#layer-terminal-frame {
+  /* Bottom corners will be handled by additional elements if needed */
+  /* For now, we'll focus on making top corners visible */
+}
+
+/* ============================================================
+   Phase 1.4: Magitek Typography & Colors
+   ============================================================ */
+
+/* Gold Labels - Primary Text */
+/* ⚡ HIGH SPECIFICITY: Override all legacy styles */
+#layer-scroll-content .radar-title,
+#layer-scroll-content .section-title,
+#layer-scroll-content .page-title,
+#layer-scroll-content .user-info-name,
+#layer-scroll-content .user-info-v5-page-title,
+#layer-scroll-content h1,
+#layer-scroll-content h2,
+#layer-scroll-content h3,
+#layer-scroll-content .form-label,
+#layer-scroll-content label,
+#layer-scroll-content .section-header h3,
+.user-info-v5-container .radar-title,
+.user-info-v5-container .section-title,
+.user-info-v5-container .page-title,
+.user-info-v5-container .user-info-v5-page-title,
+.user-info-v5-container h1,
+.user-info-v5-container h2,
+.user-info-v5-container h3,
+.radar-title,
+.section-title,
+.page-title,
+.user-info-name,
+.user-info-v5-page-title,
+h1, h2, h3,
+.form-label,
+label,
+.section-header h3 {
+  color: #FF8C00 !important; /* Gold */
+  text-shadow: 
+    0 0 8px rgba(255, 140, 0, 0.6),
+    0 0 16px rgba(255, 140, 0, 0.3),
+    0 2px 4px rgba(0, 0, 0, 0.8) !important;
+  font-weight: 700 !important;
+}
+
+/* Blue Data Values - Spiritual Pressure */
+.score-value,
+.ladder-score,
+.rank-value,
+.completion-count,
+input[type="number"],
+input[type="text"],
+input[type="email"],
+select,
+textarea {
+  color: #00BFFF !important; /* Blue */
+  text-shadow: 
+    0 0 8px rgba(0, 191, 255, 0.6),
+    0 0 16px rgba(0, 191, 255, 0.3),
+    0 2px 4px rgba(0, 0, 0, 0.8) !important;
+}
+
+input[type="text"]:focus,
+input[type="number"]:focus,
+input[type="email"]:focus,
+select:focus,
+textarea:focus {
+  color: #00BFFF !important;
+  text-shadow: 
+    0 0 12px rgba(0, 191, 255, 0.8),
+    0 0 20px rgba(0, 191, 255, 0.4),
+    0 2px 4px rgba(0, 0, 0, 0.8) !important;
+}
+
+/* HUD Glow for all text */
+body,
+#layer-scroll-content {
+  text-shadow: 0 0 4px rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Secondary text with subtle glow */
+.page-subtitle,
+.section-description,
+.form-hint,
+.field-hint {
+  color: rgba(255, 255, 255, 0.7) !important;
+  text-shadow: 
+    0 0 4px rgba(255, 255, 255, 0.2),
+    0 1px 2px rgba(0, 0, 0, 0.6) !important;
+}
+
+/* ============================================================
+   Phase 1.5: Scroll Content Layer
+   ⚡ HIGH SPECIFICITY: Override index.css
+   ============================================================ */
+#root #layer-master-root #layer-scroll-content,
+#layer-master-root #layer-scroll-content,
+#layer-scroll-content {
+  position: relative !important;
+  min-height: 100vh !important;
+  width: 100% !important;
+  padding: 20px !important;
+  z-index: 100 !important; /* Match index.css z-index */
+  color: rgba(255, 255, 255, 0.9) !important;
+  /* Ensure backdrop-filter works on children */
+  transform: translateZ(0) !important;
+  will-change: scroll-position !important;
+}
+
+/* ============================================================
+   Phase 1.6: HUD Status Layer (Placeholder)
+   ⚡ HIGH SPECIFICITY: Override index.css
+   ============================================================ */
+#root #layer-master-root #layer-hud-status,
+#layer-master-root #layer-hud-status,
+#layer-hud-status {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  height: 100px !important;
+  pointer-events: none !important;
+  z-index: 5000 !important; /* Match index.css z-index */
+  background: transparent !important;
+}
+
+/* ============================================================
+   Phase 1.7: Input Fields - Magitek Style
+   ============================================================ */
+.form-input,
+input[type="text"],
+input[type="number"],
+input[type="email"],
+select,
+textarea {
+  background: rgba(0, 0, 0, 0.3) !important;
+  border: 1px solid rgba(255, 140, 0, 0.3) !important;
+  border-radius: 8px !important;
+  color: #00BFFF !important;
+  padding: 12px !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+  transition: all 0.3s ease !important;
+}
+
+.form-input:focus,
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: #FF8C00 !important;
+  box-shadow: 
+    0 0 12px rgba(255, 140, 0, 0.4),
+    inset 0 0 8px rgba(255, 140, 0, 0.1) !important;
+  outline: none !important;
+}
+
+/* ============================================================
+   Phase 1.8: Buttons - Magitek Style
+   ============================================================ */
+button,
+.submit-btn,
+.action-btn {
+  background: rgba(255, 140, 0, 0.2) !important;
+  border: 1px solid #FF8C00 !important;
+  color: #FF8C00 !important;
+  border-radius: 8px !important;
+  padding: 12px 24px !important;
+  font-weight: 700 !important;
+  text-shadow: 0 0 8px rgba(255, 140, 0, 0.6) !important;
+  box-shadow: 
+    0 4px 12px rgba(0, 0, 0, 0.3),
+    0 0 8px rgba(255, 140, 0, 0.2) !important;
+  transition: all 0.3s ease !important;
+  cursor: pointer !important;
+}
+
+button:hover,
+.submit-btn:hover,
+.action-btn:hover {
+  background: rgba(255, 140, 0, 0.3) !important;
+  box-shadow: 
+    0 6px 16px rgba(0, 0, 0, 0.4),
+    0 0 12px rgba(255, 140, 0, 0.4) !important;
+  transform: translateY(-2px) !important;
+}
+
+button:active,
+.submit-btn:active,
+.action-btn:active {
+  transform: translateY(0) !important;
+}
+
+/* ============================================================
+   Phase 1.9: Additional Component Styling
+   ============================================================ */
+
+/* User Identity Section */
+.user-info-identity {
+  margin-bottom: 24px !important;
+}
+
+.user-info-name {
+  font-size: 28px !important;
+  margin-bottom: 12px !important;
+}
+
+.rpg-class-badge-inline {
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+  background: rgba(255, 140, 0, 0.1) !important;
+  border: 1px solid rgba(255, 140, 0, 0.3) !important;
+  color: #FF8C00 !important;
+}
+
+/* Ladder Status Module */
+.ladder-status-wrapper {
+  margin-bottom: 24px !important;
+}
+
+.ladder-potential-label {
+  color: rgba(255, 255, 255, 0.7) !important;
+  text-shadow: 0 0 4px rgba(255, 255, 255, 0.2) !important;
+}
+
+.ladder-potential-score {
+  color: #00BFFF !important;
+  text-shadow: 
+    0 0 8px rgba(0, 191, 255, 0.6),
+    0 0 16px rgba(0, 191, 255, 0.3) !important;
+}
+
+.ladder-potential-upgrade-btn {
+  background: rgba(255, 140, 0, 0.2) !important;
+  border: 1px solid #FF8C00 !important;
+  color: #FF8C00 !important;
+  box-shadow: 0 0 8px rgba(255, 140, 0, 0.3) !important;
+}
+
+/* Action Toolbar */
+.action-toolbar {
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  background: rgba(255, 255, 255, 0.03) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.action-toolbar-btn {
+  background: rgba(255, 140, 0, 0.15) !important;
+  border: 1px solid rgba(255, 140, 0, 0.3) !important;
+  color: #FF8C00 !important;
+}
+
+.action-toolbar-btn:hover {
+  background: rgba(255, 140, 0, 0.25) !important;
+  border-color: rgba(255, 140, 0, 0.5) !important;
+  box-shadow: 0 0 12px rgba(255, 140, 0, 0.4) !important;
+}
+
+/* Page Header */
+.page-header {
+  text-align: center !important;
+  margin-bottom: 24px !important;
+}
+
+.page-subtitle {
+  color: rgba(255, 255, 255, 0.6) !important;
+  text-shadow: 0 0 4px rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Form Sections */
+.form-section {
+  margin-bottom: 24px !important;
+}
+
+.section-header {
+  margin-bottom: 16px !important;
+}
+
+/* ============================================================
+   Responsive Adjustments
+   ============================================================ */
+@media (max-width: 768px) {
+  #layer-scroll-content {
+    padding: 15px !important;
+  }
+  
+  .radar-card,
+  .form-card {
+    padding: 16px !important;
+    border-radius: 12px !important;
+  }
+  
+  #layer-terminal-frame::before,
+  #layer-terminal-frame::after {
+    width: 30px;
+    height: 30px;
+    border-width: 2px;
+  }
+  
+  .user-info-name {
+    font-size: 24px !important;
+  }
+}

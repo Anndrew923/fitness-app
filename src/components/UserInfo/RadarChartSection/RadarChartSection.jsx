@@ -342,7 +342,7 @@ const RadarChartSection = ({ scores, loading, t }) => {
         <h2 className="radar-title">{t('userInfo.radarOverview')}</h2>
 
         {/* SVG defs */}
-        <svg style={{ position: 'absolute', width: 0, height: 0 }}>
+        <svg className="radar-svg-defs">
           <defs>
             <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
               <feGaussianBlur stdDeviation="3" result="coloredBlur" />
@@ -351,6 +351,7 @@ const RadarChartSection = ({ scores, loading, t }) => {
                 <feMergeNode in="SourceGraphic" />
               </feMerge>
             </filter>
+            {/* ⚡ Phase 1: Magitek Gradient - Semi-transparent Blue */}
             <linearGradient
               id="tiffanyGradient"
               x1="0%"
@@ -358,9 +359,9 @@ const RadarChartSection = ({ scores, loading, t }) => {
               x2="100%"
               y2="100%"
             >
-              <stop offset="0%" stopColor="#81D8D0" stopOpacity={0.9} />
-              <stop offset="50%" stopColor="#5F9EA0" stopOpacity={0.7} />
-              <stop offset="100%" stopColor="#81D8D0" stopOpacity={0.6} />
+              <stop offset="0%" stopColor="#00BFFF" stopOpacity={0.5} />
+              <stop offset="50%" stopColor="#0099CC" stopOpacity={0.4} />
+              <stop offset="100%" stopColor="#00BFFF" stopOpacity={0.3} />
             </linearGradient>
             {/* 🔥 Limit Break: 覺醒狀態漸變（金色/紅色） */}
             <linearGradient
@@ -386,7 +387,7 @@ const RadarChartSection = ({ scores, loading, t }) => {
             >
               <PolarGrid
                 gridType="polygon"
-                stroke="rgba(129, 216, 208, 0.25)"
+                stroke="rgba(255, 140, 0, 0.25)"
                 strokeWidth={2}
                 strokeDasharray="4 4"
               />
@@ -408,7 +409,7 @@ const RadarChartSection = ({ scores, loading, t }) => {
                 tickCount={5}
                 tick={{
                   fontSize: 12,
-                  fill: '#2d3748',
+                  fill: '#FF8C00',
                   fontWeight: 600,
                   fontFamily:
                     "'JetBrains Mono', 'Courier New', 'Monaco', monospace",
@@ -416,17 +417,16 @@ const RadarChartSection = ({ scores, loading, t }) => {
                 }}
                 axisLine={false}
               />
-              {/* 🔥 Limit Break: 允許數據溢出網格，動態變色 */}
+              {/* ⚡ Phase 1: Magitek Radar - Semi-transparent Blue fill with Gold stroke */}
               <Radar
                 name={t('userInfo.yourPerformance')}
                 dataKey="value"
-                stroke={isLimitBreak ? limitBreakColor : '#81D8D0'}
-                fill={`url(#${gradientId})`}
-                fillOpacity={isLimitBreak ? 0.6 : 0.8}
-                strokeWidth={isLimitBreak ? 5 : 4}
+                stroke={isLimitBreak ? limitBreakColor : '#FF8C00'}
+                fill="rgba(0, 191, 255, 0.4)"
+                fillOpacity={isLimitBreak ? 0.6 : 0.4}
+                strokeWidth={isLimitBreak ? 5 : 3}
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                // 允許數據超出 domain，實現溢出效果
                 isAnimationActive={true}
               />
             </RadarChart>

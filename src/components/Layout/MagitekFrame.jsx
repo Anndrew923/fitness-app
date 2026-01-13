@@ -36,9 +36,14 @@ function MagitekFrame({ children, className = '', extraChildren, avatarSection }
       
       {/* Layer 5: 頂部 HUD 與頭像 (z: 5000) - 必加 pointer-events: none; */}
       <div id="layer-hud-status">
-        {/* 頭像移入此層，精準對位 HUD 圓形槽位 */}
-        {avatarSection}
-        <div className={styles.topStatusHud}></div>
+        {/* ⚡ V6.1: 響應式包裝器 - 百分比錨定策略 */}
+        <div className={styles.hudWrapper}>
+          {/* 頭像移入此層，精準對位 HUD 圓形槽位 */}
+          {avatarSection}
+          <div className={styles.topStatusHud}>
+            <span className={styles.systemReadyText}>SYSTEM: READY</span>
+          </div>
+        </div>
       </div>
       
       {/* 額外子元素（如 BottomNavBar）直接作為 container 的子元素 */}

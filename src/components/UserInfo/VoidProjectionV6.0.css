@@ -1,0 +1,647 @@
+/* ⚡ V6.0: The Void Projection - NUCLEAR TRANSPARENCY OVERRIDE
+ * 
+ * Architecture:
+ * - BG Layer: z-index -100 (Master Void)
+ * - Content Layer: z-index 10 (Floating Data)
+ * - Terminal Frame: z-index 500 (Middle Layer)
+ * - HUD Mask: z-index 1000 (Top Layer)
+ * 
+ * Principles:
+ * - NO backgrounds, NO backdrop-filter, NO borders
+ * - Data floats directly on #layer-master-bg
+ * - 1px emissive lines for structure
+ * - Holographic text-shadows for legibility
+ * - NO 40px heavy armor constraints
+ * 
+ * ⚡ CRITICAL: This file MUST load AFTER UserInfoV5.css to override
+ * ⚡ NUCLEAR: Global transparency override for ALL containers
+ */
+
+/* ============================================================
+   V6.0.1: Master Void Background (Already in index.css)
+   ============================================================ */
+#root #layer-master-root #layer-master-bg,
+#layer-master-root #layer-master-bg,
+#layer-master-bg {
+  z-index: -100 !important; /* V6.0 Sandwich Architecture */
+}
+
+/* ============================================================
+   V6.0.2: Content Layer - Pure Transparency
+   ============================================================ */
+#root #layer-master-root #layer-scroll-content,
+#layer-master-root #layer-scroll-content,
+#layer-scroll-content {
+  position: relative !important;
+  min-height: 100vh !important;
+  width: 100% !important;
+  max-width: none !important;
+  /* ⚡ V6.0: Remove ALL padding/margin constraints - Complete Space Release */
+  padding: 0 !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  padding-inline: 0 !important;
+  margin: 0 !important;
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  margin-inline: 0 !important;
+  /* Remove any calc() that includes 40px */
+  z-index: 10 !important; /* V6.0 Sandwich Architecture: BG (-100), Content (10), HUD (1000) */
+  color: rgba(255, 255, 255, 0.95) !important;
+  /* NO background, NO backdrop-filter - Complete Transparency Purge */
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* ============================================================
+   V6.0.2.1: GLOBAL TRANSPARENCY OVERRIDE - Nuclear Force
+   ⚡ EXECUTE THE VOID: Every container MUST be 100% see-through
+   ============================================================ */
+#layer-scroll-content div,
+#layer-scroll-content section,
+#layer-scroll-content article,
+#layer-scroll-content aside,
+#layer-scroll-content main,
+#layer-scroll-content header,
+#layer-scroll-content footer,
+#layer-scroll-content nav,
+#layer-scroll-content span,
+#layer-scroll-content p,
+#layer-scroll-content * {
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  filter: none !important;
+  /* Force 100% see-through - NO dark tints, NO grey overlays */
+  opacity: 1 !important;
+}
+
+/* Exception: Only allow text and essential content, NO containers */
+#layer-scroll-content *:not(script):not(style):not(svg):not(canvas):not(img):not(video) {
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+}
+
+/* Force ALL pseudo-elements transparent */
+#layer-scroll-content *::before,
+#layer-scroll-content *::after {
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  /* Exception: Only allow emissive lines (1px gradients) - handled separately */
+}
+
+/* Override #layer-glass-panel from UserInfoV5.css line 70-91 */
+#layer-glass-panel {
+  display: none !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* Override any rgba backgrounds that create dark tints */
+#layer-scroll-content *[style*="background"],
+#layer-scroll-content *[style*="rgba"] {
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
+/* ============================================================
+   V6.0.3: Transparency Purge - Remove ALL backgrounds/borders
+   ============================================================ */
+
+/* Radar Card - Complete Transparency - 100% SEE-THROUGH */
+#layer-scroll-content .radar-section,
+#layer-scroll-content #radar-section,
+#layer-master-root #layer-scroll-content .radar-section,
+#root #layer-master-root #layer-scroll-content .radar-section,
+.user-info-v5-container .radar-section,
+.user-info-v5-radar-section,
+.radar-section,
+#radar-section {
+  position: relative !important;
+  margin: 0 !important;
+  padding: 20px 0 !important; /* Only vertical, NO horizontal */
+  padding-inline: 0 !important;
+  width: 100% !important;
+  max-width: none !important;
+  /* ⚡ V6.0: Complete transparency purge - 100% see-through */
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  /* NO dark tints, NO grey overlays */
+}
+
+#layer-scroll-content .radar-card,
+#layer-scroll-content #radar-section .radar-card,
+#layer-master-root #layer-scroll-content .radar-card,
+#root #layer-master-root #layer-scroll-content .radar-card,
+.user-info-v5-container .radar-card,
+.radar-card {
+  /* ⚡ V6.0: Complete transparency purge - 100% see-through */
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  width: 100% !important;
+  max-width: none !important;
+  /* NO dark tints, NO grey overlays - Pure void */
+}
+
+/* Form Card - Complete Transparency - 100% SEE-THROUGH */
+#layer-scroll-content .form-card,
+#layer-scroll-content #user-form-section,
+#layer-master-root #layer-scroll-content .form-card,
+#root #layer-master-root #layer-scroll-content .form-card,
+.user-info-v5-container .form-card,
+.form-card,
+#user-form-section {
+  /* ⚡ V6.0: Complete transparency purge - 100% see-through */
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  padding: 20px 0 !important; /* Only vertical, NO horizontal */
+  padding-inline: 0 !important;
+  margin: 0 !important;
+  width: 100% !important;
+  max-width: none !important;
+  /* NO dark tints, NO grey overlays - Pure void */
+}
+
+/* User Info Container - Remove all constraints - FORCE 100% WIDTH */
+/* ⚡ NUCLEAR OVERRIDE: Override UserInfoV5.css line 277 padding: 20px */
+#root #layer-master-root #layer-scroll-content .user-info-v5-container,
+#layer-master-root #layer-scroll-content .user-info-v5-container,
+#layer-scroll-content .user-info-v5-container,
+.user-info-v5-container,
+[class*='user-info-v5-container'] {
+  width: 100% !important;
+  max-width: none !important;
+  min-width: 100% !important;
+  /* ⚡ V6.0: Space Release - Remove ALL padding constraints */
+  padding: 0 !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  padding-inline: 0 !important;
+  margin: 0 !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  margin-inline: 0 !important;
+  /* ⚡ V6.0: Complete transparency - NO dark tints, NO grey overlays */
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  /* Force horizontal expansion */
+  left: 0 !important;
+  right: 0 !important;
+}
+
+/* ============================================================
+   V6.0.4: Visual Contrast - Emissive Lines & Holographic Text
+   ============================================================ */
+
+/* 1px Emissive Lines for Structure */
+.radar-title,
+.section-title,
+.page-title,
+.user-info-v5-page-title {
+  position: relative !important;
+  padding-bottom: 12px !important;
+  margin-bottom: 16px !important;
+}
+
+.radar-title::after,
+.section-title::after,
+.page-title::after,
+.user-info-v5-page-title::after {
+  content: '' !important;
+  position: absolute !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 1px !important;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(0, 191, 255, 0.8) 20%,
+    rgba(0, 191, 255, 1) 50%,
+    rgba(0, 191, 255, 0.8) 80%,
+    transparent 100%
+  ) !important;
+  box-shadow: 0 0 8px rgba(0, 191, 255, 0.6) !important;
+}
+
+/* Holographic Text Shadows for Legibility */
+.radar-title,
+.section-title,
+.page-title,
+.user-info-v5-page-title,
+.user-info-name,
+h1, h2, h3 {
+  color: #FFFFFF !important;
+  text-shadow: 
+    0 0 4px rgba(0, 191, 255, 0.8),
+    0 0 8px rgba(0, 191, 255, 0.6),
+    0 0 12px rgba(0, 191, 255, 0.4),
+    0 0 16px rgba(0, 191, 255, 0.2),
+    0 2px 4px rgba(0, 0, 0, 0.9) !important;
+  font-weight: 700 !important;
+}
+
+/* Data Values - Blue Holographic Glow */
+.score-value,
+.ladder-score,
+.rank-value,
+.completion-count,
+input[type="number"],
+input[type="text"],
+input[type="email"],
+select,
+textarea {
+  color: #00BFFF !important;
+  text-shadow: 
+    0 0 6px rgba(0, 191, 255, 0.9),
+    0 0 12px rgba(0, 191, 255, 0.7),
+    0 0 18px rgba(0, 191, 255, 0.5),
+    0 0 24px rgba(0, 191, 255, 0.3),
+    0 2px 4px rgba(0, 0, 0, 0.9) !important;
+}
+
+/* Labels - Gold Holographic Glow - FORCE ALL LABELS */
+#layer-scroll-content .form-label,
+#layer-scroll-content label,
+#layer-scroll-content .section-header h3,
+#layer-scroll-content .section-title,
+.user-info-v5-container .form-label,
+.user-info-v5-container label,
+.form-label,
+label,
+.section-header h3,
+.section-title {
+  color: #FF8C00 !important;
+  text-shadow: 
+    0 0 8px rgba(255, 140, 0, 1),
+    0 0 16px rgba(255, 140, 0, 0.8),
+    0 0 24px rgba(255, 140, 0, 0.6),
+    0 0 32px rgba(255, 140, 0, 0.4),
+    0 2px 4px rgba(0, 0, 0, 0.9) !important;
+  font-weight: 700 !important;
+}
+
+/* Secondary Text */
+.page-subtitle,
+.user-info-v5-page-subtitle,
+.section-description,
+.form-hint,
+.field-hint {
+  color: rgba(255, 255, 255, 0.7) !important;
+  text-shadow: 
+    0 0 4px rgba(255, 255, 255, 0.4),
+    0 0 8px rgba(255, 255, 255, 0.2),
+    0 1px 2px rgba(0, 0, 0, 0.8) !important;
+}
+
+/* ============================================================
+   V6.0.5: Input Fields - Void Style
+   ============================================================ */
+.form-input,
+input[type="text"],
+input[type="number"],
+input[type="email"],
+select,
+textarea {
+  background: transparent !important;
+  background-color: transparent !important;
+  border: 1px solid rgba(0, 191, 255, 0.3) !important;
+  border-radius: 0 !important;
+  padding: 12px !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  transition: all 0.3s ease !important;
+}
+
+.form-input:focus,
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: rgba(0, 191, 255, 0.8) !important;
+  box-shadow: 
+    0 0 8px rgba(0, 191, 255, 0.4),
+    inset 0 0 8px rgba(0, 191, 255, 0.1) !important;
+  outline: none !important;
+}
+
+/* ============================================================
+   V6.0.6: Buttons - Void Style
+   ============================================================ */
+button,
+.submit-btn,
+.action-btn,
+.action-toolbar-btn {
+  background: transparent !important;
+  background-color: transparent !important;
+  border: 1px solid rgba(0, 191, 255, 0.5) !important;
+  color: #00BFFF !important;
+  border-radius: 0 !important;
+  padding: 12px 24px !important;
+  font-weight: 700 !important;
+  text-shadow: 
+    0 0 6px rgba(0, 191, 255, 0.9),
+    0 0 12px rgba(0, 191, 255, 0.7) !important;
+  box-shadow: 
+    0 0 8px rgba(0, 191, 255, 0.3),
+    inset 0 0 8px rgba(0, 191, 255, 0.1) !important;
+  transition: all 0.3s ease !important;
+  cursor: pointer !important;
+}
+
+button:hover,
+.submit-btn:hover,
+.action-btn:hover,
+.action-toolbar-btn:hover {
+  border-color: rgba(0, 191, 255, 0.8) !important;
+  box-shadow: 
+    0 0 12px rgba(0, 191, 255, 0.5),
+    inset 0 0 12px rgba(0, 191, 255, 0.2) !important;
+  transform: translateY(-2px) !important;
+}
+
+/* ============================================================
+   V6.0.7: Terminal Frame - Remove border-image, keep corners
+   ============================================================ */
+#root #layer-terminal-frame,
+#layer-master-root #layer-terminal-frame,
+#layer-terminal-frame {
+  z-index: 500 !important; /* V6.0: Between Content (10) and HUD (1000) */
+  border-image: none !important;
+  border-image-source: none !important;
+  border: none !important;
+}
+
+/* Keep corner brackets but make them emissive */
+#root #layer-terminal-frame::before,
+#layer-master-root #layer-terminal-frame::before,
+#layer-terminal-frame::before {
+  border-top: 1px solid rgba(255, 140, 0, 0.8) !important;
+  border-left: 1px solid rgba(255, 140, 0, 0.8) !important;
+  box-shadow: 
+    0 0 8px rgba(255, 140, 0, 0.6),
+    inset 0 0 8px rgba(255, 140, 0, 0.3) !important;
+}
+
+#root #layer-terminal-frame::after,
+#layer-master-root #layer-terminal-frame::after,
+#layer-terminal-frame::after {
+  border-top: 1px solid rgba(255, 140, 0, 0.8) !important;
+  border-right: 1px solid rgba(255, 140, 0, 0.8) !important;
+  box-shadow: 
+    0 0 8px rgba(255, 140, 0, 0.6),
+    inset 0 0 8px rgba(255, 140, 0, 0.3) !important;
+}
+
+/* ============================================================
+   V6.0.8: HUD Status Layer
+   ============================================================ */
+#root #layer-master-root #layer-hud-status,
+#layer-master-root #layer-hud-status,
+#layer-hud-status {
+  z-index: 1000 !important; /* V6.0 Sandwich Architecture - Top Layer */
+}
+
+/* ============================================================
+   V6.0.9: Remove all legacy glassmorphism from sub-components
+   ============================================================ */
+
+/* Remove all pseudo-elements that create backgrounds */
+.radar-card::before,
+.radar-card::after,
+.form-card::before,
+.form-card::after {
+  display: none !important;
+}
+
+/* Remove corner decorations */
+.radar-card .corner-decoration,
+.form-card .corner-decoration {
+  display: none !important;
+}
+
+/* Action Toolbar - Void Style */
+.action-toolbar {
+  background: transparent !important;
+  background-color: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  padding: 16px 20px !important;
+  margin: 0 !important;
+}
+
+/* ============================================================
+   V6.0.10: Override ALL legacy styles from sub-components
+   ============================================================ */
+
+/* Override RadarChartSection.css - Force transparency */
+#layer-scroll-content .radar-chart-container,
+.user-info-v5-container .radar-chart-container,
+.radar-chart-container {
+  background: transparent !important;
+  background-color: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  box-shadow: none !important;
+}
+
+/* Override RadarChartSection.css padding */
+#layer-scroll-content .radar-section,
+.user-info-v5-container .radar-section,
+.radar-section {
+  padding: 20px !important; /* Minimal padding, NO 40px */
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+/* Override UserFormSection.css - Force transparency */
+#layer-scroll-content .user-form,
+#layer-scroll-content .form-section,
+.user-info-v5-container .user-form,
+.user-info-v5-container .form-section,
+.user-form,
+.form-section {
+  background: transparent !important;
+  background-color: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  box-shadow: none !important;
+}
+
+#layer-scroll-content .form-group,
+.user-info-v5-container .form-group,
+.form-group {
+  background: transparent !important;
+  background-color: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: none !important;
+  margin-bottom: 16px !important;
+}
+
+/* Override UserInfoV5.css 40px constraints - FORCE HORIZONTAL EXPANSION */
+/* ⚡ NUCLEAR OVERRIDE: Override UserInfoV5.css line 298 padding: 0 20px 40px 20px */
+#root #layer-master-root #layer-scroll-content .user-info-v5-content,
+#layer-master-root #layer-scroll-content .user-info-v5-content,
+#layer-scroll-content .user-info-v5-content,
+.user-info-v5-content {
+  width: 100% !important;
+  max-width: none !important;
+  min-width: 100% !important;
+  /* ⚡ V6.0: Override line 298 - Remove ALL horizontal padding */
+  padding: 20px 0 !important; /* Only vertical, NO horizontal */
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  padding-inline: 0 !important;
+  margin: 0 !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  margin-inline: 0 !important;
+  /* ⚡ V6.0: Complete transparency - NO dark tints, NO grey overlays */
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  /* Force full width expansion - BREATHE ACROSS THE VOID */
+  left: 0 !important;
+  right: 0 !important;
+}
+
+/* Override all 40px constraints from legacy CSS */
+/* Force remove 40px from UserInfoV5.css line 298 and 337 */
+.user-info-v5-content {
+  padding: 20px 0 !important; /* Only vertical padding, NO horizontal */
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+.user-info-v5-test-button {
+  margin-left: auto !important;
+  margin-right: auto !important;
+  margin-bottom: 20px !important; /* Reduced from 40px */
+}
+
+/* Ensure no child element has 40px constraints - FORCE HORIZONTAL EXPANSION */
+#layer-scroll-content *,
+.user-info-v5-container *,
+.user-info-v5-content * {
+  /* Remove any calc() that includes 40px */
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  padding-inline: 0 !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  margin-inline: 0 !important;
+  /* Force 100% width for all containers - BREATHE ACROSS THE VOID */
+  max-width: none !important;
+  width: 100% !important;
+  /* Remove any left/right positioning that creates margins */
+  left: auto !important;
+  right: auto !important;
+}
+
+/* Exception: Allow minimal vertical spacing */
+#layer-scroll-content > *:not(:first-child) {
+  margin-top: 20px !important;
+}
+
+/* Force all sections and containers to full width */
+#layer-scroll-content section,
+#layer-scroll-content article,
+#layer-scroll-content .form-section,
+#layer-scroll-content .user-form,
+#layer-scroll-content .user-info-v5-content,
+.user-info-v5-content {
+  width: 100% !important;
+  max-width: none !important;
+  min-width: 100% !important;
+  padding-inline: 0 !important;
+  margin-inline: 0 !important;
+  /* Remove any calc() constraints */
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+/* ============================================================
+   V6.0.11: Responsive - Maintain space release
+   ============================================================ */
+@media (max-width: 768px) {
+  #layer-scroll-content {
+    padding: 0 !important;
+    padding-inline: 0 !important;
+  }
+  
+  .radar-section,
+  .form-card {
+    padding: 15px 0 !important; /* Only vertical, NO horizontal */
+    padding-inline: 0 !important;
+  }
+  
+  /* Force full width on mobile */
+  #layer-scroll-content * {
+    width: 100% !important;
+    max-width: none !important;
+    padding-inline: 0 !important;
+    margin-inline: 0 !important;
+  }
+}

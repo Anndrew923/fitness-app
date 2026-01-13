@@ -19,14 +19,10 @@ const UserFormSection = ({
 }) => {
   return (
     <>
-      {/* ⚡ 4. 擊穿白塊：直接在容器上套用內聯樣式，這是權重最高的做法 */}
+      {/* ⚡ Phase 0: The Grand Purge - 移除内联样式 */}
       <div
         id="user-form-section"
         className="form-card"
-        style={{
-          background: 'transparent',
-          backgroundColor: 'transparent',
-        }}
       >
         <form className="user-form" onSubmit={onSubmit}>
           {/* 1. 基本資料表單 (Basic Info) */}
@@ -66,15 +62,7 @@ const UserFormSection = ({
         避免提交按鈕被鍵盤或廣告遮擋。
         設置 height: 120px 以確保安全。
       */}
-      <div
-        className="bottom-spacer safe-area-keyboard"
-        style={{
-          height: '120px',
-          width: '100%',
-          clear: 'both',
-          marginBottom: 'env(safe-area-inset-bottom)',
-        }}
-      />
+      <div className="bottom-spacer safe-area-keyboard" />
     </>
   );
 };

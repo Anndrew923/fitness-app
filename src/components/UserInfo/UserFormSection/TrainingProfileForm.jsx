@@ -255,7 +255,7 @@ const TrainingProfileForm = ({ userData, setUserData, onChange, t }) => {
                 </option>
               ))}
             </select>
-            <p className="field-hint" style={{ marginTop: '4px', fontSize: '12px', color: '#718096' }}>
+            <p className="field-hint">
               💡 {t('userInfo.training.professionHint', '選擇職業可參與未來的「職業分組天梯」')}
             </p>
           </div>

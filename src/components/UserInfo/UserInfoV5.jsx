@@ -16,6 +16,7 @@ import { useUserInfoForm } from '../../hooks/useUserInfoForm';
 import { usePageScroll } from '../../hooks/usePageScroll';
 import { useTranslation } from 'react-i18next';
 import './UserInfoV5.css';
+import './VoidProjectionV6.0.css';
 
 const DEFAULT_SCORES = {
   strength: 0,

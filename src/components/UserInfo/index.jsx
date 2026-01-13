@@ -38,12 +38,15 @@ import NotificationBell from '../Notification/NotificationBell';
 const LadderStatusCard = lazy(() => import('../Ladder/LadderStatusCard'));
 import { useLadderData } from '../../hooks/useLadderData';
 
-import './userinfo.css'; // Core layout
-import './UserRadar.css';
-import './UserForm.css';
-import './UserModals.css';
-import './UserHeader.css';
+// ⚡ Phase 0: The Grand Purge - 所有旧 CSS 导入已停用
+// import './userinfo.css'; // Core layout - DISABLED
+// import './UserRadar.css'; // DISABLED
+// import './UserForm.css'; // DISABLED
+// import './UserModals.css'; // DISABLED
+// import './UserHeader.css'; // DISABLED
 import { useTranslation } from 'react-i18next';
+import './Modals/Phase0TempStyles.css';
+import './MagitekV5.5.css';
 
 // 開發環境下載入調試工具
 if (process.env.NODE_ENV === 'development') {
@@ -682,38 +685,18 @@ function UserInfo({ testData, onLogout, clearTestData }) {
     );
   }
 
-  // ⚡ V4.2 毀滅性修正 3: 恢復「首頁」滑動權限
-  // 刪除最外層的 .user-info-container，讓雷達圖和卡片直接暴露在 #layer-scroll-content 之下
+  // ⚡ Phase 0: The Grand Purge - 实现 Four Strata Architecture
   return (
     <>
-      {/* 右上角按鈕組 */}
-      <div
-        className="user-info__top-actions"
-        style={{
-          position: 'fixed',
-          top: 'calc(15px + env(safe-area-inset-top))',
-          right: '15px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'flex-end',
-          gap: '12px', // ✅ Consistent gap
-          zIndex: 999,
-          height: 'auto',
-          lineHeight: 0,
-        }}
-      >
-        {/* ✅ 1. WRAP the Bell in a 44px container to match the button */}
+      {/* ⚡ Phase 1: Magitek Resonance Infusion - V5.5 Visual Specifications */}
+      <div id="layer-master-bg" />
+      <div id="layer-scroll-content">
+        {/* 右上角按鈕組 */}
         <div
-          style={{
-            width: '44px',
-            height: '44px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            margin: 0,
-            padding: 0,
-          }}
+          className="user-info__top-actions"
         >
+        {/* ✅ 1. WRAP the Bell in a 44px container to match the button */}
+        <div className="user-info__bell-container">
           <NotificationBell />
         </div>
 
@@ -724,22 +707,6 @@ function UserInfo({ testData, onLogout, clearTestData }) {
           className="user-info__settings-btn"
           aria-label={t('navbar.settings')}
           title={t('navbar.settings')}
-          style={{
-            width: '44px', // ✅ CHANGED: 40px -> 44px
-            height: '44px', // ✅ CHANGED: 40px -> 44px
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            margin: 0,
-            padding: 0,
-            background: 'rgba(0, 10, 30, 0.6)',
-            backdropFilter: 'blur(10px)',
-            border: '2px solid rgba(0, 191, 255, 0.5)',
-            borderRadius: '50%',
-            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
-            border: '2px solid rgba(102, 126, 234, 0.3)',
-            cursor: 'pointer',
-          }}
         >
           <svg
             width="24" // ✅ CHANGED: 20 -> 24 (Scale icon slightly for 44px btn)
@@ -820,19 +787,9 @@ function UserInfo({ testData, onLogout, clearTestData }) {
 
       {/* ✅ UP-LADDER-EVO: 戰力資訊條 (Stacked Layout) */}
       {completionStatus.isFullyCompleted && (
-        <div
-          className="ladder-status-wrapper"
-          style={{
-            display: 'flex',
-            flexDirection: 'column', // 🔥 FORCE VERTICAL STACK
-            alignItems: 'center',
-            width: '100%',
-            position: 'relative',
-            marginBottom: '20px',
-          }}
-        >
+        <div className="ladder-status-wrapper">
           {/* 1. Main Ladder Card (Top Layer) */}
-          <div style={{ position: 'relative', zIndex: 2, width: '100%' }}>
+          <div className="ladder-status-main">
             <Suspense
               fallback={
                 <div className="h-24 bg-gray-100 rounded-xl animate-pulse" />
@@ -848,61 +805,14 @@ function UserInfo({ testData, onLogout, clearTestData }) {
 
           {/* 2. Upgrade Module (Bottom Layer - Tucked Under) */}
           {isUnsynced && (
-            <div
-              className="ladder-potential-module"
-              style={{
-                width: '96%', // Slightly narrower than main card
-                marginTop: '-18px', // Tuck underneath the main card
-                paddingTop: '22px', // Internal padding to clear the overlap
-                paddingBottom: '10px',
-                paddingLeft: '16px',
-                paddingRight: '16px',
-                background: 'rgba(20, 20, 20, 0.85)', // Dark glass
-                backdropFilter: 'blur(12px)',
-                border: '1px solid rgba(16, 185, 129, 0.3)',
-                borderTop: 'none',
-                borderRadius: '0 0 16px 16px', // Rounded bottom only
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                position: 'relative',
-                zIndex: 1, // Sits behind main card
-                boxShadow: '0 10px 25px -5px rgba(0,0,0,0.3)',
-              }}
-            >
+            <div className="ladder-potential-module">
               {/* Left: Stacked Label & Score */}
-              <div
-                style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  justifyContent: 'center',
-                }}
-              >
-                <span
-                  style={{
-                    fontSize: '0.65rem',
-                    color: '#9ca3af',
-                    fontWeight: '700',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.5px',
-                    lineHeight: '1.2',
-                  }}
-                >
+              <div className="ladder-potential-left">
+                <span className="ladder-potential-label">
                   {t('userInfo.potentialPower', '潛在戰力')}
                 </span>
-                <div
-                  style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
-                >
-                  <span
-                    style={{
-                      fontSize: '1.3rem',
-                      color: '#10B981',
-                      fontWeight: '800',
-                      fontFamily: 'monospace',
-                      lineHeight: '1.2',
-                      textShadow: '0 0 10px rgba(16, 185, 129, 0.3)',
-                    }}
-                  >
+                <div className="ladder-potential-score-wrapper">
+                  <span className="ladder-potential-score">
                     {liveLadderScore}
                   </span>
                 </div>
@@ -910,36 +820,14 @@ function UserInfo({ testData, onLogout, clearTestData }) {
 
               {/* Right: Action Button */}
               {isScoreHigher ? (
-                <div
-                  style={{
-                    background:
-                      'linear-gradient(135deg, #10B981 0%, #059669 100%)',
-                    padding: '6px 12px',
-                    borderRadius: '8px',
-                    color: 'white',
-                    fontSize: '0.85rem',
-                    fontWeight: 'bold',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '4px',
-                    boxShadow: '0 4px 12px rgba(16, 185, 129, 0.4)',
-                    whiteSpace: 'nowrap',
-                    animation: 'pulse-green 2s infinite',
-                  }}
-                >
-                  <span style={{ fontSize: '1rem', lineHeight: 0 }}>⇡</span>
+                <div className="ladder-potential-upgrade-btn">
+                  <span className="ladder-potential-arrow">⇡</span>
                   <span>
                     +{(liveLadderScore - savedLadderScore).toFixed(2)}
                   </span>
                 </div>
               ) : (
-                <span
-                  style={{
-                    fontSize: '0.7rem',
-                    color: '#6b7280',
-                    fontStyle: 'italic',
-                  }}
-                >
+                <span className="ladder-potential-unsynced">
                   {t('userInfo.notSynced', '未同步')}
                 </span>
               )}
@@ -1030,9 +918,13 @@ function UserInfo({ testData, onLogout, clearTestData }) {
             t={t}
           />
           {/* 保留 formSectionRef 用於滾動定位 */}
-          <div ref={formSectionRef} style={{ display: 'none' }} />
+          <div ref={formSectionRef} className="form-section-ref" />
         </>
       )}
+      </div>
+      {/* ⚡ Phase 1: Terminal Shell & HUD Status */}
+      <div id="layer-terminal-frame" />
+      <div id="layer-hud-status" />
 
       {/* 提交確認對話框 */}
       {submitConfirmModal.isOpen && (
@@ -1043,15 +935,6 @@ function UserInfo({ testData, onLogout, clearTestData }) {
           remainingCount={submitConfirmModal.remainingCount}
         />
       )}
-
-      {/* Keyframe animation for pulse-green */}
-      <style>{`
-        @keyframes pulse-green {
-          0% { box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4); }
-          50% { box-shadow: 0 4px 18px rgba(16, 185, 129, 0.6); }
-          100% { box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4); }
-        }
-      `}</style>
     </>
   );
 }

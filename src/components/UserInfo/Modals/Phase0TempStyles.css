@@ -1,0 +1,280 @@
+/* ⚡ Phase 0: The Grand Purge - 临时样式文件
+ * 用于替代内联样式，保持功能完整性
+ * 这些样式将在 Magitek 重构完成后被替换
+ */
+
+/* Phase 0: 临时高对比度占位符 - 用于验证层结构 */
+.phase0-debug-layer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+}
+
+.phase0-debug-red {
+  border: 2px solid red;
+}
+
+.phase0-debug-blue {
+  border: 2px solid blue;
+  min-height: 100vh;
+  position: relative;
+}
+
+.phase0-debug-green {
+  border: 2px solid green;
+}
+
+.phase0-debug-yellow {
+  border: 2px solid yellow;
+}
+
+/* RPGClassModal 临时样式 */
+.rpg-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.85);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.rpg-modal-card {
+  position: relative;
+  width: 85%;
+  max-width: 500px;
+  background-color: #1E1E1E;
+  border-radius: 20px;
+  border: 2px solid #FF5722;
+  padding: 25px;
+  box-shadow: 0 0 30px rgba(255, 87, 34, 0.8), 0 0 60px rgba(255, 87, 34, 0.4);
+  animation: rpgModalSlideIn 0.4s ease-out;
+}
+
+.rpg-modal-header {
+  text-align: center;
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid rgba(255, 87, 34, 0.3);
+}
+
+.rpg-modal-icon-large {
+  font-size: 40px;
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+.rpg-modal-title {
+  margin: 0;
+  font-size: 24px;
+  font-weight: bold;
+  color: #FFD700;
+  text-align: center;
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.5), 0 0 20px rgba(255, 215, 0, 0.3);
+}
+
+.rpg-modal-description {
+  font-size: 16px;
+  color: #E0E0E0;
+  line-height: 26px;
+  text-align: justify;
+  margin-bottom: 25px;
+  min-height: 80px;
+}
+
+.rpg-modal-footer {
+  display: flex;
+  justify-content: center;
+}
+
+.rpg-modal-button {
+  background-color: #FF5722;
+  padding: 12px 30px;
+  border-radius: 25px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #FF8A65;
+  box-shadow: 0 4px 15px rgba(255, 87, 34, 0.5), 0 0 20px rgba(255, 87, 34, 0.3);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 120px;
+  outline: none;
+}
+
+.rpg-modal-button:hover {
+  background-color: #FF7043;
+  border-color: #FFAB91;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 25px rgba(255, 87, 34, 0.7), 0 0 30px rgba(255, 87, 34, 0.4);
+}
+
+.rpg-modal-button-text {
+  color: #FFFFFF;
+  font-size: 18px;
+  font-weight: bold;
+  letter-spacing: 2px;
+  user-select: none;
+}
+
+/* SaveSuccessModal 临时样式 */
+.save-success-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0;
+}
+
+.save-success-content {
+  width: 90%;
+  max-width: 340px;
+  background-color: #1E1E1E;
+  border-radius: 16px;
+  border: 2px solid #48BB78;
+  padding: 24px 20px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  animation: slideDown 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  margin: 0;
+}
+
+.save-success-header {
+  text-align: center;
+  margin-bottom: 15px;
+  border-bottom: 1px solid rgba(72, 187, 120, 0.3);
+  padding-bottom: 15px;
+}
+
+.save-success-icon {
+  font-size: 40px;
+  margin-bottom: 10px;
+}
+
+.save-success-title {
+  margin: 0;
+  color: #48BB78;
+  font-size: 22px;
+  font-weight: bold;
+  text-shadow: 0 0 10px rgba(72, 187, 120, 0.3);
+}
+
+.save-success-body {
+  margin-bottom: 25px;
+  text-align: center;
+}
+
+.save-success-quote {
+  color: #E0E0E0;
+  font-style: italic;
+  margin-bottom: 12px;
+  font-size: 15px;
+  opacity: 0.9;
+}
+
+.save-success-text {
+  color: #A0AEC0;
+  font-size: 14px;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.save-success-footer {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.save-success-button {
+  flex: 1;
+  padding: 12px;
+  border-radius: 12px;
+  border: none;
+  font-weight: bold;
+  font-size: 15px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.save-success-button-primary {
+  background-color: #48BB78;
+  color: white;
+  box-shadow: 0 4px 12px rgba(72, 187, 120, 0.3);
+}
+
+.save-success-button-primary:hover {
+  background-color: #38a169;
+  transform: translateY(-2px);
+}
+
+.save-success-button-secondary {
+  background-color: transparent;
+  border: 1px solid #718096;
+  color: #CBD5E0;
+}
+
+.save-success-button-secondary:hover {
+  background-color: #4a5568;
+}
+
+/* 其他临时样式 */
+.logout-tooltip-styled {
+  position: absolute;
+  bottom: 44px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(60, 60, 60, 0.95);
+  color: #fff;
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-size: 13px;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.avatar-file-input {
+  display: none;
+}
+
+.radar-svg-defs {
+  position: absolute;
+  width: 0;
+  height: 0;
+}
+
+.form-section-ref {
+  display: none;
+}
+
+/* 动画 */
+@keyframes rpgModalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
