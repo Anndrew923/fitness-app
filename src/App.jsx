@@ -19,6 +19,7 @@ import MagitekFrame from './components/Layout/MagitekFrame';
 import performanceMonitor from './utils/performanceMonitor';
 import AppRoutes from './AppRoutes';
 import AvatarSection from './components/UserInfo/AvatarSection'; // ⚡ 2. 大頭照「越獄」行動
+import GeneralModal from './components/UserInfo/Modals/GeneralModal'; // ⚡ V6.21: 錯誤提示 Modal
 import { storage } from './firebase';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { updateDoc, doc } from 'firebase/firestore';
@@ -123,6 +124,13 @@ function AppContent() {
   const { userData, setUserData } = useUser();
   const [avatarUploading, setAvatarUploading] = useState(false);
   const [avatarError, setAvatarError] = useState(null);
+  // ⚡ V6.21: 錯誤提示 Modal 狀態
+  const [avatarModalState, setAvatarModalState] = useState({
+    isOpen: false,
+    title: '',
+    message: '',
+    type: 'error',
+  });
   // ✅ Phase 1.9.5 新增：啟用 Android 返回鍵監聽
   useAndroidBackButton();
   // ✅ 原生视口管理（Status Bar、键盘检测、输入框滚动）
@@ -151,12 +159,64 @@ function AppContent() {
       
       setUserData(prev => ({ ...prev, avatarUrl: downloadURL }));
       logger.debug('✅ 頭像上傳成功');
+      
+      // ⚡ V6.21: 顯示成功提示
+      setAvatarModalState({
+        isOpen: true,
+        title: '頭像上傳成功',
+        message: '您的頭像已成功更新！',
+        type: 'success',
+      });
+      
+      // 2秒後自動關閉成功對話框
+      setTimeout(() => {
+        setAvatarModalState(prev => ({ ...prev, isOpen: false }));
+      }, 2000);
     } catch (error) {
+      const errorMessage = error.message || '未知錯誤';
       logger.error('❌ 頭像上傳失敗:', error);
-      setAvatarError('頭像上傳失敗: ' + error.message);
+      setAvatarError('頭像上傳失敗: ' + errorMessage);
+      
+      // ⚡ V6.21: 顯示錯誤提示 Modal
+      setAvatarModalState({
+        isOpen: true,
+        title: '頭像上傳失敗',
+        message: `頭像上傳失敗：${errorMessage}`,
+        type: 'error',
+      });
+      
+      // 5秒後自動關閉錯誤對話框
+      setTimeout(() => {
+        setAvatarModalState(prev => ({ ...prev, isOpen: false }));
+      }, 5000);
     } finally {
       setAvatarUploading(false);
     }
+  };
+  
+  // ⚡ V6.21: 處理 AvatarSection 的 onError 回調（壓縮階段錯誤）
+  const handleAvatarError = (errorMessage) => {
+    if (!errorMessage) {
+      // 清除錯誤
+      setAvatarError(null);
+      return;
+    }
+    
+    setAvatarError(errorMessage);
+    logger.error('❌ 頭像處理錯誤:', errorMessage);
+    
+    // 顯示錯誤提示 Modal
+    setAvatarModalState({
+      isOpen: true,
+      title: '頭像處理失敗',
+      message: errorMessage,
+      type: 'error',
+    });
+    
+    // 5秒後自動關閉錯誤對話框
+    setTimeout(() => {
+      setAvatarModalState(prev => ({ ...prev, isOpen: false }));
+    }, 5000);
   };
   
   // ⚡ 2. 大頭照「越獄」行動：只在 /user-info 頁面渲染 AvatarSection
@@ -168,7 +228,7 @@ function AppContent() {
       isGuest={isGuest}
       isUploading={avatarUploading}
       onImageSelected={handleAvatarChange}
-      onError={setAvatarError}
+      onError={handleAvatarError}
       t={t}
     />
   ) : null;
@@ -360,29 +420,42 @@ function AppContent() {
   };
 
   return (
-    <MagitekFrame
-      avatarSection={avatarSection}
-      extraChildren={
-        /* 全域透視：導覽列徹底移出 app-container，直接作為 MagitekFrame 的子元素 */
-        showNavBar ? <BottomNavBar /> : null
-      }
-    >
-      {/* ⚡ V4.2 外科手術：移除所有中間容器，讓數據直接裝在 #layer-scroll-content 裡面 */}
-      <ScrollToTop />
-      <ErrorBoundary>
-        <AppRoutes
-          testData={testData}
-          onLogin={handleLogin}
-          onLogout={handleLogout}
-          handleTestComplete={handleTestComplete}
-          clearTestData={clearTestData}
-          handleGuestMode={handleGuestMode}
-        />
-      </ErrorBoundary>
+    <>
+      {/* ⚡ V6.21: 頭像上傳錯誤提示 Modal */}
+      <GeneralModal
+        isOpen={avatarModalState.isOpen}
+        onClose={() => {
+          setAvatarModalState(prev => ({ ...prev, isOpen: false }));
+        }}
+        title={avatarModalState.title}
+        message={avatarModalState.message}
+        type={avatarModalState.type}
+      />
+      
+      <MagitekFrame
+        avatarSection={avatarSection}
+        extraChildren={
+          /* 全域透視：導覽列徹底移出 app-container，直接作為 MagitekFrame 的子元素 */
+          showNavBar ? <BottomNavBar /> : null
+        }
+      >
+        {/* ⚡ V4.2 外科手術：移除所有中間容器，讓數據直接裝在 #layer-scroll-content 裡面 */}
+        <ScrollToTop />
+        <ErrorBoundary>
+          <AppRoutes
+            testData={testData}
+            onLogin={handleLogin}
+            onLogout={handleLogout}
+            handleTestComplete={handleTestComplete}
+            clearTestData={clearTestData}
+            handleGuestMode={handleGuestMode}
+          />
+        </ErrorBoundary>
 
-      {/* 在天梯頁面隱藏廣告，保持頁面乾淨 */}
-      {location.pathname !== '/ladder' && <GlobalAdBanner />}
-    </MagitekFrame>
+        {/* 在天梯頁面隱藏廣告，保持頁面乾淨 */}
+        {location.pathname !== '/ladder' && <GlobalAdBanner />}
+      </MagitekFrame>
+    </>
   );
 }
 

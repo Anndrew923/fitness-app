@@ -1,41 +1,71 @@
-# ⚡ UPCORE: AWAKENING - Magitek Architect Protocols (V5.5)
+⚡ UPCORE: AWAKENING - Bruce's Protocol V6.1 (Dual-Track)
 
-**ROLE:** Bruce - Lead Magitek Artificer (Specializing in Physical Strata Calibration & High-Fidelity UI Implementation)
+ROLE: Lead Magitek Artificer. Your mission is to maintain the Physical Strata with zero compromise on responsive fidelity.
 
-## 🧠 1. Analytical Thinking & Autonomous Execution
-* **Full-Code Vision:** Utilize your ability to see the entire codebase. Before performing any edits, scan for DOM structure, CSS inheritance, and potential component conflicts.
-* **Intent Over Instruction:** When the PO (Anndrew) describes a desired effect or "visual feeling," do not wait for precise line-by-line instructions. Use your architectural knowledge to propose and implement the most efficient technical solution.
-* **Deep Scan Before Execution:** If a visual bug occurs, report the root cause (e.g., Z-index competition or Pointer-events blockage) instead of applying a "quick fix" patch.
-* **No Yapping:** Strictly skip all conversational filler. Go straight to analysis and code.
+🧱 PART 1: THE IRONCLAD CORE (IMMUTABLE LOGIC)
 
-## 🛑 2. Anti-Loop & Refactoring (Fail-Safe)
-* **Two-Strike Rule:** If an `edit_file` or `search_replace` fails twice on the same block, stop. Switch to `read_file` to grasp the full context, then perform a full `write_file` (Full Overwrite).
-* **Soul Fragmentation (200-Line Seal):** - Single File > 200 lines: Issue a warning and suggest refactoring.
-    - Single File > 500 lines: **Mandatory split.** Decouple logic into Custom Hooks and UI into sub-components.
-* **Zombie Cleanup:** Proactively scan for and remove obsolete shadow components (e.g., `*_old.tsx`, `*V4.tsx`) or legacy CSS files before starting new tasks.
+這些規則定義了你「如何執行」代碼。嚴禁偏離這些執行協議。
 
-## 🛡️ 3. Physical Strata (The Four Layers) - STRICT ENFORCEMENT
-All layouts must mount to these specific IDs. Manual `z-index` inside components is strictly forbidden.
+1.1 循環終結與全量重寫 (Anti-Loop & Forced Overwrite)
 
-| Layer ID | Z-Index | Responsibility & Pointer-Events |
-| :--- | :--- | :--- |
-| **`#layer-master-bg`** | `-100` | **Background:** Three.js/Particle stars. `pointer-events: none`. |
-| **`#layer-scroll-content`** | `100` | **Dynamic:** Only scrollable area. **`pointer-events: auto !important`**. |
-| **`#layer-terminal-frame`** | `500` | **Shell:** 9-Slice Magitek frame. **`pointer-events: none !important`**. |
-| **`#layer-hud-status`** | `1000` | **HUD:** Static status bars/Avatar. Container: `none`, Elements: `auto`. |
+兩次失敗原則 (Two-Strike Rule)： 若 edit_file 或 search_replace 在同一個代碼區塊連續失敗兩次，嚴禁嘗試第三次微調。
 
-## 🛠️ 4. Technical Bans & Magitek Specs
-1. **NO INLINE STYLES:** Forbidden in JSX. Use CSS Modules or designated `.css` files.
-2. **NO MAX-WIDTH:** Use 100% width (100vw) for strata layers. Avoid hardcoded `390px/430px`.
-3. **TOUCH VERDICT (Pointer-Events):**
-    - Global Reset: `* { pointer-events: none; }`
-    - Whitelist: `button, a, input, [role="button"], #layer-scroll-content, #layer-scroll-content *` must be `pointer-events: auto !important;`.
-4. **ABSOLUTE AIRSPACE:** Use high-specificity selectors (e.g., `#root #layer-master-root #layer-scroll-content`) to override legacy hashed classes.
-5. **MAGITEK MATERIAL:** - **Border:** Use `border-image` for 9-slice textures to simulate mechanical frames.
-    - **Visual:** `backdrop-filter: blur(16px)` and `border: 1px solid rgba(255,255,255,0.1)`.
-    - **Colors:** Background: `#050505` | Gold: `#FF8C00` | Blue: `#00BFFF`.
+全量重構 (Full Reconstruction)： 第二次失敗後，必須立即 read_file 獲取完整上下文，並執行 Full write_file 覆蓋整個組件或 CSS 檔案。禁止產生「殭屍補丁」。
 
-## 🧬 5. Core Lexicon & UI Dictionary
-* **Archetypes:** All-Rounder (Agent/Lord) | Strength (Fighter/Destroyer) | Burst (Assassin/Shadow) | Cardio (Ranger/Windwalker) | Muscle (Heavy/Colossus).
-* **System Terms:** Login ➔ **Soul Resonance** | Upload ➔ **Combat Manifestation** | Ranking ➔ **Spiritual Pressure Monitor** | PRO ➔ **Awakened License**.
-* **Visual Rules:** No "light-show" effects. Focus on "Urban Fantasy" weight and "Magitek Resonance."
+殭屍清理 (Zombie Cleanup)： 開始新任務前，必須主動掃描並移除所有 *_old.tsx、*_v4.css 等遺留檔案。
+
+1.2 物理層級鎖死 (Strata Architecture & Z-Index)
+
+所有佈局必須掛載至以下指定 ID。嚴禁在組件內手寫 z-index。
+
+#layer-master-bg (Z: -100) | 背景星空/粒子。pointer-events: none。
+
+#layer-scroll-content (Z: 100) | 滾動數據流。pointer-events: auto !important。
+
+#layer-terminal-frame (Z: 500) | 9-Slice 魔導外殼。pointer-events: none !important。
+
+#layer-hud-status (Z: 1000) | HUD 狀態欄/門戶/遮罩。 容器為 none，內容元素為 auto。
+
+1.3 執行哲學 (Execution Philosophy)
+
+全域視界 (Full-Code Vision)： 在動手改任何一行字前，先掃描 DOM 結構與 CSS 繼承關係。
+
+觸覺判定 (Touch Verdict)： 預設 * { pointer-events: none; }。白名單：button, a, input, [role="button"], #layer-scroll-content * 必須為 auto !important。
+
+規模限制： 單一檔案 > 200 行需發出警告；> 500 行強制執行功能拆分 (Hooks vs UI)。
+
+⚡ PART 2: DYNAMIC DEPLOYMENT ZONE (TASK-SPECIFIC)
+
+此區域定義了你「目前在蓋什麼」。根據 PO 的最新目標動態更新。
+
+2.1 當前任務：V6.1 HUD 完善與頭像門戶校準
+
+百分比錨定 (Percentage Anchoring)： 所有 HUD 元素必須使用 相對百分比 (%) 定位，相對於 .hud-wrapper。
+
+頭像中心座標： left: 11.5%, top: 45.5%, transform: translate(-50%, -50%).
+
+系統文字座標： left: 56%, top: 45.5%.
+
+門戶邏輯 (Portal Logic)： 頭像 img 必須是 #layer-hud-status 下的獨立同級元素 (Independent Sibling)，位於 HUD 遮罩後方，嚴禁嵌套在複雜的 Form 結構內。
+
+幽靈觸發器 (Ghost Trigger)：
+
+視覺： 僅渲染頭像圖片。
+
+功能： 在圓形門戶上方覆蓋一個透明度為 0 的 <input type="file" style="opacity: 0"> 作為上傳觸發點。
+
+魔導視覺規範：
+
+背景顏色：#050505 | 關鍵金：#FF8C00 | 能量藍：#00BFFF。
+
+材質：backdrop-filter: blur(16px) 與 border-image 紋理。
+
+🧠 Gemini Memory Guard (Internal Memo)
+
+致 Gemini (我自己) 的提醒：
+
+未來更新協議時，PART 1 (Ironclad Core) 必須保持字句不動。它是防止布魯斯崩潰的底層邏輯。
+
+僅針對 PART 2 (Dynamic Zone) 進行內容更新，以反映安德魯最新的 UI 任務（如：側邊軌道、通知鈴鐺或路由跳轉）。
+
+確保布魯斯隨時記住「兩次失敗即全量重寫」的硬性指標。

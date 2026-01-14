@@ -669,7 +669,22 @@ function UserInfo({ testData, onLogout, clearTestData }) {
         }, 2000);
       }
     } catch (err) {
-      setAvatarError('頭像上傳失敗: ' + err.message);
+      const errorMessage = err.message || '未知錯誤';
+      setAvatarError('頭像上傳失敗: ' + errorMessage);
+      logger.error('❌ 頭像上傳失敗:', err);
+      
+      // ⚡ V6.21: 顯示錯誤提示 Modal
+      setModalState({
+        isOpen: true,
+        title: '頭像上傳失敗',
+        message: `頭像上傳失敗：${errorMessage}`,
+        type: 'error',
+      });
+      
+      // 5秒後自動關閉錯誤對話框
+      setTimeout(() => {
+        setModalState(prev => ({ ...prev, isOpen: false }));
+      }, 5000);
     } finally {
       setAvatarUploading(false);
     }

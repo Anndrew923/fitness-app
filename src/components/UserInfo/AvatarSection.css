@@ -1,108 +1,127 @@
-/* ⚡ V17.0: 頭像定位已由 UserInfoV5.css 統一控制 */
-/* 此處只保留不影響定位的樣式，定位規則已移至 UserInfoV5.css */
+/* ⚡ V6.17: Recursive Centering - 遞歸居中校準 */
+/* 根據 Rule 1.1: 全量重寫堆疊邏輯，確保金屬邊框視覺上重疊頭像邊緣 */
+/* 微調座標：left: 13.5%, top: 48.5% (基於視覺反饋：頭像太左太上方) */
+
+/* ============================================================
+   V6.16: HUD Mask - 絕對層級覆蓋，必須在最上層
+   使用最高優先級選擇器覆蓋所有衝突規則
+   ============================================================ */
+#root #layer-master-root #layer-hud-status .hudWrapper .topStatusHud,
+#layer-master-root #layer-hud-status .hudWrapper .topStatusHud,
+#layer-hud-status .hudWrapper .topStatusHud,
+#layer-hud-status .topStatusHud,
+.topStatusHud,
+[class*='topStatusHud'] {
+  /* ⚡ V6.16: 物理層級鎖死 - HUD Mask 必須在 Avatar 之上 */
+  z-index: 1000 !important;
+}
+
+/* ============================================================
+   V6.17: System Text - 同步更新為 top: 48.5%，與 Avatar 保持視覺水平一致
+   ============================================================ */
+#root #layer-master-root #layer-hud-status .systemReadyText,
+#layer-master-root #layer-hud-status .systemReadyText,
+#layer-hud-status .systemReadyText,
+.systemReadyText,
+.topStatusHud .systemReadyText {
+  top: 48.5% !important;
+}
+
+/* ============================================================
+   V6.16: Avatar Container - 物理凹陷效果
+   確保頭像在 HUD Mask 之下，實現「坐進駕駛艙」效果
+   ============================================================ */
+#root #layer-master-root #layer-hud-status .hudWrapper .avatar-section,
+#layer-master-root #layer-hud-status .hudWrapper .avatar-section,
+#layer-hud-status .hudWrapper .avatar-section,
+#layer-hud-status .avatar-section,
 .avatar-section {
-  text-align: left;
-  margin-bottom: 0;
-  /* ⚡ V17.0: 定位規則已由 UserInfoV5.css 統一控制，此處不覆蓋 */
+  position: absolute !important;
+  /* ⚡ V6.17: 遞歸居中校準 - 基於視覺反饋微調，向右向下移動 */
+  left: 13.5% !important;
+  top: 48.5% !important;
+  transform: translate(-50%, -50%) !important;
+  /* ⚡ V6.16: 物理層級強制壓制 - Avatar 必須在 HUD Mask (z-index: 1000) 之下 */
+  z-index: 800 !important;
+  width: auto !important;
+  height: auto !important;
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  background: transparent !important;
+  overflow: hidden !important;
+  /* ⚡ V6.16: 確保不創建新的堆疊上下文 */
+  isolation: isolate !important;
 }
 
-.avatar-container {
-  position: relative;
-  display: inline-block;
-  margin-bottom: 0;
-}
-
-.avatar-actions-container {
-  position: relative;
-  display: inline-block;
-}
-
-/* ⚡ 頭像「術式嵌入」：移除圓形邊框，改用 1px 奧術藍微弱發光線條 */
+/* ============================================================
+   V6.18: Avatar Image - centerCrop 模式，圖片填滿容器
+   使用 object-fit: cover 實現 centerCrop 效果，圖片完全填滿圓形容器
+   ============================================================ */
+#root #layer-master-root #layer-hud-status .avatar-section .user-avatar,
+#layer-master-root #layer-hud-status .avatar-section .user-avatar,
+#layer-hud-status .avatar-section .user-avatar,
+#layer-hud-status img.user-avatar,
+#layer-hud-status .user-avatar,
+.avatar-section .user-avatar,
 .user-avatar {
-  width: 70px !important; /* 適配八角形區域尺寸 */
+  position: relative !important;
+  width: 70px !important;
   height: 70px !important;
-  /* ⚡ 移除圓形邊框，改用八角形裁剪 */
-  clip-path: polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%);
-  object-fit: cover;
-  /* ⚡ 1px 奧術藍微弱發光線條 */
-  border: 1px solid rgba(0, 191, 255, 0.3);
-  box-shadow: 0 0 8px rgba(0, 191, 255, 0.2);
+  /* ⚡ V6.18: centerCrop 模式 - 圖片填滿容器，居中裁剪 */
+  object-fit: cover !important;
+  object-position: center center !important;
+  /* ⚡ V6.18: 移除 scale(0.9)，讓圖片完全填滿容器 */
+  transform: none !important;
+  /* ⚡ V6.16: 完美圓形裁剪 - 強制執行 */
+  clip-path: circle(50%) !important;
+  -webkit-clip-path: circle(50%) !important;
+  border-radius: 50% !important;
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  /* ⚡ V6.16: 物理層級強制壓制 - 繼承父容器 z-index: 800 */
+  z-index: inherit !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  min-width: 70px !important;
+  min-height: 70px !important;
+  /* ⚡ V6.17: 臨時調試邊框 - 青色十字線用於對齊驗證 */
+  border: 1px solid cyan !important;
+  /* ⚡ V6.18: 確保背景透明，不顯示白色背景 */
+  background-color: transparent !important;
+  background: transparent !important;
+  background-image: none !important;
+  box-shadow: none !important;
+  pointer-events: auto !important;
   transition: all 0.3s ease;
-  background: transparent;
+  overflow: hidden !important;
 }
 
+/* ============================================================
+   V6.16: Ghost Input - 保持在最上層用於觸摸事件
+   ============================================================ */
+.avatar-file-input {
+  position: absolute !important;
+  left: 50% !important;
+  top: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  width: 70px !important;
+  height: 70px !important;
+  opacity: 0 !important;
+  cursor: pointer !important;
+  /* ⚡ V6.16: 絕對層級覆蓋 - 始終在最上層 */
+  z-index: 1100 !important;
+  pointer-events: auto !important;
+  border-radius: 50% !important;
+}
+
+/* ============================================================
+   V6.18: 懸停效果 - 輕微縮放，不改變層級（移除 scale(0.9) 基礎值）
+   ============================================================ */
 .user-avatar:hover {
-  transform: scale(1.05);
-  /* 增強發光效果 */
-  box-shadow: 0 0 15px rgba(0, 191, 255, 0.4);
-  border-color: rgba(0, 191, 255, 0.5);
+  transform: scale(1.05) !important;
 }
-
-/* ⚡ Phase 2: 魔導化上傳按鈕 */
-.avatar-upload-label {
-  cursor: pointer;
-  color: #ffffff;
-  font-weight: 600;
-  font-size: 12px;
-  transition: all 0.3s ease;
-  display: inline-block;
-  margin-top: 8px;
-  padding: 6px 12px;
-  /* 魔導背景 */
-  background: rgba(0, 10, 30, 0.6);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border-radius: 12px;
-  border: 1px solid rgba(0, 191, 255, 0.4);
-  box-shadow: 0 0 10px rgba(0, 191, 255, 0.3);
-}
-
-.avatar-upload-label:hover {
-  color: #ffffff;
-  background: rgba(0, 20, 40, 0.7);
-  border-color: rgba(0, 191, 255, 0.6);
-  box-shadow: 0 0 15px rgba(0, 191, 255, 0.5);
-}
-
-.avatar-error {
-  color: #e53e3e;
-  font-size: 13px;
-  margin-top: 8px;
-  background: rgba(229, 62, 62, 0.1);
-  padding: 8px 12px;
-  border-radius: 8px;
-  display: inline-block;
-}
-
-/* ⚡ Phase 2: 訪客頭像提示 - 魔導化 */
-.guest-avatar-note {
-  color: rgba(0, 191, 255, 1);
-  font-size: 13px;
-  margin-top: 8px;
-  /* 魔導背景 */
-  background: rgba(0, 10, 30, 0.5);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  padding: 8px 12px;
-  border-radius: 8px;
-  display: inline-block;
-  font-weight: 500;
-  border: 1px solid rgba(0, 191, 255, 0.4);
-  box-shadow: 0 0 10px rgba(0, 191, 255, 0.3);
-}
-
-/* ⚡ V17.0: 響應式設計 - 定位規則已由 UserInfoV5.css 統一控制 */
-@media (max-width: 768px) {
-  .user-avatar {
-    width: 60px !important;
-    height: 60px !important;
-  }
-}
-
-@media (max-width: 480px) {
-  .user-avatar {
-    width: 55px !important;
-    height: 55px !important;
-  }
-}
-

@@ -6,6 +6,7 @@ import logger from '../utils/logger';
 /**
  * Hook for managing user data synchronization with debouncing
  * Handles setUserData logic with intelligent debouncing and write queue management
+ * ⚡ V6.19: 頭像更新立即保存，不受防抖機制影響
  */
 export function useUserDataSync(userData, dispatch, addToWriteQueue) {
   // Debounce refs
@@ -86,6 +87,26 @@ export function useUserDataSync(userData, dispatch, addToWriteQueue) {
         });
 
         if (hasImportantChanges) {
+          // ⚡ V6.19: 頭像更新立即保存，跳過防抖機制
+          const avatarUrlChanged =
+            newData.avatarUrl &&
+            newData.avatarUrl !== userData.avatarUrl &&
+            newData.avatarUrl.trim() !== '';
+
+          if (avatarUrlChanged) {
+            // 清除任何現有的防抖定時器
+            if (setUserDataDebounceRef.current) {
+              clearTimeout(setUserDataDebounceRef.current);
+              setUserDataDebounceRef.current = null;
+            }
+            // 立即保存頭像更新
+            logger.debug('⚡ 頭像更新立即保存（跳過防抖機制）');
+            lastWriteTimeRef.current = Date.now();
+            writeCountRef.current++;
+            addToWriteQueue(newData, 'userData');
+            return;
+          }
+
           const isOnlyNicknameChange =
             JSON.stringify(newData.nickname) !==
               JSON.stringify(userData.nickname) &&
@@ -150,4 +171,3 @@ export function useUserDataSync(userData, dispatch, addToWriteQueue) {
     setUserData,
   };
 }
-

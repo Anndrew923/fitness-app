@@ -47,13 +47,20 @@
   width: 100vw !important;
   height: 100px !important;
   min-height: 100px !important;
-  overflow: visible !important;
+  overflow: visible !important; /* ⚡ V6.3: 確保沒有 overflow: hidden */
   pointer-events: none !important;
   background: transparent !important;
   opacity: 1 !important;
   visibility: visible !important;
   z-index: 5000 !important;
   display: block !important;
+}
+
+/* ⚡ V6.3: 確保 HUD wrapper 及其子元素沒有 overflow: hidden */
+#layer-hud-status *,
+#layer-hud-status .hud-wrapper,
+.hud-wrapper {
+  overflow: visible !important; /* ⚡ V6.3: 強制可見，防止裁剪 */
 }
 
 /* HUD 容器觸控穿透，但交互組件可點擊 */
@@ -139,10 +146,7 @@
 [class*='TopStatusHud'],
 .topStatusHud,
 #layer-hud-status,
-#layer-hud-status *,
-.avatar-section,
-.avatar-container,
-.avatar-actions-container {
+#layer-hud-status * {
   background: transparent !important;
   background-color: transparent !important;
   background-image: none !important;
@@ -158,7 +162,7 @@
 .topStatusHud,
 #layer-hud-status .topStatusHud,
 [class*='topStatusHud'] {
-  position: absolute !important; /* ⚡ V6.1: 相對於 .hud-wrapper */
+  position: absolute !important;
   top: 0 !important;
   left: 0 !important;
   width: 100% !important;
@@ -169,7 +173,8 @@
   background-color: transparent !important;
   mix-blend-mode: normal !important;
   pointer-events: none !important;
-  z-index: 1 !important; /* ⚡ V6.1: 在 .hud-wrapper 內相對定位 */
+  /* ⚡ V6.15: HUD Mask 必須在 Avatar 之上 */
+  z-index: 1000 !important;
   margin: 0 !important;
   padding: 0 !important;
   overflow: visible !important;
@@ -179,32 +184,49 @@
    V6.1: 大頭照組件級對位 - 百分比錨定策略
    使用百分比定位，確保在不同設備上正確對齊 HUD 圓框
    ============================================================ */
-/* ⚡ V6.2: 百分比錨定 - 視覺補償定位 */
+/* ⚡ V6.15: 視覺搜索與救援 - 精確資產對位 (已同步至 AvatarSection.css) */
 #root #layer-master-root #layer-hud-status .avatar-section,
 #layer-master-root #layer-hud-status .avatar-section,
 #layer-hud-status .avatar-section,
 .avatar-section {
-  position: absolute !important; /* ⚡ V6.2: absolute 相對於 .hud-wrapper */
-  /* ⚡ V6.2: 視覺補償定位 - 根據 HUD 素材實際幾何結構 */
-  left: 11.5% !important; /* ⚡ V6.2: 圓框中心實際位置，比 8% 更靠右 */
-  top: 42% !important; /* ⚡ V6.2: 提升到深色顯示區域，而非 HUD 幾何中心 */
-  transform: translate(-50%, -50%) scale(0.85) !important; /* ⚡ 完美居中並縮放 */
-  width: 80px !important;
+  position: absolute !important;
+  /* ⚡ V6.17: 遞歸居中校準 - 與 AvatarSection.css 同步 */
+  left: 15.5% !important;
+  top: 48.5% !important;
+  transform: translate(-50%, -50%) !important;
+  width: auto !important;
   height: auto !important;
-  display: block !important; /* ⚡ V6.2: 確保可見性 */
+  display: block !important;
   pointer-events: auto !important;
-  z-index: 1001 !important; /* ⚡ V6.2: 暫時設為 1001 確保可見 */
+  /* ⚡ V6.15: 物理層級強制壓制 - Avatar 必須在 HUD Mask 之下 */
+  z-index: 800 !important;
   background: transparent !important;
   background-color: transparent !important;
   background-image: none !important;
   margin: 0 !important;
   padding: 0 !important;
-  overflow: visible !important; /* ⚡ V6.2: 防止被裁剪 */
+  overflow: hidden !important;
+  visibility: visible !important;
+  opacity: 1 !important;
 }
 
-/* ⚡ V17.0: 大頭照容器 - 移除所有可能影響定位的樣式 */
-.avatar-container,
-.avatar-actions-container {
+/* ⚡ V6.5: 大頭照容器 - 絕對尺寸控制 */
+#layer-hud-status .avatar-container,
+#layer-hud-status .avatar-container.avatar-clickable {
+  position: relative !important;
+  display: inline-block !important;
+  width: 70px !important; /* ⚡ V6.5: 強制 70px 寬度 */
+  height: 70px !important; /* ⚡ V6.5: 強制 70px 高度 */
+  margin: 0 !important;
+  padding: 0 !important;
+  background: transparent !important;
+  cursor: pointer !important; /* ⚡ V6.5: 可點擊指示 */
+  transform: none !important;
+  overflow: visible !important; /* ⚡ V6.5: 確保內容可見 */
+}
+
+/* ⚡ V6.3: 非HUD區域的頭像容器保持原有樣式 */
+.avatar-container:not(#layer-hud-status .avatar-container) {
   position: relative !important;
   display: inline-block !important;
   width: auto !important;
@@ -213,8 +235,26 @@
   margin: 0 !important;
   padding: 0 !important;
   background: transparent !important;
-  /* ⚡ V17.0: 確保不會影響 fixed 定位的子元素 */
   transform: none !important;
+}
+
+/* ⚡ V6.3: HUD區域隱藏上傳控件 */
+#layer-hud-status .avatar-actions-container {
+  display: none !important; /* ⚡ V6.3: 在HUD區域完全隱藏 */
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* ⚡ V6.3: 非HUD區域的上傳控件保持可見 */
+.avatar-actions-container:not(#layer-hud-status .avatar-actions-container) {
+  position: relative !important;
+  display: inline-block !important;
+  width: auto !important;
+  height: auto !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  background: transparent !important;
 }
 
 /* ⚡ V17.0: 使用 :before 虛擬元素放置魔導圓框 */

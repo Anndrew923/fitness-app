@@ -38,7 +38,7 @@ function MagitekFrame({ children, className = '', extraChildren, avatarSection }
       <div id="layer-hud-status">
         {/* ⚡ V6.1: 響應式包裝器 - 百分比錨定策略 */}
         <div className={styles.hudWrapper}>
-          {/* 頭像移入此層，精準對位 HUD 圓形槽位 */}
+          {/* ⚡ V6.15: DOM 順序修正 - Avatar 先渲染，HUD Mask 後渲染，確保金屬邊框覆蓋在頭像之上 */}
           {avatarSection}
           <div className={styles.topStatusHud}>
             <span className={styles.systemReadyText}>SYSTEM: READY</span>

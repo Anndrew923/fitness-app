@@ -449,7 +449,7 @@ textarea,
   overflow: visible !important;
 }
 
-/* ⚡ V6.1: 強制召喚 HUD 飾條 - 使用 V6_Top_HUD_Clean.png */
+/* ⚡ V6.16: 強制召喚 HUD 飾條 - 使用 V6_Top_HUD_Clean.png (物理層級修正) */
 #layer-hud-status [class*="topStatusHud"] {
   position: absolute !important; /* ⚡ V6.1: 相對於 .hud-wrapper */
   top: 0 !important;
@@ -465,12 +465,13 @@ textarea,
   pointer-events: none !important;
   margin: 0 !important;
   padding: 0 !important;
-  z-index: 1 !important;
+  /* ⚡ V6.16: 物理層級鎖死 - HUD Mask 必須在 Avatar 之上 */
+  z-index: 1000 !important;
   overflow: visible !important;
 }
 
 /* 強制移除所有黑色背景，確保完全透明 */
-/* ⚡ V6.1: 全域 HUD 樣式 - 響應式百分比錨定 */
+/* ⚡ V6.16: 全域 HUD 樣式 - 響應式百分比錨定 (物理層級修正) */
 #layer-hud-status [class*='topStatusHud'],
 #layer-hud-status .topStatusHud,
 .topStatusHud,
@@ -495,7 +496,8 @@ textarea,
   margin: 0 !important;
   padding: 0 !important;
   pointer-events: none !important;     /* ⚡ 裝飾性元素必須是「幻影」 */
-  z-index: 1 !important; /* ⚡ 在 .hud-wrapper 內相對定位 */
+  /* ⚡ V6.16: 物理層級鎖死 - HUD Mask 必須在 Avatar 之上 */
+  z-index: 1000 !important;
   overflow: visible !important;
 }
 
@@ -506,14 +508,14 @@ textarea,
   pointer-events: auto !important; /* ⚡ 只有裡面的按鈕能點擊 */
 }
 
-/* ⚡ V6.2: SYSTEM: READY 文本覆蓋 - 視覺補償定位 */
+/* ⚡ V6.3: SYSTEM: READY 文本覆蓋 - 精確資產對位 */
 .topStatusHud [class*="systemReadyText"],
 .topStatusHud .systemReadyText,
 #layer-hud-status [class*="systemReadyText"],
 #layer-hud-status .systemReadyText {
   position: absolute !important;
-  left: 55% !important; /* ⚡ V6.2: 向右偏移以平衡頭像重量 */
-  top: 42% !important; /* ⚡ V6.2: 提升到深色顯示區域 */
+  left: 56% !important; /* ⚡ V6.3: 精確水平位置 */
+  top: 46% !important; /* ⚡ V6.3: 精確垂直位置 */
   transform: translate(-50%, -50%) !important; /* ⚡ 完美居中 */
   color: #FF8C00 !important; /* ⚡ Magitek Gold */
   font-family: 'Courier New', monospace !important;
@@ -532,20 +534,21 @@ textarea,
    確保大頭照 .avatar-section 能夠完美對準新素材 V6_Top_HUD_Clean.png 的圓框位置
    使用百分比定位，隨 HUD 拉伸而正確移動
    ============================================================ */
-/* ⚡ V6.2: 百分比錨定 - 視覺補償定位 */
+/* ⚡ V6.15: 視覺搜索與救援 - 精確資產對位 (已同步至 AvatarSection.css) */
 #layer-hud-status [class*='avatar-section'],
 #layer-hud-status .avatar-section {
-  position: absolute !important; /* ⚡ V6.2: absolute 相對於 .hud-wrapper */
-  /* ⚡ V6.2: 視覺補償定位 - 根據 HUD 素材實際幾何結構 */
-  left: 11.5% !important; /* ⚡ V6.2: 圓框中心實際位置 */
-  top: 42% !important; /* ⚡ V6.2: 提升到深色顯示區域 */
-  transform: translate(-50%, -50%) !important; /* ⚡ 完美居中 */
-  display: block !important; /* ⚡ V6.2: 確保可見性 */
+  position: absolute !important;
+  /* ⚡ V6.17: 遞歸居中校準 - 與 AvatarSection.css 同步 */
+  left: 13.5% !important;
+  top: 48.5% !important;
+  transform: translate(-50%, -50%) !important;
+  display: block !important;
   background: transparent !important;
-  z-index: 1001 !important; /* ⚡ V6.2: 暫時設為 1001 確保可見 */
+  /* ⚡ V6.15: 物理層級強制壓制 - Avatar 必須在 HUD Mask (z-index: 1000) 之下 */
+  z-index: 800 !important;
   visibility: visible !important;
   opacity: 1 !important;
-  overflow: visible !important;
+  overflow: hidden !important;
 }
 
 /* ============================================================
