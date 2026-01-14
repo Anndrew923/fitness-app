@@ -1,4 +1,4 @@
-import { GoogleAuth } from '@belongnet/capacitor-google-auth';
+import { GoogleAuth } from '@daniele-rolli/capacitor-google-auth';
 import { auth, db } from '../firebase';
 import { signInWithCredential, GoogleAuthProvider } from 'firebase/auth';
 import { doc, setDoc, getDoc } from 'firebase/firestore';

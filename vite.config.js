@@ -1,4 +1,4 @@
-﻿import { defineConfig, loadEnv } from 'vite';
+import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
 import { existsSync, copyFileSync, mkdirSync, statSync } from 'fs';
 import { resolve } from 'path';
@@ -278,7 +278,7 @@ export default defineConfig(({ mode }) => {
               // ✅ 關鍵修正：將所有 Capacitor 插件也合併到 react-core
               // 避免 capacitor-plugins chunk 的載入順序問題
               id.includes('node_modules/@capacitor') || // 所有 @capacitor/* 插件
-              id.includes('node_modules/@belongnet/capacitor') || // Google Auth 插件
+              id.includes('node_modules/@daniele-rolli/capacitor') || // Google Auth 插件
               id.includes('node_modules/@capacitor-community') || // AdMob 等社群插件
               // ✅ 關鍵修正：將 Firebase 也合併到 react-core
               // Firebase 在應用啟動時就被導入（App.jsx），必須與 React 一起載入
