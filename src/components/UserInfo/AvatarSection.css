@@ -89,8 +89,8 @@
   padding: 0 !important;
   min-width: 70px !important;
   min-height: 70px !important;
-  /* ⚡ V6.17: 臨時調試邊框 - 青色十字線用於對齊驗證 */
-  border: 1px solid cyan !important;
+  /* ⚡ V6.23: 移除調試邊框，保持乾淨的視覺效果 */
+  border: none !important;
   /* ⚡ V6.18: 確保背景透明，不顯示白色背景 */
   background-color: transparent !important;
   background: transparent !important;
@@ -124,4 +124,57 @@
    ============================================================ */
 .user-avatar:hover {
   transform: scale(1.05) !important;
+}
+
+/* ============================================================
+   V6.23: Loading State & Error Handling
+   ============================================================ */
+#root #layer-master-root #layer-hud-status .avatar-section .avatar-loading-spinner,
+#layer-master-root #layer-hud-status .avatar-section .avatar-loading-spinner,
+#layer-hud-status .avatar-section .avatar-loading-spinner,
+.avatar-section .avatar-loading-spinner {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 24px;
+  height: 24px;
+  border: 2px solid rgba(0, 255, 157, 0.3);
+  border-top-color: #00ff9d;
+  border-radius: 50%;
+  animation: avatarSpin 0.8s linear infinite;
+  z-index: 801;
+  pointer-events: none;
+}
+
+@keyframes avatarSpin {
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+#root #layer-master-root #layer-hud-status .avatar-section .user-avatar.avatar-loading,
+#layer-master-root #layer-hud-status .avatar-section .user-avatar.avatar-loading,
+#layer-hud-status .avatar-section .user-avatar.avatar-loading,
+.avatar-section .user-avatar.avatar-loading {
+  opacity: 0.5 !important;
+  filter: blur(1px);
+}
+
+#root #layer-master-root #layer-hud-status .avatar-section .user-avatar.avatar-error,
+#layer-master-root #layer-hud-status .avatar-section .user-avatar.avatar-error,
+#layer-hud-status .avatar-section .user-avatar.avatar-error,
+.avatar-section .user-avatar.avatar-error {
+  opacity: 0.7 !important;
+}
+
+#root #layer-master-root #layer-hud-status .avatar-section .avatar-placeholder-empty,
+#layer-master-root #layer-hud-status .avatar-section .avatar-placeholder-empty,
+#layer-hud-status .avatar-section .avatar-placeholder-empty,
+.avatar-section .avatar-placeholder-empty {
+  position: relative;
+  display: block;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
 }

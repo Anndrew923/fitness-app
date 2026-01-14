@@ -1,15 +1,16 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { compressImage } from '../../utils/imageUtils';
 import './AvatarSection.css';
 
 /**
- * ⚡ V6.9: 恢复上传功能 - 保持代码简洁
+ * ⚡ V6.23: Pure Data Logic - 移除测试人脸，使用本地 placeholder
  * 
  * 功能：
- * - 使用高对比度 placeholder 直到真实图片加载
- * - 简洁的文件上传逻辑
- * - 预览 URL 立即更新
+ * - 使用本地 /default-avatar.svg 作为 placeholder（不再使用外部测试图片）
+ * - 条件渲染：只有在有有效 URL 时才渲染 img 的 src
+ * - Loading 状态：在 avatarUrl 加载时显示加载状态或保持空状态（但保持尺寸）
+ * - 纯数据逻辑：初始状态为透明或本地 placeholder
  */
 const AvatarSection = ({
   avatarUrl,
@@ -20,22 +21,48 @@ const AvatarSection = ({
   t,
 }) => {
   const [previewUrl, setPreviewUrl] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [imageError, setImageError] = useState(false);
   const previewUrlRef = useRef(null);
   const fileInputRef = useRef(null);
 
-  // ⚡ V6.9: 高对比度 placeholder - 直到真实图片成功加载
-  const HIGH_CONTRAST_PLACEHOLDER = 'https://i.pravatar.cc/150?u=placeholder';
-  
-  // ⚡ V6.9: 获取图片源 - 优先预览，然后真实URL，最后placeholder
-  const getImageSrc = () => {
-    if (isGuest) return '/guest-avatar.svg';
-    if (previewUrl) return previewUrl;
+  // ⚡ V6.23: 监听 avatarUrl 变化，重置 loading 状态
+  useEffect(() => {
     if (avatarUrl && avatarUrl.trim() !== '') {
+      setIsLoading(true);
+      setImageError(false);
+    }
+  }, [avatarUrl]);
+
+  // ⚡ V6.23: 获取图片源 - 纯数据逻辑，不使用外部测试图片
+  const getImageSrc = () => {
+    // Guest 模式：使用 guest-avatar.svg
+    if (isGuest) return '/guest-avatar.svg';
+    
+    // 优先预览 URL（用户刚上传的图片）
+    if (previewUrl) return previewUrl;
+    
+    // 真实头像 URL（从 Firebase 获取）
+    if (avatarUrl && avatarUrl.trim() !== '' && avatarUrl !== 'null' && avatarUrl !== 'undefined') {
       return avatarUrl;
     }
-    return HIGH_CONTRAST_PLACEHOLDER;
+    
+    // 默认：使用本地 placeholder（不再使用 pravatar.cc）
+    return '/default-avatar.svg';
   };
+  
   const imageSrc = getImageSrc();
+  
+  // ⚡ V6.23: 判断是否应该渲染图片
+  const shouldRenderImage = () => {
+    if (isGuest) return true; // Guest 模式总是显示
+    if (previewUrl) return true; // 有预览 URL 时显示
+    if (avatarUrl && avatarUrl.trim() !== '' && avatarUrl !== 'null' && avatarUrl !== 'undefined') {
+      return true; // 有有效头像 URL 时显示
+    }
+    // 即使没有头像，也显示默认 placeholder
+    return true;
+  };
 
   // ⚡ V6.9: 简洁的文件上传处理
   const handleFileChange = async (e) => {
@@ -87,23 +114,65 @@ const AvatarSection = ({
     }
   };
 
+  // ⚡ V6.23: 图片加载成功处理
+  const handleImageLoad = () => {
+    setIsLoading(false);
+    setImageError(false);
+  };
+
+  // ⚡ V6.23: 图片加载失败处理 - 只使用本地 placeholder
+  const handleImageError = (e) => {
+    setIsLoading(false);
+    setImageError(true);
+    
+    // 如果当前不是默认 placeholder，切换到默认 placeholder
+    const currentSrc = e.target.src;
+    if (!currentSrc.includes('/default-avatar.svg') && !currentSrc.includes('/guest-avatar.svg')) {
+      e.target.src = '/default-avatar.svg';
+      e.target.onerror = null; // 防止无限循环
+    }
+  };
+
   return (
     <div className="avatar-section">
-      {/* ⚡ V6.9: 简洁的 img 标签 */}
-      <img
-        src={imageSrc}
-        alt={t('community.ui.avatarAlt')}
-        className="user-avatar"
-        loading="eager"
-        onError={(e) => {
-          // 如果真实图片加载失败，fallback 到 placeholder
-          if (e.target.src !== HIGH_CONTRAST_PLACEHOLDER && !e.target.src.includes('pravatar')) {
-            e.target.src = HIGH_CONTRAST_PLACEHOLDER;
-          }
-        }}
-      />
+      {/* ⚡ V6.23: 条件渲染 - 只有在有有效源时才渲染 img */}
+      {shouldRenderImage() && (
+        <>
+          {/* Loading 状态指示器 */}
+          {isLoading && !previewUrl && avatarUrl && (
+            <div className="avatar-loading-spinner" />
+          )}
+          
+          {/* 图片标签 - 只有在有有效源时才设置 src */}
+          <img
+            src={imageSrc}
+            alt={t('community.ui.avatarAlt')}
+            className={`user-avatar ${isLoading ? 'avatar-loading' : ''} ${imageError ? 'avatar-error' : ''}`}
+            loading="eager"
+            onLoad={handleImageLoad}
+            onError={handleImageError}
+            style={{
+              opacity: isLoading ? 0.5 : 1,
+              transition: 'opacity 0.3s ease',
+            }}
+          />
+        </>
+      )}
       
-      {/* ⚡ V6.9: 隐藏的文件输入 - 覆盖在 11.5%/45.5% 中心点 */}
+      {/* ⚡ V6.23: 如果没有图片源，显示透明占位符（保持尺寸） */}
+      {!shouldRenderImage() && (
+        <div 
+          className="avatar-placeholder-empty"
+          style={{
+            width: '70px',
+            height: '70px',
+            borderRadius: '50%',
+            background: 'transparent',
+          }}
+        />
+      )}
+      
+      {/* ⚡ V6.9: 隐藏的文件输入 - 覆盖在头像中心点 */}
       {!isGuest && (
         <input
           ref={fileInputRef}
