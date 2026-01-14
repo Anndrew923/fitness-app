@@ -20,14 +20,80 @@ const GeneralModal = ({
 
   const getIcon = () => {
     switch (type) {
-      case 'warning':
-        return '⚠️';
       case 'success':
-        return '✅';
+        return (
+          <svg
+            className="magitek-icon magitek-icon-success"
+            width="32"
+            height="32"
+            viewBox="0 0 32 32"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <circle cx="16" cy="16" r="14" stroke="#00ff9d" strokeWidth="2" />
+            <path
+              d="M10 16 L14 20 L22 12"
+              stroke="#00ff9d"
+              strokeWidth="3"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        );
       case 'error':
-        return '❌';
+        return (
+          <svg
+            className="magitek-icon magitek-icon-error"
+            width="32"
+            height="32"
+            viewBox="0 0 32 32"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <circle cx="16" cy="16" r="14" stroke="#ff4757" strokeWidth="2" />
+            <path
+              d="M12 12 L20 20 M20 12 L12 20"
+              stroke="#ff4757"
+              strokeWidth="3"
+              strokeLinecap="round"
+            />
+          </svg>
+        );
+      case 'warning':
+        return (
+          <svg
+            className="magitek-icon magitek-icon-warning"
+            width="32"
+            height="32"
+            viewBox="0 0 32 32"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M16 8 L24 24 L8 24 Z"
+              stroke="#ffa502"
+              strokeWidth="2"
+              fill="none"
+            />
+            <circle cx="16" cy="18" r="1.5" fill="#ffa502" />
+            <path d="M16 12 L16 15" stroke="#ffa502" strokeWidth="2" strokeLinecap="round" />
+          </svg>
+        );
       default:
-        return 'ℹ️';
+        return (
+          <svg
+            className="magitek-icon magitek-icon-info"
+            width="32"
+            height="32"
+            viewBox="0 0 32 32"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <circle cx="16" cy="16" r="14" stroke="#4dabf7" strokeWidth="2" />
+            <circle cx="16" cy="12" r="1.5" fill="#4dabf7" />
+            <path d="M16 16 L16 22" stroke="#4dabf7" strokeWidth="2" strokeLinecap="round" />
+          </svg>
+        );
     }
   };
 
@@ -68,11 +134,11 @@ const GeneralModal = ({
   return createPortal(
     <div className="modal-overlay" onClick={handleOverlayClick}>
       <div
-        className="modal-content"
+        className={`modal-content magitek-modal magitek-modal-${type}`}
         onClick={e => e.stopPropagation()}
       >
         <div className="modal-header">
-          <span className="modal-icon">{getIcon()}</span>
+          <div className="modal-icon-wrapper">{getIcon()}</div>
           <h3 className="modal-title">{title}</h3>
         </div>
         <div className="modal-body">

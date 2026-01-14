@@ -1,62 +1,221 @@
-/* Modal 通用樣式 - 使用 Portal 居中顯示 */
+/* ⚡ V6.23: Magitek Resonance Feedback System
+ * 全息投影式系统反馈模态框
+ * 从终端本身投射出的全息投影效果
+ */
+
+/* ============================================================
+   1. The Base Container (The Hologram Emitter)
+   ============================================================ */
 .modal-overlay {
   position: fixed !important;
   top: 0 !important;
   left: 0 !important;
   width: 100vw !important;
   height: 100vh !important;
-  background-color: rgba(0, 0, 0, 0.5) !important;
+  background-color: rgba(0, 0, 0, 0.7) !important;
   display: flex !important;
-  align-items: center !important; /* Center Vertically */
-  justify-content: center !important; /* Center Horizontally */
+  align-items: center !important;
+  justify-content: center !important;
   z-index: 10000 !important;
   padding: 0 !important;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
 }
 
 .modal-content {
-  background: white;
-  border-radius: 16px !important;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15) !important;
+  /* ⚡ 基础容器：深色半透明背景 */
+  background: rgba(10, 12, 18, 0.95) !important;
+  /* ⚡ 材质效果：背景模糊混合 */
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  /* ⚡ 形状：略微机械化的圆角 */
+  border-radius: 8px !important;
+  /* ⚡ 深度：强烈阴影使其突出 */
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important;
   max-width: 340px !important;
   width: 90% !important;
   max-height: 80vh;
   overflow: hidden;
-  animation: modalSlideIn 0.3s ease-out;
   position: relative !important;
   margin: 0 !important;
+  /* ⚡ 动画：从 0.9 缩放到 1.0，淡入 */
+  animation: magitekManifest 0.2s ease-out !important;
 }
 
-@keyframes modalSlideIn {
+/* ============================================================
+   2. State: SUCCESS (System Online)
+   ============================================================ */
+.magitek-modal-success {
+  /* ⚡ 边框发光：稳定的翠绿色能量场 */
+  border: 2px solid #00ff9d !important;
+  box-shadow: 0 0 15px rgba(0, 255, 157, 0.4),
+    inset 0 0 10px rgba(0, 255, 157, 0.1),
+    0 10px 30px rgba(0, 0, 0, 0.5) !important;
+}
+
+.magitek-modal-success .modal-title {
+  color: #00ff9d !important;
+  font-weight: 700 !important;
+}
+
+/* ============================================================
+   3. State: FAILURE (System Error)
+   ============================================================ */
+.magitek-modal-error {
+  /* ⚡ 边框发光：不稳定的脉动深红色场 */
+  border: 2px solid #ff4757 !important;
+  box-shadow: 0 0 15px rgba(255, 71, 87, 0.4),
+    inset 0 0 10px rgba(255, 71, 87, 0.1),
+    0 10px 30px rgba(0, 0, 0, 0.5) !important;
+  /* ⚡ 轻微故障效果 */
+  animation: magitekManifest 0.2s ease-out, magitekGlitch 2s infinite !important;
+}
+
+.magitek-modal-error .modal-title {
+  color: #ff4757 !important;
+  font-weight: 700 !important;
+}
+
+/* ⚡ 故障效果动画 */
+@keyframes magitekGlitch {
+  0%, 100% {
+    filter: brightness(1);
+  }
+  50% {
+    filter: brightness(1.1);
+  }
+  97% {
+    filter: brightness(1);
+  }
+  98% {
+    filter: brightness(1.2) hue-rotate(5deg);
+  }
+  99% {
+    filter: brightness(1);
+  }
+}
+
+/* ============================================================
+   4. State: WARNING
+   ============================================================ */
+.magitek-modal-warning {
+  border: 2px solid #ffa502 !important;
+  box-shadow: 0 0 15px rgba(255, 165, 2, 0.4),
+    inset 0 0 10px rgba(255, 165, 2, 0.1),
+    0 10px 30px rgba(0, 0, 0, 0.5) !important;
+}
+
+.magitek-modal-warning .modal-title {
+  color: #ffa502 !important;
+  font-weight: 700 !important;
+}
+
+/* ============================================================
+   5. State: INFO
+   ============================================================ */
+.magitek-modal-info {
+  border: 2px solid #4dabf7 !important;
+  box-shadow: 0 0 15px rgba(77, 171, 247, 0.4),
+    inset 0 0 10px rgba(77, 171, 247, 0.1),
+    0 10px 30px rgba(0, 0, 0, 0.5) !important;
+}
+
+.magitek-modal-info .modal-title {
+  color: #4dabf7 !important;
+  font-weight: 700 !important;
+}
+
+/* ============================================================
+   6. Animation (Entrance): Manifestation
+   ============================================================ */
+@keyframes magitekManifest {
   from {
     opacity: 0;
-    transform: translateY(20px) scale(0.95);
+    transform: scale(0.9);
   }
   to {
     opacity: 1;
-    transform: translateY(0) scale(1);
+    transform: scale(1);
   }
 }
 
+/* ============================================================
+   7. Header & Typography
+   ============================================================ */
 .modal-header {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   padding: 20px 20px 12px 20px;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.modal-icon {
-  font-size: 22px;
+.modal-icon-wrapper {
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.magitek-icon {
+  filter: drop-shadow(0 0 8px currentColor);
+  animation: iconPulse 2s ease-in-out infinite;
+}
+
+.magitek-icon-success {
+  color: #00ff9d;
+}
+
+.magitek-icon-error {
+  color: #ff4757;
+  animation: iconPulse 2s ease-in-out infinite, iconGlitch 3s infinite;
+}
+
+.magitek-icon-warning {
+  color: #ffa502;
+}
+
+.magitek-icon-info {
+  color: #4dabf7;
+}
+
+@keyframes iconPulse {
+  0%, 100% {
+    opacity: 1;
+    filter: drop-shadow(0 0 8px currentColor);
+  }
+  50% {
+    opacity: 0.8;
+    filter: drop-shadow(0 0 12px currentColor);
+  }
+}
+
+@keyframes iconGlitch {
+  0%, 100% {
+    transform: translate(0, 0);
+  }
+  25% {
+    transform: translate(-1px, 1px);
+  }
+  50% {
+    transform: translate(1px, -1px);
+  }
+  75% {
+    transform: translate(-1px, -1px);
+  }
 }
 
 .modal-title {
   margin: 0;
   font-size: 17px;
   font-weight: 700;
-  color: #2d3748;
+  /* ⚡ 高对比度浅灰色 */
+  color: #e0e0e0 !important;
 }
 
+/* ============================================================
+   8. Body & Message
+   ============================================================ */
 .modal-body {
   padding: 16px 20px;
 }
@@ -65,9 +224,13 @@
   margin: 0;
   font-size: 16px;
   line-height: 1.6;
-  color: #4a5568;
+  /* ⚡ 高对比度浅灰色 */
+  color: #e0e0e0 !important;
 }
 
+/* ============================================================
+   9. Footer & Buttons
+   ============================================================ */
 .modal-footer {
   padding: 12px 20px 20px 20px;
   display: flex;
@@ -93,66 +256,74 @@
   cursor: pointer;
   transition: all 0.2s ease;
   min-width: 80px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #e0e0e0;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.modal-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
 }
 
 .modal-btn-info {
-  background: linear-gradient(135deg, #81d8d0, #5f9ea0);
-  color: white;
+  background: rgba(77, 171, 247, 0.2);
+  color: #4dabf7;
+  border-color: rgba(77, 171, 247, 0.4);
 }
 
 .modal-btn-info:hover {
-  background: linear-gradient(135deg, #5f9ea0, #4a7c7a);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(129, 216, 208, 0.3);
+  background: rgba(77, 171, 247, 0.3);
+  box-shadow: 0 0 10px rgba(77, 171, 247, 0.3);
 }
 
 .modal-btn-success {
-  background: linear-gradient(135deg, #48bb78, #38a169);
-  color: white;
+  background: rgba(0, 255, 157, 0.2);
+  color: #00ff9d;
+  border-color: rgba(0, 255, 157, 0.4);
 }
 
 .modal-btn-success:hover {
-  background: linear-gradient(135deg, #38a169, #2f855a);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(72, 187, 120, 0.3);
+  background: rgba(0, 255, 157, 0.3);
+  box-shadow: 0 0 10px rgba(0, 255, 157, 0.3);
 }
 
 .modal-btn-warning {
-  background: linear-gradient(135deg, #ed8936, #dd6b20);
-  color: white;
+  background: rgba(255, 165, 2, 0.2);
+  color: #ffa502;
+  border-color: rgba(255, 165, 2, 0.4);
 }
 
 .modal-btn-warning:hover {
-  background: linear-gradient(135deg, #dd6b20, #c05621);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(237, 137, 54, 0.3);
+  background: rgba(255, 165, 2, 0.3);
+  box-shadow: 0 0 10px rgba(255, 165, 2, 0.3);
 }
 
 .modal-btn-error {
-  background: linear-gradient(135deg, #f56565, #e53e3e);
-  color: white;
+  background: rgba(255, 71, 87, 0.2);
+  color: #ff4757;
+  border-color: rgba(255, 71, 87, 0.4);
 }
 
 .modal-btn-error:hover {
-  background: linear-gradient(135deg, #e53e3e, #c53030);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(245, 101, 101, 0.3);
+  background: rgba(255, 71, 87, 0.3);
+  box-shadow: 0 0 10px rgba(255, 71, 87, 0.3);
 }
 
 .modal-btn-secondary {
-  background: linear-gradient(135deg, #718096, #4a5568);
-  color: white;
+  background: rgba(113, 128, 150, 0.2);
+  color: #718096;
+  border-color: rgba(113, 128, 150, 0.4);
 }
 
 .modal-btn-secondary:hover {
-  background: linear-gradient(135deg, #4a5568, #2d3748);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(113, 128, 150, 0.3);
+  background: rgba(113, 128, 150, 0.3);
+  box-shadow: 0 0 10px rgba(113, 128, 150, 0.3);
 }
 
-/* =========================================
+/* ============================================================
    🚀 NUCLEAR FIX: Force Center Submit Modal
-   ========================================= */
+   ============================================================ */
 
 /* 1. Overlay: Centered with Flexbox */
 .submit-confirm-overlay {
@@ -389,9 +560,9 @@
 /* 響應式設計 */
 @media (max-width: 480px) {
   .modal-content {
-    margin: 0 !important; /* ✅ UI 優化：保持無 margin，使用 width 控制間距 */
-    max-width: 340px !important; /* ✅ UI 優化：保持最大寬度限制 */
-    width: 90% !important; /* ✅ UI 優化：小螢幕上保持 90% 寬度 */
+    margin: 0 !important;
+    max-width: 340px !important;
+    width: 90% !important;
   }
 
   .modal-header {
@@ -524,10 +695,11 @@
   }
 
   .modal-btn-secondary {
-    background: linear-gradient(135deg, #4a5568, #2d3748);
+    background: rgba(113, 128, 150, 0.2);
+    border-color: rgba(113, 128, 150, 0.4);
   }
 
   .modal-btn-secondary:hover {
-    background: linear-gradient(135deg, #2d3748, #1a202c);
+    background: rgba(113, 128, 150, 0.3);
   }
 }
