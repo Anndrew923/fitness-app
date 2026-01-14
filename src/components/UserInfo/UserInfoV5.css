@@ -258,6 +258,7 @@
 }
 
 /* ⚡ V17.0: 使用 :before 虛擬元素放置魔導圓框 */
+/* ⚡ V6.23: 移除不存在的 magitek_avatar_frame.png 引用，改用 CSS 边框效果 */
 #root #layer-master-root #layer-hud-status .avatar-section::before,
 #layer-master-root #layer-hud-status .avatar-section::before,
 #layer-hud-status .avatar-section::before,
@@ -265,10 +266,15 @@
   content: '' !important;
   position: absolute !important;
   inset: -5px !important;
-  background-image: url('/images/magitek_avatar_frame.png') !important;
+  /* ⚡ V6.23: 移除不存在的图片引用，改用纯 CSS 边框效果 */
+  background-image: none !important;
   background-size: contain !important;
   background-repeat: no-repeat !important;
   background-position: center !important;
+  /* ⚡ V6.23: 使用 CSS 边框替代图片 - Magitek 风格发光边框 */
+  border: 2px solid rgba(0, 191, 255, 0.6) !important;
+  border-radius: 50% !important;
+  box-shadow: 0 0 10px rgba(0, 191, 255, 0.4), inset 0 0 10px rgba(0, 191, 255, 0.2) !important;
   mix-blend-mode: screen !important;
   z-index: 10 !important;
   pointer-events: none !important;
