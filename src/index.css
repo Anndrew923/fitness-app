@@ -1,14 +1,15 @@
 /* ============================================================
    V7.0 萬象更新 - 強制 HTML/BODY 物理擴張
+   ⚡ V6.23: 全局透明化 - 根除白色背景泄漏
    ============================================================ */
-/* ⚡ V5.6 權限大降階：根除「黑色塊」源頭 */
-body {
-  background-color: #050505 !important;
-}
-
+/* ⚡ V6.23: 强制全局透明 - 只有 #layer-master-bg 可以有背景 */
+html,
+body,
 #root,
 #layer-master-root {
   background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
 }
 
 /* ============================================================
@@ -36,6 +37,10 @@ html, body {
   padding: 0 !important;
   overflow-x: hidden !important; /* ⚡ 防止橫向抖動 */
   display: block !important;
+  /* ⚡ V6.23: 强制透明 - 根除白色背景泄漏 */
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
 }
 
 html, body, #root, #layer-master-root {
@@ -44,6 +49,10 @@ html, body, #root, #layer-master-root {
   display: block !important;         /* ⚡ 移除 flex 導致的壓縮 */
   margin: 0 !important;
   padding: 0 !important;
+  /* ⚡ V6.23: 强制透明 - 根除白色背景泄漏 */
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
 }
 
 /* ⚡ V6.0: 強制重設物理根節點，殺死 390px 殘留 */
@@ -187,8 +196,10 @@ body,
   max-width: none !important;        /* ⚡ 擊穿 390px 限制 */
   min-width: 100vw !important;
   overflow: hidden !important;        /* 鎖死外殼，防止整頁捲動 */
+  /* ⚡ V6.23: 强制全局透明 - 根除白色背景泄漏 */
   background: transparent !important;
   background-color: transparent !important;
+  background-image: none !important;
 }
 
 /* ============================================================
@@ -203,12 +214,15 @@ body,
    #layer-master-bg - z-index: -100
    唯一星空背景，100% 透視星空
    ⚡ V4.2 外科手術：只有星空層可以有底色
-   ⚡ V6.23: 增強 CSS 特异性，確保生產環境正確應用
+   ⚡ V6.23: 提升特异性到最高级别 - 确保生产环境正确应用
    ============================================================ */
+html body #root #layer-master-root #layer-master-bg,
+body #root #layer-master-root #layer-master-bg,
 #root #layer-master-root #layer-master-bg,
 #layer-master-root #layer-master-bg,
 #layer-master-bg,
-[id="layer-master-bg"] {
+[id="layer-master-bg"],
+div[id="layer-master-bg"] {
   position: fixed !important;
   inset: 0 !important;
   width: 100vw !important;
@@ -376,7 +390,14 @@ body, #root, #layer-master-root, #layer-master-bg, #layer-terminal-frame {
    V7.0 封鎖 HUD 閃退邏輯 (Lock HUD Visibility)
    為了防止 HUD 消失，強制將 HUD 的透明度鎖定為 1
    ============================================================ */
-#layer-hud-status {
+/* ⚡ V6.23: 提升 HUD 特异性到最高级别 - 确保生产环境正确应用 */
+html body #root #layer-master-root #layer-hud-status,
+body #root #layer-master-root #layer-hud-status,
+#root #layer-master-root #layer-hud-status,
+#layer-master-root #layer-hud-status,
+#layer-hud-status,
+[id="layer-hud-status"],
+div[id="layer-hud-status"] {
   position: fixed !important;
   top: 0 !important;
   left: 0 !important;
@@ -437,7 +458,11 @@ textarea,
    V12.1 全域顯影 - 使用全域選擇器強制顯示 HUD 飾條
    不要依賴局部類名，直接對 #layer-hud-status 內部的 HUD 容器進行全域強制顯影
    ============================================================ */
-/* ⚡ V6.1: HUD 包裝器 - 響應式百分比錨定容器 */
+/* ⚡ V6.23: 提升 HUD 包装器特异性 - 确保生产环境正确应用 */
+html body #root #layer-master-root #layer-hud-status [class*="hudWrapper"],
+body #root #layer-master-root #layer-hud-status [class*="hudWrapper"],
+#root #layer-master-root #layer-hud-status [class*="hudWrapper"],
+#layer-master-root #layer-hud-status [class*="hudWrapper"],
 #layer-hud-status [class*="hudWrapper"],
 #layer-hud-status .hudWrapper {
   position: fixed !important;
@@ -454,7 +479,11 @@ textarea,
   overflow: visible !important;
 }
 
-/* ⚡ V6.16: 強制召喚 HUD 飾條 - 使用 V6_Top_HUD_Clean.png (物理層級修正) */
+/* ⚡ V6.23: 提升 HUD 饰条特异性 - 确保生产环境正确应用 */
+html body #root #layer-master-root #layer-hud-status [class*="topStatusHud"],
+body #root #layer-master-root #layer-hud-status [class*="topStatusHud"],
+#root #layer-master-root #layer-hud-status [class*="topStatusHud"],
+#layer-master-root #layer-hud-status [class*="topStatusHud"],
 #layer-hud-status [class*="topStatusHud"] {
   position: absolute !important; /* ⚡ V6.1: 相對於 .hud-wrapper */
   top: 0 !important;
