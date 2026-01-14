@@ -203,18 +203,23 @@ body,
    #layer-master-bg - z-index: -100
    唯一星空背景，100% 透視星空
    ⚡ V4.2 外科手術：只有星空層可以有底色
+   ⚡ V6.23: 增強 CSS 特异性，確保生產環境正確應用
    ============================================================ */
-#layer-master-bg {
+#root #layer-master-root #layer-master-bg,
+#layer-master-root #layer-master-bg,
+#layer-master-bg,
+[id="layer-master-bg"] {
   position: fixed !important;
   inset: 0 !important;
   width: 100vw !important;
   height: 100vh !important;
   z-index: -100 !important;          /* 真正的最低層 */
   pointer-events: none !important;    /* 不阻擋任何交互 */
-  background-image: url('/images/magitek_bg_layer1_v2.png');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
+  /* ⚡ V6.23: 使用絕對路徑，確保生產環境正確載入 */
+  background-image: url('/images/magitek_bg_layer1_v2.png') !important;
+  background-size: cover !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
   /* ⚡ V4.2 外科手術：只有星空層可以有底色 */
   background-color: #050505 !important;
   /* 性能優化：禁用所有動畫 */

@@ -12,13 +12,19 @@
   to = "/assets/:splat"
   status = 200
 
+# ⚡ V6.23: 處理 images 目錄，確保星空背景圖片正確載入
+[[redirects]]
+  from = "/images/*"
+  to = "/images/:splat"
+  status = 200
+
 # ✅ 修復：處理 .well-known 目錄
 [[redirects]]
   from = "/.well-known/*"
   to = "/.well-known/:splat"
   status = 200
 
-# ✅ 修復：其他路徑重定向到 index.html（但排除 assets 和 .well-known）
+# ✅ 修復：其他路徑重定向到 index.html（但排除 assets、images 和 .well-known）
 [[redirects]]
   from = "/*"
   to = "/index.html"
