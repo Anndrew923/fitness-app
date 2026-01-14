@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
 import './Modals.css';
-import '../Phase0TempStyles.css';
+import './Phase0TempStyles.css';
 
 const RPGClassModal = ({ isOpen, onClose, classInfo }) => {
   const { t } = useTranslation();

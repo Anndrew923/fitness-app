@@ -2,7 +2,7 @@ import React from 'react';
 import { createPortal } from 'react-dom';
 import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
-import './Phase0TempStyles.css';
+import './Modals/Phase0TempStyles.css';
 
 const SaveSuccessModal = ({ isOpen, onClose, onNavigate }) => {
   const { t } = useTranslation();
