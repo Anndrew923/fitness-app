@@ -1,8 +1,11 @@
+import React from 'react';
 import PropTypes from 'prop-types';
 import styles from './MagitekFrame.module.css';
 
 /**
  * MagitekFrame - 魔導外殼容器 (V16.0: 固定觀測窗物理架構)
+ *
+ * ⚡ V6.23: 持久化佈局 - HUD 和背景位於路由器之上，不會在路由切換時重新掛載
  *
  * 五層物理隔離架構 (Five-Layer Strata)：
  * - Layer 1: #layer-master-bg (z: -100) - 唯一起點，星空背景
@@ -59,4 +62,14 @@ MagitekFrame.propTypes = {
   avatarSection: PropTypes.node,      // 頭像組件
 };
 
-export default MagitekFrame;
+// ⚡ V6.23: 使用 React.memo 確保 HUD 和背景層在路由切換時不會重新掛載
+// 只有當 props 真正改變時才會重新渲染
+export default React.memo(MagitekFrame, (prevProps, nextProps) => {
+  // 自定義比較函數：只有當關鍵 props 改變時才重新渲染
+  // children 總是會改變（路由內容），但 HUD 和背景層應該保持穩定
+  return (
+    prevProps.className === nextProps.className &&
+    prevProps.extraChildren === nextProps.extraChildren &&
+    prevProps.avatarSection === nextProps.avatarSection
+  );
+});

@@ -93,7 +93,7 @@
   width: 100% !important;
   height: 100% !important;
   /* ⚡ V6.1: 使用 V6_Top_HUD_Clean.png 背景圖片 */
-  background-image: url('/images/V6_Top_HUD_Clean.png') !important;
+  background-image: url('/images/V6_Top_HUD_Clean.png?v=v6.23') !important;
   background-size: 100% 100% !important;
   background-position: top center !important;
   background-repeat: no-repeat !important;

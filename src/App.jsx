@@ -1,4 +1,4 @@
-import React, { useState, Component, useEffect } from 'react';
+import React, { useState, Component, useEffect, useMemo } from 'react';
 import {
   BrowserRouter as Router,
   useLocation,
@@ -219,19 +219,22 @@ function AppContent() {
     }, 5000);
   };
   
-  // ⚡ 2. 大頭照「越獄」行動：只在 /user-info 頁面渲染 AvatarSection
+  // ⚡ V6.23: 使用 useMemo 穩定 avatarSection，避免路由切換時重新掛載
   const isUserInfoPage = location.pathname === '/user-info';
   const isGuest = sessionStorage.getItem('guestMode') === 'true';
-  const avatarSection = isUserInfoPage ? (
-    <AvatarSection
-      avatarUrl={isGuest ? '/guest-avatar.svg' : userData?.avatarUrl}
-      isGuest={isGuest}
-      isUploading={avatarUploading}
-      onImageSelected={handleAvatarChange}
-      onError={handleAvatarError}
-      t={t}
-    />
-  ) : null;
+  const avatarSection = useMemo(() => {
+    return isUserInfoPage ? (
+      <AvatarSection
+        avatarUrl={isGuest ? '/guest-avatar.svg' : userData?.avatarUrl}
+        isGuest={isGuest}
+        isUploading={avatarUploading}
+        onImageSelected={handleAvatarChange}
+        onError={handleAvatarError}
+        t={t}
+      />
+    ) : null;
+  }, [isUserInfoPage, isGuest, userData?.avatarUrl, avatarUploading, t]);
+  
   const showNavBar = [
     '/user-info',
     '/history',
@@ -247,6 +250,11 @@ function AppContent() {
     '/training-tools',
     '/timer',
   ].some(path => location.pathname.startsWith(path));
+  
+  // ⚡ V6.23: 使用 useMemo 穩定 extraChildren，避免路由切換時重新掛載
+  const extraChildren = useMemo(() => {
+    return showNavBar ? <BottomNavBar /> : null;
+  }, [showNavBar]);
 
   // 檢查是否需要為固定廣告預留空間
   const showFixedAd = [
@@ -432,12 +440,10 @@ function AppContent() {
         type={avatarModalState.type}
       />
       
+      {/* ⚡ V6.23: MagitekFrame 位於路由器之上，HUD 和背景不會在路由切換時重新掛載 */}
       <MagitekFrame
         avatarSection={avatarSection}
-        extraChildren={
-          /* 全域透視：導覽列徹底移出 app-container，直接作為 MagitekFrame 的子元素 */
-          showNavBar ? <BottomNavBar /> : null
-        }
+        extraChildren={extraChildren}
       >
         {/* ⚡ V4.2 外科手術：移除所有中間容器，讓數據直接裝在 #layer-scroll-content 裡面 */}
         <ScrollToTop />

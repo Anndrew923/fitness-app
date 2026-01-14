@@ -230,7 +230,7 @@ div[id="layer-master-bg"] {
   z-index: -100 !important;          /* 真正的最低層 */
   pointer-events: none !important;    /* 不阻擋任何交互 */
   /* ⚡ V6.23: 使用絕對路徑，確保生產環境正確載入 */
-  background-image: url('/images/magitek_bg_layer1_v2.png') !important;
+  background-image: url('/images/magitek_bg_layer1_v2.png?v=v6.23') !important;
   background-size: cover !important;
   background-position: center !important;
   background-repeat: no-repeat !important;
@@ -362,7 +362,7 @@ body, #root, #layer-master-root, #layer-master-bg, #layer-terminal-frame {
   inset: 0 !important;
   width: 100vw !important;
   height: 100vh !important;
-  border-image-source: url('/images/magitek_frame_v3.png') !important;
+  border-image-source: url('/images/magitek_frame_v3.png?v=v6.23') !important;
   /* ⚡ V12.0: 根據 V3 素材比例微調 */
   border-image-slice: 150 fill !important;
   border-width: 45px !important;
@@ -490,7 +490,7 @@ body #root #layer-master-root #layer-hud-status [class*="topStatusHud"],
   left: 0 !important;
   width: 100% !important;
   height: 100% !important;
-  background-image: url('/images/V6_Top_HUD_Clean.png') !important;
+  background-image: url('/images/V6_Top_HUD_Clean.png?v=v6.23') !important;
   background-size: 100% 100% !important;
   background-repeat: no-repeat !important;
   background-position: top center !important;
@@ -520,7 +520,7 @@ body #root #layer-master-root #layer-hud-status [class*="topStatusHud"],
   width: 100% !important;
   height: 100% !important;
   /* ⚡ V6.1: 更換為 V6_Top_HUD_Clean.png 素材 */
-  background-image: url('/images/V6_Top_HUD_Clean.png') !important;
+  background-image: url('/images/V6_Top_HUD_Clean.png?v=v6.23') !important;
   background-size: 100% 100% !important;
   background-color: transparent !important;
   background-position: top center !important;

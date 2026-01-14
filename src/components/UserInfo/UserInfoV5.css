@@ -22,7 +22,7 @@
   inset: 0 !important;
   width: 100vw !important;
   height: 100vh !important;
-  border-image-source: url('/images/magitek_frame_v3.png') !important;
+  border-image-source: url('/images/magitek_frame_v3.png?v=v6.23') !important;
   border-image-slice: 150 fill !important;
   border-width: 45px !important;
   pointer-events: none !important;
@@ -167,7 +167,7 @@
   left: 0 !important;
   width: 100% !important;
   height: 100% !important;
-  background-image: url('/images/V6_Top_HUD_Clean.png') !important;
+  background-image: url('/images/V6_Top_HUD_Clean.png?v=v6.23') !important;
   background-size: 100% 100% !important;
   background-position: center top !important;
   background-color: transparent !important;
